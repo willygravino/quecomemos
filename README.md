@@ -4,7 +4,7 @@ Comisión: #48405
 Alumno: Guillermo Gravino
 
 # Nombre del Proyecto
-NuestroTubo. V.1.0
+QUÉ COMEMOS HOY
 
 # Requerimientos
 Para poder correr este proyecto es necesario tener instalado python 3.9 o superior. 
