@@ -1,0 +1,42 @@
+{% extends "AdminVideos/base.html" %}
+
+{% load static %}
+
+{% block principal %}
+
+<div class="album py-5 bg-body-tertiary">
+  <div class="container">
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+        <div class="col">
+            <div class="card shadow-sm">
+              <img class="card-img-top" style="height: 225px; width: 100%; display: block" src="{{plato.image_url}}" data-holder-rendered="true">
+              <div class="card-body">
+                <strong><p class="card-text">{{ plato.ingredientes }}</p></strong>
+                <p class="card-text">{{ plato.descripcion_plato }}</p>
+                <p class="card-text">Receta: {{ plato.receta }}</p>
+                <p class="card-text">AGREGAR CAMPO DE URL POR SI LINQUEA A ALGUNA EXPLICACIÓN</p>
+                <h5>Ingredientes:  {{plato.ingredientes}} </h5>
+                <p></p>
+                {% if user.id == plato.propietario.id %}
+                  <a href="{% url 'videos-delete' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Eliminar</a>
+                  <a href="{% url 'videos-update' plato.id %}" type="button"  class="btn btn-sm btn-outline-secondary">Editar</a>
+              </div>
+            </div>
+                 <p></p>
+                 <small class="text-muted">Subido por mi.</small> 
+                {% else %} 
+              </div>
+            </div>
+                 <p></p>
+                 <small class="text-muted">Subido por {{ plato.propietario }}</small> 
+                {% endif %}
+    
+               
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+{% endblock %}

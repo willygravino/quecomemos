@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from AdminVideos.models import Video, Profile, Mensaje
+from AdminVideos.models import Plato, Profile, Mensaje
 from django.urls import reverse_lazy
 from django.contrib.auth.forms import UserCreationForm
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
@@ -12,9 +12,9 @@ def index(request):
 def about(request):
     return render(request, "AdminVideos/about.html")
 
-class VideoList(ListView):
-    model = Video
-    context_object_name = "videos"
+class PlatoList(ListView):
+    model = Plato
+    context_object_name = "platos"
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
@@ -22,55 +22,54 @@ class VideoList(ListView):
                 if self.request.user.profile:
                         query = self.request.user.profile.nombre_completo
                         if query:
-                            object_list = Video.objects.filter(quienes_aparecen__icontains=query)
+                            object_list = Plato.objects.filter(ingredientes__icontains=query)
                         return object_list
             except Exception:
-               object_list = Video.objects.filter(quienes_aparecen__icontains="%%")
+               object_list = Plato.objects.filter(ingredientes__icontains="%%")
             return object_list
         else:
-            object_list = Video.objects.filter(quienes_aparecen__icontains="%%")
+            object_list = Plato.objects.filter(ingredientes__icontains="%%")
         return object_list
     
-class VideosMineList(LoginRequiredMixin, VideoList):
+class PlatosMineList(LoginRequiredMixin, PlatoList):
     template_name = 'AdminVideos/videosmine_list.html' 
 
     def get_queryset(self):
-      return Video.objects.filter(propietario=self.request.user.id)
+      return Plato.objects.filter(propietario=self.request.user.id)
 
-class VideoDetail(DetailView):
-    model = Video
-    context_object_name = "video"
+class PlatoDetail(DetailView):
+    model = Plato
+    context_object_name = "plato"
 
 
-class VideoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-    model = Video
+class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Plato
     success_url = reverse_lazy("videos-list")
-    fields = ["nombre_video","url_video","descripcion_video","quienes_aparecen","image","fecha_video"]
+    fields = ["nombre_plato","receta","descripcion_plato","ingredientes","image"]
     #fields = '__all__'
 
     def test_func(self):
         user_id = self.request.user.id
-        video_id =  self.kwargs.get("pk")
-        return Video.objects.filter(propietario=user_id, id=video_id).exists()
+        plato_id =  self.kwargs.get("pk")
+        return Plato.objects.filter(propietario=user_id, id=plato_id).exists()
     
     
 
-
-class VideoDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
-    model = Video
-    context_object_name = "video"
+class PlatoDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Plato
+    context_object_name = "plato"
     success_url = reverse_lazy("videos-list")
 
     def test_func(self):
         user_id = self.request.user.id
-        video_id =  self.kwargs.get("pk")
-        return Video.objects.filter(propietario=user_id, id=video_id).exists()
+        plato_id =  self.kwargs.get("pk")
+        return Plato.objects.filter(propietario=user_id, id=plato_id).exists()
 
 
-class VideoCreate(LoginRequiredMixin, CreateView):
-    model = Video
+class PlatoCreate(LoginRequiredMixin, CreateView):
+    model = Plato
     success_url = reverse_lazy("videos-list")
-    fields = ["nombre_video","url_video","descripcion_video","quienes_aparecen","image","fecha_video"]
+    fields = ["nombre_plato","receta","descripcion_plato","ingredientes","image"]
 #    fields = '__all__'
 
     def form_valid(self, form):
@@ -114,26 +113,26 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
         return Profile.objects.filter(user=self.request.user).exists()
 
 
-class MensajeCreate(CreateView):
-   model = Mensaje
-   success_url = reverse_lazy('videos-list')
-   fields = '__all__'
+# class MensajeCreate(CreateView):
+#   model = Mensaje
+#   success_url = reverse_lazy('videos-list')
+#   fields = '__all__'
 
 
-class MensajeDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
-   model = Mensaje
-   context_object_name = "mensaje"
-   success_url = reverse_lazy("mensaje-list")
+#class MensajeDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+#   model = Mensaje
+#   context_object_name = "mensaje"
+#   success_url = reverse_lazy("mensaje-list")
 
-   def test_func(self):
-       return Mensaje.objects.filter(destinatario=self.request.user).exists()
+#   def test_func(self):
+#       return Mensaje.objects.filter(destinatario=self.request.user).exists()
     
 
-class MensajeList(LoginRequiredMixin, ListView):
-   model = Mensaje
-   context_object_name = "mensajes"
+#class MensajeList(LoginRequiredMixin, ListView):
+#   model = Mensaje
+#   context_object_name = "mensajes"
 
-   def get_queryset(self):
-       import pdb; pdb.set_trace
-       return Mensaje.objects.filter(destinatario=self.request.user).all()
+ #  def get_queryset(self):
+ #      import pdb; pdb.set_trace
+ #      return Mensaje.objects.filter(destinatario=self.request.user).all()
     

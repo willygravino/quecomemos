@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from AdminVideos.views import index, VideoList, VideoUpdate, VideoDelete, VideoCreate, Login, Logout, SignUp, ProfileCreate, ProfileUpdate, about, VideoDetail, MensajeCreate, MensajeList, MensajeDelete, VideosMineList
+from AdminVideos.views import index, PlatoList, PlatoUpdate, PlatoDelete, PlatoCreate, Login, Logout, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, PlatosMineList #,MensajeCreate, MensajeList, MensajeDelete,
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -23,21 +23,21 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', index, name="index"),
-    path('videos/list', VideoList.as_view(), name="videos-list"),
-    path('videos/list/mine', VideosMineList.as_view(), name="videos-mine"),
-    path('videos/<pk>/update', VideoUpdate.as_view(), name="videos-update"),
-    path('videos/<pk>/delete', VideoDelete.as_view(), name="videos-delete"),
-    path('videos/<pk>/detail', VideoDetail.as_view(), name="videos-detail"),
-    path('videos/create', VideoCreate.as_view(), name="videos-create"),
+    path('videos/list', PlatoList.as_view(), name="videos-list"),
+    path('videos/list/mine', PlatosMineList.as_view(), name="videos-mine"),
+    path('videos/<pk>/update', PlatoUpdate.as_view(), name="videos-update"),
+    path('videos/<pk>/delete', PlatoDelete.as_view(), name="videos-delete"),
+    path('videos/<pk>/detail', PlatoDetail.as_view(), name="videos-detail"),
+    path('videos/create', PlatoCreate.as_view(), name="videos-create"),
     path('login', Login.as_view(), name="login"),
     path('logout', Logout.as_view(), name="logout"),
     path('signup', SignUp.as_view(), name="signup"),
     path('perfil/crear', ProfileCreate.as_view(), name="profile-create"),
     path('profile/<pk>/update', ProfileUpdate.as_view(), name="profile-update"),
     path('about', about, name="about"),
-    path('mensaje/list', MensajeList.as_view(), name="mensaje-list" ),
-    path('mensaje/create', MensajeCreate.as_view(), name="mensaje-create" ),
-    path('mensaje/<pk>/delete', MensajeDelete.as_view(), name="mensaje-delete"),
+   # path('mensaje/list', MensajeList.as_view(), name="mensaje-list" ),
+   # path('mensaje/create', MensajeCreate.as_view(), name="mensaje-create" ),
+   # path('mensaje/<pk>/delete', MensajeDelete.as_view(), name="mensaje-delete"),
 
      
 ]

@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Hugo 0.108.0">
-    <title>NuestroTubo · 1.0</title>
+    <title>¿Qué cómemos? · 1.0</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/album/">
 
@@ -180,29 +180,29 @@
           </a>
       {% endif %} 
 
-      <a href="{% url 'mensaje-create' %}" class="navbar-brand d-flex align-items-center">
+      <!-- <a href=" url 'mensaje-create' " class="navbar-brand d-flex align-items-center">
         <strong>Enviar Mensaje</strong>
-      </a>
+      </a> -->
       {% if user.is_authenticated  %}
         <a href= "{% url 'videos-mine' %}" class="navbar-brand d-flex align-items-center">
-          <strong>Mis Videos</strong>
+          <strong>Mis Platos</strong>
         </a> 
 
       <a href="{% url 'videos-list' %}" class="navbar-brand d-flex align-items-center">
-        <strong>Nuestro Tubo</strong>
+        <strong>Búsqueda de Platos</strong>
       </a>
 
       <a href="{% url 'videos-create' %}" class="navbar-brand d-flex align-items-center">
-        <strong>Publicar Video</strong>
+        <strong>Agregar Plato</strong>
       </a>
 
-      <a href="{% url 'mensaje-list' %}" class="navbar-brand d-flex align-items-center">
+      <!-- <a href=" url 'mensaje-list' " class="navbar-brand d-flex align-items-center">
         <strong>Mis Mensajes</strong>
-      </a>
+      </a> -->
 
       {% if user.profile %}
         <a href="{% url 'profile-update' user.profile.id %}" class="navbar-brand d-flex align-items-center">
-          <strong>Perfil ({{user.profile.nombre_completo}})</strong>
+          <strong>Perfil ({{user.username}})</strong>
         </a>
         
       {% else %}
@@ -213,7 +213,7 @@
     {% endif %}
        
     <a href="{% url 'logout' %}" class="navbar-brand d-flex align-items-center">
-      <strong>Hola {{user.username}} | Salir</strong>
+      <strong>Hola {{user.profile.nombre_completo}} | Salir</strong>
     </a>
 
   {% else %} 
@@ -241,7 +241,7 @@
       <p class="float-end mb-1">
         <a href="{% url 'videos-list' %}">Volver</a>
       </p>
-      <p class="mb-1">NuestroTubo. Trabajo Final. Curso Python · Coderhouse. Guillermo Gravino.</p>
+      <p class="mb-1">QuéComemos V. 1.0.</p>
     </div>
  </footer>
   

@@ -4,21 +4,20 @@
 
 {% block un_video %}
 
-{% for video in videos %}
+{% for plato in platos %}
   <div class="col">
     <div class="card shadow-sm">
-      <img class="card-img-top" style="height: 225px; width: 100%; display: block" src="{{video.image_url}}" data-holder-rendered="true">
+      <img class="card-img-top" style="height: 225px; width: 100%; display: block" src="{{plato.image_url}}" data-holder-rendered="true">
       <div class="card-body">
-        <strong><p class="card-text">{{ video.nombre_video }}</p></strong>
-        <p class="card-text">{{ video.descripcion_video }}</p>
-        <p><small class="text-muted">Fecha de captura: {{ video.fecha_video }}</small></p>
+        <strong><p class="card-text">{{ plato.nombre_plato }}</p></strong>
+        <p class="card-text">{{ plato.descripcion_plato }}</p>
         <div class="d-flex justify-content-between align-items-center">
           <div class="btn-group">
-            <a href="{{video.url_video}}" type="button" class="btn btn-sm btn-outline-primary">VER VIDEO</a>
-            <a href="{% url 'videos-detail' video.id %}" type="button" class="btn btn-sm btn-outline-secondary">Detalle del Video</a>
-            {% if user.id == video.propietario.id %}
-              <a href="{% url 'videos-delete' video.id %}" type="button" class="btn btn-sm btn-outline-secondary">Eliminar</a>
-              <a href="{% url 'videos-update' video.id %}" type="button"  class="btn btn-sm btn-outline-secondary">Editar</a>
+            <!-- <a href="{{video.receta}}" type="button" class="btn btn-sm btn-outline-primary">VER PLATO</a> -->
+            <a href="{% url 'videos-detail' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Detalle del plato</a>
+            {% if user.id == plato.propietario.id %}
+              <a href="{% url 'videos-delete' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Eliminar</a>
+              <a href="{% url 'videos-update' plato.id %}" type="button"  class="btn btn-sm btn-outline-secondary">Editar</a>
           </div>
         </div>
              <p></p>
@@ -27,7 +26,7 @@
           </div>
         </div>
              <p></p>
-             <small class="text-muted">Subido por {{ video.propietario }}</small> 
+             <small class="text-muted">Subido por {{ plato.propietario }}</small> 
             {% endif %}
           
         </div>

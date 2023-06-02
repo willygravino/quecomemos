@@ -1,21 +1,21 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-class Video(models.Model):
-    nombre_video = models.CharField(max_length=30)
-    url_video = models.CharField(max_length=80, blank=False)
-    descripcion_video = models.CharField(max_length=300)
-    quienes_aparecen = models.CharField('Ingresá el nombre y apellido de quienes participan en el video, separados por coma', max_length=120, blank=False)
+class Plato(models.Model):
+    nombre_plato = models.CharField(max_length=30)
+    receta = models.CharField(max_length=80, blank=False)
+    descripcion_plato = models.CharField(max_length=300)
+    ingredientes = models.CharField('Ingresá los ingredientes, separados por coma', max_length=120, blank=False)
     propietario = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="propietario")
-    image = models.ImageField("Subí una imagen que identifique al video (o un fotograma del mismo)", upload_to="videos/", null=True, blank=True)
-    fecha_video= models.DateTimeField("Fecha de captura del video:")
+    image = models.ImageField("Subí una imagen que identifique al plato (o un fotograma del mismo)", upload_to="videos/", null=True, blank=True)
+    # fecha_video= models.DateTimeField("Fecha de captura del video:")
 
     @property
     def image_url(self):
         return self.image.url if self.image else '/media/videos/nuestrotubo.png'
 
     def __str__(self):
-        return f"{self.id} - {self.nombre_video}"
+        return f"{self.id} - {self.nombre_plato}"
     
     
 class Profile(models.Model):
