@@ -6,24 +6,24 @@
 {% block principal %}
 
 <div class="album py-5 bg-light">
-    <section class="py-1 text-center container">
-      <div class="row py-lg-1">
-        <div class="col-lg-8 col-md-8 mx-auto">
-          <h1 class="fw-light">Formulario de publicación de plato.</h1>
-        </div>
+  <section class="py-1 text-center container">
+    <div class="row py-lg-1">
+      <div class="col-lg-8 col-md-8 mx-auto">
+        <h1 class="fw-light">Formulario de publicación de plato.</h1>
       </div>
-    </section>
-</div> 
+    </div>
+  </section>
+</div>
 
 <div style="margin-top:40px">
-    <form method="post" enctype="multipart/form-data"> 
+  <form method="post" enctype="multipart/form-data">
     <center>
-      <p>    
+      <p>
         {% csrf_token %}
         {{form.as_p}}
         <input type="submit" value="Actualizar">
       </p>
-    </center>    
-    </form>
+    </center>
+  </form>
 </div>
 {% endblock %}

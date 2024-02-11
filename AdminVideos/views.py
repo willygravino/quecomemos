@@ -1,3 +1,5 @@
+# from contextvars import Context AGREGADO POR MI PARA VER LA QUERY
+from contextvars import Context
 from django.shortcuts import render, redirect
 from AdminVideos.models import Plato, Profile, Mensaje
 from django.urls import reverse_lazy
@@ -8,21 +10,26 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 def index(request):
     return render(request, "AdminVideos/index.html")
-   
+
 def about(request):
     return render(request, "AdminVideos/about.html")
 
 class PlatoList(ListView):
     model = Plato
     context_object_name = "platos"
+    # query = "tomatelas"
 
     def get_queryset(self):
+        # self.query = "tomatelas"
+
         if self.request.user.is_authenticated:
             try:
                 if self.request.user.profile:
-                        query = self.request.user.profile.nombre_completo
-                        if query:
-                            object_list = Plato.objects.filter(ingredientes__icontains=query)
+                        # self.query = "higo"
+                        self.query = self.request.GET.get("la-busqueda")
+                        # query = self.request.user.profile.nombre_completo
+                        if self.query:
+                            object_list = Plato.objects.filter(ingredientes__icontains=self.query)
                         return object_list
             except Exception:
                object_list = Plato.objects.filter(ingredientes__icontains="%%")
@@ -30,9 +37,16 @@ class PlatoList(ListView):
         else:
             object_list = Plato.objects.filter(ingredientes__icontains="%%")
         return object_list
-    
+
+    def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            # Pasar query al contexto
+            context['query'] = self.query
+            return context
+
+
 class PlatosMineList(LoginRequiredMixin, PlatoList):
-    template_name = 'AdminVideos/videosmine_list.html' 
+    template_name = 'AdminVideos/videosmine_list.html'
 
     def get_queryset(self):
       return Plato.objects.filter(propietario=self.request.user.id)
@@ -52,8 +66,8 @@ class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         user_id = self.request.user.id
         plato_id =  self.kwargs.get("pk")
         return Plato.objects.filter(propietario=user_id, id=plato_id).exists()
-    
-    
+
+
 
 class PlatoDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Plato
@@ -126,7 +140,7 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
 
 #   def test_func(self):
 #       return Mensaje.objects.filter(destinatario=self.request.user).exists()
-    
+
 
 #class MensajeList(LoginRequiredMixin, ListView):
 #   model = Mensaje
@@ -135,4 +149,4 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
  #  def get_queryset(self):
  #      import pdb; pdb.set_trace
  #      return Mensaje.objects.filter(destinatario=self.request.user).all()
-    
+

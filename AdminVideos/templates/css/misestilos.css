@@ -1,0 +1,14 @@
+* {
+    max-width: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.armado {
+    display: flex;
+    flex-direction: column;
+}
+
+.formulario-busqueda {
+background-color: blue;
+}
