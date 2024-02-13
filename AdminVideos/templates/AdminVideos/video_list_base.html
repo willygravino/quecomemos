@@ -23,9 +23,6 @@
 
 <section>
   {% for plato in platos %}
-
-
-
   <div class="col">
     <div class="card shadow-sm">
       <img class="card-img-top" style="height: 225px; width: 100%; display: block" src="{{plato.image_url}}"
@@ -123,17 +120,16 @@
       <section>
         <div class="mt-4 btn btn-primary">
           <select name="dog-names" id="dog-names">
-            <option value="rigatoni">Rigatoni</option>
-            <option value="dave">Dave</option>
-            <option value="pumpernickel">Pumpernickel</option>
-            <option value="reeses">Reeses</option>
+            {% for elegido in elegidos %}
+              <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
+            {% endfor %}  
           </select>
+
           <br>
           <select name="dog-names" id="dog-names">
-            <option value="rigatoni">Rigatoni</option>
-            <option value="dave">Dave</option>
-            <option value="pumpernickel">Pumpernickel</option>
-            <option value="reeses">Reeses</option>
+            {% for elegido in elegidos %}
+              <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
+            {% endfor %}  
           </select>
 
         </div>
@@ -141,102 +137,90 @@
 
         <div class="mt-5 btn btn-primary">
           <select name="dog-names" id="dog-names">
-            <option value="rigatoni">Rigatoni</option>
-            <option value="dave">Dave</option>
-            <option value="pumpernickel">Pumpernickel</option>
-            <option value="reeses">Reeses</option>
+            {% for elegido in elegidos %}
+              <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
+            {% endfor %}  
           </select>
           <br>
           <select name="dog-names" id="dog-names">
-            <option value="rigatoni">Rigatoni</option>
-            <option value="dave">Dave</option>
-            <option value="pumpernickel">Pumpernickel</option>
-            <option value="reeses">Reeses</option>
+            {% for elegido in elegidos %}
+              <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
+            {% endfor %}  
           </select>
         </div>
         <br>
 
         <div class="mt-4 btn btn-primary">
           <select name="dog-names" id="dog-names">
-            <option value="rigatoni">Rigatoni</option>
-            <option value="dave">Dave</option>
-            <option value="pumpernickel">Pumpernickel</option>
-            <option value="reeses">Reeses</option>
+            {% for elegido in elegidos %}
+            <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
+          {% endfor %}  
           </select>
           <br>
           <select name="dog-names" id="dog-names">
-            <option value="rigatoni">Rigatoni</option>
-            <option value="dave">Dave</option>
-            <option value="pumpernickel">Pumpernickel</option>
-            <option value="reeses">Reeses</option>
+            {% for elegido in elegidos %}
+              <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
+            {% endfor %}  
           </select>
         </div>
         <br>
 
         <div class="mt-5 btn btn-primary">
           <select name="dog-names" id="dog-names">
-            <option value="rigatoni">Rigatoni</option>
-            <option value="dave">Dave</option>
-            <option value="pumpernickel">Pumpernickel</option>
-            <option value="reeses">Reeses</option>
+            {% for elegido in elegidos %}
+            <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
+          {% endfor %}  
           </select>
           <br>
           <select name="dog-names" id="dog-names">
-            <option value="rigatoni">Rigatoni</option>
-            <option value="dave">Dave</option>
-            <option value="pumpernickel">Pumpernickel</option>
-            <option value="reeses">Reeses</option>
+            {% for elegido in elegidos %}
+            <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
+          {% endfor %}  
           </select>
         </div>
         <br>
 
         <div class="mt-4 btn btn-primary">
           <select name="dog-names" id="dog-names">
-            <option value="rigatoni">Rigatoni</option>
-            <option value="dave">Dave</option>
-            <option value="pumpernickel">Pumpernickel</option>
-            <option value="reeses">Reeses</option>
+            {% for elegido in elegidos %}
+            <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
+          {% endfor %}  
           </select>
           <br>
           <select name="dog-names" id="dog-names">
-            <option value="rigatoni">Rigatoni</option>
-            <option value="dave">Dave</option>
-            <option value="pumpernickel">Pumpernickel</option>
-            <option value="reeses">Reeses</option>
+            {% for elegido in elegidos %}
+            <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
+          {% endfor %}  
           </select>
         </div>
         <br>
 
         <div class="mt-5 btn btn-primary">
           <select name="dog-names" id="dog-names">
-            <option value="rigatoni">Rigatoni</option>
-            <option value="dave">Dave</option>
-            <option value="pumpernickel">Pumpernickel</option>
-            <option value="reeses">Reeses</option>
+            {% for elegido in elegidos %}
+              <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
+            {% endfor %}  
           </select>
           <br>
           <select name="dog-names" id="dog-names">
-            <option value="rigatoni">Rigatoni</option>
-            <option value="dave">Dave</option>
-            <option value="pumpernickel">Pumpernickel</option>
-            <option value="reeses">Reeses</option>
+            {% for elegido in elegidos %}
+            <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
+          {% endfor %}  
           </select>
         </div>
         <br>
 
         <div class="mt-4 btn btn-primary">
           <select name="dog-names" id="dog-names">
-            <option value="rigatoni">Rigatoni</option>
-            <option value="dave">Dave</option>
-            <option value="pumpernickel">Pumpernickel</option>
-            <option value="reeses">Reeses</option>
+            {% for elegido in elegidos %}
+            <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
+          {% endfor %}  
           </select>
           <br>
           <select name="dog-names" id="dog-names">
-            <option value="rigatoni">Rigatoni</option>
-            <option value="dave">Dave</option>
-            <option value="pumpernickel">Pumpernickel</option>
-            <option value="reeses">Reeses</option>
+            {% for elegido in elegidos %}
+              <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
+            {% endfor %}  
           </select>
         </div>
       </section>

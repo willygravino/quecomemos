@@ -53,6 +53,17 @@ class PlatoList(ListView):
             # Pasar query al contexto
             context['query'] = self.query if self.query else "tomate"
             return context
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Obtener objetos de Elegidos
+        elegidos = Elegidos.objects.all()  # O puedes filtrar según tu necesidad
+
+        # Agregar objetos de Elegidos al contexto
+        context['elegidos'] = elegidos
+
+        return context
 
 
 class PlatosMineList(LoginRequiredMixin, PlatoList):
