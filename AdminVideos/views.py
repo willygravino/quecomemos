@@ -1,7 +1,8 @@
 # from contextvars import Context AGREGADO POR MI PARA VER LA QUERY
 from contextvars import Context
 from django.shortcuts import render, redirect
-from AdminVideos.models import Plato, Profile, Mensaje
+from AdminVideos.models import Plato, Profile, Mensaje, Elegidos
+from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.contrib.auth.forms import UserCreationForm
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
@@ -14,10 +15,19 @@ def index(request):
 def about(request):
     return render(request, "AdminVideos/about.html")
 
+
+def plato_elegido(request):
+    nombre_plato = request.GET.get('opcion1')
+    elegido = Elegidos(nombre_plato=nombre_plato)
+    elegido.save()
+
+    return redirect(reverse_lazy("videos-list"))
+
+
 class PlatoList(ListView):
     model = Plato
     context_object_name = "platos"
-    # query = "tomatelas"
+    # query = None
 
     def get_queryset(self):
         # self.query = "tomatelas"
@@ -41,7 +51,7 @@ class PlatoList(ListView):
     def get_context_data(self, **kwargs):
             context = super().get_context_data(**kwargs)
             # Pasar query al contexto
-            context['query'] = self.query
+            context['query'] = self.query if self.query else "tomate"
             return context
 
 

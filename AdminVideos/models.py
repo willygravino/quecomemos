@@ -17,6 +17,9 @@ class Plato(models.Model):
     def __str__(self):
         return f"{self.id} - {self.nombre_plato}"
     
+class Elegidos(models.Model):
+    nombre_plato = models.CharField(max_length=30)
+
     
 class Profile(models.Model):
      user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")

@@ -4,24 +4,26 @@
 
 {% block un_video %}
 
-<div class="armado">
-
-  <form  method="get" > 
+<!-- <div class="armado"> -->
+<section>
+  <form method="get">
 
     <p>
 
       Busca por ingrediente: <input type="search" name="la-busqueda">
 
-      <input type="submit" value="Buscar">
-
+      <!-- <input type="submit" value="Buscar"> -->
+      <button type="submit" style="display: none;">Buscar</button>
     </p>
 
   </form>
 
   <h1>EL QUERY!!!: {{ query }}</h1>
+</section>
 
-
+<section>
   {% for plato in platos %}
+
 
 
   <div class="col">
@@ -40,9 +42,9 @@
               del plato</a>
             {% if user.id == plato.propietario.id %}
             <a href="{% url 'videos-delete' plato.id %}" type="button"
-              class="btn btn-sm btn-outline-secondary">Eliminar</a>
-            <a href="{% url 'videos-update' plato.id %}" type="button"
-              class="btn btn-sm btn-outline-secondary">Editar</a>
+              class="btn btn-sm btn-outline-secondary">Eliminar<a>
+                <a href="{% url 'videos-update' plato.id %}" type="button"
+                  class="btn btn-sm btn-outline-secondary">Editar</a>
           </div>
         </div>
         <p></p>
@@ -55,12 +57,192 @@
     {% endif %}
 
   </div>
+  <!-- <form action="/ruta-de-tu-vista/" method="GET"> -->
+ 
+    <form action="{% url 'plato-elegido' %}" method="GET">
+      <label for="opcion{{ plato.id }}">Elegir este plato:</label>
+      <input type="checkbox" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
+      <input type="submit" value="Enviar">
+  </form>
 
-</div>
-</div>
 
-{% endfor %}
+  </div>
+  <!-- </div> -->
 
+  {% endfor %}
+</section>
+
+
+<section>
+  <h3> ARMADO DEL MENÚ.</h3>
+  <div class="d-flex flex-column justify-content-center ">
+    <div class="d-flex flex-row justify-content-center ">
+      <section>
+
+        <p>Lunes</p>
+        <h5>Almuezo</h5>
+        <h5>Cena</h5>
+
+
+        <p>Martes</p>
+        <h5>Almuezo</h5>
+        <h5>Cena</h5>
+
+
+
+        <p>Miércoles</p>
+        <h5>Almuezo</h5>
+        <h5>Cena</h5>
+
+
+
+        <p>Jueves</p>
+        <h5>Almuezo</h5>
+        <h5>Cena</h5>
+
+
+
+        <p>Viernes</p>
+        <h5>Almuezo</h5>
+        <h5>Cena</h5>
+
+
+
+        <p>Sábado</p>
+        <h5>Almuezo</h5>
+        <h5>Cena</h5>
+
+
+
+        <p>Domingo</p>
+        <h5>Almuezo</h5>
+        <h5>Cena</h5>
+
+      </section>
+
+      <section>
+        <div class="mt-4 btn btn-primary">
+          <select name="dog-names" id="dog-names">
+            <option value="rigatoni">Rigatoni</option>
+            <option value="dave">Dave</option>
+            <option value="pumpernickel">Pumpernickel</option>
+            <option value="reeses">Reeses</option>
+          </select>
+          <br>
+          <select name="dog-names" id="dog-names">
+            <option value="rigatoni">Rigatoni</option>
+            <option value="dave">Dave</option>
+            <option value="pumpernickel">Pumpernickel</option>
+            <option value="reeses">Reeses</option>
+          </select>
+
+        </div>
+        <br>
+
+        <div class="mt-5 btn btn-primary">
+          <select name="dog-names" id="dog-names">
+            <option value="rigatoni">Rigatoni</option>
+            <option value="dave">Dave</option>
+            <option value="pumpernickel">Pumpernickel</option>
+            <option value="reeses">Reeses</option>
+          </select>
+          <br>
+          <select name="dog-names" id="dog-names">
+            <option value="rigatoni">Rigatoni</option>
+            <option value="dave">Dave</option>
+            <option value="pumpernickel">Pumpernickel</option>
+            <option value="reeses">Reeses</option>
+          </select>
+        </div>
+        <br>
+
+        <div class="mt-4 btn btn-primary">
+          <select name="dog-names" id="dog-names">
+            <option value="rigatoni">Rigatoni</option>
+            <option value="dave">Dave</option>
+            <option value="pumpernickel">Pumpernickel</option>
+            <option value="reeses">Reeses</option>
+          </select>
+          <br>
+          <select name="dog-names" id="dog-names">
+            <option value="rigatoni">Rigatoni</option>
+            <option value="dave">Dave</option>
+            <option value="pumpernickel">Pumpernickel</option>
+            <option value="reeses">Reeses</option>
+          </select>
+        </div>
+        <br>
+
+        <div class="mt-5 btn btn-primary">
+          <select name="dog-names" id="dog-names">
+            <option value="rigatoni">Rigatoni</option>
+            <option value="dave">Dave</option>
+            <option value="pumpernickel">Pumpernickel</option>
+            <option value="reeses">Reeses</option>
+          </select>
+          <br>
+          <select name="dog-names" id="dog-names">
+            <option value="rigatoni">Rigatoni</option>
+            <option value="dave">Dave</option>
+            <option value="pumpernickel">Pumpernickel</option>
+            <option value="reeses">Reeses</option>
+          </select>
+        </div>
+        <br>
+
+        <div class="mt-4 btn btn-primary">
+          <select name="dog-names" id="dog-names">
+            <option value="rigatoni">Rigatoni</option>
+            <option value="dave">Dave</option>
+            <option value="pumpernickel">Pumpernickel</option>
+            <option value="reeses">Reeses</option>
+          </select>
+          <br>
+          <select name="dog-names" id="dog-names">
+            <option value="rigatoni">Rigatoni</option>
+            <option value="dave">Dave</option>
+            <option value="pumpernickel">Pumpernickel</option>
+            <option value="reeses">Reeses</option>
+          </select>
+        </div>
+        <br>
+
+        <div class="mt-5 btn btn-primary">
+          <select name="dog-names" id="dog-names">
+            <option value="rigatoni">Rigatoni</option>
+            <option value="dave">Dave</option>
+            <option value="pumpernickel">Pumpernickel</option>
+            <option value="reeses">Reeses</option>
+          </select>
+          <br>
+          <select name="dog-names" id="dog-names">
+            <option value="rigatoni">Rigatoni</option>
+            <option value="dave">Dave</option>
+            <option value="pumpernickel">Pumpernickel</option>
+            <option value="reeses">Reeses</option>
+          </select>
+        </div>
+        <br>
+
+        <div class="mt-4 btn btn-primary">
+          <select name="dog-names" id="dog-names">
+            <option value="rigatoni">Rigatoni</option>
+            <option value="dave">Dave</option>
+            <option value="pumpernickel">Pumpernickel</option>
+            <option value="reeses">Reeses</option>
+          </select>
+          <br>
+          <select name="dog-names" id="dog-names">
+            <option value="rigatoni">Rigatoni</option>
+            <option value="dave">Dave</option>
+            <option value="pumpernickel">Pumpernickel</option>
+            <option value="reeses">Reeses</option>
+          </select>
+        </div>
+      </section>
+
+    </div>
+</section>
 </div>
 
 {% endblock %}
