@@ -1,13 +1,15 @@
 # from contextvars import Context AGREGADO POR MI PARA VER LA QUERY
 from contextvars import Context
+import json
 from django.shortcuts import render, redirect
-from AdminVideos.models import Plato, Profile, Mensaje, Elegidos
-from django.http import HttpResponse
+from AdminVideos.models import Plato, Profile, Mensaje, Elegidos, ElegidosXSemana
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.urls import reverse_lazy
 from django.contrib.auth.forms import UserCreationForm
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from datetime import datetime
 
 def index(request):
     return render(request, "AdminVideos/index.html")
@@ -63,12 +65,72 @@ class PlatoList(ListView):
         # Agregar objetos de Elegidos al contexto
         context['elegidos'] = elegidos
 
+        fecha_actual = datetime.now()
+        fecha = fecha_actual.date()
+        context['fecha_actual'] = fecha
+
         return context
+    
+def grabar_menu_elegido(request):
+    if request.method == 'POST':
+        # Obtén los datos del formulario
+        datos = {
+            'lunes_a': request.POST.get('lunes-a'),
+            'lunes_c': request.POST.get('lunes-c'),
+            'martes_a': request.POST.get('martes-a'),
+            'martes_c': request.POST.get('martes-c'),
+            'miercoles_a': request.POST.get('miercoles-a'),
+            'miercoles_c': request.POST.get('miercoles-c'),
+            'jueves_a': request.POST.get('jueves-a'),
+            'jueves_c': request.POST.get('jueves-c'),
+            'viernes_a': request.POST.get('viernes-a'),
+            'viernes_c': request.POST.get('viernes-c'),
+            'sabado_a': request.POST.get('sabado-a'),
+            'sabado_c': request.POST.get('sabado-c'),
+            'domingo_a': request.POST.get('domingo-a'),
+            'domingo_c': request.POST.get('domingo-c')
+        }
+        
+        fecha_actual = request.POST.get('fecha_actual')
+        # Crea un diccionario con la fecha como clave y los datos como valor
+        datos_por_dia = {fecha_actual: datos}
+        
+        # Crea una instancia del modelo ElegidosPorDia con el diccionario de datos
+        elegidos_por_semana_objeto = ElegidosXSemana(elegidos_por_semana=datos_por_dia)
+        
+        # Guarda la instancia del modelo en la base de datos
+        elegidos_por_semana_objeto.save()
+        
+        # Retorna una respuesta JSON
+        return redirect(reverse_lazy("menu-elegido"))
+    else:
+        # Retorna una respuesta JSON con un mensaje de error si el método no es POST
+        return JsonResponse({'error': 'El método de solicitud debe ser POST'})
+    
+class MenuElegido (CreateView):
+    model = ElegidosXSemana
+    fields = ["elegidos_por_semana"]
+    template_name = 'AdminVideos/menu_elegido.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        ultimo_objeto = ElegidosXSemana.objects.latest('id')
+        # Suponiendo que tienes el último objeto cargado en la variable `ultimo_objeto`
+        if ultimo_objeto is not None:
+           # Obtener los datos del campo JSON como un diccionario
+           datos_json = ultimo_objeto.elegidos_por_semana    
+           # Convertir los datos JSON en un diccionario de Python
+        #    datos_dict = json.loads(datos_json)
+           # Agregar el diccionario al contexto
+           context['elegidos_semanal'] = datos_json
+        else: context['elegidos_semanal'] = "poroto"   
+        return context
+    
+ 
 
 
 class PlatosMineList(LoginRequiredMixin, PlatoList):
     template_name = 'AdminVideos/videosmine_list.html'
-
     def get_queryset(self):
       return Plato.objects.filter(propietario=self.request.user.id)
 

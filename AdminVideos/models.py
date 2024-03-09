@@ -20,7 +20,12 @@ class Plato(models.Model):
 class Elegidos(models.Model):
     nombre_plato = models.CharField(max_length=30)
 
-    
+class ElegidosXSemana(models.Model):
+    elegidos_por_semana = models.JSONField(null=True, blank=True)
+
+    def __str__(self):
+         return f'Menu Elegido {self.id}' 
+
 class Profile(models.Model):
      user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
      nombre_completo = models.CharField(max_length=80, blank=False)

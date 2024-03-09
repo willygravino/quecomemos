@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from AdminVideos.views import index, PlatoList, PlatoUpdate, PlatoDelete, PlatoCreate, Login, Logout, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, PlatosMineList, plato_elegido #,MensajeCreate, MensajeList, MensajeDelete,
+from AdminVideos.views import index, PlatoList, PlatoUpdate, PlatoDelete, PlatoCreate, Login, Logout, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, PlatosMineList, plato_elegido, grabar_menu_elegido, MenuElegido #,MensajeCreate, MensajeList, MensajeDelete,
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -25,6 +25,9 @@ urlpatterns = [
     path('', index, name="index"),
     path('videos/list', PlatoList.as_view(), name="videos-list"),
     path('plato/elegido', plato_elegido, name="plato-elegido"),
+    path('plato/grabar', grabar_menu_elegido, name="grabar-menu"),
+    path('menu/elegido', MenuElegido.as_view(), name="menu-elegido"),
+    path('videos/list/mine', PlatosMineList.as_view(), name="videos-mine"),
     path('videos/list/mine', PlatosMineList.as_view(), name="videos-mine"),
     path('videos/<pk>/update', PlatoUpdate.as_view(), name="videos-update"),
     path('videos/<pk>/delete', PlatoDelete.as_view(), name="videos-delete"),

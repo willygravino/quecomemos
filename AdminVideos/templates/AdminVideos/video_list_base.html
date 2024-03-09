@@ -5,95 +5,89 @@
 {% block un_video %}
 
 <!-- <div class="armado"> -->
+
+
 <section>
+<div class="d-flex flex-row justify-content-between" >
   <form method="get">
 
     <p>
 
-      Busca por ingrediente: <input type="search" name="la-busqueda">
+      Busca por ingrediente: <br><input type="search" name="la-busqueda">
 
       <!-- <input type="submit" value="Buscar"> -->
       <button type="submit" style="display: none;">Buscar</button>
     </p>
 
-  </form>
 
-  <h1>EL QUERY!!!: {{ query }}</h1>
+  </form>
+  <p>
+    Tipo de vista: <br>
+
+    <select name="tipo-de-vista">
+      <option value="seleccionados">Seleccionados</option>
+      <option value="todos">Todos</option>
+    </select>
+    <button type="submit">Enviar</button>
+
+  </p>
+  
+</div>
 </section>
 
 <section>
   {% for plato in platos %}
-  <div class="col">
-    <div class="card shadow-sm">
-      <img class="card-img-top" style="height: 225px; width: 100%; display: block" src="{{plato.image_url}}"
-        data-holder-rendered="true">
-      <div class="card-body">
-        <strong>
-          <p class="card-text">{{ plato.nombre_plato }}</p>
-        </strong>
-        <p class="card-text">{{ plato.descripcion_plato }}</p>
-        <div class="d-flex justify-content-between align-items-center">
-          <div class="btn-group">
-            <!-- <a href="{{video.receta}}" type="button" class="btn btn-sm btn-outline-primary">VER PLATO</a> -->
-            <a href="{% url 'videos-detail' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Detalle
-              del plato</a>
-            {% if user.id == plato.propietario.id %}
-            <a href="{% url 'videos-delete' plato.id %}" type="button"
-              class="btn btn-sm btn-outline-secondary">Eliminar<a>
-                <a href="{% url 'videos-update' plato.id %}" type="button"
-                  class="btn btn-sm btn-outline-secondary">Editar</a>
-          </div>
-        </div>
-        <p></p>
-        <small class="text-muted">Subido por mi.</small>
-        {% else %}
-      </div>
+  <div class="d-flex flex-row">
+    <img style="width: 20%" src="{{plato.image_url}}" data-holder-rendered="true">
+    <div>
+      <strong>
+        <h6>{{ plato.nombre_plato }}</h6>
+      </strong>
+      <h6>{{ plato.descripcion_plato }}</h6>
+      <a href="{% url 'videos-detail' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Detalle del
+        plato</a>
+      {% if user.id == plato.propietario.id %}
+      <a href="{% url 'videos-delete' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Eliminar<a>
+          <a href="{% url 'videos-update' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Editar</a>
+          <small class="text-muted">Subido por mi.</small>
+          {% else %}
+          <small class="text-muted">Subido por {{ plato.propietario }}</small>
+          {% endif %}
     </div>
-    <p></p>
-    <small class="text-muted">Subido por {{ plato.propietario }}</small>
-    {% endif %}
-
   </div>
-  <!-- <form action="/ruta-de-tu-vista/" method="GET"> -->
- 
-    <form action="{% url 'plato-elegido' %}" method="GET">
-      <label for="opcion{{ plato.id }}">Elegir este plato:</label>
-      <input type="checkbox" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
-      <input type="submit" value="Enviar">
+  <form action="{% url 'plato-elegido' %}" method="GET">
+    <label for="opcion{{ plato.id }}">Elegir este plato:</label>
+    <input type="checkbox" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
+    <input type="submit" value="Enviar">
   </form>
-
-
-  </div>
-  <!-- </div> -->
-
   {% endfor %}
 </section>
 
 
 <section>
+
   <h3> ARMADO DEL MENÚ.</h3>
   <div class="d-flex flex-column justify-content-center ">
     <div class="d-flex flex-row justify-content-center ">
       <section>
 
-        <p>Lunes</p>
+        <p>Lunes {{ fecha_actual }}</p>
         <h5>Almuezo</h5>
         <h5>Cena</h5>
 
 
-        <p>Martes</p>
+        <p>Martes {{ fecha_actual }}</p>
+        <h5>Almuezo</h5>
+        <h5>Cena</h5>
+
+
+        <p>Miércoles {{ fecha_actual }}</p>
         <h5>Almuezo</h5>
         <h5>Cena</h5>
 
 
 
-        <p>Miércoles</p>
-        <h5>Almuezo</h5>
-        <h5>Cena</h5>
-
-
-
-        <p>Jueves</p>
+        <p>Jueves {{ fecha_actual }}</p>
         <h5>Almuezo</h5>
         <h5>Cena</h5>
 
@@ -116,117 +110,132 @@
         <h5>Cena</h5>
 
       </section>
-
       <section>
-        <div class="mt-4 btn btn-primary">
-          <select name="dog-names" id="dog-names">
-            {% for elegido in elegidos %}
+
+        <form action="{% url 'grabar-menu' %}" method="post">
+
+          {% csrf_token %}
+
+          <div class="mt-5 btn btn-primary">
+            <select name="lunes-a">
+              {% for elegido in elegidos %}
               <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
-            {% endfor %}  
-          </select>
-
-          <br>
-          <select name="dog-names" id="dog-names">
-            {% for elegido in elegidos %}
+              {% endfor %}
+            </select>
+            <br>
+            <select name="lunes-c">
+              {% for elegido in elegidos %}
               <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
-            {% endfor %}  
-          </select>
+              {% endfor %}
+            </select>
+          </div>
+          <br>
 
-        </div>
-        <br>
-
-        <div class="mt-5 btn btn-primary">
-          <select name="dog-names" id="dog-names">
-            {% for elegido in elegidos %}
+          <div class="mt-4 btn btn-primary">
+            <select name="martes-a">
+              {% for elegido in elegidos %}
               <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
-            {% endfor %}  
-          </select>
-          <br>
-          <select name="dog-names" id="dog-names">
-            {% for elegido in elegidos %}
+              {% endfor %}
+            </select>
+            <br>
+            <select name="martes-c">
+              {% for elegido in elegidos %}
               <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
-            {% endfor %}  
-          </select>
-        </div>
-        <br>
-
-        <div class="mt-4 btn btn-primary">
-          <select name="dog-names" id="dog-names">
-            {% for elegido in elegidos %}
-            <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
-          {% endfor %}  
-          </select>
+              {% endfor %}
+            </select>
+          </div>
           <br>
-          <select name="dog-names" id="dog-names">
-            {% for elegido in elegidos %}
+
+          <div class="mt-4 btn btn-primary">
+            <select name="miercoles-a">
+              {% for elegido in elegidos %}
               <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
-            {% endfor %}  
-          </select>
-        </div>
-        <br>
+              {% endfor %}
+            </select>
 
-        <div class="mt-5 btn btn-primary">
-          <select name="dog-names" id="dog-names">
-            {% for elegido in elegidos %}
-            <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
-          {% endfor %}  
-          </select>
-          <br>
-          <select name="dog-names" id="dog-names">
-            {% for elegido in elegidos %}
-            <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
-          {% endfor %}  
-          </select>
-        </div>
-        <br>
-
-        <div class="mt-4 btn btn-primary">
-          <select name="dog-names" id="dog-names">
-            {% for elegido in elegidos %}
-            <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
-          {% endfor %}  
-          </select>
-          <br>
-          <select name="dog-names" id="dog-names">
-            {% for elegido in elegidos %}
-            <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
-          {% endfor %}  
-          </select>
-        </div>
-        <br>
-
-        <div class="mt-5 btn btn-primary">
-          <select name="dog-names" id="dog-names">
-            {% for elegido in elegidos %}
+            <br>
+            <select name="miercoles-c">
+              {% for elegido in elegidos %}
               <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
-            {% endfor %}  
-          </select>
-          <br>
-          <select name="dog-names" id="dog-names">
-            {% for elegido in elegidos %}
-            <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
-          {% endfor %}  
-          </select>
-        </div>
-        <br>
+              {% endfor %}
+            </select>
 
-        <div class="mt-4 btn btn-primary">
-          <select name="dog-names" id="dog-names">
-            {% for elegido in elegidos %}
-            <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
-          {% endfor %}  
-          </select>
+          </div>
           <br>
-          <select name="dog-names" id="dog-names">
-            {% for elegido in elegidos %}
+
+          <div class="mt-5 btn btn-primary">
+            <select name="jueves-a">
+              {% for elegido in elegidos %}
               <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
-            {% endfor %}  
-          </select>
-        </div>
+              {% endfor %}
+            </select>
+            <br>
+            <select name="jueves-c">
+              {% for elegido in elegidos %}
+              <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <br>
+
+          <div class="mt-4 btn btn-primary">
+            <select name="viernes-a">
+              {% for elegido in elegidos %}
+              <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
+              {% endfor %}
+            </select>
+            <br>
+            <select name="viernes-c">
+              {% for elegido in elegidos %}
+              <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <br>
+
+          <div class="mt-5 btn btn-primary">
+            <select name="sabado-a">
+              {% for elegido in elegidos %}
+              <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
+              {% endfor %}
+            </select>
+            <br>
+            <select name="sabado-c">
+              {% for elegido in elegidos %}
+              <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <br>
+
+          <div class="mt-4 btn btn-primary">
+            <select name="domingo-a">
+              {% for elegido in elegidos %}
+              <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
+              {% endfor %}
+            </select>
+            <br>
+            <select name="domingo-c">
+              {% for elegido in elegidos %}
+              <option value="{{ elegido.nombre_plato }}">{{ elegido.nombre_plato }}</option>
+              {% endfor %}
+            </select>
+
+          </div>
+          <p>La fecha y hora actuales son: {{ fecha_actual }}</p>
+          <button type="submit">Enviar</button>
       </section>
 
+      <!-- </section> -->
+
     </div>
+
+
+    </form>
+
+  </div>
+
 </section>
-</div>
+
 
 {% endblock %}

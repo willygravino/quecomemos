@@ -1,0 +1,31 @@
+{% for plato in platos %}
+  <div class="col">
+    <div class="card shadow-sm">
+      <img class="card-img-top" style="height: 225px; width: 100%; display: block" src="{{plato.image_url}}"
+        data-holder-rendered="true">
+      <div class="card-body">
+        <strong>
+          <p class="card-text">{{ plato.nombre_plato }}</p>
+        </strong>
+        <p class="card-text">{{ plato.descripcion_plato }}</p>
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="btn-group">
+            <!-- <a href="{{video.receta}}" type="button" class="btn btn-sm btn-outline-primary">VER PLATO</a> -->
+            <a href="{% url 'videos-detail' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Detalle
+              del plato</a>
+            {% if user.id == plato.propietario.id %}
+            <a href="{% url 'videos-delete' plato.id %}" type="button"
+              class="btn btn-sm btn-outline-secondary">Eliminar<a>
+                <a href="{% url 'videos-update' plato.id %}" type="button"
+                  class="btn btn-sm btn-outline-secondary">Editar</a>
+          </div>
+        </div>
+        <p></p>
+        <small class="text-muted">Subido por mi.</small>
+        {% else %}
+      </div>
+    </div>
+    <p></p>
+    <small class="text-muted">Subido por {{ plato.propietario }}</small>
+    {% endif %}
+  </div>

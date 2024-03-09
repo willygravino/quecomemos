@@ -1,0 +1,23 @@
+{% extends "AdminVideos/index.html" %}
+
+{% load static %}
+
+{% block un_video %}
+
+<p>AQUÍ EL MENU ELEGIDO</p>
+
+<body>
+    <h1>Datos de Elegidos Por Día</h1>
+    <ul>
+        {% for dia, platos in elegidos_semanal.items %}
+        <li>{{ dia }}</li>
+        <ul>
+            {% for comida, plato in platos.items %}
+            <li>{{ comida }}: {{ plato }}</li>
+            {% endfor %}
+        </ul>
+        {% endfor %}
+    </ul>
+</body>
+
+{% endblock %}
