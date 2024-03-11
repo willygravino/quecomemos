@@ -20,8 +20,12 @@ def about(request):
 
 def plato_elegido(request):
     nombre_plato = request.GET.get('opcion1')
-    elegido = Elegidos(nombre_plato=nombre_plato)
-    elegido.save()
+    borrar = request.GET.get('borrar')
+    elegido = Elegidos(nombre_plato_elegido=nombre_plato)
+    if borrar == "borrar":
+       Elegidos.objects.filter(nombre_plato_elegido=nombre_plato).delete()
+    else:
+      elegido.save()
 
     return redirect(reverse_lazy("videos-list"))
 
@@ -37,9 +41,7 @@ class PlatoList(ListView):
         if self.request.user.is_authenticated:
             try:
                 if self.request.user.profile:
-                        # self.query = "higo"
                         self.query = self.request.GET.get("la-busqueda")
-                        # query = self.request.user.profile.nombre_completo
                         if self.query:
                             object_list = Plato.objects.filter(ingredientes__icontains=self.query)
                         return object_list
@@ -74,6 +76,7 @@ class PlatoList(ListView):
 def grabar_menu_elegido(request):
     if request.method == 'POST':
         # Obtén los datos del formulario
+        fecha_actual = request.POST.get('fecha_actual')
         datos = {
             'lunes_a': request.POST.get('lunes-a'),
             'lunes_c': request.POST.get('lunes-c'),
@@ -91,7 +94,6 @@ def grabar_menu_elegido(request):
             'domingo_c': request.POST.get('domingo-c')
         }
         
-        fecha_actual = request.POST.get('fecha_actual')
         # Crea un diccionario con la fecha como clave y los datos como valor
         datos_por_dia = {fecha_actual: datos}
         
@@ -127,12 +129,11 @@ class MenuElegido (CreateView):
         return context
     
  
-
-
 class PlatosMineList(LoginRequiredMixin, PlatoList):
+    model = Plato
     template_name = 'AdminVideos/videosmine_list.html'
     def get_queryset(self):
-      return Plato.objects.filter(propietario=self.request.user.id)
+      return Plato.objects.filter(propietario_id=self.request.user.id)
 
 class PlatoDetail(DetailView):
     model = Plato

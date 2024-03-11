@@ -29,3 +29,106 @@
     <small class="text-muted">Subido por {{ plato.propietario }}</small>
     {% endif %}
   </div>
+
+
+          <!-- {% if forloop.last %}
+            <form action="{% url 'plato-elegido' %}" method="GET">
+              <label for="opcion{{ plato.id }}">Elegir este plato:</label>
+              <input type="checkbox" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
+              <button type="submit">Enviar</button>
+            </form>
+          {% endif %} -->
+
+
+
+  <!-- {% for plato in platos %}
+                  <div class="d-flex flex-row">
+                    <img style="width: 20%" src="{{plato.image_url}}" data-holder-rendered="true">
+                    <div>
+                      <strong>
+                        <h6>{{ plato.nombre_plato }}</h6>
+                      </strong>
+                      <h6>DESCRIPCIÓN {{ plato.descripcion_plato }}</h6>
+                      <a href="{% url 'videos-detail' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Detalle del
+                        plato</a>
+                      {% if user.id == plato.propietario.id %}
+                      <a href="{% url 'videos-delete' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Eliminar<a>
+                          <a href="{% url 'videos-update' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Editar</a>
+                          <small class="text-muted">Subido por mi.</small>
+                          {% else %}
+                          <small class="text-muted">Subido por {{ plato.propietario.id }}</small>
+                      {% endif %}
+                    </div>
+                  </div>
+
+                  {% if plato.nombre_plato in elegidos %}
+                    <p>ESTÁ EN ELEGIDOS! OK</p>
+                  {% endif %}
+                  
+                  {% for elegido in elegidos %}
+                      {% if plato.nombre_plato == elegido.nombre_plato %}
+                      <form action="{% url 'plato-elegido' %}" method="GET">
+                        <label for="opcion{{ plato.id }}">Elegir este plato:</label>
+                        <input type="checkbox" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}" checked>
+                        <input type="checkbox" id="borrar" name="borrar" value="borrar">
+                        <button type="submit">Enviar</button>
+                      </form>
+                      {% endif %}
+                  {% endfor %}
+                  {% if forloop.last %}
+                    <form action="{% url 'plato-elegido' %}" method="GET">
+                      <label for="opcion{{ plato.id }}">Elegir este plato:</label>
+                      <input type="checkbox" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
+                      <button type="submit">Enviar</button>
+                    </form>
+                  {% endif %}
+                  
+                  <p>-------------------------</p>
+
+  {% endfor %} -->
+
+  <!-- <div class="d-flex flex-column justify-content-center ">
+    <div class="d-flex flex-row justify-content-center ">
+      <section>
+
+        <p>Lunes {{ fecha_actual }}</p>
+        <h5>Almuezo</h5>
+        <h5>Cena</h5>
+
+
+        <p>Martes {{ fecha_actual }}</p>
+        <h5>Almuezo</h5>
+        <h5>Cena</h5>
+
+
+        <p>Miércoles {{ fecha_actual }}</p>
+        <h5>Almuezo</h5>
+        <h5>Cena</h5>
+
+
+
+        <p>Jueves {{ fecha_actual }}</p>
+        <h5>Almuezo</h5>
+        <h5>Cena</h5>
+
+
+
+        <p>Viernes</p>
+        <h5>Almuezo</h5>
+        <h5>Cena</h5>
+
+
+
+        <h5>Sábado</h5>
+        <h5>Almuezo</h5>
+        <h5>Cena</h5>
+
+
+
+        <p>Domingo</p>
+        <h5>Almuezo</h5>
+        <h5>Cena</h5>
+
+      </section> -->
+
+                <!-- <p>La fecha y hora actuales son: {{ fecha_actual }}</p> -->

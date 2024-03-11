@@ -8,16 +8,10 @@
 
 <body>
     <h1>Datos de Elegidos Por Día</h1>
-    <ul>
-        {% for dia, platos in elegidos_semanal.items %}
-        <li>{{ dia }}</li>
-        <ul>
-            {% for comida, plato in platos.items %}
+            {% for comida, plato in elegidos_semanal.items %}
             <li>{{ comida }}: {{ plato }}</li>
+            <br>
             {% endfor %}
-        </ul>
-        {% endfor %}
-    </ul>
 </body>
 
 {% endblock %}

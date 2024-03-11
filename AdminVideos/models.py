@@ -18,7 +18,7 @@ class Plato(models.Model):
         return f"{self.id} - {self.nombre_plato}"
     
 class Elegidos(models.Model):
-    nombre_plato = models.CharField(max_length=30)
+    nombre_plato_elegido = models.CharField(max_length=30, null=True)
 
 class ElegidosXSemana(models.Model):
     elegidos_por_semana = models.JSONField(null=True, blank=True)
