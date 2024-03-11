@@ -45,11 +45,15 @@ class PlatoList(ListView):
                         if self.query:
                             object_list = Plato.objects.filter(ingredientes__icontains=self.query)
                         return object_list
+                        
+                
             except Exception:
-               object_list = Plato.objects.filter(ingredientes__icontains="%%")
+            #    object_list = Plato.objects.filter(ingredientes__icontains="%%")
+               object_list = Plato.objects.all()
             return object_list
         else:
-            object_list = Plato.objects.filter(ingredientes__icontains="%%")
+            # object_list = Plato.objects.filter(ingredientes__icontains="%%")
+            object_list = Plato.objects.all()
         return object_list
 
     def get_context_data(self, **kwargs):
@@ -57,10 +61,10 @@ class PlatoList(ListView):
             # Pasar query al contexto
             context['query'] = self.query if self.query else "tomate"
             return context
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+
         # Obtener objetos de Elegidos
         elegidos = Elegidos.objects.all()  # O puedes filtrar según tu necesidad
 
@@ -72,7 +76,7 @@ class PlatoList(ListView):
         context['fecha_actual'] = fecha
 
         return context
-    
+
 def grabar_menu_elegido(request):
     if request.method == 'POST':
         # Obtén los datos del formulario
@@ -93,22 +97,22 @@ def grabar_menu_elegido(request):
             'domingo_a': request.POST.get('domingo-a'),
             'domingo_c': request.POST.get('domingo-c')
         }
-        
+
         # Crea un diccionario con la fecha como clave y los datos como valor
         datos_por_dia = {fecha_actual: datos}
-        
+
         # Crea una instancia del modelo ElegidosPorDia con el diccionario de datos
         elegidos_por_semana_objeto = ElegidosXSemana(elegidos_por_semana=datos_por_dia)
-        
+
         # Guarda la instancia del modelo en la base de datos
         elegidos_por_semana_objeto.save()
-        
+
         # Retorna una respuesta JSON
         return redirect(reverse_lazy("menu-elegido"))
     else:
         # Retorna una respuesta JSON con un mensaje de error si el método no es POST
         return JsonResponse({'error': 'El método de solicitud debe ser POST'})
-    
+
 class MenuElegido (CreateView):
     model = ElegidosXSemana
     fields = ["elegidos_por_semana"]
@@ -117,34 +121,37 @@ class MenuElegido (CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         ultimo_objeto = ElegidosXSemana.objects.latest('id')
-        # Suponiendo que tienes el último objeto cargado en la variable `ultimo_objeto`
         if ultimo_objeto is not None:
-           # Obtener los datos del campo JSON como un diccionario
-           datos_json = ultimo_objeto.elegidos_por_semana    
-           # Convertir los datos JSON en un diccionario de Python
-        #    datos_dict = json.loads(datos_json)
-           # Agregar el diccionario al contexto
+           datos_json = ultimo_objeto.elegidos_por_semana
            context['elegidos_semanal'] = datos_json
-        else: context['elegidos_semanal'] = "poroto"   
+        else: context['elegidos_semanal'] = "poroto"
         return context
-    
- 
+
+
 class PlatosMineList(LoginRequiredMixin, PlatoList):
     model = Plato
     template_name = 'AdminVideos/videosmine_list.html'
     def get_queryset(self):
-      return Plato.objects.filter(propietario_id=self.request.user.id)
+      platos_elegidos = Plato.objects.filter(propietario_id=self.request.user.id)
+      return platos_elegidos
+
+class PlatosElegidosMenu(PlatoList):
+    model = ElegidosXSemana
+    template_name = 'AdminVideos/platos_elegidos.html'
+
+    def get_queryset(self):
+        # Filtra los platos que estén en la tabla Elegidos
+        platos_elegidos = Plato.objects.filter(nombre_plato__in=Elegidos.objects.values_list('nombre_plato_elegido', flat=True))
+        return platos_elegidos
 
 class PlatoDetail(DetailView):
     model = Plato
     context_object_name = "plato"
 
-
 class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Plato
     success_url = reverse_lazy("videos-list")
     fields = ["nombre_plato","receta","descripcion_plato","ingredientes","image"]
-    #fields = '__all__'
 
     def test_func(self):
         user_id = self.request.user.id
