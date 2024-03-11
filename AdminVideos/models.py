@@ -12,13 +12,14 @@ class Plato(models.Model):
 
     @property
     def image_url(self):
-        return self.image.url if self.image else '/media/videos/nuestrotubo.png'
+        return self.image.url if self.image else '/media/videos/logo.png'
 
     def __str__(self):
         return f"{self.id} - {self.nombre_plato}"
     
 class Elegidos(models.Model):
     nombre_plato_elegido = models.CharField(max_length=30, null=True)
+    
 
 class ElegidosXSemana(models.Model):
     elegidos_por_semana = models.JSONField(null=True, blank=True)
@@ -33,7 +34,7 @@ class Profile(models.Model):
 
      @property
      def avatar_url(self):
-        return self.avatar.url if self.avatar else '/media/avatares/default-avatar.png'
+        return self.avatar.url if self.avatar else '/media/avatares/logo.png'
      
      
 class Mensaje(models.Model):

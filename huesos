@@ -1,3 +1,59 @@
+<p>
+  Medios: <br>
+
+  <select name="tipo-de-vista">
+    <option value="seleccionados">Seleccionados</option>
+    <option value="todos">Todos</option>
+  </select>
+  <button type="submit">Enviar</button>
+
+</p>
+<p>
+  Tipo de preparación: <br>
+
+  <select name="tipo-de-vista">
+    <option value="seleccionados">Seleccionados</option>
+    <option value="todos">Todos</option>
+  </select>
+  <button type="submit">Enviar</button>
+
+</p>
+<p>
+  Categoría: <br>
+
+  <select name="tipo-de-vista">
+    <option value="seleccionados">Seleccionados</option>
+    <option value="todos">Todos</option>
+  </select>
+  <button type="submit">Enviar</button>
+
+</p>
+<p>
+  Tipo: <br>
+
+  <select name="tipo-de-vista">
+    <option value="seleccionados">Seleccionados</option>
+    <option value="todos">Todos</option>
+  </select>
+  <button type="submit">Enviar</button>
+
+</p>
+<p>
+  Liviano - Calórico: <br>
+
+  <select name="tipo-de-vista">
+    <option value="seleccionados">Seleccionados</option>
+    <option value="todos">Todos</option>
+  </select>
+  <button type="submit">Enviar</button>
+
+</p>
+
+
+
+
+
+
 <a href="{% url 'videos-mine' %}" class="navbar-brand d-flex align-items-center">
   <strong>Mis Platos</strong>
 </a>
