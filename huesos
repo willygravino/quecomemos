@@ -1,3 +1,24 @@
+<a href="{% url 'videos-mine' %}" class="navbar-brand d-flex align-items-center">
+  <strong>Mis Platos</strong>
+</a>
+
+<a href="{% url 'platos-elegidos' %}" class="navbar-brand d-flex align-items-center">
+  <strong>Platos Elegidos</strong>
+</a> 
+
+<a href="{% url 'videos-list' %}" class="navbar-brand d-flex align-items-center">
+  <strong>Armado de Menú</strong>
+</a>
+
+<a href="{% url 'index' %}" class="navbar-brand d-flex align-items-center">
+  Inicio
+</a>
+
+<a href="{% url 'about' %}" class="navbar-brand d-flex align-items-center">
+  About
+</a>
+
+
 {% for plato in platos %}
   <div class="col">
     <div class="card shadow-sm">

@@ -121,19 +121,53 @@ class MenuElegido (CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         ultimo_objeto = ElegidosXSemana.objects.latest('id')
+        context['ultimo_elegido'] = "seleccionados"
         if ultimo_objeto is not None:
            datos_json = ultimo_objeto.elegidos_por_semana
            context['elegidos_semanal'] = datos_json
         else: context['elegidos_semanal'] = "poroto"
         return context
 
+def elecion_de_lista (request):
+    if request.method == 'GET':
+        tipo_de_vista = request.GET.get('tipo-de-vista', None)
+        if tipo_de_vista == 'todos':
+            return redirect('videos-list')
+        elif tipo_de_vista == 'seleccionados':
+            return redirect('platos-elegidos')
+        elif tipo_de_vista == 'de-otros':
+            return redirect('platos-de-otros')
+        elif tipo_de_vista == 'solo-mios':
+            return redirect('videos-mine')
+        else:
+            # Redirige a alguna vista predeterminada si el tipo de vista no está definido
+            return redirect('videos-list')
 
 class PlatosMineList(LoginRequiredMixin, PlatoList):
     model = Plato
     template_name = 'AdminVideos/videosmine_list.html'
+    
     def get_queryset(self):
       platos_elegidos = Plato.objects.filter(propietario_id=self.request.user.id)
       return platos_elegidos
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ultimo_elegido'] = 'solo-mios'
+        return context
+    
+class PlatosDeOtros(LoginRequiredMixin, PlatoList):
+    model = Plato
+    template_name = 'AdminVideos/videosmine_list.html'
+
+    def get_queryset(self):
+      platos_de_otros = Plato.objects.exclude(propietario_id=self.request.user.id)
+      return platos_de_otros
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ultimo_elegido'] = 'de-otros'
+        return context
 
 class PlatosElegidosMenu(PlatoList):
     model = ElegidosXSemana
@@ -143,6 +177,11 @@ class PlatosElegidosMenu(PlatoList):
         # Filtra los platos que estén en la tabla Elegidos
         platos_elegidos = Plato.objects.filter(nombre_plato__in=Elegidos.objects.values_list('nombre_plato_elegido', flat=True))
         return platos_elegidos
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['ultimo_elegido'] = 'seleccionados'
+        return context
 
 class PlatoDetail(DetailView):
     model = Plato

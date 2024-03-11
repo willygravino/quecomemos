@@ -24,14 +24,14 @@
 
 <section>
   <p>Tipo de vista: </p><br>
-  <form method=" get">
+  <form action="{% url 'menu-desplegable' %}" method=" get">
         {% csrf_token %}
         <select name="tipo-de-vista">
-          <option value="todos">Todos</option>
-          <option value="seleccionados">Seleccionados</option>
-          <option value="de-otros">Solo platos de los otros</option>
-          <option value="solo-mios">Solo mis platos</option>
-        </select>
+  <option value="todos">Todos</option>
+  <option value="seleccionados" {% if ultimo_elegido == 'seleccionados' %} selected {% endif %}>Seleccionados</option>
+  <option value="de-otros" {% if ultimo_elegido == 'de-otros' %} selected {% endif %}>Solo platos de los otros</option>
+  <option value="solo-mios" {% if ultimo_elegido == 'solo-mios' %} selected {% endif %}>Solo mis platos</option>
+</select>
         <button type="submit">Enviar</button>
   </form>
 
@@ -63,12 +63,14 @@
           {% endif %}
 
           {% endfor %}
+        {% if ultimo_elegido != 'seleccionados' %}
+            <form action="{% url 'plato-elegido' %}" method="GET">
+              <label for="opcion{{ plato.id }}">Elegir este plato:</label>
+              <input type="checkbox" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
+              <button type="submit">Enviar</button>
+            </form>
+        {% endif %}
 
-          <form action="{% url 'plato-elegido' %}" method="GET">
-            <label for="opcion{{ plato.id }}">Elegir este plato:</label>
-            <input type="checkbox" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
-            <button type="submit">Enviar</button>
-          </form>
 
     </div>
   </div>
