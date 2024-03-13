@@ -6,6 +6,48 @@ class Plato(models.Model):
     receta = models.CharField(max_length=80, blank=False)
     descripcion_plato = models.CharField(max_length=300)
     ingredientes = models.CharField('Ingresá los ingredientes, separados por coma', max_length=120, blank=False)
+
+    HORNO = 'horno'
+    COCINA = 'cocina'
+    PARRILA = 'parrilla'
+    WOK = 'wok'
+    SIN_COCCION = 'sin coccion'
+    
+    MEDIOS_CHOICES = [
+        (HORNO, 'horno'),
+        (COCINA, 'cocina'),
+        (PARRILA, 'parrilla'),
+        (WOK,'wok'),
+        (SIN_COCCION,'sin cocción'),
+    ]
+    medios = models.CharField(max_length=20, choices=MEDIOS_CHOICES, null=True, blank=True)
+    categoria = models.CharField(max_length=30, null=True, blank=True)
+
+    ENTRADA = 'entrada'
+    SALSA = 'salsa'
+    PICADA = 'picada'
+    PRINCIPAL = 'Plato principal'
+    POSTRE = 'postre'
+    TORTA = 'torta'
+    UNTABLE = 'untable'
+    TRAGO = 'trago'
+    GUARNICION = 'guarnicion'
+
+    TIPO_CHOICES = [
+        (ENTRADA, 'Entrada'),
+        (SALSA, 'Salsa'),
+        (PICADA, 'Picada'),
+        (PRINCIPAL,'Plato principal'),
+        (POSTRE,'postre'),
+        (TORTA,'torta'),
+        (UNTABLE,'untable'),
+        (TRAGO,'trago'),
+        (GUARNICION,'guarnicion'),
+    ]
+
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, null=True, blank=True)
+    calorias = models.CharField(max_length=30,null=True, blank=True)
+
     propietario = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="propietario")
     image = models.ImageField("Subí una imagen que identifique al plato (o un fotograma del mismo)", upload_to="videos/", null=True, blank=True)
     # fecha_video= models.DateTimeField("Fecha de captura del video:")
