@@ -8,16 +8,36 @@
 
 
 <section>
+  <h1>Lista de Platos</h1>
+
+  <!-- Formulario de filtrado -->
+  <form method="GET">
+      {{ form.as_p }}
+      <button type="submit">Filtrar</button>
+  </form>
+
+  <!-- Lista de platos -->
+  <ul>
+      {% for plato in platos %}
+          <li>
+              <h2>{{ plato.nombre_plato }}</h2>
+              <p><strong>Receta:</strong> {{ plato.receta }}</p>
+              <p><strong>Descripción:</strong> {{ plato.descripcion_plato }}</p>
+              <p><strong>Ingredientes:</strong> {{ plato.ingredientes }}</p>
+              <!-- Agrega más campos según tus necesidades -->
+          </li>
+      {% empty %}
+          <li>No se encontraron platos que coincidan con los criterios de búsqueda.</li>
+      {% endfor %}
+  </ul>
+    <!-- </ul>
+
   <form method="get">
 
     <p>
 
       Busca por ingrediente: <br><input type="search" name="la-busqueda">
 
-      <button type="submit" ">Buscar</button>
-      </p>
-
-      <p>
         Ingredientes: <br>
       
         <select name="tipo-de-vista">
@@ -34,7 +54,6 @@
           <option value="todos">Legumbres</option>
 
         </select>
-        <button type="submit">Enviar</button>
       
       </p>
 
@@ -49,7 +68,6 @@
           <option value="todos">Wok</option>
           <option value="todos">Sin Cocción</option>
         </select>
-        <button type="submit">Enviar</button>
       
       </p>
       <p>
@@ -62,7 +80,6 @@
           <option value="todos">Nada</option>
 
         </select>
-        <button type="submit">Enviar</button>
       
       </p>
       <p>
@@ -74,7 +91,6 @@
           <option value="seleccionados">Común</option>
           <option value="todos">Especial</option>
         </select>
-        <button type="submit">Enviar</button>
       
       </p>
 
@@ -92,7 +108,6 @@
           <option value="todos">Untable</option>
           <option value="todos">Guarnición</option>
         </select>
-        <button type="submit">Enviar</button>
       
       </p>
 
@@ -111,9 +126,9 @@
         <button type="submit">Enviar</button>
       
       </p>
-      
+       
+    </form> -->
 
-    </form>
 
 </section>
 

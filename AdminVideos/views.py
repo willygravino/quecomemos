@@ -10,6 +10,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView, D
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from datetime import datetime
+from .forms import PlatoFilterForm
 
 def index(request):
     return render(request, "AdminVideos/index.html")
@@ -212,7 +213,7 @@ class PlatoDetail(DetailView):
 class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Plato
     success_url = reverse_lazy("videos-list")
-    fields = ["nombre_plato","receta","descripcion_plato","ingredientes","image"]
+    fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria","tipo","calorias","image"]
 
     def test_func(self):
         user_id = self.request.user.id
@@ -235,7 +236,7 @@ class PlatoDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 class PlatoCreate(LoginRequiredMixin, CreateView):
     model = Plato
     success_url = reverse_lazy("videos-list")
-    fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria","tipo","calorias","image"]
+    fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria","preparacion", "tipo","calorias","image"]
 #    fields = '__all__'
 
     def form_valid(self, form):
@@ -279,6 +280,32 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
         return Profile.objects.filter(user=self.request.user).exists()
 
 
+def filtrar_platos(request):
+    form = PlatoFilterForm(request.GET)
+    platos = Plato.objects.all()
+
+    if form.is_valid():
+        nombre_plato = form.cleaned_data.get('nombre_plato')
+        medios = form.cleaned_data.get('medios')
+        categoria = form.cleaned_data.get('categoria')
+        preparacion = form.cleaned_data.get('preparacion')
+        tipo = form.cleaned_data.get('tipo')
+        calorias = form.cleaned_data.get('calorias')
+
+        if nombre_plato:
+            platos = platos.filter(nombre_plato__icontains=nombre_plato)
+        if medios:
+            platos = platos.filter(medios=medios)
+        if categoria:
+            platos = platos.filter(categoria=categoria)
+        if preparacion:
+            platos = platos.filter(preparacion=preparacion)
+        if tipo:
+            platos = platos.filter(tipo=tipo)
+        if calorias:
+            platos = platos.filter(calorias=calorias)
+
+    return render(request, 'AdminVideos/video_list_base.html', {'form': form, 'platos': platos})
 # class MensajeCreate(CreateView):
 #   model = Mensaje
 #   success_url = reverse_lazy('videos-list')
