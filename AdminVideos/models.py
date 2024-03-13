@@ -21,7 +21,27 @@ class Plato(models.Model):
         (SIN_COCCION,'sin cocción'),
     ]
     medios = models.CharField(max_length=20, choices=MEDIOS_CHOICES, null=True, blank=True)
-    categoria = models.CharField(max_length=30, null=True, blank=True)
+
+    COMUN = 'Común'
+    ESPECIAL = 'Especial'
+       
+    CATEGORIA_CHOICES = [
+        (COMUN, 'Común'),
+        (ESPECIAL, 'Especial'),
+        
+    ]
+    categoria = models.CharField(max_length=20, choices=CATEGORIA_CHOICES, null=True, blank=True)
+
+    MUCHO = 'Mucho'
+    POCO = 'Poco'
+    NADA = 'Nada'
+       
+    PREPA_CHOICES = [
+        (MUCHO, 'Mucho'),
+        (POCO, 'Poco'),
+        (NADA, 'Nada'),
+    ]
+    preparacion = models.CharField(max_length=20, choices=PREPA_CHOICES, null=True, blank=True)
 
     ENTRADA = 'entrada'
     SALSA = 'salsa'
@@ -46,7 +66,22 @@ class Plato(models.Model):
     ]
 
     tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, null=True, blank=True)
-    calorias = models.CharField(max_length=30,null=True, blank=True)
+
+    CALORICO = 'Calórico'
+    LIVIANO = 'Liviano'
+    NORMAL = 'Normal'
+    INVIERNO = 'Plato de invierno'
+  
+
+    CALORIAS_CHOICES = [
+        (CALORICO, 'Calórico'),
+        (LIVIANO, 'Liviano'),
+        (NORMAL, 'Normal'),
+        (INVIERNO,'Plato de invierno'),
+   
+    ]
+
+    calorias = models.CharField(max_length=20, choices=CALORIAS_CHOICES, null=True, blank=True)  
 
     propietario = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="propietario")
     image = models.ImageField("Subí una imagen que identifique al plato (o un fotograma del mismo)", upload_to="videos/", null=True, blank=True)

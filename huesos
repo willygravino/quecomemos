@@ -1,211 +1,46 @@
-<p>
-  Medios: <br>
+class PlatoList(ListView):
+    model = Plato
+    context_object_name = "platos"
+    # query = None
 
-  <select name="tipo-de-vista">
-    <option value="seleccionados">Seleccionados</option>
-    <option value="todos">Todos</option>
-  </select>
-  <button type="submit">Enviar</button>
+    def get_queryset(self):
+        # self.query = "tomatelas"
 
-</p>
-<p>
-  Tipo de preparación: <br>
+        if self.request.user.is_authenticated:
+            try:
+                if self.request.user.profile:
+                        self.query = self.request.GET.get("la-busqueda")
+                        if self.query:
+                            object_list = Plato.objects.filter(ingredientes__icontains=self.query)
+                        return object_list
+                    
+                
+            except Exception:
+            #    object_list = Plato.objects.filter(ingredientes__icontains="%%")
+               object_list = Plato.objects.all()
+            return object_list
+        else:
+            # object_list = Plato.objects.filter(ingredientes__icontains="%%")
+            object_list = Plato.objects.all()
+        return object_list
 
-  <select name="tipo-de-vista">
-    <option value="seleccionados">Seleccionados</option>
-    <option value="todos">Todos</option>
-  </select>
-  <button type="submit">Enviar</button>
+    def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            # Pasar query al contexto
+            context['query'] = self.query if self.query else "tomate"
+            return context
 
-</p>
-<p>
-  Categoría: <br>
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
 
-  <select name="tipo-de-vista">
-    <option value="seleccionados">Seleccionados</option>
-    <option value="todos">Todos</option>
-  </select>
-  <button type="submit">Enviar</button>
+        # Obtener objetos de Elegidos asociados al usuario logueado
+        usuario = self.request.user
+        elegidos = Elegidos.objects.filter(usuario=usuario)
 
-</p>
-<p>
-  Tipo: <br>
+        # Agregar objetos de Elegidos al contexto
+        context['elegidos'] = elegidos      
+        # fecha_actual = datetime.now()
+        # fecha = fecha_actual.date()
+        # context['fecha_actual'] = fecha
 
-  <select name="tipo-de-vista">
-    <option value="seleccionados">Seleccionados</option>
-    <option value="todos">Todos</option>
-  </select>
-  <button type="submit">Enviar</button>
-
-</p>
-<p>
-  Liviano - Calórico: <br>
-
-  <select name="tipo-de-vista">
-    <option value="seleccionados">Seleccionados</option>
-    <option value="todos">Todos</option>
-  </select>
-  <button type="submit">Enviar</button>
-
-</p>
-
-
-
-
-
-
-<a href="{% url 'videos-mine' %}" class="navbar-brand d-flex align-items-center">
-  <strong>Mis Platos</strong>
-</a>
-
-<a href="{% url 'platos-elegidos' %}" class="navbar-brand d-flex align-items-center">
-  <strong>Platos Elegidos</strong>
-</a> 
-
-<a href="{% url 'videos-list' %}" class="navbar-brand d-flex align-items-center">
-  <strong>Armado de Menú</strong>
-</a>
-
-<a href="{% url 'index' %}" class="navbar-brand d-flex align-items-center">
-  Inicio
-</a>
-
-<a href="{% url 'about' %}" class="navbar-brand d-flex align-items-center">
-  About
-</a>
-
-
-{% for plato in platos %}
-  <div class="col">
-    <div class="card shadow-sm">
-      <img class="card-img-top" style="height: 225px; width: 100%; display: block" src="{{plato.image_url}}"
-        data-holder-rendered="true">
-      <div class="card-body">
-        <strong>
-          <p class="card-text">{{ plato.nombre_plato }}</p>
-        </strong>
-        <p class="card-text">{{ plato.descripcion_plato }}</p>
-        <div class="d-flex justify-content-between align-items-center">
-          <div class="btn-group">
-            <!-- <a href="{{video.receta}}" type="button" class="btn btn-sm btn-outline-primary">VER PLATO</a> -->
-            <a href="{% url 'videos-detail' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Detalle
-              del plato</a>
-            {% if user.id == plato.propietario.id %}
-            <a href="{% url 'videos-delete' plato.id %}" type="button"
-              class="btn btn-sm btn-outline-secondary">Eliminar<a>
-                <a href="{% url 'videos-update' plato.id %}" type="button"
-                  class="btn btn-sm btn-outline-secondary">Editar</a>
-          </div>
-        </div>
-        <p></p>
-        <small class="text-muted">Subido por mi.</small>
-        {% else %}
-      </div>
-    </div>
-    <p></p>
-    <small class="text-muted">Subido por {{ plato.propietario }}</small>
-    {% endif %}
-  </div>
-
-
-          <!-- {% if forloop.last %}
-            <form action="{% url 'plato-elegido' %}" method="GET">
-              <label for="opcion{{ plato.id }}">Elegir este plato:</label>
-              <input type="checkbox" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
-              <button type="submit">Enviar</button>
-            </form>
-          {% endif %} -->
-
-
-
-  <!-- {% for plato in platos %}
-                  <div class="d-flex flex-row">
-                    <img style="width: 20%" src="{{plato.image_url}}" data-holder-rendered="true">
-                    <div>
-                      <strong>
-                        <h6>{{ plato.nombre_plato }}</h6>
-                      </strong>
-                      <h6>DESCRIPCIÓN {{ plato.descripcion_plato }}</h6>
-                      <a href="{% url 'videos-detail' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Detalle del
-                        plato</a>
-                      {% if user.id == plato.propietario.id %}
-                      <a href="{% url 'videos-delete' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Eliminar<a>
-                          <a href="{% url 'videos-update' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Editar</a>
-                          <small class="text-muted">Subido por mi.</small>
-                          {% else %}
-                          <small class="text-muted">Subido por {{ plato.propietario.id }}</small>
-                      {% endif %}
-                    </div>
-                  </div>
-
-                  {% if plato.nombre_plato in elegidos %}
-                    <p>ESTÁ EN ELEGIDOS! OK</p>
-                  {% endif %}
-                  
-                  {% for elegido in elegidos %}
-                      {% if plato.nombre_plato == elegido.nombre_plato %}
-                      <form action="{% url 'plato-elegido' %}" method="GET">
-                        <label for="opcion{{ plato.id }}">Elegir este plato:</label>
-                        <input type="checkbox" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}" checked>
-                        <input type="checkbox" id="borrar" name="borrar" value="borrar">
-                        <button type="submit">Enviar</button>
-                      </form>
-                      {% endif %}
-                  {% endfor %}
-                  {% if forloop.last %}
-                    <form action="{% url 'plato-elegido' %}" method="GET">
-                      <label for="opcion{{ plato.id }}">Elegir este plato:</label>
-                      <input type="checkbox" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
-                      <button type="submit">Enviar</button>
-                    </form>
-                  {% endif %}
-                  
-                  <p>-------------------------</p>
-
-  {% endfor %} -->
-
-  <!-- <div class="d-flex flex-column justify-content-center ">
-    <div class="d-flex flex-row justify-content-center ">
-      <section>
-
-        <p>Lunes {{ fecha_actual }}</p>
-        <h5>Almuezo</h5>
-        <h5>Cena</h5>
-
-
-        <p>Martes {{ fecha_actual }}</p>
-        <h5>Almuezo</h5>
-        <h5>Cena</h5>
-
-
-        <p>Miércoles {{ fecha_actual }}</p>
-        <h5>Almuezo</h5>
-        <h5>Cena</h5>
-
-
-
-        <p>Jueves {{ fecha_actual }}</p>
-        <h5>Almuezo</h5>
-        <h5>Cena</h5>
-
-
-
-        <p>Viernes</p>
-        <h5>Almuezo</h5>
-        <h5>Cena</h5>
-
-
-
-        <h5>Sábado</h5>
-        <h5>Almuezo</h5>
-        <h5>Cena</h5>
-
-
-
-        <p>Domingo</p>
-        <h5>Almuezo</h5>
-        <h5>Cena</h5>
-
-      </section> -->
-
-                <!-- <p>La fecha y hora actuales son: {{ fecha_actual }}</p> -->
+        return context

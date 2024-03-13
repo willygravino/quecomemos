@@ -81,7 +81,7 @@ class PlatoList(ListView):
         nombres_platos_elegidos = [e.nombre_plato_elegido for e in elegidos]
         
         # Pasar query y nombres de platos seleccionados al contexto
-        context['query'] = self.query if self.query else "tomate"
+        # context['query'] = self.query if self.query else "tomate"
         context['elegidos'] = nombres_platos_elegidos
 
         return context
@@ -191,6 +191,7 @@ class PlatosDeOtros(LoginRequiredMixin, PlatoList):
         return context
 
 class PlatosElegidosMenu(PlatoList):
+    # RARO, NO TENDRÍA QUE SER ELEGIDOS?
     model = ElegidosXSemana
     template_name = 'AdminVideos/platos_elegidos.html'
 
