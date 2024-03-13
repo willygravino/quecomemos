@@ -59,7 +59,7 @@ class PlatoList(ListView):
                         if self.query:
                             object_list = Plato.objects.filter(ingredientes__icontains=self.query)
                         return object_list
-                        
+                    
                 
             except Exception:
             #    object_list = Plato.objects.filter(ingredientes__icontains="%%")
@@ -79,15 +79,15 @@ class PlatoList(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Obtener objetos de Elegidos
-        elegidos = Elegidos.objects.all()  # O puedes filtrar según tu necesidad
+        # Obtener objetos de Elegidos asociados al usuario logueado
+        usuario = self.request.user
+        elegidos = Elegidos.objects.filter(usuario=usuario)
 
         # Agregar objetos de Elegidos al contexto
-        context['elegidos'] = elegidos
-
-        fecha_actual = datetime.now()
-        fecha = fecha_actual.date()
-        context['fecha_actual'] = fecha
+        context['elegidos'] = elegidos      
+        # fecha_actual = datetime.now()
+        # fecha = fecha_actual.date()
+        # context['fecha_actual'] = fecha
 
         return context
 
@@ -196,7 +196,7 @@ class PlatosElegidosMenu(PlatoList):
         context = super().get_context_data(**kwargs)
         context['ultimo_elegido'] = 'seleccionados'
         return context
-
+    
 class PlatoDetail(DetailView):
     model = Plato
     context_object_name = "plato"
