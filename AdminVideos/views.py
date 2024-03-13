@@ -71,25 +71,32 @@ class PlatoList(ListView):
         return object_list
 
     def get_context_data(self, **kwargs):
-            context = super().get_context_data(**kwargs)
-            # Pasar query al contexto
-            context['query'] = self.query if self.query else "tomate"
-            return context
-
-    def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
+        
         # Obtener objetos de Elegidos asociados al usuario logueado
         usuario = self.request.user
         elegidos = Elegidos.objects.filter(usuario=usuario)
-
-        # Agregar objetos de Elegidos al contexto
-        context['elegidos'] = elegidos      
-        # fecha_actual = datetime.now()
-        # fecha = fecha_actual.date()
-        # context['fecha_actual'] = fecha
+        
+        # Obtener solo los nombres de los platos seleccionados
+        nombres_platos_elegidos = [e.nombre_plato_elegido for e in elegidos]
+        
+        # Pasar query y nombres de platos seleccionados al contexto
+        context['query'] = self.query if self.query else "tomate"
+        context['elegidos'] = nombres_platos_elegidos
 
         return context
+
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+
+    #     # Obtener objetos de Elegidos asociados al usuario logueado
+    #     usuario = self.request.user
+    #     elegidos = Elegidos.objects.filter(usuario=usuario)
+
+    #     # Agregar objetos de Elegidos al contexto
+    #     context['elegidos'] = elegidos      
+    
+    #     return context
 
 def grabar_menu_elegido(request):
     if request.method == 'POST':

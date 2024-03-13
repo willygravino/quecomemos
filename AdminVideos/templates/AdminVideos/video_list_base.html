@@ -148,23 +148,19 @@
           <small class="text-muted">Subido por {{ plato.propietario }}</small>
           {% endif %}
 
-          {% for elegido in elegidos %}
-          {% if plato.nombre_plato == elegido.nombre_plato_elegido %}
+          {% if plato.nombre_plato  in elegidos.0 %}
           <form action="{% url 'plato-elegido' %}" method="GET">
             <input type="hidden" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
             <input type="checkbox" id="borrar" name="borrar" value="borrar" checked>
             <button type="submit">Borrar</button>
           </form>
-          {% endif %}
-
-          {% endfor %}
-        {% if ultimo_elegido != 'seleccionados' %}
+          {% else %}
             <form action="{% url 'plato-elegido' %}" method="GET">
               <label for="opcion{{ plato.id }}">Elegir este plato:</label>
               <input type="checkbox" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
               <button type="submit">Enviar</button>
             </form>
-        {% endif %}
+         {% endif %}
 
 
     </div>
@@ -172,6 +168,31 @@
   <p>-------------------------</p>
   {% endfor %}
 
+  {% for elegido in elegidos.0 %}
+  <h1>
+    {{ elegido}}</h1>
+  {% endfor %}
+
+  <!--  elegidos.0 ES TODA LA LISTA!!!!! </h1> -->
+
+
+  <!-- {% if 'Lasagna' in elegidos.0 %}
+     <h1>{{ elegidos.0 }} encontrado!!!!</h1>
+     {% endif %} -->
+<!-- 
+  {% for elegido in elegidos.0 %}
+    <h1>{{ elegido }}</h1>
+    <h1>dd</h1>
+  {% endfor %} -->
+<!-- 
+  <ul>
+    <h1>gggg</h1>
+    {% for datos in elegidos %}
+      {% for plato in datos.nombre_plato_elegido %}
+        <li>{{ plato }}</li>
+      {% endfor %}
+    {% endfor %}
+  </ul>   -->
 
 </section>
 
@@ -189,14 +210,14 @@
         <div class="mt-5 btn btn-primary">
           <h5>Lunes</h5>
           <select name="lunes-a">
-            {% for elegido in elegidos %}
-            <option value="{{ elegido.nombre_plato_elegido }}">{{ elegido.nombre_plato_elegido }}</option>
+            {% for elegido in elegidos.0 %}
+            <option value="{{ elegido }}">{{ elegido }}</option>
             {% endfor %}
           </select>
           <br>
           <select name="lunes-c">
-            {% for elegido in elegidos %}
-            <option value="{{ elegido.nombre_plato_elegido }}">{{ elegido.nombre_plato_elegido }}</option>
+            {% for elegido in elegidos.0 %}
+            <option value="{{ elegido }}">{{ elegido }}</option>
             {% endfor %}
           </select>
         </div>
@@ -206,14 +227,14 @@
           <h5>Martes</h5>
 
           <select name="martes-a">
-            {% for elegido in elegidos %}
-            <option value="{{ elegido.nombre_plato_elegido }}">{{ elegido.nombre_plato_elegido }}</option>
+            {% for elegido in elegidos.0 %}
+            <option value="{{ elegido }}">{{ elegido }}</option>
             {% endfor %}
           </select>
           <br>
           <select name="martes-c">
-            {% for elegido in elegidos %}
-            <option value="{{ elegido.nombre_plato_elegido }}">{{ elegido.nombre_plato_elegido }}</option>
+            {% for elegido in elegidos.0 %}
+            <option value="{{ elegido }}">{{ elegido }}</option>
             {% endfor %}
           </select>
         </div>
@@ -223,15 +244,15 @@
           <h5>Miércoles</h5>
 
           <select name="miercoles-a">
-            {% for elegido in elegidos %}
-            <option value="{{ elegido.nombre_plato_elegido }}">{{ elegido.nombre_plato_elegido }}</option>
+            {% for elegido in elegidos.0 %}
+            <option value="{{ elegido }}">{{ elegido }}</option>
             {% endfor %}
           </select>
 
           <br>
           <select name="miercoles-c">
-            {% for elegido in elegidos %}
-            <option value="{{ elegido.nombre_plato_elegido }}">{{ elegido.nombre_plato_elegido }}</option>
+            {% for elegido in elegidos.0 %}
+            <option value="{{ elegido }}">{{ elegido }}</option>
             {% endfor %}
           </select>
 
@@ -242,14 +263,14 @@
           <h5>Jueves</h5>
 
           <select name="jueves-a">
-            {% for elegido in elegidos %}
-            <option value="{{ elegido.nombre_plato_elegido }}">{{ elegido.nombre_plato_elegido }}</option>
+            {% for elegido in elegidos.0 %}
+            <option value="{{ elegido }}">{{ elegido }}</option>
             {% endfor %}
           </select>
           <br>
           <select name="jueves-c">
-            {% for elegido in elegidos %}
-            <option value="{{ elegido.nombre_plato_elegido }}">{{ elegido.nombre_plato_elegido }}</option>
+            {% for elegido in elegidos.0 %}
+            <option value="{{ elegido }}">{{ elegido }}</option>
             {% endfor %}
           </select>
         </div>
@@ -259,14 +280,14 @@
           <h5>Viernes</h5>
 
           <select name="viernes-a">
-            {% for elegido in elegidos %}
-            <option value="{{ elegido.nombre_plato_elegido }}">{{ elegido.nombre_plato_elegido }}</option>
+            {% for elegido in elegidos.0 %}
+            <option value="{{ elegido }}">{{ elegido }}</option>
             {% endfor %}
           </select>
           <br>
           <select name="viernes-c">
-            {% for elegido in elegidos %}
-            <option value="{{ elegido.nombre_plato_elegido }}">{{ elegido.nombre_plato_elegido }}</option>
+            {% for elegido in elegidos.0 %}
+            <option value="{{ elegido }}">{{ elegido }}</option>
             {% endfor %}
           </select>
         </div>
@@ -276,14 +297,14 @@
           <h5>Sábado</h5>
 
           <select name="sabado-a">
-            {% for elegido in elegidos %}
-            <option value="{{ elegido.nombre_plato_elegido }}">{{ elegido.nombre_plato_elegido }}</option>
+            {% for elegido in elegidos.0 %}
+            <option value="{{ elegido }}">{{ elegido }}</option>
             {% endfor %}
           </select>
           <br>
           <select name="sabado-c">
-            {% for elegido in elegidos %}
-            <option value="{{ elegido.nombre_plato_elegido }}">{{ elegido.nombre_plato_elegido }}</option>
+            {% for elegido in elegidos.0 %}
+            <option value="{{ elegido }}">{{ elegido }}</option>
             {% endfor %}
           </select>
         </div>
@@ -293,20 +314,19 @@
           <h5>Domingo</h5>
 
           <select name="domingo-a">
-            {% for elegido in elegidos %}
-            <option value="{{ elegido.nombre_plato_elegido }}">{{ elegido.nombre_plato_elegido }}</option>
+            {% for elegido in elegidos.0 %}
+            <option value="{{ elegido }}">{{ elegido }}</option>
             {% endfor %}
           </select>
           <br>
           <select name="domingo-c">
-            {% for elegido in elegidos %}
-            <option value="{{ elegido.nombre_plato_elegido }}">{{ elegido.nombre_plato_elegido }}</option>
+            {% for elegido in elegidos.0 %}
+            <option value="{{ elegido }}">{{ elegido }}</option>
             {% endfor %}
           </select>
 
         </div>
         <br>
-        <input type="hidden" id="fecha_actual" name="fecha_actual" value="{{ fecha_actual }}">
         <button type="submit">Enviar</button>
       </form>
     </section>
