@@ -17,17 +17,31 @@ def index(request):
 def about(request):
     return render(request, "AdminVideos/about.html")
 
-
 def plato_elegido(request):
-    nombre_plato = request.GET.get('opcion1')
-    borrar = request.GET.get('borrar')
-    elegido = Elegidos(nombre_plato_elegido=nombre_plato)
-    if borrar == "borrar":
-       Elegidos.objects.filter(nombre_plato_elegido=nombre_plato).delete()
-    else:
-      elegido.save()
+    if request.method == 'GET':
+        nombre_plato = request.GET.get('opcion1')
+        borrar = request.GET.get('borrar')
+        
+        usuario = request.user  # Obtener el usuario logueado
+        elegidos, created = Elegidos.objects.get_or_create(usuario=usuario)  # Obtener o crear la instancia de Elegidos asociada al usuario
 
-    return redirect(reverse_lazy("videos-list"))
+        if borrar == "borrar":
+            # Eliminar el plato de la lista de platos elegidos
+            if nombre_plato in elegidos.nombre_plato_elegido:
+                elegidos.nombre_plato_elegido.remove(nombre_plato)
+        else:
+            # Agregar el plato a la lista de platos elegidos
+            if nombre_plato not in elegidos.nombre_plato_elegido:
+                elegidos.nombre_plato_elegido.append(nombre_plato)
+
+        # Guardar los cambios en la base de datos
+        elegidos.save()
+
+        # Redirigir a la página deseada
+        return redirect(reverse_lazy("videos-list"))
+    else:
+        # Manejar solicitudes POST u otras solicitudes que no sean GET
+        return JsonResponse({"error": "Método no permitido"}, status=405)
 
 
 class PlatoList(ListView):

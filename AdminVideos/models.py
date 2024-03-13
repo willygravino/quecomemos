@@ -18,11 +18,13 @@ class Plato(models.Model):
         return f"{self.id} - {self.nombre_plato}"
     
 class Elegidos(models.Model):
-    nombre_plato_elegido = models.CharField(max_length=30, null=True)
-    
+    nombre_plato_elegido = models.JSONField(default=list)
+    usuario = models.OneToOneField(to=User, on_delete=models.CASCADE, related_name="platos_elegidos", null=True, blank=True)
+
 
 class ElegidosXSemana(models.Model):
     elegidos_por_semana = models.JSONField(null=True, blank=True)
+
 
     def __str__(self):
          return f'Menu Elegido {self.id}' 
