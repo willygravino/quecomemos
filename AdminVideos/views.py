@@ -234,7 +234,7 @@ class PlatoDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 class PlatoCreate(LoginRequiredMixin, CreateView):
     model = Plato
     success_url = reverse_lazy("videos-list")
-    fields = ["nombre_plato","receta","descripcion_plato","ingredientes","image"]
+    fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria","tipo","calorias","image"]
 #    fields = '__all__'
 
     def form_valid(self, form):
