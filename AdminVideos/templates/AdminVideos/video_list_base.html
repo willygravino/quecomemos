@@ -145,7 +145,7 @@
           <a href="{% url 'videos-update' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Editar</a>
           <small class="text-muted">Subido por mi.</small>
           {% else %}
-          <small class="text-muted">Subido por {{ plato.propietario.id }}</small>
+          <small class="text-muted">Subido por {{ plato.propietario }}</small>
           {% endif %}
 
           {% for elegido in elegidos %}
