@@ -8,29 +8,28 @@
 
 
 <section>
-  <h1>Lista de Platos</h1>
+  <!-- <h1>Lista de Platos</h1> -->
 
   <!-- Formulario de filtrado -->
-  <form method="GET">
+  <!-- <form method="GET">
       {{ form.as_p }}
       <button type="submit">Filtrar</button>
-  </form>
+  </form> -->
 
   <!-- Lista de platos -->
-  <ul>
+  <!-- <ul>
       {% for plato in platos %}
           <li>
               <h2>{{ plato.nombre_plato }}</h2>
               <p><strong>Receta:</strong> {{ plato.receta }}</p>
               <p><strong>Descripción:</strong> {{ plato.descripcion_plato }}</p>
               <p><strong>Ingredientes:</strong> {{ plato.ingredientes }}</p>
-              <!-- Agrega más campos según tus necesidades -->
           </li>
       {% empty %}
           <li>No se encontraron platos que coincidan con los criterios de búsqueda.</li>
       {% endfor %}
-  </ul>
-    <!-- </ul>
+  </ul> -->
+    
 
   <form method="get">
 
@@ -39,7 +38,7 @@
       Busca por ingrediente: <br><input type="search" name="la-busqueda">
 
         Ingredientes: <br>
-      
+
         <select name="tipo-de-vista">
           <option value="seleccionados"> ----- </option>
           <option value="seleccionados">Veggie</option>
@@ -54,12 +53,12 @@
           <option value="todos">Legumbres</option>
 
         </select>
-      
+
       </p>
 
       <p>
         Medios: <br>
-      
+
         <select name="tipo-de-vista">
           <option value="seleccionados"> ----- </option>
           <option value="seleccionados">Horno</option>
@@ -68,11 +67,11 @@
           <option value="todos">Wok</option>
           <option value="todos">Sin Cocción</option>
         </select>
-      
+
       </p>
       <p>
         Tipo de preparación: <br>
-      
+
         <select name="tipo-de-vista">
           <option value="seleccionados"> ----- </option>
           <option value="seleccionados">Mucho</option>
@@ -80,23 +79,23 @@
           <option value="todos">Nada</option>
 
         </select>
-      
+
       </p>
       <p>
         Categoría: <br>
-      
+
         <select name="tipo-de-vista">
           <option value="seleccionados"> ----- </option>
 
           <option value="seleccionados">Común</option>
           <option value="todos">Especial</option>
         </select>
-      
+
       </p>
 
       <p>
         Tipo: <br>
-      
+
         <select name="tipo-de-vista">
           <option value="seleccionados"> ----- </option>
 
@@ -108,12 +107,12 @@
           <option value="todos">Untable</option>
           <option value="todos">Guarnición</option>
         </select>
-      
+
       </p>
 
       <p>
         Liviano - Calórico: <br>
-      
+
         <select name="tipo-de-vista">
           <option value="seleccionados"> ----- </option>
 
@@ -124,10 +123,10 @@
 
         </select>
         <button type="submit">Enviar</button>
-      
+
       </p>
-       
-    </form> -->
+
+    </form> 
 
 
 </section>

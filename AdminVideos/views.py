@@ -192,14 +192,12 @@ class PlatosDeOtros(LoginRequiredMixin, PlatoList):
         return context
 
 class PlatosElegidosMenu(PlatoList):
-    # RARO, NO TENDRÍA QUE SER ELEGIDOS?
-    model = ElegidosXSemana
+    model = Plato
     template_name = 'AdminVideos/platos_elegidos.html'
 
     def get_queryset(self):
-        # Filtra los platos que estén en la tabla Elegidos
-        platos_elegidos = Plato.objects.filter(nombre_plato__in=Elegidos.objects.values_list('nombre_plato_elegido', flat=True))
-        return platos_elegidos
+      platos_de_otros = Plato.objects.exclude(propietario_id=self.request.user.id)
+      return platos_de_otros
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -305,7 +303,7 @@ def filtrar_platos(request):
         if calorias:
             platos = platos.filter(calorias=calorias)
 
-    return render(request, 'AdminVideos/video_list_base.html', {'form': form, 'platos': platos})
+    return render(request, 'AdminVideos/mostrar_fitrado_por_formulario.html', {'form': form, 'platos': platos})
 # class MensajeCreate(CreateView):
 #   model = Mensaje
 #   success_url = reverse_lazy('videos-list')
