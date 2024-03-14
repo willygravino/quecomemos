@@ -2,6 +2,22 @@
 
 {% load static %}
 
+
+{% block filtro %}
+<form method="get">
+
+      <p>
+  
+        Busca por ingrediente: <br><input type="search" name="la-busqueda">
+  
+      </p>
+      <button type="submit">Enviar</button>
+  
+  
+  </form>  
+{% endblock %}  
+
+
 {% block titulo_ok %}
    <h1 class="fw-light"> Estos son los platos que coinciden con tu búsqueda. </h1>
 {% endblock %}

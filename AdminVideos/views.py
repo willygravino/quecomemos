@@ -40,32 +40,6 @@ def plato_elegido(request):
         # Manejar solicitudes POST u otras solicitudes que no sean GET
         return JsonResponse({"error": "Método no permitido"}, status=405)
 
-# def plato_elegido(request):
-#     if request.method == 'GET':
-#         nombre_plato = request.GET.get('opcion1')
-#         borrar = request.GET.get('borrar')
-
-#         usuario = request.user  # Obtener el usuario logueado
-#         elegidos, created = Elegidos.objects.get_or_create(usuario=usuario)  # Obtener o crear la instancia de Elegidos asociada al usuario
-
-#         if borrar == "borrar":
-#             # Eliminar el plato de la lista de platos elegidos
-#             if nombre_plato in elegidos.nombre_plato_elegido:
-#                 elegidos.nombre_plato_elegido.remove(nombre_plato)
-#         else:
-#             # Agregar el plato a la lista de platos elegidos
-#             if nombre_plato not in elegidos.nombre_plato_elegido:
-#                 elegidos.nombre_plato_elegido.append(nombre_plato)
-
-#         # Guardar los cambios en la base de datos
-#         elegidos.save()
-
-#         # Redirigir a la página deseada
-#         return redirect(reverse_lazy("videos-list"))
-#     else:
-#         # Manejar solicitudes POST u otras solicitudes que no sean GET
-#         return JsonResponse({"error": "Método no permitido"}, status=405)
-
 
 class PlatoList(ListView):
     model = Plato
@@ -210,8 +184,10 @@ class PlatosDeOtros(LoginRequiredMixin, PlatoList):
         context['ultimo_elegido'] = 'de-otros'
         return context
 
-class PlatosElegidosMenu(LoginRequiredMixin, TemplateView):
+class PlatosElegidosMenu(LoginRequiredMixin, PlatoList):
+    # template_name = 'AdminVideos/plato_list.html'
     template_name = 'AdminVideos/videosmine_list.html'
+
     context_object_name = 'platos'
 
     def get_context_data(self, **kwargs):
@@ -230,43 +206,6 @@ class PlatosElegidosMenu(LoginRequiredMixin, TemplateView):
         context['ultimo_elegido'] = 'seleccionados'
         
         return context
-
-
-# class PlatosElegidosMenu(TemplateView):
-#     template_name = 'AdminVideos/videosmine_list.html'
-#     context_object_name = 'platos'
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-        
-#         # Obtener los nombres de los platos elegidos por el usuario logueado
-#         nombres_platos_elegidos = Elegidos.objects.filter(usuario=self.request.user).values_list('nombre_plato_elegido', flat=True)
-        
-#         # Filtrar los platos según los nombres obtenidos
-#         platos_elegidos = Plato.objects.filter(nombre_plato__in=nombres_platos_elegidos)
-        
-#         context['platos'] = platos_elegidos
-#         context['ultimo_elegido'] = 'seleccionados'
-        
-#         return context
-
-# class PlatosElegidosMenu(PlatoList):
-#     model = Plato, Elegidos
-#     # template_name = 'AdminVideos/platos_elegidos.html'
-#     template_name = 'AdminVideos/videosmine_list.html'
-#     context_object_name = 'platos'
-
-#     def get_queryset(self):
-#         # Obtener los nombres de los platos elegidos por el usuario logueado
-#         nombres_platos_elegidos = Elegidos.objects.filter(usuario=self.request.user).values_list('nombre_plato_elegido', flat=True)
-#         # Filtrar los platos según los nombres obtenidos
-#         platos_elegidos = Plato.objects.filter(nombre_plato__in=nombres_platos_elegidos)
-#         return platos_elegidos
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         context['ultimo_elegido'] = 'seleccionados'
-#         return context
 
 class PlatoDetail(DetailView):
     model = Plato
@@ -365,7 +304,22 @@ def filtrar_platos(request):
         if calorias:
             platos = platos.filter(calorias=calorias)
 
-    return render(request, 'AdminVideos/mostrar_fitrado_por_formulario.html', {'form': form, 'platos': platos})
+     
+    if request.user.is_authenticated:
+        usuario = request.user
+        platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
+
+    contexto = {
+        'form': form,
+        'platos': platos,
+        'elegidos': platos_elegidos,
+    }       
+
+    # return render(request, 'AdminVideos/mostrar_fitrado_por_formulario.html', {'form': form, 'platos': platos})
+    # return render(request, 'AdminVideos/video_list_base.html', {'form': form, 'platos': platos})
+    return render(request, 'AdminVideos/lista_filtrada.html', contexto)
+
+
 # class MensajeCreate(CreateView):
 #   model = Mensaje
 #   success_url = reverse_lazy('videos-list')

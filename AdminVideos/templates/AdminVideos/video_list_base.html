@@ -8,126 +8,9 @@
 
 
 <section>
-  <!-- <h1>Lista de Platos</h1> -->
 
-  <!-- Formulario de filtrado -->
-  <!-- <form method="GET">
-      {{ form.as_p }}
-      <button type="submit">Filtrar</button>
-  </form> -->
-
-  <!-- Lista de platos -->
-  <!-- <ul>
-      {% for plato in platos %}
-          <li>
-              <h2>{{ plato.nombre_plato }}</h2>
-              <p><strong>Receta:</strong> {{ plato.receta }}</p>
-              <p><strong>Descripción:</strong> {{ plato.descripcion_plato }}</p>
-              <p><strong>Ingredientes:</strong> {{ plato.ingredientes }}</p>
-          </li>
-      {% empty %}
-          <li>No se encontraron platos que coincidan con los criterios de búsqueda.</li>
-      {% endfor %}
-  </ul> -->
-    
-
-  <form method="get">
-
-    <p>
-
-      Busca por ingrediente: <br><input type="search" name="la-busqueda">
-
-        Ingredientes: <br>
-
-        <select name="tipo-de-vista">
-          <option value="seleccionados"> ----- </option>
-          <option value="seleccionados">Veggie</option>
-          <option value="todos">Vaca</option>
-          <option value="todos">Cordero</option>
-          <option value="todos">Pollo</option>
-          <option value="todos">Cerdo</option>
-          <option value="todos">Marisco</option>
-          <option value="todos">Pasta</option>
-          <option value="todos">Pescado</option>
-          <option value="todos">Lácteos</option>
-          <option value="todos">Legumbres</option>
-
-        </select>
-
-      </p>
-
-      <p>
-        Medios: <br>
-
-        <select name="tipo-de-vista">
-          <option value="seleccionados"> ----- </option>
-          <option value="seleccionados">Horno</option>
-          <option value="todos">Cocina</option>
-          <option value="todos">Parrila</option>
-          <option value="todos">Wok</option>
-          <option value="todos">Sin Cocción</option>
-        </select>
-
-      </p>
-      <p>
-        Tipo de preparación: <br>
-
-        <select name="tipo-de-vista">
-          <option value="seleccionados"> ----- </option>
-          <option value="seleccionados">Mucho</option>
-          <option value="todos">Poco</option>
-          <option value="todos">Nada</option>
-
-        </select>
-
-      </p>
-      <p>
-        Categoría: <br>
-
-        <select name="tipo-de-vista">
-          <option value="seleccionados"> ----- </option>
-
-          <option value="seleccionados">Común</option>
-          <option value="todos">Especial</option>
-        </select>
-
-      </p>
-
-      <p>
-        Tipo: <br>
-
-        <select name="tipo-de-vista">
-          <option value="seleccionados"> ----- </option>
-
-          <option value="seleccionados">Plato principal</option>
-          <option value="todos">Entrada</option>
-          <option value="todos">Salsa</option>
-          <option value="todos">Postre</option>
-          <option value="todos">Torta</option>
-          <option value="todos">Untable</option>
-          <option value="todos">Guarnición</option>
-        </select>
-
-      </p>
-
-      <p>
-        Liviano - Calórico: <br>
-
-        <select name="tipo-de-vista">
-          <option value="seleccionados"> ----- </option>
-
-          <option value="seleccionados"> ----- </option>
-          <option value="seleccionados">Calórico</option>
-          <option value="todos">Normal</option>
-          <option value="todos">Liviano</option>
-
-        </select>
-        <button type="submit">Enviar</button>
-
-      </p>
-
-    </form> 
-
+  {% block filtro %}
+  {% endblock %}
 
 </section>
 
@@ -143,12 +26,6 @@
 </select>
         <button type="submit">Enviar</button>
   </form>
-
-  <h6>ELEGIDOS LLEGA {{ elegidos }}</h6>
-
- 
-  {{ platos_elegidos }}
-
 
   {% for plato in platos %}
   <div class="d-flex flex-row">
@@ -168,7 +45,10 @@
           <small class="text-muted">Subido por {{ plato.propietario }}</small>
           {% endif %}
 
-          {% if plato.nombre_plato  in elegidos %}
+          <h6>ELEGIDOS {{ elegidos }}</h6>
+
+
+          {% if plato.nombre_plato in elegidos %}
           <form action="{% url 'plato-elegido' %}" method="GET">
             <input type="hidden" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
             <input type="checkbox" id="borrar" name="borrar" value="borrar" checked>

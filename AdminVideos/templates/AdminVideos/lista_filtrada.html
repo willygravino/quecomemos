@@ -1,0 +1,35 @@
+{% extends "AdminVideos/video_list_base.html" %}
+
+{% load static %}
+
+{% block filtro %}
+  <!-- Formulario de filtrado -->
+  <form method="GET">
+    {{ form.as_p }}
+    <button type="submit">Filtrar</button>
+</form>
+
+<!-- Lista de platos -->
+<ul>
+    {% for plato in platos %}
+        <li>
+            <h2>{{ plato.nombre_plato }}</h2>
+            <p><strong>Receta:</strong> {{ plato.receta }}</p>
+            <p><strong>Descripción:</strong> {{ plato.descripcion_plato }}</p>
+            <p><strong>Ingredientes:</strong> {{ plato.ingredientes }}</p>
+            <!-- Agrega más campos según tus necesidades -->
+        </li>
+    {% empty %}
+        <li>No se encontraron platos que coincidan con los criterios de búsqueda.</li>
+    {% endfor %}
+</ul>
+{% endblock %}
+
+{% block titulo_ok %}
+      <h1 class="fw-light"> Esto  s son los platos  blabla  que  cargaste. </h1>
+{% endblock %}
+
+{% block mensaje %}
+        <h1 class="fw-light"> Aún no publicas BLA BLA te ningún plato. </h1>
+        <p class="lead text-body-secondary">Para ingresar platos y compart BLA BLA irlos con la comunidad de qué comemos, cargá la receta de esos platos ingresando a agregar plato.</p>
+ {% endblock %}  
