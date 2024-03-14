@@ -1,12 +1,23 @@
-{% extends "AdminVideos/video_list_base.html" %}
-
-{% load static %}
-
-{% block titulo_ok %}
-      <h1 class="fw-light"> Estos son los platos que elegiste para programar. </h1>
-{% endblock %}
-
-{% block mensaje %}
-        <h1 class="fw-light"> Aún no elegiste ningún plato. </h1>
-        <p class="lead text-body-secondary">Para elegir platos blabla platos y compartirlos con la comunidad de qué comemos, cargá la receta de esos platos ingresando a agregar plato.</p>
- {% endblock %}  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platos Elegidos</title>
+</head>
+<body>
+    <h1>Platos Elegidos</h1>
+    <p>Nombres de platos elegidos: {{ nombres_platos_elegidos }}</p>
+    <p>platos_elegidos: {{ platos_elegidos }}</p>
+    
+    
+    <ul>
+        {% for plato in platos_elegidos %}
+            <li>{{ plato.nombre_plato }}</li>
+        {% empty %}
+            <li>No hay platos elegidos</li>
+        {% endfor %}
+    </ul>
+    <p>Último elegido: {{ ultimo_elegido }}</p>
+</body>
+</html>

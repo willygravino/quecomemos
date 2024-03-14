@@ -11,6 +11,8 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from datetime import datetime
 from .forms import PlatoFilterForm
+from django.views.generic import TemplateView
+
 
 def index(request):
     return render(request, "AdminVideos/index.html")
@@ -22,27 +24,47 @@ def plato_elegido(request):
     if request.method == 'GET':
         nombre_plato = request.GET.get('opcion1')
         borrar = request.GET.get('borrar')
-        
+
         usuario = request.user  # Obtener el usuario logueado
-        elegidos, created = Elegidos.objects.get_or_create(usuario=usuario)  # Obtener o crear la instancia de Elegidos asociada al usuario
 
         if borrar == "borrar":
             # Eliminar el plato de la lista de platos elegidos
-            if nombre_plato in elegidos.nombre_plato_elegido:
-                elegidos.nombre_plato_elegido.remove(nombre_plato)
+            Elegidos.objects.filter(usuario=usuario, nombre_plato_elegido=nombre_plato).delete()
         else:
             # Agregar el plato a la lista de platos elegidos
-            if nombre_plato not in elegidos.nombre_plato_elegido:
-                elegidos.nombre_plato_elegido.append(nombre_plato)
-
-        # Guardar los cambios en la base de datos
-        elegidos.save()
+            Elegidos.objects.get_or_create(usuario=usuario, nombre_plato_elegido=nombre_plato)
 
         # Redirigir a la página deseada
         return redirect(reverse_lazy("videos-list"))
     else:
         # Manejar solicitudes POST u otras solicitudes que no sean GET
         return JsonResponse({"error": "Método no permitido"}, status=405)
+
+# def plato_elegido(request):
+#     if request.method == 'GET':
+#         nombre_plato = request.GET.get('opcion1')
+#         borrar = request.GET.get('borrar')
+
+#         usuario = request.user  # Obtener el usuario logueado
+#         elegidos, created = Elegidos.objects.get_or_create(usuario=usuario)  # Obtener o crear la instancia de Elegidos asociada al usuario
+
+#         if borrar == "borrar":
+#             # Eliminar el plato de la lista de platos elegidos
+#             if nombre_plato in elegidos.nombre_plato_elegido:
+#                 elegidos.nombre_plato_elegido.remove(nombre_plato)
+#         else:
+#             # Agregar el plato a la lista de platos elegidos
+#             if nombre_plato not in elegidos.nombre_plato_elegido:
+#                 elegidos.nombre_plato_elegido.append(nombre_plato)
+
+#         # Guardar los cambios en la base de datos
+#         elegidos.save()
+
+#         # Redirigir a la página deseada
+#         return redirect(reverse_lazy("videos-list"))
+#     else:
+#         # Manejar solicitudes POST u otras solicitudes que no sean GET
+#         return JsonResponse({"error": "Método no permitido"}, status=405)
 
 
 class PlatoList(ListView):
@@ -52,7 +74,6 @@ class PlatoList(ListView):
 
     def get_queryset(self):
         # self.query = "tomatelas"
-
         if self.request.user.is_authenticated:
             try:
                 if self.request.user.profile:
@@ -60,8 +81,6 @@ class PlatoList(ListView):
                         if self.query:
                             object_list = Plato.objects.filter(ingredientes__icontains=self.query)
                         return object_list
-                    
-                
             except Exception:
             #    object_list = Plato.objects.filter(ingredientes__icontains="%%")
                object_list = Plato.objects.all()
@@ -73,14 +92,14 @@ class PlatoList(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+
         # Obtener objetos de Elegidos asociados al usuario logueado
         usuario = self.request.user
         elegidos = Elegidos.objects.filter(usuario=usuario)
-        
+
         # Obtener solo los nombres de los platos seleccionados
         nombres_platos_elegidos = [e.nombre_plato_elegido for e in elegidos]
-        
+
         # Pasar query y nombres de platos seleccionados al contexto
         # context['query'] = self.query if self.query else "tomate"
         context['elegidos'] = nombres_platos_elegidos
@@ -95,8 +114,8 @@ class PlatoList(ListView):
     #     elegidos = Elegidos.objects.filter(usuario=usuario)
 
     #     # Agregar objetos de Elegidos al contexto
-    #     context['elegidos'] = elegidos      
-    
+    #     context['elegidos'] = elegidos
+
     #     return context
 
 def grabar_menu_elegido(request):
@@ -168,16 +187,16 @@ def elecion_de_lista (request):
 class PlatosMineList(LoginRequiredMixin, PlatoList):
     model = Plato
     template_name = 'AdminVideos/videosmine_list.html'
-    
+
     def get_queryset(self):
       platos_elegidos = Plato.objects.filter(propietario_id=self.request.user.id)
       return platos_elegidos
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['ultimo_elegido'] = 'solo-mios'
         return context
-    
+
 class PlatosDeOtros(LoginRequiredMixin, PlatoList):
     model = Plato
     template_name = 'AdminVideos/videosmine_list.html'
@@ -185,25 +204,70 @@ class PlatosDeOtros(LoginRequiredMixin, PlatoList):
     def get_queryset(self):
       platos_de_otros = Plato.objects.exclude(propietario_id=self.request.user.id)
       return platos_de_otros
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['ultimo_elegido'] = 'de-otros'
         return context
 
-class PlatosElegidosMenu(PlatoList):
-    model = Plato
-    template_name = 'AdminVideos/platos_elegidos.html'
+class PlatosElegidosMenu(LoginRequiredMixin, TemplateView):
+    template_name = 'AdminVideos/videosmine_list.html'
+    context_object_name = 'platos'
 
-    def get_queryset(self):
-      platos_de_otros = Plato.objects.exclude(propietario_id=self.request.user.id)
-      return platos_de_otros
-    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
+        # Obtener el usuario logueado
+        usuario = self.request.user
+        
+        # Obtener los nombres de los platos elegidos por el usuario logueado
+        nombres_platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
+        
+        # Filtrar los platos según los nombres obtenidos
+        platos_elegidos = Plato.objects.filter(nombre_plato__in=nombres_platos_elegidos)
+        
+        context['platos'] = platos_elegidos
         context['ultimo_elegido'] = 'seleccionados'
+        
         return context
-    
+
+
+# class PlatosElegidosMenu(TemplateView):
+#     template_name = 'AdminVideos/videosmine_list.html'
+#     context_object_name = 'platos'
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+        
+#         # Obtener los nombres de los platos elegidos por el usuario logueado
+#         nombres_platos_elegidos = Elegidos.objects.filter(usuario=self.request.user).values_list('nombre_plato_elegido', flat=True)
+        
+#         # Filtrar los platos según los nombres obtenidos
+#         platos_elegidos = Plato.objects.filter(nombre_plato__in=nombres_platos_elegidos)
+        
+#         context['platos'] = platos_elegidos
+#         context['ultimo_elegido'] = 'seleccionados'
+        
+#         return context
+
+# class PlatosElegidosMenu(PlatoList):
+#     model = Plato, Elegidos
+#     # template_name = 'AdminVideos/platos_elegidos.html'
+#     template_name = 'AdminVideos/videosmine_list.html'
+#     context_object_name = 'platos'
+
+#     def get_queryset(self):
+#         # Obtener los nombres de los platos elegidos por el usuario logueado
+#         nombres_platos_elegidos = Elegidos.objects.filter(usuario=self.request.user).values_list('nombre_plato_elegido', flat=True)
+#         # Filtrar los platos según los nombres obtenidos
+#         platos_elegidos = Plato.objects.filter(nombre_plato__in=nombres_platos_elegidos)
+#         return platos_elegidos
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['ultimo_elegido'] = 'seleccionados'
+#         return context
+
 class PlatoDetail(DetailView):
     model = Plato
     context_object_name = "plato"
@@ -217,8 +281,6 @@ class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         user_id = self.request.user.id
         plato_id =  self.kwargs.get("pk")
         return Plato.objects.filter(propietario=user_id, id=plato_id).exists()
-
-
 
 class PlatoDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Plato
