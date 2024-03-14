@@ -7,6 +7,7 @@ class Plato(models.Model):
     descripcion_plato = models.CharField(max_length=300)
     ingredientes = models.CharField('Ingresá los ingredientes, separados por coma', max_length=120, blank=False)
 
+    INDISTINTO = '-'
     HORNO = 'horno'
     COCINA = 'cocina'
     PARRILA = 'parrilla'
@@ -14,35 +15,41 @@ class Plato(models.Model):
     SIN_COCCION = 'sin coccion'
     
     MEDIOS_CHOICES = [
+        (INDISTINTO, '-'),
         (HORNO, 'horno'),
         (COCINA, 'cocina'),
         (PARRILA, 'parrilla'),
         (WOK,'wok'),
         (SIN_COCCION,'sin cocción'),
     ]
-    medios = models.CharField(max_length=20, choices=MEDIOS_CHOICES, null=True, blank=True)
-
+    medios = models.CharField(max_length=20, choices=MEDIOS_CHOICES, default=INDISTINTO, null=True, blank=True)
+   
+    INDISTINTO = '-'
     COMUN = 'Común'
     ESPECIAL = 'Especial'
        
     CATEGORIA_CHOICES = [
+        (INDISTINTO, '-'),
         (COMUN, 'Común'),
         (ESPECIAL, 'Especial'),
         
     ]
-    categoria = models.CharField(max_length=20, choices=CATEGORIA_CHOICES, null=True, blank=True)
+    categoria = models.CharField(max_length=20, choices=CATEGORIA_CHOICES, default=INDISTINTO, null=True, blank=True)
 
+    INDISTINTO = '-'
     MUCHO = 'Mucho'
     POCO = 'Poco'
     NADA = 'Nada'
        
     PREPA_CHOICES = [
+        (INDISTINTO, '-'),
         (MUCHO, 'Mucho'),
         (POCO, 'Poco'),
         (NADA, 'Nada'),
     ]
-    preparacion = models.CharField(max_length=20, choices=PREPA_CHOICES, null=True, blank=True)
+    preparacion = models.CharField(max_length=20, choices=PREPA_CHOICES, default=INDISTINTO, null=True, blank=True)
 
+    INDISTINTO = '-'
     ENTRADA = 'entrada'
     SALSA = 'salsa'
     PICADA = 'picada'
@@ -54,6 +61,7 @@ class Plato(models.Model):
     GUARNICION = 'guarnicion'
 
     TIPO_CHOICES = [
+        (INDISTINTO, '-'),
         (ENTRADA, 'Entrada'),
         (SALSA, 'Salsa'),
         (PICADA, 'Picada'),
@@ -65,8 +73,9 @@ class Plato(models.Model):
         (GUARNICION,'guarnicion'),
     ]
 
-    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, null=True, blank=True)
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default=INDISTINTO, null=True, blank=True)
 
+    INDISTINTO = '-'
     CALORICO = 'Calórico'
     LIVIANO = 'Liviano'
     NORMAL = 'Normal'
@@ -74,6 +83,7 @@ class Plato(models.Model):
   
 
     CALORIAS_CHOICES = [
+        (INDISTINTO, '-'),
         (CALORICO, 'Calórico'),
         (LIVIANO, 'Liviano'),
         (NORMAL, 'Normal'),
@@ -81,7 +91,7 @@ class Plato(models.Model):
    
     ]
 
-    calorias = models.CharField(max_length=20, choices=CALORIAS_CHOICES, null=True, blank=True)  
+    calorias = models.CharField(max_length=20, choices=CALORIAS_CHOICES, default=INDISTINTO,null=True, blank=True)  
 
     propietario = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="propietario")
     image = models.ImageField("Subí una imagen que identifique al plato (o un fotograma del mismo)", upload_to="videos/", null=True, blank=True)

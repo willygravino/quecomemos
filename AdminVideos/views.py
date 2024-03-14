@@ -44,6 +44,8 @@ def plato_elegido(request):
 class PlatoList(ListView):
     model = Plato
     context_object_name = "platos"
+    template_name = 'AdminVideos/lista_filtrada.html'
+
     # query = None
 
     def get_queryset(self):
@@ -160,7 +162,9 @@ def elecion_de_lista (request):
 
 class PlatosMineList(LoginRequiredMixin, PlatoList):
     model = Plato
-    template_name = 'AdminVideos/videosmine_list.html'
+    # template_name = 'AdminVideos/videosmine_list.html'
+    template_name = 'AdminVideos/lista_filtrada.html'
+
 
     def get_queryset(self):
       platos_elegidos = Plato.objects.filter(propietario_id=self.request.user.id)
@@ -173,7 +177,9 @@ class PlatosMineList(LoginRequiredMixin, PlatoList):
 
 class PlatosDeOtros(LoginRequiredMixin, PlatoList):
     model = Plato
-    template_name = 'AdminVideos/videosmine_list.html'
+    # template_name = 'AdminVideos/videosmine_list.html'
+    template_name = 'AdminVideos/lista_filtrada.html'
+
 
     def get_queryset(self):
       platos_de_otros = Plato.objects.exclude(propietario_id=self.request.user.id)
@@ -186,7 +192,9 @@ class PlatosDeOtros(LoginRequiredMixin, PlatoList):
 
 class PlatosElegidosMenu(LoginRequiredMixin, PlatoList):
     # template_name = 'AdminVideos/plato_list.html'
-    template_name = 'AdminVideos/videosmine_list.html'
+    # template_name = 'AdminVideos/videosmine_list.html'
+    template_name = 'AdminVideos/lista_filtrada.html'
+
 
     context_object_name = 'platos'
 
@@ -278,33 +286,32 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
     def test_func(self):
         return Profile.objects.filter(user=self.request.user).exists()
 
-
 def filtrar_platos(request):
     form = PlatoFilterForm(request.GET)
     platos = Plato.objects.all()
 
     if form.is_valid():
-        nombre_plato = form.cleaned_data.get('nombre_plato')
+        # nombre_plato = form.cleaned_data.get('nombre_plato')
+        tipo_de_vista = form.cleaned_data.get('medios')
         medios = form.cleaned_data.get('medios')
         categoria = form.cleaned_data.get('categoria')
         preparacion = form.cleaned_data.get('preparacion')
         tipo = form.cleaned_data.get('tipo')
         calorias = form.cleaned_data.get('calorias')
 
-        if nombre_plato:
-            platos = platos.filter(nombre_plato__icontains=nombre_plato)
-        if medios:
+        # if nombre_plato:
+        #     platos = platos.filter(nombre_plato__icontains=nombre_plato)
+        if medios and medios != '-':
             platos = platos.filter(medios=medios)
-        if categoria:
+        if categoria and categoria != '-':
             platos = platos.filter(categoria=categoria)
-        if preparacion:
+        if preparacion and preparacion != '-':
             platos = platos.filter(preparacion=preparacion)
-        if tipo:
+        if tipo and tipo != '-':
             platos = platos.filter(tipo=tipo)
-        if calorias:
+        if calorias and calorias != '-':
             platos = platos.filter(calorias=calorias)
 
-     
     if request.user.is_authenticated:
         usuario = request.user
         platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
@@ -313,11 +320,49 @@ def filtrar_platos(request):
         'form': form,
         'platos': platos,
         'elegidos': platos_elegidos,
-    }       
+    }
 
-    # return render(request, 'AdminVideos/mostrar_fitrado_por_formulario.html', {'form': form, 'platos': platos})
-    # return render(request, 'AdminVideos/video_list_base.html', {'form': form, 'platos': platos})
     return render(request, 'AdminVideos/lista_filtrada.html', contexto)
+
+# def filtrar_platos(request):
+#     form = PlatoFilterForm(request.GET)
+#     platos = Plato.objects.all()
+
+#     if form.is_valid():
+#         nombre_plato = form.cleaned_data.get('nombre_plato')
+#         medios = form.cleaned_data.get('medios')
+#         categoria = form.cleaned_data.get('categoria')
+#         preparacion = form.cleaned_data.get('preparacion')
+#         tipo = form.cleaned_data.get('tipo')
+#         calorias = form.cleaned_data.get('calorias')
+
+#         if nombre_plato:
+#             platos = platos.filter(nombre_plato__icontains=nombre_plato)
+#         if medios:
+#             platos = platos.filter(medios=medios)
+#         if categoria:
+#             platos = platos.filter(categoria=categoria)
+#         if preparacion:
+#             platos = platos.filter(preparacion=preparacion)
+#         if tipo:
+#             platos = platos.filter(tipo=tipo)
+#         if calorias:
+#             platos = platos.filter(calorias=calorias)
+
+     
+#     if request.user.is_authenticated:
+#         usuario = request.user
+#         platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
+
+#     contexto = {
+#         'form': form,
+#         'platos': platos,
+#         'elegidos': platos_elegidos,
+#     }       
+
+#     # return render(request, 'AdminVideos/mostrar_fitrado_por_formulario.html', {'form': form, 'platos': platos})
+#     # return render(request, 'AdminVideos/video_list_base.html', {'form': form, 'platos': platos})
+#     return render(request, 'AdminVideos/lista_filtrada.html', contexto)
 
 
 # class MensajeCreate(CreateView):
