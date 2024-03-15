@@ -33,52 +33,36 @@ def plato_elegido(request):
             Elegidos.objects.get_or_create(usuario=usuario, nombre_plato_elegido=nombre_plato)
 
         # Redirigir a la página deseada
-        return redirect(reverse_lazy("videos-list"))
+        return redirect(reverse_lazy("filtro-de-platos"))
     else:
         # Manejar solicitudes POST u otras solicitudes que no sean GET
         return JsonResponse({"error": "Método no permitido"}, status=405)
 
+# class VistaInicial (ListView):
+#   model = Plato
+#   context_object_name = "platos"
+#   template_name = 'AdminVideos/lista_filtrada.html'
 
-class PlatoList(ListView):
-    model = Plato
-    context_object_name = "platos"
-    template_name = 'AdminVideos/lista_filtrada.html'
+# class PlatoList(ListView):
+#     model = Plato
+#     context_object_name = "platos"
+#     template_name = 'AdminVideos/lista_filtrada.html'
 
-    # query = None
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
 
-    def get_queryset(self):
-        # self.query = "tomatelas"
-        if self.request.user.is_authenticated:
-            try:
-                if self.request.user.profile:
-                        self.query = self.request.GET.get("la-busqueda")
-                        if self.query:
-                            object_list = Plato.objects.filter(ingredientes__icontains=self.query)
-                        return object_list
-            except Exception:
-            #    object_list = Plato.objects.filter(ingredientes__icontains="%%")
-               object_list = Plato.objects.all()
-            return object_list
-        else:
-            # object_list = Plato.objects.filter(ingredientes__icontains="%%")
-            object_list = Plato.objects.all()
-        return object_list
+#         # Obtener objetos de Elegidos asociados al usuario logueado
+#         usuario = self.request.user
+#         elegidos = Elegidos.objects.filter(usuario=usuario)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+#         # Obtener solo los nombres de los platos seleccionados
+#         nombres_platos_elegidos = [e.nombre_plato_elegido for e in elegidos]
 
-        # Obtener objetos de Elegidos asociados al usuario logueado
-        usuario = self.request.user
-        elegidos = Elegidos.objects.filter(usuario=usuario)
+#         # Pasar query y nombres de platos seleccionados al contexto
+#         # context['query'] = self.query if self.query else "tomate"
+#         context['elegidos'] = nombres_platos_elegidos
 
-        # Obtener solo los nombres de los platos seleccionados
-        nombres_platos_elegidos = [e.nombre_plato_elegido for e in elegidos]
-
-        # Pasar query y nombres de platos seleccionados al contexto
-        # context['query'] = self.query if self.query else "tomate"
-        context['elegidos'] = nombres_platos_elegidos
-
-        return context
+#         return context
 
 
 def grabar_menu_elegido(request):
@@ -132,81 +116,13 @@ class MenuElegido (CreateView):
         else: context['elegidos_semanal'] = "poroto"
         return context
 
-def elecion_de_lista (request):
-    if request.method == 'GET':
-        tipo_de_vista = request.GET.get('tipo-de-vista', None)
-        if tipo_de_vista == 'todos':
-            return redirect('videos-list')
-        elif tipo_de_vista == 'seleccionados':
-            return redirect('platos-elegidos')
-        elif tipo_de_vista == 'de-otros':
-            return redirect('platos-de-otros')
-        elif tipo_de_vista == 'solo-mios':
-            return redirect('videos-mine')
-        else:
-            # Redirige a alguna vista predeterminada si el tipo de vista no está definido
-            return redirect('videos-list')
-
-class PlatosMineList(LoginRequiredMixin, PlatoList):
-    model = Plato
-    # template_name = 'AdminVideos/videosmine_list.html'
-    template_name = 'AdminVideos/lista_filtrada.html'
-
-
-    def get_queryset(self):
-      platos_elegidos = Plato.objects.filter(propietario_id=self.request.user.id)
-      return platos_elegidos
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['ultimo_elegido'] = 'solo-mios'
-        return context
-
-class PlatosDeOtros(LoginRequiredMixin, PlatoList):
-    model = Plato
-    # template_name = 'AdminVideos/videosmine_list.html'
-    template_name = 'AdminVideos/lista_filtrada.html'
-
-
-    def get_queryset(self):
-      platos_de_otros = Plato.objects.exclude(propietario_id=self.request.user.id)
-      return platos_de_otros
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['ultimo_elegido'] = 'de-otros'
-        return context
-
-class PlatosElegidosMenu(LoginRequiredMixin, PlatoList):
-    # template_name = 'AdminVideos/plato_list.html'
-    # template_name = 'AdminVideos/videosmine_list.html'
-    template_name = 'AdminVideos/lista_filtrada.html'
-    context_object_name = 'platos'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        
-        # Obtener el usuario logueado
-        usuario = self.request.user
-        
-        # Obtener los nombres de los platos elegidos por el usuario logueado
-        nombres_platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
-        
-        # Filtrar los platos según los nombres obtenidos
-        platos_elegidos = Plato.objects.filter(nombre_plato__in=nombres_platos_elegidos)
-        
-        context['platos'] = platos_elegidos
-        context['ultimo_elegido'] = 'seleccionados'
-        
-        return context
-
 class PlatoDetail(DetailView):
     model = Plato
     context_object_name = "plato"
 
 class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Plato
-    success_url = reverse_lazy("videos-list")
+    success_url = reverse_lazy("filtro-de-platos")
     fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria","tipo","calorias","image"]
 
     def test_func(self):
@@ -217,7 +133,7 @@ class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 class PlatoDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Plato
     context_object_name = "plato"
-    success_url = reverse_lazy("videos-list")
+    success_url = reverse_lazy("filtro-de-platos")
 
     def test_func(self):
         user_id = self.request.user.id
@@ -227,7 +143,7 @@ class PlatoDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 class PlatoCreate(LoginRequiredMixin, CreateView):
     model = Plato
-    success_url = reverse_lazy("videos-list")
+    success_url = reverse_lazy("filtro-de-platos")
     fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria","preparacion", "tipo","calorias","image"]
 #    fields = '__all__'
 
@@ -238,13 +154,13 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         return redirect(self.success_url)
 
 class Login(LoginView):
-    next_page = reverse_lazy("videos-list")
+    next_page = reverse_lazy("filtro-de-platos")
 
 
 class SignUp(CreateView):
     form_class = UserCreationForm
     template_name = 'registration/signup.html'
-    success_url = reverse_lazy('videos-list')
+    success_url = reverse_lazy('filtro-de-platos')
 
 
 class Logout(LogoutView):
@@ -271,7 +187,7 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
     def test_func(self):
         return Profile.objects.filter(user=self.request.user).exists()
     
-class FiltrarPlatos(LoginRequiredMixin, PlatoList):
+class FiltrarPlatos(LoginRequiredMixin, ListView):
     def get(self, request):
         form = PlatoFilterForm(request.GET)
         platos = Plato.objects.all()
