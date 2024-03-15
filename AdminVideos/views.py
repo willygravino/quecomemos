@@ -1,9 +1,7 @@
-# from contextvars import Context AGREGADO POR MI PARA VER LA QUERY
 from contextvars import Context
-import json
 from django.shortcuts import render, redirect
 from AdminVideos.models import Plato, Profile, Mensaje, Elegidos, ElegidosXSemana
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.contrib.auth.forms import UserCreationForm
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
@@ -82,17 +80,6 @@ class PlatoList(ListView):
 
         return context
 
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-
-    #     # Obtener objetos de Elegidos asociados al usuario logueado
-    #     usuario = self.request.user
-    #     elegidos = Elegidos.objects.filter(usuario=usuario)
-
-    #     # Agregar objetos de Elegidos al contexto
-    #     context['elegidos'] = elegidos
-
-    #     return context
 
 def grabar_menu_elegido(request):
     if request.method == 'POST':
@@ -194,8 +181,6 @@ class PlatosElegidosMenu(LoginRequiredMixin, PlatoList):
     # template_name = 'AdminVideos/plato_list.html'
     # template_name = 'AdminVideos/videosmine_list.html'
     template_name = 'AdminVideos/lista_filtrada.html'
-
-
     context_object_name = 'platos'
 
     def get_context_data(self, **kwargs):
@@ -285,84 +270,54 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
 
     def test_func(self):
         return Profile.objects.filter(user=self.request.user).exists()
+    
+class FiltrarPlatos(LoginRequiredMixin, PlatoList):
+    def get(self, request):
+        form = PlatoFilterForm(request.GET)
+        platos = Plato.objects.all()
+        platos_elegidos = None
+        usuario = self.request.user
 
-def filtrar_platos(request):
-    form = PlatoFilterForm(request.GET)
-    platos = Plato.objects.all()
+        if form.is_valid():
+            tipo_de_vista = form.cleaned_data.get('tipo_de_vista')
+            medios = form.cleaned_data.get('medios')
+            categoria = form.cleaned_data.get('categoria')
+            preparacion = form.cleaned_data.get('preparacion')
+            tipo = form.cleaned_data.get('tipo')
+            calorias = form.cleaned_data.get('calorias')
 
-    if form.is_valid():
-        # nombre_plato = form.cleaned_data.get('nombre_plato')
-        tipo_de_vista = form.cleaned_data.get('medios')
-        medios = form.cleaned_data.get('medios')
-        categoria = form.cleaned_data.get('categoria')
-        preparacion = form.cleaned_data.get('preparacion')
-        tipo = form.cleaned_data.get('tipo')
-        calorias = form.cleaned_data.get('calorias')
+            if tipo_de_vista == 'solo-mios':
+                platos = platos.filter(propietario_id=self.request.user.id)
 
-        # if nombre_plato:
-        #     platos = platos.filter(nombre_plato__icontains=nombre_plato)
-        if medios and medios != '-':
-            platos = platos.filter(medios=medios)
-        if categoria and categoria != '-':
-            platos = platos.filter(categoria=categoria)
-        if preparacion and preparacion != '-':
-            platos = platos.filter(preparacion=preparacion)
-        if tipo and tipo != '-':
-            platos = platos.filter(tipo=tipo)
-        if calorias and calorias != '-':
-            platos = platos.filter(calorias=calorias)
+            if tipo_de_vista == 'de-otros':
+                platos =  platos.exclude(propietario_id=self.request.user.id)
+   
+            if tipo_de_vista == 'preseleccionados':
+                nombres_platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
+                platos = platos.filter(nombre_plato__in=nombres_platos_elegidos)    
+                        
+            if medios and medios != '-':
+                platos = platos.filter(medios=medios)
+            if categoria and categoria != '-':
+                platos = platos.filter(categoria=categoria)
+            if preparacion and preparacion != '-':
+                platos = platos.filter(preparacion=preparacion)
+            if tipo and tipo != '-':
+                platos = platos.filter(tipo=tipo)
+            if calorias and calorias != '-':
+                platos = platos.filter(calorias=calorias)
 
-    if request.user.is_authenticated:
-        usuario = request.user
-        platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
+            if usuario:
+                platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
 
-    contexto = {
-        'form': form,
-        'platos': platos,
-        'elegidos': platos_elegidos,
-    }
+        contexto = {
+            'form': form,
+            'platos': platos,
+            'elegidos': platos_elegidos,
+       }
 
-    return render(request, 'AdminVideos/lista_filtrada.html', contexto)
+        return render(request, 'AdminVideos/lista_filtrada.html', contexto)
 
-# def filtrar_platos(request):
-#     form = PlatoFilterForm(request.GET)
-#     platos = Plato.objects.all()
-
-#     if form.is_valid():
-#         nombre_plato = form.cleaned_data.get('nombre_plato')
-#         medios = form.cleaned_data.get('medios')
-#         categoria = form.cleaned_data.get('categoria')
-#         preparacion = form.cleaned_data.get('preparacion')
-#         tipo = form.cleaned_data.get('tipo')
-#         calorias = form.cleaned_data.get('calorias')
-
-#         if nombre_plato:
-#             platos = platos.filter(nombre_plato__icontains=nombre_plato)
-#         if medios:
-#             platos = platos.filter(medios=medios)
-#         if categoria:
-#             platos = platos.filter(categoria=categoria)
-#         if preparacion:
-#             platos = platos.filter(preparacion=preparacion)
-#         if tipo:
-#             platos = platos.filter(tipo=tipo)
-#         if calorias:
-#             platos = platos.filter(calorias=calorias)
-
-     
-#     if request.user.is_authenticated:
-#         usuario = request.user
-#         platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
-
-#     contexto = {
-#         'form': form,
-#         'platos': platos,
-#         'elegidos': platos_elegidos,
-#     }       
-
-#     # return render(request, 'AdminVideos/mostrar_fitrado_por_formulario.html', {'form': form, 'platos': platos})
-#     # return render(request, 'AdminVideos/video_list_base.html', {'form': form, 'platos': platos})
-#     return render(request, 'AdminVideos/lista_filtrada.html', contexto)
 
 
 # class MensajeCreate(CreateView):
