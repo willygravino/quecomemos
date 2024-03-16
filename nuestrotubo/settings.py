@@ -12,9 +12,11 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 
+import os
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -41,6 +43,14 @@ INSTALLED_APPS = [
    # 'embed_video'
 ]
 
+CORS_ALLOW_ALL_ORIGINS = True  # Permitir todas las solicitudes de origen
+
+CORS_ALLOWED_ORIGINS = [
+    "https://quecomemos-old-breeze-2782.fly.dev",
+    "https://fly.io/apps/quecomemos-old-breeze-2782",
+    # Agrega otros orígenes permitidos según sea necesario
+]
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -49,6 +59,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware', # nuevo
+    'corsheaders.middleware.CorsMiddleware', # nuevo
 ]
 
 ROOT_URLCONF = 'nuestrotubo.urls'
@@ -129,3 +141,15 @@ MEDIA_ROOT = str(Path(BASE_DIR) / 'media')
 MEDIA_URL = '/media/'
 
 LOGIN_URL = "index"
+
+
+
+
+
+
+
+
+# # fly io
+
+# APP_NAME = os.environ.get("FLY_APP_NAME")
+# ALLOWED_HOSTS = [f"{APP_NAME}.fly.dev"]  # ← Updated!

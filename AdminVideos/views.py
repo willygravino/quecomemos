@@ -11,6 +11,9 @@ from datetime import datetime
 from .forms import PlatoFilterForm
 from django.views.generic import TemplateView
 
+class SugerenciasRandom(TemplateView):
+    template_name = 'AdminVideos/random.html'
+
 
 def index(request):
     return render(request, "AdminVideos/index.html")

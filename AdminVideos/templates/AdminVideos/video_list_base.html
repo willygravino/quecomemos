@@ -7,8 +7,12 @@
 <section>
 
   {% block filtro %}
+  
   {% endblock %}
 
+  <form action="{% url 'random' %}" method="get">
+    <button type="submit" class="btn btn-primary">¡¡ RANDOM !!</button>
+  </form>
 </section>
 
 <section>
