@@ -4,6 +4,7 @@
 
 {% block filtro %}
   <form method="GET">
+    {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Filtrar</button>
 </form>

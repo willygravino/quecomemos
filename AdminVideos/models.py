@@ -99,7 +99,7 @@ class Plato(models.Model):
 
     @property
     def image_url(self):
-        return self.image.url if self.image else '/media/videos/logo.png'
+        return self.image.url if self.image else '/media/avatares/logo.png'
 
     def __str__(self):
         return f"{self.id} - {self.nombre_plato}"

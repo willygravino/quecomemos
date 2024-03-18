@@ -11,12 +11,17 @@
   {% endblock %}
 
   <form action="{% url 'random' %}" method="get">
+    <!-- el token debería usarse solo en formularios POST -->
+    {% csrf_token %}
+
     <button type="submit" class="btn btn-primary">¡¡ RANDOM !!</button>
   </form>
 </section>
 
 <section>
-  
+  <h6>TIPO DE VISTA ESTABLE - TIPO DE VISTA {{ tipo_de_vista_estable }}</h6>
+
+
   {% for plato in platos %}
   <div class="d-flex flex-row">
     <img style="width: 20%" src="{{plato.image_url}}" data-holder-rendered="true">
@@ -74,12 +79,16 @@
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
+          <option value="-----">-----</option>
+
         </select>
         <br>
         <select name="lunes-c">
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
+          <option value="-----">-----</option>
+
         </select>
       </div>
       <br>
@@ -91,12 +100,15 @@
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
+          <option value="-----">-----</option>
         </select>
         <br>
         <select name="martes-c">
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
+          <option value="-----">-----</option>
+
         </select>
       </div>
       <br>
@@ -108,6 +120,8 @@
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
+          <option value="-----">-----</option>
+
         </select>
 
         <br>
@@ -115,6 +129,8 @@
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
+          <option value="-----">-----</option>
+
         </select>
 
       </div>
@@ -127,12 +143,16 @@
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
+          <option value="-----">-----</option>
+
         </select>
         <br>
         <select name="jueves-c">
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
+          <option value="-----">-----</option>
+
         </select>
       </div>
       <br>
@@ -144,12 +164,16 @@
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
+          <option value="-----">-----</option>
+
         </select>
         <br>
         <select name="viernes-c">
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
+          <option value="-----">-----</option>
+
         </select>
       </div>
       <br>
@@ -161,12 +185,16 @@
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
+          <option value="-----">-----</option>
+
         </select>
         <br>
         <select name="sabado-c">
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
+          <option value="-----">-----</option>
+
         </select>
       </div>
       <br>
@@ -178,12 +206,16 @@
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
+          <option value="-----">-----</option>
+
         </select>
         <br>
         <select name="domingo-c">
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
+          <option value="-----">-----</option>
+
         </select>
 
       </div>
@@ -196,7 +228,7 @@
   </div>
 
 
-  </form>
+  <!-- </form> -->
 
   </div>
 </section>

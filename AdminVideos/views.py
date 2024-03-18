@@ -172,7 +172,7 @@ class Logout(LogoutView):
 
 class ProfileCreate(LoginRequiredMixin, CreateView):
     model = Profile
-    success_url = reverse_lazy("videos-list")
+    success_url = reverse_lazy("filtro-de-platos")
     fields = ["nombre_completo","avatar"]
 
     def form_valid(self, form):
@@ -184,7 +184,7 @@ class ProfileCreate(LoginRequiredMixin, CreateView):
 
 class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
     model = Profile
-    success_url = reverse_lazy("videos-list")
+    success_url = reverse_lazy("filtro-de-platos")
     fields = ["nombre_completo","avatar"]
 
     def test_func(self):
@@ -192,11 +192,22 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
     
 class FiltrarPlatos(LoginRequiredMixin, ListView):
     def get(self, request):
-        form = PlatoFilterForm(request.GET)
+        
+        tipo_de_vista_estable = request.session.get('tipo_de_vista_estable', "None")
+        inicial = "platito"
+        
+        data = {
+            "nombre_plato": inicial,
+                }
+ 
+        # NO ENTIENDO POR QUÉ NO FUNCIONA INITIAL, PROBÉ DE TODO / tipo_de_vista_estable ESTÁ LISTA PARA ADJUDICARSE 
+        form = PlatoFilterForm(self.request.GET, initial=data)
+        # form = PlatoFilterForm(request.GET, tipo_de_vista_estable=tipo_de_vista_estable)
         platos = Plato.objects.all()
-        platos_elegidos = None
         usuario = self.request.user
-
+        platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
+        # Obtener el valor de tipo_de_vista de la sesión si existe, de lo contrario, establecerlo en "None"
+       
         if form.is_valid():
             tipo_de_vista = form.cleaned_data.get('tipo_de_vista')
             medios = form.cleaned_data.get('medios')
@@ -205,6 +216,9 @@ class FiltrarPlatos(LoginRequiredMixin, ListView):
             tipo = form.cleaned_data.get('tipo')
             calorias = form.cleaned_data.get('calorias')
 
+            # if tipo_de_vista_estable!="None":
+            #     tipo_de_vista = tipo_de_vista_estable          
+  
             if tipo_de_vista == 'solo-mios':
                 platos = platos.filter(propietario_id=self.request.user.id)
 
@@ -229,10 +243,15 @@ class FiltrarPlatos(LoginRequiredMixin, ListView):
             if usuario:
                 platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
 
+           # Guardar el valor de tipo_de_vista en la sesión
+            request.session['tipo_de_vista_estable'] =  tipo_de_vista
+            tipo_de_vista_estable = tipo_de_vista
+
         contexto = {
             'form': form,
             'platos': platos,
             'elegidos': platos_elegidos,
+            "tipo_de_vista_estable" :  tipo_de_vista_estable
        }
 
         return render(request, 'AdminVideos/lista_filtrada.html', contexto)
@@ -241,7 +260,7 @@ class FiltrarPlatos(LoginRequiredMixin, ListView):
 
 # class MensajeCreate(CreateView):
 #   model = Mensaje
-#   success_url = reverse_lazy('videos-list')
+#   success_url = reverse_lazy('filtro-de-platos')
 #   fields = '__all__'
 
 
