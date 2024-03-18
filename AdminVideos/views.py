@@ -217,18 +217,19 @@ class FiltrarPlatos(LoginRequiredMixin, ListView):
             calorias = form.cleaned_data.get('calorias')
 
             # if tipo_de_vista_estable!="None":
-            #     tipo_de_vista = tipo_de_vista_estable          
-  
-            if tipo_de_vista == 'solo-mios':
-                platos = platos.filter(propietario_id=self.request.user.id)
+            #     tipo_de_vista = tipo_de_vista_estable
+
+                 
+            if tipo_de_vista == 'solo-mios' or tipo_de_vista=="random-con-mios":
+                 platos = platos.filter(propietario_id=self.request.user.id)
 
             if tipo_de_vista == 'de-otros':
                 platos =  platos.exclude(propietario_id=self.request.user.id)
-   
+
             if tipo_de_vista == 'preseleccionados':
                 nombres_platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
                 platos = platos.filter(nombre_plato__in=nombres_platos_elegidos)    
-                        
+                         
             if medios and medios != '-':
                 platos = platos.filter(medios=medios)
             if categoria and categoria != '-':
@@ -240,6 +241,9 @@ class FiltrarPlatos(LoginRequiredMixin, ListView):
             if calorias and calorias != '-':
                 platos = platos.filter(calorias=calorias)
 
+            if tipo_de_vista=="random-todos" or tipo_de_vista=="random-con-mios":
+                platos = platos.order_by('?')[:4]
+                
             if usuario:
                 platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
 

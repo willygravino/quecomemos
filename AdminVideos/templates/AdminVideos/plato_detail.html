@@ -6,17 +6,21 @@
 
 <div class="album py-5 bg-body-tertiary">
   <div class="container">
-      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+      <!-- <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3"> -->
         <div class="col">
             <div class="card shadow-sm">
               <img class="card-img-top" style="height: 225px; width: 100%; display: block" src="{{plato.image_url}}" data-holder-rendered="true">
               <div class="card-body">
                 <strong><h3>{{ plato.nombre_plato }}</h3></strong>
-                <strong><p class="card-text">{{ plato.ingredientes }}</p></strong>
-                <p class="card-text">{{ plato.descripcion_plato }}</p>
+                <strong><p class="card-text">Ingredientes: {{ plato.ingredientes }}</p></strong>
+                <p class="card-text">Descripción: {{ plato.descripcion_plato }}</p>
                 <p class="card-text">Receta: {{ plato.receta }}</p>
-                <p class="card-text">AGREGAR CAMPO DE URL POR SI LINQUEA A ALGUNA EXPLICACIÓN</p>
-                <h5>Ingredientes:  {{plato.ingredientes}} </h5>
+                <p class="card-text">Medios: {{ plato.medios }}</p>
+                <p class="card-text">Categoría: {{ plato.categoria }}</p>
+                <p class="card-text">Preparación: {{ plato.preparacion }}</p>
+                <p class="card-text">Tipo: {{ plato.tipo }}</p>
+                <p class="card-text">Calorías: {{ plato.calorias }}</p>
+   
                 <p></p>
                 {% if user.id == plato.propietario.id %}
                   <a href="{% url 'videos-delete' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Eliminar</a>
@@ -36,7 +40,7 @@
               </div>
             </div>
         </div>
-      </div>
+      <!-- </div> -->
     </div>
 </div>
 

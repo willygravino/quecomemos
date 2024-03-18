@@ -10,7 +10,8 @@ class PlatoFilterForm(forms.Form):
     preparacion = forms.ChoiceField(choices=Plato.PREPA_CHOICES, required=False)
     tipo = forms.ChoiceField(choices=Plato.TIPO_CHOICES, required=False)
     calorias = forms.ChoiceField(choices=Plato.CALORIAS_CHOICES, required=False)
-    tipo_de_vista = forms.ChoiceField(choices=[('todos', 'Todos'), ('solo-mios', 'Solo mis platos'), ('de-otros', 'Solo platos de otros'), ('preseleccionados', 'Preseleccionados')], required=True)
+    
+    tipo_de_vista = forms.ChoiceField(choices=[('todos', 'Todos'), ('solo-mios', 'Solo mis platos'), ('de-otros', 'Solo platos de otros'), ('preseleccionados', 'Preseleccionados'), ("random-todos", "< Random con todos >"), ("random-con-mios", "< Random con los mios>")], required=True)
     
 
     # def __init__(self, *args, **kwargs):
