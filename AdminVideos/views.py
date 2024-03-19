@@ -193,6 +193,9 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
 class FiltrarPlatos(LoginRequiredMixin, ListView):
     def get(self, request):
         
+        # Obtiene la fecha actual
+        fecha_actual = datetime.now()
+
         tipo_de_vista_estable = request.session.get('tipo_de_vista_estable', "None")
         inicial = "platito"
         
@@ -255,7 +258,8 @@ class FiltrarPlatos(LoginRequiredMixin, ListView):
             'form': form,
             'platos': platos,
             'elegidos': platos_elegidos,
-            "tipo_de_vista_estable" :  tipo_de_vista_estable
+            "tipo_de_vista_estable" :  tipo_de_vista_estable,
+            "fecha_actual": fecha_actual
        }
 
         return render(request, 'AdminVideos/lista_filtrada.html', contexto)

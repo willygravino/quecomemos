@@ -7,9 +7,9 @@
 <section>
 
   {% block filtro %}
-  
+
   {% endblock %}
-<!-- 
+  <!-- 
   <form action="{% url 'random' %}" method="get">
     el token debería usarse solo en formularios POST 
     {% csrf_token %}
@@ -66,101 +66,113 @@
 
 
   <section>
-    <h3> ARMADO DEL MENÚ.</h3>
+    <!-- <h3> ARMADO DEL MENÚ.</h3> -->
 
-
+    <select class="mt-1 btn btn-primary" name="modo-armado">
+      <option value="modo-diario">MODO DIARIO</option>
+      <option value="modo-celebracion">MODO CELEBRACIÓN</option>
+    </select>
+    
     <form action="{% url 'grabar-menu' %}" method="post">
 
       {% csrf_token %}
 
-      <div class="mt-5 btn btn-primary">
-        <h5>Lunes</h5>
+      <div class="mt-2 btn btn-primary">
+        <h5>{{ fecha_actual|date:"d-m-y" }} </h5>
+        
         <select name="lunes-a">
+          <option value="-----">Elegir plato</option>
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
-          <option value="-----">-----</option>
-
         </select>
         <br>
         <select name="lunes-c">
+          <option value="-----">Elegir plato</option>
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
-          <option value="-----">-----</option>
 
         </select>
       </div>
       <br>
 
-      <div class="mt-4 btn btn-primary">
+      <div class="mt-2 btn btn-primary">
         <h5>Martes</h5>
 
         <select name="martes-a">
+          <option value="-----">Elegir plato</option>
+
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
-          <option value="-----">-----</option>
         </select>
         <br>
         <select name="martes-c">
+          <option value="-----">Elegir plato</option>
+
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
-          <option value="-----">-----</option>
 
         </select>
       </div>
       <br>
 
-      <div class="mt-4 btn btn-primary">
+      <div class="mt-2 btn btn-primary">
         <h5>Miércoles</h5>
 
         <select name="miercoles-a">
+          <option value="-----">Elegir plato</option>
+
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
-          <option value="-----">-----</option>
 
         </select>
 
         <br>
         <select name="miercoles-c">
+          <option value="-----">Elegir plato</option>
+
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
-          <option value="-----">-----</option>
 
         </select>
 
       </div>
       <br>
 
-      <div class="mt-5 btn btn-primary">
+      <div class="mt-2 btn btn-primary">
         <h5>Jueves</h5>
 
         <select name="jueves-a">
+          <option value="-----">Elegir plato</option>
+
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
-          <option value="-----">-----</option>
 
         </select>
         <br>
         <select name="jueves-c">
+          <option value="-----">Elegir plato</option>
+
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
-          <option value="-----">-----</option>
 
         </select>
       </div>
       <br>
 
-      <div class="mt-4 btn btn-primary">
+      <div class="mt-2 btn btn-primary">
         <h5>Viernes</h5>
 
         <select name="viernes-a">
+          <option value="-----">Elegir plato</option>
+
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
@@ -172,49 +184,52 @@
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
-          <option value="-----">-----</option>
 
         </select>
       </div>
       <br>
 
-      <div class="mt-5 btn btn-primary">
+      <div class="mt-2 btn btn-primary">
         <h5>Sábado</h5>
 
         <select name="sabado-a">
+          <option value="-----">Elegir plato</option>
+
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
-          <option value="-----">-----</option>
 
         </select>
         <br>
         <select name="sabado-c">
+          <option value="-----">Elegir plato</option>
+
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
-          <option value="-----">-----</option>
 
         </select>
       </div>
       <br>
 
-      <div class="mt-4 btn btn-primary">
+      <div class="mt-2 btn btn-primary">
         <h5>Domingo</h5>
 
         <select name="domingo-a">
+          <option value="-----">Elegir plato</option>
+
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
-          <option value="-----">-----</option>
 
         </select>
         <br>
         <select name="domingo-c">
+          <option value="-----">Elegir plato</option>
+
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
-          <option value="-----">-----</option>
 
         </select>
 

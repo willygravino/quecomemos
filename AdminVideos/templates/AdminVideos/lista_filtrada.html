@@ -5,8 +5,15 @@
 {% block filtro %}
   <form method="GET">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Filtrar</button>
+    <ul class="font-weight-bold text-primary">
+      <h4>Medios: {{ form.medios }}</h4> <br>
+      <h7>Categoría: {{ form.categoria }}</h7><br>
+      <h4>Preparación: {{ form.preparacion }}</h4><br>
+      <h3>Tipo: {{ form.tipo }}</h3><br>
+  </ul>
+  <h9>Tipo de vista: {{ form.tipo_de_vista }} </h6>
+    <br>
+    <button  type="submit" class="btn btn-primary">Filtrar</button>
 </form>
 
 {% endblock %}

@@ -106,12 +106,21 @@ class Plato(models.Model):
     
 class Elegidos(models.Model):
     usuario = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="platos_elegidos", null=True, blank=True)
-    nombre_plato_elegido = models.CharField(max_length=30)
+    # EL SIGUIENTE CAMPO DEBERÍA LLAMARSE "PLATOS_PRESELECCIONADOS"
+    nombre_plato_elegido = models.CharField(max_length=30) 
+  
     # usuario = models.OneToOneField(to=User, on_delete=models.CASCADE, related_name="platos_elegidos", null=True, blank=True)
+
+class PlatosSeleccionados(models.Model):
+    usuario_seleccionados = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="platos_seleccionados", null=True, blank=True)
+    nombre_plato_seleccionado = models.CharField(max_length=30) 
+    fecha_seleccion_del_plato = models.DateTimeField()
+
+    def __str__(self):
+       return f'{self.nombre_plato_seleccionado} - {self.fecha_seleccion_del_plato}'
 
 class ElegidosXSemana(models.Model):
     elegidos_por_semana = models.JSONField(null=True, blank=True)
-
 
     def __str__(self):
          return f'Menu Elegido {self.id}' 
