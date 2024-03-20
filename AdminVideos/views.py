@@ -1,6 +1,6 @@
 from contextvars import Context
 from django.shortcuts import render, redirect
-from AdminVideos.models import Plato, Profile, Mensaje, Elegidos, ElegidosXSemana
+from AdminVideos.models import Plato, Profile, Mensaje, Elegidos, ElegidosXSemana, Sugeridos
 from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.contrib.auth.forms import UserCreationForm
@@ -190,11 +190,18 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
     def test_func(self):
         return Profile.objects.filter(user=self.request.user).exists()
     
+# que pasa si a continuación agrego ModelForm? qué es esa clase???   
+
 class FiltrarPlatos(LoginRequiredMixin, ListView):
+
+   
     def get(self, request):
-        
+
+        borrar_sugeribles = request.GET.get('borrar-lista-sugeribles')
+    
         # Obtiene la fecha actual
         fecha_actual = datetime.now()
+        cantidad_platos_sugeribles = 0
 
         tipo_de_vista_estable = request.session.get('tipo_de_vista_estable', "None")
         inicial = "platito"
@@ -210,7 +217,10 @@ class FiltrarPlatos(LoginRequiredMixin, ListView):
         usuario = self.request.user
         platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
         # Obtener el valor de tipo_de_vista de la sesión si existe, de lo contrario, establecerlo en "None"
-       
+
+        if borrar_sugeribles=="borrar-sugeribles":
+            Sugeridos.objects.filter(usuario_de_sugeridos=usuario).delete()
+
         if form.is_valid():
             tipo_de_vista = form.cleaned_data.get('tipo_de_vista')
             medios = form.cleaned_data.get('medios')
@@ -221,7 +231,6 @@ class FiltrarPlatos(LoginRequiredMixin, ListView):
 
             # if tipo_de_vista_estable!="None":
             #     tipo_de_vista = tipo_de_vista_estable
-
                  
             if tipo_de_vista == 'solo-mios' or tipo_de_vista=="random-con-mios":
                  platos = platos.filter(propietario_id=self.request.user.id)
@@ -245,21 +254,36 @@ class FiltrarPlatos(LoginRequiredMixin, ListView):
                 platos = platos.filter(calorias=calorias)
 
             if tipo_de_vista=="random-todos" or tipo_de_vista=="random-con-mios":
+                # Obtén los platos sugeridos asociados al usuario logueado
+                platos_sugeridos_usuario = Sugeridos.objects.filter(usuario_de_sugeridos=usuario).values_list('nombre_plato_sugerido', flat=True)
+                # Excluye los platos sugeridos de la lista general de platos
+                platos = platos.exclude(nombre_plato__in=platos_sugeridos_usuario)
+                cantidad_platos_sugeribles = platos.count()
                 platos = platos.order_by('?')[:4]
-                
+                # Obtiene los primeros cuatro platos de la lista
+                platos_sugeridos = platos[:4]
+                # Crea y guarda una instancia de Sugeridos para cada uno de los primeros platos
+                for plato in platos_sugeridos:
+                    Sugeridos.objects.get_or_create(usuario_de_sugeridos=usuario, nombre_plato_sugerido=plato.nombre_plato)
+                 
             if usuario:
                 platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
 
            # Guardar el valor de tipo_de_vista en la sesión
             request.session['tipo_de_vista_estable'] =  tipo_de_vista
             tipo_de_vista_estable = tipo_de_vista
+        # Obtén el número de platos sugeridos para el usuario actual
+        cantidad_platos_sugeridos = Sugeridos.objects.filter(usuario_de_sugeridos=usuario).count()
+
 
         contexto = {
             'form': form,
             'platos': platos,
             'elegidos': platos_elegidos,
             "tipo_de_vista_estable" :  tipo_de_vista_estable,
-            "fecha_actual": fecha_actual
+            "fecha_actual": fecha_actual,
+            "cantidad_platos_sugeridos": cantidad_platos_sugeridos,
+            "cantidad_platos_sugeribles": cantidad_platos_sugeribles
        }
 
         return render(request, 'AdminVideos/lista_filtrada.html', contexto)
