@@ -3,3 +3,5 @@ Django==5.0.3
 gunicorn==21.2.0
 packaging==24.0
 sqlparse==0.4.4
+
+dj_database_url==0.5.0

@@ -12,13 +12,8 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 
-import os
-
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 # Quick-start development settings - unsuitable for production
@@ -30,16 +25,7 @@ SECRET_KEY = 'django-insecure-ff(ii27o)5bnj*cy5l6bz1hr=hecla%@rxat^zg8g*&6z&e1dx
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-
-# # fly io
-
-APP_NAME = os.environ.get("FLY_APP_NAME")
-ALLOWED_HOSTS = [f"{APP_NAME}.fly.dev",
-                 "127.0.0.1"                 
-                 ]  # ← Updated!
-
-# ALLOWED_HOSTS = []
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -52,11 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'AdminVideos',
-   # 'embed_video'
+    'embed_video'
 ]
-
-# CORS_ALLOW_ALL_ORIGINS = True  # Permitir todas las solicitudes de origen
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -66,12 +49,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
- ]
-
-CORS_ALLOWED_ORIGINS = [
-     'https://quecomemos-old-breeze-2782.fly.dev',
-     'https://quecomemos-old-breeze-2782.fly.dev/login'
- ]
+]
 
 ROOT_URLCONF = 'nuestrotubo.urls'
 
@@ -98,22 +76,12 @@ WSGI_APPLICATION = 'nuestrotubo.wsgi.application'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-     'default': {
-         'ENGINE': 'django.db.backends.sqlite3',
-         'NAME': BASE_DIR / 'db.sqlite3',
-     }
- }
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
-# Directorio en el volumen persistente donde se almacenará la base de datos SQLite AGREGADO!!!!!
-# VOLUME_DIR = '/mnt/basesqliteflyio'  # Reemplaza 'nombre_del_volumen' con el nombre de tu volumen
-
-# Configuración de la base de datos
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(VOLUME_DIR, 'db.sqlite3'),
-#     }
-# }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -161,7 +129,4 @@ MEDIA_ROOT = str(Path(BASE_DIR) / 'media')
 MEDIA_URL = '/media/'
 
 LOGIN_URL = "index"
-
-
-
 

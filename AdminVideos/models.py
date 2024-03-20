@@ -111,13 +111,16 @@ class Elegidos(models.Model):
   
     # usuario = models.OneToOneField(to=User, on_delete=models.CASCADE, related_name="platos_elegidos", null=True, blank=True)
 
-class PlatosSeleccionados(models.Model):
-    usuario_seleccionados = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="platos_seleccionados", null=True, blank=True)
-    nombre_plato_seleccionado = models.CharField(max_length=30) 
-    fecha_seleccion_del_plato = models.DateTimeField()
+# class Sugeridos(models.Model):
+#     usuario_seleccionados = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+#     nombre_plato_seleccionado = models.CharField(max_length=30) 
+#     fecha_seleccion_del_plato = models.DateTimeField()
 
-    def __str__(self):
-       return f'{self.nombre_plato_seleccionado} - {self.fecha_seleccion_del_plato}'
+#     def __str__(self):
+# #        return f'{self.nombre_plato_seleccionado} - {self.fecha_seleccion_del_plato}'
+    
+# #     Uso de ForeignKey: En tus modelos PlatosSeleccionados y Elegidos, estás usando ForeignKey a User. Si estos modelos están relacionados con el usuario autenticado, considera usar OneToOneField en lugar de ForeignKey para garantizar que solo haya una instancia por usuario.
+# En este ejemplo, el campo usuario en el modelo PerfilUsuario es un OneToOneField que apunta al modelo de usuario predeterminado de Django (User). Esto significa que cada instancia de PerfilUsuario está asociada a exactamente una instancia de User, y viceversa. La opción on_delete=models.CASCADE especifica que si se elimina el usuario, también se eliminará automáticamente su perfil de usuario asociado.
 
 class ElegidosXSemana(models.Model):
     elegidos_por_semana = models.JSONField(null=True, blank=True)
