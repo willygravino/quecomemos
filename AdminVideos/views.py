@@ -190,101 +190,199 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
     def test_func(self):
         return Profile.objects.filter(user=self.request.user).exists()
     
-# que pasa si a continuación agrego ModelForm? qué es esa clase???   
+# que pasa si a continuación agrego ModelForm? qué es esa clase??? 
+
+def FiltroDePlatos (request):
+
+    # Obtiene la fecha actual
+    fecha_actual = datetime.now()
+    cantidad_platos_sugeribles = 0
+    tipo_de_vista_estable = request.session.get('tipo_de_vista_estable', "None")
+    platos = Plato.objects.all()
+    usuario = request.user
+    cantidad_platos_sugeridos = 0
+    tipo_de_vista = tipo_de_vista_estable
+
+
+    platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
+
+    medios = "-"
+    categoria = "-"
+    preparacion = "-"
+    tipo = "-"
+    calorias = "-"
+
+    if request.method == "POST":
+            form = PlatoFilterForm(request.POST)
+           
+            if form.is_valid():
+                tipo_de_vista = form.cleaned_data.get('tipo_de_vista')
+                medios = form.cleaned_data.get('medios')
+                categoria = form.cleaned_data.get('categoria')
+                preparacion = form.cleaned_data.get('preparacion')
+                tipo = form.cleaned_data.get('tipo')
+                calorias = form.cleaned_data.get('calorias')
+
+                # Guardar el valor de tipo_de_vista en la sesión
+                request.session['tipo_de_vista_estable'] =  tipo_de_vista
+                tipo_de_vista_estable = tipo_de_vista
+
+            # contexto = {
+            #     'form': form,
+            #     'platos': platos,
+            #     'elegidos': platos_elegidos,
+            #     "tipo_de_vista_estable" :  tipo_de_vista_estable,
+            #     "fecha_actual": fecha_actual,
+            #     "cantidad_platos_sugeridos": cantidad_platos_sugeridos,
+            #     "cantidad_platos_sugeribles": cantidad_platos_sugeribles
+            #    } 
+    else: 
+        form = PlatoFilterForm({'tipo_de_vista': tipo_de_vista_estable})
+                    
+    if tipo_de_vista == 'solo-mios' or tipo_de_vista=="random-con-mios":
+        platos = platos.filter(propietario_id=request.user.id)
+
+    if tipo_de_vista == 'de-otros':
+        platos =  platos.exclude(propietario_id=request.user.id)
+
+    if tipo_de_vista == 'preseleccionados':
+        nombres_platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
+        platos = platos.filter(nombre_plato__in=nombres_platos_elegidos)    
+                            
+    if medios and medios != '-':
+        platos = platos.filter(medios=medios)
+    if categoria and categoria != '-':
+                    platos = platos.filter(categoria=categoria)
+    if preparacion and preparacion != '-':
+        platos = platos.filter(preparacion=preparacion)
+    if tipo and tipo != '-':
+        platos = platos.filter(tipo=tipo)
+    if calorias and calorias != '-':
+        platos = platos.filter(calorias=calorias)
+
+    if tipo_de_vista=="random-todos" or tipo_de_vista=="random-con-mios":
+        # Obtén los platos sugeridos asociados al usuario logueado
+        platos_sugeridos_usuario = Sugeridos.objects.filter(usuario_de_sugeridos=usuario).values_list('nombre_plato_sugerido', flat=True)
+        # Excluye los platos sugeridos de la lista general de platos
+        platos = platos.exclude(nombre_plato__in=platos_sugeridos_usuario)
+        cantidad_platos_sugeribles = platos.count()
+        platos = platos.order_by('?')[:4]
+        # Obtiene los primeros cuatro platos de la lista
+        platos_sugeridos = platos[:4]
+        # Crea y guarda una instancia de Sugeridos para cada uno de los primeros platos
+        for plato in platos_sugeridos:
+            Sugeridos.objects.get_or_create(usuario_de_sugeridos=usuario, nombre_plato_sugerido=plato.nombre_plato)
+                    
+    if usuario:
+        platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
+
+        
+# Obtén el número de platos sugeridos para el usuario actual
+    cantidad_platos_sugeridos = Sugeridos.objects.filter(usuario_de_sugeridos=usuario).count()
+
+    contexto = {
+                'form': form,
+                'platos': platos,
+                'elegidos': platos_elegidos,
+                "tipo_de_vista_estable" :  tipo_de_vista_estable,
+                "fecha_actual": fecha_actual,
+                "cantidad_platos_sugeridos": cantidad_platos_sugeridos,
+                "cantidad_platos_sugeribles": cantidad_platos_sugeribles
+               } 
+
+    return render(request, 'AdminVideos/lista_filtrada.html', contexto)
+
 
 class FiltrarPlatos(LoginRequiredMixin, ListView):
 
-   
-    def get(self, request):
+   def get(self, request):
 
         borrar_sugeribles = request.GET.get('borrar-lista-sugeribles')
     
         # Obtiene la fecha actual
         fecha_actual = datetime.now()
+
         cantidad_platos_sugeribles = 0
 
         tipo_de_vista_estable = request.session.get('tipo_de_vista_estable', "None")
-        inicial = "platito"
-        
-        data = {
-            "nombre_plato": inicial,
-                }
- 
-        # NO ENTIENDO POR QUÉ NO FUNCIONA INITIAL, PROBÉ DE TODO / tipo_de_vista_estable ESTÁ LISTA PARA ADJUDICARSE 
-        form = PlatoFilterForm(self.request.GET, initial=data)
-        # form = PlatoFilterForm(request.GET, tipo_de_vista_estable=tipo_de_vista_estable)
-        platos = Plato.objects.all()
-        usuario = self.request.user
-        platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
-        # Obtener el valor de tipo_de_vista de la sesión si existe, de lo contrario, establecerlo en "None"
+   
+    
+        if request.method == "GET":
+            form = PlatoFilterForm(self.request.GET)
+            platos = Plato.objects.all()
+            usuario = self.request.user
+            platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
+            # Obtener el valor de tipo_de_vista de la sesión si existe, de lo contrario, establecerlo en "None"
 
-        if borrar_sugeribles=="borrar-sugeribles":
-            Sugeridos.objects.filter(usuario_de_sugeridos=usuario).delete()
+            if borrar_sugeribles=="borrar-sugeribles":
+                Sugeridos.objects.filter(usuario_de_sugeridos=usuario).delete()
 
-        if form.is_valid():
-            tipo_de_vista = form.cleaned_data.get('tipo_de_vista')
-            medios = form.cleaned_data.get('medios')
-            categoria = form.cleaned_data.get('categoria')
-            preparacion = form.cleaned_data.get('preparacion')
-            tipo = form.cleaned_data.get('tipo')
-            calorias = form.cleaned_data.get('calorias')
+            if form.is_valid():
+                tipo_de_vista = form.cleaned_data.get('tipo_de_vista')
+                medios = form.cleaned_data.get('medios')
+                categoria = form.cleaned_data.get('categoria')
+                preparacion = form.cleaned_data.get('preparacion')
+                tipo = form.cleaned_data.get('tipo')
+                calorias = form.cleaned_data.get('calorias')
 
-            # if tipo_de_vista_estable!="None":
-            #     tipo_de_vista = tipo_de_vista_estable
-                 
-            if tipo_de_vista == 'solo-mios' or tipo_de_vista=="random-con-mios":
-                 platos = platos.filter(propietario_id=self.request.user.id)
+                # if tipo_de_vista_estable!="None":
+                #     tipo_de_vista = tipo_de_vista_estable
+                    
+                if tipo_de_vista == 'solo-mios' or tipo_de_vista=="random-con-mios":
+                    platos = platos.filter(propietario_id=self.request.user.id)
 
-            if tipo_de_vista == 'de-otros':
-                platos =  platos.exclude(propietario_id=self.request.user.id)
+                if tipo_de_vista == 'de-otros':
+                    platos =  platos.exclude(propietario_id=self.request.user.id)
 
-            if tipo_de_vista == 'preseleccionados':
-                nombres_platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
-                platos = platos.filter(nombre_plato__in=nombres_platos_elegidos)    
-                         
-            if medios and medios != '-':
-                platos = platos.filter(medios=medios)
-            if categoria and categoria != '-':
-                platos = platos.filter(categoria=categoria)
-            if preparacion and preparacion != '-':
-                platos = platos.filter(preparacion=preparacion)
-            if tipo and tipo != '-':
-                platos = platos.filter(tipo=tipo)
-            if calorias and calorias != '-':
-                platos = platos.filter(calorias=calorias)
+                if tipo_de_vista == 'preseleccionados':
+                    nombres_platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
+                    platos = platos.filter(nombre_plato__in=nombres_platos_elegidos)    
+                            
+                if medios and medios != '-':
+                    platos = platos.filter(medios=medios)
+                if categoria and categoria != '-':
+                    platos = platos.filter(categoria=categoria)
+                if preparacion and preparacion != '-':
+                    platos = platos.filter(preparacion=preparacion)
+                if tipo and tipo != '-':
+                    platos = platos.filter(tipo=tipo)
+                if calorias and calorias != '-':
+                    platos = platos.filter(calorias=calorias)
 
-            if tipo_de_vista=="random-todos" or tipo_de_vista=="random-con-mios":
-                # Obtén los platos sugeridos asociados al usuario logueado
-                platos_sugeridos_usuario = Sugeridos.objects.filter(usuario_de_sugeridos=usuario).values_list('nombre_plato_sugerido', flat=True)
-                # Excluye los platos sugeridos de la lista general de platos
-                platos = platos.exclude(nombre_plato__in=platos_sugeridos_usuario)
-                cantidad_platos_sugeribles = platos.count()
-                platos = platos.order_by('?')[:4]
-                # Obtiene los primeros cuatro platos de la lista
-                platos_sugeridos = platos[:4]
-                # Crea y guarda una instancia de Sugeridos para cada uno de los primeros platos
-                for plato in platos_sugeridos:
-                    Sugeridos.objects.get_or_create(usuario_de_sugeridos=usuario, nombre_plato_sugerido=plato.nombre_plato)
-                 
-            if usuario:
-                platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
+                if tipo_de_vista=="random-todos" or tipo_de_vista=="random-con-mios":
+                    # Obtén los platos sugeridos asociados al usuario logueado
+                    platos_sugeridos_usuario = Sugeridos.objects.filter(usuario_de_sugeridos=usuario).values_list('nombre_plato_sugerido', flat=True)
+                    # Excluye los platos sugeridos de la lista general de platos
+                    platos = platos.exclude(nombre_plato__in=platos_sugeridos_usuario)
+                    cantidad_platos_sugeribles = platos.count()
+                    platos = platos.order_by('?')[:4]
+                    # Obtiene los primeros cuatro platos de la lista
+                    platos_sugeridos = platos[:4]
+                    # Crea y guarda una instancia de Sugeridos para cada uno de los primeros platos
+                    for plato in platos_sugeridos:
+                        Sugeridos.objects.get_or_create(usuario_de_sugeridos=usuario, nombre_plato_sugerido=plato.nombre_plato)
+                    
+                if usuario:
+                    platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
 
-           # Guardar el valor de tipo_de_vista en la sesión
-            request.session['tipo_de_vista_estable'] =  tipo_de_vista
-            tipo_de_vista_estable = tipo_de_vista
-        # Obtén el número de platos sugeridos para el usuario actual
-        cantidad_platos_sugeridos = Sugeridos.objects.filter(usuario_de_sugeridos=usuario).count()
+            # Guardar el valor de tipo_de_vista en la sesión
+                request.session['tipo_de_vista_estable'] =  tipo_de_vista
+                tipo_de_vista_estable = tipo_de_vista
+            # Obtén el número de platos sugeridos para el usuario actual
+            cantidad_platos_sugeridos = Sugeridos.objects.filter(usuario_de_sugeridos=usuario).count()
 
+            contexto = {
+                'form': form,
+                'platos': platos,
+                'elegidos': platos_elegidos,
+                "tipo_de_vista_estable" :  tipo_de_vista_estable,
+                "fecha_actual": fecha_actual,
+                "cantidad_platos_sugeridos": cantidad_platos_sugeridos,
+                "cantidad_platos_sugeribles": cantidad_platos_sugeribles
+               } 
+        else: 
+         form = PlatoFilterForm({'medios': 'horno'})
 
-        contexto = {
-            'form': form,
-            'platos': platos,
-            'elegidos': platos_elegidos,
-            "tipo_de_vista_estable" :  tipo_de_vista_estable,
-            "fecha_actual": fecha_actual,
-            "cantidad_platos_sugeridos": cantidad_platos_sugeridos,
-            "cantidad_platos_sugeribles": cantidad_platos_sugeribles
-       }
 
         return render(request, 'AdminVideos/lista_filtrada.html', contexto)
 

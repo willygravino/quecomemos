@@ -3,16 +3,15 @@
 {% load static %}
 
 {% block filtro %}
-  <form method="GET">
+  <form method="POST">
     {% csrf_token %}
-    <ul class="font-weight-bold text-primary">
-      <h4>Medios: {{ form.medios }}</h4> <br>
-      <h7>Categoría: {{ form.categoria }}</h7><br>
-      <h4>Preparación: {{ form.preparacion }}</h4><br>
-      <h3>Tipo: {{ form.tipo }}</h3><br>
+    <ul >
+      <p>Medios: {{ form.medios }}</p> 
+      <p>Categoría: {{ form.categoria }}</p> 
+      <p>Preparación: {{ form.preparacion }}</p> 
+      <p>Tipo: {{ form.tipo }}</p> 
   </ul>
-  <h9>Tipo de vista: {{ form.tipo_de_vista }} </h6>
-    <br>
+  <p>Tipo de vista: {{ form.tipo_de_vista }} </p> 
     <button  type="submit" class="btn btn-primary">Filtrar</button>
 </form>
 

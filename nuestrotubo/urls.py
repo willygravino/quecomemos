@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from AdminVideos.views import index, PlatoUpdate, PlatoDelete, PlatoCreate, Login, Logout, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, plato_elegido, grabar_menu_elegido, MenuElegido, FiltrarPlatos, SugerenciasRandom # VistaInicial ,MensajeCreate, MensajeList, MensajeDelete, PlatoList, PlatosMineList, PlatosElegidosMenu, elecion_de_lista, PlatosDeOtros,
+from AdminVideos.views import index, PlatoUpdate, PlatoDelete, PlatoCreate, Login, Logout, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, plato_elegido, grabar_menu_elegido, MenuElegido, FiltrarPlatos, SugerenciasRandom, FiltroDePlatos # VistaInicial ,MensajeCreate, MensajeList, MensajeDelete, PlatoList, PlatosMineList, PlatosElegidosMenu, elecion_de_lista, PlatosDeOtros,
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -29,7 +29,7 @@ urlpatterns = [
     path('menu/random', SugerenciasRandom.as_view(), name="random"),
 
     # path('videos/inicial', VistaInicial.as_view(), name="vista-inicial"),
-    path('videos/list/filtro', FiltrarPlatos.as_view(), name="filtro-de-platos"),
+    path('videos/list/filtro', FiltroDePlatos, name="filtro-de-platos"),
     path('videos/<pk>/update', PlatoUpdate.as_view(), name="videos-update"),
     path('videos/<pk>/delete', PlatoDelete.as_view(), name="videos-delete"),
     path('videos/<pk>/detail', PlatoDetail.as_view(), name="videos-detail"),
