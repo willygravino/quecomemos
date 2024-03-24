@@ -24,7 +24,7 @@
   <h6>CANTIDAD DE PLATOS SUGERIDOS {{ cantidad_platos_sugeridos }}</h6>
   <h6>CANTIDAD SUGERIBLES SEGUN FILTRO {{ cantidad_platos_sugeribles }}</h6>
   
-  <form action="{% url 'filtro-de-platos' %}" method="GET">
+  <form action="{% url 'reiniciar-sugeridos' %}" method="GET">
     <input type="checkbox" id="borrar-sugeribles" name="borrar-lista-sugeribles" value="borrar-sugeribles" checked>
     <button type="submit">Reiniciar sugeribles</button>
   </form>

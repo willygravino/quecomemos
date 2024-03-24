@@ -15,7 +15,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from AdminVideos.views import index, PlatoUpdate, PlatoDelete, PlatoCreate, Login, Logout, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, plato_elegido, grabar_menu_elegido, MenuElegido, FiltrarPlatos, SugerenciasRandom, FiltroDePlatos # VistaInicial ,MensajeCreate, MensajeList, MensajeDelete, PlatoList, PlatosMineList, PlatosElegidosMenu, elecion_de_lista, PlatosDeOtros,
+from django.contrib.auth.views import LogoutView
+
+from AdminVideos.views import index, PlatoUpdate, PlatoDelete, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, plato_elegido, grabar_menu_elegido, MenuElegido,SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, user_logout # VistaInicial ,Logout, MensajeCreate, MensajeList, MensajeDelete, PlatoList, PlatosMineList, PlatosElegidosMenu, elecion_de_lista, PlatosDeOtros,, LogtViews
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -27,15 +29,18 @@ urlpatterns = [
     path('plato/grabar', grabar_menu_elegido, name="grabar-menu"),
     path('menu/elegido', MenuElegido.as_view(), name="menu-elegido"),
     path('menu/random', SugerenciasRandom.as_view(), name="random"),
-
     # path('videos/inicial', VistaInicial.as_view(), name="vista-inicial"),
     path('videos/list/filtro', FiltroDePlatos, name="filtro-de-platos"),
+    path('videos/reiniciar/sugeridos', reiniciar_sugeridos, name="reiniciar-sugeridos"),
     path('videos/<pk>/update', PlatoUpdate.as_view(), name="videos-update"),
     path('videos/<pk>/delete', PlatoDelete.as_view(), name="videos-delete"),
     path('videos/<pk>/detail', PlatoDetail.as_view(), name="videos-detail"),
     path('videos/create', PlatoCreate.as_view(), name="videos-create"),
     path('login', Login.as_view(), name="login"),
-    path('logout', Logout.as_view(), name="logout"),
+    path('registration/logout/', user_logout, name='logout'),
+
+    # path('registration/logout/', LogoutView.as_view(), name='logout'),
+    # path('logout', Logout.as_view(), name="logout"),
     path('signup', SignUp.as_view(), name="signup"),
     path('perfil/crear', ProfileCreate.as_view(), name="profile-create"),
     path('profile/<pk>/update', ProfileUpdate.as_view(), name="profile-update"),
