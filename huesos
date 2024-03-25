@@ -1,0 +1,25 @@
+<!-- 
+{% block titulo_ok %}
+      <h1 class="fw-light"> Esto  s son los platos  blabla  que  cargaste. </h1>
+{% endblock %} -->
+
+<!-- 
+
+{% block titulo_ok %}
+   <h1 class="fw-light"> Estos son los platos que coinciden con tu búsqueda. </h1>
+{% endblock %} -->
+
+
+{% block mensaje %}
+        <h1 class="fw-light"> Aún no publicas BLA BLA te ningún plato. </h1>
+        <p class="lead text-body-secondary">Para ingresar platos y compart BLA BLA irlos con la comunidad de qué comemos, cargá la receta de esos platos ingresando a agregar plato.</p>
+ {% endblock %}  
+
+
+ {% if tipo_de_vista_estable == "random-todos" or tipo_de_vista_estable == "random-con-mios"%}
+     
+ <form action="{% url 'reiniciar-sugeridos' %}" method="GET">
+   <input type="checkbox" id="borrar-sugeribles" name="borrar-lista-sugeribles" value="borrar-sugeribles" checked>        
+   <button type="submit">Reiniciar sugeribles</button>
+ </form>
+{% endif %}
