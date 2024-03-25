@@ -96,6 +96,8 @@ class Plato(models.Model):
     propietario = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="propietario")
     image = models.ImageField("Subí una imagen que identifique al plato (o un fotograma del mismo)", upload_to="videos/", null=True, blank=True)
     # fecha_video= models.DateTimeField("Fecha de captura del video:")
+    variedades = models.JSONField(null=True, blank=True)
+
 
     @property
     def image_url(self):

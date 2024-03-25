@@ -23,3 +23,73 @@
    <button type="submit">Reiniciar sugeribles</button>
  </form>
 {% endif %}
+
+<p>Propietario: {{ form.propietario }}</p>
+
+   <p>Medios de cocción:
+        <select name="medios">
+          <!-- <option value="">- Seleccione -</option> -->
+          {% for choice in form.medios.field.choices %}
+          <option value="{{ choice.0 }}" {% if choice.0==form.initial.medios %}selected{% endif %}>{{ choice.1 }}
+          </option>
+          {% endfor %}
+        </select>
+      </p>
+
+
+
+
+      <select name="medios">
+        <option value="">- Seleccione -</option> 
+          {% for choice in form.medios.field.choices %}
+          <option value="{{ choice.0 }}" {% if choice.0==form.initial.medios %} selected {% endif %}>{{ choice.1 }}
+          </option>
+          {% endfor %}
+        </select>
+      </p>
+      <p>Categoría:
+        <select name="categoria">
+          <option value="" {% if form.initial.categoria=='' %}selected{% endif %}>- Seleccione -</option>
+          {% for choice in form.categoria.field.choices %}
+          <option value="{{ choice.0 }}" {% if choice.0==form.initial.categoria %}selected{% endif %}>{{ choice.1 }}
+          </option>
+          {% endfor %}
+        </select>
+      </p>
+
+      <p>Preparación:
+        <select name="preparacion">
+          <option value="">- Seleccione -</option>
+          {% for choice in form.preparacion.field.choices %}
+          <option value="{{ choice.0 }}" {% if choice.0==form.initial.preparacion %}selected{% endif %}>{{ choice.1 }}
+          </option>
+          {% endfor %}
+        </select>
+      </p>
+
+<!-- lo que no funcionaba en plato_form -->
+      <p>Tipo:
+        <select name="tipo">
+          <option value="">- Seleccione -</option>
+          {% for choice in form.tipo.field.choices %}
+          <option value="{{ choice.0 }}" {% if choice.0==form.initial.tipo %}selected{% endif %}>{{ choice.1 }}</option>
+          {% endfor %}
+        </select>
+      </p>
+
+      <p>Calorías:
+        <select name="calorias">
+          <option value="">- Seleccione -</option>
+          {% for choice in form.calorias.field.choices %}
+          <option value="{{ choice.0 }}" {% if choice.0==form.initial.calorias %}selected{% endif %}>{{ choice.1 }}
+          </option>
+          {% endfor %}
+        </select>
+      </p>
+      <p>Imagen: {{ form.image }}</p>
+      <p>Variedades: {{ form.variedades }}</p>
+      <button type="submit">Guardar</button>
+    </form>
+
+
+    <p> form.medios {{ form.medios }} </p>

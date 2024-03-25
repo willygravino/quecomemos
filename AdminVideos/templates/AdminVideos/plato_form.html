@@ -16,14 +16,36 @@
 </div>
 
 <div style="margin-top:40px">
-  <form method="post" enctype="multipart/form-data">
-    <center>
-      <p>
-        {% csrf_token %}
-        {{form.as_p}}
-        <input type="submit" value="Actualizar">
-      </p>
-    </center>
-  </form>
+  <center>
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <p>Nombre del Plato: {{ form.nombre_plato }}</p>
+      <p>Receta: {{ form.receta }}</p>
+      <p>Descripción del Plato: {{ form.descripcion_plato }}</p>
+      <p>Ingredientes: {{ form.ingredientes }}</p>
+      <p>Medios de cocción:
+        {{ form.medios }} </p>
+      <p>Categoría:
+
+        {{ form.categoria }} </p>
+      <p>Preparación:
+        {{ form.preparacion }} </p>
+      <p>Calorías:
+
+        {{ form.calorias }} </p>
+
+      <p>Variedades: {{ form.variedades }}</p>
+      <p>Imagen: {{ form.image }}</p>
+      <button type="submit">Guardar</button>
+    </form>
+
+
+
+
+
+
+
+  </center>
 </div>
 {% endblock %}

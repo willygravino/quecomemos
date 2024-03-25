@@ -1,0 +1,25 @@
+
+{% extends "AdminVideos/video_list_base.html" %}
+
+{% load static %}
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div id="variedades-container">
+        <input type="text" name="variedades" class="variedades-input">
+    </div>
+    <button type="button" id="add-variedad">Agregar Variedad</button>
+    <button type="submit">Guardar</button>
+</form>
+
+<script>
+    document.getElementById('add-variedad').addEventListener('click', function() {
+        var container = document.getElementById('variedades-container');
+        var input = document.createElement('input');
+        input.type = 'text';
+        input.name = 'variedades';
+        input.className = 'variedades-input';
+        container.appendChild(input);
+    });
+</script>

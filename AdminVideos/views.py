@@ -128,7 +128,7 @@ class PlatoDetail(DetailView):
 class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Plato
     success_url = reverse_lazy("filtro-de-platos")
-    fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria","tipo","calorias","image"]
+    fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria", "preparacion","tipo","calorias","variedades", "image"]
 
     def test_func(self):
         user_id = self.request.user.id
@@ -149,11 +149,12 @@ class PlatoDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 class PlatoCreate(LoginRequiredMixin, CreateView):
     model = Plato
     success_url = reverse_lazy("filtro-de-platos")
-    fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria","preparacion", "tipo","calorias","image"]
+    fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria","preparacion", "tipo","calorias", "variedades", "image"]
 #    fields = '__all__'
 
     def form_valid(self, form):
         el_propietario = form.save(commit=False)
+        # AQUI SE PUEDE INTERVENIR, SEGÚN GPT
         el_propietario.propietario = self.request.user
         el_propietario.save()
         return redirect(self.success_url)
@@ -172,10 +173,6 @@ def user_logout(request):
     logout(request)
     return render(request, 'registration/logout.html', {})
 
-# class Logout(LogoutView):
-#     template_name = "registration/logout.html"
-
-
 class ProfileCreate(LoginRequiredMixin, CreateView):
     model = Profile
     success_url = reverse_lazy("filtro-de-platos")
@@ -186,7 +183,7 @@ class ProfileCreate(LoginRequiredMixin, CreateView):
         el_user.user = self.request.user
         el_user.save()
         return redirect(self.success_url)
-
+    
 
 class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
     model = Profile
@@ -196,7 +193,11 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
     def test_func(self):
         return Profile.objects.filter(user=self.request.user).exists()
     
-# que pasa si a continuación agrego ModelForm? qué es esa clase??? 
+
+# def pagina_inicial():
+#     PlatoFilterForm({"medios":"horno"})
+#     return redirect(reverse_lazy('filtro-de-platos'))
+
 
 def FiltroDePlatos (request):
 
@@ -213,18 +214,22 @@ def FiltroDePlatos (request):
     calorias = request.session.get('calorias_estable', "None")
 
     items_iniciales = ""
+    # items_iniciales = {
+    #                     'tipo_de_vista_estable': tipo_de_vista_estable,
+    #                     'medios_estable': "cocina",
+    #                     'categoria_estable': categoria, # OJO QUE ESTA FUNCIONA SIN NECESIDAD DE USAR "_ESTABLE, ESTOY DERROCHANDO VARIABLES ESTABLES (seguire usando así)?"
+    #                     'preparacion_estable': preparacion,
+    #                     'tipo_estable': tipo,
+    #                     'calorias_estable': calorias
+    #                 }
 
     platos = Plato.objects.all()
     usuario = request.user
     cantidad_platos_sugeridos = 0
     platos_a_sugerir = ""
-    platos_tras_sugerir = ""
     tipo_de_vista = tipo_de_vista_estable
 
-
     platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
-
-    
 
     if request.method == "POST":
             form = PlatoFilterForm(request.POST)
@@ -250,11 +255,7 @@ def FiltroDePlatos (request):
                 tipo_estable = tipo
                 request.session['calorias_estable'] = calorias
                 calorias_estable = calorias
-                # request.session['categoria_estable'] = categoria
-                # request.session['preparacion_estable'] = preparacion
-                # request.session['tipo_estable'] = tipo
-                # request.session ['calorias_estable', "None"] = calorias
-
+            
                 items_iniciales = {
                         'tipo_de_vista_estable': tipo_de_vista_estable,
                         'medios_estable': medios_estable,
@@ -321,7 +322,6 @@ def FiltroDePlatos (request):
                 "cantidad_platos_sugeridos": cantidad_platos_sugeridos,
                 "cantidad_platos_sugeribles": cantidad_platos_sugeribles,
                 "platos_a_sugerir":  platos_a_sugerir,
-                "platos_tras_sugerir": platos_tras_sugerir 
                } 
 
     return render(request, 'AdminVideos/lista_filtrada.html', contexto)
