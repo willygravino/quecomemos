@@ -12,8 +12,17 @@ class PlatoFilterForm(forms.Form):
     calorias = forms.ChoiceField(choices=Plato.CALORIAS_CHOICES, required=False)
     
     tipo_de_vista = forms.ChoiceField(choices=[('todos', 'Todos'), ('solo-mios', 'Solo mis platos'), ('de-otros', 'Solo platos de otros'), ('preseleccionados', 'Preseleccionados'), ("random-todos", "< Random con todos >"), ("random-con-mios", "< Random con los mios>")], required=True)
+
+
+class PlatoForm(forms.ModelForm):
+    variedad = forms.CharField(max_length=100)
+    ingredientes_de_variedad = forms.CharField(label='Ingresá los ingredientes, separados por coma', max_length=120)
+
+    class Meta:
+        model = Plato
+        fields = ["nombre_plato", "receta", "descripcion_plato", "ingredientes", "medios", "categoria", "preparacion", "tipo", "calorias", "image"]
     
- 
+
     # Si quieres personalizar la forma en que se muestra un campo, puedes hacerlo así:
     # def __init__(self, *args, **kwargs):
     #     super(PlatoForm, self).__init__(*args, **kwargs)

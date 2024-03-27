@@ -35,17 +35,22 @@
 
         {{ form.calorias }} </p>
 
-      <p>Variedades: {{ form.variedades }}</p>
+      <p>Variedad:
+
+        {{ form.variedad }} </p>
+      <p>Ingredientes de variedad:
+
+        {{ form.ingredientes_de_variedad }} </p>
+
+
+
       <p>Imagen: {{ form.image }}</p>
       <button type="submit">Guardar</button>
     </form>
 
 
-
-
-
-
-
   </center>
 </div>
+
+
 {% endblock %}

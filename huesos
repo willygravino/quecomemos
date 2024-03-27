@@ -93,3 +93,16 @@
 
 
     <p> form.medios {{ form.medios }} </p>
+
+
+    <p>Variedades:
+      {{ form.variedades }} </p>
+
+
+
+
+      <p> Variedad
+        <input type="text" value="">
+      <h3>Ingredientes</h3>
+      <input type="text" value="">
+      </p>

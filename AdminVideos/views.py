@@ -10,7 +10,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView, D
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from datetime import datetime
-from .forms import PlatoFilterForm
+from .forms import PlatoFilterForm, PlatoForm
 from django.views.generic import TemplateView
 
 class SugerenciasRandom(TemplateView):
@@ -146,18 +146,66 @@ class PlatoDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return Plato.objects.filter(propietario=user_id, id=plato_id).exists()
 
 
+
+
+
+
+
+
+
+# class PlatoCreate(LoginRequiredMixin, CreateView):
+#     model = Plato
+#     success_url = reverse_lazy("filtro-de-platos")
+#     fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria","preparacion", "tipo","calorias", "image"]
+# #    fields = '__all__'
+
+#     def form_valid(self, form):
+#         el_propietario = form.save(commit=False)
+#         # AQUI SE PUEDE INTERVENIR, SEGÚN GPT
+#         el_propietario.propietario = self.request.user
+#         el_propietario.save()
+#         return redirect(self.success_url)
+
+
 class PlatoCreate(LoginRequiredMixin, CreateView):
     model = Plato
+    form_class = PlatoForm
     success_url = reverse_lazy("filtro-de-platos")
-    fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria","preparacion", "tipo","calorias", "variedades", "image"]
+    # fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria","preparacion", "tipo","calorias", "image"]
 #    fields = '__all__'
 
     def form_valid(self, form):
+        plato = form.save(commit=False)
+        plato.propietario = self.request.user
+
+        # Procesar los datos adicionales de variedad e ingredientes
+        variedad = form.cleaned_data.get('variedad')
+        ingredientes_variedad = form.cleaned_data.get('ingredientes_de_variedad')
+        # Aquí puedes hacer lo que necesites con estos datos adicionales
+
+        # Crear un diccionario con la variedad e ingredientes_variedad
+        variedades = {"variedad": variedad, "ingrediente_variedades": ingredientes_variedad}
+        
+        # Asignar variedades al campo JSONField del modelo Plato
+        plato.variedades = variedades
+
         el_propietario = form.save(commit=False)
-        # AQUI SE PUEDE INTERVENIR, SEGÚN GPT
         el_propietario.propietario = self.request.user
         el_propietario.save()
         return redirect(self.success_url)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class Login(LoginView):
     next_page = reverse_lazy("filtro-de-platos")
@@ -184,7 +232,6 @@ class ProfileCreate(LoginRequiredMixin, CreateView):
         el_user.save()
         return redirect(self.success_url)
     
-
 class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
     model = Profile
     success_url = reverse_lazy("filtro-de-platos")
