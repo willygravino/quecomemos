@@ -181,11 +181,16 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         # Procesar los datos adicionales de variedad e ingredientes
         variedad = form.cleaned_data.get('variedad')
         ingredientes_variedad = form.cleaned_data.get('ingredientes_de_variedad')
+        variedad2 = form.cleaned_data.get('variedad2')
+        ingredientes_variedad2 = form.cleaned_data.get('ingredientes_de_variedad2')
         # Aquí puedes hacer lo que necesites con estos datos adicionales
 
         # Crear un diccionario con la variedad e ingredientes_variedad
-        variedades = {"variedad": variedad, "ingrediente_variedades": ingredientes_variedad}
-        
+        variedades = {
+                "variedad1": {"variedad": variedad, "ingredientes_variedades": ingredientes_variedad},
+                "variedad2": {"variedad": variedad2, "ingredientes_variedades": ingredientes_variedad2}
+            }
+                
         # Asignar variedades al campo JSONField del modelo Plato
         plato.variedades = variedades
 
