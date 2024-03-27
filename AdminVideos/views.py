@@ -1,4 +1,5 @@
 from contextvars import Context
+import json
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
@@ -125,15 +126,24 @@ class PlatoDetail(DetailView):
     model = Plato
     context_object_name = "plato"
 
-class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-    model = Plato
-    success_url = reverse_lazy("filtro-de-platos")
-    fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria", "preparacion","tipo","calorias","variedades", "image"]
+# class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+#     model = Plato
+#     form_class = PlatoForm
+#     template_name = 'AdminVideos/plato_update.html'
+#     success_url = reverse_lazy("filtro-de-platos")
+#     # fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria", "preparacion","tipo","calorias", "image"]
 
-    def test_func(self):
-        user_id = self.request.user.id
-        plato_id =  self.kwargs.get("pk")
-        return Plato.objects.filter(propietario=user_id, id=plato_id).exists()
+#     def get_context_data(self, **kwargs):
+#          context = super().get_context_data(**kwargs)
+#          context['variedades_en_base'] = {"variedad1": {"variedad": "var1", "ingredientes_variedades": "ing1"},
+#                                           "variedad2": {"variedad": "var2", "ingredientes_variedades": "ing2"}}
+#          return context
+
+#     def test_func(self):
+#         user_id = self.request.user.id
+#         plato_id =  self.kwargs.get("pk")
+#         return Plato.objects.filter(propietario=user_id, id=plato_id).exists()
+
 
 class PlatoDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Plato
@@ -144,13 +154,6 @@ class PlatoDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         user_id = self.request.user.id
         plato_id =  self.kwargs.get("pk")
         return Plato.objects.filter(propietario=user_id, id=plato_id).exists()
-
-
-
-
-
-
-
 
 
 # class PlatoCreate(LoginRequiredMixin, CreateView):
@@ -167,13 +170,66 @@ class PlatoDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 #         return redirect(self.success_url)
 
 
+
+
+
+
+
+
+
+
+
+
+class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Plato
+    form_class = PlatoForm
+    template_name = 'AdminVideos/plato_update.html'
+    success_url = reverse_lazy("filtro-de-platos")
+
+    def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            variedades_en_base = self.object.variedades
+            if variedades_en_base:
+                context['variedades_en_base'] = json.loads(variedades_en_base)
+            else:
+                context['variedades_en_base'] = {}
+            return context
+    
+    def test_func(self):
+        user_id = self.request.user.id
+        plato_id = self.kwargs.get("pk")
+        return Plato.objects.filter(propietario=user_id, id=plato_id).exists()
+
+    def form_valid(self, form):
+        # Guardar el formulario y obtener la instancia del plato
+        plato = form.save(commit=False)
+        plato.propietario = self.request.user
+
+        # Procesar las variedades ingresadas en el formulario
+        variedades = {}
+        for key, value in self.request.POST.items():
+            if key.startswith('variedad'):
+                numero_variedad = key.replace('variedad', '')
+                ingredientes_key = 'ingredientes_de_variedad' + numero_variedad
+                variedades['variedad' + numero_variedad] = {
+                    'variedad': value,
+                    'ingredientes_variedades': self.request.POST.get(ingredientes_key)
+                }
+
+        # Asignar las variedades al campo JSONField
+        plato.variedades = json.dumps(variedades)
+        plato.save()
+
+        return redirect(self.success_url)
+    
+
 class PlatoCreate(LoginRequiredMixin, CreateView):
     model = Plato
     form_class = PlatoForm
     success_url = reverse_lazy("filtro-de-platos")
     # fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria","preparacion", "tipo","calorias", "image"]
 #    fields = '__all__'
-
+    
     def form_valid(self, form):
         plato = form.save(commit=False)
         plato.propietario = self.request.user

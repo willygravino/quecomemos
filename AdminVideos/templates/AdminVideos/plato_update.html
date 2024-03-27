@@ -1,0 +1,63 @@
+{% extends "AdminVideos/base.html" %}
+
+{% load static %}
+
+
+{% block principal %}
+
+<div class="album py-5 bg-light">
+    <section class="py-1 text-center container">
+        <div class="row py-lg-1">
+            <div class="col-lg-8 col-md-8 mx-auto">
+                <h1 class="fw-light">UPDATE.</h1>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div style="margin-top:40px">
+    <center>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <p>Nombre del Plato: {{ form.nombre_plato }}</p>
+            <p>Receta: {{ form.receta }}</p>
+            <p>Descripción del Plato: {{ form.descripcion_plato }}</p>
+            <p>Ingredientes: {{ form.ingredientes }}</p>
+            <p>Medios de cocción:
+                {{ form.medios }} </p>
+            <p>Categoría:
+
+                {{ form.categoria }} </p>
+            <p>Preparación:
+                {{ form.preparacion }} </p>
+            <p>Calorías:
+
+                {{ form.calorias }} </p>
+
+                <p>VARIEDADES EN BASE {{ variedades_en_base }}</p>
+
+                    <!-- Iterar sobre las variedades_en_base -->
+                    {% for key, value in variedades_en_base.items %}
+                    <div class="variedad-group">
+                        <p>Variedad {{ forloop.counter }}: <input type="text" name="variedad{{ forloop.counter }}" value="{{ value.variedad }}">
+                        </p>
+                        <p>Ingredientes de variedad {{ forloop.counter }}:  <input type="text" name="ingredientes_de_variedad{{ forloop.counter }}"
+                                value="{{ value.ingredientes_variedades }}"></p>
+            
+                    </div>
+                    {% endfor %}
+
+                    <!-- Botón para agregar otra variedad e ingredientes de variedad -->
+                    <button type="button" id="agregar-variedad">Agregar Variedad</button> 
+
+
+                    <p>Imagen: {{ form.image }}</p>
+                    <button type="submit">Guardar</button>
+        </form>
+
+
+    </center>
+</div>
+
+{% endblock %}

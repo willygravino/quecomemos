@@ -1,10 +1,6 @@
 {% extends "AdminVideos/base.html" %}
-
 {% load static %}
-
-
 {% block principal %}
-
 <div class="album py-5 bg-light">
   <section class="py-1 text-center container">
     <div class="row py-lg-1">
@@ -14,10 +10,8 @@
     </div>
   </section>
 </div>
-
 <div style="margin-top:40px">
   <center>
-
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
       <p>Nombre del Plato: {{ form.nombre_plato }}</p>
@@ -27,17 +21,12 @@
       <p>Medios de cocción:
         {{ form.medios }} </p>
       <p>Categoría:
-
         {{ form.categoria }} </p>
       <p>Preparación:
         {{ form.preparacion }} </p>
       <p>Calorías:
 
         {{ form.calorias }} </p>
-
-
-
-
 
       <!-- Varias variedades e ingredientes de variedad -->
       <div id="variedades-container">
@@ -51,15 +40,9 @@
       <button type="button" id="agregar-variedad">Agregar Variedad</button>
 
 
-
-
-
-
       <p>Imagen: {{ form.image }}</p>
       <button type="submit">Guardar</button>
     </form>
-
-
   </center>
 </div>
 

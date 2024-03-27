@@ -15,10 +15,10 @@ class PlatoFilterForm(forms.Form):
 
 
 class PlatoForm(forms.ModelForm):
-    variedad = forms.CharField(max_length=100)
-    ingredientes_de_variedad = forms.CharField(label='Ingresá los ingredientes, separados por coma', max_length=120)
-    variedad2 = forms.CharField(max_length=100)
-    ingredientes_de_variedad2 = forms.CharField(label='Ingresá los ingredientes, separados por coma', max_length=120)
+    variedad = forms.CharField(max_length=100, required=False)
+    ingredientes_de_variedad = forms.CharField(label='Ingresá los ingredientes, separados por coma', max_length=120, required=False)
+    variedad2 = forms.CharField(max_length=100, required=False)
+    ingredientes_de_variedad2 = forms.CharField(label='Ingresá los ingredientes, separados por coma', max_length=120, required=False)
 
 
     class Meta:

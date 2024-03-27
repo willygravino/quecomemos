@@ -1,3 +1,56 @@
+{{form.as_p}}
+
+
+
+
+
+            <!-- Iterar sobre las variedades_en_base -->
+            {% for key, value in variedades_en_base.items %}
+            <div class="variedad-group">
+                <p>Variedad {{ forloop.counter }}: {{ value.variedad }}</p>
+                <p>Ingredientes de variedad {{ forloop.counter }}: {{ value.ingredientes_variedades }}</p>
+            </div>
+            {% endfor %}
+
+            <!-- Botón para agregar otra variedad e ingredientes de variedad -->
+            <button type="button" id="agregar-variedad">Agregar Variedad</button>
+
+
+
+
+
+      <!-- Varias variedades e ingredientes de variedad -->
+      <div id="variedades-container">
+        <div class="variedad-group">
+          <p>Variedad: {{ form.variedad }}</p>
+          <p>Ingredientes de variedad: {{ form.ingredientes_de_variedad }}</p>
+        </div>
+      </div>
+
+      <!-- Botón para agregar otra variedad e ingredientes de variedad -->
+      <button type="button" id="agregar-variedad">Agregar Variedad</button>
+
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <!-- 
 {% block titulo_ok %}
       <h1 class="fw-light"> Esto  s son los platos  blabla  que  cargaste. </h1>
@@ -106,3 +159,32 @@
       <h3>Ingredientes</h3>
       <input type="text" value="">
       </p>
+
+      <!-- 
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    var contador = 2;  // Inicializar el contador en 2 para la segunda variedad
+
+    document.getElementById("agregar-variedad").addEventListener("click", function() {
+      var container = document.getElementById("variedades-container");
+      var newVariedadGroup = document.createElement("div");
+      newVariedadGroup.classList.add("variedad-group");
+      newVariedadGroup.innerHTML = `
+        <p>VariedadDDDDD: {{ form.variedad|add:1 }}</p>
+        <p>Ingredientes de variedadDDDDDDD: {{ form['ingredientes_de_variedad' + contador] }}</p>
+      `;
+      container.appendChild(newVariedadGroup);
+
+      // Incrementar el contador para el siguiente conjunto de campos
+      contador++;
+    });
+  });
+</script>
+ -->
+ <p>{{ form.variedades }}</p>
+
+<!-- 
+funcipona! -->
+ {% if  form.variedad  %} 
+             
+ {% endif %}
