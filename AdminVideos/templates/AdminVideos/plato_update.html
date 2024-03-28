@@ -36,61 +36,29 @@
                 {{ form.calorias }} </p>
 
             <p>VARIEDADES EN BASE {{ variedades_en_base }}</p>
-
-            <!-- Iterar sobre las variedades_en_base -->
-            {% for key, value in variedades_en_base.items %}
-            <p>KEY >>>: {{ key }} cortado {{ key|slice:"8:" }}" </p>
-
-            <div id="variedades-container">
-
-                <div class="variedad-group">
-                    <p>Variedad {{ key }}: <input type="text" name="{{ key }}" value="{{ value.variedad }}">
-                    </p>
-                    <p>Ingredientes de variedad {{ forloop.counter }}: <input type="text"
-                            name="ingredientes_de_variedad{{ key|slice:" 8:" }} "
-                      value=" {{ value.ingredientes_variedades }}"></p>
-                    <button type="button" class="eliminar-variedad">Eliminar Variedad</button>
-                </div>
+           
+                    <p>Variedad 1: <input type="text" name="variedad1" value="{{ variedades_en_base.variedad1.variedad|default:'' }}"></p>
+                    <p>Ingredientes de variedad 1: <input type="text" name="ingredientes_de_variedad1" value="{{ variedades_en_base.variedad1.ingredientes_variedades|default:'' }}"></p>
+                    <p>Variedad 2: <input type="text" name="variedad2" value="{{ variedades_en_base.variedad2.variedad|default:'' }}"></p>
+                    <p>Ingredientes de variedad 2: <input type="text" name="ingredientes_de_variedad2" value="{{ variedades_en_base.variedad2.ingredientes_variedades|default:'' }}"></p>
+                    <p>Variedad 3: <input type="text" name="variedad3" value="{{ variedades_en_base.variedad3.variedad|default:'' }}"></p>
+                    <p>Ingredientes de variedad 3: <input type="text" name="ingredientes_de_variedad3" value="{{ variedades_en_base.variedad3.ingredientes_variedades|default:'' }}"></p>
+                    <p>Variedad 4: <input type="text" name="variedad4" value="{{ variedades_en_base.variedad4.variedad|default:'' }}"></p>
+                    <p>Ingredientes de variedad 4: <input type="text" name="ingredientes_de_variedad4" value="{{ variedades_en_base.variedad4.ingredientes_variedades|default:'' }}"></p>
+                    <p>Variedad 5: <input type="text" name="variedad5" value="{{ variedades_en_base.variedad5.variedad|default:'' }}"></p>
+                    <p>Ingredientes de variedad 5: <input type="text" name="ingredientes_de_variedad5" value="{{ variedades_en_base.variedad5.ingredientes_variedades|default:'' }}"></p>
+                    <p>Variedad 6: <input type="text" name="variedad6" value="{{ variedades_en_base.variedad6.variedad|default:'' }}"></p>
+                    <p>Ingredientes de variedad 6: <input type="text" name="ingredientes_de_variedad6" value="{{ variedades_en_base.variedad6.ingredientes_variedades|default:'' }}"></p>
+                
+                <p>Imagen: {{ form.image }}</p>
+                <button type="submit">Guardar</button>
 
             </div>
-
-            {% endfor %}
-
-            <!-- Botón para agregar otra variedad e ingredientes de variedad -->
-            <button type="button" id="agregar-variedad">Agregar Variedad</button>
-
-            <p>Imagen: {{ form.image }}</p>
-            <button type="submit">Guardar</button>
         </form>
 
 
     </center>
 </div>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // Manejar clic en el botón "Agregar Variedad"
-        document.getElementById("agregar-variedad").addEventListener("click", function () {
-            var container = document.getElementById("plato-form");
-            var newVariedadGroup = document.createElement("div");
-            newVariedadGroup.classList.add("variedad-group");
-
-            newVariedadGroup.innerHTML = `
-                <p>Variedad: <input type="text" name="nueva_variedad"></p>
-                <p>Ingredientes de variedad: <input type="text" name="nuevos_ingredientes_variedad"></p>
-                <button type="button" class="eliminar-variedad">Eliminar Variedad</button>
-            `;
-            container.insertBefore(newVariedadGroup, document.getElementById("agregar-variedad"));
-        });
-
-        // Manejar clic en los botones "Eliminar Variedad"
-        document.addEventListener("click", function (event) {
-            if (event.target.classList.contains("eliminar-variedad")) {
-                event.target.parentNode.remove(); // Eliminar el grupo de campos
-            }
-        });
-    });
-</script>
 
 
 {% endblock %}

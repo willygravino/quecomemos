@@ -234,7 +234,7 @@ class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 class PlatoCreate(LoginRequiredMixin, CreateView):
     model = Plato
     form_class = PlatoForm
-    # template_name = 'AdminVideos/plato_update.html'
+    template_name = 'AdminVideos/plato_update.html'
     success_url = reverse_lazy("filtro-de-platos")
     # fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria","preparacion", "tipo","calorias", "image"]
 #    fields = '__all__'
