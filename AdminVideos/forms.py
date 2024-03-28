@@ -16,17 +16,17 @@ class PlatoFilterForm(forms.Form):
 
 class PlatoForm(forms.ModelForm):
     variedad1 = forms.CharField(max_length=100, required=False)
-    ingredientes_de_variedad1 = forms.CharField(label='Ingresá los ingredientes, separados por coma', max_length=120, required=False)
+    ingredientes_de_variedad1 = forms.CharField( max_length=120, required=False)
     variedad2 = forms.CharField(max_length=100, required=False)
-    ingredientes_de_variedad2 = forms.CharField(label='Ingresá los ingredientes, separados por coma', max_length=120, required=False)
+    ingredientes_de_variedad2 = forms.CharField(max_length=120, required=False)
     variedad3 = forms.CharField(max_length=100, required=False)
-    ingredientes_de_variedad3 = forms.CharField(label='Ingresá los ingredientes, separados por coma', max_length=120, required=False)
+    ingredientes_de_variedad3 = forms.CharField( max_length=120, required=False)
     variedad4 = forms.CharField(max_length=100, required=False)
-    ingredientes_de_variedad4 = forms.CharField(label='Ingresá los ingredientes, separados por coma', max_length=120, required=False)
+    ingredientes_de_variedad4 = forms.CharField( max_length=120, required=False)
     variedad5 = forms.CharField(max_length=100, required=False)
-    ingredientes_de_variedad5 = forms.CharField(label='Ingresá los ingredientes, separados por coma', max_length=120, required=False)
+    ingredientes_de_variedad5 = forms.CharField( max_length=120, required=False)
     variedad6 = forms.CharField(max_length=100, required=False)
-    ingredientes_de_variedad6 = forms.CharField(label='Ingresá los ingredientes, separados por coma', max_length=120, required=False)
+    ingredientes_de_variedad6 = forms.CharField( max_length=120, required=False)
   
     class Meta:
         model = Plato

@@ -1,3 +1,16 @@
+<p>Variedad 1: <input type="text" name="variedad1" value="{{ variedades_en_base.variedad1.variedad|default:'' }}"></p>
+<p>Ingredientes de variedad 1: <input type="text" name="ingredientes_de_variedad1" value="{{ variedades_en_base.variedad1.ingredientes_variedades|default:'' }}"></p>
+<p>Variedad 2: <input type="text" name="variedad2" value="{{ variedades_en_base.variedad2.variedad|default:'' }}"></p>
+<p>Ingredientes de variedad 2: <input type="text" name="ingredientes_de_variedad2" value="{{ variedades_en_base.variedad2.ingredientes_variedades|default:'' }}"></p>
+<p>Variedad 3: <input type="text" name="variedad3" value="{{ variedades_en_base.variedad3.variedad|default:'' }}"></p>
+<p>Ingredientes de variedad 3: <input type="text" name="ingredientes_de_variedad3" value="{{ variedades_en_base.variedad3.ingredientes_variedades|default:'' }}"></p>
+<p>Variedad 4: <input type="text" name="variedad4" value="{{ variedades_en_base.variedad4.variedad|default:'' }}"></p>
+<p>Ingredientes de variedad 4: <input type="text" name="ingredientes_de_variedad4" value="{{ variedades_en_base.variedad4.ingredientes_variedades|default:'' }}"></p>
+<p>Variedad 5: <input type="text" name="variedad5" value="{{ variedades_en_base.variedad5.variedad|default:'' }}"></p>
+<p>Ingredientes de variedad 5: <input type="text" name="ingredientes_de_variedad5" value="{{ variedades_en_base.variedad5.ingredientes_variedades|default:'' }}"></p>
+<p>Variedad 6: <input type="text" name="variedad6" value="{{ variedades_en_base.variedad6.variedad|default:'' }}"></p>
+<p>Ingredientes de variedad 6: <input type="text" name="ingredientes_de_variedad6" value="{{ variedades_en_base.variedad6.ingredientes_variedades|default:'' }}"></p>
+
 
 
 
@@ -21,9 +34,6 @@
               </div>
           </div>
       </div>
-
-
-
 
       <div class="accordion-item">
           <h2 class="accordion-header" id="headingTwo">
