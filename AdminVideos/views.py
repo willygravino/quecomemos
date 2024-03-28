@@ -186,14 +186,20 @@ class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     template_name = 'AdminVideos/plato_update.html'
     success_url = reverse_lazy("filtro-de-platos")
 
+
     def get_context_data(self, **kwargs):
-            context = super().get_context_data(**kwargs)
-            variedades_en_base = self.object.variedades
-            if variedades_en_base:
-                context['variedades_en_base'] = json.loads(variedades_en_base)
-            else:
-                context['variedades_en_base'] = {}
-            return context
+         context = super().get_context_data(**kwargs)
+         context['variedades_en_base'] = self.object.variedades or {}
+         return context
+
+    # def get_context_data(self, **kwargs):
+    #         context = super().get_context_data(**kwargs)
+    #         variedades_en_base = self.object.variedades
+    #         if variedades_en_base:
+    #              context['variedades_en_base'] = json.loads(variedades_en_base)
+    #         else:
+    #              context['variedades_en_base'] = {}
+    #         return context
     
     def test_func(self):
         user_id = self.request.user.id
@@ -217,7 +223,9 @@ class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                 }
 
         # Asignar las variedades al campo JSONField
-        plato.variedades = json.dumps(variedades)
+        # plato.variedades = json.dumps(variedades)
+        plato.variedades = variedades
+
         plato.save()
 
         return redirect(self.success_url)
@@ -235,24 +243,16 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         plato.propietario = self.request.user
 
         # Procesar los datos adicionales de variedad e ingredientes
-        variedad = form.cleaned_data.get('variedad')
-        ingredientes_variedad = form.cleaned_data.get('ingredientes_de_variedad')
-        variedad2 = form.cleaned_data.get('variedad2')
-        ingredientes_variedad2 = form.cleaned_data.get('ingredientes_de_variedad2')
-        # Aquí puedes hacer lo que necesites con estos datos adicionales
+        variedades = {}
+        for i in range(1, 7):  # Iterar desde 1 hasta 6
+            variedad = form.cleaned_data.get(f'variedad{i}')
+            ingredientes_variedad = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
+            if variedad:  # Verificar si la variedad no está vacía
+                variedades[f"variedad{i}"] = {"variedad": variedad, "ingredientes_variedades": ingredientes_variedad}
 
-        # Crear un diccionario con la variedad e ingredientes_variedad
-        variedades = {
-                "variedad1": {"variedad": variedad, "ingredientes_variedades": ingredientes_variedad},
-                "variedad2": {"variedad": variedad2, "ingredientes_variedades": ingredientes_variedad2}
-            }
-                
-        # Asignar variedades al campo JSONField del modelo Plato
         plato.variedades = variedades
+        plato.save()
 
-        el_propietario = form.save(commit=False)
-        el_propietario.propietario = self.request.user
-        el_propietario.save()
         return redirect(self.success_url)
 
 

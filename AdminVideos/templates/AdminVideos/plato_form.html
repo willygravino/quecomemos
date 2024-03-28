@@ -31,8 +31,8 @@
       <!-- Varias variedades e ingredientes de variedad -->
       <div id="variedades-container">
         <div class="variedad-group">
-          <p>Variedad: {{ form.variedad }}</p>
-          <p>Ingredientes de variedad: {{ form.ingredientes_de_variedad }}</p>
+          <p>Variedad: {{ form.variedad1 }}</p>
+          <p>Ingredientes de variedad: {{ form.ingredientes_de_variedad1 }}</p>
         </div>
       </div>
 
@@ -45,25 +45,62 @@
     </form>
   </center>
 </div>
-
-
 <script>
   document.addEventListener("DOMContentLoaded", function() {
     // Manejar clic en el botón "Agregar Variedad"
-    var contador = 0;  // Inicializar el contador
+    var contador = 2;  // Inicializar el contador en 2 para la segunda variedad
 
     document.getElementById("agregar-variedad").addEventListener("click", function() {
       var container = document.getElementById("variedades-container");
       var newVariedadGroup = document.createElement("div");
       newVariedadGroup.classList.add("variedad-group");
-      newVariedadGroup.innerHTML = `
-        <p>VariedadDDDDD: {{ form.variedad2 }}</p>
-        <p>Ingredientes de variedadDDDDDDD: {{ form.ingredientes_de_variedad2 }}</p>
-      `;
-      container.appendChild(newVariedadGroup);
-
-      // Incrementar el contador
-      contador++;
+      
+      if (contador === 2) {  // Agregar campos solo si contador es igual a 2
+        newVariedadGroup.innerHTML = `
+          <p>Variedad 2: {{ form.variedad2 }}</p>
+          <p>Ingredientes de variedad 2: {{ form.ingredientes_de_variedad2 }}</p>
+        `;
+        container.appendChild(newVariedadGroup);
+        
+        // Incrementar el contador solo si se agregan campos
+        contador++;
+      } else if (contador === 3) {  // Agregar campos solo si contador es igual a 3
+        newVariedadGroup.innerHTML = `
+          <p>Variedad 3: {{ form.variedad3 }}</p>
+          <p>Ingredientes de variedad 3: {{ form.ingredientes_de_variedad3 }}</p>
+        `;
+        container.appendChild(newVariedadGroup);
+        
+        // Incrementar el contador solo si se agregan campos
+        contador++;
+      } else if (contador === 4) {  // Agregar campos solo si contador es igual a 4
+        newVariedadGroup.innerHTML = `
+          <p>Variedad 4: {{ form.variedad4 }}</p>
+          <p>Ingredientes de variedad 4: {{ form.ingredientes_de_variedad4 }}</p>
+        `;
+        container.appendChild(newVariedadGroup);
+        
+        // Incrementar el contador solo si se agregan campos
+        contador++;
+      } else if (contador === 5) {  // Agregar campos solo si contador es igual a 5
+        newVariedadGroup.innerHTML = `
+          <p>Variedad 5: {{ form.variedad5 }}</p>
+          <p>Ingredientes de variedad 5: {{ form.ingredientes_de_variedad5 }}</p>
+        `;
+        container.appendChild(newVariedadGroup);
+        
+        // Incrementar el contador solo si se agregan campos
+        contador++;
+      } else if (contador === 6) {  // Agregar campos solo si contador es igual a 6
+        newVariedadGroup.innerHTML = `
+          <p>Variedad 6: {{ form.variedad6 }}</p>
+          <p>Ingredientes de variedad 6: {{ form.ingredientes_de_variedad6 }}</p>
+        `;
+        container.appendChild(newVariedadGroup);
+        
+        // Incrementar el contador solo si se agregan campos
+        contador++;
+      }
     });
   });
 </script>
