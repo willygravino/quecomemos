@@ -1,16 +1,17 @@
 from contextvars import Context
 import json
+import locale
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from AdminVideos.models import Plato, Profile, Mensaje, Elegidos, ElegidosXSemana, Sugeridos
+from AdminVideos.models import Plato, Profile, Mensaje, Elegidos, ElegidosXDia, Sugeridos
 from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.contrib.auth.forms import UserCreationForm
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from datetime import datetime
+from datetime import datetime, timedelta
 from .forms import PlatoFilterForm, PlatoForm
 from django.views.generic import TemplateView
 
@@ -71,55 +72,109 @@ def plato_elegido(request):
 #         return context
 
 
+# def grabar_menu_elegido(request):
+#     if request.method == 'POST':
+#         # Obtén los datos del formulario / 1_a significa dia 1, almuerzo - c significa cena
+#         fecha_actual = request.POST.get('fecha_actual')
+#         datos = {
+#             '1_a': request.POST.get('1-a'),
+#             '1_c': request.POST.get('1-c'),
+#             '2_a': request.POST.get('2-a'),
+#             '2_c': request.POST.get('2-c'),
+#             '3_a': request.POST.get('3-a'),
+#             '3_c': request.POST.get('3-c'),
+#             '4_a': request.POST.get('4-a'),
+#             '4_c': request.POST.get('4-c'),
+#             '5_a': request.POST.get('5-a'),
+#             '5_c': request.POST.get('5-c'),
+#             '6_a': request.POST.get('6-a'),
+#             '6_c': request.POST.get('6-c'),
+#             '7_a': request.POST.get('7-a'),
+#             '7_c': request.POST.get('7-c')
+#         }
+
+#         # Crea un diccionario con la fecha como clave y los datos como valor
+#         datos_por_dia = {fecha_actual: datos}
+
+#         # Crea una instancia del modelo ElegidosPorDia con el diccionario de datos
+#         elegidos_por_semana_objeto = ElegidosXDia(elegidos_por_semana=datos_por_dia)
+
+#         # Guarda la instancia del modelo en la base de datos
+#         elegidos_por_semana_objeto.save()
+
+#         # Retorna una respuesta JSON
+#         return redirect(reverse_lazy("menu-elegido"))
+#     else:
+#         # Retorna una respuesta JSON con un mensaje de error si el método no es POST
+#         return JsonResponse({'error': 'El método de solicitud debe ser POST'})
+
 def grabar_menu_elegido(request):
     if request.method == 'POST':
-        # Obtén los datos del formulario
-        fecha_actual = request.POST.get('fecha_actual')
-        datos = {
-            'lunes_a': request.POST.get('lunes-a'),
-            'lunes_c': request.POST.get('lunes-c'),
-            'martes_a': request.POST.get('martes-a'),
-            'martes_c': request.POST.get('martes-c'),
-            'miercoles_a': request.POST.get('miercoles-a'),
-            'miercoles_c': request.POST.get('miercoles-c'),
-            'jueves_a': request.POST.get('jueves-a'),
-            'jueves_c': request.POST.get('jueves-c'),
-            'viernes_a': request.POST.get('viernes-a'),
-            'viernes_c': request.POST.get('viernes-c'),
-            'sabado_a': request.POST.get('sabado-a'),
-            'sabado_c': request.POST.get('sabado-c'),
-            'domingo_a': request.POST.get('domingo-a'),
-            'domingo_c': request.POST.get('domingo-c')
-        }
+        # Obtener el usuario logueado
+        usuario = request.user
+    
+        # Obtener las fechas y platos elegidos del formulario
+        for i in range(1, 8):
+            fecha = request.POST.get(f"fecha-{i}")
+            almuerzo = request.POST.get(f"{i}-a")
+            cena = request.POST.get(f"{i}-c")
+            
+            # Verificar si se recibieron datos del formulario
+            if almuerzo != '-----' or cena != '-----':
+               
+                # Crear una lista de platos para este día
+                platos_del_dia = {'almuerzo': almuerzo, 'cena': cena}
 
-        # Crea un diccionario con la fecha como clave y los datos como valor
-        datos_por_dia = {fecha_actual: datos}
+                # Crear una instancia del modelo ElegidosXDia y guardar en la base de datos
+                ElegidosXDia.objects.create(
+                    user=usuario,
+                    el_dia_en_que_comemos=fecha,
+                    platos_que_comemos=platos_del_dia
+                )
 
-        # Crea una instancia del modelo ElegidosPorDia con el diccionario de datos
-        elegidos_por_semana_objeto = ElegidosXSemana(elegidos_por_semana=datos_por_dia)
-
-        # Guarda la instancia del modelo en la base de datos
-        elegidos_por_semana_objeto.save()
-
-        # Retorna una respuesta JSON
+        # Redirigir al usuario a la página de menú elegido
         return redirect(reverse_lazy("menu-elegido"))
     else:
         # Retorna una respuesta JSON con un mensaje de error si el método no es POST
         return JsonResponse({'error': 'El método de solicitud debe ser POST'})
 
-class MenuElegido (CreateView):
-    model = ElegidosXSemana
-    fields = ["elegidos_por_semana"]
+# class MenuElegido (CreateView):
+#     model = ElegidosXDia
+#     fields = ["platos_que_comemos"]
+#     template_name = 'AdminVideos/menu_elegido.html'
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         ultimo_objeto = ElegidosXDia.objects.latest('id')
+#         context['ultimo_elegido'] = "seleccionados"
+#         if ultimo_objeto is not None:
+#            datos_json = ultimo_objeto.platos_que_comemos
+#            context['elegidos_semanal'] = datos_json
+#         else: context['elegidos_semanal'] = "poroto"
+#         return context
+    
+
+class MenuElegido(LoginRequiredMixin, CreateView):
+    model = ElegidosXDia
+    fields = ["platos_que_comemos"]
     template_name = 'AdminVideos/menu_elegido.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        ultimo_objeto = ElegidosXSemana.objects.latest('id')
-        context['ultimo_elegido'] = "seleccionados"
-        if ultimo_objeto is not None:
-           datos_json = ultimo_objeto.elegidos_por_semana
-           context['elegidos_semanal'] = datos_json
-        else: context['elegidos_semanal'] = "poroto"
+        
+        # Filtrar los objetos de ElegidosXDia por el usuario logueado
+        objetos_del_usuario = ElegidosXDia.objects.filter(user=self.request.user)
+        
+        # Crear un diccionario para almacenar los platos elegidos por día
+        platos_por_dia = {}
+        
+        # Iterar sobre los objetos filtrados y almacenar los platos elegidos por día
+        for objeto in objetos_del_usuario:
+            platos_por_dia[objeto.el_dia_en_que_comemos] = objeto.platos_que_comemos
+
+        # Agregar los platos elegidos por día al contexto
+        context['platos_por_dia'] = platos_por_dia
+        
         return context
 
 class PlatoDetail(DetailView):
@@ -266,9 +321,6 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
 
 
 
-
-
-
 class Login(LoginView):
     next_page = reverse_lazy("filtro-de-platos")
 
@@ -310,8 +362,31 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
 
 def FiltroDePlatos (request):
 
+    # # Obtiene la fecha actual
+    # fecha_actual = datetime.now()
+    # # Obtener el nombre del día de la semana
+    # nombre_dia_semana = fecha_actual.strftime('%A')
+    # Establecer la configuración regional a español
+    locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+ 
     # Obtiene la fecha actual
-    fecha_actual = datetime.now()
+    fecha_actual = datetime.now().date()
+
+    # Lista para almacenar los días y sus nombres
+    dias_desde_hoy = []
+
+    # Obtener el nombre del día de la semana para la fecha actual
+    nombre_dia_semana = fecha_actual.strftime('%A')
+
+    # Agregar la fecha actual y su nombre al inicio de la lista
+    dias_desde_hoy.append((fecha_actual, nombre_dia_semana))
+
+    # Calcular y agregar las fechas y nombres de los días para los próximos 6 días
+    for i in range(1, 7):
+        fecha = fecha_actual + timedelta(days=i)
+        nombre_dia = fecha.strftime('%A')
+        dias_desde_hoy.append((fecha, nombre_dia))
+
     cantidad_platos_sugeribles = 0
     
     tipo_de_vista_estable = request.session.get('tipo_de_vista_estable', "None")
@@ -427,7 +502,8 @@ def FiltroDePlatos (request):
                 'platos': platos,
                 'elegidos': platos_elegidos,
                 "tipo_de_vista_estable" :  tipo_de_vista_estable,
-                "fecha_actual": fecha_actual,
+                "dias_desde_hoy": dias_desde_hoy,
+                "nombre_dia_de_la_semana": nombre_dia_semana,
                 "cantidad_platos_sugeridos": cantidad_platos_sugeridos,
                 "cantidad_platos_sugeribles": cantidad_platos_sugeribles,
                 "platos_a_sugerir":  platos_a_sugerir,

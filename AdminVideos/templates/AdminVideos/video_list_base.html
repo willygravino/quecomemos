@@ -99,22 +99,23 @@
       <option value="modo-diario">MODO DIARIO</option>
       <option value="modo-celebracion">MODO CELEBRACIÓN</option>
     </select>
-    
+   
     <form action="{% url 'grabar-menu' %}" method="post">
 
       {% csrf_token %}
 
       <div class="mt-2 btn btn-primary">
-        <h5>{{ fecha_actual|date:"d-m-y" }} </h5>
-        
-        <select name="lunes-a">
+        <h5>{{ dias_desde_hoy.0.1 }} {{ dias_desde_hoy.0.0|date:'Y-m-d' }}</h5>
+     
+        <input type="hidden" name="fecha-1" value="{{ dias_desde_hoy.0.0|date:'Y-m-d' }}">
+        <select name="1-a">
           <option value="-----">Elegir plato</option>
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
           {% endfor %}
         </select>
         <br>
-        <select name="lunes-c">
+        <select name="1-c">
           <option value="-----">Elegir plato</option>
           {% for elegido in elegidos %}
           <option value="{{ elegido }}">{{ elegido }}</option>
@@ -125,9 +126,9 @@
       <br>
 
       <div class="mt-2 btn btn-primary">
-        <h5>Martes</h5>
-
-        <select name="martes-a">
+        <h5>{{ dias_desde_hoy.1.1 }} {{ dias_desde_hoy.1.0 }}</h5>
+        <input type="hidden" name="fecha-2" value="{{ dias_desde_hoy.1.0|date:'Y-m-d' }}">
+        <select name="2-a">
           <option value="-----">Elegir plato</option>
 
           {% for elegido in elegidos %}
@@ -135,55 +136,7 @@
           {% endfor %}
         </select>
         <br>
-        <select name="martes-c">
-          <option value="-----">Elegir plato</option>
-
-          {% for elegido in elegidos %}
-          <option value="{{ elegido }}">{{ elegido }}</option>
-          {% endfor %}
-
-        </select>
-      </div>
-      <br>
-
-      <div class="mt-2 btn btn-primary">
-        <h5>Miércoles</h5>
-
-        <select name="miercoles-a">
-          <option value="-----">Elegir plato</option>
-
-          {% for elegido in elegidos %}
-          <option value="{{ elegido }}">{{ elegido }}</option>
-          {% endfor %}
-
-        </select>
-
-        <br>
-        <select name="miercoles-c">
-          <option value="-----">Elegir plato</option>
-
-          {% for elegido in elegidos %}
-          <option value="{{ elegido }}">{{ elegido }}</option>
-          {% endfor %}
-
-        </select>
-
-      </div>
-      <br>
-
-      <div class="mt-2 btn btn-primary">
-        <h5>Jueves</h5>
-
-        <select name="jueves-a">
-          <option value="-----">Elegir plato</option>
-
-          {% for elegido in elegidos %}
-          <option value="{{ elegido }}">{{ elegido }}</option>
-          {% endfor %}
-
-        </select>
-        <br>
-        <select name="jueves-c">
+        <select name="2-c">
           <option value="-----">Elegir plato</option>
 
           {% for elegido in elegidos %}
@@ -195,9 +148,60 @@
       <br>
 
       <div class="mt-2 btn btn-primary">
-        <h5>Viernes</h5>
+        <h5>{{ dias_desde_hoy.2.1 }} {{ dias_desde_hoy.2.0 }}</h5>
+        <input type="hidden" name="fecha-3" value="{{ dias_desde_hoy.2.0|date:'Y-m-d' }}">
 
-        <select name="viernes-a">
+        <select name="3-a">
+          <option value="-----">Elegir plato</option>
+
+          {% for elegido in elegidos %}
+          <option value="{{ elegido }}">{{ elegido }}</option>
+          {% endfor %}
+
+        </select>
+
+        <br>
+        <select name="3-c">
+          <option value="-----">Elegir plato</option>
+
+          {% for elegido in elegidos %}
+          <option value="{{ elegido }}">{{ elegido }}</option>
+          {% endfor %}
+
+        </select>
+
+      </div>
+      <br>
+
+      <div class="mt-2 btn btn-primary">
+        <h5>{{ dias_desde_hoy.3.1 }} {{ dias_desde_hoy.3.0 }}</h5>
+        <input type="hidden" name="fecha-4" value="{{ dias_desde_hoy.3.0|date:'Y-m-d' }}">
+
+        <select name="4-a">
+          <option value="-----">Elegir plato</option>
+
+          {% for elegido in elegidos %}
+          <option value="{{ elegido }}">{{ elegido }}</option>
+          {% endfor %}
+
+        </select>
+        <br>
+        <select name="4-c">
+          <option value="-----">Elegir plato</option>
+
+          {% for elegido in elegidos %}
+          <option value="{{ elegido }}">{{ elegido }}</option>
+          {% endfor %}
+
+        </select>
+      </div>
+      <br>
+
+      <div class="mt-2 btn btn-primary">
+        <h5>{{ dias_desde_hoy.4.1 }} {{ dias_desde_hoy.4.0 }}</h5>
+        <input type="hidden" name="fecha-5" value="{{ dias_desde_hoy.4.0|date:'Y-m-d' }}">
+
+        <select name="5-a">
           <option value="-----">Elegir plato</option>
 
           {% for elegido in elegidos %}
@@ -206,29 +210,9 @@
           <option value="-----">-----</option>
 
         </select>
-        <br>
-        <select name="viernes-c">
-          {% for elegido in elegidos %}
-          <option value="{{ elegido }}">{{ elegido }}</option>
-          {% endfor %}
+        <br>         
 
-        </select>
-      </div>
-      <br>
-
-      <div class="mt-2 btn btn-primary">
-        <h5>Sábado</h5>
-
-        <select name="sabado-a">
-          <option value="-----">Elegir plato</option>
-
-          {% for elegido in elegidos %}
-          <option value="{{ elegido }}">{{ elegido }}</option>
-          {% endfor %}
-
-        </select>
-        <br>
-        <select name="sabado-c">
+        <select name="5-c">
           <option value="-----">Elegir plato</option>
 
           {% for elegido in elegidos %}
@@ -240,9 +224,10 @@
       <br>
 
       <div class="mt-2 btn btn-primary">
-        <h5>Domingo</h5>
+        <h5>{{ dias_desde_hoy.5.1 }} {{ dias_desde_hoy.5.0 }}</h5>
+        <input type="hidden" name="fecha-6" value="{{ dias_desde_hoy.5.0|date:'Y-m-d' }}">
 
-        <select name="domingo-a">
+        <select name="6-a">
           <option value="-----">Elegir plato</option>
 
           {% for elegido in elegidos %}
@@ -251,7 +236,32 @@
 
         </select>
         <br>
-        <select name="domingo-c">
+        <select name="6-c">
+          <option value="-----">Elegir plato</option>
+
+          {% for elegido in elegidos %}
+          <option value="{{ elegido }}">{{ elegido }}</option>
+          {% endfor %}
+
+        </select>
+      </div>
+      <br>
+
+      <div class="mt-2 btn btn-primary">
+        <h5>{{ dias_desde_hoy.6.1 }} {{ dias_desde_hoy.6.0 }}</h5>
+        <input type="hidden" name="fecha-7" value="{{ dias_desde_hoy.6.0|date:'Y-m-d' }}">
+
+
+        <select name="7-a">
+          <option value="-----">Elegir plato</option>
+
+          {% for elegido in elegidos %}
+          <option value="{{ elegido }}">{{ elegido }}</option>
+          {% endfor %}
+
+        </select>
+        <br>
+        <select name="7-c">
           <option value="-----">Elegir plato</option>
 
           {% for elegido in elegidos %}

@@ -121,8 +121,10 @@ class Sugeridos(models.Model):
 # #     Uso de ForeignKey: En tus modelos PlatosSeleccionados y Elegidos, estás usando ForeignKey a User. Si estos modelos están relacionados con el usuario autenticado, considera usar OneToOneField en lugar de ForeignKey para garantizar que solo haya una instancia por usuario.
 # En este ejemplo, el campo usuario en el modelo PerfilUsuario es un OneToOneField que apunta al modelo de usuario predeterminado de Django (User). Esto significa que cada instancia de PerfilUsuario está asociada a exactamente una instancia de User, y viceversa. La opción on_delete=models.CASCADE especifica que si se elimina el usuario, también se eliminará automáticamente su perfil de usuario asociado.
 
-class ElegidosXSemana(models.Model):
-    elegidos_por_semana = models.JSONField(null=True, blank=True)
+class ElegidosXDia(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="usuario_que_come", null=True)
+    el_dia_en_que_comemos = models.DateField(null=True)  # Campo de fecha
+    platos_que_comemos = models.JSONField(null=True, blank=True)
 
     def __str__(self):
          return f'Menu Elegido {self.id}' 

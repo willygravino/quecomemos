@@ -4,14 +4,19 @@
 
 {% block un_video %}
 
-<p>AQUÍ EL MENU ELEGIDO</p>
+<h1>Menú Elegido</h1>
 
-<body>
-    <h1>Datos de Elegidos Por Día</h1>
-            {% for comida, plato in elegidos_semanal.items %}
-            <li>{{ comida }}: {{ plato }}</li>
-            <br>
+<ul>
+    {% for fecha, platos in platos_por_dia.items %}
+    <li>
+        <strong>{{ fecha }}</strong>:
+        <ul>
+            {% for tipo_plato, plato in platos.items %}
+            <li>{{ tipo_plato }}: {{ plato }}</li>
             {% endfor %}
-</body>
+        </ul>
+    </li>
+    {% endfor %}
+</ul>
 
 {% endblock %}
