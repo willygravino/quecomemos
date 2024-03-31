@@ -1,11 +1,15 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.dispatch import receiver
+from django.db.models.signals import post_delete  # Agrega esta línea
+
+
 
 class Plato(models.Model):
     nombre_plato = models.CharField(max_length=30)
-    receta = models.CharField(max_length=80, blank=False)
-    descripcion_plato = models.CharField(max_length=300)
-    ingredientes = models.CharField('Ingresá los ingredientes, separados por coma', max_length=120, blank=False)
+    receta = models.CharField(max_length=80, blank=True)
+    descripcion_plato = models.CharField(max_length=300, blank=True)
+    ingredientes = models.CharField('Ingresá los ingredientes, separados por coma', max_length=120, blank=True)
 
     INDISTINTO = '-'
     HORNO = 'horno'
@@ -106,10 +110,16 @@ class Plato(models.Model):
     def __str__(self):
         return f"{self.id} - {self.nombre_plato}"
     
+# ESTO DEBERÍA BORRAR HAMBURGUESA DE TODOS LOS USUARIOS PORQUE SI ALGUIEN LA PRESELECCIONÓ, YA NO ESTARÁ
+@receiver(post_delete, sender=Plato)
+def eliminar_registros_relacionados(sender, instance, **kwargs):
+    Elegidos.objects.filter(usuario=instance.propietario, nombre_plato_elegido=instance.nombre_plato).delete()
+    
 class Elegidos(models.Model):
     usuario = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="platos_elegidos", null=True, blank=True)
     # EL SIGUIENTE CAMPO DEBERÍA LLAMARSE "PLATOS_PRESELECCIONADOS"
-    nombre_plato_elegido = models.CharField(max_length=30) 
+    nombre_plato_elegido = models.CharField(max_length=30)
+    # id_usuario_que_lo_cargo = models.CharField(max_length=30)
   
     # usuario = models.OneToOneField(to=User, on_delete=models.CASCADE, related_name="platos_elegidos", null=True, blank=True)
 

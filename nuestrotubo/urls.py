@@ -33,7 +33,9 @@ urlpatterns = [
     path('videos/list/filtro', FiltroDePlatos, name="filtro-de-platos"),
     path('videos/reiniciar/sugeridos', reiniciar_sugeridos, name="reiniciar-sugeridos"),
     path('videos/<pk>/update', PlatoUpdate.as_view(), name="videos-update"),
+    # path('videos/<pk>/delete',plato_delete, name="videos-delete"),
     path('videos/<pk>/delete', PlatoDelete.as_view(), name="videos-delete"),
+
     path('videos/<pk>/detail', PlatoDetail.as_view(), name="videos-detail"),
     path('videos/create', PlatoCreate.as_view(), name="videos-create"),
     path('login', Login.as_view(), name="login"),

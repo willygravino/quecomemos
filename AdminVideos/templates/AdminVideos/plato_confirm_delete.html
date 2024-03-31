@@ -8,13 +8,30 @@
   <div class="row py-lg-1">
     <div class="col-lg-6 col-md-8 mx-auto">
       <h1 class="fw-light"> ¿Estás seguro de que querés borrar el plato? </h1>
+
+      <p>El plato a eliminar es: {{ plato.nombre_plato }}</p>
+      <p>en elegidos: {{ plato_a_borrar.nombre_plato }}</p>
+      <p>en elegidos: {{ platos_elegidos }}</p>
+
+      {% for elegido in platos_elegidos %}
+           <p> ID:{{ elegido.usuario_id }} USUARIO:{{ elegido.usuario }} PLATO:{{ elegido.nombre_plato_elegido }} </p>
+
+            {% if elegido.nombre_plato_elegido == plato.nombre_plato %}
+              <p>ES IGUAL!!!</p>
+            {% else %}
+              <p>NO ES IGUAL!!!</p>
+            {% endif %}
+
+      {% endfor %}
+
+
     </div>
   </div>
   <div style="margin-top:40px">
-    <form method="post" enctype="multipart/form-data"> 
-        {% csrf_token %}
-        {{form.as_p}}
-        <input type="submit" value="Borrar">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{form.as_p}}
+      <input type="submit" value="Borrar">
     </form>
   </div>
 </section>

@@ -3,7 +3,7 @@ import json
 import locale
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from AdminVideos.models import Plato, Profile, Mensaje, Elegidos, ElegidosXDia, Sugeridos
 from django.http import JsonResponse
 from django.urls import reverse_lazy
@@ -45,68 +45,6 @@ def plato_elegido(request):
         # Manejar solicitudes POST u otras solicitudes que no sean GET
         return JsonResponse({"error": "Método no permitido"}, status=405)
 
-# class VistaInicial (ListView):
-#   model = Plato
-#   context_object_name = "platos"
-#   template_name = 'AdminVideos/lista_filtrada.html'
-
-# class PlatoList(ListView):
-#     model = Plato
-#     context_object_name = "platos"
-#     template_name = 'AdminVideos/lista_filtrada.html'
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-
-#         # Obtener objetos de Elegidos asociados al usuario logueado
-#         usuario = self.request.user
-#         elegidos = Elegidos.objects.filter(usuario=usuario)
-
-#         # Obtener solo los nombres de los platos seleccionados
-#         nombres_platos_elegidos = [e.nombre_plato_elegido for e in elegidos]
-
-#         # Pasar query y nombres de platos seleccionados al contexto
-#         # context['query'] = self.query if self.query else "tomate"
-#         context['elegidos'] = nombres_platos_elegidos
-
-#         return context
-
-
-# def grabar_menu_elegido(request):
-#     if request.method == 'POST':
-#         # Obtén los datos del formulario / 1_a significa dia 1, almuerzo - c significa cena
-#         fecha_actual = request.POST.get('fecha_actual')
-#         datos = {
-#             '1_a': request.POST.get('1-a'),
-#             '1_c': request.POST.get('1-c'),
-#             '2_a': request.POST.get('2-a'),
-#             '2_c': request.POST.get('2-c'),
-#             '3_a': request.POST.get('3-a'),
-#             '3_c': request.POST.get('3-c'),
-#             '4_a': request.POST.get('4-a'),
-#             '4_c': request.POST.get('4-c'),
-#             '5_a': request.POST.get('5-a'),
-#             '5_c': request.POST.get('5-c'),
-#             '6_a': request.POST.get('6-a'),
-#             '6_c': request.POST.get('6-c'),
-#             '7_a': request.POST.get('7-a'),
-#             '7_c': request.POST.get('7-c')
-#         }
-
-#         # Crea un diccionario con la fecha como clave y los datos como valor
-#         datos_por_dia = {fecha_actual: datos}
-
-#         # Crea una instancia del modelo ElegidosPorDia con el diccionario de datos
-#         elegidos_por_semana_objeto = ElegidosXDia(elegidos_por_semana=datos_por_dia)
-
-#         # Guarda la instancia del modelo en la base de datos
-#         elegidos_por_semana_objeto.save()
-
-#         # Retorna una respuesta JSON
-#         return redirect(reverse_lazy("menu-elegido"))
-#     else:
-#         # Retorna una respuesta JSON con un mensaje de error si el método no es POST
-#         return JsonResponse({'error': 'El método de solicitud debe ser POST'})
 
 def grabar_menu_elegido(request):
     if request.method == 'POST':
@@ -138,21 +76,6 @@ def grabar_menu_elegido(request):
         # Retorna una respuesta JSON con un mensaje de error si el método no es POST
         return JsonResponse({'error': 'El método de solicitud debe ser POST'})
 
-# class MenuElegido (CreateView):
-#     model = ElegidosXDia
-#     fields = ["platos_que_comemos"]
-#     template_name = 'AdminVideos/menu_elegido.html'
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         ultimo_objeto = ElegidosXDia.objects.latest('id')
-#         context['ultimo_elegido'] = "seleccionados"
-#         if ultimo_objeto is not None:
-#            datos_json = ultimo_objeto.platos_que_comemos
-#            context['elegidos_semanal'] = datos_json
-#         else: context['elegidos_semanal'] = "poroto"
-#         return context
-    
 
 class MenuElegido(LoginRequiredMixin, CreateView):
     model = ElegidosXDia
@@ -181,24 +104,6 @@ class PlatoDetail(DetailView):
     model = Plato
     context_object_name = "plato"
 
-# class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-#     model = Plato
-#     form_class = PlatoForm
-#     template_name = 'AdminVideos/plato_update.html'
-#     success_url = reverse_lazy("filtro-de-platos")
-#     # fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria", "preparacion","tipo","calorias", "image"]
-
-#     def get_context_data(self, **kwargs):
-#          context = super().get_context_data(**kwargs)
-#          context['variedades_en_base'] = {"variedad1": {"variedad": "var1", "ingredientes_variedades": "ing1"},
-#                                           "variedad2": {"variedad": "var2", "ingredientes_variedades": "ing2"}}
-#          return context
-
-#     def test_func(self):
-#         user_id = self.request.user.id
-#         plato_id =  self.kwargs.get("pk")
-#         return Plato.objects.filter(propietario=user_id, id=plato_id).exists()
-
 
 class PlatoDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Plato
@@ -209,21 +114,7 @@ class PlatoDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         user_id = self.request.user.id
         plato_id =  self.kwargs.get("pk")
         return Plato.objects.filter(propietario=user_id, id=plato_id).exists()
-
-
-# class PlatoCreate(LoginRequiredMixin, CreateView):
-#     model = Plato
-#     success_url = reverse_lazy("filtro-de-platos")
-#     fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria","preparacion", "tipo","calorias", "image"]
-# #    fields = '__all__'
-
-#     def form_valid(self, form):
-#         el_propietario = form.save(commit=False)
-#         # AQUI SE PUEDE INTERVENIR, SEGÚN GPT
-#         el_propietario.propietario = self.request.user
-#         el_propietario.save()
-#         return redirect(self.success_url)
-
+    
 
 
 
@@ -247,14 +138,6 @@ class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
          context['variedades_en_base'] = self.object.variedades or {}
          return context
 
-    # def get_context_data(self, **kwargs):
-    #         context = super().get_context_data(**kwargs)
-    #         variedades_en_base = self.object.variedades
-    #         if variedades_en_base:
-    #              context['variedades_en_base'] = json.loads(variedades_en_base)
-    #         else:
-    #              context['variedades_en_base'] = {}
-    #         return context
     
     def test_func(self):
         user_id = self.request.user.id
@@ -277,8 +160,6 @@ class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                     'ingredientes_variedades': self.request.POST.get(ingredientes_key)
                 }
 
-        # Asignar las variedades al campo JSONField
-        # plato.variedades = json.dumps(variedades)
         plato.variedades = variedades
 
         plato.save()
@@ -355,17 +236,8 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
         return Profile.objects.filter(user=self.request.user).exists()
     
 
-# def pagina_inicial():
-#     PlatoFilterForm({"medios":"horno"})
-#     return redirect(reverse_lazy('filtro-de-platos'))
-
-
 def FiltroDePlatos (request):
 
-    # # Obtiene la fecha actual
-    # fecha_actual = datetime.now()
-    # # Obtener el nombre del día de la semana
-    # nombre_dia_semana = fecha_actual.strftime('%A')
     # Establecer la configuración regional a español
     locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
  
@@ -398,15 +270,7 @@ def FiltroDePlatos (request):
     calorias = request.session.get('calorias_estable', "None")
 
     items_iniciales = ""
-    # items_iniciales = {
-    #                     'tipo_de_vista_estable': tipo_de_vista_estable,
-    #                     'medios_estable': "cocina",
-    #                     'categoria_estable': categoria, # OJO QUE ESTA FUNCIONA SIN NECESIDAD DE USAR "_ESTABLE, ESTOY DERROCHANDO VARIABLES ESTABLES (seguire usando así)?"
-    #                     'preparacion_estable': preparacion,
-    #                     'tipo_estable': tipo,
-    #                     'calorias_estable': calorias
-    #                 }
-
+  
     platos = Plato.objects.all()
     usuario = request.user
     cantidad_platos_sugeridos = 0
