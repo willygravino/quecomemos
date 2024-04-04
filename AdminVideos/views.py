@@ -87,6 +87,16 @@ def grabar_menu_elegido(request):
         return JsonResponse({'error': 'El método de solicitud debe ser POST'})
     
 
+
+
+
+
+
+
+
+
+
+
 @login_required
 def menu_elegido(request):
     # Obtener la fecha actual
@@ -126,10 +136,60 @@ def menu_elegido(request):
             "cena_info": cena_info
         }
 
+        lista_de_compras = []
+            
+    # def lista_de_compras(request):
+        if request.method == 'POST':
+            ingredientes_seleccionados = request.POST.getlist('ingrediente_a_comprar')
+            
+            lista_de_compras = []
+            for ingrediente in ingredientes_seleccionados:
+                # Por ejemplo, aquí podrías guardar los ingredientes en la variable lista_de_compras
+                lista_de_compras.append(ingrediente)
+            
+        #     # Ahora puedes hacer lo que necesites con la lista_de_compras, como guardarla en la base de datos o realizar otras operaciones
+            
+        #     # Finalmente, puedes redirigir a una página de éxito o renderizar un nuevo template
+        #     return render(request, 'AdminVideos/menu_elegido.html', {'lista_de_compras': lista_de_compras})
+        # else:
+        #     # Si es una solicitud GET, simplemente renderiza el formulario
+        #     return redirect('menu-elegido', lista_compras=','.join(lista_de_compras))
+
     # ingredientes_separados_por_comas = ", ".join(ingredientes_unicos)  # Convertir el conjunto en cadena separada por comas
 
-    context = {'platos_por_dia': platos_por_dia, 'ingredientes_separados_por_comas': ingredientes_unicos}
+    context = {'platos_por_dia': platos_por_dia, 'ingredientes_separados_por_comas': ingredientes_unicos, "lista_de_compras": lista_de_compras }
     return render(request, 'AdminVideos/menu_elegido.html', context)
+
+
+# if request.method == 'GET':
+# nombre_plato = request.GET.get(name) toma el valor > value que corresponde al ID
+# borrar = request.GET.get(name)
+
+def lista_de_compras(request):
+    if request.method == 'POST':
+        ingredientes_seleccionados = request.POST.getlist('ingrediente_a_comprar')
+        
+        lista_de_compras = []
+        for ingrediente in ingredientes_seleccionados:
+            # Por ejemplo, aquí podrías guardar los ingredientes en la variable lista_de_compras
+            lista_de_compras.append(ingrediente)
+        
+        # Ahora puedes hacer lo que necesites con la lista_de_compras, como guardarla en la base de datos o realizar otras operaciones
+        
+        # Finalmente, puedes redirigir a una página de éxito o renderizar un nuevo template
+        return render(request, 'AdminVideos/menu_elegido.html', {'lista_de_compras': lista_de_compras})
+    else:
+        # Si es una solicitud GET, simplemente renderiza el formulario
+        return redirect('menu-elegido', lista_compras=','.join(lista_de_compras))
+
+
+
+
+
+
+
+
+
 
 
 class PlatoDetail(DetailView):
@@ -268,19 +328,8 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
         return Profile.objects.filter(user=self.request.user).exists()
     
 
-def lista_de_compras(request):
-    if request.method == 'POST':
-        # Procesar el primer formulario
-        # Procesar el segundo formulario
-        # Lógica para procesar los datos del formulario y guardarlos en la base de datos o hacer lo que sea necesario
-        # Redirigir a una página de éxito o a la misma vista si necesitas mostrar más información
 
-    else:
-        # Si es una solicitud GET, mostrar los formularios vacíos
-        form1 = Formulario1()
-        form2 = Formulario2()
 
-    return render(request, 'ruta/a/template.html', {'form1': form1, 'form2': form2})
 
 
 def FiltroDePlatos (request):

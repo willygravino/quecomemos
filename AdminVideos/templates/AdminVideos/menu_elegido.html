@@ -7,7 +7,7 @@
 <section>
     <h1>Menúes Programados</h1>
 
-    <form method="post">
+    <form action="{% url 'menu-elegido' %}" method="post">
         {% csrf_token %}
         {% for fecha, platos in platos_por_dia.items %}
         <h3>{{ fecha }}</h3>
@@ -47,12 +47,14 @@
 
 
 <section>
+    <form>
+
         {% csrf_token %}
         <h3>EDITA LISTA DE COMPRAS</h3>
         {% for ingrediente in ingredientes_separados_por_comas %}
-        <input type="checkbox" id="{{ ingrediente }}" name="ingredientes" value="{{ ingrediente }}" checked>
-        <label for="{{ ingrediente }}">{{ ingrediente }}</label>
-        <input type="text" id="{{ ingrediente }}_detalle" name="{{ ingrediente }}_detalle" placeholder="Detalles"><br>
+        <input type="checkbox" id="{{ ingrediente }}" name="ingrediente_a_comprar" value="{{ ingrediente }}" checked>
+        <label for="{{ ingrediente }}">{{ ingrediente }}</label><br>
+        <!-- <input type="text" id="{{ ingrediente }}_detalle" name="{{ ingrediente }}_detalle" placeholder="Detalles">-->
         {% endfor %}
         <input type="submit" value="Enviar">
     </form>
@@ -61,10 +63,10 @@
 
 
 <section>
-<H3>LISTA DE COMPRAS
-</H3>
-<h2>{{ ingredientes_separados_por_comas }}</h2>
+    <H3>LISTA DE COMPRAS
+    </H3>
+    <h2>{{ lista_de_compras }}</h2>
 
-</section> 
+</section>
 
 {% endblock %}

@@ -13,9 +13,8 @@ class PlatoFilterForm(forms.Form):
     
     tipo_de_vista = forms.ChoiceField(choices=[('todos', 'Todos'), ('solo-mios', 'Solo mis platos'), ('de-otros', 'Solo platos de otros'), ('preseleccionados', 'Preseleccionados'), ("random-todos", "< Random con todos >"), ("random-con-mios", "< Random con los mios>")], required=True)
 
-
-class IngredienteForm(forms.Form):
-    detalle = forms.CharField(max_length=100)
+# class IngredienteForm(forms.Form):
+#     ingrediente_a_comprar = forms.CharField(max_length=100)
 
 class PlatoForm(forms.ModelForm):
     variedad1 = forms.CharField(max_length=100, required=False)
