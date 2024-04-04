@@ -4,19 +4,67 @@
 
 {% block un_video %}
 
-<h1>Menú Elegido</h1>
+<section>
+    <h1>Menúes Programados</h1>
 
-<ul>
-    {% for fecha, platos in platos_por_dia.items %}
-    <li>
-        <strong>{{ fecha }}</strong>:
-        <ul>
-            {% for tipo_plato, plato in platos.items %}
-            <li>{{ tipo_plato }}: {{ plato }}</li>
-            {% endfor %}
-        </ul>
-    </li>
-    {% endfor %}
-</ul>
+    <form method="post">
+        {% csrf_token %}
+        {% for fecha, platos in platos_por_dia.items %}
+        <h3>{{ fecha }}</h3>
+
+        <div class="plato-info">
+            <p><strong>Almuerzo:</strong> {{ platos.almuerzo }}</p>
+            {% if platos.almuerzo_info and platos.almuerzo != "-----" %}
+            <p><strong>Ingredientes del almuerzo:</strong> {{ platos.almuerzo_info }}</p>
+            <input type="checkbox" id="excluir_almuerzo_{{ fecha }}" name="excluir_almuerzo_{{ fecha }}"
+                value="{{ fecha }}" checked>
+            <label for="excluir_almuerzo_{{ fecha }}">Excluir ingredientes en lista de compras</label>
+            {% else %}
+            <p>No se encontraron ingredientes para el almuerzo.</p>
+            {% endif %}
+
+
+        </div>
+
+        <div class="plato-info">
+            <p><strong>Cena:</strong> {{ platos.cena }}</p>
+            {% if platos.cena_info and platos.cena != "-----" %}
+            <p><strong>Ingredientes de la cena:</strong> {{ platos.cena_info }}</p>
+            <input type="checkbox" id="excluir_cena_{{ fecha }}" name="excluir_cena_{{ fecha }}" value="{{ fecha }}"
+                checked>
+            <label for="excluir_cena_{{ fecha }}">Excluir ingredientes en lista de compras</label>
+            {% else %}
+            <p>No se encontraron ingredientes para la cena.</p>
+            {% endif %}
+
+
+        </div>
+        {% endfor %}
+        <input type="submit" value="Enviar">
+
+
+</section>
+
+
+<section>
+        {% csrf_token %}
+        <h3>EDITA LISTA DE COMPRAS</h3>
+        {% for ingrediente in ingredientes_separados_por_comas %}
+        <input type="checkbox" id="{{ ingrediente }}" name="ingredientes" value="{{ ingrediente }}" checked>
+        <label for="{{ ingrediente }}">{{ ingrediente }}</label>
+        <input type="text" id="{{ ingrediente }}_detalle" name="{{ ingrediente }}_detalle" placeholder="Detalles"><br>
+        {% endfor %}
+        <input type="submit" value="Enviar">
+    </form>
+
+</section>
+
+
+<section>
+<H3>LISTA DE COMPRAS
+</H3>
+<h2>{{ ingredientes_separados_por_comas }}</h2>
+
+</section> 
 
 {% endblock %}

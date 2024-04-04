@@ -11,7 +11,16 @@
 <p>Variedad 6: <input type="text" name="variedad6" value="{{ variedades_en_base.variedad6.variedad|default:'' }}"></p>
 <p>Ingredientes de variedad 6: <input type="text" name="ingredientes_de_variedad6" value="{{ variedades_en_base.variedad6.ingredientes_variedades|default:'' }}"></p>
 
-
+<!-- {% else %}
+  <section class="py-0 text-center container">
+    <div class="row py-lg-1">
+      <div class="col-lg-10 col-md-8 mx-auto">
+        <h1 class="fw-light"> Es necesario que completes tu perfil. </h1>
+        <p class="lead text-body-secondary">Completá el perfil con tu nombre y apellido en Completar perfil, para poder
+          ver los videos que comparten con vos.</p>
+      </div>
+    </div>
+  </section> -->
 
 
 <div class="container">

@@ -210,17 +210,13 @@
           <strong>Agregar Plato</strong>
         </a>
 
-        <a href="" class="navbar-brand d-flex align-items-center">
-          <strong>Configuración</strong>
-        </a>
-
-        <!-- <a href=" url 'mensaje-list' " class="navbar-brand d-flex align-items-center">
+               <!-- <a href=" url 'mensaje-list' " class="navbar-brand d-flex align-items-center">
         <strong>Mis Mensajes</strong>
       </a> -->
 
         {% if user.profile %}
         <a href="{% url 'profile-update' user.profile.id %}" class="navbar-brand d-flex align-items-center">
-          <strong>Perfil ({{user.username}})</strong>
+          <strong>Configuración ({{user.username}})</strong>
         </a>
 
         {% else %}
