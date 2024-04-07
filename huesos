@@ -1,338 +1,75 @@
+@login_required
+def menu_elegido(request):
+    # Obtener la fecha actual
+    today = date.today()  # Importa 'date' desde 'datetime'
+        # Filtrar los objetos de ElegidosXDia para excluir aquellos cuya fecha sea anterior a la fecha actual
+    objetos_del_usuario = ElegidosXDia.objects.filter(user=request.user, el_dia_en_que_comemos__gte=today).order_by('el_dia_en_que_comemos')
+    platos_por_dia = {}
+    ingredientes_unicos = set()  # Conjunto para almacenar ingredientes únicos
+    lista_de_compras = []
+
+    # Inicializar las listas de ingredientes a excluir
+    ingredientes_a_excluir_almuerzo = []
+    ingredientes_a_excluir_cena = []
+
+      # def lista_de_compras(request):
+    if request.method == 'POST':
+            ingredientes_a_excluir_almuerzo = request.POST.getlist('excluir_almuerzo')
+            ingredientes_a_excluir_cena = request.POST.getlist('excluir_cena')
+            # Aquí puedes procesar los ingredientes seleccionados de almuerzo y cena si es necesario
+            ingredientes_seleccionados = request.POST.getlist('ingrediente_a_comprar')
+
+            # Agrega los ingredientes seleccionados que no están excluidos a la lista de compras
+            for ingrediente in ingredientes_seleccionados:
+                if ingrediente not in ingredientes_a_excluir_almuerzo and ingrediente not in ingredientes_a_excluir_cena:
+                    lista_de_compras.append(ingrediente)
+
+    for objeto in objetos_del_usuario:
+        platos_dia = objeto.platos_que_comemos
+        almuerzo_que_comemos = platos_dia.get("almuerzo", [])
+        cena_que_comemos = platos_dia.get("cena", [])
+
+        almuerzo_info_queryset = Plato.objects.filter(nombre_plato=almuerzo_que_comemos).values("ingredientes")
+        almuerzo_info = almuerzo_info_queryset.first()['ingredientes'] if almuerzo_info_queryset.exists() else ""
+
+        # Plato.objects.filter(ingredientes__icontains="%%")
+        cena_info_queryset = Plato.objects.filter(nombre_plato=cena_que_comemos).values("ingredientes")
+        cena_info = cena_info_queryset.first()['ingredientes'] if cena_info_queryset.exists() else ""
+
+        # if almuerzo_info:
+        #     ingredientes_unicos.update(almuerzo_info.split(", "))
+        # if cena_info:
+        #     ingredientes_unicos.update(cena_info.split(", "))
+
+        
+        if almuerzo_info:
+            # Actualiza los ingredientes únicos excluyendo los seleccionados para excluir del almuerzo
+            ingredientes_unicos.update(filter(lambda ingrediente: ingrediente not in ingredientes_a_excluir_almuerzo, almuerzo_info.split(", ")))
+        if cena_info:
+            # Actualiza los ingredientes únicos excluyendo los seleccionados para excluir de la cena
+            ingredientes_unicos.update(filter(lambda ingrediente: ingrediente not in ingredientes_a_excluir_cena, cena_info.split(", ")))
+    
+
+
+        if not cena_info:
+            cena_info = ""
+        if not almuerzo_info:
+            almuerzo_info = ""
+
+        platos_por_dia[objeto.el_dia_en_que_comemos] = {
+            "almuerzo": almuerzo_que_comemos,
+            "cena": cena_que_comemos,
+            "almuerzo_info": almuerzo_info,
+            "cena_info": cena_info
+        }
+
+        lista_de_compras = []
+            
+    context = {'platos_por_dia': platos_por_dia, 'ingredientes_separados_por_comas': ingredientes_unicos, "lista_de_compras": lista_de_compras,  " ingredientes_a_excluir_cena": ingredientes_a_excluir_cena }
+    return render(request, 'AdminVideos/menu_elegido.html', context)
 
 
-<p>Variedad 1: <input type="text" name="variedad1" value="{{ variedades_en_base.variedad1.variedad|default:'' }}"></p>
-<p>Ingredientes de variedad 1: <input type="text" name="ingredientes_de_variedad1" value="{{ variedades_en_base.variedad1.ingredientes_variedades|default:'' }}"></p>
-<p>Variedad 2: <input type="text" name="variedad2" value="{{ variedades_en_base.variedad2.variedad|default:'' }}"></p>
-<p>Ingredientes de variedad 2: <input type="text" name="ingredientes_de_variedad2" value="{{ variedades_en_base.variedad2.ingredientes_variedades|default:'' }}"></p>
-<p>Variedad 3: <input type="text" name="variedad3" value="{{ variedades_en_base.variedad3.variedad|default:'' }}"></p>
-<p>Ingredientes de variedad 3: <input type="text" name="ingredientes_de_variedad3" value="{{ variedades_en_base.variedad3.ingredientes_variedades|default:'' }}"></p>
-<p>Variedad 4: <input type="text" name="variedad4" value="{{ variedades_en_base.variedad4.variedad|default:'' }}"></p>
-<p>Ingredientes de variedad 4: <input type="text" name="ingredientes_de_variedad4" value="{{ variedades_en_base.variedad4.ingredientes_variedades|default:'' }}"></p>
-<p>Variedad 5: <input type="text" name="variedad5" value="{{ variedades_en_base.variedad5.variedad|default:'' }}"></p>
-<p>Ingredientes de variedad 5: <input type="text" name="ingredientes_de_variedad5" value="{{ variedades_en_base.variedad5.ingredientes_variedades|default:'' }}"></p>
-<p>Variedad 6: <input type="text" name="variedad6" value="{{ variedades_en_base.variedad6.variedad|default:'' }}"></p>
-<p>Ingredientes de variedad 6: <input type="text" name="ingredientes_de_variedad6" value="{{ variedades_en_base.variedad6.ingredientes_variedades|default:'' }}"></p>
-
-<!-- {% else %}
-  <section class="py-0 text-center container">
-    <div class="row py-lg-1">
-      <div class="col-lg-10 col-md-8 mx-auto">
-        <h1 class="fw-light"> Es necesario que completes tu perfil. </h1>
-        <p class="lead text-body-secondary">Completá el perfil con tu nombre y apellido en Completar perfil, para poder
-          ver los videos que comparten con vos.</p>
-      </div>
-    </div>
-  </section> -->
-
-
-<div class="container">
-  <div class="accordion" id="accordionExample">
-      <div class="accordion-item">
-          <h2 class="accordion-header" id="headingOne">
-              <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                  data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                  <p>Variedad 1: <input type="text" name="variedad1"
-                          value="{{ variedades_en_base.variedad1.variedad|default:'' }}"></p>
-              </button>
-          </h2>
-          <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
-              data-bs-parent="#accordionExample">
-              <div class="accordion-body">
-                  <p>Ingredientes de variedad 1: <input type="text" name="ingredientes_de_variedad1"
-                          value="{{ variedades_en_base.variedad1.ingredientes_variedades|default:'' }}">
-                  </p>
-
-              </div>
-          </div>
-      </div>
-
-      <div class="accordion-item">
-          <h2 class="accordion-header" id="headingTwo">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                  data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                  <p>Variedad 2: <input type="text" name="variedad2"
-                          value="{{ variedades_en_base.variedad2.variedad|default:'' }}"></p>
-              </button>
-          </h2>
-          <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
-              data-bs-parent="#accordionExample">
-              <div class="accordion-body">
-
-                  <p>Ingredientes de variedad 2: <input type="text" name="ingredientes_de_variedad2"
-                          value="{{ variedades_en_base.variedad2.ingredientes_variedades|default:'' }}">
-                  </p>
-              </div>
-          </div>
-      </div>
-      <div class="accordion-item">
-          <h2 class="accordion-header" id="headingThree">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                  data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-
-                  <p>Variedad 3: <input type="text" name="variedad3"
-                          value="{{ variedades_en_base.variedad3.variedad|default:'' }}"></p>
-              </button>
-          </h2>
-          <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree"
-              data-bs-parent="#accordionExample">
-              <div class="accordion-body">
-
-
-                  <p>Ingredientes de variedad 3: <input type="text" name="ingredientes_de_variedad3"
-                          value="{{ variedades_en_base.variedad3.ingredientes_variedades|default:'' }}">
-                  </p>
-              </div>
-          </div>
-      </div>
-      <div class="accordion-item">
-          <h2 class="accordion-header" id="headingOne">
-              <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                  data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-
-                  <p>Variedad 4: <input type="text" name="variedad4"
-                          value="{{ variedades_en_base.variedad4.variedad|default:'' }}"></p>
-              </button>
-          </h2>
-          <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
-              data-bs-parent="#accordionExample">
-              <div class="accordion-body">
 
 
-                  <p>Ingredientes de variedad 4: <input type="text" name="ingredientes_de_variedad4"
-                          value="{{ variedades_en_base.variedad4.ingredientes_variedades|default:'' }}">
-                  </p>
 
-              </div>
-          </div>
-      </div>
-      <div class="accordion-item">
-          <h2 class="accordion-header" id="headingTwo">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                  data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
 
-                  <p>Varifdfddfedad 5: <input type="text" name="variedad5"
-                          value="{{ variedades_en_base.variedad5.variedad|default:'' }}"></p>
-              </button>
-          </h2>
-          <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
-              data-bs-parent="#accordionExample">
-              <div class="accordion-body">
-
-                  <p>Ingredientes de variedad 5: <input type="text" name="ingredientes_de_variedad5"
-                          value="{{ variedades_en_base.variedad5.ingredientes_variedades|default:'' }}">
-                  </p>
-              </div>
-          </div>
-      </div>
-      <div class="accordion-item">
-          <h2 class="accordion-header" id="headingThree">
-              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                  data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-
-                  <p>Variedfdfdad 6: <input type="text" name="variedad6"
-                          value="{{ variedades_en_base.variedad6.variedad|default:'' }}"></p>
-              </button>
-          </h2>
-          <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree"
-              data-bs-parent="#accordionExample">
-              <div class="accordion-body">
-                  <p>Ingredidfdfdffdentes de variedad rrrr6: <input type="text" name="ingredientes_de_variedad6"
-                          value="{{ variedades_en_base.variedad6.ingredientes_variedades|default:'' }}">
-                  </p>
-              </div>
-          </div>
-      </div>
-  </div>
-
-
-
-{{form.as_p}}
-
-
-
-
-
-            <!-- Iterar sobre las variedades_en_base -->
-            {% for key, value in variedades_en_base.items %}
-            <div class="variedad-group">
-                <p>Variedad {{ forloop.counter }}: {{ value.variedad }}</p>
-                <p>Ingredientes de variedad {{ forloop.counter }}: {{ value.ingredientes_variedades }}</p>
-            </div>
-            {% endfor %}
-
-            <!-- Botón para agregar otra variedad e ingredientes de variedad -->
-            <button type="button" id="agregar-variedad">Agregar Variedad</button>
-
-
-
-
-
-      <!-- Varias variedades e ingredientes de variedad -->
-      <div id="variedades-container">
-        <div class="variedad-group">
-          <p>Variedad: {{ form.variedad }}</p>
-          <p>Ingredientes de variedad: {{ form.ingredientes_de_variedad }}</p>
-        </div>
-      </div>
-
-      <!-- Botón para agregar otra variedad e ingredientes de variedad -->
-      <button type="button" id="agregar-variedad">Agregar Variedad</button>
-
-      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- 
-{% block titulo_ok %}
-      <h1 class="fw-light"> Esto  s son los platos  blabla  que  cargaste. </h1>
-{% endblock %} -->
-
-<!-- 
-
-{% block titulo_ok %}
-   <h1 class="fw-light"> Estos son los platos que coinciden con tu búsqueda. </h1>
-{% endblock %} -->
-
-
-{% block mensaje %}
-        <h1 class="fw-light"> Aún no publicas BLA BLA te ningún plato. </h1>
-        <p class="lead text-body-secondary">Para ingresar platos y compart BLA BLA irlos con la comunidad de qué comemos, cargá la receta de esos platos ingresando a agregar plato.</p>
- {% endblock %}  
-
-
- {% if tipo_de_vista_estable == "random-todos" or tipo_de_vista_estable == "random-con-mios"%}
-     
- <form action="{% url 'reiniciar-sugeridos' %}" method="GET">
-   <input type="checkbox" id="borrar-sugeribles" name="borrar-lista-sugeribles" value="borrar-sugeribles" checked>        
-   <button type="submit">Reiniciar sugeribles</button>
- </form>
-{% endif %}
-
-<p>Propietario: {{ form.propietario }}</p>
-
-   <p>Medios de cocción:
-        <select name="medios">
-          <!-- <option value="">- Seleccione -</option> -->
-          {% for choice in form.medios.field.choices %}
-          <option value="{{ choice.0 }}" {% if choice.0==form.initial.medios %}selected{% endif %}>{{ choice.1 }}
-          </option>
-          {% endfor %}
-        </select>
-      </p>
-
-
-
-
-      <select name="medios">
-        <option value="">- Seleccione -</option> 
-          {% for choice in form.medios.field.choices %}
-          <option value="{{ choice.0 }}" {% if choice.0==form.initial.medios %} selected {% endif %}>{{ choice.1 }}
-          </option>
-          {% endfor %}
-        </select>
-      </p>
-      <p>Categoría:
-        <select name="categoria">
-          <option value="" {% if form.initial.categoria=='' %}selected{% endif %}>- Seleccione -</option>
-          {% for choice in form.categoria.field.choices %}
-          <option value="{{ choice.0 }}" {% if choice.0==form.initial.categoria %}selected{% endif %}>{{ choice.1 }}
-          </option>
-          {% endfor %}
-        </select>
-      </p>
-
-      <p>Preparación:
-        <select name="preparacion">
-          <option value="">- Seleccione -</option>
-          {% for choice in form.preparacion.field.choices %}
-          <option value="{{ choice.0 }}" {% if choice.0==form.initial.preparacion %}selected{% endif %}>{{ choice.1 }}
-          </option>
-          {% endfor %}
-        </select>
-      </p>
-
-<!-- lo que no funcionaba en plato_form -->
-      <p>Tipo:
-        <select name="tipo">
-          <option value="">- Seleccione -</option>
-          {% for choice in form.tipo.field.choices %}
-          <option value="{{ choice.0 }}" {% if choice.0==form.initial.tipo %}selected{% endif %}>{{ choice.1 }}</option>
-          {% endfor %}
-        </select>
-      </p>
-
-      <p>Calorías:
-        <select name="calorias">
-          <option value="">- Seleccione -</option>
-          {% for choice in form.calorias.field.choices %}
-          <option value="{{ choice.0 }}" {% if choice.0==form.initial.calorias %}selected{% endif %}>{{ choice.1 }}
-          </option>
-          {% endfor %}
-        </select>
-      </p>
-      <p>Imagen: {{ form.image }}</p>
-      <p>Variedades: {{ form.variedades }}</p>
-      <button type="submit">Guardar</button>
-    </form>
-
-
-    <p> form.medios {{ form.medios }} </p>
-
-
-    <p>Variedades:
-      {{ form.variedades }} </p>
-
-
-
-
-      <p> Variedad
-        <input type="text" value="">
-      <h3>Ingredientes</h3>
-      <input type="text" value="">
-      </p>
-
-      <!-- 
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    var contador = 2;  // Inicializar el contador en 2 para la segunda variedad
-
-    document.getElementById("agregar-variedad").addEventListener("click", function() {
-      var container = document.getElementById("variedades-container");
-      var newVariedadGroup = document.createElement("div");
-      newVariedadGroup.classList.add("variedad-group");
-      newVariedadGroup.innerHTML = `
-        <p>VariedadDDDDD: {{ form.variedad|add:1 }}</p>
-        <p>Ingredientes de variedadDDDDDDD: {{ form['ingredientes_de_variedad' + contador] }}</p>
-      `;
-      container.appendChild(newVariedadGroup);
-
-      // Incrementar el contador para el siguiente conjunto de campos
-      contador++;
-    });
-  });
-</script>
- -->
- <p>{{ form.variedades }}</p>
-
-<!-- 
-funcipona! -->
- {% if  form.variedad  %} 
-             
- {% endif %}

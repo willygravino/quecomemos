@@ -92,19 +92,17 @@ def grabar_menu_elegido(request):
 
 
 
-
-
-
-
-
 @login_required
 def menu_elegido(request):
     # Obtener la fecha actual
-    today = date.today()  # Importa 'date' desde 'datetime'
-        # Filtrar los objetos de ElegidosXDia para excluir aquellos cuya fecha sea anterior a la fecha actual
+    today = date.today()
+    # Filtrar los objetos de ElegidosXDia para excluir aquellos cuya fecha sea anterior a la fecha actual
     objetos_del_usuario = ElegidosXDia.objects.filter(user=request.user, el_dia_en_que_comemos__gte=today).order_by('el_dia_en_que_comemos')
     platos_por_dia = {}
     ingredientes_unicos = set()  # Conjunto para almacenar ingredientes únicos
+    # Inicializar las listas de ingredientes a excluir
+    ingredientes_a_excluir_almuerzo = []
+    ingredientes_a_excluir_cena = []
 
     for objeto in objetos_del_usuario:
         platos_dia = objeto.platos_que_comemos
@@ -114,7 +112,6 @@ def menu_elegido(request):
         almuerzo_info_queryset = Plato.objects.filter(nombre_plato=almuerzo_que_comemos).values("ingredientes")
         almuerzo_info = almuerzo_info_queryset.first()['ingredientes'] if almuerzo_info_queryset.exists() else ""
 
-        # Plato.objects.filter(ingredientes__icontains="%%")
         cena_info_queryset = Plato.objects.filter(nombre_plato=cena_que_comemos).values("ingredientes")
         cena_info = cena_info_queryset.first()['ingredientes'] if cena_info_queryset.exists() else ""
 
@@ -122,7 +119,6 @@ def menu_elegido(request):
             ingredientes_unicos.update(almuerzo_info.split(", "))
         if cena_info:
             ingredientes_unicos.update(cena_info.split(", "))
-
 
         if not cena_info:
             cena_info = ""
@@ -136,29 +132,39 @@ def menu_elegido(request):
             "cena_info": cena_info
         }
 
-        lista_de_compras = []
-            
-    # def lista_de_compras(request):
-        if request.method == 'POST':
-            ingredientes_seleccionados = request.POST.getlist('ingrediente_a_comprar')
-            
-            lista_de_compras = []
-            for ingrediente in ingredientes_seleccionados:
-                # Por ejemplo, aquí podrías guardar los ingredientes en la variable lista_de_compras
+    lista_de_compras = []
+
+    if request.method == 'POST':
+        ingredientes_seleccionados = request.POST.getlist('ingrediente_a_comprar')
+        ingredientes_a_excluir_almuerzo_str = request.POST.get('excluir_almuerzo')
+        ingredientes_a_excluir_cena_str = request.POST.get('excluir_cena')
+
+        # Convertir las cadenas de ingredientes a excluir en listas si existen
+        ingredientes_a_excluir_almuerzo = ingredientes_a_excluir_almuerzo_str.split(', ') if ingredientes_a_excluir_almuerzo_str else []
+        ingredientes_a_excluir_cena = ingredientes_a_excluir_cena_str.split(', ') if ingredientes_a_excluir_cena_str else []
+
+        # Agrega los ingredientes seleccionados que no están excluidos a la lista de compras
+        for ingrediente in ingredientes_seleccionados:
+            if ingrediente not in ingredientes_a_excluir_almuerzo and ingrediente not in ingredientes_a_excluir_cena:
                 lista_de_compras.append(ingrediente)
-            
-        #     # Ahora puedes hacer lo que necesites con la lista_de_compras, como guardarla en la base de datos o realizar otras operaciones
-            
-        #     # Finalmente, puedes redirigir a una página de éxito o renderizar un nuevo template
-        #     return render(request, 'AdminVideos/menu_elegido.html', {'lista_de_compras': lista_de_compras})
-        # else:
-        #     # Si es una solicitud GET, simplemente renderiza el formulario
-        #     return redirect('menu-elegido', lista_compras=','.join(lista_de_compras))
 
-    # ingredientes_separados_por_comas = ", ".join(ingredientes_unicos)  # Convertir el conjunto en cadena separada por comas
+      
+    # Excluir los ingredientes de las listas de exclusión del conjunto de ingredientes únicos
+    for ingrediente_excluir in ingredientes_a_excluir_almuerzo + ingredientes_a_excluir_cena:
+        ingredientes_unicos.discard(ingrediente_excluir)
+          
+    context = {
+        'platos_por_dia': platos_por_dia,
+        'ingredientes_separados_por_comas': ingredientes_unicos,
+        "lista_de_compras": lista_de_compras,
+        "ingredientes_a_excluir_cena": ingredientes_a_excluir_cena,
+        "ingredientes_a_excluir_almuerzo": ingredientes_a_excluir_almuerzo
+    }
 
-    context = {'platos_por_dia': platos_por_dia, 'ingredientes_separados_por_comas': ingredientes_unicos, "lista_de_compras": lista_de_compras }
     return render(request, 'AdminVideos/menu_elegido.html', context)
+
+
+
 
 
 # if request.method == 'GET':
