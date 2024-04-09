@@ -109,8 +109,11 @@ def menu_elegido(request):
         almuerzo_que_comemos = platos_dia.get("almuerzo", [])
         cena_que_comemos = platos_dia.get("cena", [])
 
-        almuerzo_info_queryset = Plato.objects.filter(nombre_plato=almuerzo_que_comemos).values("ingredientes")
+        almuerzo_info_queryset = Plato.objects.filter(nombre_plato=almuerzo_que_comemos).values("ingredientes", "variedades")
+        almuerzo_info_result = almuerzo_info_queryset.first()
         almuerzo_info = almuerzo_info_queryset.first()['ingredientes'] if almuerzo_info_queryset.exists() else ""
+        almuerzo_variedades = almuerzo_info_result['variedades'] if almuerzo_info_result else None
+
 
         cena_info_queryset = Plato.objects.filter(nombre_plato=cena_que_comemos).values("ingredientes")
         cena_info = cena_info_queryset.first()['ingredientes'] if cena_info_queryset.exists() else ""
@@ -124,12 +127,14 @@ def menu_elegido(request):
             cena_info = ""
         if not almuerzo_info:
             almuerzo_info = ""
+    
 
         platos_por_dia[objeto.el_dia_en_que_comemos] = {
             "almuerzo": almuerzo_que_comemos,
             "cena": cena_que_comemos,
             "almuerzo_info": almuerzo_info,
-            "cena_info": cena_info
+            "cena_info": cena_info,
+            "variedades": almuerzo_variedades
         }
 
     lista_de_compras = []
@@ -158,7 +163,7 @@ def menu_elegido(request):
         'ingredientes_separados_por_comas': ingredientes_unicos,
         "lista_de_compras": lista_de_compras,
         "ingredientes_a_excluir_cena": ingredientes_a_excluir_cena,
-        "ingredientes_a_excluir_almuerzo": ingredientes_a_excluir_almuerzo
+        "ingredientes_a_excluir_almuerzo": ingredientes_a_excluir_almuerzo,
     }
 
     return render(request, 'AdminVideos/menu_elegido.html', context)
