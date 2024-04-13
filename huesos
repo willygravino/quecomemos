@@ -1,3 +1,40 @@
+                        value="{{ variedades_en_base['variedad' ~ i].ingredientes_variedades|default:'' }}">
+
+
+
+
+            {% for i in '0123456789'|make_list %}
+            {{ forloop.counter }}
+            {% endfor %}
+
+
+            <div class="container">
+                <div class="accordion" id="accordionExample">
+                    {% for key, value in variedades_en_base.items %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading{{ loop.index }}">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapse{{ loop.index }}" aria-expanded="true"
+                                aria-controls="collapse{{ loop.index }}">
+                                Variedad {{ loop.index }}: <input type="text" name="variedad{{ loop.index }}"
+                                    value="{{ key }}">
+                            </button>
+                        </h2>
+                        <div id="collapse{{ loop.index }}" class="accordion-collapse collapse"
+                            aria-labelledby="heading{{ loop.index }}" data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                Ingredientes de variedad {{ loop.index }}: <input type="text"
+                                    name="ingredientes_de_variedad{{ loop.index }}" value="{{ value }}">
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+
+
+
 @login_required
 def menu_elegido(request):
     # Obtener la fecha actual

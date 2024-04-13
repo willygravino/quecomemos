@@ -172,10 +172,6 @@ def menu_elegido(request):
 
 
 
-# if request.method == 'GET':
-# nombre_plato = request.GET.get(name) toma el valor > value que corresponde al ID
-# borrar = request.GET.get(name)
-
 def lista_de_compras(request):
     if request.method == 'POST':
         ingredientes_seleccionados = request.POST.getlist('ingrediente_a_comprar')
@@ -258,10 +254,11 @@ class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             if key.startswith('variedad'):
                 numero_variedad = key.replace('variedad', '')
                 ingredientes_key = 'ingredientes_de_variedad' + numero_variedad
-                variedades['variedad' + numero_variedad] = {
+                if value:  
+                  variedades['variedad' + numero_variedad] = {
                     'variedad': value,
                     'ingredientes_variedades': self.request.POST.get(ingredientes_key)
-                }
+                   }
 
         plato.variedades = variedades
 
@@ -520,4 +517,3 @@ def reiniciar_sugeridos(request):
  #  def get_queryset(self):
  #      import pdb; pdb.set_trace
  #      return Mensaje.objects.filter(destinatario=self.request.user).all()
-

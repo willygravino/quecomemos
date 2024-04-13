@@ -35,6 +35,8 @@
 
                 {{ form.calorias }} </p>
 
+                
+
                 <div class="container">
                     <div class="accordion" id="accordionExample">
                         <div class="accordion-item">
@@ -48,9 +50,9 @@
                             <div id="collapseOne" class="accordion-collapse collapse " aria-labelledby="headingOne"
                                 data-bs-parent="#accordionExample">
                                 <div class="accordion-body">
-                                    Ingredientes de variedad 1: <textarea  name="ingredientes_de_variedad1">
-                                        value="{{ variedades_en_base.variedad1.ingredientes_variedades|default:'' }}"</textarea>
-
+                                    Ingredientes de variedad 1: <input type="text" name="ingredientes_de_variedad1"
+                                    value="{{ variedades_en_base.variedad1.ingredientes_variedades|default:'' }}">
+                                
                                 </div>
                             </div>
                         </div>
@@ -128,7 +130,7 @@
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                     data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
 
-                                    Varifdfddfedad 5: <input type="text" name="variedad5"
+                                    Variedad 5: <input type="text" name="variedad5"
                                         value="{{ variedades_en_base.variedad5.variedad|default:'' }}">
                                 </button>
                             </h2>
@@ -147,14 +149,14 @@
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                     data-bs-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
 
-                                    Variedfdfdad 6: <input type="text" name="variedad6"
+                                    Variedad 6: <input type="text" name="variedad6"
                                         value="{{ variedades_en_base.variedad6.variedad|default:'' }}">
                                 </button>
                             </h2>
                             <div id="collapseSix" class="accordion-collapse collapse" aria-labelledby="headingThree"
                                 data-bs-parent="#accordionExample">
                                 <div class="accordion-body">
-                                    Ingredidfdfdffdentes de variedad rrrr6: <input type="text"
+                                    Ingredientes de variedad 6: <input type="text"
                                         name="ingredientes_de_variedad6"
                                         value="{{ variedades_en_base.variedad6.ingredientes_variedades|default:'' }}">
 

@@ -22,22 +22,35 @@
 
                 <div class="plato-info">
                     <h6 class="card-subtitle mb-2 text-muted">{{ platos.almuerzo }}</h6>
+                    <p class="card-text">{{ platos.almuerzo_info }}</p>
+
 
                     {% if platos.almuerzo_info %}
-                    <h5>VARIEDADES {{ platos.variedades }} dddd </h5>
-                    <p class="card-text">{{ platos.almuerzo_info }}</p>
+
                     <input type="checkbox" id="excluir_almuerzo_{{ fecha }}" name="excluir_almuerzo"
                         value="{{ platos.almuerzo_info }}">
                     <label for="excluir_almuerzo_{{ fecha }}">Excluir ingredientes</label>
                     {% else %}
                     <p>No se encontraron ingredientes para el almuerzo.</p>
                     {% endif %}
+
+                    {% for key, value in platos.variedades.items %}
+                       {% if value.variedad %}
+                            <p>Variedad: {{ value.variedad }}</p>
+                            {% if value.ingredientes_variedades %}
+                                <p>Ingredientes variedad: {{ value.ingredientes_variedades }}</p>
+                            {% else %}
+                                <p>No se encontraron ingredientes para la variedad.</p>
+                            {% endif %}
+                       {% endif %}
+
+                    {% endfor %}
                 </div><br>
                 {% endif %}
                 {% if platos.cena != '-----' %}
                 <div class="plato-info">
                     {% if platos.cena_info %}
-                  
+
                     <h6 class="card-subtitle mb-2 text-muted">{{ platos.cena }}</h6>
 
                     <p class="card-text">{{ platos.cena_info }}</p>
