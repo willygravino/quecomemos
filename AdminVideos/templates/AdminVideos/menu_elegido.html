@@ -17,6 +17,8 @@
         <div class="card">
             <div class="card-body">
                 <h5>{{ fecha }}</h5>
+                <h5>{{ platos_por_dia }}</h5>
+
 
                 {% if platos.almuerzo != '-----' %}
 
@@ -35,18 +37,13 @@
                     {% endif %}
 
                     {% for key, value in platos.variedades.items %}
-                       {% if value.variedad %}
-                            <p>Variedad: {{ value.variedad }}</p>
-                            {% if value.ingredientes_variedades %}
-                                <p>Ingredientes variedad: {{ value.ingredientes_variedades }}</p>
-                                <input type="checkbox" id="incluir{{key}}" name="incluir{{key}}"
-                                value="{{ value.ingredientes_variedades }}">
-                                <label for="incluir{{key}}">Incluir Variedad</label>
-                            {% else %}
-                                <p>No se encontraron ingredientes para la variedad.</p>
-                            {% endif %}
-                       {% endif %}
-
+                    {% if value.variedad %}
+                    <p>Variedad: {{ value.variedad }}</p>
+                    <h5>Ingredientes variedad: {{value.ingredientes_de_variedades}}</h5>
+                    <input type="checkbox" id="incluir{{key}}" name="incluir{{key}}"
+                        value="{{value.ingredientes_de_variedades}}">
+                    <label for="incluir{{key}}">Incluir Variedad</label>
+                    {% endif %}
                     {% endfor %}
                 </div><br>
                 {% endif %}
@@ -81,6 +78,8 @@
 
         {% csrf_token %}
         <h3>EDITA LISTA DE COMPRAS</h3>
+        <p>ingredientes_separados_por_comas: {{ ingredientes_separados_por_comas }}</p>
+
         {% for ingrediente in ingredientes_separados_por_comas %}
         <input type="checkbox" id="{{ ingrediente }}" name="ingrediente_a_comprar" value="{{ ingrediente }}" checked>
         <label for="{{ ingrediente }}">{{ ingrediente }}</label><br>

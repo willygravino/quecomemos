@@ -112,6 +112,7 @@ def menu_elegido(request):
         almuerzo_info_queryset = Plato.objects.filter(nombre_plato=almuerzo_que_comemos).values("ingredientes", "variedades")
         almuerzo_info_result = almuerzo_info_queryset.first()
         almuerzo_info = almuerzo_info_queryset.first()['ingredientes'] if almuerzo_info_queryset.exists() else ""
+       
         almuerzo_variedades = almuerzo_info_result['variedades'] if almuerzo_info_result else None
 
 
@@ -140,6 +141,20 @@ def menu_elegido(request):
     lista_de_compras = []
 
     if request.method == 'POST':
+        for key, value in request.POST.items():
+            if key.startswith('incluir'):
+                # Aquí obtienes los ingredientes seleccionados del formulario
+                ingredientes_variedades_a_sumar = request.POST.getlist(key)  # Obtener la lista completa de ingredientes
+                  # Convertir la cadena de ingredientes a una lista separada por comas
+                    # Eliminar corchetes y comillas de la cadena si es necesario
+                ingredientes_variedades_a_sumar = [ingrediente.strip("[]' ") for ingrediente in ingredientes_variedades_a_sumar]
+                
+                ingredientes_variedades_a_sumar = ",".join(ingredientes_variedades_a_sumar)
+                # Dividir la cadena en elementos individuales
+                ingredientes_variedades_a_sumar = [ingrediente.strip() for ingrediente in ingredientes_variedades_a_sumar.split(",")]
+                # Agregar los ingredientes seleccionados a la lista de ingredientes únicos
+                ingredientes_unicos.update(ingredientes_variedades_a_sumar)
+
         ingredientes_seleccionados = request.POST.getlist('ingrediente_a_comprar')
         ingredientes_a_excluir_almuerzo_str = request.POST.get('excluir_almuerzo')
         ingredientes_a_excluir_cena_str = request.POST.get('excluir_cena')
