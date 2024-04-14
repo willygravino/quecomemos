@@ -231,11 +231,38 @@ class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     template_name = 'AdminVideos/plato_update.html'
     success_url = reverse_lazy("filtro-de-platos")
 
-
     def get_context_data(self, **kwargs):
-         context = super().get_context_data(**kwargs)
-         context['variedades_en_base'] = self.object.variedades or {}
-         return context
+        context = super().get_context_data(**kwargs)
+        
+        variedades_en_base = self.object.variedades or {}
+        
+        # Crear diccionario para las variedades
+        variedades = {}
+       # Crear diccionario para los ingredientes
+        ingredientes_por_variedad = {}
+        
+        for key, value in variedades_en_base.items():
+            variedad = value.get('variedad', '')
+            ingredientes_variedad = value.get('ingredientes_variedades', [])
+            
+            # Agregar la variedad al diccionario de variedades
+            variedades[key] = variedad
+            
+            # Convertir la lista de ingredientes en una cadena separada por comas
+            ingredientes_separados_por_comas = ', '.join(ingredientes_variedad)
+            
+            # Agregar los ingredientes de esta variedad al diccionario de ingredientes
+            ingredientes_por_variedad[key] = ingredientes_separados_por_comas
+        
+        context['variedades_en_base'] = variedades
+        context['ingredientes_variedad'] = ingredientes_por_variedad
+        
+        return context
+    
+    # def get_context_data(self, **kwargs):
+    #      context = super().get_context_data(**kwargs)
+    #      context['variedades_en_base'] = self.object.variedades or {}
+    #      return context
 
     
     def test_func(self):
@@ -255,10 +282,15 @@ class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
                 numero_variedad = key.replace('variedad', '')
                 ingredientes_key = 'ingredientes_de_variedad' + numero_variedad
                 if value:  
-                  variedades['variedad' + numero_variedad] = {
-                    'variedad': value,
-                    'ingredientes_variedades': self.request.POST.get(ingredientes_key)
-                   }
+                   ingredientes_variedades = self.request.POST.get(ingredientes_key)
+                    # Convertir la cadena de ingredientes en una lista
+                    # Convertir la cadena de ingredientes en una lista
+                   lista_ingredientes = [ingrediente.strip() for ingrediente in ingredientes_variedades.split(',')] if ingredientes_variedades else []
+                   
+                   variedades['variedad' + numero_variedad] = {
+                        'variedad': value,
+                        'ingredientes_variedades': lista_ingredientes
+                    }
 
         plato.variedades = variedades
 
@@ -283,9 +315,13 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         variedades = {}
         for i in range(1, 7):  # Iterar desde 1 hasta 6
             variedad = form.cleaned_data.get(f'variedad{i}')
-            ingredientes_variedad = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
+            ingredientes_variedad_str = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
+
+            # Convertir la cadena de ingredientes en una lista
+            ingredientes_variedad = [ingrediente.strip() for ingrediente in ingredientes_variedad_str.split(',')] if ingredientes_variedad_str else []
+
             if variedad:  # Verificar si la variedad no está vacía
-                variedades[f"variedad{i}"] = {"variedad": variedad, "ingredientes_variedades": ingredientes_variedad}
+                variedades[f"variedad{i}"] = {"variedad": variedad, "ingredientes_de_variedades": ingredientes_variedad}
 
         plato.variedades = variedades
         plato.save()

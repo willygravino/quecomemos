@@ -39,6 +39,9 @@
                             <p>Variedad: {{ value.variedad }}</p>
                             {% if value.ingredientes_variedades %}
                                 <p>Ingredientes variedad: {{ value.ingredientes_variedades }}</p>
+                                <input type="checkbox" id="incluir{{key}}" name="incluir{{key}}"
+                                value="{{ value.ingredientes_variedades }}">
+                                <label for="incluir{{key}}">Incluir Variedad</label>
                             {% else %}
                                 <p>No se encontraron ingredientes para la variedad.</p>
                             {% endif %}
