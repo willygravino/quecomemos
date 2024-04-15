@@ -22,15 +22,15 @@ class SugerenciasRandom(TemplateView):
     template_name = 'AdminVideos/random.html'
 
 
-# def index(request):
-#     return render(request, "AdminVideos/lista_filtrada.html")
+def index(request):
+     return render(request, "AdminVideos/lista_filtrada.html")
 
-def index(request: HttpRequest):
-    # Ejecuta la función FiltroDePlatos y obtén el resultado
-    resultado_filtro = FiltroDePlatos(request)
+# def index(request: HttpRequest):
+#     # Ejecuta la función FiltroDePlatos y obtén el resultado
+#     resultado_filtro = FiltroDePlatos(request)
 
-    # Devuelve el resultado obtenido
-    return resultado_filtro
+#     # Devuelve el resultado obtenido
+#     return resultado_filtro
 
 def about(request):
     return render(request, "AdminVideos/about.html")
@@ -398,7 +398,6 @@ class PaginaInicial (TemplateView):  # LoginRequiredMixin?????
     model = Plato
 
 
-
 def FiltroDePlatos (request):
 
     # Establecer la configuración regional a español
@@ -434,7 +433,7 @@ def FiltroDePlatos (request):
 
     # items_iniciales = ""
 
-    platos = Plato.objects.all()
+    # platos = Plato.objects.all()
     usuario = request.user
     cantidad_platos_sugeridos = 0
     platos_a_sugerir = ""
@@ -488,43 +487,50 @@ def FiltroDePlatos (request):
         form = PlatoFilterForm(initial=items_iniciales)
 
     pasa_por_aca = "PASA"
-    if tipo_de_vista == 'solo-mios' or tipo_de_vista=="random-con-mios":
-        platos = platos.filter(propietario_id=request.user.id)
 
-    if tipo_de_vista == 'de-otros':
-        platos =  platos.exclude(propietario_id=request.user.id)
+    platos = Plato.objects.all()
 
-    if tipo_de_vista == 'preseleccionados':
-        nombres_platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
-        platos = platos.filter(nombre_plato__in=nombres_platos_elegidos)
+    if tipo_de_vista != 'Todos':
+        if tipo_de_vista == 'solo-mios' or tipo_de_vista=="random-con-mios":
+            platos = platos.filter(propietario_id=request.user.id)
 
-    if medios and medios != '-':
-        platos = platos.filter(medios=medios)
-    if categoria and categoria != '-':
-                    platos = platos.filter(categoria=categoria)
-    if preparacion and preparacion != '-':
-        platos = platos.filter(preparacion=preparacion)
-    if tipo and tipo != '-':
-        platos = platos.filter(tipo=tipo)
-    if calorias and calorias != '-':
-        platos = platos.filter(calorias=calorias)
+        if tipo_de_vista == 'de-otros':
+            platos =  platos.exclude(propietario_id=request.user.id)
 
-    if tipo_de_vista=="random-todos" or tipo_de_vista=="random-con-mios":
-        # Obtén los platos sugeridos asociados al usuario logueado
-        platos_sugeridos_usuario = Sugeridos.objects.filter(usuario_de_sugeridos=usuario).values_list('nombre_plato_sugerido', flat=True)
-        platos_a_sugerir = platos
-        cantidad_platos_sugeribles = platos.count()
-        # Excluye los platos sugeridos de la lista general de platos
-        platos = platos.exclude(nombre_plato__in=platos_sugeridos_usuario)
-        platos_a_sugerir = platos
-        # cantidad_platos_sugeribles = platos.count()
-        platos = platos.order_by('?')[:4]
-        # Obtiene los primeros cuatro platos de la lista
-        platos_sugeridos = platos[:4]
-        platos = platos_sugeridos
-        # Crea y guarda una instancia de Sugeridos para cada uno de los primeros platos
-        for plato in platos_sugeridos:
-            Sugeridos.objects.get_or_create(usuario_de_sugeridos=usuario, nombre_plato_sugerido=plato.nombre_plato)
+        if tipo_de_vista == 'preseleccionados':
+            nombres_platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
+            platos = platos.filter(nombre_plato__in=nombres_platos_elegidos)
+
+        if medios and medios != '-':
+            platos = platos.filter(medios=medios)
+        if categoria and categoria != '-':
+                        platos = platos.filter(categoria=categoria)
+        if preparacion and preparacion != '-':
+            platos = platos.filter(preparacion=preparacion)
+        if tipo and tipo != '-':
+            platos = platos.filter(tipo=tipo)
+        if calorias and calorias != '-':
+            platos = platos.filter(calorias=calorias)
+
+        if tipo_de_vista=="random-todos" or tipo_de_vista=="random-con-mios":
+            # Obtén los platos sugeridos asociados al usuario logueado
+            platos_sugeridos_usuario = Sugeridos.objects.filter(usuario_de_sugeridos=usuario).values_list('nombre_plato_sugerido', flat=True)
+            platos_a_sugerir = platos
+            cantidad_platos_sugeribles = platos.count()
+            # Excluye los platos sugeridos de la lista general de platos
+            platos = platos.exclude(nombre_plato__in=platos_sugeridos_usuario)
+            platos_a_sugerir = platos
+            # cantidad_platos_sugeribles = platos.count()
+            platos = platos.order_by('?')[:4]
+            # Obtiene los primeros cuatro platos de la lista
+            platos_sugeridos = platos[:4]
+            platos = platos_sugeridos
+            # Crea y guarda una instancia de Sugeridos para cada uno de los primeros platos
+            for plato in platos_sugeridos:
+                Sugeridos.objects.get_or_create(usuario_de_sugeridos=usuario, nombre_plato_sugerido=plato.nombre_plato)
+    else:  
+        pasa_por_aca ="SUMA TODOS"+tipo_de_vista
+        platos = Plato.objects.all()        
 
     if usuario:
         platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
@@ -532,6 +538,8 @@ def FiltroDePlatos (request):
 
 # Obtén el número de platos sugeridos para el usuario actual
     cantidad_platos_sugeridos = Sugeridos.objects.filter(usuario_de_sugeridos=usuario).count()
+
+   
 
     contexto = {
                 'form': form,
