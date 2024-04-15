@@ -5,12 +5,16 @@
 {% block filtro %}
   <form method="POST">
     {% csrf_token %}
+
+    <p>POST O NO: {{ hubo_post_o_no }} </p> 
+
     <ul >
       <p>Medios: {{ form.medios }}</p> 
       <p>Categoría: {{ form.categoria }}</p> 
       <p>Preparación: {{ form.preparacion }}</p> 
       <p>Tipo: {{ form.tipo }}</p> 
   </ul>
+
   <p>Tipo de vista: {{ form.tipo_de_vista }} </p> 
     <button  type="submit" class="btn btn-primary">Filtrar</button>
 </form>
