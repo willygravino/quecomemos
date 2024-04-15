@@ -13,8 +13,8 @@
 </section>
 
 <section>
-  <h6>TIPO DE VISTA ESTABLE  {{ tipo_de_vista_estable }} - TIPO DE VISTA {{ tipo_de_vista }}</h6> 
-  
+  <h6>TIPO DE VISTA ESTABLE {{ tipo_de_vista_estable }} - TIPO DE VISTA {{ tipo_de_vista }}</h6>
+
 
   {% if tipo_de_vista_estable == "random-todos" or tipo_de_vista_estable == "random-con-mios" %}
   <h6>CANTIDAD DE PLATOS SUGERIDOS {{ cantidad_platos_sugeridos }}</h6>
@@ -68,9 +68,9 @@
           {% endif %}
           <br>
           {% for key, value in plato.variedades.items %}
-            {% if value.variedad  %}
-                <small class="text-success"> {{ value.variedad }} /</small>
-            {% endif %}
+          {% if value.variedad %}
+          <small class="text-success"> {{ value.variedad }} /</small>
+          {% endif %}
 
           {% endfor %}
 
@@ -279,7 +279,27 @@
         </select>
 
       </div>
-      <br>
+
+      <!-- no sé cómo pero el siguiente script parece funcionar ok!  -->
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      <script>
+        $(document).ready(function () {
+          $('select').change(function () {
+            var btn = $(this).closest('.btn');
+            var selectA = btn.find('select[name$="-a"]');
+            var selectC = btn.find('select[name$="-c"]');
+            var selectedValueA = selectA.val();
+            var selectedValueC = selectC.val();
+      
+            if (selectedValueA !== '-----' || selectedValueC !== '-----') {
+              btn.removeClass('btn-primary').addClass('btn-success');
+            } else {
+              btn.removeClass('btn-success').addClass('btn-primary');
+            }
+          });
+        });
+      </script>
+
       <button type="submit">Enviar</button>
     </form>
   </section>

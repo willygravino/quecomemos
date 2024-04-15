@@ -475,7 +475,7 @@ def FiltroDePlatos (request):
                 #     }
 
     else:
-
+        pasa_por_aca = "PASA POR NO-POST"
         items_iniciales = {
                         'tipo_de_vista': tipo_de_vista_estable,
                         'medios': medios,
@@ -487,6 +487,7 @@ def FiltroDePlatos (request):
         post_o_no = "NO POST, MANDA INICIALES"+tipo_de_vista_estable
         form = PlatoFilterForm(initial=items_iniciales)
 
+    pasa_por_aca = "PASA"
     if tipo_de_vista == 'solo-mios' or tipo_de_vista=="random-con-mios":
         platos = platos.filter(propietario_id=request.user.id)
 
@@ -538,6 +539,7 @@ def FiltroDePlatos (request):
                 'elegidos': platos_elegidos,
                 "tipo_de_vista_estable" :  tipo_de_vista_estable,
                 "tipo_de_vista": tipo_de_vista,
+                "por_donde_pasa": pasa_por_aca,
                 "dias_desde_hoy": dias_desde_hoy,
                 "nombre_dia_de_la_semana": nombre_dia_semana,
                 "cantidad_platos_sugeridos": cantidad_platos_sugeridos,
