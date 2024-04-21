@@ -107,6 +107,10 @@
       <option value="modo-diario">MODO DIARIO</option>
       <option value="modo-celebracion">MODO CELEBRACIÓN</option>
     </select>
+    <!-- <h5>AHORA LISTA: {{ platos_elegidos_por_dia_lista }} </h5> -->
+    <p>cuarto Almuerzo??? {{ platos_elegidos_por_dia_lista.3 }}</p>
+    <p>Cuarto Almuerzo ok?: {{ platos_elegidos_por_dia_lista.3.1.almuerzo }}</p>
+    <p>Cuarto cena ok?: {{ platos_elegidos_por_dia_lista.3.1.cena }}</p>
 
     <form action="{% url 'grabar-menu' %}" method="post">
 
@@ -119,14 +123,17 @@
         <select name="1-a">
           <option value="-----">Elegir plato</option>
           {% for elegido in elegidos %}
-          <option value="{{ elegido }}">{{ elegido }}</option>
+          <!-- <option value="{{ elegido }}">{{ elegido }}</option> -->
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.0.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
+
           {% endfor %}
         </select>
         <br>
         <select name="1-c">
           <option value="-----">Elegir plato</option>
           {% for elegido in elegidos %}
-          <option value="{{ elegido }}">{{ elegido }}</option>
+          <!-- <option value="{{ elegido }}">{{ elegido }}</option> -->
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.0.1.cena %}selected{% endif %}>{{ elegido }}</option>
           {% endfor %}
 
         </select>
@@ -140,7 +147,8 @@
           <option value="-----">Elegir plato</option>
 
           {% for elegido in elegidos %}
-          <option value="{{ elegido }}">{{ elegido }}</option>
+          <!-- <option value="{{ elegido }}">{{ elegido }}</option> -->
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.1.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
           {% endfor %}
         </select>
         <br>
@@ -148,7 +156,7 @@
           <option value="-----">Elegir plato</option>
 
           {% for elegido in elegidos %}
-          <option value="{{ elegido }}">{{ elegido }}</option>
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.1.1.cena %}selected{% endif %}>{{ elegido }}</option>          
           {% endfor %}
 
         </select>
@@ -163,7 +171,7 @@
           <option value="-----">Elegir plato</option>
 
           {% for elegido in elegidos %}
-          <option value="{{ elegido }}">{{ elegido }}</option>
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
           {% endfor %}
 
         </select>
@@ -173,7 +181,7 @@
           <option value="-----">Elegir plato</option>
 
           {% for elegido in elegidos %}
-          <option value="{{ elegido }}">{{ elegido }}</option>
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.2.1.cena %}selected{% endif %}>{{ elegido }}</option>
           {% endfor %}
 
         </select>
@@ -189,7 +197,7 @@
           <option value="-----">Elegir plato</option>
 
           {% for elegido in elegidos %}
-          <option value="{{ elegido }}">{{ elegido }}</option>
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.3.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
           {% endfor %}
 
         </select>
@@ -198,7 +206,7 @@
           <option value="-----">Elegir plato</option>
 
           {% for elegido in elegidos %}
-          <option value="{{ elegido }}">{{ elegido }}</option>
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.3.1.cena %}selected{% endif %}>{{ elegido }}</option>          
           {% endfor %}
 
         </select>
@@ -213,7 +221,7 @@
           <option value="-----">Elegir plato</option>
 
           {% for elegido in elegidos %}
-          <option value="{{ elegido }}">{{ elegido }}</option>
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.4.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
           {% endfor %}
           <option value="-----">-----</option>
 
@@ -224,7 +232,7 @@
           <option value="-----">Elegir plato</option>
 
           {% for elegido in elegidos %}
-          <option value="{{ elegido }}">{{ elegido }}</option>
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.4.1.cena %}selected{% endif %}>{{ elegido }}</option>          
           {% endfor %}
 
         </select>
@@ -239,7 +247,7 @@
           <option value="-----">Elegir plato</option>
 
           {% for elegido in elegidos %}
-          <option value="{{ elegido }}">{{ elegido }}</option>
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.5.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
           {% endfor %}
 
         </select>
@@ -248,8 +256,7 @@
           <option value="-----">Elegir plato</option>
 
           {% for elegido in elegidos %}
-          <option value="{{ elegido }}">{{ elegido }}</option>
-          {% endfor %}
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.5.1.cena %}selected{% endif %}>{{ elegido }}</option>          {% endfor %}
 
         </select>
       </div>
@@ -264,7 +271,7 @@
           <option value="-----">Elegir plato</option>
 
           {% for elegido in elegidos %}
-          <option value="{{ elegido }}">{{ elegido }}</option>
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.6.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>          
           {% endfor %}
 
         </select>
@@ -273,7 +280,7 @@
           <option value="-----">Elegir plato</option>
 
           {% for elegido in elegidos %}
-          <option value="{{ elegido }}">{{ elegido }}</option>
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.6.1.cena %}selected{% endif %}>{{ elegido }}</option>            
           {% endfor %}
 
         </select>
@@ -290,7 +297,7 @@
             var selectC = btn.find('select[name$="-c"]');
             var selectedValueA = selectA.val();
             var selectedValueC = selectC.val();
-      
+
             if (selectedValueA !== '-----' || selectedValueC !== '-----') {
               btn.removeClass('btn-primary').addClass('btn-success');
             } else {

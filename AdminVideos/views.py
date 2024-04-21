@@ -15,6 +15,8 @@ from datetime import datetime, timedelta
 from .forms import PlatoFilterForm, PlatoForm
 from django.views.generic import TemplateView
 from datetime import date
+import datetime
+
 
 
 
@@ -394,8 +396,8 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
         return Profile.objects.filter(user=self.request.user).exists()
 
 
-class PaginaInicial (TemplateView):  # LoginRequiredMixin?????
-    model = Plato
+# class PaginaInicial (TemplateView):  # LoginRequiredMixin?????
+#     model = Plato
 
 
 def FiltroDePlatos (request):
@@ -404,7 +406,10 @@ def FiltroDePlatos (request):
     locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
 
     # Obtiene la fecha actual
-    fecha_actual = datetime.now().date()
+    # fecha_actual = datetime.now().date()
+
+    # Obtener la fecha y hora actuales
+    fecha_actual = datetime.datetime.now().date()
 
     # Lista para almacenar los días y sus nombres
     dias_desde_hoy = []
@@ -478,7 +483,7 @@ def FiltroDePlatos (request):
         items_iniciales = {
                         'tipo_de_vista': tipo_de_vista_estable,
                         'medios': medios,
-                        'categoria': categoria, 
+                        'categoria': categoria,
                         'preparacion': preparacion,
                         'tipo': tipo,
                         'calorias': calorias
@@ -528,9 +533,9 @@ def FiltroDePlatos (request):
             # Crea y guarda una instancia de Sugeridos para cada uno de los primeros platos
             for plato in platos_sugeridos:
                 Sugeridos.objects.get_or_create(usuario_de_sugeridos=usuario, nombre_plato_sugerido=plato.nombre_plato)
-    else:  
+    else:
         pasa_por_aca ="SUMA TODOS"+tipo_de_vista
-        platos = Plato.objects.all()        
+        platos = Plato.objects.all()
 
     if usuario:
         platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
@@ -539,7 +544,26 @@ def FiltroDePlatos (request):
 # Obtén el número de platos sugeridos para el usuario actual
     cantidad_platos_sugeridos = Sugeridos.objects.filter(usuario_de_sugeridos=usuario).count()
 
+    # Obtén los objetos ElegidosXDia asociados al usuario actual
+    elegidos_por_dia = ElegidosXDia.objects.filter(user=request.user)
+
+    platos_elegidos_por_dia = {}
    
+    # Obtener los platos elegidos de la base de datos para las fechas existentes
+    for i in range(7):
+        fecha = fecha_actual + datetime.timedelta(days=i)
+        platos_existente = ElegidosXDia.objects.filter(el_dia_en_que_comemos=fecha).first()
+        if platos_existente:
+            platos_elegidos_por_dia[fecha] = platos_existente.platos_que_comemos
+        else:
+            platos_elegidos_por_dia[fecha] = {'almuerzo': None, 'cena': None}
+
+    # Convertir el diccionario en una lista de tuplas
+    platos_elegidos_por_dia_lista = list(platos_elegidos_por_dia.items())
+
+    # for elegido in elegidos_por_dia:
+    #     platos_elegidos_por_dia[elegido.el_dia_en_que_comemos] = elegido.platos_que_comemos
+    # platos_elegidos_por_dia_lista = list(platos_elegidos_por_dia.items())
 
     contexto = {
                 'form': form,
@@ -553,7 +577,9 @@ def FiltroDePlatos (request):
                 "cantidad_platos_sugeridos": cantidad_platos_sugeridos,
                 "cantidad_platos_sugeribles": cantidad_platos_sugeribles,
                 "platos_a_sugerir":  platos_a_sugerir,
-                "hubo_post_o_no": post_o_no
+                "hubo_post_o_no": post_o_no,
+                "platos_elegidos_por_dia": platos_elegidos_por_dia,
+                "platos_elegidos_por_dia_lista": platos_elegidos_por_dia_lista
                }
 
     return render(request, 'AdminVideos/lista_filtrada.html', contexto)

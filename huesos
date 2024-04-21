@@ -1,0 +1,52 @@
+todas las pruebas! (incluye la que funciona)
+
+
+
+    <h5>platos elegidos por día {{ platos_elegidos_por_dia }}</h5>
+
+    {% for key, value in platos_elegidos_por_dia.items %}
+    <h5>key {{ key }} value {{ value }}</h5>
+
+    {% endfor %}
+
+    <h5>AHORA LISTA: {{ platos_elegidos_por_dia_lista }} </h5>
+
+    {% for fecha, platos in platos_elegidos_por_dia_lista %}
+    <p>Fecha: {{ fecha }}</p>
+    {% if platos.almuerzo %}
+    <p>Almuerzo: {{ platos.almuerzo }}</p>
+    {% endif %}
+    {% if platos.cena %}
+    <p>Cena: {{ platos.cena }}</p>
+    {% endif %}
+    {% endfor %}
+
+    <p>cuarto Almuerzo??? {{ platos_elegidos_por_dia_lista.3 }}</p>
+    <p>Cuarto Almuerzo ok?: {{ platos_elegidos_por_dia_lista.3.1.almuerzo }}</p>
+    <p>Cuarto Almuerzo ok?: {{ platos_elegidos_por_dia_lista.3.1.cena }}</p>
+
+
+
+
+    <form action="{% url 'grabar-menu' %}" method="post">
+
+      {% csrf_token %}
+
+      <div class="mt-2 btn btn-primary">
+        <h5>{{ dias_desde_hoy.0.1 }} {{ dias_desde_hoy.0.0|date:'Y-m-d' }}</h5>
+
+
+        {% with fecha_seleccionada=dias_desde_hoy.1.0%}
+        <p>FECHA SELECCIONADA {{ fecha_seleccionada }} platos elegidos {{ platos_elegidos_por_dia }}</p>
+
+        {% if fecha_seleccionada in platos_elegidos_por_dia %}
+        <p>LA FECHA EXISTE! >>> {{ platos_elegidos_por_dia.items }}<<<< /p>
+            {% with platos_del_dia=platos_elegidos_por_dia.fecha_seleccionada %}
+            <p>Almuerzo: {{ platos_del_dia.almuerzo }}</p>
+            <p>Cena: {{ platos_del_dia.cena }}</p>
+            {% endwith %}
+            {% else %}
+            <p>LA FECHA NO EXISTE!</p>
+            {% endif %}
+            {% endwith %}
+
