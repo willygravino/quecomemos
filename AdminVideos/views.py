@@ -88,6 +88,13 @@ def grabar_menu_elegido(request):
                         el_dia_en_que_comemos=fecha,
                         platos_que_comemos=platos_del_dia
                     )
+            elif almuerzo == '-----' or cena == '-----':
+                # Verificar si existe un registro para esta fecha y este usuario
+                registro_existente = ElegidosXDia.objects.filter(user=usuario, el_dia_en_que_comemos=fecha).first()
+
+                if registro_existente:
+                    # Eliminar el registro existente
+                    registro_existente.delete()
 
         # Redirigir al usuario a la página de menú elegido
         return redirect(reverse_lazy("menu-elegido"))
@@ -121,12 +128,18 @@ def menu_elegido(request):
         almuerzo_info_queryset = Plato.objects.filter(nombre_plato=almuerzo_que_comemos).values("ingredientes", "variedades")
         almuerzo_info_result = almuerzo_info_queryset.first()
         almuerzo_info = almuerzo_info_queryset.first()['ingredientes'] if almuerzo_info_queryset.exists() else ""
-
         almuerzo_variedades = almuerzo_info_result['variedades'] if almuerzo_info_result else None
 
 
-        cena_info_queryset = Plato.objects.filter(nombre_plato=cena_que_comemos).values("ingredientes")
+        # cena
+        cena_info_queryset = Plato.objects.filter(nombre_plato=cena_que_comemos).values("ingredientes", "variedades")
+        cena_info_result = cena_info_queryset.first()
         cena_info = cena_info_queryset.first()['ingredientes'] if cena_info_queryset.exists() else ""
+        cena_variedades = cena_info_result['variedades'] if cena_info_result else None
+
+
+        # cena_info_queryset = Plato.objects.filter(nombre_plato=cena_que_comemos).values("ingredientes")
+        # cena_info = cena_info_queryset.first()['ingredientes'] if cena_info_queryset.exists() else ""
 
         if almuerzo_info:
             ingredientes_unicos.update(almuerzo_info.split(", "))
@@ -144,7 +157,8 @@ def menu_elegido(request):
             "cena": cena_que_comemos,
             "almuerzo_info": almuerzo_info,
             "cena_info": cena_info,
-            "variedades": almuerzo_variedades
+            "variedades": almuerzo_variedades,
+            "variedades_cena": cena_variedades
         }
 
     lista_de_compras = []
