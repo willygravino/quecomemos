@@ -85,7 +85,6 @@ class Plato(models.Model):
     NORMAL = 'Normal'
     INVIERNO = 'Plato de invierno'
   
-
     CALORIAS_CHOICES = [
         (INDISTINTO, '-'),
         (CALORICO, 'Calórico'),

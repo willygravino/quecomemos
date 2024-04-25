@@ -79,15 +79,24 @@ def grabar_menu_elegido(request):
                     registro_existente.platos_que_comemos = {'almuerzo': almuerzo, 'cena': cena}
                     registro_existente.save()
                 else:
+# ------------------
+                    almuerzo_variedades_queryset = Plato.objects.filter(nombre_plato=almuerzo).values("variedades")
+                    almuerzo_variedades_result = almuerzo_variedades_queryset.first()
+                    almuerzo_variedades = almuerzo_variedades_result['variedades'] if almuerzo_variedades_result else None
+
+                    # cena
+                    cena_variedades_queryset = Plato.objects.filter(nombre_plato=cena).values("variedades")
+                    cena_variedades_result = cena_variedades_queryset.first()
+                    cena_variedades = cena_variedades_result['variedades'] if cena_variedades_result else None
+
+# -------------------
                     # Crear una lista de platos para este día
-                    platos_del_dia = {'almuerzo': almuerzo, 'cena': cena}
+
+                    platos_del_dia = {'almuerzo': almuerzo, 'variedades_almuerzo': almuerzo_variedades,'cena': cena, 'variedades_cena': cena_variedades}
 
                     # Crear una instancia del modelo ElegidosXDia y guardar en la base de datos
-                    ElegidosXDia.objects.create(
-                        user=usuario,
-                        el_dia_en_que_comemos=fecha,
-                        platos_que_comemos=platos_del_dia
-                    )
+                    ElegidosXDia.objects.create(user=usuario,el_dia_en_que_comemos=fecha,platos_que_comemos=platos_del_dia)
+                    
             elif almuerzo == '-----' or cena == '-----':
                 # Verificar si existe un registro para esta fecha y este usuario
                 registro_existente = ElegidosXDia.objects.filter(user=usuario, el_dia_en_que_comemos=fecha).first()
