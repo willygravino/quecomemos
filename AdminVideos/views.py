@@ -69,43 +69,56 @@ def grabar_menu_elegido(request):
             almuerzo = request.POST.get(f"{i}-a")
             cena = request.POST.get(f"{i}-c")
 
+            registro_existente = ElegidosXDia.objects.filter(user=usuario, el_dia_en_que_comemos=fecha).first()
+
+            if registro_existente:
+                    registro_existente.delete()
+
             # Verificar si se recibieron datos del formulario
             if almuerzo != '-----' or cena != '-----':
                 # Consultar si ya existe un registro para esta fecha y este usuario
                 registro_existente = ElegidosXDia.objects.filter(user=usuario, el_dia_en_que_comemos=fecha).first()
 
-                if registro_existente:
-                    # Actualizar el registro existente
-                    registro_existente.platos_que_comemos = {'almuerzo': almuerzo, 'cena': cena}
-                    registro_existente.save()
-                else:
-# ------------------
-                    almuerzo_variedades_queryset = Plato.objects.filter(nombre_plato=almuerzo).values("variedades")
-                    almuerzo_variedades_result = almuerzo_variedades_queryset.first()
-                    almuerzo_variedades = almuerzo_variedades_result['variedades'] if almuerzo_variedades_result else None
+                almuerzo_variedades_queryset = Plato.objects.filter(nombre_plato=almuerzo).values("variedades")
+                almuerzo_variedades_result = almuerzo_variedades_queryset.first()
+                almuerzo_variedades = almuerzo_variedades_result['variedades'] if almuerzo_variedades_result else None
+               
 
-                    # cena
-                    cena_variedades_queryset = Plato.objects.filter(nombre_plato=cena).values("variedades")
-                    cena_variedades_result = cena_variedades_queryset.first()
-                    cena_variedades = cena_variedades_result['variedades'] if cena_variedades_result else None
+                #  BUCLE PARA SUMAR EL CAMPO "ELEGIDOS A CADA PLATO Y VARIEDAD"
+                variedad_almuerzo_con_elegidos = {}
+                if almuerzo_variedades:
+                    for variedad, detalles_variedad in almuerzo_variedades.items():
+                        # variedad es la clave y detalles_variedad es el valor (otro diccionario)
+                        variedad_almuerzo_con_elegidos[variedad] = {
+                            "variedad": detalles_variedad.get("variedad", ""),
+                            "ingredientes_de_variedades": detalles_variedad.get("ingredientes_de_variedades", []),
+                            "elegido": True
+                        }
 
-# -------------------
-                    # Crear una lista de platos para este día
+                # cena
+                cena_variedades_queryset = Plato.objects.filter(nombre_plato=cena).values("variedades")
+                cena_variedades_result = cena_variedades_queryset.first()
+                cena_variedades = cena_variedades_result['variedades'] if cena_variedades_result else None
+                 
+                #  BUCLE PARA SUMAR EL CAMPO "ELEGIDOS A CADA PLATO Y VARIEDAD"
+                variedad_cena_con_elegidos = {}
+                if cena_variedades:
+                    for variedad, detalles_variedad in cena_variedades.items():
+                        # variedad es la clave y detalles_variedad es el valor (otro diccionario)
+                        variedad_cena_con_elegidos[variedad] = {
+                            "variedad": detalles_variedad.get("variedad", ""),
+                            "ingredientes_de_variedades": detalles_variedad.get("ingredientes_de_variedades", []),
+                            "elegido": True
+                        }
 
-                    platos_del_dia = {'almuerzo': almuerzo, 'variedades_almuerzo': almuerzo_variedades,'cena': cena, 'variedades_cena': cena_variedades}
+                # Crear una lista de platos para este día
 
-                    # Crear una instancia del modelo ElegidosXDia y guardar en la base de datos
-                    ElegidosXDia.objects.create(user=usuario,el_dia_en_que_comemos=fecha,platos_que_comemos=platos_del_dia)
+                platos_del_dia = { "almuerzo": {"plato": almuerzo,"elegido": True}, "variedades_almuerzo": variedad_almuerzo_con_elegidos,'cena':{"plato": cena,"elegido":True}, 'variedades_cena': variedad_cena_con_elegidos}
+
+                        # Crear una instancia del modelo ElegidosXDia y guardar en la base de datos
+                ElegidosXDia.objects.create(user=usuario,el_dia_en_que_comemos=fecha,platos_que_comemos=platos_del_dia)
                     
-            elif almuerzo == '-----' or cena == '-----':
-                # Verificar si existe un registro para esta fecha y este usuario
-                registro_existente = ElegidosXDia.objects.filter(user=usuario, el_dia_en_que_comemos=fecha).first()
-
-                if registro_existente:
-                    # Eliminar el registro existente
-                    registro_existente.delete()
-
-        # Redirigir al usuario a la página de menú elegido
+               # Redirigir al usuario a la página de menú elegido
         return redirect(reverse_lazy("menu-elegido"))
     else:
         # Retorna una respuesta JSON con un mensaje de error si el método no es POST
@@ -125,6 +138,7 @@ def menu_elegido(request):
     objetos_del_usuario = ElegidosXDia.objects.filter(user=request.user, el_dia_en_que_comemos__gte=today).order_by('el_dia_en_que_comemos')
     platos_por_dia = {}
     ingredientes_unicos = set()  # Conjunto para almacenar ingredientes únicos
+    
     # Inicializar las listas de ingredientes a excluir
     ingredientes_a_excluir_almuerzo = []
     ingredientes_a_excluir_cena = []
