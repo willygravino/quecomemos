@@ -77,13 +77,13 @@ def grabar_menu_elegido(request):
             # Verificar si se recibieron datos del formulario
             if almuerzo != '-----' or cena != '-----':
                 # Consultar si ya existe un registro para esta fecha y este usuario
-                registro_existente = ElegidosXDia.objects.filter(user=usuario, el_dia_en_que_comemos=fecha).first()
+                # registro_existente = ElegidosXDia.objects.filter(user=usuario, el_dia_en_que_comemos=fecha).first()
 
-                almuerzo_variedades_queryset = Plato.objects.filter(nombre_plato=almuerzo).values("variedades")
-                almuerzo_variedades_result = almuerzo_variedades_queryset.first()
-                almuerzo_variedades = almuerzo_variedades_result['variedades'] if almuerzo_variedades_result else None
+                almuerzo_queryset = Plato.objects.filter(nombre_plato=almuerzo).values("ingredientes", "variedades")
+                almuerzo_result = almuerzo_queryset.first()
+                almuerzo_variedades = almuerzo_result['variedades'] if almuerzo_result else None
+                almuerzo_ingredientes = almuerzo_result['ingredientes'] if almuerzo_result else None
                
-
                 #  BUCLE PARA SUMAR EL CAMPO "ELEGIDOS A CADA PLATO Y VARIEDAD"
                 variedad_almuerzo_con_elegidos = {}
                 if almuerzo_variedades:
@@ -96,9 +96,11 @@ def grabar_menu_elegido(request):
                         }
 
                 # cena
-                cena_variedades_queryset = Plato.objects.filter(nombre_plato=cena).values("variedades")
-                cena_variedades_result = cena_variedades_queryset.first()
-                cena_variedades = cena_variedades_result['variedades'] if cena_variedades_result else None
+                cena_queryset = Plato.objects.filter(nombre_plato=cena).values("ingredientes", "variedades")
+                cena_result = cena_queryset.first()
+                cena_variedades = cena_result['variedades'] if cena_result else None
+                cena_ingredientes = cena_result['ingredientes'] if cena_result else None
+
                  
                 #  BUCLE PARA SUMAR EL CAMPO "ELEGIDOS A CADA PLATO Y VARIEDAD"
                 variedad_cena_con_elegidos = {}
@@ -108,12 +110,12 @@ def grabar_menu_elegido(request):
                         variedad_cena_con_elegidos[variedad] = {
                             "variedad": detalles_variedad.get("variedad", ""),
                             "ingredientes_de_variedades": detalles_variedad.get("ingredientes_de_variedades", []),
-                            "elegido": True
+                            "elegido": False
                         }
 
                 # Crear una lista de platos para este día
 
-                platos_del_dia = { "almuerzo": {"plato": almuerzo,"elegido": True}, "variedades_almuerzo": variedad_almuerzo_con_elegidos,'cena':{"plato": cena,"elegido":True}, 'variedades_cena': variedad_cena_con_elegidos}
+                platos_del_dia = { "almuerzo": {"plato": almuerzo,"ingredientes": almuerzo_ingredientes,"elegido": True}, "variedades_almuerzo": variedad_almuerzo_con_elegidos,'cena':{"plato": cena,"ingredientes": cena_ingredientes, "elegido":True}, 'variedades_cena': variedad_cena_con_elegidos}
 
                         # Crear una instancia del modelo ElegidosXDia y guardar en la base de datos
                 ElegidosXDia.objects.create(user=usuario,el_dia_en_que_comemos=fecha,platos_que_comemos=platos_del_dia)
@@ -145,20 +147,32 @@ def menu_elegido(request):
 
     for objeto in objetos_del_usuario:
         platos_dia = objeto.platos_que_comemos
-        almuerzo_que_comemos = platos_dia.get("almuerzo", [])
-        cena_que_comemos = platos_dia.get("cena", [])
 
-        almuerzo_info_queryset = Plato.objects.filter(nombre_plato=almuerzo_que_comemos).values("ingredientes", "variedades")
-        almuerzo_info_result = almuerzo_info_queryset.first()
-        almuerzo_info = almuerzo_info_queryset.first()['ingredientes'] if almuerzo_info_queryset.exists() else ""
-        almuerzo_variedades = almuerzo_info_result['variedades'] if almuerzo_info_result else None
+        almuerzo_que_comemos = platos_dia.get("almuerzo", {}).get("plato", [])
+        almuerzo_elegido = platos_dia.get("almuerzo", {}).get("elegido", [])
+        cena_elegida = platos_dia.get("almuerzo", {}).get("elegido", [])
+
+        almuerzo_info = platos_dia.get("almuerzo", {}).get("ingredientes", [])
+        cena_info = platos_dia.get("cena", {}).get("ingredientes", [])
+        cena_elegida = platos_dia.get("cena", {}).get("elegido", [])
 
 
-        # cena
-        cena_info_queryset = Plato.objects.filter(nombre_plato=cena_que_comemos).values("ingredientes", "variedades")
-        cena_info_result = cena_info_queryset.first()
-        cena_info = cena_info_queryset.first()['ingredientes'] if cena_info_queryset.exists() else ""
-        cena_variedades = cena_info_result['variedades'] if cena_info_result else None
+        cena_que_comemos = platos_dia.get("cena", {}).get("plato", [])
+
+
+        # almuerzo_info_queryset = Plato.objects.filter(nombre_plato=almuerzo_que_comemos).values("ingredientes", "variedades")
+        # almuerzo_info_result = almuerzo_info_queryset.first()
+        # almuerzo_info = almuerzo_info_queryset.first()['ingredientes'] if almuerzo_info_queryset.exists() else ""
+        almuerzo_variedades = platos_dia.get("variedades_almuerzo", {})
+
+
+        # # cena
+        # cena_info_queryset = Plato.objects.filter(nombre_plato=cena_que_comemos).values("ingredientes", "variedades")
+        # cena_info_result = cena_info_queryset.first()
+        # cena_info = cena_info_queryset.first()['ingredientes'] if cena_info_queryset.exists() else ""
+        # cena_variedades = cena_info_result['variedades'] if cena_info_result else None
+        cena_variedades = platos_dia.get("variedades_cena", {})
+
 
 
         # cena_info_queryset = Plato.objects.filter(nombre_plato=cena_que_comemos).values("ingredientes")
@@ -177,7 +191,9 @@ def menu_elegido(request):
 
         platos_por_dia[objeto.el_dia_en_que_comemos] = {
             "almuerzo": almuerzo_que_comemos,
+            "almuerzo_elegido": almuerzo_elegido,
             "cena": cena_que_comemos,
+            "cena_elegida": cena_elegida,
             "almuerzo_info": almuerzo_info,
             "cena_info": cena_info,
             "variedades": almuerzo_variedades,
