@@ -593,30 +593,33 @@ def FiltroDePlatos (request):
     if usuario:
         platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
 
-
-# Obtén el número de platos sugeridos para el usuario actual
+    # Obtén el número de platos sugeridos para el usuario actual
     cantidad_platos_sugeridos = Sugeridos.objects.filter(usuario_de_sugeridos=usuario).count()
 
     # Obtén los objetos ElegidosXDia asociados al usuario actual
     elegidos_por_dia = ElegidosXDia.objects.filter(user=request.user)
 
     platos_elegidos_por_dia = {}
+
+        # Suponiendo que elegidos_por_dia sea tu diccionario
+    
+    for objeto_elegido in elegidos_por_dia:
+        fecha = objeto_elegido.el_dia_en_que_comemos
+        plato_almuerzo = objeto_elegido.platos_que_comemos.get("almuerzo", {}).get("plato", None)
+        plato_cena = objeto_elegido.platos_que_comemos.get("cena", {}).get("plato", None)
+        platos_elegidos_por_dia[fecha] = {"almuerzo": plato_almuerzo, "cena": plato_cena}
    
-    # Obtener los platos elegidos de la base de datos para las fechas existentes
+    platos_preseleccionados={}
+   
     for i in range(7):
         fecha = fecha_actual + datetime.timedelta(days=i)
-        platos_existente = ElegidosXDia.objects.filter(el_dia_en_que_comemos=fecha).first()
-        if platos_existente:
-            platos_elegidos_por_dia[fecha] = platos_existente.platos_que_comemos
+        if fecha in platos_elegidos_por_dia:  # Verificar si la fecha ya está en platos_elegidos_por_dia
+            platos_preseleccionados[fecha] = platos_elegidos_por_dia[fecha]
         else:
-            platos_elegidos_por_dia[fecha] = {'almuerzo': None, 'cena': None}
+            platos_preseleccionados[fecha] = {'almuerzo': None, 'cena': None}
 
     # Convertir el diccionario en una lista de tuplas
-    platos_elegidos_por_dia_lista = list(platos_elegidos_por_dia.items())
-
-    # for elegido in elegidos_por_dia:
-    #     platos_elegidos_por_dia[elegido.el_dia_en_que_comemos] = elegido.platos_que_comemos
-    # platos_elegidos_por_dia_lista = list(platos_elegidos_por_dia.items())
+    platos_elegidos_por_dia_lista = list(platos_preseleccionados.items())
 
     contexto = {
                 'form': form,
