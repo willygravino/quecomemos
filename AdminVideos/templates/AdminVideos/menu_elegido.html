@@ -30,12 +30,15 @@
 
                     <h5>elegido????? {{ platos.almuerzo_elegido }}</h5>
 
-                    <input type="checkbox" id="excluir_almuerzo_{{ fecha }}" name="excluir_almuerzo"
+                    <input type="checkbox" id="inc_almuerzo_{{ fecha }}" name="inc_almuerzo"
                         value="{{ platos.almuerzo_info }}" {% if platos.almuerzo_elegido %} checked {% endif %}>
-                    <label for="excluir_almuerzo_{{ fecha }}">Plato incluido</label>
+                    <label for="inc_almuerzo_{{ fecha }}">Plato incluido</label>
                     {% else %}
                     <p>No se encontraron ingredientes para el almuerzo.</p>
                     {% endif %}
+
+                    <p>Variedades_almuerzo: >{{ platos.variedades }}<</p>
+
 
                     {% for key, value in platos.variedades.items %}
                     {% if value.variedad %}
@@ -65,9 +68,9 @@
 
                     <p class="card-text">{{ platos.cena_info }}</p>
 
-                    <input type="checkbox" id="excluir_cena_{{ fecha }}" name="excluir_cena"
+                    <input type="checkbox" id="inc_cena_{{ fecha }}" name="inc_cena"
                         value="{{ platos.cena_info }}"  {% if platos.cena_elegida %} checked {% endif %}>
-                    <label for="excluir_cena_{{ fecha }}">Excluir ingredientes</label>
+                    <label for="inc_cena_{{ fecha }}">Incluir Plato</label>
                     {% else %}
                     <p>No se encontraron ingredientes para la cena.</p>
                     {% endif %}
@@ -75,6 +78,7 @@
                 {% endif %}
 
                 <!-- <h5>VARIEDADES CENA: {{platos.variedades_cena}}</h5> -->
+                <p>Variedades_cena: <{{ platos.variedades_cena }}></p>
 
                 {% for key, value in platos.variedades_cena.items %}
                 {% if value.variedad %}

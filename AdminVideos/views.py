@@ -110,7 +110,7 @@ def grabar_menu_elegido(request):
                         variedad_cena_con_elegidos[variedad] = {
                             "variedad": detalles_variedad.get("variedad", ""),
                             "ingredientes_de_variedades": detalles_variedad.get("ingredientes_de_variedades", []),
-                            "elegido": False
+                            "elegido": True
                         }
 
                 # Crear una lista de platos para este día
@@ -142,65 +142,12 @@ def menu_elegido(request):
     ingredientes_unicos = set()  # Conjunto para almacenar ingredientes únicos
     
     # Inicializar las listas de ingredientes a excluir
-    ingredientes_a_excluir_almuerzo = []
-    ingredientes_a_excluir_cena = []
+    # ingredientes_a_excluir_almuerzo = []
+    # ingredientes_a_excluir_cena = []
 
-    for objeto in objetos_del_usuario:
-        platos_dia = objeto.platos_que_comemos
+    
 
-        almuerzo_que_comemos = platos_dia.get("almuerzo", {}).get("plato", [])
-        almuerzo_elegido = platos_dia.get("almuerzo", {}).get("elegido", [])
-        cena_elegida = platos_dia.get("almuerzo", {}).get("elegido", [])
-
-        almuerzo_info = platos_dia.get("almuerzo", {}).get("ingredientes", [])
-        cena_info = platos_dia.get("cena", {}).get("ingredientes", [])
-        cena_elegida = platos_dia.get("cena", {}).get("elegido", [])
-
-
-        cena_que_comemos = platos_dia.get("cena", {}).get("plato", [])
-
-
-        # almuerzo_info_queryset = Plato.objects.filter(nombre_plato=almuerzo_que_comemos).values("ingredientes", "variedades")
-        # almuerzo_info_result = almuerzo_info_queryset.first()
-        # almuerzo_info = almuerzo_info_queryset.first()['ingredientes'] if almuerzo_info_queryset.exists() else ""
-        almuerzo_variedades = platos_dia.get("variedades_almuerzo", {})
-
-
-        # # cena
-        # cena_info_queryset = Plato.objects.filter(nombre_plato=cena_que_comemos).values("ingredientes", "variedades")
-        # cena_info_result = cena_info_queryset.first()
-        # cena_info = cena_info_queryset.first()['ingredientes'] if cena_info_queryset.exists() else ""
-        # cena_variedades = cena_info_result['variedades'] if cena_info_result else None
-        cena_variedades = platos_dia.get("variedades_cena", {})
-
-
-
-        # cena_info_queryset = Plato.objects.filter(nombre_plato=cena_que_comemos).values("ingredientes")
-        # cena_info = cena_info_queryset.first()['ingredientes'] if cena_info_queryset.exists() else ""
-
-        if almuerzo_info:
-            ingredientes_unicos.update(almuerzo_info.split(", "))
-        if cena_info:
-            ingredientes_unicos.update(cena_info.split(", "))
-
-        if not cena_info:
-            cena_info = ""
-        if not almuerzo_info:
-            almuerzo_info = ""
-
-
-        platos_por_dia[objeto.el_dia_en_que_comemos] = {
-            "almuerzo": almuerzo_que_comemos,
-            "almuerzo_elegido": almuerzo_elegido,
-            "cena": cena_que_comemos,
-            "cena_elegida": cena_elegida,
-            "almuerzo_info": almuerzo_info,
-            "cena_info": cena_info,
-            "variedades": almuerzo_variedades,
-            "variedades_cena": cena_variedades
-        }
-
-    lista_de_compras = []
+    # lista_de_compras = []
 
     if request.method == 'POST':
         for key, value in request.POST.items():
@@ -217,30 +164,86 @@ def menu_elegido(request):
                 # Agregar los ingredientes seleccionados a la lista de ingredientes únicos
                 ingredientes_unicos.update(ingredientes_variedades_a_sumar)
 
-        ingredientes_seleccionados = request.POST.getlist('ingrediente_a_comprar')
-        ingredientes_a_excluir_almuerzo_str = request.POST.get('excluir_almuerzo')
-        ingredientes_a_excluir_cena_str = request.POST.get('excluir_cena')
+    else:
+        for objeto in objetos_del_usuario:
+            platos_dia = objeto.platos_que_comemos
+
+            almuerzo_que_comemos = platos_dia.get("almuerzo", {}).get("plato", [])
+            almuerzo_info = platos_dia.get("almuerzo", {}).get("ingredientes", [])
+            almuerzo_elegido = platos_dia.get("almuerzo", {}).get("elegido", [])
+
+
+            cena_que_comemos = platos_dia.get("cena", {}).get("plato", [])
+            cena_info = platos_dia.get("cena", {}).get("ingredientes", [])
+            cena_elegida = platos_dia.get("cena", {}).get("elegido", [])
+
+           
+            almuerzo_variedades = platos_dia.get("variedades_almuerzo", {})
+
+            # Iterar a través del diccionario y extraer los ingredientes
+            if almuerzo_variedades:
+                for key, value in almuerzo_variedades.items():
+                    ingredientes = value['ingredientes_de_variedades']
+                    ingredientes_unicos.update(ingredientes)
+    
+         
+            cena_variedades = platos_dia.get("variedades_cena", {})
+
+            # Iterar a través del diccionario y extraer los ingredientes
+            if cena_variedades:
+                for key, value in cena_variedades.items():
+                    ingredientes = value['ingredientes_de_variedades']
+                    ingredientes_unicos.update(ingredientes)
+           
+            if almuerzo_info:
+                ingredientes_unicos.update(almuerzo_info.split(", "))
+            if cena_info:
+                ingredientes_unicos.update(cena_info.split(", "))
+
+            if not cena_info:
+                cena_info = ""
+            if not almuerzo_info:
+                almuerzo_info = ""
+
+
+            platos_por_dia[objeto.el_dia_en_que_comemos] = {
+                "almuerzo": almuerzo_que_comemos,
+                "almuerzo_elegido": almuerzo_elegido,
+                "cena": cena_que_comemos,
+                "cena_elegida": cena_elegida,
+                "almuerzo_info": almuerzo_info,
+                "cena_info": cena_info,
+                "variedades": almuerzo_variedades,
+                "variedades_cena": cena_variedades
+            }
+                    
+        # ingredientes_seleccionados = request.POST.getlist('ingrediente_a_comprar')
+        ingredientes_a_incluir_almuerzo_str = request.POST.get('inc_almuerzo')
+        ingredientes_a_incluir_cena_str = request.POST.get('inc_cena')
 
         # Convertir las cadenas de ingredientes a excluir en listas si existen
-        ingredientes_a_excluir_almuerzo = ingredientes_a_excluir_almuerzo_str.split(', ') if ingredientes_a_excluir_almuerzo_str else []
-        ingredientes_a_excluir_cena = ingredientes_a_excluir_cena_str.split(', ') if ingredientes_a_excluir_cena_str else []
+        ingredientes_a_incluir_almuerzo = ingredientes_a_incluir_almuerzo_str.split(', ') if ingredientes_a_incluir_almuerzo_str else []
+        ingredientes_a_incluir_cena = ingredientes_a_incluir_cena_str.split(', ') if ingredientes_a_incluir_cena_str else []
 
+        ingredientes_unicos.update(ingredientes_a_incluir_almuerzo)
+        ingredientes_unicos.update(ingredientes_a_incluir_cena)
+        
         # Agrega los ingredientes seleccionados que no están excluidos a la lista de compras
-        for ingrediente in ingredientes_seleccionados:
-            if ingrediente not in ingredientes_a_excluir_almuerzo and ingrediente not in ingredientes_a_excluir_cena:
-                lista_de_compras.append(ingrediente)
+        # for ingrediente in ingredientes_seleccionados:
+        #     # if ingrediente not in ingredientes_a_incluir_almuerzo and ingrediente not in ingredientes_a_incluir_cena:
+        #     lista_de_compras.append(ingrediente)
 
 
-    # Excluir los ingredientes de las listas de exclusión del conjunto de ingredientes únicos
-    for ingrediente_excluir in ingredientes_a_excluir_almuerzo + ingredientes_a_excluir_cena:
-        ingredientes_unicos.discard(ingrediente_excluir)
+    # # Excluir los ingredientes de las listas de exclusión del conjunto de ingredientes únicos
+    # for ingrediente_excluir in ingredientes_a_excluir_almuerzo + ingredientes_a_excluir_cena:
+    #     ingredientes_unicos.discard(ingrediente_excluir)
 
     context = {
         'platos_por_dia': platos_por_dia,
         'ingredientes_separados_por_comas': ingredientes_unicos,
-        "lista_de_compras": lista_de_compras,
-        "ingredientes_a_excluir_cena": ingredientes_a_excluir_cena,
-        "ingredientes_a_excluir_almuerzo": ingredientes_a_excluir_almuerzo,
+        # "lista_de_compras": lista_de_compras
+        # "ingredientes_a_excluir_cena": ingredientes_a_excluir_cena,
+        # "ingredientes_a_excluir_almuerzo": ingredientes_a_excluir_almuerzo,
     }
 
     return render(request, 'AdminVideos/menu_elegido.html', context)
