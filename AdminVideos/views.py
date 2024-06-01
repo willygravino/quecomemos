@@ -1,4 +1,5 @@
 from contextvars import Context
+import copy
 import json
 import locale
 from django.contrib.auth import logout
@@ -150,20 +151,111 @@ def menu_elegido(request):
     # lista_de_compras = []
 
     if request.method == 'POST':
-        for key, value in request.POST.items():
-            if key.startswith('incluir'):
-                # Aquí obtienes los ingredientes seleccionados del formulario
-                ingredientes_variedades_a_sumar = request.POST.getlist(key)  # Obtener la lista completa de ingredientes
-                  # Convertir la cadena de ingredientes a una lista separada por comas
-                    # Eliminar corchetes y comillas de la cadena si es necesario
-                ingredientes_variedades_a_sumar = [ingrediente.strip("[]' ") for ingrediente in ingredientes_variedades_a_sumar]
+         # TRABAJAR ESTE CONTEXTO!!!!!!!!!
+                for objeto in objetos_del_usuario:
+                    platos_dia = objeto.platos_que_comemos
 
-                ingredientes_variedades_a_sumar = ",".join(ingredientes_variedades_a_sumar)
-                # Dividir la cadena en elementos individuales
-                ingredientes_variedades_a_sumar = [ingrediente.strip() for ingrediente in ingredientes_variedades_a_sumar.split(",")]
-                # Agregar los ingredientes seleccionados a la lista de ingredientes únicos
-                ingredientes_unicos.update(ingredientes_variedades_a_sumar)
+                    almuerzo_que_comemos = platos_dia.get("almuerzo", {}).get("plato", [])
+                    almuerzo_info = platos_dia.get("almuerzo", {}).get("ingredientes", [])
+                    almuerzo_elegido = False
 
+
+                    cena_que_comemos = platos_dia.get("cena", {}).get("plato", [])
+                    cena_info = platos_dia.get("cena", {}).get("ingredientes", [])
+                    cena_elegida = False
+
+                
+                    almuerzo_variedades = platos_dia.get("variedades_almuerzo", {})
+
+                    # Iterar a través del diccionario y extraer los ingredientes
+                    if almuerzo_variedades:
+                        for key, value in almuerzo_variedades.items():
+                            value["elegido"] = False
+                            # ingredientes = value['ingredientes_de_variedades']
+                            # ingredientes_unicos.update(ingredientes)
+                            
+                    cena_variedades = platos_dia.get("variedades_cena", {})
+
+                    # Iterar a través del diccionario y extraer los ingredientes
+                    if cena_variedades:
+                        for key, value in cena_variedades.items():
+                             value["elegido"] = False
+
+                    platos_por_dia[objeto.el_dia_en_que_comemos] = {
+                        "almuerzo": almuerzo_que_comemos,
+                        "almuerzo_elegido": almuerzo_elegido,
+                        "cena": cena_que_comemos,
+                        "cena_elegida": cena_elegida,
+                        "almuerzo_info": almuerzo_info,
+                        "cena_info": cena_info,
+                        "variedades": almuerzo_variedades,
+                        "variedades_cena": cena_variedades
+                    }
+                              
+                for key, value in request.POST.items():
+                      for objeto in objetos_del_usuario:
+                        platos_dia = objeto.platos_que_comemos
+                        
+                        almuerzo_que_comemos = platos_dia.get("almuerzo", {}).get("plato", [])
+                        if almuerzo_que_comemos in request.POST:
+                                almuerzo_elegido = True
+
+                        cena_que_comemos = platos_dia.get("cena", {}).get("plato", [])
+                        if cena_que_comemos in request.POST:
+                               cena_elegida = True        
+
+
+                        almuerzo_variedades = platos_dia.get("variedades_almuerzo", {})
+                        for variedad_key, variedad_value in almuerzo_variedades.items():
+                            if variedad_value["variedad"] in request.POST:
+                                    # variedad_nombre = variedad_value["variedad"]
+                                    almuerzo_variedades[variedad_key]["elegido"] = True
+
+                                                       
+                        
+                        cena_variedades = platos_dia.get("variedades_cena", {})
+                        for variedad_key, variedad_value in cena_variedades.items():
+
+                        # variedad_key ES EL PROBLEMA!!!
+
+                            if variedad_value["variedad"] in request.POST:
+                               cena_variedades[variedad_key]["elegido"] = True
+
+                      platos_por_dia[objeto.el_dia_en_que_comemos] = {
+                        "almuerzo": almuerzo_que_comemos,
+                        "almuerzo_elegido": almuerzo_elegido,
+                        "cena": cena_que_comemos,
+                        "cena_elegida": cena_elegida,
+                        "almuerzo_info": almuerzo_info,
+                        "cena_info": cena_info,
+                        "variedades": almuerzo_variedades,
+                        "variedades_cena": cena_variedades
+                    }                                  
+                            
+                for value in request.POST.values():
+                                    
+                    if key.startswith('inc'):
+                        # Aquí obtienes los ingredientes seleccionados del formulario
+                        ingredientes_variedades_a_sumar = request.POST.getlist(key)  # Obtener la lista completa de ingredientes
+                        # Convertir la cadena de ingredientes a una lista separada por comas
+                            # Eliminar corchetes y comillas de la cadena si es necesario
+                        ingredientes_variedades_a_sumar = [ingrediente.strip("[]' ") for ingrediente in ingredientes_variedades_a_sumar]
+
+                        ingredientes_variedades_a_sumar = ",".join(ingredientes_variedades_a_sumar)
+                        # Dividir la cadena en elementos individuales
+                        ingredientes_variedades_a_sumar = [ingrediente.strip() for ingrediente in ingredientes_variedades_a_sumar.split(",")]
+                        # Agregar los ingredientes seleccionados a la lista de ingredientes únicos
+                        ingredientes_unicos.update(ingredientes_variedades_a_sumar)
+
+
+                # context = { NO SE PASA DESDE AQUÍ EL CONTEXTO SINO DESDE LA ÚLTIMA LINEA
+                #             'post_data': a_pasar,
+                #             # 'ingredientes_separados_por_comas': ingredientes_unicos,
+                #             # "lista_de_compras": lista_de_compras
+                #             # "ingredientes_a_excluir_cena": ingredientes_a_excluir_cena,
+                #             # "ingredientes_a_excluir_almuerzo": ingredientes_a_excluir_almuerzo,
+                #         }        
+               
     else:
         for objeto in objetos_del_usuario:
             platos_dia = objeto.platos_que_comemos
@@ -241,6 +333,9 @@ def menu_elegido(request):
     context = {
         'platos_por_dia': platos_por_dia,
         'ingredientes_separados_por_comas': ingredientes_unicos,
+        'post_data': request.POST,
+
+
         # "lista_de_compras": lista_de_compras
         # "ingredientes_a_excluir_cena": ingredientes_a_excluir_cena,
         # "ingredientes_a_excluir_almuerzo": ingredientes_a_excluir_almuerzo,
@@ -252,22 +347,22 @@ def menu_elegido(request):
 
 
 
-def lista_de_compras(request):
-    if request.method == 'POST':
-        ingredientes_seleccionados = request.POST.getlist('ingrediente_a_comprar')
+# def lista_de_compras(request):
+#     if request.method == 'POST':
+#         ingredientes_seleccionados = request.POST.getlist('ingrediente_a_comprar')
 
-        lista_de_compras = []
-        for ingrediente in ingredientes_seleccionados:
-            # Por ejemplo, aquí podrías guardar los ingredientes en la variable lista_de_compras
-            lista_de_compras.append(ingrediente)
+#         lista_de_compras = []
+#         for ingrediente in ingredientes_seleccionados:
+#             # Por ejemplo, aquí podrías guardar los ingredientes en la variable lista_de_compras
+#             lista_de_compras.append(ingrediente)
 
-        # Ahora puedes hacer lo que necesites con la lista_de_compras, como guardarla en la base de datos o realizar otras operaciones
+#         # Ahora puedes hacer lo que necesites con la lista_de_compras, como guardarla en la base de datos o realizar otras operaciones
 
-        # Finalmente, puedes redirigir a una página de éxito o renderizar un nuevo template
-        return render(request, 'AdminVideos/menu_elegido.html', {'lista_de_compras': lista_de_compras})
-    else:
-        # Si es una solicitud GET, simplemente renderiza el formulario
-        return redirect('menu-elegido', lista_compras=','.join(lista_de_compras))
+#         # Finalmente, puedes redirigir a una página de éxito o renderizar un nuevo template
+#         return render(request, 'AdminVideos/menu_elegido.html', {'lista_de_compras': lista_de_compras})
+#     else:
+#         # Si es una solicitud GET, simplemente renderiza el formulario
+#         return redirect('menu-elegido', lista_compras=','.join(lista_de_compras))
 
 
 
