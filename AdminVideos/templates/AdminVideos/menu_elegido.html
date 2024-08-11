@@ -12,14 +12,19 @@
     <form action="{% url 'menu-elegido' %}" method="post">
         {% csrf_token %}
 
-        <h5>>>>>{{ post_data }}<<<</h5>
+        <h5>>>>>{{ post_data }}<<<</h5> 
+
+        <h5>DIA QUE COMEMOS: >{{ dia_que_comemos }}<</h5> 
 
 
         {% for fecha, platos in platos_por_dia.items %}
 
         <div class="card">
             <div class="card-body">
-                <h5>{{ fecha }}</h5>
+                <h5>{{ fecha }}
+                    FORMATEADA {{ fecha|date:"d M. Y"|lower }}
+
+                </h5>
 
                 <h5>ALMUERZO</h5>
 
@@ -34,8 +39,9 @@
 
                     <!-- <h5>elegido????? {{ platos.almuerzo_elegido }}</h5> -->
 
-                    <input type="checkbox" id="inc_almuerzo_{{ fecha }}" name="{{ platos.almuerzo }}"
-                        value="{{ platos.almuerzo_info }}" {% if platos.almuerzo_elegido %} checked {% endif %}>
+                    <!-- en el diccionario request.POST <name> es la clave y <value> es el valor! -->
+                    <input type="checkbox" id="inc_almuerzo_{{ fecha }}" name="{{ platos.almuerzo }}{{ fecha|date:"d M. Y"|lower }}"
+                        value="z{{ platos.almuerzo_info }}" {% if platos.almuerzo_elegido %} checked {% endif %}>
                      <label for="inc_almuerzo_{{ fecha }}">Plato incluido</label>
                     {% else %}
                     <p>No se encontraron ingredientes para el almuerzo.</p>
@@ -52,7 +58,7 @@
 
 
                     <h5>Ingredientes variedad: {{value.ingredientes_de_variedades}}</h5>
-                    <input type="checkbox" id="incluir{{key}}" name="{{ value.variedad }}"
+                    <input type="checkbox" id="incluir{{key}}" name="{{ value.variedad }}{{ fecha|date:"d M. Y"|lower }}"
                         value="{{value.ingredientes_de_variedades}}" {% if value.elegido %} checked {% endif %}>
                     <label for="incluir{{key}}">Variedad incluida</label>
                     {% endif %}
@@ -72,7 +78,7 @@
 
                     <p class="card-text">{{ platos.cena_info }}</p>
 
-                    <input type="checkbox" id="{{ platos.cena }}" name="{{ platos.cena }}"
+                    <input type="checkbox" id="{{ platos.cena }}" name="{{ platos.cena }}{{ fecha|date:"d M. Y"|lower }}"
                         value="{{ platos.cena_info }}"  {% if platos.cena_elegida %} checked {% endif %}>
                     <label for="inc_cena_{{ fecha }}">Incluir Plato</label>
                     {% else %}
@@ -90,7 +96,7 @@
                 <!-- <p>ELEGIDA LA VARIEDAD????: {{ value.elegido }}</p> -->
 
                 <h5>Ingredientes variedad: {{value.ingredientes_de_variedades}}</h5>
-                <input type="checkbox" id="incluir{{key}}" name="{{ value.variedad }}"
+                <input type="checkbox" id="incluir{{key}}" name="{{ value.variedad }}{{ fecha|date:"d M. Y"|lower }}"
                     value="{{value.ingredientes_de_variedades}}"  {% if value.elegido %} checked {% endif %}>
                 <label for="incluir{{key}}">Variedad incluida</label>
                 {% endif %}
