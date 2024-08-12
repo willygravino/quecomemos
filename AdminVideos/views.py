@@ -144,8 +144,7 @@ def menu_elegido(request):
     objetos_del_usuario = ElegidosXDia.objects.filter(user=request.user, el_dia_en_que_comemos__gte=today).order_by('el_dia_en_que_comemos')
     platos_por_dia = {}
     ingredientes_unicos = set()  # Conjunto para almacenar ingredientes únicos
-    dia_en_que_comemos_str = ""
-
+    # dia_en_que_comemos_str = ""
     
     if request.method == 'POST':
                 for objeto in objetos_del_usuario:
@@ -159,6 +158,7 @@ def menu_elegido(request):
                     buscar_almuerzo_por_dia = almuerzo_que_comemos + dia_en_que_comemos_str
                     if buscar_almuerzo_por_dia in request.POST:
                           almuerzo_elegido = True
+                          ingredientes_unicos.update(almuerzo_info.split(", "))
                     else: almuerzo_elegido = False
 
                     cena_que_comemos = platos_dia.get("cena", {}).get("plato", [])
@@ -169,11 +169,37 @@ def menu_elegido(request):
                     buscar_cena_por_dia = cena_que_comemos + dia_en_que_comemos_str
                     if buscar_cena_por_dia in request.POST:
                           cena_elegida = True
+                          ingredientes_unicos.update(cena_info.split(", "))
+
                     else: cena_elegida = False
 
                     almuerzo_variedades = platos_dia.get("variedades_almuerzo", {})
+                    if almuerzo_variedades:
+                           
+                            for variedad_key, variedad_value in almuerzo_variedades.items():
+                                  # Convertir dia_en_que_comemos a cadena con un formato específico
+                                dia_en_que_comemos_str = objeto.el_dia_en_que_comemos.strftime('%d %b. %Y')
+                                 # Concatenar el valor de 'dia_en_que_comemos' a 'variedad_value["variedad"]'
+                                buscar_variedad_por_dia = variedad_value["variedad"] + dia_en_que_comemos_str
+                                if buscar_variedad_por_dia in request.POST:
+                                   almuerzo_variedades[variedad_key]["elegido"] = True
+                                   ingredientes_unicos.update(variedad_value["ingredientes_de_variedades"].split(", "))
+                                else: almuerzo_variedades[variedad_key]["elegido"] = False
                                                      
                     cena_variedades = platos_dia.get("variedades_cena", {})
+
+                    if cena_variedades:
+
+                            for variedad_key, variedad_value in cena_variedades.items():
+                                 # Convertir dia_en_que_comemos a cadena con un formato específico
+                                dia_en_que_comemos_str = objeto.el_dia_en_que_comemos.strftime('%d %b. %Y')
+                                 # Concatenar el valor de 'dia_en_que_comemos' a 'variedad_value["variedad"]'
+                                buscar_variedad_por_dia = variedad_value["variedad"] + dia_en_que_comemos_str
+                                if buscar_variedad_por_dia in request.POST:                                
+                                   cena_variedades[variedad_key]["elegido"] = True
+                                   ingredientes_unicos.update(variedad_value["ingredientes_de_variedades"].split(", "))
+
+                                else:  cena_variedades[variedad_key]["elegido"] = False     
 
                     platos_por_dia[objeto.el_dia_en_que_comemos] = {
                         "almuerzo": almuerzo_que_comemos,
@@ -186,52 +212,6 @@ def menu_elegido(request):
                         "variedades_cena": cena_variedades
                     }
 
-                for key, value in request.POST.items():
-                    if key != 'csrfmiddlewaretoken':  # Ignorar la clave csrfmiddlewaretoken
-                      for objeto in objetos_del_usuario:
-                        platos_dia = objeto.platos_que_comemos
-                        dia_en_que_comemos = objeto.el_dia_en_que_comemos
-
-                        ingredientes_alm_cena = request.POST.get(key)
-                        # Convertir la cadena de ingredientes en una lista
-                        ingredientes_alm_cena = [ingrediente.strip() for ingrediente in ingredientes_alm_cena.split(",")]
-                        ingredientes_unicos.update(ingredientes_alm_cena)
-                        
-                        almuerzo_variedades = platos_dia.get("variedades_almuerzo", {})
-                        if almuerzo_variedades:
-                           
-                            for variedad_key, variedad_value in almuerzo_variedades.items():
-                                  # Convertir dia_en_que_comemos a cadena con un formato específico
-                                dia_en_que_comemos_str = dia_en_que_comemos.strftime('%d %b. %Y')
-                                 # Concatenar el valor de 'dia_en_que_comemos' a 'variedad_value["variedad"]'
-                                buscar_variedad_por_dia = variedad_value["variedad"] + dia_en_que_comemos_str
-                                if buscar_variedad_por_dia in request.POST:
-                                   almuerzo_variedades[variedad_key]["elegido"] = True
-                                else: almuerzo_variedades[variedad_key]["elegido"] = False
-                                                                                             
-                        cena_variedades = platos_dia.get("variedades_cena", {})
-                        if cena_variedades:
-
-                            for variedad_key, variedad_value in cena_variedades.items():
-                                 # Convertir dia_en_que_comemos a cadena con un formato específico
-                                dia_en_que_comemos_str = dia_en_que_comemos.strftime('%d %b. %Y')
-                                 # Concatenar el valor de 'dia_en_que_comemos' a 'variedad_value["variedad"]'
-                                buscar_variedad_por_dia = variedad_value["variedad"] + dia_en_que_comemos_str
-                                if buscar_variedad_por_dia in request.POST:                                
-                                   cena_variedades[variedad_key]["elegido"] = True
-                                else:  cena_variedades[variedad_key]["elegido"] = False        
-
-                      platos_por_dia[objeto.el_dia_en_que_comemos] = {
-                        "almuerzo": almuerzo_que_comemos,
-                        "almuerzo_elegido": almuerzo_elegido,
-                        "cena": cena_que_comemos,
-                        "cena_elegida": cena_elegida,
-                        "almuerzo_info": almuerzo_info,
-                        "cena_info": cena_info,
-                        "variedades": almuerzo_variedades,
-                        "variedades_cena": cena_variedades
-                       }                                  
-                
     else:
         for objeto in objetos_del_usuario:
             platos_dia = objeto.platos_que_comemos
@@ -288,7 +268,7 @@ def menu_elegido(request):
         'platos_por_dia': platos_por_dia,
         'ingredientes_separados_por_comas': ingredientes_unicos,
         'post_data': request.POST,
-        'dia_que_comemos': dia_en_que_comemos_str
+        # 'dia_que_comemos': dia_en_que_comemos_str
     }
 
     return render(request, 'AdminVideos/menu_elegido.html', context)

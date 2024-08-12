@@ -12,9 +12,9 @@
     <form action="{% url 'menu-elegido' %}" method="post">
         {% csrf_token %}
 
-        <h5>>>>>{{ post_data }}<<<</h5> 
+    <!-- <h5>>>>>{{ post_data }}<<<</h5>   -->
 
-        <h5>DIA QUE COMEMOS: >{{ dia_que_comemos }}<</h5> 
+        <!-- <h5>DIA QUE COMEMOS: >{{ dia_que_comemos }}<</h5>  -->
 
 
         {% for fecha, platos in platos_por_dia.items %}
@@ -22,12 +22,9 @@
         <div class="card">
             <div class="card-body">
                 <h5>{{ fecha }}
-                    FORMATEADA {{ fecha|date:"d M. Y"|lower }}
-
                 </h5>
 
                 <h5>ALMUERZO</h5>
-
 
                 {% if platos.almuerzo != '-----' %}
 
@@ -114,15 +111,20 @@
 <section>
     <form>
 
-        {% csrf_token %}
         <h3>EDITA LISTA DE COMPRAS</h3>
-        <p>ingredientes_separados_por_comas: {{ ingredientes_separados_por_comas }}</p>
+        <!-- <p>ingredientes_separados_por_comas: {{ ingredientes_separados_por_comas }}</p> -->
 
-        {% for ingrediente in ingredientes_separados_por_comas %}
-        <input type="checkbox" id="{{ ingrediente }}" name="ingrediente_a_comprar" value="{{ ingrediente }}" checked>
-        <label for="{{ ingrediente }}">{{ ingrediente }}</label><br>
-        <!-- <input type="text" id="{{ ingrediente }}_detalle" name="{{ ingrediente }}_detalle" placeholder="Detalles">-->
-        {% endfor %}
+        {% if ingredientes_separados_por_comas %}
+            {% for ingrediente in ingredientes_separados_por_comas %}
+            <input type="checkbox" id="{{ ingrediente }}" name="ingrediente_a_comprar" value="{{ ingrediente }}" checked>
+            <label for="{{ ingrediente }}">{{ ingrediente }}</label><br>
+            <!-- <input type="text" id="{{ ingrediente }}_detalle" name="{{ ingrediente }}_detalle" placeholder="Detalles">-->
+            {% endfor %}
+        {% else %}
+           <p>No hay ingredientes para comprar. Seleccione menúes.</p>
+        {% endif %}
+   
+
         <input type="submit" value="Enviar">
     </form>
 
