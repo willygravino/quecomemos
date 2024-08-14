@@ -142,6 +142,7 @@ class Profile(models.Model):
      user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
      nombre_completo = models.CharField(max_length=80, blank=False)
      avatar = models.ImageField(upload_to="avatares", null=True, blank=True)
+     ingredientes_que_tengo = models.JSONField(default=list, blank=True)
 
      @property
      def avatar_url(self):

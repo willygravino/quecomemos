@@ -12,9 +12,15 @@
     <form action="{% url 'menu-elegido' %}" method="post">
         {% csrf_token %}
 
-    <!-- <h5>>>>>{{ post_data }}<<<</h5>   -->
+     <h5>>>>>{{ post_data }}<<<</h5>   
+     <!-- <h5>>>>>ingredientes: {{ ingredientes_separados_por_comas }}<<<</h5>   -->
+
 
         <!-- <h5>DIA QUE COMEMOS: >{{ dia_que_comemos }}<</h5>  -->
+      <h5>lista de compras: >{{ lista_de_compras }}<</h5> 
+      <h5>ingredientes_no_comprados: >{{ ingredientes_no_comprados }}<</h5> 
+
+
 
 
         {% for fecha, platos in platos_por_dia.items %}
@@ -115,8 +121,12 @@
         <!-- <p>ingredientes_separados_por_comas: {{ ingredientes_separados_por_comas }}</p> -->
 
         {% if ingredientes_separados_por_comas %}
-            {% for ingrediente in ingredientes_separados_por_comas %}
-            <input type="checkbox" id="{{ ingrediente }}" name="ingrediente_a_comprar" value="{{ ingrediente }}" checked>
+            {% for ingrediente, valor  in ingredientes_separados_por_comas.items %}
+            <input type="checkbox" id="{{ ingrediente }}" name="ingrediente_a_comprar" value="{{ ingrediente }}"  {% if valor.estado == "no-tengo" %} checked {% endif %}>
+            <!-- <h3>ing >>{{ ingrediente }}<<</h3>
+            <h3>estado >>{{ valor.estado }}<<</h3> -->
+            <!-- <h3>comentario >>{{ valor.comentario }}<<</h3> -->
+
             <label for="{{ ingrediente }}">{{ ingrediente }}</label><br>
             <!-- <input type="text" id="{{ ingrediente }}_detalle" name="{{ ingrediente }}_detalle" placeholder="Detalles">-->
             {% endfor %}
