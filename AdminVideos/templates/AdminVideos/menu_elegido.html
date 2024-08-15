@@ -12,13 +12,18 @@
     <form action="{% url 'menu-elegido' %}" method="post">
         {% csrf_token %}
 
-     <h5>>>>>{{ post_data }}<<<</h5>   
+     <h5>>>>>{{ post_data }}<<<</h5> 
      <!-- <h5>>>>>ingredientes: {{ ingredientes_separados_por_comas }}<<<</h5>   -->
 
 
         <!-- <h5>DIA QUE COMEMOS: >{{ dia_que_comemos }}<</h5>  -->
-      <h5>lista de compras: >{{ lista_de_compras }}<</h5> 
+      <h5>lista de compras: >{{ lista_de_compras }}<</h5>  
       <h5>ingredientes_no_comprados: >{{ ingredientes_no_comprados }}<</h5> 
+      <h5>Set a no incluir: >{{ set_a_no_incluir }}<</h5> 
+
+      {% if set_a_no_incluir == ingredientes_no_comprados %}
+           <h5>ES IGUAL<</h5> 
+      {% endif %}
 
 
 

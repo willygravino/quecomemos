@@ -78,9 +78,7 @@ def grabar_menu_elegido(request):
 
             # Verificar si se recibieron datos del formulario
             if almuerzo != '-----' or cena != '-----':
-                # Consultar si ya existe un registro para esta fecha y este usuario
-                # registro_existente = ElegidosXDia.objects.filter(user=usuario, el_dia_en_que_comemos=fecha).first()
-
+              
                 almuerzo_queryset = Plato.objects.filter(nombre_plato=almuerzo).values("ingredientes", "variedades")
                 almuerzo_result = almuerzo_queryset.first()
                 almuerzo_variedades = almuerzo_result['variedades'] if almuerzo_result else None
@@ -94,7 +92,7 @@ def grabar_menu_elegido(request):
                         variedad_almuerzo_con_elegidos[variedad] = {
                             "variedad": detalles_variedad.get("variedad", ""),
                             "ingredientes_de_variedades": detalles_variedad.get("ingredientes_de_variedades", []),
-                            "elegido": True
+                             "elegido": True
                         }
 
                 # cena
@@ -103,8 +101,8 @@ def grabar_menu_elegido(request):
                 cena_variedades = cena_result['variedades'] if cena_result else None
                 cena_ingredientes = cena_result['ingredientes'] if cena_result else None
 
-                 
-                #  BUCLE PARA SUMAR EL CAMPO "ELEGIDOS A CADA PLATO Y VARIEDAD"
+                 #si se hardodea a true en menu-elegido no sería necesario el campo "elegido y todo este lío"
+                #  BUCLE PARA SUMAR EL CAMPO "ELEGIDOS A CADA PLATO Y VARIEDAD" 
                 variedad_cena_con_elegidos = {}
                 if cena_variedades:
                     for variedad, detalles_variedad in cena_variedades.items():
@@ -119,7 +117,7 @@ def grabar_menu_elegido(request):
 
                 platos_del_dia = { "almuerzo": {"plato": almuerzo,"ingredientes": almuerzo_ingredientes,"elegido": True}, "variedades_almuerzo": variedad_almuerzo_con_elegidos,'cena':{"plato": cena,"ingredientes": cena_ingredientes, "elegido":True}, 'variedades_cena': variedad_cena_con_elegidos}
 
-                        # Crear una instancia del modelo ElegidosXDia y guardar en la base de datos
+                # Crear una instancia del modelo ElegidosXDia y guardar en la base de datos
                 ElegidosXDia.objects.create(user=usuario,el_dia_en_que_comemos=fecha,platos_que_comemos=platos_del_dia)
                     
                # Redirigir al usuario a la página de menú elegido
@@ -146,11 +144,22 @@ def menu_elegido(request):
     lista_de_ingredientes = set()
     ingredientes_unicos = {}  # Diccionario para almacenar ingredientes a comprar, estado, comentario
     # dia_en_que_comemos_str = ""
+    ingredientes_no_comprados = []
+    lista_de_compras = []
+    no_incluir = set()
 
     # Obtener el perfil del usuario actual
     perfil = get_object_or_404(Profile, user=request.user)
     
     if request.method == 'POST':
+                
+                # # ESTABLEZCO LOS TRUE HASTA AQUÍ
+                # for objeto in objetos_del_usuario:
+                #      platos_dia = objeto.platos_que_comemos
+                #      if 
+
+                # no_incluir = set() TAL VEZ SEA SUFICIENTE CON QUE ESTÉ AQUÍ
+
                 lista_de_compras = request.POST.getlist("ingrediente_a_comprar")
 
                 for objeto in objetos_del_usuario:
@@ -160,14 +169,25 @@ def menu_elegido(request):
                     almuerzo_info = platos_dia.get("almuerzo", {}).get("ingredientes", [])
                     # Convertir dia_en_que_comemos a cadena con un formato específico
                     dia_en_que_comemos_str = objeto.el_dia_en_que_comemos.strftime('%d %b. %Y')
+                
+
                     # Concatenar el valor de 'dia_en_que_comemos' a 'variedad_value["variedad"]'
                     buscar_almuerzo_por_dia = almuerzo_que_comemos + dia_en_que_comemos_str
                     if buscar_almuerzo_por_dia in request.POST:
                           almuerzo_elegido = True
-                          ingredientes = almuerzo_info
-                          lista_de_ingredientes.update({ingrediente.strip() for ingrediente in ingredientes.split(',')})
-                     
-                    else: almuerzo_elegido = False
+                          lista_de_ingredientes.update({ingrediente.strip() for ingrediente in almuerzo_info.split(',')})
+
+                          if not objeto.platos_que_comemos["almuerzo"]["elegido"]:
+                                    objeto.platos_que_comemos["almuerzo"]["elegido"] = True
+                                    # Guardar el objeto en la base de datos
+                                    objeto.save()
+                                    no_incluir.update({ingrediente.strip() for ingrediente in almuerzo_info.split(',')})
+                   
+                    else: 
+                        almuerzo_elegido = False
+                        objeto.platos_que_comemos["almuerzo"]["elegido"] = False
+                        # Guardar el objeto en la base de datos
+                        objeto.save()
 
                     cena_que_comemos = platos_dia.get("cena", {}).get("plato", [])
                     cena_info = platos_dia.get("cena", {}).get("ingredientes", [])
@@ -177,11 +197,18 @@ def menu_elegido(request):
                     buscar_cena_por_dia = cena_que_comemos + dia_en_que_comemos_str
                     if buscar_cena_por_dia in request.POST:
                           cena_elegida = True
-                          ingredientes = cena_info
-                        #   lista_de_ingredientes = [ingrediente.strip() for ingrediente in ingredientes.split(',')]
-                          lista_de_ingredientes.update({ingrediente.strip() for ingrediente in ingredientes.split(',')})
-                          #   ingredientes_unicos.update(cena_info.split(", "))
-                    else: cena_elegida = False
+                          lista_de_ingredientes.update({ingrediente.strip() for ingrediente in cena_info.split(',')})
+
+                          if not objeto.platos_que_comemos["cena"]["elegido"]:
+                                objeto.platos_que_comemos["cena"]["elegido"] = True
+                                # Guardar el objeto en la base de datos
+                                objeto.save()
+                                no_incluir.update({ingrediente.strip() for ingrediente in cena_info.split(',')})
+                    else: 
+                          cena_elegida = False
+                          objeto.platos_que_comemos["cena"]["elegido"] = False
+                        # Guardar el objeto en la base de datos
+                          objeto.save()
 
                     almuerzo_variedades = platos_dia.get("variedades_almuerzo", {})
                     if almuerzo_variedades:
@@ -193,11 +220,25 @@ def menu_elegido(request):
                                 buscar_variedad_por_dia = variedad_value["variedad"] + dia_en_que_comemos_str
                                 if buscar_variedad_por_dia in request.POST:
                                    almuerzo_variedades[variedad_key]["elegido"] = True
+
                                    ingredientes = variedad_value['ingredientes_de_variedades']
                                 #    lista_de_ingredientes = [ingrediente.strip() for ingrediente in ingredientes.split(',')]
                                    lista_de_ingredientes.update({ingrediente.strip() for ingrediente in ingredientes.split(',')})
-                                #    ingredientes_unicos.update(variedad_value["ingredientes_de_variedades"].split(", "))
-                                else: almuerzo_variedades[variedad_key]["elegido"] = False
+                                  
+                                #   ESTE BLOQUE SE REPITE VARIAS VECES!!!!
+                                   # Asignar la variable modificada al objeto correspondiente
+                                   objeto.platos_que_comemos["variedades_almuerzo"] = almuerzo_variedades
+                                        # Guardar el objeto en la base de datos
+                                   objeto.save()
+
+                                #    HASTA AQUÍ
+                                else: 
+                                     almuerzo_variedades[variedad_key]["elegido"] = False
+                                    
+                                     # Asignar la variable modificada al objeto correspondiente
+                                     objeto.platos_que_comemos["variedades_almuerzo"] = almuerzo_variedades
+                                      # Guardar el objeto en la base de datos
+                                     objeto.save()
                                                      
                     cena_variedades = platos_dia.get("variedades_cena", {})
 
@@ -212,27 +253,53 @@ def menu_elegido(request):
                                    cena_variedades[variedad_key]["elegido"] = True
                                    ingredientes = variedad_value['ingredientes_de_variedades']
                                 #    lista_de_ingredientes = [ingrediente.strip() for ingrediente in ingredientes.split(',')]
-                                   lista_de_ingredientes.update({ingrediente.strip() for ingrediente in ingredientes.split(',')}) 
-                                 #    ingredientes_unicos.update(variedad_value["ingredientes_de_variedades"].split(", "))
-                                else:  cena_variedades[variedad_key]["elegido"] = False
+                                   lista_de_ingredientes.update({ingrediente.strip() for ingrediente in ingredientes.split(',')})
+
+                                   # Asignar la variable modificada al objeto correspondiente
+                                   objeto.platos_que_comemos["variedades_almuerzo"] = almuerzo_variedades
+                                      # Guardar el objeto en la base de datos
+                                   objeto.save()
+                              
+                                else: 
+                                     cena_variedades[variedad_key]["elegido"] = False
+                                      # Asignar la variable modificada al objeto correspondiente
+                                     objeto.platos_que_comemos["variedades_cena"] = cena_variedades
+                                      # Guardar el objeto en la base de datos
+                                     objeto.save()
                     
                     set_compras = set(lista_de_compras)
+                    set_a_no_incluir = set(no_incluir)
                     # Identificar elementos que están en lista_de_ingredientes pero no en set_compras
-                    ingredientes_no_comprados = lista_de_ingredientes - set_compras
+                    ingredientes_no_comprados_1 = lista_de_ingredientes - set_compras
+                    ingredientes_no_comprados = ingredientes_no_comprados_1 - set_a_no_incluir
+                    if ingredientes_no_comprados:
+                            for ingrediente_nuevo in ingredientes_no_comprados:
+                                if ingrediente_nuevo not in perfil.ingredientes_que_tengo:
+                                    # Actualizar el campo ingredientes_que_tengo
+                                    perfil.ingredientes_que_tengo.append(ingrediente_nuevo)
+                                    # Guardar el perfil actualizado
+                                    perfil.save()
 
-
+                    if lista_de_compras:
+                            for ingrediente_a_comprar in lista_de_compras:
+                                 if ingrediente_a_comprar in perfil.ingredientes_que_tengo:
+                                    # Eliminar el ingrediente de la lista
+                                    perfil.ingredientes_que_tengo.remove(ingrediente_a_comprar)
+                                    # Guardar el perfil actualizado
+                                    perfil.save()          
+                          
                     if lista_de_ingredientes:  
                        for ingrediente in lista_de_ingredientes:
                                        if ingrediente in perfil.ingredientes_que_tengo:
                                          ingredientes_unicos [ingrediente] = {
                                             "comentario": "<comentario>",
                                             "estado": "tengo" }
+                                       
                                        else:
                                             ingredientes_unicos [ingrediente] = {
                                             "comentario": "<comentario>",
                                             "estado": "no-tengo" }
-
-
+                                            
                     platos_por_dia[objeto.el_dia_en_que_comemos] = {
                         "almuerzo": almuerzo_que_comemos,
                         "almuerzo_elegido": almuerzo_elegido,
@@ -250,11 +317,11 @@ def menu_elegido(request):
 
             almuerzo_que_comemos = platos_dia.get("almuerzo", {}).get("plato", [])
             almuerzo_info = platos_dia.get("almuerzo", {}).get("ingredientes", [])
-            almuerzo_elegido = platos_dia.get("almuerzo", {}).get("elegido", [])
+            almuerzo_elegido = platos_dia.get("almuerzo", {}).get("elegido", []) # podría precindirse de esto si hardcodeamos a True mas abajo
 
             cena_que_comemos = platos_dia.get("cena", {}).get("plato", [])
-            cena_info = platos_dia.get("cena", {}).get("ingredientes", [])
-            cena_elegida = platos_dia.get("cena", {}).get("elegido", [])
+            cena_info = platos_dia.get("cena", {}).get("ingredientes", []) 
+            cena_elegida = platos_dia.get("cena", {}).get("elegido", []) # podría precindirse de esto si hardcodeamos a True mas abajo
            
             almuerzo_variedades = platos_dia.get("variedades_almuerzo", {})
 
@@ -271,12 +338,9 @@ def menu_elegido(request):
                 for key, value in cena_variedades.items():
                     ingredientes = value['ingredientes_de_variedades']
                     lista_de_ingredientes.update({ingrediente.strip() for ingrediente in ingredientes.split(',')})
-
            
             if almuerzo_info:
                      lista_de_ingredientes.update({ingrediente.strip() for ingrediente in almuerzo_info.split(',')})
-
-
                 
             if cena_info:
                     lista_de_ingredientes.update({ingrediente.strip() for ingrediente in cena_info.split(',')})
@@ -299,21 +363,22 @@ def menu_elegido(request):
 
             platos_por_dia[objeto.el_dia_en_que_comemos] = {
                 "almuerzo": almuerzo_que_comemos,
-                "almuerzo_elegido": almuerzo_elegido,
+                "almuerzo_elegido": almuerzo_elegido,  # puede hargodearse a TRUE
                 "cena": cena_que_comemos,
-                "cena_elegida": cena_elegida,
+                "cena_elegida": cena_elegida, # puede hargodearse a TRUE
                 "almuerzo_info": almuerzo_info,
                 "cena_info": cena_info,
                 "variedades": almuerzo_variedades,
                 "variedades_cena": cena_variedades
             }
-        
+
     context = {
         'platos_por_dia': platos_por_dia,
         'ingredientes_separados_por_comas': ingredientes_unicos,
         'post_data': request.POST,
         "lista_de_compras": lista_de_compras,
-        "ingredientes_no_comprados": ingredientes_no_comprados
+        "ingredientes_no_comprados": ingredientes_no_comprados,
+        "set_a_no_incluir": set_a_no_incluir
     }
 
     return render(request, 'AdminVideos/menu_elegido.html', context)
