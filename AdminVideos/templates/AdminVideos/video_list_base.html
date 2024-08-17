@@ -4,15 +4,12 @@
 
 {% block un_video %}
 
-<section>
+<!-- <section>
 
-  {% block filtro %}
 
-  {% endblock %}
-
-</section>
-
-<section>
+</section> -->
+<!-- 
+<section> -->
   <!-- <h6>TIPO DE VISTA ESTABLE {{ tipo_de_vista_estable }} - TIPO DE VISTA {{ tipo_de_vista }}</h6> -->
 
 
@@ -51,7 +48,7 @@
 
   {% for plato in platos %}
   <div class="d-flex flex-row">
-    <img style="width: 20%" src="{{plato.image_url}}" data-holder-rendered="true">
+    <img style="width: 3%" src="{{plato.image_url}}" data-holder-rendered="true">
     <div>
       <strong>
         <h6>{{ plato.nombre_plato }}</h6>
@@ -92,15 +89,15 @@
 
     </div>
   </div>
-  <p>-------------------------</p>
+  <p> </p>
   {% endfor %}
 
-</section>
-
-<section>
+<!-- </section> -->
 
 
-  <section>
+
+<!-- 
+  <section> -->
     <!-- <h3> ARMADO DEL MENÚ.</h3> -->
 
     <select class="mt-1 btn btn-primary" name="modo-armado">
@@ -312,7 +309,7 @@
 
       <button type="submit">Enviar</button>
     </form>
-  </section>
+  <!-- </section> -->
 
 
   </div>
@@ -321,7 +318,7 @@
   <!-- </form> -->
 
   </div>
-</section>
+<!-- </section> -->
 
 
 {% endblock %}

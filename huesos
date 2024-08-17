@@ -2,3 +2,13 @@ COSAS A CORREGIR:
 
 ver si sirve de algo el campo "elegido" al iniciar menu-elegido; tal vez solo sea necesario hardcodear a True antes de accionar el formulario
 
+
+
+    <!-- <ul >
+      <p>Medios: {{ form.medios }}</p> 
+      <p>Categoría: {{ form.categoria }}</p> 
+      <p>Preparación: {{ form.preparacion }}</p> 
+      <p>Tipo: {{ form.tipo }}</p> 
+  </ul> -->
+
+  <!-- <p>Tipo de vista: {{ form.tipo_de_vista }} </p>  -->
