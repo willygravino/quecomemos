@@ -21,6 +21,9 @@
       <h5>ingredientes_no_comprados: >{{ ingredientes_no_comprados }}<</h5> 
       <h5>Set a no incluir: >{{ set_a_no_incluir }}<</h5> 
 
+      <h2>Pasa o no? {{ pasa_por_aca }}</h2>
+
+
       {% if set_a_no_incluir == ingredientes_no_comprados %}
            <h5>ES IGUAL<</h5> 
       {% endif %}
@@ -114,7 +117,7 @@
         </div>
 
         {% endfor %}
-        <input type="submit" value="Enviar">
+        <input type="submit" value="Editar Lista de Compras">
 
 </section>
 
@@ -140,7 +143,9 @@
         {% endif %}
    
 
-        <input type="submit" value="Enviar">
+        <input type="submit" value="Imprimir lista de compras">
+        <input type="submit" value="Imprimir Plan de Comidas">
+
     </form>
 
 </section>
@@ -152,6 +157,7 @@
     <h2>{{ lista_de_compras }}</h2>
     <h2>ingredientes a excluir {{ ingredientes_a_excluir_almuerzo }}</h2>
     <h2>ingredientes a excluir cena {{ ingredientes_a_excluir_cena }}</h2>
+
 
 
 </section>

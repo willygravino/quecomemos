@@ -146,10 +146,11 @@ def menu_elegido(request):
     # dia_en_que_comemos_str = ""
     ingredientes_no_comprados = []
     lista_de_compras = []
-    no_incluir = set()
-
+    # no_incluir = set()
+    set_a_no_incluir = set()
     # Obtener el perfil del usuario actual
     perfil = get_object_or_404(Profile, user=request.user)
+    pasa_por_aca = "no pasa"
     
     if request.method == 'POST':
                 
@@ -158,7 +159,7 @@ def menu_elegido(request):
                 #      platos_dia = objeto.platos_que_comemos
                 #      if 
 
-                # no_incluir = set() TAL VEZ SEA SUFICIENTE CON QUE ESTÉ AQUÍ
+                no_incluir = set() # TAL VEZ SEA SUFICIENTE CON QUE ESTÉ AQUÍ
 
                 lista_de_compras = request.POST.getlist("ingrediente_a_comprar")
 
@@ -219,17 +220,22 @@ def menu_elegido(request):
                                  # Concatenar el valor de 'dia_en_que_comemos' a 'variedad_value["variedad"]'
                                 buscar_variedad_por_dia = variedad_value["variedad"] + dia_en_que_comemos_str
                                 if buscar_variedad_por_dia in request.POST:
-                                   almuerzo_variedades[variedad_key]["elegido"] = True
 
                                    ingredientes = variedad_value['ingredientes_de_variedades']
                                 #    lista_de_ingredientes = [ingrediente.strip() for ingrediente in ingredientes.split(',')]
                                    lista_de_ingredientes.update({ingrediente.strip() for ingrediente in ingredientes.split(',')})
-                                  
-                                #   ESTE BLOQUE SE REPITE VARIAS VECES!!!!
-                                   # Asignar la variable modificada al objeto correspondiente
-                                   objeto.platos_que_comemos["variedades_almuerzo"] = almuerzo_variedades
-                                        # Guardar el objeto en la base de datos
-                                   objeto.save()
+                                                                    
+                                   if not objeto.platos_que_comemos["variedades_almuerzo"][variedad_key]["elegido"]:
+                                        #   ESTE BLOQUE SE REPIT E VARIAS VECES!!!!
+                                        pasa_por_aca = "pasa!"
+                                        almuerzo_variedades[variedad_key]["elegido"] = True
+
+                                        # objeto.platos_que_comemos["variedades_almuerzo"][variedad_key]["variedad"] = "True"
+                                        # objeto.platos_que_comemos["variedades_almuerzo"] = almuerzo_variedades
+                                                # Guardar el objeto en la base de datos
+                                        objeto.save()
+
+                                        no_incluir.update(({ingrediente.strip() for ingrediente in ingredientes.split(',')}))
 
                                 #    HASTA AQUÍ
                                 else: 
@@ -250,15 +256,18 @@ def menu_elegido(request):
                                  # Concatenar el valor de 'dia_en_que_comemos' a 'variedad_value["variedad"]'
                                 buscar_variedad_por_dia = variedad_value["variedad"] + dia_en_que_comemos_str
                                 if buscar_variedad_por_dia in request.POST:                                
-                                   cena_variedades[variedad_key]["elegido"] = True
                                    ingredientes = variedad_value['ingredientes_de_variedades']
                                 #    lista_de_ingredientes = [ingrediente.strip() for ingrediente in ingredientes.split(',')]
                                    lista_de_ingredientes.update({ingrediente.strip() for ingrediente in ingredientes.split(',')})
 
-                                   # Asignar la variable modificada al objeto correspondiente
-                                   objeto.platos_que_comemos["variedades_almuerzo"] = almuerzo_variedades
-                                      # Guardar el objeto en la base de datos
-                                   objeto.save()
+                                   if not objeto.platos_que_comemos["variedades_cena"][variedad_key]["elegido"]:
+                                        cena_variedades[variedad_key]["elegido"] = True
+                                 
+                                        # Asignar la variable modificada al objeto correspondiente
+                                        objeto.platos_que_comemos["variedades_cena"] = cena_variedades
+                                            # Guardar el objeto en la base de datos
+                                        objeto.save()
+                                        no_incluir.update(({ingrediente.strip() for ingrediente in ingredientes.split(',')}))
                               
                                 else: 
                                      cena_variedades[variedad_key]["elegido"] = False
@@ -378,6 +387,8 @@ def menu_elegido(request):
         'post_data': request.POST,
         "lista_de_compras": lista_de_compras,
         "ingredientes_no_comprados": ingredientes_no_comprados,
+        "pasa_por_aca": pasa_por_aca,
+
         "set_a_no_incluir": set_a_no_incluir
     }
 
