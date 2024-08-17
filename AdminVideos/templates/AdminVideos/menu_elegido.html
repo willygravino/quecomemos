@@ -12,21 +12,20 @@
     <form action="{% url 'menu-elegido' %}" method="post">
         {% csrf_token %}
 
-     <h5>>>>>{{ post_data }}<<<</h5> 
+     <!-- <h5>>>>>{{ post_data }}<<<</h5>  -->
      <!-- <h5>>>>>ingredientes: {{ ingredientes_separados_por_comas }}<<<</h5>   -->
 
 
         <!-- <h5>DIA QUE COMEMOS: >{{ dia_que_comemos }}<</h5>  -->
-      <h5>lista de compras: >{{ lista_de_compras }}<</h5>  
-      <h5>ingredientes_no_comprados: >{{ ingredientes_no_comprados }}<</h5> 
-      <h5>Set a no incluir: >{{ set_a_no_incluir }}<</h5> 
-
-      <h2>Pasa o no? {{ pasa_por_aca }}</h2>
+      <!-- <h5>lista de compras: >{{ lista_de_compras }}<</h5>   -->
+      <!-- <h5>ingredientes_no_comprados: >{{ ingredientes_no_comprados }}<</h5>  -->
+      <!-- <h5>Set a no incluir: >{{ set_a_no_incluir }}<</h5>  -->
 
 
-      {% if set_a_no_incluir == ingredientes_no_comprados %}
+
+      <!-- {% if set_a_no_incluir == ingredientes_no_comprados %}
            <h5>ES IGUAL<</h5> 
-      {% endif %}
+      {% endif %} -->
 
 
 
@@ -155,8 +154,8 @@
     <H3>LISTA DE COMPRAS
     </H3>
     <h2>{{ lista_de_compras }}</h2>
-    <h2>ingredientes a excluir {{ ingredientes_a_excluir_almuerzo }}</h2>
-    <h2>ingredientes a excluir cena {{ ingredientes_a_excluir_cena }}</h2>
+    <!-- <h2>ingredientes a excluir {{ ingredientes_a_excluir_almuerzo }}</h2>
+    <h2>ingredientes a excluir cena {{ ingredientes_a_excluir_cena }}</h2> -->
 
 
 
