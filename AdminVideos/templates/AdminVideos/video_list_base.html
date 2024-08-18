@@ -4,13 +4,6 @@
 
 {% block un_video %}
 
-<!-- <section>
-
-
-</section> -->
-<!-- 
-<section> -->
-  <!-- <h6>TIPO DE VISTA ESTABLE {{ tipo_de_vista_estable }} - TIPO DE VISTA {{ tipo_de_vista }}</h6> -->
 
 
   {% if tipo_de_vista_estable == "random-todos" or tipo_de_vista_estable == "random-con-mios" %}
@@ -25,26 +18,9 @@
   {% endif %}
   {% endif %}
 
-  <!-- <h6>{{ platos }}</h6> -->
-
   {% if not platos %}
   <h6>No hay platos para mostrar.</h6>
   {% endif %}
-
-
-  <!-- 
-  <h6>PLATOS A SUGERIR</h6>
-
-  {% for sugerible in platos_a_sugerir %}
-        <h6>{{ sugerible.nombre_plato }}</h6>
-      </strong>
-  {% endfor %}
-
-  {% for trasssugerible in  platos_tras_sugerir %}
-  <h6>{{ trassugerible.nombre_plato }}</h6>
-</strong>
-  {% endfor %} -->
-
 
   {% for plato in platos %}
   <div class="d-flex flex-row">

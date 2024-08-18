@@ -4,37 +4,19 @@
 
 {% block principal %}
 
-<main>
-
-  <!-- <section class="py-3 text-center container">
-    <div class="row py-lg-1">
-      <div class="col-lg-10 col-md-8 mx-auto">
-        <h3 class="fw-light">¿Qué comemos?.</h3>
-        <p class="lead text-muted">Versión 1.0</p>
-      </div>
-    </div>
-  </section> -->
-
+<!-- <main> -->
   {% if user.is_authenticated %}
   {% if user.profile.nombre_completo != "" %}
   {% if not platos%}
-  <!-- <section class="py-3 text-center container"> -->
-    <!-- <div class="row py-lg-1"> -->
-      <div class="col-lg-6 col-md-8 mx-auto">
-        {% block mensaje %}{% endblock %}
-      </div>
-    <!-- </div> -->
-  <!-- </section> -->
+  <div class="col-lg-6 col-md-8 mx-auto">
+    {% block mensaje %}{% endblock %}
+  </div>
   {% else %}
-  <!-- <section class="py-0 text-center container"> -->
-    <!-- <div class="row py-lg-1"> -->
-      <div class="col-lg-10 col-md-8 mx-auto">
-        {% block titulo_ok %}{% endblock %}
-      </div>
-    <!-- </div> -->
-  <!-- </section> -->
+  <div class="col-lg-10 col-md-8 mx-auto">
+    {% block titulo_ok %}{% endblock %}
+  </div>
   {% endif %}
-  
+
   {% endif %}
   {% else %}
   <section class="py-0 text-center container">
@@ -49,16 +31,9 @@
     </div>
   </section>
   {% endif %}
-  <!-- <div class="container"> -->
-    <!-- <div class=" py-3 bg-body-tertiary"> -->
-      <!-- <div class="row  row-cols-1 row-cols-sm-2 row-cols-md-3 justify-content-between"> -->
-        {% block un_video %}
-        {% endblock %}
-      <!-- </div> -->
-    <!-- </div> -->
-  <!-- </div> -->
 
-
-</main>
+  {% block un_video %}
+  {% endblock %}
+<!-- </main> -->
 
 {% endblock %}

@@ -5,28 +5,12 @@
 {% block filtro %}
 <form method="POST">
   {% csrf_token %}
-
-  <li class="nav-item">
-    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true"
-      aria-controls="collapseTwo">
-      <!-- <i class="fas fa-fw fa-cog"></i> -->
-      <span>Medios: {{ form.medios }}</span>
-      <span>Categoría: {{ form.categoria }}</span>
-      <span>Preparación: {{ form.preparacion }}</span>
-      <span>Tipo: {{ form.tipo }}</span>
-      <span>Tipo de vista: {{ form.tipo_de_vista }}</span>
-    </a>
-    <!-- <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-          <div class="bg-white py-2 collapse-inner rounded">
-              <h6 class="collapse-header">Custom Components:</h6>
-              <a class="collapse-item" href="/AdminVideos/templates/AdminVideos/buttons.html">Buttons</a>
-              <a class="collapse-item" href="cards.html">Cards</a>
-          </div> 
-      </div> -->
-      <button type="submit" class="btn btn-primary">Filtrar</button>
-
-  </li>
-
+  <span>Medios: {{ form.medios }}</span>
+  <span>Categoría: {{ form.categoria }}</span>
+  <span>Preparación: {{ form.preparacion }}</span>
+  <span>Tipo: {{ form.tipo }}</span>
+  <span>Tipo de vista: {{ form.tipo_de_vista }}</span>
+  <button type="submit" class="btn btn-primary">Filtrar</button>
 </form>
 
 {% endblock %}
