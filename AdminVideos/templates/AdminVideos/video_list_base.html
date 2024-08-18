@@ -4,102 +4,96 @@
 
 {% block un_video %}
 
+<div class="row" style="height: 50vh; background-color: lightblue; overflow: auto;">
+  <div class="col">
+    <section>
+      {% if tipo_de_vista_estable == "random-todos" or tipo_de_vista_estable == "random-con-mios" %}
+      <h6>CANTIDAD DE PLATOS SUGERIDOS {{ cantidad_platos_sugeridos }}</h6>
+      <h6>CANTIDAD SUGERIBLES SEGUN FILTRO {{ cantidad_platos_sugeribles }}</h6>
+      {% if cantidad_platos_sugeridos >= cantidad_platos_sugeribles %}
+      <h6>No hay más platos para sugerir.</h6>
+      <form action="{% url 'reiniciar-sugeridos' %}" method="GET">
+        <input type="checkbox" id="borrar-sugeribles" name="borrar-lista-sugeribles" value="borrar-sugeribles" checked>
+        <button type="submit">Reiniciar sugeribles para volver a sugerir</button>
+      </form>
+      {% endif %}
+      {% endif %}
+
+      {% if not platos %}
+      <h6>No hay platos para mostrar.</h6>
+      {% endif %}
+
+      {% for plato in platos %}
+      <div class="d-flex flex-row">
+        <img style="width: 3%" src="{{plato.image_url}}" data-holder-rendered="true">
+        <div>
+          <strong>
+            <h6>{{ plato.nombre_plato }}</h6>
+          </strong>
+          <h6>DESCRIPCIÓN {{ plato.descripcion_plato }}</h6>
+          <a href="{% url 'videos-detail' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Detalle
+            del
+            plato</a>
+          {% if user.id == plato.propietario.id %}
+          <a href="{% url 'videos-delete' plato.id %}" type="button"
+            class="btn btn-sm btn-outline-secondary">Eliminar<a>
+              <a href="{% url 'videos-update' plato.id %}" type="button"
+                class="btn btn-sm btn-outline-secondary">Editar</a>
+              <small class="text-muted">Subido por mi.</small>
+              {% else %}
+              <small class="text-muted">Subido por {{ plato.propietario }}</small>
+              {% endif %}
+              <br>
+              {% for key, value in plato.variedades.items %}
+              {% if value.variedad %}
+              <small class="text-success"> {{ value.variedad }} /</small>
+              {% endif %}
+
+              {% endfor %}
 
 
-  {% if tipo_de_vista_estable == "random-todos" or tipo_de_vista_estable == "random-con-mios" %}
-  <h6>CANTIDAD DE PLATOS SUGERIDOS {{ cantidad_platos_sugeridos }}</h6>
-  <h6>CANTIDAD SUGERIBLES SEGUN FILTRO {{ cantidad_platos_sugeribles }}</h6>
-  {% if cantidad_platos_sugeridos >= cantidad_platos_sugeribles %}
-  <h6>No hay más platos para sugerir.</h6>
-  <form action="{% url 'reiniciar-sugeridos' %}" method="GET">
-    <input type="checkbox" id="borrar-sugeribles" name="borrar-lista-sugeribles" value="borrar-sugeribles" checked>
-    <button type="submit">Reiniciar sugeribles para volver a sugerir</button>
-  </form>
-  {% endif %}
-  {% endif %}
-
-  {% if not platos %}
-  <h6>No hay platos para mostrar.</h6>
-  {% endif %}
-
-  {% for plato in platos %}
-  <div class="d-flex flex-row">
-    <img style="width: 3%" src="{{plato.image_url}}" data-holder-rendered="true">
-    <div>
-      <strong>
-        <h6>{{ plato.nombre_plato }}</h6>
-      </strong>
-      <h6>DESCRIPCIÓN {{ plato.descripcion_plato }}</h6>
-      <a href="{% url 'videos-detail' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Detalle del
-        plato</a>
-      {% if user.id == plato.propietario.id %}
-      <a href="{% url 'videos-delete' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Eliminar<a>
-          <a href="{% url 'videos-update' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Editar</a>
-          <small class="text-muted">Subido por mi.</small>
-          {% else %}
-          <small class="text-muted">Subido por {{ plato.propietario }}</small>
-          {% endif %}
-          <br>
-          {% for key, value in plato.variedades.items %}
-          {% if value.variedad %}
-          <small class="text-success"> {{ value.variedad }} /</small>
-          {% endif %}
-
-          {% endfor %}
-
-
-          {% if plato.nombre_plato in elegidos %}
-          <form action="{% url 'plato-elegido' %}" method="GET">
-            <input type="hidden" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
-            <input type="checkbox" id="borrar" name="borrar" value="borrar" checked>
-            <button type="submit">Borrar</button>
-          </form>
-          {% else %}
-          <form action="{% url 'plato-elegido' %}" method="GET">
-            <label for="opcion{{ plato.id }}">Elegir este plato:</label>
-            <input type="checkbox" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
-            <button type="submit">Enviar</button>
-          </form>
-          {% endif %}
-
-
-    </div>
+              {% if plato.nombre_plato in elegidos %}
+              <form action="{% url 'plato-elegido' %}" method="GET">
+                <input type="hidden" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
+                <input type="checkbox" id="borrar" name="borrar" value="borrar" checked>
+                <button type="submit">Borrar</button>
+              </form>
+              {% else %}
+              <form action="{% url 'plato-elegido' %}" method="GET">
+                <label for="opcion{{ plato.id }}">Elegir este plato:</label>
+                <input type="checkbox" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
+                <button type="submit">Enviar</button>
+              </form>
+              {% endif %}
+        </div>
+      </div>
+      <p> </p>
+      {% endfor %}
+    </section>
   </div>
-  <p> </p>
-  {% endfor %}
+</div>
 
-<!-- </section> -->
-
-
-
-<!-- 
-  <section> -->
-    <!-- <h3> ARMADO DEL MENÚ.</h3> -->
-
-    <select class="mt-1 btn btn-primary" name="modo-armado">
-      <option value="modo-diario">MODO DIARIO</option>
-      <option value="modo-celebracion">MODO CELEBRACIÓN</option>
+<!-- Segunda fila -->
+<div class="row" style="height: 50vh; background-color: lightcoral; overflow: auto;">
+  <div class="row">
+<section>
+  <select class="mt-1 btn btn-primary" name="modo-armado">
+    <option value="modo-diario">MODO DIARIO</option>
+    <option value="modo-celebracion">MODO CELEBRACIÓN</option>
     </select>
-    <!-- <h5>AHORA LISTA: {{ platos_elegidos_por_dia_lista }} </h5> -->
-    <!-- <p>cuarto Almuerzo??? {{ platos_elegidos_por_dia_lista.3 }}</p>
-    <p>Cuarto Almuerzo ok?: {{ platos_elegidos_por_dia_lista.3.1.almuerzo }}</p>
-    <p>Cuarto cena ok?: {{ platos_elegidos_por_dia_lista.3.1.cena }}</p>
-    
-    <p>platos elegidos:  >{{platos_elegidos_por_dia}}<</p> -->
+   
 
+<form action="{% url 'grabar-menu' %}" method="post">
 
-    <form action="{% url 'grabar-menu' %}" method="post">
+  {% csrf_token %}
 
-      {% csrf_token %}
-
-      <div class="mt-2 btn btn-primary">
-        <h5>{{ dias_desde_hoy.0.1 }} {{ dias_desde_hoy.0.0|date:'Y-m-d' }}</h5>
+  <div class="mt-2 btn btn-primary">
+    <h5>{{ dias_desde_hoy.0.1 }} {{ dias_desde_hoy.0.0|date:'Y-m-d' }}</h5>
 
         <input type="hidden" name="fecha-1" value="{{ dias_desde_hoy.0.0|date:'Y-m-d' }}">
         <select name="1-a">
           <option value="-----">Elegir plato</option>
           {% for elegido in elegidos %}
-          <!-- <option value="{{ elegido }}">{{ elegido }}</option> -->
           <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.0.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
 
           {% endfor %}
@@ -289,12 +283,9 @@
 
 
   </div>
-
-
-  <!-- </form> -->
-
   </div>
-<!-- </section> -->
-
+</section> 
+</div>
+</div>
 
 {% endblock %}

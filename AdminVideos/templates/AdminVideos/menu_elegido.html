@@ -4,161 +4,130 @@
 
 {% block un_video %}
 
-<section>
-    <h1>Menúes Programados</h1>
+       
 
+<div class="row">
+    <div class="col-md-4">
 
+    <section>
+        <h1>Menúes Programados</h1>
 
-    <form action="{% url 'menu-elegido' %}" method="post">
-        {% csrf_token %}
+        <form action="{% url 'menu-elegido' %}" method="post">
+            {% csrf_token %}
 
-     <!-- <h5>>>>>{{ post_data }}<<<</h5>  -->
-     <!-- <h5>>>>>ingredientes: {{ ingredientes_separados_por_comas }}<<<</h5>   -->
+            {% for fecha, platos in platos_por_dia.items %}
 
+            <div class="card">
+                <div class="card-body">
+                    <h5>{{ fecha }}
+                    </h5>
 
-        <!-- <h5>DIA QUE COMEMOS: >{{ dia_que_comemos }}<</h5>  -->
-      <!-- <h5>lista de compras: >{{ lista_de_compras }}<</h5>   -->
-      <!-- <h5>ingredientes_no_comprados: >{{ ingredientes_no_comprados }}<</h5>  -->
-      <!-- <h5>Set a no incluir: >{{ set_a_no_incluir }}<</h5>  -->
+                    <h5>ALMUERZO</h5>
 
+                    {% if platos.almuerzo != '-----' %}
 
+                    <div class="plato-info">
+                        <h6 class="card-subtitle mb-2 text-muted">>>>>{{ platos.almuerzo }}</h6>
+                        <p class="card-text">{{ platos.almuerzo_info }}</p>
 
-      <!-- {% if set_a_no_incluir == ingredientes_no_comprados %}
-           <h5>ES IGUAL<</h5> 
-      {% endif %} -->
+                        {% if platos.almuerzo_info %}
+                        <input type="checkbox" id="inc_almuerzo_{{ fecha }}" name="{{ platos.almuerzo }}{{ fecha|date:"d M. Y"|lower }}"
+                            value="z{{ platos.almuerzo_info }}" {% if platos.almuerzo_elegido %} checked {% endif %}>
+                        <label for="inc_almuerzo_{{ fecha }}">Plato incluido</label>
+                        {% else %}
+                        <p>No se encontraron ingredientes para el almuerzo.</p>
+                        {% endif %}
 
+                        {% for key, value in platos.variedades.items %}
+                        {% if value.variedad %}
+                        <p>Variedad: {{ value.variedad }}</p>
 
-
-
-        {% for fecha, platos in platos_por_dia.items %}
-
-        <div class="card">
-            <div class="card-body">
-                <h5>{{ fecha }}
-                </h5>
-
-                <h5>ALMUERZO</h5>
-
-                {% if platos.almuerzo != '-----' %}
-
-                <div class="plato-info">
-                    <h6 class="card-subtitle mb-2 text-muted">>>>>{{ platos.almuerzo }}</h6>
-                    <p class="card-text">{{ platos.almuerzo_info }}</p>
-
-                    {% if platos.almuerzo_info %}
-
-                    <!-- <h5>elegido????? {{ platos.almuerzo_elegido }}</h5> -->
-
-                    <!-- en el diccionario request.POST <name> es la clave y <value> es el valor! -->
-                    <input type="checkbox" id="inc_almuerzo_{{ fecha }}" name="{{ platos.almuerzo }}{{ fecha|date:"d M. Y"|lower }}"
-                        value="z{{ platos.almuerzo_info }}" {% if platos.almuerzo_elegido %} checked {% endif %}>
-                     <label for="inc_almuerzo_{{ fecha }}">Plato incluido</label>
-                    {% else %}
-                    <p>No se encontraron ingredientes para el almuerzo.</p>
+                        <h5>Ingredientes variedad: {{value.ingredientes_de_variedades}}</h5>
+                        <input type="checkbox" id="incluir{{key}}" name="{{ value.variedad }}{{ fecha|date:"d M. Y"|lower }}"
+                            value="{{value.ingredientes_de_variedades}}" {% if value.elegido %} checked {% endif %}>
+                        <label for="incluir{{key}}">Variedad incluida</label>
+                        {% endif %}
+                        {% endfor %}
+                    </div><br>
                     {% endif %}
 
-                    <!-- <p>Variedades_almuerzo: >{{ platos.variedades }}<</p> -->
+                    <h5>CENA</h5>
 
+                    {% if platos.cena != '-----' %}
 
-                    {% for key, value in platos.variedades.items %}
+                    <div class="plato-info">
+                        {% if platos.cena_info %}
+
+                        <h6 class="card-subtitle mb-2 text-muted">{{ platos.cena }}</h6>
+
+                        <p class="card-text">{{ platos.cena_info }}</p>
+
+                        <input type="checkbox" id="{{ platos.cena }}" name="{{ platos.cena }}{{ fecha|date:"d M. Y"|lower }}"
+                            value="{{ platos.cena_info }}"  {% if platos.cena_elegida %} checked {% endif %}>
+                        <label for="inc_cena_{{ fecha }}">Incluir Plato</label>
+                        {% else %}
+                        <p>No se encontraron ingredientes para la cena.</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    {% for key, value in platos.variedades_cena.items %}
                     {% if value.variedad %}
                     <p>Variedad: {{ value.variedad }}</p>
 
-                    <!-- <p>ELEGIDA LA VARIEDAD????: {{ value.elegido }}</p> -->
-
-
                     <h5>Ingredientes variedad: {{value.ingredientes_de_variedades}}</h5>
                     <input type="checkbox" id="incluir{{key}}" name="{{ value.variedad }}{{ fecha|date:"d M. Y"|lower }}"
-                        value="{{value.ingredientes_de_variedades}}" {% if value.elegido %} checked {% endif %}>
+                        value="{{value.ingredientes_de_variedades}}"  {% if value.elegido %} checked {% endif %}>
                     <label for="incluir{{key}}">Variedad incluida</label>
                     {% endif %}
                     {% endfor %}
-                </div><br>
-                {% endif %}
 
-                <h5>CENA</h5>
-
-                {% if platos.cena != '-----' %}
-                <!-- <h5>elegido????? {{ platos.cena_elegida }}</h5> -->
-
-                <div class="plato-info">
-                    {% if platos.cena_info %}
-
-                    <h6 class="card-subtitle mb-2 text-muted">{{ platos.cena }}</h6>
-
-                    <p class="card-text">{{ platos.cena_info }}</p>
-
-                    <input type="checkbox" id="{{ platos.cena }}" name="{{ platos.cena }}{{ fecha|date:"d M. Y"|lower }}"
-                        value="{{ platos.cena_info }}"  {% if platos.cena_elegida %} checked {% endif %}>
-                    <label for="inc_cena_{{ fecha }}">Incluir Plato</label>
-                    {% else %}
-                    <p>No se encontraron ingredientes para la cena.</p>
-                    {% endif %}
                 </div>
-                {% endif %}
-
-                <!-- <h5>VARIEDADES CENA: {{platos.variedades_cena}}</h5> -->
-                <!-- <p>Variedades_cena: <{{ platos.variedades_cena }}></p> -->
-
-                {% for key, value in platos.variedades_cena.items %}
-                {% if value.variedad %}
-                <p>Variedad: {{ value.variedad }}</p>
-                <!-- <p>ELEGIDA LA VARIEDAD????: {{ value.elegido }}</p> -->
-
-                <h5>Ingredientes variedad: {{value.ingredientes_de_variedades}}</h5>
-                <input type="checkbox" id="incluir{{key}}" name="{{ value.variedad }}{{ fecha|date:"d M. Y"|lower }}"
-                    value="{{value.ingredientes_de_variedades}}"  {% if value.elegido %} checked {% endif %}>
-                <label for="incluir{{key}}">Variedad incluida</label>
-                {% endif %}
-                {% endfor %}
-
             </div>
-        </div>
 
-        {% endfor %}
-        <input type="submit" value="Editar Lista de Compras">
-
-</section>
-
-
-<section>
-    <form>
-
-        <h3>EDITA LISTA DE COMPRAS</h3>
-        <!-- <p>ingredientes_separados_por_comas: {{ ingredientes_separados_por_comas }}</p> -->
-
-        {% if ingredientes_separados_por_comas %}
-            {% for ingrediente, valor  in ingredientes_separados_por_comas.items %}
-            <input type="checkbox" id="{{ ingrediente }}" name="ingrediente_a_comprar" value="{{ ingrediente }}"  {% if valor.estado == "no-tengo" %} checked {% endif %}>
-            <!-- <h3>ing >>{{ ingrediente }}<<</h3>
-            <h3>estado >>{{ valor.estado }}<<</h3> -->
-            <!-- <h3>comentario >>{{ valor.comentario }}<<</h3> -->
-
-            <label for="{{ ingrediente }}">{{ ingrediente }}</label><br>
-            <!-- <input type="text" id="{{ ingrediente }}_detalle" name="{{ ingrediente }}_detalle" placeholder="Detalles">-->
             {% endfor %}
-        {% else %}
-           <p>No hay ingredientes para comprar. Seleccione menúes.</p>
-        {% endif %}
-   
+            <input type="submit" value="Editar Lista de Compras">
 
-        <input type="submit" value="Imprimir lista de compras">
-        <input type="submit" value="Imprimir Plan de Comidas">
+    </section>
+</div>
 
-    </form>
+<div class="col-md-4">
 
-</section>
+    <section>
+        <form>
 
+            <h3>EDITA LISTA DE COMPRAS</h3>
+            <!-- <p>ingredientes_separados_por_comas: {{ ingredientes_separados_por_comas }}</p> -->
 
-<section>
-    <H3>LISTA DE COMPRAS
-    </H3>
-    <h2>{{ lista_de_compras }}</h2>
-    <!-- <h2>ingredientes a excluir {{ ingredientes_a_excluir_almuerzo }}</h2>
-    <h2>ingredientes a excluir cena {{ ingredientes_a_excluir_cena }}</h2> -->
+            {% if ingredientes_separados_por_comas %}
+                {% for ingrediente, valor  in ingredientes_separados_por_comas.items %}
+                <input type="checkbox" id="{{ ingrediente }}" name="ingrediente_a_comprar" value="{{ ingrediente }}"  {% if valor.estado == "no-tengo" %} checked {% endif %}>
+                <!-- <h3>ing >>{{ ingrediente }}<<</h3>
+                <h3>estado >>{{ valor.estado }}<<</h3> -->
+                <!-- <h3>comentario >>{{ valor.comentario }}<<</h3> -->
 
+                <label for="{{ ingrediente }}">{{ ingrediente }}</label><br>
+                <!-- <input type="text" id="{{ ingrediente }}_detalle" name="{{ ingrediente }}_detalle" placeholder="Detalles">-->
+                {% endfor %}
+            {% else %}
+            <p>No hay ingredientes para comprar. Seleccione menúes.</p>
+            {% endif %}
+    
 
+            <input type="submit" value="Imprimir lista de compras">
+            <input type="submit" value="Imprimir Plan de Comidas">
 
-</section>
+        </form>
+
+    </section>
+</div>
+
+<div class="col-md-4">
+    <section>
+        <H3>LISTA DE COMPRAS
+        </H3>
+        <h2>{{ lista_de_compras }}</h2>
+    </section>
+</div>
 
 {% endblock %}

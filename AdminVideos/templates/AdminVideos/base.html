@@ -108,6 +108,9 @@
                         <i class="fa fa-bars"></i>
                     </button>
 
+                    {% block filtro %}
+                    {% endblock %}
+
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
 
@@ -285,7 +288,7 @@
                             </div>
                         </li>
                         {% else %}
-                        <a href="{% url 'login' %}" class="navbar-brand d-flex align-items-center">Login</a>
+                        <a href="{% url 'login' %}" class="navbar-brand d-flex align-items-center">LoginN</a>
                         <a href="{% url 'signup' %}" class="navbar-brand d-flex align-items-center">Registrarse</a>
                         {% endif %}
                     </ul>
@@ -296,9 +299,7 @@
                 <!-- Begin Page Content -->
 
                 <div class="container-fluid">
-                    {% block filtro %}
-                    {% endblock %}
-
+                   
                     {% block principal %}
                     {% endblock %}
 

@@ -12,3 +12,13 @@ ver si sirve de algo el campo "elegido" al iniciar menu-elegido; tal vez solo se
   </ul> -->
 
   <!-- <p>Tipo de vista: {{ form.tipo_de_vista }} </p>  -->
+
+
+  {% for key, value in platos.variedades_cena.items %}
+  {% if value.variedad %}
+      <p>Variedad: {{ value.variedad }}</p>
+      <h5>Ingredientes variedad: {{value.ingredientes_de_variedades}}</h5>
+      <input type="checkbox" id="incluir{{key}}" name="{{ value.variedad }}{{ fecha|date:" d M.Y"|lower }}" value="{{value.ingredientes_de_variedades}}" {% if value.elegido %} checked {% endif %}>
+      <label for="incluir{{key}}">Variedad incluida</label>
+  {% endif %}
+{% endfor %}
