@@ -3,22 +3,71 @@ COSAS A CORREGIR:
 ver si sirve de algo el campo "elegido" al iniciar menu-elegido; tal vez solo sea necesario hardcodear a True antes de accionar el formulario
 
 
+CARROUSEL PARA MOSTRAR LOS PLATOS. FUNCIONA SOLO UNA PASADA, DESPUÉS NO FUNCIONA MÁS.
 
-    <!-- <ul >
-      <p>Medios: {{ form.medios }}</p> 
-      <p>Categoría: {{ form.categoria }}</p> 
-      <p>Preparación: {{ form.preparacion }}</p> 
-      <p>Tipo: {{ form.tipo }}</p> 
-  </ul> -->
+<div id="carouselExampleCaptions" class="carousel slide">
+  <div class="carousel-indicators">
+    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active"
+      aria-current="true" aria-label="Slide 1"></button>
+    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
+    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="Slide 3"></button>
+  </div>
+  {% if platos %}
+  <div class="carousel-inner">
+    {% for plato in platos %}
+    {% if forloop.counter == 1 %}
+    <div class="carousel-item active">
+      {% elif forloop.counter > 1 %}
+      <div class="carousel-item">
+        {% endif %}
+        <img src="{{plato.image_url}}" class="d-block w-100" alt="...">
+        <div class="carousel-caption d-none d-md-block">
+          <h5>{{ plato.nombre_plato }}</h5>
+          <p>DESCRIPCIÓN {{ plato.descripcion_plato }}</p>
 
-  <!-- <p>Tipo de vista: {{ form.tipo_de_vista }} </p>  -->
+          <a href="{% url 'videos-detail' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Detalle
+            del plato</a>
+          {% if user.id == plato.propietario.id %}
+          <a href="{% url 'videos-delete' plato.id %}" type="button"
+            class="btn btn-sm btn-outline-secondary">Eliminar<a>
+              <a href="{% url 'videos-update' plato.id %}" type="button"
+                class="btn btn-sm btn-outline-secondary">Editar</a>
+              <small class="text-muted">Subido por mi.</small>
+              {% else %}
+              <small class="text-muted">Subido por {{ plato.propietario }}</small>
+              {% endif %}
+              <br>
+              {% for key, value in plato.variedades.items %}
+              {% if value.variedad %}
+              <small class="text-success"> {{ value.variedad }} /</small>
+              {% endif %}
 
+              {% endfor %}
+              {% if plato.nombre_plato in elegidos %}
+              <form action="{% url 'plato-elegido' %}" method="GET">
+                <input type="hidden" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
+                <input type="checkbox" id="borrar" name="borrar" value="borrar" checked>
+                <button type="submit">Borrar</button>
+              </form>
+              {% else %}
+              <form action="{% url 'plato-elegido' %}" method="GET">
+                <label for="opcion{{ plato.id }}">Elegir este plato:</label>
+                <input type="checkbox" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
+                <button type="submit">Enviar</button>
+              </form>
+              {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
 
-  {% for key, value in platos.variedades_cena.items %}
-  {% if value.variedad %}
-      <p>Variedad: {{ value.variedad }}</p>
-      <h5>Ingredientes variedad: {{value.ingredientes_de_variedades}}</h5>
-      <input type="checkbox" id="incluir{{key}}" name="{{ value.variedad }}{{ fecha|date:" d M.Y"|lower }}" value="{{value.ingredientes_de_variedades}}" {% if value.elegido %} checked {% endif %}>
-      <label for="incluir{{key}}">Variedad incluida</label>
-  {% endif %}
-{% endfor %}
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+  </div>

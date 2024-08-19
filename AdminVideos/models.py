@@ -104,7 +104,7 @@ class Plato(models.Model):
 
     @property
     def image_url(self):
-        return self.image.url if self.image else '/media/avatares/logo.png'
+        return self.image.url if self.image else '/media/avatares/logo.jpg'
 
     def __str__(self):
         return f"{self.id} - {self.nombre_plato}"
@@ -146,7 +146,7 @@ class Profile(models.Model):
 
      @property
      def avatar_url(self):
-        return self.avatar.url if self.avatar else '/media/avatares/logo.png'
+        return self.avatar.url if self.avatar else '/media/avatares/logo.jpg'
      
      
 class Mensaje(models.Model):
