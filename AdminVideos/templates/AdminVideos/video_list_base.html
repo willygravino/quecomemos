@@ -4,6 +4,9 @@
 
 {% block un_video %}
 
+<!-- <a href="https://web.whatsapp.com/send?phone=5491145342640" target="_blank" dm_dont_rewrite_url="true" aria-label="whatsapp" onclick="dm_gaq_push_event &amp;&amp; dm_gaq_push_event('socialLink', 'click', 'Whatsapp')"> <span class="dmSocialWhatsapp dm-social-icons-whatsapp oneIcon socialHubIcon style4" aria-hidden="true" data-hover-effect="float"></span>  -->
+</a>
+
 {% if tipo_de_vista_estable == "random-todos" or tipo_de_vista_estable == "random-con-mios" %}
   <h6>CANTIDAD DE PLATOS SUGERIDOS {{ cantidad_platos_sugeridos }}</h6>
   <h6>CANTIDAD SUGERIBLES SEGUN FILTRO {{ cantidad_platos_sugeribles }}</h6>
@@ -17,56 +20,55 @@
   {% endif %}
 {% endif %}
 
+<a href="https://wa.me/5491145342640" target="_blank">whatsapp</a>
+
 <section>
   {% if not platos %}
     <h6>No hay platos para mostrar.</h6>
   {% else %}
       <div class="row">
         <div class="col">
-          <div class="bg-primary p-1 d-flex flex-wrap">
+          <div class="p-1 d-flex flex-wrap">
           {% for plato in platos %}
             <div class="d-flex flex-row">
               <div class="col-md-4 mb-3">
                 <div class="card" style="width: 10rem;">
                   <div class="container p-0">
-                    <div class="position-relative">
-                        <img src="{{plato.image_url}}" class="img-fluid position-absolute object-fit-cover" alt="Imagen del Plato">
-                        <div class="position-absolute top-0 start-50 translate-middle-x p-2 text-center text-white bg-dark bg-opacity-10 rounded">
-                             <h6 class="mb-0"> {{ plato.nombre_plato }} </h6>
-                        </div>
-                    </div>
+                    <!-- <div class="position-relative"> -->
+                      <a href="{% url 'videos-detail' plato.id %}">
+                        <img src="{{plato.image_url}}" class="img-fluid position-relative object-fit-cover" alt="Imagen del Plato">
+                      </a>                        
+                      <div class="position-absolute top-0 start-50 translate-middle-x p-2 text-center text-white bg-dark bg-opacity-10 rounded">
+                          <h6 class="mb-0 small"> {{ plato.nombre_plato }} </h6>
+                      </div>
+                    <!-- </div> -->
                   </div>
-        <div class="card-body position-relative">
-        
-                  <a href="{% url 'videos-detail' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Detalle del plato</a>
-                  {% if user.id == plato.propietario.id %}
-                      <a href="{% url 'videos-delete' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Eliminar<a>
-                      <a href="{% url 'videos-update' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Editar</a>
-                      <small class="text-muted">Subido por mi.</small>
-                  {% else %}
-                      <small class="text-muted">Subido por {{ plato.propietario }}</small>
-                  {% endif %}
-                  <br>
-                  {% for key, value in plato.variedades.items %}
-                      {% if value.variedad %}
-                        <small class="text-success"> {{ value.variedad }} /</small>
+                  <div class="mt-1">
+                      <!-- <a href="{% url 'videos-detail' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Detalle del plato</a> -->
+                      {% if user.id != plato.propietario.id %}
+                        <small class="text-muted">Subido por {{ plato.propietario }}</small>
                       {% endif %}
-                  {% endfor %}
+                      <br>
+                      {% for key, value in plato.variedades.items %}
+                          {% if value.variedad %}
+                            <small class="mtext-success"> {{ value.variedad }} /</small>
+                          {% endif %}
+                      {% endfor %}
 
-                  {% if plato.nombre_plato in elegidos %}
-                      <form action="{% url 'plato-elegido' %}" method="GET">
-                        <input type="hidden" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
-                        <input type="checkbox" id="borrar" name="borrar" value="borrar" checked>
-                        <button type="submit">Borrar</button>
-                      </form>
-                  {% else %}
-                      <form action="{% url 'plato-elegido' %}" method="GET">
-                        <label for="opcion{{ plato.id }}">Elegir este plato:</label>
-                        <input type="checkbox" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
-                        <button type="submit">Enviar</button>
-                      </form>
-                  {% endif %}
-                </div>
+                      {% if plato.nombre_plato in elegidos %}
+                          <form action="{% url 'plato-elegido' %}" method="GET">
+                            <input type="hidden" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
+                            <input type="checkbox" id="borrar" name="borrar" value="borrar" checked style="display: none;">
+                            <button type="submit" class="btn btn-primary" style="font-size: 12px; padding: 2px 5px;">No</button>
+                          </form>
+                      {% else %}
+                          <form action="{% url 'plato-elegido' %}" method="GET">
+                            <!-- <label for="opcion{{ plato.id }}">Elegir este plato:</label> -->
+                            <input type="checkbox" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}" checked style="display: none;">
+                            <button type="submit" class="btn btn-primary" style="font-size: 12px; padding: 2px 5px;">Sí</button>
+                          </form>
+                      {% endif %}
+                   </div>
 
                 </div>
              </div>
@@ -78,224 +80,229 @@
       </div>
     {% endif %}
 
- 
+
 
 <!-- </div> -->
 </section>
 
 
 <!-- Segunda fila -->
-<div class="row" style="height: 50vh; background-color: lightcoral; overflow: auto;">
-  <div class="row">
+
+<!--
 <section>
   <select class="mt-1 btn btn-primary" name="modo-armado">
     <option value="modo-diario">MODO DIARIO</option>
     <option value="modo-celebracion">MODO CELEBRACIÓN</option>
-    </select>
-   
+  </select> -->
 
-<form action="{% url 'grabar-menu' %}" method="post">
+  <form action="{% url 'grabar-menu' %}" method="post">
 
-  {% csrf_token %}
+  <div class="row">
+    <div class="col">
+      <div class="d-flex flex-wrap">
 
-  <div class="mt-2 btn btn-primary">
-    <h5>{{ dias_desde_hoy.0.1 }} {{ dias_desde_hoy.0.0|date:'Y-m-d' }}</h5>
+            {% csrf_token %}
 
-        <input type="hidden" name="fecha-1" value="{{ dias_desde_hoy.0.0|date:'Y-m-d' }}">
-        <select name="1-a">
-          <option value="-----">Elegir plato</option>
-          {% for elegido in elegidos %}
-          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.0.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
+            <div class="mt-2 btn btn-primary ">
+              <h5>{{ dias_desde_hoy.0.1 }} {{ dias_desde_hoy.0.0|date:'Y-m-d' }}</h5>
 
-          {% endfor %}
-        </select>
-        <br>
-        <select name="1-c">
-          <option value="-----">Elegir plato</option>
-          {% for elegido in elegidos %}
-          <!-- <option value="{{ elegido }}">{{ elegido }}</option> -->
-          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.0.1.cena %}selected{% endif %}>{{ elegido }}</option>
-          {% endfor %}
+                  <input type="hidden" name="fecha-1" value="{{ dias_desde_hoy.0.0|date:'Y-m-d' }}">
+                  <select name="1-a">
+                    <option value="-----">Elegir plato</option>
+                    {% for elegido in elegidos %}
+                    <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.0.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
 
-        </select>
+                    {% endfor %}
+                  </select>
+                  <br>
+                  <select name="1-c">
+                    <option value="-----">Elegir plato</option>
+                    {% for elegido in elegidos %}
+                    <!-- <option value="{{ elegido }}">{{ elegido }}</option> -->
+                    <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.0.1.cena %}selected{% endif %}>{{ elegido }}</option>
+                    {% endfor %}
+
+                  </select>
+                </div>
+                <br>
+
+                <div class="mt-2 btn btn-primary">
+                  <h5>{{ dias_desde_hoy.1.1 }} {{ dias_desde_hoy.1.0 }}</h5>
+                  <input type="hidden" name="fecha-2" value="{{ dias_desde_hoy.1.0|date:'Y-m-d' }}">
+                  <select name="2-a">
+                    <option value="-----">Elegir plato</option>
+
+                    {% for elegido in elegidos %}
+                    <!-- <option value="{{ elegido }}">{{ elegido }}</option> -->
+                    <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.1.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
+                    {% endfor %}
+                  </select>
+                  <br>
+                  <select name="2-c">
+                    <option value="-----">Elegir plato</option>
+
+                    {% for elegido in elegidos %}
+                    <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.1.1.cena %}selected{% endif %}>{{ elegido }}</option>
+                    {% endfor %}
+
+                  </select>
+                </div>
+                <br>
+
+                <div class="mt-2 btn btn-primary">
+                  <h5>{{ dias_desde_hoy.2.1 }} {{ dias_desde_hoy.2.0 }}</h5>
+                  <input type="hidden" name="fecha-3" value="{{ dias_desde_hoy.2.0|date:'Y-m-d' }}">
+
+                  <select name="3-a">
+                    <option value="-----">Elegir plato</option>
+
+                    {% for elegido in elegidos %}
+                    <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
+                    {% endfor %}
+
+                  </select>
+
+                  <br>
+                  <select name="3-c">
+                    <option value="-----">Elegir plato</option>
+
+                    {% for elegido in elegidos %}
+                    <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.2.1.cena %}selected{% endif %}>{{ elegido }}</option>
+                    {% endfor %}
+
+                  </select>
+
+                </div>
+                <br>
+
+                <div class="mt-2 btn btn-primary">
+                  <h5>{{ dias_desde_hoy.3.1 }} {{ dias_desde_hoy.3.0 }}</h5>
+                  <input type="hidden" name="fecha-4" value="{{ dias_desde_hoy.3.0|date:'Y-m-d' }}">
+
+                  <select name="4-a">
+                    <option value="-----">Elegir plato</option>
+
+                    {% for elegido in elegidos %}
+                    <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.3.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
+                    {% endfor %}
+
+                  </select>
+                  <br>
+                  <select name="4-c">
+                    <option value="-----">Elegir plato</option>
+
+                    {% for elegido in elegidos %}
+                    <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.3.1.cena %}selected{% endif %}>{{ elegido }}</option>
+                    {% endfor %}
+
+                  </select>
+                </div>
+                <br>
+
+                <div class="mt-2 btn btn-primary">
+                  <h5>{{ dias_desde_hoy.4.1 }} {{ dias_desde_hoy.4.0 }}</h5>
+                  <input type="hidden" name="fecha-5" value="{{ dias_desde_hoy.4.0|date:'Y-m-d' }}">
+
+                  <select name="5-a">
+                    <option value="-----">Elegir plato</option>
+
+                    {% for elegido in elegidos %}
+                    <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.4.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
+                    {% endfor %}
+                    <option value="-----">-----</option>
+
+                  </select>
+                  <br>
+
+                  <select name="5-c">
+                    <option value="-----">Elegir plato</option>
+
+                    {% for elegido in elegidos %}
+                    <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.4.1.cena %}selected{% endif %}>{{ elegido }}</option>
+                    {% endfor %}
+
+                  </select>
+                </div>
+                <br>
+
+                <div class="mt-2 btn btn-primary">
+                  <h5>{{ dias_desde_hoy.5.1 }} {{ dias_desde_hoy.5.0 }}</h5>
+                  <input type="hidden" name="fecha-6" value="{{ dias_desde_hoy.5.0|date:'Y-m-d' }}">
+
+                  <select name="6-a">
+                    <option value="-----">Elegir plato</option>
+
+                    {% for elegido in elegidos %}
+                    <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.5.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
+                    {% endfor %}
+
+                  </select>
+                  <br>
+                  <select name="6-c">
+                    <option value="-----">Elegir plato</option>
+
+                    {% for elegido in elegidos %}
+                    <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.5.1.cena %}selected{% endif %}>{{ elegido }}</option>          {% endfor %}
+
+                  </select>
+                </div>
+                <br>
+
+                <div class="mt-2 btn btn-primary">
+                  <h5>{{ dias_desde_hoy.6.1 }} {{ dias_desde_hoy.6.0 }}</h5>
+                  <input type="hidden" name="fecha-7" value="{{ dias_desde_hoy.6.0|date:'Y-m-d' }}">
+
+
+                  <select name="7-a">
+                    <option value="-----">Elegir plato</option>
+
+                    {% for elegido in elegidos %}
+                    <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.6.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
+                    {% endfor %}
+
+                  </select>
+                  <br>
+                  <select name="7-c">
+                    <option value="-----">Elegir plato</option>
+
+                    {% for elegido in elegidos %}
+                    <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.6.1.cena %}selected{% endif %}>{{ elegido }}</option>
+                    {% endfor %}
+
+                  </select>
+
+                </div>
+
+                <!-- no sé cómo pero el siguiente script parece funcionar ok!  -->
+                <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                <script>
+                  $(document).ready(function () {
+                    $('select').change(function () {
+                      var btn = $(this).closest('.btn');
+                      var selectA = btn.find('select[name$="-a"]');
+                      var selectC = btn.find('select[name$="-c"]');
+                      var selectedValueA = selectA.val();
+                      var selectedValueC = selectC.val();
+
+                      if (selectedValueA !== '-----' || selectedValueC !== '-----') {
+                        btn.removeClass('btn-primary').addClass('btn-success');
+                      } else {
+                        btn.removeClass('btn-success').addClass('btn-primary');
+                      }
+                    });
+                  });
+                </script>
+
+                <button type="submit">Enviar</button>
+        </form>
+
+        <!-- </div> -->
+        <!-- </div> -->
       </div>
-      <br>
-
-      <div class="mt-2 btn btn-primary">
-        <h5>{{ dias_desde_hoy.1.1 }} {{ dias_desde_hoy.1.0 }}</h5>
-        <input type="hidden" name="fecha-2" value="{{ dias_desde_hoy.1.0|date:'Y-m-d' }}">
-        <select name="2-a">
-          <option value="-----">Elegir plato</option>
-
-          {% for elegido in elegidos %}
-          <!-- <option value="{{ elegido }}">{{ elegido }}</option> -->
-          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.1.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
-          {% endfor %}
-        </select>
-        <br>
-        <select name="2-c">
-          <option value="-----">Elegir plato</option>
-
-          {% for elegido in elegidos %}
-          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.1.1.cena %}selected{% endif %}>{{ elegido }}</option>          
-          {% endfor %}
-
-        </select>
-      </div>
-      <br>
-
-      <div class="mt-2 btn btn-primary">
-        <h5>{{ dias_desde_hoy.2.1 }} {{ dias_desde_hoy.2.0 }}</h5>
-        <input type="hidden" name="fecha-3" value="{{ dias_desde_hoy.2.0|date:'Y-m-d' }}">
-
-        <select name="3-a">
-          <option value="-----">Elegir plato</option>
-
-          {% for elegido in elegidos %}
-          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
-          {% endfor %}
-
-        </select>
-
-        <br>
-        <select name="3-c">
-          <option value="-----">Elegir plato</option>
-
-          {% for elegido in elegidos %}
-          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.2.1.cena %}selected{% endif %}>{{ elegido }}</option>
-          {% endfor %}
-
-        </select>
-
-      </div>
-      <br>
-
-      <div class="mt-2 btn btn-primary">
-        <h5>{{ dias_desde_hoy.3.1 }} {{ dias_desde_hoy.3.0 }}</h5>
-        <input type="hidden" name="fecha-4" value="{{ dias_desde_hoy.3.0|date:'Y-m-d' }}">
-
-        <select name="4-a">
-          <option value="-----">Elegir plato</option>
-
-          {% for elegido in elegidos %}
-          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.3.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
-          {% endfor %}
-
-        </select>
-        <br>
-        <select name="4-c">
-          <option value="-----">Elegir plato</option>
-
-          {% for elegido in elegidos %}
-          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.3.1.cena %}selected{% endif %}>{{ elegido }}</option>          
-          {% endfor %}
-
-        </select>
-      </div>
-      <br>
-
-      <div class="mt-2 btn btn-primary">
-        <h5>{{ dias_desde_hoy.4.1 }} {{ dias_desde_hoy.4.0 }}</h5>
-        <input type="hidden" name="fecha-5" value="{{ dias_desde_hoy.4.0|date:'Y-m-d' }}">
-
-        <select name="5-a">
-          <option value="-----">Elegir plato</option>
-
-          {% for elegido in elegidos %}
-          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.4.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
-          {% endfor %}
-          <option value="-----">-----</option>
-
-        </select>
-        <br>
-
-        <select name="5-c">
-          <option value="-----">Elegir plato</option>
-
-          {% for elegido in elegidos %}
-          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.4.1.cena %}selected{% endif %}>{{ elegido }}</option>          
-          {% endfor %}
-
-        </select>
-      </div>
-      <br>
-
-      <div class="mt-2 btn btn-primary">
-        <h5>{{ dias_desde_hoy.5.1 }} {{ dias_desde_hoy.5.0 }}</h5>
-        <input type="hidden" name="fecha-6" value="{{ dias_desde_hoy.5.0|date:'Y-m-d' }}">
-
-        <select name="6-a">
-          <option value="-----">Elegir plato</option>
-
-          {% for elegido in elegidos %}
-          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.5.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
-          {% endfor %}
-
-        </select>
-        <br>
-        <select name="6-c">
-          <option value="-----">Elegir plato</option>
-
-          {% for elegido in elegidos %}
-          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.5.1.cena %}selected{% endif %}>{{ elegido }}</option>          {% endfor %}
-
-        </select>
-      </div>
-      <br>
-
-      <div class="mt-2 btn btn-primary">
-        <h5>{{ dias_desde_hoy.6.1 }} {{ dias_desde_hoy.6.0 }}</h5>
-        <input type="hidden" name="fecha-7" value="{{ dias_desde_hoy.6.0|date:'Y-m-d' }}">
-
-
-        <select name="7-a">
-          <option value="-----">Elegir plato</option>
-
-          {% for elegido in elegidos %}
-          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.6.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>          
-          {% endfor %}
-
-        </select>
-        <br>
-        <select name="7-c">
-          <option value="-----">Elegir plato</option>
-
-          {% for elegido in elegidos %}
-          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.6.1.cena %}selected{% endif %}>{{ elegido }}</option>            
-          {% endfor %}
-
-        </select>
-
-      </div>
-
-      <!-- no sé cómo pero el siguiente script parece funcionar ok!  -->
-      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-      <script>
-        $(document).ready(function () {
-          $('select').change(function () {
-            var btn = $(this).closest('.btn');
-            var selectA = btn.find('select[name$="-a"]');
-            var selectC = btn.find('select[name$="-c"]');
-            var selectedValueA = selectA.val();
-            var selectedValueC = selectC.val();
-
-            if (selectedValueA !== '-----' || selectedValueC !== '-----') {
-              btn.removeClass('btn-primary').addClass('btn-success');
-            } else {
-              btn.removeClass('btn-success').addClass('btn-primary');
-            }
-          });
-        });
-      </script>
-
-      <button type="submit">Enviar</button>
-    </form>
-  <!-- </section> -->
-
-
+    </div>
   </div>
-  </div>
-</section> 
+
+</section>
 </div>
 </div>
 

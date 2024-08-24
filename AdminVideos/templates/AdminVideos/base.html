@@ -19,6 +19,8 @@
         rel="stylesheet">
     <link href="{% static 'AdminVideos/css/sb-admin-2.min.css' %}" rel="stylesheet">
 
+    <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"> -->
+
     <title>¿Qué cómemos? · V1.0</title>
 
 
@@ -52,32 +54,67 @@
             <!-- Divider -->
             <hr class="sidebar-divider">
 
-
-            <!-- Nav Item - Pages Collapse Menu -->
-
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
-                    aria-expanded="true" aria-controls="collapseTwo">
-                    <i class="fas fa-fw fa-cog"></i>
-                    <span>Menú Busqueda 1</span>
-                </a>
-                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Custom Components:</h6>
-                        <a class="collapse-item" href="/AdminVideos/templates/AdminVideos/buttons.html">Buttons</a>
-                        <a class="collapse-item" href="cards.html">Cards</a>
-                    </div>
-                </div>
-            </li>
-
+             <!-- Heading -->
+             <div class="sidebar-heading">
+                AGREGAR
+            </div>
+       
             <!-- Nav Item - Utilities Collapse Menu -->
 
             {% if user.is_authenticated %}
 
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'videos-create' %}">
+                    <i class="fa-solid fa-shrimp" style="font-size: 1.3rem;"></i>
+                                        <!-- <i class="fas fa-fw fa-wrench"></i> -->
+                    <span>Entrada</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'videos-create' %}">
+                    <i class="fas fa-solid fa-bowl-rice" style="font-size: 1.3rem;"></i>
+                    <span>Dip</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'videos-create' %}">
+                    <i class="fa-solid fa-utensils" style="font-size: 1.3rem;"></i>
                     <!-- <i class="fas fa-fw fa-wrench"></i> -->
-                    <span>AGREGAR PLATO</span>
+                    <span>Plato Principal</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'videos-create' %}">
+                    <i class="fa-solid fa-pepper-hot" style="font-size: 1.3rem;"></i>
+                    <!-- <i class="fas fa-fw fa-wrench"></i> -->
+                    <span>Salsa</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'videos-create' %}">
+                    <i class="fa-solid fa-plate-wheat" style="font-size: 1.3rem;"></i>
+                    <!-- <i class="fas fa-fw fa-wrench"></i> -->
+                    <span>Guarnición</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'videos-create' %}">
+                    <i class="fa-solid fa-ice-cream" style="font-size: 1.3rem;"></i>
+                    <!-- <i class="fas fa-fw fa-wrench"></i> -->
+                    <span>Postre</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'videos-create' %}">
+                    <i class="fa-solid fa-martini-glass-citrus" style="font-size: 1.3rem;"></i>
+                    <!-- <i class="fas fa-fw fa-wrench"></i> -->
+                    <span>Trago</span>
                 </a>
             </li>
 
@@ -108,8 +145,7 @@
                         <i class="fa fa-bars"></i>
                     </button>
 
-                    {% block filtro %}
-                    {% endblock %}
+              
 
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
@@ -296,6 +332,9 @@
                 </nav>
                 <!-- End of Topbar -->
 
+                {% block filtro %}
+                {% endblock %}
+
                 <!-- Begin Page Content -->
 
                 <div class="container-fluid">
@@ -319,6 +358,7 @@
                 </div>
             </footer>
             <!-- End of Footer -->
+         
 
         </div>
         <!-- End of Content Wrapper -->

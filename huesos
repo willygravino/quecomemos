@@ -3,6 +3,22 @@ COSAS A CORREGIR:
 ver si sirve de algo el campo "elegido" al iniciar menu-elegido; tal vez solo sea necesario hardcodear a True antes de accionar el formulario
 
 
+<input type="radio" class="btn-check" name="options-base" id="option5" autocomplete="off" checked>
+<label class="btn" for="option5">Checked</label>
+
+<input type="radio" class="btn-check" name="options-base" id="option6" autocomplete="off">
+<label class="btn" for="option6">Radio</label>
+
+<input type="radio" class="btn-check" name="options-base" id="option7" autocomplete="off" disabled>
+<label class="btn" for="option7">Disabled</label>
+
+<input type="radio" class="btn-check" name="options-base" id="option8" autocomplete="off">
+<label class="btn" for="option8">Radio</label>
+
+{% if {{ valor.selected }} %}
+<h3>SELECCIONADO!!<</h3>
+{% endif %} 
+
 CARROUSEL PARA MOSTRAR LOS PLATOS. FUNCIONA SOLO UNA PASADA, DESPUÉS NO FUNCIONA MÁS.
 
 <div id="carouselExampleCaptions" class="carousel slide">
@@ -71,3 +87,23 @@ CARROUSEL PARA MOSTRAR LOS PLATOS. FUNCIONA SOLO UNA PASADA, DESPUÉS NO FUNCION
       <span class="visually-hidden">Next</span>
     </button>
   </div>
+
+
+
+  {'name': 'tipo_de_vista', 'value': 'todos', 'label': 'Todos', 'selected': True, 'index': '0', 'attrs': {'selected': True}, 'type': 'select', 'template_name': 'django/forms/widgets/select_option.html', 'wrap_label': True} < field.data 
+
+  <!-- 
+      <h3>{{field.data.name}} < valor de name </h3> 
+      <h3>{{field.data.index}} < Index </h3> 
+      <h3>{{field.data.selected}} < selected </h3>
+      <h3>{{field.data.value}} < Valor </h3>
+      <h3>{{field.data.label}} < Label </h3> -->
+
+      {% for field in formulario.tipo_de_vista %}
+
+        <input type="radio" class="btn-check" name="{{field.data.name}}" id="id_{{field.data.name}}{{field.data.index}}" value="{{field.data.value}}" autocomplete="off" {% if field.data.selected %}checked{% endif %}>
+
+        <label class="btn" for="id_{{field.data.name}}{{field.data.index}}">{{field.data.value}}</label>
+
+
+      {% endfor %}

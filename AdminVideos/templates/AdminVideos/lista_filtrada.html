@@ -3,14 +3,30 @@
 {% load static %}
 
 {% block filtro %}
+
 <form method="POST">
+
   {% csrf_token %}
-  <span>Medios: {{ form.medios }}</span>
-  <span>Categoría: {{ form.categoria }}</span>
-  <span>Preparación: {{ form.preparacion }}</span>
-  <span>Tipo: {{ form.tipo }}</span>
-  <span>Tipo de vista: {{ form.tipo_de_vista }}</span>
-  <button type="submit" class="btn btn-primary">Filtrar</button>
-</form>
+  <span>Medios: {{ formulario.medios }}</span>
+  <span>Categoría: {{ formulario.categoria }}</span>
+  <span>Preparación: {{ formulario.preparacion }}</span>
+  <span>Tipo: {{ formulario.tipo }}</span>
+
+  <br>
+
+  {% for field in formulario.tipo_de_vista %}
+
+      <input type="radio" class="btn-check" name="{{field.data.name}}" id="id_{{field.data.name}}{{field.data.index}}" value="{{field.data.value}}" autocomplete="off" {% if field.data.selected %}checked{% endif %}>
+
+      <label class="btn btn-secondary" for="id_{{field.data.name}}{{field.data.index}}">{{field.data.value}}</label>
+  {% endfor %}
+    
+    <button type="submit" class="btn btn-primary">Filtrar</button>
+
+  </form>
 
 {% endblock %}
+<!-- 
+en documentación de django buscar:
+
+https://docs.djangoproject.com/en/5.1/topics/forms/ -->

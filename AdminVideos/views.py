@@ -29,13 +29,6 @@ class SugerenciasRandom(TemplateView):
 def index(request):
      return render(request, "AdminVideos/lista_filtrada.html")
 
-# def index(request: HttpRequest):
-#     # Ejecuta la función FiltroDePlatos y obtén el resultado
-#     resultado_filtro = FiltroDePlatos(request)
-
-#     # Devuelve el resultado obtenido
-#     return resultado_filtro
-
 def about(request):
     return render(request, "AdminVideos/about.html")
 
@@ -652,16 +645,6 @@ def FiltroDePlatos (request):
                 request.session['tipo_estable'] = tipo
                 request.session['calorias_estable'] = calorias
 
-                # items_iniciales = {
-                #         'tipo_de_vista_estable': tipo_de_vista_estable,
-                #         'medios_estable': medios_estable,
-                #         'categoria_estable': categoria, # OJO QUE ESTA FUNCIONA SIN NECESIDAD DE USAR "_ESTABLE, ESTOY DERROCHANDO VARIABLES ESTABLES (seguire usando así)?"
-                #         'preparacion_estable': preparacion,
-                #         'tipo_estable': tipo,
-                #         # 'tipo_de_vista_estable': tipo_de_vista_estable,
-                #         'calorias_estable': calorias
-                #     }
-
     else:
         pasa_por_aca = "PASA POR NO-POST"
         items_iniciales = {
@@ -753,7 +736,7 @@ def FiltroDePlatos (request):
     platos_elegidos_por_dia_lista = list(platos_preseleccionados.items())
 
     contexto = {
-                'form': form,
+                'formulario': form,
                 'platos': platos,
                 'elegidos': platos_elegidos,
                 "tipo_de_vista_estable" :  tipo_de_vista_estable,
