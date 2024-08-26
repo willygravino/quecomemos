@@ -32,6 +32,7 @@ urlpatterns = [
     path('menu/random', SugerenciasRandom.as_view(), name="random"),
     # path('pagina/inicial', pagina_inicial, name="pagina-inicial"),
     path('videos/list/filtro', FiltroDePlatos, name="filtro-de-platos"),
+    # path('platos-del-dia', PlatosDelDia, name="platos-del-dia"),
     path('videos/reiniciar/sugeridos', reiniciar_sugeridos, name="reiniciar-sugeridos"),
     path('videos/<pk>/update', PlatoUpdate.as_view(), name="videos-update"),
     # path('videos/<pk>/delete',plato_delete, name="videos-delete"),

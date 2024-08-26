@@ -3,17 +3,6 @@ COSAS A CORREGIR:
 ver si sirve de algo el campo "elegido" al iniciar menu-elegido; tal vez solo sea necesario hardcodear a True antes de accionar el formulario
 
 
-<input type="radio" class="btn-check" name="options-base" id="option5" autocomplete="off" checked>
-<label class="btn" for="option5">Checked</label>
-
-<input type="radio" class="btn-check" name="options-base" id="option6" autocomplete="off">
-<label class="btn" for="option6">Radio</label>
-
-<input type="radio" class="btn-check" name="options-base" id="option7" autocomplete="off" disabled>
-<label class="btn" for="option7">Disabled</label>
-
-<input type="radio" class="btn-check" name="options-base" id="option8" autocomplete="off">
-<label class="btn" for="option8">Radio</label>
 
 {% if {{ valor.selected }} %}
 <h3>SELECCIONADO!!<</h3>
@@ -99,11 +88,154 @@ CARROUSEL PARA MOSTRAR LOS PLATOS. FUNCIONA SOLO UNA PASADA, DESPUÉS NO FUNCION
       <h3>{{field.data.value}} < Valor </h3>
       <h3>{{field.data.label}} < Label </h3> -->
 
-      {% for field in formulario.tipo_de_vista %}
 
-        <input type="radio" class="btn-check" name="{{field.data.name}}" id="id_{{field.data.name}}{{field.data.index}}" value="{{field.data.value}}" autocomplete="off" {% if field.data.selected %}checked{% endif %}>
-
-        <label class="btn" for="id_{{field.data.name}}{{field.data.index}}">{{field.data.value}}</label>
+      
 
 
-      {% endfor %}
+
+      <div class="mt-2 btn btn-primary">
+        <h5>{{ dias_desde_hoy.1.1 }} {{ dias_desde_hoy.1.0 }}</h5>
+        <input type="hidden" name="fecha-2" value="{{ dias_desde_hoy.1.0|date:'Y-m-d' }}">
+        <select name="2-a">
+          <option value="-----">Eldddgir plato</option>
+
+          {% for elegido in elegidos %}
+        
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.1.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
+          {% endfor %}
+        </select>
+        <br>
+        <select name="2-c">
+          <option value="-----">Elegir plato</option>
+
+          {% for elegido in elegidos %}
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.1.1.cena %}selected{% endif %}>{{ elegido }}</option>
+          {% endfor %}
+
+        </select>
+      </div>
+      <br>
+
+      <div class="mt-2 btn btn-primary">
+        <h5>{{ dias_desde_hoy.2.1 }} {{ dias_desde_hoy.2.0 }}</h5>
+        <input type="hidden" name="fecha-3" value="{{ dias_desde_hoy.2.0|date:'Y-m-d' }}">
+
+        <select name="3-a">
+          <option value="-----">Elegir plato</option>
+
+          {% for elegido in elegidos %}
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
+          {% endfor %}
+
+        </select>
+
+        <br>
+        <select name="3-c">
+          <option value="-----">Elegir plato</option>
+
+          {% for elegido in elegidos %}
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.2.1.cena %}selected{% endif %}>{{ elegido }}</option>
+          {% endfor %}
+
+        </select>
+
+      </div>
+      <br>
+
+      <div class="mt-2 btn btn-primary">
+        <h5>{{ dias_desde_hoy.3.1 }} {{ dias_desde_hoy.3.0 }}</h5>
+        <input type="hidden" name="fecha-4" value="{{ dias_desde_hoy.3.0|date:'Y-m-d' }}">
+
+        <select name="4-a">
+          <option value="-----">Elegir plato</option>
+
+          {% for elegido in elegidos %}
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.3.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
+          {% endfor %}
+
+        </select>
+        <br>
+        <select name="4-c">
+          <option value="-----">Elegir plato</option>
+
+          {% for elegido in elegidos %}
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.3.1.cena %}selected{% endif %}>{{ elegido }}</option>
+          {% endfor %}
+
+        </select>
+      </div>
+      <br>
+
+      <div class="mt-2 btn btn-primary">
+        <h5>{{ dias_desde_hoy.4.1 }} {{ dias_desde_hoy.4.0 }}</h5>
+        <input type="hidden" name="fecha-5" value="{{ dias_desde_hoy.4.0|date:'Y-m-d' }}">
+
+        <select name="5-a">
+          <option value="-----">Elegir plato</option>
+
+          {% for elegido in elegidos %}
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.4.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
+          {% endfor %}
+          <option value="-----">-----</option>
+
+        </select>
+        <br>
+
+        <select name="5-c">
+          <option value="-----">Elegir plato</option>
+
+          {% for elegido in elegidos %}
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.4.1.cena %}selected{% endif %}>{{ elegido }}</option>
+          {% endfor %}
+
+        </select>
+      </div>
+      <br>
+
+      <div class="mt-2 btn btn-primary">
+        <h5>{{ dias_desde_hoy.5.1 }} {{ dias_desde_hoy.5.0 }}</h5>
+        <input type="hidden" name="fecha-6" value="{{ dias_desde_hoy.5.0|date:'Y-m-d' }}">
+
+        <select name="6-a">
+          <option value="-----">Elegir plato</option>
+
+          {% for elegido in elegidos %}
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.5.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
+          {% endfor %}
+
+        </select>
+        <br>
+        <select name="6-c">
+          <option value="-----">Elegir plato</option>
+
+          {% for elegido in elegidos %}
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.5.1.cena %}selected{% endif %}>{{ elegido }}</option>          {% endfor %}
+
+        </select>
+      </div>
+      <br>
+
+      <div class="mt-2 btn btn-primary">
+        <h5>{{ dias_desde_hoy.6.1 }} {{ dias_desde_hoy.6.0 }}</h5>
+        <input type="hidden" name="fecha-7" value="{{ dias_desde_hoy.6.0|date:'Y-m-d' }}">
+
+
+        <select name="7-a">
+          <option value="-----">Elegir plato</option>
+
+          {% for elegido in elegidos %}
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.6.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
+          {% endfor %}
+
+        </select>
+        <br>
+        <select name="7-c">
+          <option value="-----">Elegir plato</option>
+
+          {% for elegido in elegidos %}
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.6.1.cena %}selected{% endif %}>{{ elegido }}</option>
+          {% endfor %}
+
+        </select>
+
+      </div>

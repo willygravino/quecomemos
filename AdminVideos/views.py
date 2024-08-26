@@ -53,17 +53,6 @@ def plato_elegido(request):
         return JsonResponse({"error": "Método no permitido"}, status=405)
 
 
-
-# def actualizar_datos(original, actualizados):
-#     for clave, valor in actualizados.items():
-#         if isinstance(valor, dict) and clave in original:
-#             actualizar_datos(original[clave], valor)
-#         else:
-#             original[clave] = valor
-
-
-
-
 def grabar_menu_elegido(request):
     if request.method == 'POST':
         # Obtener el usuario logueado
@@ -72,80 +61,79 @@ def grabar_menu_elegido(request):
         # AQUÍ, PONER LAS INSTRUCCIONES ADECUADAS PARA BORRAR LOS REGISTROS DE DÍAS MÁS ALLÁ DE 45 DÍAS ATRÁS; DE ESTE MODO SE PODRÁ CALCULAR LO QUE SE COMIÓ EN LOS ÚLTIMOS 45 DÍAS "HACE 45 DÍAS QUE NO COMÉS PESCADO"
 
         # Obtener las fechas y platos elegidos del formulario
-        for i in range(1, 8):
-            fecha = request.POST.get(f"fecha-{i}")
-            almuerzo = request.POST.get(f"{i}-a")
-            cena = request.POST.get(f"{i}-c")
+        # for i in range(1, 8):
+        fecha = request.POST.get("fecha")
+        almuerzo = request.POST.get("a")
+        cena = request.POST.get("c")
+        
+        registro_existente = ElegidosXDia.objects.filter(user=usuario, el_dia_en_que_comemos=fecha).first()
 
-            registro_existente = ElegidosXDia.objects.filter(user=usuario, el_dia_en_que_comemos=fecha).first()
+        if registro_existente and (almuerzo == '-----' and cena == '-----'):
+            registro_existente.delete()
 
-            if registro_existente and (almuerzo == '-----' and cena == '-----'):
-               registro_existente.delete()
+        if almuerzo != '-----' or cena != '-----':
 
-            if almuerzo != '-----' or cena != '-----':
+            # Obtener datos de almuerzo y cena
+            almuerzo_queryset = Plato.objects.filter(nombre_plato=almuerzo).values("ingredientes", "variedades")
+            almuerzo_result = almuerzo_queryset.first()
+            almuerzo_variedades = almuerzo_result['variedades'] if almuerzo_result else None
+            almuerzo_ingredientes = almuerzo_result['ingredientes'] if almuerzo_result else None
 
-                # Obtener datos de almuerzo y cena
-                almuerzo_queryset = Plato.objects.filter(nombre_plato=almuerzo).values("ingredientes", "variedades")
-                almuerzo_result = almuerzo_queryset.first()
-                almuerzo_variedades = almuerzo_result['variedades'] if almuerzo_result else None
-                almuerzo_ingredientes = almuerzo_result['ingredientes'] if almuerzo_result else None
+            variedad_almuerzo_con_elegidos = {}
+            if almuerzo_variedades:
+                for variedad, detalles_variedad in almuerzo_variedades.items():
+                    if registro_existente and almuerzo == registro_existente.platos_que_comemos["almuerzo"]["plato"]:
+                            elegido = registro_existente.platos_que_comemos["variedades_almuerzo"][variedad]["elegido"]
+                    else: elegido = True
+                    variedad_almuerzo_con_elegidos[variedad] = {
+                        "variedad": detalles_variedad.get("variedad", ""),
+                        "ingredientes_de_variedades": detalles_variedad.get("ingredientes_de_variedades", []),
+                        "elegido": elegido
+                    }
 
-                variedad_almuerzo_con_elegidos = {}
-                if almuerzo_variedades:
-                    for variedad, detalles_variedad in almuerzo_variedades.items():
-                        if registro_existente and almuerzo == registro_existente.platos_que_comemos["almuerzo"]["plato"]:
-                             elegido = registro_existente.platos_que_comemos["variedades_almuerzo"][variedad]["elegido"]
-                        else: elegido = True
-                        variedad_almuerzo_con_elegidos[variedad] = {
-                            "variedad": detalles_variedad.get("variedad", ""),
-                            "ingredientes_de_variedades": detalles_variedad.get("ingredientes_de_variedades", []),
-                            "elegido": elegido
-                        }
+            cena_queryset = Plato.objects.filter(nombre_plato=cena).values("ingredientes", "variedades")
+            cena_result = cena_queryset.first()
+            cena_variedades = cena_result['variedades'] if cena_result else None
+            cena_ingredientes = cena_result['ingredientes'] if cena_result else None
 
-                cena_queryset = Plato.objects.filter(nombre_plato=cena).values("ingredientes", "variedades")
-                cena_result = cena_queryset.first()
-                cena_variedades = cena_result['variedades'] if cena_result else None
-                cena_ingredientes = cena_result['ingredientes'] if cena_result else None
+            variedad_cena_con_elegidos = {}
+            if cena_variedades:
+                for variedad, detalles_variedad in cena_variedades.items():
+                    if registro_existente and cena == registro_existente.platos_que_comemos["cena"]["plato"]:
+                            elegido = registro_existente.platos_que_comemos["variedades_cena"][variedad]["elegido"]
+                    else: elegido = True
+                    variedad_cena_con_elegidos[variedad] = {
+                        "variedad": detalles_variedad.get("variedad", ""),
+                        "ingredientes_de_variedades": detalles_variedad.get("ingredientes_de_variedades", []),
+                        "elegido": elegido
+                    }
 
-                variedad_cena_con_elegidos = {}
-                if cena_variedades:
-                    for variedad, detalles_variedad in cena_variedades.items():
-                        if registro_existente and cena == registro_existente.platos_que_comemos["cena"]["plato"]:
-                             elegido = registro_existente.platos_que_comemos["variedades_cena"][variedad]["elegido"]
-                        else: elegido = True
-                        variedad_cena_con_elegidos[variedad] = {
-                            "variedad": detalles_variedad.get("variedad", ""),
-                            "ingredientes_de_variedades": detalles_variedad.get("ingredientes_de_variedades", []),
-                            "elegido": elegido
-                        }
+            # Crear el diccionario de platos para este día
+            platos_del_dia = {
+                "almuerzo": {"plato": almuerzo, "ingredientes": almuerzo_ingredientes, "elegido": True},
+                "variedades_almuerzo": variedad_almuerzo_con_elegidos,
+                "cena": {"plato": cena, "ingredientes": cena_ingredientes, "elegido": True},
+                "variedades_cena": variedad_cena_con_elegidos
+            }
 
-                # Crear el diccionario de platos para este día
-                platos_del_dia = {
-                    "almuerzo": {"plato": almuerzo, "ingredientes": almuerzo_ingredientes, "elegido": True},
-                    "variedades_almuerzo": variedad_almuerzo_con_elegidos,
-                    "cena": {"plato": cena, "ingredientes": cena_ingredientes, "elegido": True},
-                    "variedades_cena": variedad_cena_con_elegidos
-                }
+            if registro_existente:
+                    # Actualizar el registro existente
 
-                if registro_existente:
-                      # Actualizar el registro existente
-
-                     if almuerzo == registro_existente.platos_que_comemos["almuerzo"]["plato"]:
+                    if almuerzo == registro_existente.platos_que_comemos["almuerzo"]["plato"]:
                         platos_del_dia["almuerzo"]["elegido"] = registro_existente.platos_que_comemos["almuerzo"]["elegido"]
-                     if cena == registro_existente.platos_que_comemos["cena"]["plato"]:
+                    if cena == registro_existente.platos_que_comemos["cena"]["plato"]:
                         platos_del_dia["cena"]["elegido"] = registro_existente.platos_que_comemos["cena"]["elegido"]
 
-                    #  registro_existente_platos = registro_existente.platos_que_comemos
-                    #  actualizar_datos(registro_existente_platos, platos_del_dia)
-                     registro_existente.platos_que_comemos = platos_del_dia
-                     registro_existente.save()
-                else:
-                    ElegidosXDia.objects.create(user=usuario, el_dia_en_que_comemos=fecha, platos_que_comemos=platos_del_dia)
+                #  registro_existente_platos = registro_existente.platos_que_comemos
+                #  actualizar_datos(registro_existente_platos, platos_del_dia)
+                    registro_existente.platos_que_comemos = platos_del_dia
+                    registro_existente.save()
+            else:
+                ElegidosXDia.objects.create(user=usuario, el_dia_en_que_comemos=fecha, platos_que_comemos=platos_del_dia)
 
-        return redirect(reverse_lazy("menu-elegido"))
+        return redirect(reverse_lazy("filtro-de-platos"))
     else:
         return JsonResponse({'error': 'El método de solicitud debe ser POST'})
-
 
 
 @login_required

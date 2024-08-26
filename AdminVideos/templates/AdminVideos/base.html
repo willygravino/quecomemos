@@ -118,13 +118,23 @@
                 </a>
             </li>
 
+            <!-- Divider -->
+            <hr class="sidebar-divider d-none d-md-block">
+
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'menu-elegido' %}">
+                    <i class="fa-solid fa-list-check" style="font-size: 2rem;"></i>                    <!-- <i class="fas fa-fw fa-wrench"></i> -->
+                    <span>Gestionar Lista de Compras</span>
+                </a>
+            </li>
+
             {% endif %}
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
 
             <!-- Sidebar Toggler (Sidebar) -->
-            <div class="text-center d-none d-md-inline">
+            <div class="text-center d-none d-md-inline" >
                 <button class="rounded-circle border-0" id="sidebarToggle"></button>
             </div>
 
