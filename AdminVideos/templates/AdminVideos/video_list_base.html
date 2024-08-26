@@ -89,11 +89,11 @@
 
   <div class="row">
       <div class="col">
-        <div class="d-flex flex-wrap">
+        <div class="d-flex flex-wrap justify-content-between">
 
           <a class="bg-primary" data-toggle="modal" data-target="#Modal1">
-            <div class="mb-0 text-white p-2"> 
-              <p >{{ dias_desde_hoy.1.1 }} {{ dias_desde_hoy.1.0 }}</p>
+            <div class="mb-0 text-white p-2 small"> 
+              <p >{{ dias_desde_hoy.0.0|date:"l j" }}</p>
               <p >Almuerzo: {{platos_elegidos_por_dia_lista.0.1.almuerzo}}</p>
               <p >Cena: {{platos_elegidos_por_dia_lista.0.1.cena}}</p>
             </div>
@@ -101,8 +101,8 @@
 
 
           <a class="bg-primary" data-toggle="modal" data-target="#Modal2">
-            <div class="mb-0 text-white p-2"> 
-              <p>{{ dias_desde_hoy.2.1 }} {{ dias_desde_hoy.2.0 }}</p>
+            <div class="mb-0 text-white p-2 small"> 
+              <p>{{ dias_desde_hoy.1.0|date:"l j" }}</p>
               <p >Almuerzo: {{platos_elegidos_por_dia_lista.1.1.almuerzo}}</p>
               <p >Cena: {{platos_elegidos_por_dia_lista.1.1.cena}}</p>
             </div>
@@ -110,14 +110,45 @@
 
 
           <a class="bg-primary" data-toggle="modal" data-target="#Modal3">
-           <div class="mb-0 text-white p-2"> 
+           <div class="mb-0 text-white p-2 small"> 
 
-            <p>{{ dias_desde_hoy.3.1 }} {{ dias_desde_hoy.3.0 }}</p>
+            <p>{{ dias_desde_hoy.2.0|date:"l j" }}</p>
             <p >Almuerzo: {{platos_elegidos_por_dia_lista.2.1.almuerzo}}</p>
             <p >Cena: {{platos_elegidos_por_dia_lista.2.1.cena}}</p>
            </div>
           </a>
 
+          <a class="bg-primary" data-toggle="modal" data-target="#Modal4">
+            <div class="mb-0 text-white p-2 small"> 
+              <p>{{ dias_desde_hoy.3.0|date:"l j" }}</p>
+              <p >Almuerzo: {{platos_elegidos_por_dia_lista.3.1.almuerzo}}</p>
+              <p >Cena: {{platos_elegidos_por_dia_lista.3.1.cena}}</p>
+            </div>
+          </a>
+
+          <a class="bg-primary" data-toggle="modal" data-target="#Modal5">
+            <div class="mb-0 text-white p-2 small"> 
+              <p>{{ dias_desde_hoy.4.0|date:"l j" }}</p>
+              <p >Almuerzo: {{platos_elegidos_por_dia_lista.4.1.almuerzo}}</p>
+              <p >Cena: {{platos_elegidos_por_dia_lista.4.1.cena}}</p>
+            </div>
+          </a>
+
+          <a class="bg-primary" data-toggle="modal" data-target="#Modal6">
+            <div class="mb-0 text-white p-2 small"> 
+              <p>{{ dias_desde_hoy.5.0|date:"l j" }}</p>
+              <p >Almuerzo: {{platos_elegidos_por_dia_lista.5.1.almuerzo}}</p>
+              <p >Cena: {{platos_elegidos_por_dia_lista.5.1.cena}}</p>
+            </div>
+          </a>
+
+          <a class="bg-primary" data-toggle="modal" data-target="#Modal7">
+            <div class="mb-0 text-white p-2 small"> 
+              <p>{{ dias_desde_hoy.6.0|date:"l j" }}</p>
+              <p >Almuerzo: {{platos_elegidos_por_dia_lista.6.1.almuerzo}}</p>
+              <p >Cena: {{platos_elegidos_por_dia_lista.6.1.cena}}</p>
+            </div>
+          </a>
 
         </div>
       </div>
@@ -125,7 +156,8 @@
 </div>
 
 
-<!-- Menú del Día -> Modal-->
+<!-- Menú del Día -> Modal 1 -->
+
 <div class="modal fade" id="Modal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -134,7 +166,7 @@
           {% csrf_token %}
 
           <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">{{ dias_desde_hoy.1.1 }} {{ dias_desde_hoy.1.0 }}</h5>
+            <h5 class="modal-title" id="exampleModalLabel">{{ dias_desde_hoy.0.1 }} {{ dias_desde_hoy.0.0 }}</h5>
             <button class="close" type="button" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">×</span>
             </button>
@@ -166,6 +198,7 @@
   </div>
 </div>
 
+<!-- Menú del Día -> Modal 2 -->
 
 <div class="modal fade" id="Modal2" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
@@ -175,7 +208,7 @@
           {% csrf_token %}
 
           <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">{{ dias_desde_hoy.2.1 }} {{ dias_desde_hoy.2.0 }}</h5>
+            <h5 class="modal-title" id="exampleModalLabel">{{ dias_desde_hoy.1.1 }} {{ dias_desde_hoy.1.0 }}</h5>
             <button class="close" type="button" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">×</span>
             </button>
@@ -211,6 +244,8 @@
   </div>
 </div>
 
+<!-- Menú del Día -> Modal 3 -->
+
 <div class="modal fade" id="Modal3" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -219,7 +254,7 @@
           {% csrf_token %}
 
           <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">{{ dias_desde_hoy.3.1 }} {{ dias_desde_hoy.3.0 }}</h5>
+            <h5 class="modal-title" id="exampleModalLabel">{{ dias_desde_hoy.2.1 }} {{ dias_desde_hoy.2.0 }}</h5>
             <button class="close" type="button" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">×</span>
             </button>
@@ -256,6 +291,196 @@
     </div>
   </div>
 </div>
+
+
+<!-- Menú del Día -> Modal 4 -->
+
+<div class="modal fade" id="Modal4" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form action="{% url 'grabar-menu' %}" method="post">
+
+          {% csrf_token %}
+
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">{{ dias_desde_hoy.3.1 }} {{ dias_desde_hoy.3.0 }}</h5>
+            <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+
+          <div class="modal-body">
+            <input type="hidden" name="fecha" value="{{ dias_desde_hoy.3.0|date:'Y-m-d' }}">
+
+            <select name="a">
+              <option value="-----">Elegir plato</option>
+    
+              {% for elegido in elegidos %}
+              <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.3.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
+              {% endfor %}
+              <option value="-----">-----</option>
+    
+            </select>
+    
+            <br>
+            <select name="c">
+              <option value="-----">Elegir plato</option>
+    
+              {% for elegido in elegidos %}
+              <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.3.1.cena %}selected{% endif %}>{{ elegido }}</option>
+              {% endfor %}
+    
+            </select>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
+            <button type="submit">Enviar</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<!-- Menú del Día -> Modal 5 -->
+
+<div class="modal fade" id="Modal5" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form action="{% url 'grabar-menu' %}" method="post">
+
+          {% csrf_token %}
+
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">{{ dias_desde_hoy.4.1 }} {{ dias_desde_hoy.4.0 }}</h5>
+            <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+
+          <div class="modal-body">
+            <input type="hidden" name="fecha" value="{{ dias_desde_hoy.4.0|date:'Y-m-d' }}">
+
+        <select name="a">
+          <option value="-----">Elegir plato</option>
+
+          {% for elegido in elegidos %}
+          <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.4.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
+          {% endfor %}
+
+        </select>
+    
+            <br>
+            <select name="c">
+              <option value="-----">Elegir plato</option>
+    
+              {% for elegido in elegidos %}
+              <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.4.1.cena %}selected{% endif %}>{{ elegido }}</option>          {% endfor %}
+    
+            </select>
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
+            <button type="submit">Enviar</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<!-- Menú del Día -> Modal 6 -->
+
+<div class="modal fade" id="Modal6" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form action="{% url 'grabar-menu' %}" method="post">
+
+          {% csrf_token %}
+
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">{{ dias_desde_hoy.5.1 }} {{ dias_desde_hoy.5.0 }}</h5>
+            <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+
+          <div class="modal-body">
+            <input type="hidden" name="fecha" value="{{ dias_desde_hoy.5.0|date:'Y-m-d' }}">
+
+
+            <select name="a">
+              <option value="-----">Elegir plato</option>
+    
+              {% for elegido in elegidos %}
+              <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.5.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
+              {% endfor %}
+    
+            </select>
+    
+            <br>
+            <select name="c">
+              <option value="-----">Elegir plato</option>
+    
+              {% for elegido in elegidos %}
+              <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.5.1.cena %}selected{% endif %}>{{ elegido }}</option>
+              {% endfor %}
+    
+            </select>
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
+            <button type="submit">Enviar</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Menú del Día -> Modal 7 -->
+
+<div class="modal fade" id="Modal7" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form action="{% url 'grabar-menu' %}" method="post">
+
+          {% csrf_token %}
+
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">{{ dias_desde_hoy.6.1 }}{{ dias_desde_hoy.6.0 }}</h5>
+            <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+
+          <div class="modal-body">
+            <input type="hidden" name="fecha" value="{{ dias_desde_hoy.6.0|date:'Y-m-d' }}">
+            <select name="a">
+              <option value="-----">Elegir plato</option>
+                  {% for elegido in elegidos %}
+                <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.6.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
+              {% endfor %}
+            </select>
+            <br>
+            <select name="c">
+              <option value="-----">Elegir plato</option>
+              {% for elegido in elegidos %}
+                <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.6.1.cena %}selected{% endif %}>{{ elegido }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
+            <button type="submit">Enviar</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 
 
 {% endblock %}
