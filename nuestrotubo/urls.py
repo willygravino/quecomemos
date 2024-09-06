@@ -26,6 +26,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', index, name="index"),
     path('plato/elegido', plato_elegido, name="plato-elegido"),
+    # path('', plato_elegido, name="plato-elegido"),
     path('plato/grabar', grabar_menu_elegido, name="grabar-menu"),
     path('menu/elegido',  menu_elegido, name="menu-elegido"),
     # path('lista/compras', lista_de_compras, name="lista-compras"),

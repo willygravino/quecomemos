@@ -5,12 +5,11 @@
 
 {% block principal %}
 
-
 <div class="album py-5 bg-light">
     <section class="py-1 text-center container">
         <div class="row py-lg-1">
             <div class="col-lg-8 col-md-8 mx-auto">
-                <h1 class="fw-light">FORMULARIO DE INGRESO.</h1>
+                <h1 class="fw-light">TRAGO.</h1>
             </div>
         </div>
     </section>
@@ -21,23 +20,24 @@
 
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <p>Nombre del Plato: {{ form.nombre_plato }}</p>
-            <p>Receta: {{ form.receta }}</p>
-            <p>Descripción del Plato: {{ form.descripcion_plato }}</p>
+            <p>Nombre de Trago: {{ form.nombre_plato }}</p>
+            <p>Descripción: {{ form.descripcion_plato }}</p>
+            <p>Preparación: {{ form.receta }}</p>
             <p>Ingredientes: {{ form.ingredientes }}</p>
-            <p>Medios de cocción:
-                {{ form.medios }} </p>
-            <p>Categoría:
+            <!-- <p>Medios de cocción:
+                {{ form.medios }} </p> -->
+            <!-- <p>Categoría:
 
-                {{ form.categoria }} </p>
-            <p>Preparación:
-                {{ form.preparacion }} </p>
-            <p>Calorías:
-
-                {{ form.calorias }} </p>
+                {{ form.categoria }} </p> -->
 
 
             <p>Tipo de plato: {{ form.tipo }}</p>
+
+            <p>Dificultad:
+                {{ form.preparacion }} </p>
+            <!-- <p>Calorías:
+
+                {{ form.calorias }} </p> -->
 
                 <!-- <p>VARIEDADES EN BASE:
 
@@ -53,7 +53,7 @@
                         <div class="accordion-item">
                             <h2 class="accordion-header" id="headingOne">
                                 <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                    data-bs-target="#collapseOne" aria-expanded="False" aria-controls="collapseOne">
                                     Variedad 1: <input type="tex" name="variedad1"
                                         value="{{ variedades_en_base.variedad1|default:'' }}">
                                 </button>

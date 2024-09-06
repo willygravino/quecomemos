@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from AdminVideos.models import Plato, Profile, Mensaje, Elegidos, ElegidosXDia, Sugeridos
 from django.http import HttpRequest, JsonResponse
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.contrib.auth.forms import UserCreationForm
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.contrib.auth.views import LoginView, LogoutView
@@ -27,7 +27,9 @@ class SugerenciasRandom(TemplateView):
 
 
 def index(request):
-     return render(request, "AdminVideos/lista_filtrada.html")
+    #  return render(request, "AdminVideos/lista_filtrada.html")
+    return redirect(reverse_lazy("filtro-de-platos"))
+
 
 def about(request):
     return render(request, "AdminVideos/about.html")
@@ -36,6 +38,8 @@ def plato_elegido(request):
     if request.method == 'GET':
         nombre_plato = request.GET.get('opcion1')
         borrar = request.GET.get('borrar')
+        tipo_pag = request.GET.get('tipopag')  # Obtener el parámetro 'tipo-pag' de la URL
+
 
         usuario = request.user  # Obtener el usuario logueado
 
@@ -46,8 +50,9 @@ def plato_elegido(request):
             # Agregar el plato a la lista de platos elegidos
             Elegidos.objects.get_or_create(usuario=usuario, nombre_plato_elegido=nombre_plato)
 
-        # Redirigir a la página deseada
-        return redirect(reverse_lazy("filtro-de-platos"))
+        # Redirigir manteniendo el parámetro 'tipo-pag'
+        return redirect(f"{reverse('filtro-de-platos')}?tipopag={tipo_pag}")
+    
     else:
         # Manejar solicitudes POST u otras solicitudes que no sean GET
         return JsonResponse({"error": "Método no permitido"}, status=405)
@@ -460,6 +465,7 @@ class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         user_id = self.request.user.id
         plato_id = self.kwargs.get("pk")
         return Plato.objects.filter(propietario=user_id, id=plato_id).exists()
+    
 
     def form_valid(self, form):
         # Guardar el formulario y obtener la instancia del plato
@@ -491,7 +497,34 @@ class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 class PlatoCreate(LoginRequiredMixin, CreateView):
     model = Plato
     form_class = PlatoForm
+
+    
     template_name = 'AdminVideos/plato_update.html'
+
+    def get_template_names(self):
+        # Obtener el valor del parámetro 'template' desde la URL
+        template_param = self.request.GET.get('template', '')
+
+        # Dependiendo del valor de 'template', asignar una plantilla diferente
+        if template_param == 'entrada':
+            return ['AdminVideos/entrada_update.html']
+        elif template_param == 'dip':
+            return ['AdminVideos/dip_update.html']
+        elif template_param == 'principal':
+            return ['AdminVideos/plato_update.html']
+        elif template_param == 'trago':
+            return ['AdminVideos/trago_update.html']
+        elif template_param == 'salsa':
+            return ['AdminVideos/salsa_update.html']
+        elif template_param == 'guarnicion':
+            return ['AdminVideos/guarnicion_update.html']
+        elif template_param == 'postre':
+            return ['AdminVideos/postre_update.html']
+        else:
+            # Plantilla por defecto
+            return [self.template_name]
+
+
     success_url = reverse_lazy("filtro-de-platos")
     # fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria","preparacion", "tipo","calorias", "image"]
 #    fields = '__all__'
@@ -539,7 +572,9 @@ class SignUp(CreateView):
 @login_required
 def user_logout(request):
     logout(request)
-    return render(request, 'registration/logout.html', {})
+    # return render(request, 'registration/logout.html', {})
+    return redirect(reverse_lazy("login"))
+
 
 class ProfileCreate(LoginRequiredMixin, CreateView):
     model = Profile
@@ -564,7 +599,7 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
 # class PaginaInicial (TemplateView):  # LoginRequiredMixin?????
 #     model = Plato
 
-
+@login_required(login_url=reverse_lazy('login'), redirect_field_name=None)
 def FiltroDePlatos (request):
 
     # Establecer la configuración regional a español
@@ -598,12 +633,10 @@ def FiltroDePlatos (request):
     medios = request.session.get('medios_estable', "None")
     categoria = request.session.get('categoria_estable', "None")
     preparacion = request.session.get('preparacion_estable', "None")
-    tipo = request.session.get('tipo_estable', "None")
+    # tipo = request.session.get('tipo_estable', "None")
+
     calorias = request.session.get('calorias_estable', "None")
 
-    # items_iniciales = ""
-
-    # platos = Plato.objects.all()
     usuario = request.user
     cantidad_platos_sugeridos = 0
     platos_a_sugerir = ""
@@ -621,7 +654,7 @@ def FiltroDePlatos (request):
                 medios = form.cleaned_data.get('medios')
                 categoria = form.cleaned_data.get('categoria')
                 preparacion = form.cleaned_data.get('preparacion')
-                tipo = form.cleaned_data.get('tipo')
+                # tipo = form.cleaned_data.get('tipo')
                 calorias = form.cleaned_data.get('calorias')
 
                 # Guardar el valor de tipo_de_vista en la sesión
@@ -630,7 +663,7 @@ def FiltroDePlatos (request):
                 request.session['medios_estable'] = medios
                 request.session['categoria_estable'] = categoria
                 request.session['preparacion_estable'] = preparacion
-                request.session['tipo_estable'] = tipo
+                # request.session['tipo_estable'] = tipo
                 request.session['calorias_estable'] = calorias
 
     else:
@@ -640,7 +673,7 @@ def FiltroDePlatos (request):
                         'medios': medios,
                         'categoria': categoria,
                         'preparacion': preparacion,
-                        'tipo': tipo,
+                        # 'tipo': tipo,
                         'calorias': calorias
                     }
         post_o_no = "NO POST, MANDA INICIALES"+tipo_de_vista_estable
@@ -649,6 +682,12 @@ def FiltroDePlatos (request):
     pasa_por_aca = "PASA"
 
     platos = Plato.objects.all()
+  
+    # TOMAR EL TIPO DEL MENÚ    !!!!!!!!!!!!!!
+    # Obtener el valor del parámetro 'tipo' desde la URL
+    tipo_parametro = request.GET.get('tipopag', '')
+    if tipo_parametro:
+       platos = platos.filter(tipo=tipo_parametro)
 
     if tipo_de_vista != 'Todos':
         if tipo_de_vista == 'solo-mios' or tipo_de_vista=="random-con-mios":
@@ -667,8 +706,7 @@ def FiltroDePlatos (request):
                         platos = platos.filter(categoria=categoria)
         if preparacion and preparacion != '-':
             platos = platos.filter(preparacion=preparacion)
-        if tipo and tipo != '-':
-            platos = platos.filter(tipo=tipo)
+
         if calorias and calorias != '-':
             platos = platos.filter(calorias=calorias)
 
@@ -729,13 +767,12 @@ def FiltroDePlatos (request):
                 'elegidos': platos_elegidos,
                 "tipo_de_vista_estable" :  tipo_de_vista_estable,
                 "tipo_de_vista": tipo_de_vista,
-                "por_donde_pasa": pasa_por_aca,
+                "tipo": tipo_parametro,
                 "dias_desde_hoy": dias_desde_hoy,
                 "nombre_dia_de_la_semana": nombre_dia_semana,
                 "cantidad_platos_sugeridos": cantidad_platos_sugeridos,
                 "cantidad_platos_sugeribles": cantidad_platos_sugeribles,
                 "platos_a_sugerir":  platos_a_sugerir,
-                "hubo_post_o_no": post_o_no,
                 "platos_elegidos_por_dia": platos_elegidos_por_dia,
                 "platos_elegidos_por_dia_lista": platos_elegidos_por_dia_lista
                }

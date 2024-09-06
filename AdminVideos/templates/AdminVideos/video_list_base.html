@@ -29,7 +29,16 @@
       <div class="row">
         <div class="col">
           <div class="p-1 d-flex flex-wrap">
-          {% for plato in platos %}
+            
+            <div class="bg-primary">
+              <a href="{% url 'videos-create' %}">
+           <!-- <a class="nav-link"  href="#" data-toggle="modal" data-target="#IngresoModal"> -->
+
+                <H1 class="center"></H1>AGREGAR PLATO
+              </a>                        
+            </div>
+          
+            {% for plato in platos %}
             <div class="d-flex flex-row">
               <div class="col-md-4 mb-3">
                 <div class="card" style="width: 10rem;">
@@ -55,19 +64,19 @@
                           {% endif %}
                       {% endfor %}
 
-                      {% if plato.nombre_plato in elegidos %}
-                          <form action="{% url 'plato-elegido' %}" method="GET">
-                            <input type="hidden" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
+                      <form action="{% url 'plato-elegido' %}" method="GET">
+                        <input type="hidden" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
+                        <input type="hidden" name="tipopag" value="{{ request.GET.tipopag }}">  <!-- Incluir tipo-pag -->
+                    
+                        {% if plato.nombre_plato in elegidos %}
                             <input type="checkbox" id="borrar" name="borrar" value="borrar" checked style="display: none;">
                             <button type="submit" class="btn btn-primary" style="font-size: 12px; padding: 2px 5px;">No</button>
-                          </form>
-                      {% else %}
-                          <form action="{% url 'plato-elegido' %}" method="GET">
-                            <!-- <label for="opcion{{ plato.id }}">Elegir este plato:</label> -->
+                        {% else %}
                             <input type="checkbox" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}" checked style="display: none;">
                             <button type="submit" class="btn btn-primary" style="font-size: 12px; padding: 2px 5px;">Sí</button>
-                          </form>
-                      {% endif %}
+                        {% endif %}
+                    </form>
+
                    </div>
 
                 </div>
@@ -91,8 +100,8 @@
       <div class="col">
         <div class="d-flex flex-wrap justify-content-between">
 
-          <a class="bg-primary" data-toggle="modal" data-target="#Modal1">
-            <div class="mb-0 text-white p-2 small"> 
+          <a class= {% if platos_elegidos_por_dia_lista.0.1.almuerzo != None or platos_elegidos_por_dia_lista.0.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %} data-toggle="modal" data-target="#Modal1">
+            <div class="mb-0 text-white p-2 small border border-dark" > 
               <p >{{ dias_desde_hoy.0.0|date:"l j" }}</p>
               <p >Almuerzo: {{platos_elegidos_por_dia_lista.0.1.almuerzo}}</p>
               <p >Cena: {{platos_elegidos_por_dia_lista.0.1.cena}}</p>
@@ -100,8 +109,8 @@
           </a>  
 
 
-          <a class="bg-primary" data-toggle="modal" data-target="#Modal2">
-            <div class="mb-0 text-white p-2 small"> 
+          <a class={% if platos_elegidos_por_dia_lista.1.1.almuerzo != None or platos_elegidos_por_dia_lista.1.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %} data-toggle="modal" data-target="#Modal2">
+            <div class="mb-0 text-white p-2 small border border-dark"> 
               <p>{{ dias_desde_hoy.1.0|date:"l j" }}</p>
               <p >Almuerzo: {{platos_elegidos_por_dia_lista.1.1.almuerzo}}</p>
               <p >Cena: {{platos_elegidos_por_dia_lista.1.1.cena}}</p>
@@ -109,8 +118,8 @@
           </a>
 
 
-          <a class="bg-primary" data-toggle="modal" data-target="#Modal3">
-           <div class="mb-0 text-white p-2 small"> 
+          <a class={% if platos_elegidos_por_dia_lista.2.1.almuerzo != None or platos_elegidos_por_dia_lista.2.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %} data-toggle="modal" data-target="#Modal3">
+           <div class="mb-0 text-white p-2 small border border-dark"> 
 
             <p>{{ dias_desde_hoy.2.0|date:"l j" }}</p>
             <p >Almuerzo: {{platos_elegidos_por_dia_lista.2.1.almuerzo}}</p>
@@ -118,32 +127,32 @@
            </div>
           </a>
 
-          <a class="bg-primary" data-toggle="modal" data-target="#Modal4">
-            <div class="mb-0 text-white p-2 small"> 
+          <a class={% if platos_elegidos_por_dia_lista.3.1.almuerzo != None or platos_elegidos_por_dia_lista.3.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %} data-toggle="modal" data-target="#Modal4">
+            <div class="mb-0 text-white p-2 small border border-dark"> 
               <p>{{ dias_desde_hoy.3.0|date:"l j" }}</p>
               <p >Almuerzo: {{platos_elegidos_por_dia_lista.3.1.almuerzo}}</p>
               <p >Cena: {{platos_elegidos_por_dia_lista.3.1.cena}}</p>
             </div>
           </a>
 
-          <a class="bg-primary" data-toggle="modal" data-target="#Modal5">
-            <div class="mb-0 text-white p-2 small"> 
+          <a class={% if platos_elegidos_por_dia_lista.4.1.almuerzo != None or platos_elegidos_por_dia_lista.4.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %} data-toggle="modal" data-target="#Modal5">
+            <div class="mb-0 text-white p-2 smal border border-dark"> 
               <p>{{ dias_desde_hoy.4.0|date:"l j" }}</p>
               <p >Almuerzo: {{platos_elegidos_por_dia_lista.4.1.almuerzo}}</p>
               <p >Cena: {{platos_elegidos_por_dia_lista.4.1.cena}}</p>
             </div>
           </a>
 
-          <a class="bg-primary" data-toggle="modal" data-target="#Modal6">
-            <div class="mb-0 text-white p-2 small"> 
+          <a class={% if platos_elegidos_por_dia_lista.5.1.almuerzo != None or platos_elegidos_por_dia_lista.5.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %} data-toggle="modal" data-target="#Modal6">
+            <div class="mb-0 text-white p-2 small border border-dark"> 
               <p>{{ dias_desde_hoy.5.0|date:"l j" }}</p>
               <p >Almuerzo: {{platos_elegidos_por_dia_lista.5.1.almuerzo}}</p>
               <p >Cena: {{platos_elegidos_por_dia_lista.5.1.cena}}</p>
             </div>
           </a>
 
-          <a class="bg-primary" data-toggle="modal" data-target="#Modal7">
-            <div class="mb-0 text-white p-2 small"> 
+          <a class={% if platos_elegidos_por_dia_lista.6.1.almuerzo != None or platos_elegidos_por_dia_lista.6.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %} data-toggle="modal" data-target="#Modal7">
+            <div class="mb-0 text-white p-2 small border border-dark"> 
               <p>{{ dias_desde_hoy.6.0|date:"l j" }}</p>
               <p >Almuerzo: {{platos_elegidos_por_dia_lista.6.1.almuerzo}}</p>
               <p >Cena: {{platos_elegidos_por_dia_lista.6.1.cena}}</p>
@@ -261,26 +270,81 @@
           </div>
 
           <div class="modal-body">
-            <input type="hidden" name="fecha" value="{{ dias_desde_hoy.2.0|date:'Y-m-d' }}">
 
-            <select name="a">
-              <option value="-----">Elegir plato</option>
-    
-              {% for elegido in elegidos %}
-              <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
-              {% endfor %}
-    
-            </select>
-    
-            <br>
-            <select name="c">
-              <option value="-----">Elegir plato</option>
-    
-              {% for elegido in elegidos %}
-              <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.2.1.cena %}selected{% endif %}>{{ elegido }}</option>
-              {% endfor %}
-    
-            </select>
+            <div class="d-flex flex-column">
+
+
+                <input type="hidden" name="fecha" value="{{ dias_desde_hoy.2.0|date:'Y-m-d' }}">
+                <h6>Almuerzo</h6>
+
+                <div class="row">
+                  <div class="d-flex justify-content-between">
+                        <div>ENTRADA 1</div>
+                        <div>ENTRADA 2</div>
+                        <div>ENTRADA 3</div>
+                      </div>
+                </div>
+
+                <select name="a">
+                  <option value="-----">Elegir plato</option>
+        
+                  {% for elegido in elegidos %}
+                  <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
+                  {% endfor %}
+        
+                </select>
+
+                <div class="row">
+                  <div class="d-flex justify-content-between">
+                    <div>GUARNICIÓN 1</div>
+                    <div>GUARNICIÓN 2</div>
+                    <div>GUARNICIÓN 3</div>
+                      </div>
+                </div>
+
+                <div class="row">
+                  <div class="d-flex justify-content-between">
+                    <div>POSTRE 1</div>
+                    <div>POSTRE 2</div>
+                    <div>POSTRE 3</div>
+                      </div>
+                </div>
+
+
+        
+                <br>
+                <h6>Cena</h6>
+                <div class="row">
+                  <div class="d-flex justify-content-between">
+                        <div>ENTRADA 1</div>
+                        <div>ENTRADA 2</div>
+                        <div>ENTRADA 3</div>
+                      </div>
+                </div>
+
+                <select name="c">
+                  <option value="-----">Elegir plato</option>
+        
+                  {% for elegido in elegidos %}
+                  <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.2.1.cena %}selected{% endif %}>{{ elegido }}</option>
+                  {% endfor %}
+        
+                </select>
+                <div class="row">
+                  <div class="d-flex justify-content-between">
+                    <div>GUARNICIÓN 1</div>
+                    <div>GUARNICIÓN 2</div>
+                    <div>GUARNICIÓN 3</div>
+                      </div>
+                </div>
+                <div class="row">
+                  <div class="d-flex justify-content-between">
+                    <div>POSTRE 1</div>
+                    <div>POSTRE 2</div>
+                    <div>POSTRE 3</div>
+                      </div>
+                </div>
+          </div>
           </div>
 
           <div class="modal-footer">
@@ -474,7 +538,7 @@
 
           <div class="modal-footer">
             <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
-            <button type="submit">Enviar</button>
+            <button type="submit">Elegir</button>
           </div>
       </form>
     </div>
@@ -482,5 +546,191 @@
 </div>
 
 
+  <!-- Plato Modal-->
+<div class="modal fade" id="IngresoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+      <div class="modal-content">
+   
+
+        <div class="album py-5 bg-light">
+            <section class="py-1 text-center container">
+                <div class="row py-lg-1">
+                    <div class="col-lg-8 col-md-8 mx-auto">
+                        <h1 class="fw-light">UPDATE.</h1>
+                    </div>
+                </div>
+            </section>
+        </div>
+        
+        <div style="margin-top:40px">
+            <center>
+        
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <p>Nombre del Plato: {{ form.nombre_plato }}</p>
+                    <p>Receta: {{ form.receta }}</p>
+                    <p>Descripción del Plato: {{ form.descripcion_plato }}</p>
+                    <p>Ingredientes: {{ form.ingredientes }}</p>
+                    <p>Medios de cocción:
+                        {{ form.medios }} </p>
+                    <p>Categoría:
+        
+                        {{ form.categoria }} </p>
+                    <p>Preparación:
+                        {{ form.preparacion }} </p>
+                    <p>Calorías:
+        
+                        {{ form.calorias }} </p>
+        
+                        <p>VARIEDADES EN BASE:
+        
+                            {{ variedades_en_base }} </p>
+        
+                        <p>INGREDIENTES:
+        
+                            {{ ingredientes_variedad }} </p>
+        
+        
+                        <div class="container">
+                            <div class="accordion" id="accordionExample">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingOne">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                            Variedad 1: <input type="tex" name="variedad1"
+                                                value="{{ variedades_en_base.variedad1|default:'' }}">
+                                        </button>
+                                    </h2>
+                                    <div id="collapseOne" class="accordion-collapse collapse " aria-labelledby="headingOne"
+                                        data-bs-parent="#accordionExample">
+                                        <div class="accordion-body">
+                                            Ingredientes de variedad 1: <input type="text" name="ingredientes_de_variedad1"
+                                            value="{{ ingredientes_variedad.variedad1|default:'' }}">
+                                        
+                                        </div>
+                                    </div>
+                                </div>
+        
+        
+        
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingTwo">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                            Variedad 2: <input type="text" name="variedad2"
+                                                value="{{ variedades_en_base.variedad2|default:'' }}">
+                                        </button>
+                                    </h2>
+                                    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                                        data-bs-parent="#accordionExample">
+                                        <div class="accordion-body">
+        
+                                            Ingredientes de variedad 2: <input type="text" name="ingredientes_de_variedad2"
+                                                value="{{ ingredientes_variedad.variedad2|default:'' }}">
+        
+                                        </div>
+                                    </div>
+                                </div>
+        
+        
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingThree">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+        
+                                            Variedad 3: <input type="text" name="variedad3"
+                                                value="{{ variedades_en_base.variedad3|default:'' }}"></p>
+                                        </button>
+                                    </h2>
+                                    <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree"
+                                        data-bs-parent="#accordionExample">
+                                        <div class="accordion-body">
+        
+        
+                                            Ingredientes de variedad 3: <input type="text" name="ingredientes_de_variedad3"
+                                                value="{{ ingredientes_variedad.variedad3|default:'' }}">
+        
+                                        </div>
+                                    </div>
+                                </div>
+        
+        
+        
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingFour">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+        
+                                            Variedad 4: <input type="text" name="variedad4"
+                                                value="{{ variedades_en_base.variedad4|default:'' }}">
+                                        </button>
+                                    </h2>
+                                    <div id="collapseFour" class="accordion-collapse collapse " aria-labelledby="headingOne"
+                                        data-bs-parent="#accordionExample">
+                                        <div class="accordion-body">
+        
+        
+                                            Ingredientes de variedad 4: <input type="text" name="ingredientes_de_variedad4"
+                                                value="{{ ingredientes_variedad.variedad4|default:'' }}">
+        
+        
+                                        </div>
+                                    </div>
+                                </div>
+        
+        
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingFive">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+        
+                                            Variedad 5: <input type="text" name="variedad5"
+                                                value="{{ variedades_en_base.variedad5|default:'' }}">
+                                        </button>
+                                    </h2>
+                                    <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                                        data-bs-parent="#accordionExample">
+                                        <div class="accordion-body">
+        
+                                            Ingredientes de variedad 5: <input type="text" name="ingredientes_de_variedad5"
+                                                value="{{ ingredientes_variedad.variedad5|default:'' }}">
+        
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingSix">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+        
+                                            Variedad 6: <input type="text" name="variedad6"
+                                                value="{{ variedades_en_base.variedad6|default:'' }}">
+                                        </button>
+                                    </h2>
+                                    <div id="collapseSix" class="accordion-collapse collapse" aria-labelledby="headingThree"
+                                        data-bs-parent="#accordionExample">
+                                        <div class="accordion-body">
+                                            Ingredientes de variedad 6: <input type="text"
+                                                name="ingredientes_de_variedad6"
+                                                value="{{ ingredientes_variedad.variedad6|default:'' }}">
+        
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+        
+        
+                        </div>
+        
+        
+                        <p>Imagen: {{ form.image }}</p>
+                        <button type="submit">Guardar</button>
+        
+                </form>
+        
+        
+            </center>
+        </div>
 
 {% endblock %}

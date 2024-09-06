@@ -26,7 +26,7 @@ class Plato(models.Model):
         (WOK,'wok'),
         (SIN_COCCION,'sin cocción'),
     ]
-    medios = models.CharField(max_length=20, choices=MEDIOS_CHOICES, default=INDISTINTO, null=True, blank=True)
+    medios = models.CharField(max_length=20, choices=MEDIOS_CHOICES, default=INDISTINTO, null=True)
    
     INDISTINTO = '-'
     COMUN = 'Común'
@@ -38,7 +38,7 @@ class Plato(models.Model):
         (ESPECIAL, 'Especial'),
         
     ]
-    categoria = models.CharField(max_length=20, choices=CATEGORIA_CHOICES, default=INDISTINTO, null=True, blank=True)
+    categoria = models.CharField(max_length=20, choices=CATEGORIA_CHOICES, default=INDISTINTO, null=True)
 
     INDISTINTO = '-'
     MUCHO = 'Mucho'
@@ -51,33 +51,33 @@ class Plato(models.Model):
         (POCO, 'Poco'),
         (NADA, 'Nada'),
     ]
-    preparacion = models.CharField(max_length=20, choices=PREPA_CHOICES, default=INDISTINTO, null=True, blank=True)
+    preparacion = models.CharField(max_length=20, choices=PREPA_CHOICES, default=INDISTINTO, null=True)
 
     INDISTINTO = '-'
-    ENTRADA = 'entrada'
-    SALSA = 'salsa'
-    PICADA = 'picada'
-    PRINCIPAL = 'Plato principal'
-    POSTRE = 'postre'
-    TORTA = 'torta'
-    UNTABLE = 'untable'
-    TRAGO = 'trago'
-    GUARNICION = 'guarnicion'
+    ENTRADA = 'Entrada'
+    SALSA = 'Salsa'
+    PICADA = 'Picada'
+    PRINCIPAL = 'Principal'
+    POSTRE = 'Postre'
+    TORTA = 'Torta'
+    UNTABLE = 'Dip'
+    TRAGO = 'Trago'
+    GUARNICION = 'Guarnicion'
 
     TIPO_CHOICES = [
         (INDISTINTO, '-'),
         (ENTRADA, 'Entrada'),
         (SALSA, 'Salsa'),
         (PICADA, 'Picada'),
-        (PRINCIPAL,'Plato principal'),
-        (POSTRE,'postre'),
-        (TORTA,'torta'),
-        (UNTABLE,'untable'),
-        (TRAGO,'trago'),
-        (GUARNICION,'guarnicion'),
+        (PRINCIPAL,'Plato Principal'),
+        (POSTRE,'Postre'),
+        (TORTA,'Torta'),
+        (UNTABLE,'Dip'),
+        (TRAGO,'Trago'),
+        (GUARNICION,'Guarnicion'),
     ]
 
-    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default=INDISTINTO, null=True, blank=True)
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, default=INDISTINTO, null=True)
 
     INDISTINTO = '-'
     CALORICO = 'Calórico'
@@ -94,7 +94,7 @@ class Plato(models.Model):
    
     ]
 
-    calorias = models.CharField(max_length=20, choices=CALORIAS_CHOICES, default=INDISTINTO,null=True, blank=True)  
+    calorias = models.CharField(max_length=20, choices=CALORIAS_CHOICES, default=INDISTINTO,null=True)  
 
     propietario = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="propietario")
     image = models.ImageField("Subí una imagen que identifique al plato (o un fotograma del mismo)", upload_to="videos/", null=True, blank=True)

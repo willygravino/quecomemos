@@ -5,12 +5,11 @@
 
 {% block principal %}
 
-
 <div class="album py-5 bg-light">
     <section class="py-1 text-center container">
         <div class="row py-lg-1">
             <div class="col-lg-8 col-md-8 mx-auto">
-                <h1 class="fw-light">FORMULARIO DE INGRESO.</h1>
+                <h1 class="fw-light">DIP.</h1>
             </div>
         </div>
     </section>
@@ -21,23 +20,25 @@
 
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <p>Nombre del Plato: {{ form.nombre_plato }}</p>
+            <p>Nombre del Dip: {{ form.nombre_plato }}</p>
             <p>Receta: {{ form.receta }}</p>
             <p>Descripción del Plato: {{ form.descripcion_plato }}</p>
             <p>Ingredientes: {{ form.ingredientes }}</p>
+ 
+            <p>Tipo de plato: {{ form.tipo }}</p>
+
+            <p>Tipo de plato: {{ form.tipo }}</p>
+
             <p>Medios de cocción:
                 {{ form.medios }} </p>
             <p>Categoría:
-
                 {{ form.categoria }} </p>
-            <p>Preparación:
+
+            <p>Dificultad:
                 {{ form.preparacion }} </p>
             <p>Calorías:
 
                 {{ form.calorias }} </p>
-
-
-            <p>Tipo de plato: {{ form.tipo }}</p>
 
                 <!-- <p>VARIEDADES EN BASE:
 

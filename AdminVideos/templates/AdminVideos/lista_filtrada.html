@@ -4,13 +4,16 @@
 
 {% block filtro %}
 
+<h1>TIPO <-{{tipo}}-></h1>
+
+
 <form method="POST">
 
   {% csrf_token %}
   <span>Medios: {{ formulario.medios }}</span>
   <span>Categoría: {{ formulario.categoria }}</span>
   <span>Preparación: {{ formulario.preparacion }}</span>
-  <span>Tipo: {{ formulario.tipo }}</span>
+  <!-- <span>Tipo: {{ formulario.tipo }}</span> -->
 
   <br>
 
