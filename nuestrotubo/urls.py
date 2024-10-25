@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path
 from django.contrib.auth.views import LogoutView
 
-from AdminVideos.views import index, PlatoUpdate, PlatoDelete, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, menu_elegido, plato_elegido, grabar_menu_elegido,SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, user_logout # VistaInicial ,Logout, MensajeCreate, MensajeList, MensajeDelete, PlatoList, PlatosMineList, PlatosElegidosMenu, elecion_de_lista, PlatosDeOtros,, LogtViews, MenuElegido, lista_de_compras
+from AdminVideos.views import index, PlatoUpdate, PlatoDelete, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_y_plan, menu_elegido, plato_elegido, grabar_menu_elegido,SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, user_logout # VistaInicial ,Logout, MensajeCreate, MensajeList, MensajeDelete, PlatoList, PlatosMineList, PlatosElegidosMenu, elecion_de_lista, PlatosDeOtros,, LogtViews, MenuElegido, lista_de_compras
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -29,7 +29,7 @@ urlpatterns = [
     # path('', plato_elegido, name="plato-elegido"),
     path('plato/grabar', grabar_menu_elegido, name="grabar-menu"),
     path('menu/elegido',  menu_elegido, name="menu-elegido"),
-    # path('lista/compras', lista_de_compras, name="lista-compras"),
+    path('lista/compras-y-plan', lista_y_plan, name="lista-y-plan"),
     path('menu/random', SugerenciasRandom.as_view(), name="random"),
     # path('pagina/inicial', pagina_inicial, name="pagina-inicial"),
     path('videos/list/filtro', FiltroDePlatos, name="filtro-de-platos"),

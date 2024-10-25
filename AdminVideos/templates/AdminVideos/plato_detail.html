@@ -24,33 +24,32 @@
                 <p></p>
                 {% if user.id == plato.propietario.id %}
                   <a href="{% url 'videos-delete' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Eliminar</a>
-                  <!-- <a href="{% url 'videos-update' plato.id %}" type="button"  class="btn btn-sm btn-outline-secondary">Editar</a> -->
+                   <a href="{% url 'videos-update' plato.id %}" type="button"  class="btn btn-sm btn-outline-secondary">Editar</a> 
                   
 
-                 <a class="nav-link"  href="#" data-toggle="modal" data-target="#PlatoModal"> 
-                  <span>Plato Principal</span></a>
+                 <!-- <a class="nav-link"  href="#" data-toggle="modal" data-target="#PlatoModal"> 
+                  <span>Editar</span></a> -->
 
               </div>
             </div>
                  <p></p>
                  <small class="text-muted">Subido por mi.</small> 
-                {% else %} 
+                {% else %}
               </div>
             </div>
                  <p></p>
                  <small class="text-muted">Subido por {{ plato.propietario }}</small> 
                 {% endif %}
-    
-               
-              </div>
+                  
             </div>
+         </div>
         </div>
       <!-- </div> -->
     </div>
 </div>
 
  <!-- Plato Modal-->
-<div class="modal fade" id="PlatoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+<!-- <div class="modal fade" id="PlatoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
   aria-hidden="true">
   <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -235,6 +234,6 @@
         
             </center>
         </div>
- 
+  -->
 
 {% endblock %}

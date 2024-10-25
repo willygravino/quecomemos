@@ -41,13 +41,11 @@ class Plato(models.Model):
     categoria = models.CharField(max_length=20, choices=CATEGORIA_CHOICES, default=INDISTINTO, null=True)
 
     INDISTINTO = '-'
-    MUCHO = 'Mucho'
     POCO = 'Poco'
     NADA = 'Nada'
        
     PREPA_CHOICES = [
         (INDISTINTO, '-'),
-        (MUCHO, 'Mucho'),
         (POCO, 'Poco'),
         (NADA, 'Nada'),
     ]
@@ -118,6 +116,10 @@ class Elegidos(models.Model):
     usuario = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="platos_elegidos", null=True, blank=True)
     # EL SIGUIENTE CAMPO DEBERÍA LLAMARSE "PLATOS_PRESELECCIONADOS"
     nombre_plato_elegido = models.CharField(max_length=30)
+    # indica si es guarnicion, salsa, o lo que sea
+    tipo_plato = models.CharField(max_length=30, null=True)
+
+
     # id_usuario_que_lo_cargo = models.CharField(max_length=30)
   
     # usuario = models.OneToOneField(to=User, on_delete=models.CASCADE, related_name="platos_elegidos", null=True, blank=True)

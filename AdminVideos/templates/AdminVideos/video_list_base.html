@@ -4,8 +4,6 @@
 
 {% block un_video %}
 
-<!-- <a href="https://web.whatsapp.com/send?phone=5491145342640" target="_blank" dm_dont_rewrite_url="true" aria-label="whatsapp" onclick="dm_gaq_push_event &amp;&amp; dm_gaq_push_event('socialLink', 'click', 'Whatsapp')"> <span class="dmSocialWhatsapp dm-social-icons-whatsapp oneIcon socialHubIcon style4" aria-hidden="true" data-hover-effect="float"></span>  -->
-</a>
 
 {% if tipo_de_vista_estable == "random-todos" or tipo_de_vista_estable == "random-con-mios" %}
   <h6>CANTIDAD DE PLATOS SUGERIDOS {{ cantidad_platos_sugeridos }}</h6>
@@ -20,7 +18,6 @@
   {% endif %}
 {% endif %}
 
-<a href="https://wa.me/5491145342640" target="_blank">whatsapp</a>
 
 <section>
   {% if not platos %}
@@ -29,15 +26,15 @@
       <div class="row">
         <div class="col">
           <div class="p-1 d-flex flex-wrap">
-            
-            <div class="bg-primary">
-              <a href="{% url 'videos-create' %}">
-           <!-- <a class="nav-link"  href="#" data-toggle="modal" data-target="#IngresoModal"> -->
+            <div class=" d-flex justify-content-center align-items-center">
+            <a class="bg-primary" href="{% url 'videos-create' %}">
+               <div class="m-3 text-white p-2 small border border-dark"> 
+               <!-- <a class="nav-link"  href="#" data-toggle="modal" data-target="#IngresoModal"> -->
+                 <p>AGREGAR PLATO</p>
+               </div>
+            </a>                        
+          </div>
 
-                <H1 class="center"></H1>AGREGAR PLATO
-              </a>                        
-            </div>
-          
             {% for plato in platos %}
             <div class="d-flex flex-row">
               <div class="col-md-4 mb-3">
@@ -58,7 +55,10 @@
                         <small class="text-muted">Subido por {{ plato.propietario }}</small>
                       {% endif %}
                       <br>
+                      <small class="mtext-success"> {{ plato.tipo }} /</small>
+
                       {% for key, value in plato.variedades.items %}
+
                           {% if value.variedad %}
                             <small class="mtext-success"> {{ value.variedad }} /</small>
                           {% endif %}
@@ -66,14 +66,16 @@
 
                       <form action="{% url 'plato-elegido' %}" method="GET">
                         <input type="hidden" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
+                      <input type="hidden" name="tipo-plato" value="{{ plato.tipo }}">   <!--  Incluir tipo-plato -->
+
                         <input type="hidden" name="tipopag" value="{{ request.GET.tipopag }}">  <!-- Incluir tipo-pag -->
                     
                         {% if plato.nombre_plato in elegidos %}
                             <input type="checkbox" id="borrar" name="borrar" value="borrar" checked style="display: none;">
-                            <button type="submit" class="btn btn-primary" style="font-size: 12px; padding: 2px 5px;">No</button>
+                            <button type="submit" class="btn btn-success" style="font-size: 12px; padding: 2px 5px;">√</button>
                         {% else %}
                             <input type="checkbox" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}" checked style="display: none;">
-                            <button type="submit" class="btn btn-primary" style="font-size: 12px; padding: 2px 5px;">Sí</button>
+                            <button type="submit" class="btn btn-primary"  style="font-size: 12px; padding: 2px 5px;">Preseleccionar</button>
                         {% endif %}
                     </form>
 
@@ -93,11 +95,22 @@
 
 <!-- </div> -->
 </section>
+<!-- 
+<form action="{% url 'grabar-menu' %}" method="post">
+
+  {% csrf_token %} -->
+
 
 <div class="container">
 
   <div class="row">
       <div class="col">
+
+        <h1> pre-elegidos: {{ elegidos }} </h1>
+        <h1> principales presel: {{ principales_presel }} </h1>
+        <h1> guarnic: {{ guarniciones_presel }} </h1>
+
+
         <div class="d-flex flex-wrap justify-content-between">
 
           <a class= {% if platos_elegidos_por_dia_lista.0.1.almuerzo != None or platos_elegidos_por_dia_lista.0.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %} data-toggle="modal" data-target="#Modal1">
@@ -226,7 +239,7 @@
           <div class="modal-body">
             <input type="hidden" name="fecha" value="{{ dias_desde_hoy.1.0|date:'Y-m-d' }}">
             <select name="a">
-              <option value="-----">Eldddgir plato</option>
+              <option value="-----">Elegir plato</option>
     
               {% for elegido in elegidos %}
             
@@ -279,38 +292,94 @@
 
                 <div class="row">
                   <div class="d-flex justify-content-between">
-                        <div>ENTRADA 1</div>
-                        <div>ENTRADA 2</div>
+                    <select name="a">
+                      <option value="-----">Entrada 1</option>
+                      {% for entrada in entradas_presel %}
+                        <option value="{{ entrada }}" {% if entrada == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ entrada }}</option>                     
+                      {% endfor %}
+                    </select>
+                    
+                    <select name="a">
+                      <option value="-----">Entrada 2</option>
+                      {% for entrada in entradas_presel %}
+                        <option value="{{ entrada }}" {% if entrada == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ entrada }}</option>                     
+                      {% endfor %}
+                    </select>
+
                         <div>ENTRADA 3</div>
                       </div>
                 </div>
 
+                <div class="row">
+                  <div class="d-flex justify-content-between">
+                    <div>DIP 1</div>
+                    <div>DIP 2</div>
+                    <div>DIP 3</div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="d-flex justify-content-between">
+                    <div>TRAGO 1</div>
+                    <div>TRAGO 2</div>
+                    <div>TRAGO 3</div>
+                  </div>
+                </div>
+
                 <select name="a">
-                  <option value="-----">Elegir plato</option>
+                  <option value="-----">Plato Principal</option>
         
                   {% for elegido in elegidos %}
-                  <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
+                  <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>                     
                   {% endfor %}
         
                 </select>
 
                 <div class="row">
                   <div class="d-flex justify-content-between">
-                    <div>GUARNICIÓN 1</div>
-                    <div>GUARNICIÓN 2</div>
+                    <div>SALSA 1</div>
+                    <div>SALSA 2</div>
+                    <div>SALSA 3</div>
+                      </div>
+                </div>
+
+                <div class="row">
+                  <div class="d-flex justify-content-between">
+                    <select name="a">
+                      <option value="-----">Guarnición 1</option>
+            
+                      {% for guarnicion in guarniciones_presel %}
+                      <option value="{{ guarnicion }}" {% if guarnicion == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ guarnicion }}</option>                     
+                      {% endfor %}
+            
+                    </select>
+
+                    <select name="a">
+                      <option value="-----">Guarnición 2</option>
+            
+                      {% for guarnicion in guarniciones_presel %}
+                      <option value="{{ guarnicion }}" {% if guarnicion == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ guarnicion }}</option>                     
+                      {% endfor %}
+            
+                    </select>
+
                     <div>GUARNICIÓN 3</div>
                       </div>
                 </div>
 
                 <div class="row">
                   <div class="d-flex justify-content-between">
-                    <div>POSTRE 1</div>
+                    <select name="a">
+                      <option value="-----">Postre Almuerzo 1</option>
+                      {% for postre in postres_presel %}
+                        <option value="{{ postre }}" {% if postre == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ postre }}</option>                     
+                      {% endfor %}
+                    </select>
+
                     <div>POSTRE 2</div>
                     <div>POSTRE 3</div>
                       </div>
                 </div>
-
-
         
                 <br>
                 <h6>Cena</h6>
@@ -322,27 +391,79 @@
                       </div>
                 </div>
 
+                <div class="row">
+                  <div class="d-flex justify-content-between">
+                    <div>DIP 1</div>
+                    <div>DIP 2</div>
+                    <div>DIP 3</div>
+                      </div>
+                </div>
+
+                <div class="row">
+                  <div class="d-flex justify-content-between">
+                    <div>TRAGO 1</div>
+                    <div>TRAGO 2</div>
+                    <div>TRAGO 3</div>
+                  </div>
+                </div>
+
                 <select name="c">
-                  <option value="-----">Elegir plato</option>
+                  <option value="-----">Plato Principal</option>
+
         
                   {% for elegido in elegidos %}
                   <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.2.1.cena %}selected{% endif %}>{{ elegido }}</option>
                   {% endfor %}
         
                 </select>
+
                 <div class="row">
                   <div class="d-flex justify-content-between">
-                    <div>GUARNICIÓN 1</div>
-                    <div>GUARNICIÓN 2</div>
+                    <div>SALSA 1</div>
+                    <div>SALSA 2</div>
+                    <div>SALSA 3</div>
+                      </div>
+                </div>
+
+                <div class="row">
+                  <div class="d-flex justify-content-between">
+                
+                    <select name="a">
+                      <option value="-----">Guarnición 1</option>
+            
+                      {% for guarnicion in guarniciones_presel %}
+                      <option value="{{ guarnicion }}" {% if guarnicion == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ guarnicion }}</option>                     
+                      {% endfor %}
+            
+                    </select>
+
+                    <select name="a">
+                      <option value="-----">Guarnición 2</option>
+            
+                      {% for guarnicion in guarniciones_presel %}
+                      <option value="{{ guarnicion }}" {% if guarnicion == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ guarnicion }}</option>                     
+                      {% endfor %}
+            
+                    </select>
+
+
+
                     <div>GUARNICIÓN 3</div>
                       </div>
                 </div>
                 <div class="row">
                   <div class="d-flex justify-content-between">
-                    <div>POSTRE 1</div>
+                    <select name="a">
+                      <option value="-----">Postre cena 1</option>
+                      {% for postre in postres_presel %}
+                        <option value="{{ postre }}" {% if postre == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ postre }}</option>                     
+                      {% endfor %}
+                    </select>
+
+
                     <div>POSTRE 2</div>
                     <div>POSTRE 3</div>
-                      </div>
+                  </div>
                 </div>
           </div>
           </div>

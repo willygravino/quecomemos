@@ -1,0 +1,212 @@
+
+<!-- Menú del Día -> Modal 3 -->
+
+<div class="modal fade" id="Modal3" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <form action="{% url 'grabar-menu' %}" method="post">
+  
+            {% csrf_token %}
+  
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">{{ dias_desde_hoy.2.1 }} {{ dias_desde_hoy.2.0 }}</h5>
+              <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+              </button>
+            </div>
+  
+            <div class="modal-body">
+  
+              <div class="d-flex flex-column">
+  
+  
+                  <input type="hidden" name="fecha" value="{{ dias_desde_hoy.2.0|date:'Y-m-d' }}">
+                  <h6>Almuerzo</h6>
+  
+                  <div class="row">
+                    <div class="d-flex justify-content-between">
+                      <select name="a">
+                        <option value="-----">Entrada 1</option>
+                        {% for entrada in entradas_presel %}
+                          <option value="{{ entrada }}" {% if entrada == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ entrada }}</option>                     
+                        {% endfor %}
+                      </select>
+                      
+                      <select name="a">
+                        <option value="-----">Entrada 2</option>
+                        {% for entrada in entradas_presel %}
+                          <option value="{{ entrada }}" {% if entrada == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ entrada }}</option>                     
+                        {% endfor %}
+                      </select>
+  
+                          <div>ENTRADA 3</div>
+                        </div>
+                  </div>
+  
+                  <div class="row">
+                    <div class="d-flex justify-content-between">
+                      <div>DIP 1</div>
+                      <div>DIP 2</div>
+                      <div>DIP 3</div>
+                    </div>
+                  </div>
+  
+                  <div class="row">
+                    <div class="d-flex justify-content-between">
+                      <div>TRAGO 1</div>
+                      <div>TRAGO 2</div>
+                      <div>TRAGO 3</div>
+                    </div>
+                  </div>
+  
+                  <select name="a">
+                    <option value="-----">Plato Principal</option>
+          
+                    {% for elegido in elegidos %}
+                    <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>                     
+                    {% endfor %}
+          
+                  </select>
+  
+                  <div class="row">
+                    <div class="d-flex justify-content-between">
+                      <div>SALSA 1</div>
+                      <div>SALSA 2</div>
+                      <div>SALSA 3</div>
+                        </div>
+                  </div>
+  
+                  <div class="row">
+                    <div class="d-flex justify-content-between">
+                      <select name="a">
+                        <option value="-----">Guarnición 1</option>
+              
+                        {% for guarnicion in guarniciones_presel %}
+                        <option value="{{ guarnicion }}" {% if guarnicion == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ guarnicion }}</option>                     
+                        {% endfor %}
+              
+                      </select>
+  
+                      <select name="a">
+                        <option value="-----">Guarnición 2</option>
+              
+                        {% for guarnicion in guarniciones_presel %}
+                        <option value="{{ guarnicion }}" {% if guarnicion == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ guarnicion }}</option>                     
+                        {% endfor %}
+              
+                      </select>
+  
+                      <div>GUARNICIÓN 3</div>
+                        </div>
+                  </div>
+  
+                  <div class="row">
+                    <div class="d-flex justify-content-between">
+                      <select name="a">
+                        <option value="-----">Postre Almuerzo 1</option>
+                        {% for postre in postres_presel %}
+                          <option value="{{ postre }}" {% if postre == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ postre }}</option>                     
+                        {% endfor %}
+                      </select>
+  
+  
+                      <div>POSTRE 2</div>
+                      <div>POSTRE 3</div>
+                        </div>
+                  </div>
+          
+                  <br>
+                  <h6>Cena</h6>
+                  <div class="row">
+                    <div class="d-flex justify-content-between">
+                          <div>ENTRADA 1</div>
+                          <div>ENTRADA 2</div>
+                          <div>ENTRADA 3</div>
+                        </div>
+                  </div>
+  
+                  <div class="row">
+                    <div class="d-flex justify-content-between">
+                      <div>DIP 1</div>
+                      <div>DIP 2</div>
+                      <div>DIP 3</div>
+                        </div>
+                  </div>
+  
+                  <div class="row">
+                    <div class="d-flex justify-content-between">
+                      <div>TRAGO 1</div>
+                      <div>TRAGO 2</div>
+                      <div>TRAGO 3</div>
+                    </div>
+                  </div>
+  
+                  <select name="c">
+                    <option value="-----">Plato Principal</option>
+  
+          
+                    {% for elegido in elegidos %}
+                    <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.2.1.cena %}selected{% endif %}>{{ elegido }}</option>
+                    {% endfor %}
+          
+                  </select>
+  
+                  <div class="row">
+                    <div class="d-flex justify-content-between">
+                      <div>SALSA 1</div>
+                      <div>SALSA 2</div>
+                      <div>SALSA 3</div>
+                        </div>
+                  </div>
+  
+                  <div class="row">
+                    <div class="d-flex justify-content-between">
+                  
+                      <select name="a">
+                        <option value="-----">Guarnición 1</option>
+              
+                        {% for guarnicion in guarniciones_presel %}
+                        <option value="{{ guarnicion }}" {% if guarnicion == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ guarnicion }}</option>                     
+                        {% endfor %}
+              
+                      </select>
+  
+                      <select name="a">
+                        <option value="-----">Guarnición 2</option>
+              
+                        {% for guarnicion in guarniciones_presel %}
+                        <option value="{{ guarnicion }}" {% if guarnicion == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ guarnicion }}</option>                     
+                        {% endfor %}
+              
+                      </select>
+  
+  
+  
+                      <div>GUARNICIÓN 3</div>
+                        </div>
+                  </div>
+                  <div class="row">
+                    <div class="d-flex justify-content-between">
+                      <select name="a">
+                        <option value="-----">Postre cena 1</option>
+                        {% for postre in postres_presel %}
+                          <option value="{{ postre }}" {% if postre == platos_elegidos_por_dia_lista.2.1.almuerzo %}selected{% endif %}>{{ postre }}</option>                     
+                        {% endfor %}
+                      </select>
+  
+  
+                      <div>POSTRE 2</div>
+                      <div>POSTRE 3</div>
+                    </div>
+                  </div>
+            </div>
+            </div>
+  
+            <div class="modal-footer">
+              <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
+              <button type="submit">Enviar</button>
+            </div>
+        </form>
+      </div>
+    </div>
+  </div>

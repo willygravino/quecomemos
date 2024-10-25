@@ -91,40 +91,67 @@
 
 <div class="col-md-4">
 
-    <section>
+    <!-- <section> -->
         <form>
 
             <h3>EDITA LISTA DE COMPRAS</h3>
             <!-- <p>ingredientes_separados_por_comas: {{ ingredientes_separados_por_comas }}</p> -->
 
-            {% if ingredientes_separados_por_comas %}
-                {% for ingrediente, valor  in ingredientes_separados_por_comas.items %}
-                <input type="checkbox" id="{{ ingrediente }}" name="ingrediente_a_comprar" value="{{ ingrediente }}"  {% if valor.estado == "no-tengo" %} checked {% endif %}>
-                <!-- <h3>ing >>{{ ingrediente }}<<</h3>
-                <h3>estado >>{{ valor.estado }}<<</h3> -->
-                <!-- <h3>comentario >>{{ valor.comentario }}<<</h3> -->
+            <!-- <div class="row">
+                <div class="d-flex"> -->
+                
+                    {% if ingredientes_separados_por_comas %}
+                        {% for ingrediente, valor  in ingredientes_separados_por_comas.items %}
+                            <input type="checkbox" id="{{ ingrediente }}" name="ingrediente_a_comprar" value="{{ ingrediente }}"  {% if valor.estado == "no-tengo" %} checked {% endif %}>
+                            <!-- <h3>ing >>{{ ingrediente }}<<</h3>
+                            <h3>estado >>{{ valor.estado }}<<</h3> -->
+                            <!-- <h3>comentario >>{{ valor.comentario }}<<</h3>  -->
 
-                <label for="{{ ingrediente }}">{{ ingrediente }}</label><br>
-                <!-- <input type="text" id="{{ ingrediente }}_detalle" name="{{ ingrediente }}_detalle" placeholder="Detalles">-->
-                {% endfor %}
-            {% else %}
-            <p>No hay ingredientes para comprar. Seleccione menúes.</p>
-            {% endif %}
-    
+                            <label for="{{ ingrediente }}">{{ ingrediente }}</label>
+                            <input type="text" id="{{ ingrediente }}_detalle" name="{{ ingrediente }}_detalle" placeholder="Comentario">
 
-            <input type="submit" value="Imprimir lista de compras">
-            <input type="submit" value="Imprimir Plan de Comidas">
+                            <br>
+                        {% endfor %}
+                    {% else %}
+                         <p>No hay ingredientes para comprar. Seleccione menúes.</p>
+                    {% endif %}
+            
+                    <!-- <a class="nav-link" href="{% url 'lista-y-plan' %}">
+                        <i class="fa-solid fa-shrimp" style="font-size: 1.3rem;"></i>
+                        <span>imprimir lista de compras</span>
+                    </a> -->
 
+                    <input type="submit" value="Imprimir lista de compras y Plan">
+                    <!-- <input type="submit" value="Imprimir Plan de Comidas"> -->
+                <!-- </div>
+            </div> -->
         </form>
 
-    </section>
+    <!-- </section> -->
 </div>
 
 <div class="col-md-4">
     <section>
-        <H3>LISTA DE COMPRAS
-        </H3>
-        <h2>{{ lista_de_compras }}</h2>
+        <H3>LISTA DE COMPRAS</H3>
+        {% if lista_de_compras %}
+          <ul>
+            {% for item in lista_de_compras %}
+              <li>{{ item }}</li>
+            {% endfor %}
+
+            <a href="https://wa.me/5491145342640?text={{ mensaje_whatsapp }}" target="_blank">Enviar lista por WhatsApp</a>
+
+          </ul>
+<!-- 
+           <h2>{{ lista_de_compras }}</h2> -->
+        {% else %}
+           <h2>NO HAY INGREDIENTES PARA COMPRAR</h2>
+        {% endif %}
+
+
+
+
+
     </section>
 </div>
 

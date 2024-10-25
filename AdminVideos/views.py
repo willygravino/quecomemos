@@ -34,9 +34,12 @@ def index(request):
 def about(request):
     return render(request, "AdminVideos/about.html")
 
+# LA SIGUIENTE FUNCIÓN TIENE QUE VER CON LOS PLATOS PRESELECCIONADOS PARA LOS MENÚES
 def plato_elegido(request):
     if request.method == 'GET':
         nombre_plato = request.GET.get('opcion1')
+        plato_tipo = request.GET.get('tipo-plato')
+
         borrar = request.GET.get('borrar')
         tipo_pag = request.GET.get('tipopag')  # Obtener el parámetro 'tipo-pag' de la URL
 
@@ -48,7 +51,7 @@ def plato_elegido(request):
             Elegidos.objects.filter(usuario=usuario, nombre_plato_elegido=nombre_plato).delete()
         else:
             # Agregar el plato a la lista de platos elegidos
-            Elegidos.objects.get_or_create(usuario=usuario, nombre_plato_elegido=nombre_plato)
+            Elegidos.objects.get_or_create(usuario=usuario, nombre_plato_elegido=nombre_plato, tipo_plato=plato_tipo)
 
         # Redirigir manteniendo el parámetro 'tipo-pag'
         return redirect(f"{reverse('filtro-de-platos')}?tipopag={tipo_pag}")
@@ -141,6 +144,54 @@ def grabar_menu_elegido(request):
         return JsonResponse({'error': 'El método de solicitud debe ser POST'})
 
 
+def lista_y_plan(request):
+    lista_de_compras = []
+
+    lista_de_compras = request.POST.getlist("ingrediente_a_comprar")
+
+    lista_de_ingredientes = set()
+
+    no_incluir = set()
+
+    # Obtener el perfil del usuario actual
+    perfil = get_object_or_404(Profile, user=request.user)
+
+    set_compras = set(lista_de_compras)
+    # Identificar elementos que están en lista_de_ingredientes pero no en set_compras
+    ingredientes_no_comprados_1 = lista_de_ingredientes - set_compras
+    ingredientes_no_comprados = ingredientes_no_comprados_1 - no_incluir
+    if ingredientes_no_comprados:
+            for ingrediente_nuevo in ingredientes_no_comprados:
+                if ingrediente_nuevo not in perfil.ingredientes_que_tengo:
+                    # Actualizar el campo ingredientes_que_tengo
+                    perfil.ingredientes_que_tengo.append(ingrediente_nuevo)
+                    # Guardar el perfil actualizado
+                    perfil.save()
+
+    if lista_de_compras:
+            for ingrediente_a_comprar in lista_de_compras:
+                    if ingrediente_a_comprar in perfil.ingredientes_que_tengo:
+                        # Eliminar el ingrediente de la lista
+                        perfil.ingredientes_que_tengo.remove(ingrediente_a_comprar)
+                        # Guardar el perfil actualizado
+                        perfil.save()
+
+      # Generar el mensaje de WhatsApp
+    mensaje_whatsapp = "Lista de compras:\n"
+    if lista_de_compras:
+        mensaje_whatsapp += "\n".join(lista_de_compras)
+    mensaje_whatsapp = mensaje_whatsapp.replace("\n", "%0A")  # Reemplazar saltos de línea para la URL        
+
+    context = {
+        "lista_de_compras": "hola",
+        "mensaje_whatsapp": mensaje_whatsapp
+    }
+
+    return render(request, 'AdminVideos/lista_y_plan.html', context)               
+
+
+     
+
 @login_required
 def menu_elegido(request):
     locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')  # Configura la localización a español
@@ -166,6 +217,7 @@ def menu_elegido(request):
                 no_incluir = set()
 
                 lista_de_compras = request.POST.getlist("ingrediente_a_comprar")
+                # detalle_ingrediente = 
 
                 for objeto in objetos_del_usuario:
                     platos_dia = objeto.platos_que_comemos
@@ -372,6 +424,12 @@ def menu_elegido(request):
                 "variedades": almuerzo_variedades,
                 "variedades_cena": cena_variedades
             }
+    
+    # Generar el mensaje de WhatsApp
+    mensaje_whatsapp = "Lista de compras:\n"
+    if lista_de_compras:
+        mensaje_whatsapp += "\n".join(lista_de_compras)
+    mensaje_whatsapp = mensaje_whatsapp.replace("\n", "%0A")  # Reemplazar saltos de línea para la URL        
 
     context = {
         'platos_por_dia': platos_por_dia,
@@ -379,8 +437,7 @@ def menu_elegido(request):
         'post_data': request.POST,
         "lista_de_compras": lista_de_compras,
         "ingredientes_no_comprados": ingredientes_no_comprados,
-
-        # "set_a_no_incluir": no_incluir
+        "mensaje_whatsapp": mensaje_whatsapp
     }
 
     return render(request, 'AdminVideos/menu_elegido.html', context)
@@ -525,7 +582,7 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             return [self.template_name]
 
 
-    success_url = reverse_lazy("filtro-de-platos")
+    success_url = reverse_lazy("videos-create")
     # fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria","preparacion", "tipo","calorias", "image"]
 #    fields = '__all__'
 
@@ -732,6 +789,21 @@ def FiltroDePlatos (request):
 
     if usuario:
         platos_elegidos = Elegidos.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
+        
+        principales_presel = Elegidos.objects.filter(usuario=usuario, tipo_plato="Principal").values_list('nombre_plato_elegido', flat=True)
+
+        guarniciones_presel = Elegidos.objects.filter(usuario=usuario, tipo_plato="Guarnicion").values_list('nombre_plato_elegido', flat=True)
+
+        salsas_presel = Elegidos.objects.filter(usuario=usuario, tipo_plato="Guarnicion").values_list('nombre_plato_elegido', flat=True)
+
+        tragos_presel = Elegidos.objects.filter(usuario=usuario, tipo_plato="Trago").values_list('nombre_plato_elegido', flat=True)
+
+        dips_presel = Elegidos.objects.filter(usuario=usuario, tipo_plato="Dip").values_list('nombre_plato_elegido', flat=True)
+
+        postres_presel = Elegidos.objects.filter(usuario=usuario, tipo_plato="Postre").values_list('nombre_plato_elegido', flat=True)
+                
+        entradas_presel = Elegidos.objects.filter(usuario=usuario, tipo_plato="Entrada").values_list('nombre_plato_elegido', flat=True)
+
 
     # Obtén el número de platos sugeridos para el usuario actual
     cantidad_platos_sugeridos = Sugeridos.objects.filter(usuario_de_sugeridos=usuario).count()
@@ -774,7 +846,14 @@ def FiltroDePlatos (request):
                 "cantidad_platos_sugeribles": cantidad_platos_sugeribles,
                 "platos_a_sugerir":  platos_a_sugerir,
                 "platos_elegidos_por_dia": platos_elegidos_por_dia,
-                "platos_elegidos_por_dia_lista": platos_elegidos_por_dia_lista
+                "platos_elegidos_por_dia_lista": platos_elegidos_por_dia_lista,
+                "guarniciones_presel": guarniciones_presel,
+                "entradas_presel": entradas_presel,
+                "principales_presel": principales_presel,
+                "tragos_presel": tragos_presel,
+                "postres_presel": postres_presel,
+                "salsa_presel": salsas_presel,
+                "dips_presel": dips_presel
                }
 
     return render(request, 'AdminVideos/lista_filtrada.html', contexto)
