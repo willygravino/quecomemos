@@ -113,13 +113,21 @@
 
         <div class="d-flex flex-wrap justify-content-between">
 
-          <a class= {% if platos_elegidos_por_dia_lista.0.1.almuerzo != None or platos_elegidos_por_dia_lista.0.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %} data-toggle="modal" data-target="#Modal1">
+        <a href="{% url 'formulario-dia' dia=dias_desde_hoy.0.0|date:'Y-m-d' %}" class= {% if platos_elegidos_por_dia_lista.0.1.almuerzo != None or platos_elegidos_por_dia_lista.0.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %} >
+            <div class="mb-0 text-white p-2 small border border-dark">
+              <p >{{ dias_desde_hoy.0.0|date:"l j" }}</p>
+              <p >Almuerzo: {{platos_elegidos_por_dia_lista.0.1.almuerzo}}</p>
+              <p >Cena: {{platos_elegidos_por_dia_lista.0.1.cena}}</p>
+            </div>
+        </a>
+
+          <!-- <a class= {% if platos_elegidos_por_dia_lista.0.1.almuerzo != None or platos_elegidos_por_dia_lista.0.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %} data-toggle="modal" data-target="#Modal1">
             <div class="mb-0 text-white p-2 small border border-dark" > 
               <p >{{ dias_desde_hoy.0.0|date:"l j" }}</p>
               <p >Almuerzo: {{platos_elegidos_por_dia_lista.0.1.almuerzo}}</p>
               <p >Cena: {{platos_elegidos_por_dia_lista.0.1.cena}}</p>
             </div>
-          </a>  
+          </a>   -->
 
 
           <a class={% if platos_elegidos_por_dia_lista.1.1.almuerzo != None or platos_elegidos_por_dia_lista.1.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %} data-toggle="modal" data-target="#Modal2">

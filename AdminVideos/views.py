@@ -16,7 +16,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from datetime import datetime, timedelta
 from .forms import PlatoFilterForm, PlatoForm
 from django.views.generic import TemplateView
-from datetime import date
+from datetime import date, datetime
 import datetime
 
 
@@ -73,6 +73,16 @@ def grabar_menu_elegido(request):
         fecha = request.POST.get("fecha")
         almuerzo = request.POST.get("a")
         cena = request.POST.get("c")
+        entrada1 = request.POST.get("entrada1")
+        entrada2 = request.POST.get("entrada2")
+        entrada3 = request.POST.get("entrada3")
+        entrada4 = request.POST.get("entrada4")
+        guarnicion1 = request.POST.get("guarnicion1")
+        guarnicion2 = request.POST.get("guarnicion2")
+        guarnicion3 = request.POST.get("guarnicion3")
+        guarnicion4 = request.POST.get("guarnicion4")
+        postre1 = request.POST.get("postre1")
+        postre2 = request.POST.get("postre2")
         
         registro_existente = ElegidosXDia.objects.filter(user=usuario, el_dia_en_que_comemos=fecha).first()
 
@@ -121,7 +131,18 @@ def grabar_menu_elegido(request):
                 "almuerzo": {"plato": almuerzo, "ingredientes": almuerzo_ingredientes, "elegido": True},
                 "variedades_almuerzo": variedad_almuerzo_con_elegidos,
                 "cena": {"plato": cena, "ingredientes": cena_ingredientes, "elegido": True},
-                "variedades_cena": variedad_cena_con_elegidos
+                "variedades_cena": variedad_cena_con_elegidos,
+                "guarnicion1":guarnicion1,
+                "guarnicion2":guarnicion2,
+                "guarnicion3":guarnicion3,
+                "guarnicion4":guarnicion4,
+                "entrada1": entrada1,
+                "entrada2": entrada2,
+                "entrada3": entrada3,
+                "entrada4": entrada4,
+                "postre1" : postre1,
+                "postre2" : postre2,
+                                
             }
 
             if registro_existente:
@@ -873,6 +894,47 @@ def reiniciar_sugeridos(request):
     # Redireccionar a una página de confirmación o a donde sea necesario
     return redirect(reverse_lazy('filtro-de-platos'))
 
+
+def formulario_dia (request, dia):
+    # dia = datetime.strptime(dia, "%Y-%m-%d").strftime("%d-%m-%Y")
+    
+    # Busca los datos del día seleccionado
+    plato_dia = ElegidosXDia.objects.get(user=request.user, el_dia_en_que_comemos=dia )
+    # dia_grabado = plato_dia.el_dia_en_que_comemos
+
+    # platos_elegidos = Elegidos.objects.filter(usuario=request.user).values_list('nombre_plato_elegido', flat=True)
+    
+    principales_presel = Elegidos.objects.filter(usuario=request.user, tipo_plato="Principal").values_list('nombre_plato_elegido', flat=True)
+
+    guarniciones_presel = Elegidos.objects.filter(usuario=request.user, tipo_plato="Guarnicion").values_list('nombre_plato_elegido', flat=True)
+
+    salsas_presel = Elegidos.objects.filter(usuario=request.user, tipo_plato="Guarnicion").values_list('nombre_plato_elegido', flat=True)
+
+    tragos_presel = Elegidos.objects.filter(usuario=request.user, tipo_plato="Trago").values_list('nombre_plato_elegido', flat=True)
+
+    dips_presel = Elegidos.objects.filter(usuario=request.user, tipo_plato="Dip").values_list('nombre_plato_elegido', flat=True)
+
+    postres_presel = Elegidos.objects.filter(usuario=request.user, tipo_plato="Postre").values_list('nombre_plato_elegido', flat=True)
+            
+    entradas_presel = Elegidos.objects.filter(usuario=request.user, tipo_plato="Entrada").values_list('nombre_plato_elegido', flat=True)
+
+
+
+    
+    context = {
+        'menu_dia': plato_dia,
+        'elegidos': ["Opción 1", "Opción 2", "Opción 3"],  # Ejemplo de lista de platos
+        'dia_del_menu': dia,
+        "guarniciones_presel": guarniciones_presel,
+        "entradas_presel": entradas_presel,
+        "principales_presel": principales_presel,
+        "tragos_presel": tragos_presel,
+        "postres_presel": postres_presel,
+        "salsa_presel": salsas_presel,
+        "dips_presel": dips_presel,
+        
+    }
+    return render(request, 'AdminVideos/formulario_dia.html', context)
 
 # class MensajeCreate(CreateView):
 #   model = Mensaje

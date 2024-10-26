@@ -1,0 +1,217 @@
+{% extends "AdminVideos/index.html" %}
+
+{% load static %}
+
+{% block un_video %}
+
+<h1>Datos del Menú Elegido</h1>
+<p><strong>Plato de Almuerzo:</strong> {{ menu_dia.platos_que_comemos.almuerzo.plato }}</p>
+<p><strong>Plato de Cena:</strong> {{ menu_dia.platos_que_comemos.cena.plato }}</p>
+<p><strong>Guarnición 1:</strong> {{ menu_dia.platos_que_comemos.guarnicion1 }}</p>
+<p><strong>Guarnición 2:</strong> {{ menu_dia.platos_que_comemos.guarnicion2 }}</p>
+<p><strong>Guarnición 3:</strong> {{ menu_dia.platos_que_comemos.guarnicion3 }}</p>
+<p><strong>Guarnición 4:</strong> {{ menu_dia.platos_que_comemos.guarnicion4 }}</p>
+<p><strong>Entrada 1:</strong> {{ menu_dia.platos_que_comemos.entrada1 }}</p>
+<p><strong>Entrada 2:</strong> {{ menu_dia.platos_que_comemos.entrada2 }}</p>
+<p><strong>Entrada 3:</strong> {{ menu_dia.platos_que_comemos.entrada3 }}</p>
+<p><strong>Entrada 4:</strong> {{ menu_dia.platos_que_comemos.entrada4 }}</p>
+<p><strong>Postre 1:</strong> {{ menu_dia.platos_que_comemos.postre1 }}</p>
+<p><strong>Postre 2:</strong> {{ menu_dia.platos_que_comemos.postre2 }}</p>
+
+<h5>{{ dia_del_menu }} </h5>
+
+<form action="{% url 'grabar-menu' %}" method="post">
+
+  {% csrf_token %}
+
+
+  <div class="d-flex flex-column">
+
+    <input type="hidden" name="fecha" value="{{ dia_del_menu }}">
+    <h6>Almuerzo</h6>
+
+    <div class="row">
+      <div class="d-flex justify-content-between">
+        <select name="entrada1">
+          <option value="-----">Entrada 1</option>
+          {% for entrada in entradas_presel %}
+          <option value="{{ entrada }}" selected>{{ entrada }}</option>
+          {% endfor %}
+        </select>
+
+        <select name="entrada2">
+          <option value="-----">Entrada 2</option>
+          {% for entrada in entradas_presel %}
+          <option value="{{ entrada }}"selected>{{ entrada }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="d-flex justify-content-between">
+        <div>DIP 1</div>
+        <div>DIP 2</div>
+        <div>DIP 3</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="d-flex justify-content-between">
+        <div>TRAGO 1</div>
+        <div>TRAGO 2</div>
+        <div>TRAGO 3</div>
+      </div>
+    </div>
+
+    <select name="a">
+      <option value="-----">Plato Principal</option>
+
+      {% for elegido in elegidos %}
+      <option value="{{ elegido }}" selected>{{ elegido }}</option>
+      {% endfor %}
+
+    </select>
+
+    <div class="row">
+      <div class="d-flex justify-content-between">
+        <div>SALSA 1</div>
+        <div>SALSA 2</div>
+        <div>SALSA 3</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="d-flex justify-content-between">
+        <select name="guarnicion1">
+          <option value="-----">Guarnición 1</option>
+
+          {% for guarnicion in guarniciones_presel %}
+          <option value="{{ guarnicion }}"selected>{{ guarnicion }}</option>
+          {% endfor %}
+
+        </select>
+
+        <select name="guarnicion2">
+          <option value="-----">Guarnición 2</option>
+
+          {% for guarnicion in guarniciones_presel %}
+          <option value="{{ guarnicion }}" selected>{{ guarnicion }}</option>
+          {% endfor %}
+
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="d-flex justify-content-between">
+        <select name="postre1">
+          <option value="-----">Postre 1</option>
+          {% for postre in postres_presel %}
+          <option value="{{ postre }}">{{ postre }}</option>
+          {% endfor %}
+        </select>
+
+
+        <div>POSTRE 2</div>
+        <div>POSTRE 3</div>
+      </div>
+    </div>
+
+    <br>
+    <h6>Cena</h6>
+    <div class="row">
+      <div class="d-flex justify-content-between">
+        <select name="entrada3">
+          <option value="-----">Entrada 3</option>
+          {% for entrada in entradas_presel %}
+          <option value="{{ entrada }}" selected>{{ entrada }}</option>
+          {% endfor %}
+        </select>
+
+        <select name="entrada4">
+          <option value="-----">Entrada 4</option>
+          {% for entrada in entradas_presel %}
+          <option value="{{ entrada }}"selected>{{ entrada }}</option>
+          {% endfor %}
+        </select>
+        
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="d-flex justify-content-between">
+        <div>DIP 1</div>
+        <div>DIP 2</div>
+        <div>DIP 3</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="d-flex justify-content-between">
+        <div>TRAGO 1</div>
+        <div>TRAGO 2</div>
+        <div>TRAGO 3</div>
+      </div>
+    </div>
+
+    <select name="c">
+      <option value="-----">Plato Principal</option>
+
+
+      {% for elegido in elegidos %}
+      <option value="{{ elegido }}">{{ elegido }}</option>
+      {% endfor %}
+
+    </select>
+
+    <div class="row">
+      <div class="d-flex justify-content-between">
+        <div>SALSA 1</div>
+        <div>SALSA 2</div>
+        <div>SALSA 3</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="d-flex justify-content-between">
+
+        <select name="guarnicion3">
+          <option value="-----">Guarnición 3</option>
+
+          {% for guarnicion in guarniciones_presel %}
+          <option value="{{ guarnicion }}">{{ guarnicion }}</option>
+          {% endfor %}
+
+        </select>
+
+        <select name="guarnicion4">
+          <option value="-----">Guarnición 4</option>
+
+          {% for guarnicion in guarniciones_presel %}
+          <option value="{{ guarnicion }}">{{ guarnicion }}</option>
+          {% endfor %}
+
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="d-flex justify-content-between">
+        <select name="postre2">
+          <option value="-----">Postre 2</option>
+          {% for postre in postres_presel %}
+          <option value="{{ postre }}">{{ postre }}</option>
+          {% endfor %}
+        </select>
+
+
+      </div>
+    </div>
+  </div>
+
+  <!-- <button class="btn btn-secondary" type="button">Cancelar</button> -->
+  <button type="submit">Enviar</button>
+</form>
+
+
+{% endblock %}
