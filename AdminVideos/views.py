@@ -92,8 +92,7 @@ def grabar_menu_elegido(request):
         if almuerzo != '-----' or cena != '-----':
 
             # Obtener datos de almuerzo y cena
-            almuerzo_queryset = Plato.objects.filter(nombre_plato=almuerzo).values("ingredientes", "variedades")
-            almuerzo_result = almuerzo_queryset.first()
+            almuerzo_result = Plato.objects.filter(nombre_plato=almuerzo).values("ingredientes", "variedades").first()
             almuerzo_variedades = almuerzo_result['variedades'] if almuerzo_result else None
             almuerzo_ingredientes = almuerzo_result['ingredientes'] if almuerzo_result else None
 
@@ -109,8 +108,7 @@ def grabar_menu_elegido(request):
                         "elegido": elegido
                     }
 
-            cena_queryset = Plato.objects.filter(nombre_plato=cena).values("ingredientes", "variedades")
-            cena_result = cena_queryset.first()
+            cena_result  = Plato.objects.filter(nombre_plato=cena).values("ingredientes", "variedades").first()
             cena_variedades = cena_result['variedades'] if cena_result else None
             cena_ingredientes = cena_result['ingredientes'] if cena_result else None
 
@@ -126,23 +124,52 @@ def grabar_menu_elegido(request):
                         "elegido": elegido
                     }
 
+            guar1_ingredientes =  Plato.objects.filter(nombre_plato=guarnicion1).values("ingredientes").first()       
+            guar1_ingredientes = guar1_ingredientes['ingredientes'] if guar1_ingredientes else None
+
+            guar2_ingredientes =  Plato.objects.filter(nombre_plato=guarnicion2).values("ingredientes").first()       
+            guar2_ingredientes = guar2_ingredientes['ingredientes'] if guar2_ingredientes else None
+
+            guar3_ingredientes =  Plato.objects.filter(nombre_plato=guarnicion3).values("ingredientes").first()       
+            guar3_ingredientes = guar3_ingredientes['ingredientes'] if guar3_ingredientes else None
+
+            guar4_ingredientes =  Plato.objects.filter(nombre_plato=guarnicion4).values("ingredientes").first()       
+            guar4_ingredientes = guar4_ingredientes['ingredientes'] if guar4_ingredientes else None
+
+            ent1_ingredientes =  Plato.objects.filter(nombre_plato=entrada1).values("ingredientes").first()       
+            ent1_ingredientes = ent1_ingredientes['ingredientes'] if ent1_ingredientes else None
+
+            ent2_ingredientes =  Plato.objects.filter(nombre_plato=entrada2).values("ingredientes").first()       
+            ent2_ingredientes = ent2_ingredientes['ingredientes'] if ent2_ingredientes else None
+
+            ent3_ingredientes =  Plato.objects.filter(nombre_plato=entrada3).values("ingredientes").first()       
+            ent3_ingredientes = ent3_ingredientes['ingredientes'] if ent3_ingredientes else None
+
+            ent4_ingredientes =  Plato.objects.filter(nombre_plato=entrada4).values("ingredientes").first()       
+            ent4_ingredientes = ent4_ingredientes['ingredientes'] if ent4_ingredientes else None
+
+            post1_ingredientes =  Plato.objects.filter(nombre_plato=postre1).values("ingredientes").first()       
+            post1_ingredientes = post1_ingredientes['ingredientes'] if post1_ingredientes else None
+
+            post2_ingredientes =  Plato.objects.filter(nombre_plato=postre2).values("ingredientes").first()       
+            post2_ingredientes = post2_ingredientes['ingredientes'] if post2_ingredientes else None
+
             # Crear el diccionario de platos para este día
             platos_del_dia = {
                 "almuerzo": {"plato": almuerzo, "ingredientes": almuerzo_ingredientes, "elegido": True},
                 "variedades_almuerzo": variedad_almuerzo_con_elegidos,
                 "cena": {"plato": cena, "ingredientes": cena_ingredientes, "elegido": True},
                 "variedades_cena": variedad_cena_con_elegidos,
-                "guarnicion1":guarnicion1,
-                "guarnicion2":guarnicion2,
-                "guarnicion3":guarnicion3,
-                "guarnicion4":guarnicion4,
-                "entrada1": entrada1,
-                "entrada2": entrada2,
-                "entrada3": entrada3,
-                "entrada4": entrada4,
-                "postre1" : postre1,
-                "postre2" : postre2,
-                                
+                "guarnicion1": {"plato": guarnicion1, "ingredientes": guar1_ingredientes, "elegido": True}, 
+                "guarnicion2": {"plato": guarnicion2, "ingredientes": guar2_ingredientes, "elegido": True}, 
+                "guarnicion3": {"plato": guarnicion3, "ingredientes": guar3_ingredientes, "elegido": True}, 
+                "guarnicion4": {"plato": guarnicion4, "ingredientes": guar4_ingredientes, "elegido": True}, 
+                "entrada1": {"plato": entrada1, "ingredientes": ent1_ingredientes, "elegido": True}, 
+                "entrada2": {"plato": entrada2, "ingredientes": ent2_ingredientes, "elegido": True}, 
+                "entrada3": {"plato": entrada3, "ingredientes": ent3_ingredientes, "elegido": True}, 
+                "entrada4": {"plato": entrada4, "ingredientes": ent4_ingredientes, "elegido": True}, 
+                "postre1": {"plato": postre1, "ingredientes": post1_ingredientes, "elegido": True}, 
+                "postre2": {"plato": postre2, "ingredientes": post2_ingredientes, "elegido": True},                                
             }
 
             if registro_existente:
@@ -899,7 +926,7 @@ def formulario_dia (request, dia):
     # dia = datetime.strptime(dia, "%Y-%m-%d").strftime("%d-%m-%Y")
     
     # Busca los datos del día seleccionado
-    plato_dia = ElegidosXDia.objects.get(user=request.user, el_dia_en_que_comemos=dia )
+    plato_dia = ElegidosXDia.objects.filter(user=request.user, el_dia_en_que_comemos=dia ).first()
     # dia_grabado = plato_dia.el_dia_en_que_comemos
 
     # platos_elegidos = Elegidos.objects.filter(usuario=request.user).values_list('nombre_plato_elegido', flat=True)
@@ -917,9 +944,6 @@ def formulario_dia (request, dia):
     postres_presel = Elegidos.objects.filter(usuario=request.user, tipo_plato="Postre").values_list('nombre_plato_elegido', flat=True)
             
     entradas_presel = Elegidos.objects.filter(usuario=request.user, tipo_plato="Entrada").values_list('nombre_plato_elegido', flat=True)
-
-
-
     
     context = {
         'menu_dia': plato_dia,

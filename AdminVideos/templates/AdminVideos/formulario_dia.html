@@ -4,7 +4,7 @@
 
 {% block un_video %}
 
-<h1>Datos del Menú Elegido</h1>
+<!-- <h1>Datos del Menú Elegido</h1>
 <p><strong>Plato de Almuerzo:</strong> {{ menu_dia.platos_que_comemos.almuerzo.plato }}</p>
 <p><strong>Plato de Cena:</strong> {{ menu_dia.platos_que_comemos.cena.plato }}</p>
 <p><strong>Guarnición 1:</strong> {{ menu_dia.platos_que_comemos.guarnicion1 }}</p>
@@ -16,7 +16,7 @@
 <p><strong>Entrada 3:</strong> {{ menu_dia.platos_que_comemos.entrada3 }}</p>
 <p><strong>Entrada 4:</strong> {{ menu_dia.platos_que_comemos.entrada4 }}</p>
 <p><strong>Postre 1:</strong> {{ menu_dia.platos_que_comemos.postre1 }}</p>
-<p><strong>Postre 2:</strong> {{ menu_dia.platos_que_comemos.postre2 }}</p>
+<p><strong>Postre 2:</strong> {{ menu_dia.platos_que_comemos.postre2 }}</p> -->
 
 <h5>{{ dia_del_menu }} </h5>
 
@@ -31,7 +31,7 @@
     <h6>Almuerzo</h6>
 
     <div class="row">
-      <div class="d-flex justify-content-between">
+      <div class="d-flex justify-content-center">
         <select name="entrada1">
           <option value="-----">Entrada 1</option>
           {% for entrada in entradas_presel %}
@@ -49,7 +49,7 @@
     </div>
 
     <div class="row">
-      <div class="d-flex justify-content-between">
+      <div class="d-flex justify-content-center">
         <div>DIP 1</div>
         <div>DIP 2</div>
         <div>DIP 3</div>
@@ -57,7 +57,7 @@
     </div>
 
     <div class="row">
-      <div class="d-flex justify-content-between">
+      <div class="d-flex justify-content-center">
         <div>TRAGO 1</div>
         <div>TRAGO 2</div>
         <div>TRAGO 3</div>
@@ -67,14 +67,14 @@
     <select name="a">
       <option value="-----">Plato Principal</option>
 
-      {% for elegido in elegidos %}
-      <option value="{{ elegido }}" selected>{{ elegido }}</option>
+      {% for principal in principales_presel %}
+      <option value="{{ principal }}" selected>{{ principal }}</option>
       {% endfor %}
 
     </select>
 
     <div class="row">
-      <div class="d-flex justify-content-between">
+      <div class="d-flex justify-content-center">
         <div>SALSA 1</div>
         <div>SALSA 2</div>
         <div>SALSA 3</div>
@@ -82,7 +82,7 @@
     </div>
 
     <div class="row">
-      <div class="d-flex justify-content-between">
+      <div class="d-flex justify-content-center">
         <select name="guarnicion1">
           <option value="-----">Guarnición 1</option>
 
@@ -104,7 +104,7 @@
     </div>
 
     <div class="row">
-      <div class="d-flex justify-content-between">
+      <div class="d-flex justify-content-center">
         <select name="postre1">
           <option value="-----">Postre 1</option>
           {% for postre in postres_presel %}
@@ -121,7 +121,7 @@
     <br>
     <h6>Cena</h6>
     <div class="row">
-      <div class="d-flex justify-content-between">
+      <div class="d-flex justify-content-center">
         <select name="entrada3">
           <option value="-----">Entrada 3</option>
           {% for entrada in entradas_presel %}
@@ -140,7 +140,7 @@
     </div>
 
     <div class="row">
-      <div class="d-flex justify-content-between">
+      <div class="d-flex justify-content-center">
         <div>DIP 1</div>
         <div>DIP 2</div>
         <div>DIP 3</div>
@@ -148,7 +148,7 @@
     </div>
 
     <div class="row">
-      <div class="d-flex justify-content-between">
+      <div class="d-flex justify-content-center">
         <div>TRAGO 1</div>
         <div>TRAGO 2</div>
         <div>TRAGO 3</div>
@@ -159,14 +159,14 @@
       <option value="-----">Plato Principal</option>
 
 
-      {% for elegido in elegidos %}
-      <option value="{{ elegido }}">{{ elegido }}</option>
+      {% for principal in principales_presel %}
+      <option value="{{ principal }}">{{ principal }}</option>
       {% endfor %}
 
     </select>
 
     <div class="row">
-      <div class="d-flex justify-content-between">
+      <div class="d-flex justify-content-center">
         <div>SALSA 1</div>
         <div>SALSA 2</div>
         <div>SALSA 3</div>
@@ -174,7 +174,7 @@
     </div>
 
     <div class="row">
-      <div class="d-flex justify-content-between">
+      <div class="d-flex justify-content-center">
 
         <select name="guarnicion3">
           <option value="-----">Guarnición 3</option>
@@ -196,7 +196,7 @@
       </div>
     </div>
     <div class="row">
-      <div class="d-flex justify-content-between">
+      <div class="d-flex justify-content-center">
         <select name="postre2">
           <option value="-----">Postre 2</option>
           {% for postre in postres_presel %}
@@ -209,7 +209,6 @@
     </div>
   </div>
 
-  <!-- <button class="btn btn-secondary" type="button">Cancelar</button> -->
   <button type="submit">Enviar</button>
 </form>
 
