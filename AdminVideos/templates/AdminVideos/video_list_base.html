@@ -104,6 +104,9 @@
         <h1> guarnic: {{ guarniciones_presel }} </h1> -->
 
 
+        <p >PLATOS ELEGIDOS POR DÍA LISTA {{platos_elegidos_por_dia_lista }}</p>
+
+
         <div class="d-flex flex-wrap justify-content-between">
 
         <a href="{% url 'formulario-dia' dia=dias_desde_hoy.0.0|date:'Y-m-d' %}" class= {% if platos_elegidos_por_dia_lista.0.1.almuerzo != None or platos_elegidos_por_dia_lista.0.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %} >
@@ -121,6 +124,7 @@
               <p >Cena: {{platos_elegidos_por_dia_lista.1.1.cena}}</p>
             </div>
           </a>
+          
 
           <a href="{% url 'formulario-dia' dia=dias_desde_hoy.2.0|date:'Y-m-d' %}" class={% if platos_elegidos_por_dia_lista.2.1.almuerzo != None or platos_elegidos_por_dia_lista.2.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %}>
            <div class="mb-0 text-white p-2 small border border-dark"> 

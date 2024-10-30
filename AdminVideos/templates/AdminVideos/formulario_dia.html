@@ -4,7 +4,7 @@
 
 {% block un_video %}
 
-<!-- <h1>Datos del Menú Elegido</h1>
+<h1>Datos del Menú Elegido</h1>
 <p><strong>Plato de Almuerzo:</strong> {{ menu_dia.platos_que_comemos.almuerzo.plato }}</p>
 <p><strong>Plato de Cena:</strong> {{ menu_dia.platos_que_comemos.cena.plato }}</p>
 <p><strong>Guarnición 1:</strong> {{ menu_dia.platos_que_comemos.guarnicion1 }}</p>
@@ -16,9 +16,49 @@
 <p><strong>Entrada 3:</strong> {{ menu_dia.platos_que_comemos.entrada3 }}</p>
 <p><strong>Entrada 4:</strong> {{ menu_dia.platos_que_comemos.entrada4 }}</p>
 <p><strong>Postre 1:</strong> {{ menu_dia.platos_que_comemos.postre1 }}</p>
-<p><strong>Postre 2:</strong> {{ menu_dia.platos_que_comemos.postre2 }}</p> -->
+<p><strong>Postre 2:</strong> {{ menu_dia.platos_que_comemos.postre2 }}</p> 
+
+
+
+<!-- Menú del Día -> Modal 1 -->
+<div class="modal fade" id="Modal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form action="{% url 'grabar-menu' %}" method="post">
+          {% csrf_token %}
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">{{ dias_desde_hoy.0.1 }} {{ dias_desde_hoy.0.0 }}</h5>
+            <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="modal-body">
+              <input type="hidden" name="fecha" value="{{ dias_desde_hoy.0.0|date:'Y-m-d' }}">
+              <select name="a">
+                <option value="-----">Elegir plato</option>
+                {% for elegido in elegidos %}
+                  <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.0.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
+                {% endfor %}
+              </select>
+              <br>
+              <select name="c">
+                <option value="-----">Elegir plato</option>
+                {% for elegido in elegidos %}
+                  <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.0.1.cena %}selected{% endif %}>{{ elegido }}</option>
+                {% endfor %}
+              </select>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
+            <button type="submit">Enviar</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 <h5>{{ dia_del_menu }} </h5>
+
 
 <form action="{% url 'grabar-menu' %}" method="post">
 
@@ -35,14 +75,14 @@
         <select name="entrada1">
           <option value="-----">Entrada 1</option>
           {% for entrada in entradas_presel %}
-          <option value="{{ entrada }}" selected>{{ entrada }}</option>
+            <option value="{{ entrada }}" {% if entrada == ent1_sel %}selected{% endif %}>{{ entrada }}</option>          
           {% endfor %}
         </select>
 
         <select name="entrada2">
           <option value="-----">Entrada 2</option>
           {% for entrada in entradas_presel %}
-          <option value="{{ entrada }}"selected>{{ entrada }}</option>
+            <option value="{{ entrada }}" {% if entrada == ent2_sel %}selected{% endif %}>{{ entrada }}</option>          
           {% endfor %}
         </select>
       </div>
@@ -65,11 +105,12 @@
     </div>
 
     <select name="a">
-      <option value="-----">Plato Principal</option>
-
+      <option value="-----">Plato Principalccccc</option>
       {% for principal in principales_presel %}
-      <option value="{{ principal }}" selected>{{ principal }}</option>
+      <option value="{{ principal }}" {% if principal == almuerzo_sel %}selected{% endif %}>{{ principal }}</option>
       {% endfor %}
+
+      
 
     </select>
 
@@ -87,7 +128,8 @@
           <option value="-----">Guarnición 1</option>
 
           {% for guarnicion in guarniciones_presel %}
-          <option value="{{ guarnicion }}"selected>{{ guarnicion }}</option>
+           <option value="{{ guarnicion }}" {% if guarnicion == guar1_sel %}selected{% endif %}>{{ guarnicion }}</option>          
+         
           {% endfor %}
 
         </select>
@@ -96,7 +138,7 @@
           <option value="-----">Guarnición 2</option>
 
           {% for guarnicion in guarniciones_presel %}
-          <option value="{{ guarnicion }}" selected>{{ guarnicion }}</option>
+            <option value="{{ guarnicion }}" {% if guarnicion == guar2_sel %}selected{% endif %}>{{ guarnicion }}</option>                   
           {% endfor %}
 
         </select>
@@ -125,14 +167,15 @@
         <select name="entrada3">
           <option value="-----">Entrada 3</option>
           {% for entrada in entradas_presel %}
-          <option value="{{ entrada }}" selected>{{ entrada }}</option>
+            <option value="{{ entrada }}" {% if entrada == ent3_sel %}selected{% endif %}>{{ entrada }}</option>          
           {% endfor %}
         </select>
 
         <select name="entrada4">
           <option value="-----">Entrada 4</option>
           {% for entrada in entradas_presel %}
-          <option value="{{ entrada }}"selected>{{ entrada }}</option>
+          <option value="{{ entrada }}" {% if entrada == ent4_sel %}selected{% endif %}>{{ entrada }}</option>          
+
           {% endfor %}
         </select>
         
@@ -154,13 +197,14 @@
         <div>TRAGO 3</div>
       </div>
     </div>
-
+ 
+    <h1>PRINCIPAL cena SELECCIONADO {{ cena_sel }}</h1>
     <select name="c">
       <option value="-----">Plato Principal</option>
 
 
       {% for principal in principales_presel %}
-      <option value="{{ principal }}">{{ principal }}</option>
+         <option value="{{ principal }}" {% if principal == cena_sel %}selected{% endif %}>{{ principal }}</option>
       {% endfor %}
 
     </select>
@@ -180,7 +224,7 @@
           <option value="-----">Guarnición 3</option>
 
           {% for guarnicion in guarniciones_presel %}
-          <option value="{{ guarnicion }}">{{ guarnicion }}</option>
+            <option value="{{ guarnicion }}" {% if guarnicion == guar3_sel %}selected{% endif %}>{{ guarnicion }}</option>
           {% endfor %}
 
         </select>
@@ -189,10 +233,11 @@
           <option value="-----">Guarnición 4</option>
 
           {% for guarnicion in guarniciones_presel %}
-          <option value="{{ guarnicion }}">{{ guarnicion }}</option>
+           <option value="{{ guarnicion }}" {% if guarnicion == guar4_sel %}selected{% endif %}>{{ guarnicion }}</option>                    
           {% endfor %}
 
-        </select>
+
+          </select>
       </div>
     </div>
     <div class="row">
