@@ -148,7 +148,7 @@ class Profile(models.Model):
 
      @property
      def avatar_url(self):
-        return self.avatar.url if self.avatar else '/media/avatares/logo.jpg'
+        return self.avatar.url if self.avatar else '/media/avatares/logo.png'
      
      
 class Mensaje(models.Model):

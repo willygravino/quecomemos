@@ -3,7 +3,7 @@
 {% load static %}
 
 {% block un_video %}
-
+<!-- 
 <h1>Datos del Menú Elegido</h1>
 <p><strong>Plato de Almuerzo:</strong> {{ menu_dia.platos_que_comemos.almuerzo.plato }}</p>
 <p><strong>Plato de Cena:</strong> {{ menu_dia.platos_que_comemos.cena.plato }}</p>
@@ -17,70 +17,42 @@
 <p><strong>Entrada 4:</strong> {{ menu_dia.platos_que_comemos.entrada4 }}</p>
 <p><strong>Postre 1:</strong> {{ menu_dia.platos_que_comemos.postre1 }}</p>
 <p><strong>Postre 2:</strong> {{ menu_dia.platos_que_comemos.postre2 }}</p> 
+<p><strong>Salsa 1:</strong> {{ menu_dia.platos_que_comemos.salsa1 }}</p>
+<p><strong>Salsa 2:</strong> {{ menu_dia.platos_que_comemos.salsa2 }}</p>
+<p><strong>Salsa 3:</strong> {{ menu_dia.platos_que_comemos.salsa3 }}</p>
+<p><strong>Salsa 4:</strong> {{ menu_dia.platos_que_comemos.salsa4 }}</p>
+<p><strong>Trago 1:</strong> {{ menu_dia.platos_que_comemos.trago1 }}</p>
+<p><strong>Trago 2:</strong> {{ menu_dia.platos_que_comemos.trago2 }}</p>
+<p><strong>Dip 1:</strong> {{ menu_dia.platos_que_comemos.dip1 }}</p>
+<p><strong>Dip 2:</strong> {{ menu_dia.platos_que_comemos.dip2 }}</p>
+<p><strong>Dip 3:</strong> {{ menu_dia.platos_que_comemos.dip3 }}</p>
+<p><strong>Dip 4:</strong> {{ menu_dia.platos_que_comemos.dip4 }}</p> -->
 
 
 
-<!-- Menú del Día -> Modal 1 -->
-<div class="modal fade" id="Modal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <form action="{% url 'grabar-menu' %}" method="post">
-          {% csrf_token %}
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">{{ dias_desde_hoy.0.1 }} {{ dias_desde_hoy.0.0 }}</h5>
-            <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">×</span>
-            </button>
-          </div>
-          <div class="modal-body">
-              <input type="hidden" name="fecha" value="{{ dias_desde_hoy.0.0|date:'Y-m-d' }}">
-              <select name="a">
-                <option value="-----">Elegir plato</option>
-                {% for elegido in elegidos %}
-                  <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.0.1.almuerzo %}selected{% endif %}>{{ elegido }}</option>
-                {% endfor %}
-              </select>
-              <br>
-              <select name="c">
-                <option value="-----">Elegir plato</option>
-                {% for elegido in elegidos %}
-                  <option value="{{ elegido }}" {% if elegido == platos_elegidos_por_dia_lista.0.1.cena %}selected{% endif %}>{{ elegido }}</option>
-                {% endfor %}
-              </select>
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
-            <button type="submit">Enviar</button>
-          </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<h5>{{ dia_del_menu }} </h5>
-
+<h2 class="text-center font-weight-bold">Menú día {{ dia_del_menu }}</h2>
 
 <form action="{% url 'grabar-menu' %}" method="post">
 
   {% csrf_token %}
 
-
   <div class="d-flex flex-column">
 
     <input type="hidden" name="fecha" value="{{ dia_del_menu }}">
-    <h6>Almuerzo</h6>
+    <h2 class="text-center">Almuerzo</h2>
 
     <div class="row">
       <div class="d-flex justify-content-center">
+        <h3>Entrada</h3>
         <select name="entrada1">
-          <option value="-----">Entrada 1</option>
+          <option value="-----"></option>
           {% for entrada in entradas_presel %}
             <option value="{{ entrada }}" {% if entrada == ent1_sel %}selected{% endif %}>{{ entrada }}</option>          
           {% endfor %}
         </select>
 
         <select name="entrada2">
-          <option value="-----">Entrada 2</option>
+          <option value="-----"></option>
           {% for entrada in entradas_presel %}
             <option value="{{ entrada }}" {% if entrada == ent2_sel %}selected{% endif %}>{{ entrada }}</option>          
           {% endfor %}
@@ -90,52 +62,88 @@
 
     <div class="row">
       <div class="d-flex justify-content-center">
-        <div>DIP 1</div>
-        <div>DIP 2</div>
-        <div>DIP 3</div>
+        <h3>Dips</h3>
+        <select name="dip1">
+          <option value="-----"></option>
+          {% for dip in dips_presel %}
+            <option value="{{ dip }}" {% if dip == dip1_sel %}selected{% endif %}>{{ dip }}</option>          
+          {% endfor %}
+        </select>
+
+        <select name="dip2">
+          <option value="-----"></option>
+          {% for dip in dips_presel %}
+            <option value="{{ dip }}" {% if dip == dip2_sel %}selected{% endif %}>{{ dip }}</option>          
+          {% endfor %}
+        </select>
       </div>
     </div>
 
     <div class="row">
       <div class="d-flex justify-content-center">
-        <div>TRAGO 1</div>
-        <div>TRAGO 2</div>
-        <div>TRAGO 3</div>
+        <h3>Tragos</h3>
+
+        <select name="trago1">
+          <option value="-----"></option>
+          {% for trago in tragos_presel %}
+            <option value="{{ trago }}" {% if trago == trago1_sel %}selected{% endif %}>{{ trago }}</option>          
+          {% endfor %}
+        </select>
+
       </div>
     </div>
-
+    <div class="row">
+      <div class="d-flex justify-content-center">
+    <h3>Principal Almuerzo</h3>
     <select name="a">
-      <option value="-----">Plato Principalccccc</option>
+      <option value="-----"></option>
       {% for principal in principales_presel %}
       <option value="{{ principal }}" {% if principal == almuerzo_sel %}selected{% endif %}>{{ principal }}</option>
       {% endfor %}
-
-      
-
     </select>
+  </div>
+</div>
 
     <div class="row">
       <div class="d-flex justify-content-center">
-        <div>SALSA 1</div>
-        <div>SALSA 2</div>
-        <div>SALSA 3</div>
+       
+        <h3>Salsas</h3>
+
+        <select name="salsa1">
+          <option value="-----"></option>
+          {% for salsa in salsas_presel %}
+            <option value="{{ salsa }}" {% if salsa == salsa1_sel %}selected{% endif %}>{{ salsa }}</option>          
+          {% endfor %}
+        </select> 
+
+
+        <select name="salsa2">
+          <option value="-----"></option>
+          {% for salsa in salsas_presel %}
+            <option value="{{ salsa }}" {% if salsa == salsa2_sel %}selected{% endif %}>{{ salsa }}</option>          
+          {% endfor %}
+        </select> 
+
+
       </div>
     </div>
 
     <div class="row">
       <div class="d-flex justify-content-center">
+        <h3>Guarniciones</h3>
+
         <select name="guarnicion1">
-          <option value="-----">Guarnición 1</option>
+          <option value="-----"></option>
 
           {% for guarnicion in guarniciones_presel %}
-           <option value="{{ guarnicion }}" {% if guarnicion == guar1_sel %}selected{% endif %}>{{ guarnicion }}</option>          
+             <option value="{{ guarnicion }}" {% if guarnicion == guar1_sel %}selected{% endif %}>{{ guarnicion }}</option>          
          
           {% endfor %}
 
         </select>
 
         <select name="guarnicion2">
-          <option value="-----">Guarnición 2</option>
+          <option value="-----"></option>
 
           {% for guarnicion in guarniciones_presel %}
             <option value="{{ guarnicion }}" {% if guarnicion == guar2_sel %}selected{% endif %}>{{ guarnicion }}</option>                   
@@ -147,32 +155,30 @@
 
     <div class="row">
       <div class="d-flex justify-content-center">
+        <h3>Postre</h3>
         <select name="postre1">
-          <option value="-----">Postre 1</option>
+          <option value="-----"></option>
           {% for postre in postres_presel %}
-          <option value="{{ postre }}">{{ postre }}</option>
+           <option value="{{ postre }}" {% if postre == post1_sel %}selected{% endif %}>{{ postre }}</option> 
           {% endfor %}
         </select>
-
-
-        <div>POSTRE 2</div>
-        <div>POSTRE 3</div>
       </div>
     </div>
 
     <br>
-    <h6>Cena</h6>
+    <h2 class="text-center">Cena</h2>
     <div class="row">
       <div class="d-flex justify-content-center">
+        <h3>Entrada</h3>
         <select name="entrada3">
-          <option value="-----">Entrada 3</option>
+          <option value="-----"></option>
           {% for entrada in entradas_presel %}
             <option value="{{ entrada }}" {% if entrada == ent3_sel %}selected{% endif %}>{{ entrada }}</option>          
           {% endfor %}
         </select>
 
         <select name="entrada4">
-          <option value="-----">Entrada 4</option>
+          <option value="-----"></option>
           {% for entrada in entradas_presel %}
           <option value="{{ entrada }}" {% if entrada == ent4_sel %}selected{% endif %}>{{ entrada }}</option>          
 
@@ -184,44 +190,84 @@
 
     <div class="row">
       <div class="d-flex justify-content-center">
-        <div>DIP 1</div>
-        <div>DIP 2</div>
-        <div>DIP 3</div>
+        <h3>Dips</h3>
+        <select name="dip3">
+          <option value="-----"></option>
+          {% for dip in dips_presel %}
+            <option value="{{ dip }}" {% if dip == dip3_sel %}selected{% endif %}>{{ dip }}</option>          
+          {% endfor %}
+        </select>
+      
+        <select name="dip4">
+          <option value="-----"></option>
+          {% for dip in dips_presel %}
+            <option value="{{ dip }}" {% if dip == dip4_sel %}selected{% endif %}>{{ dip }}</option>          
+          {% endfor %}
+        </select> 
+
       </div>
     </div>
 
     <div class="row">
       <div class="d-flex justify-content-center">
-        <div>TRAGO 1</div>
-        <div>TRAGO 2</div>
-        <div>TRAGO 3</div>
+        <h3>Tragos</h3>
+
+        <select name="trago2">
+          <option value="-----"></option>
+          {% for trago in tragos_presel %}
+            <option value="{{ trago }}" {% if trago == trago2_sel %}selected{% endif %}>{{ trago }}</option>          
+          {% endfor %}
+        </select> 
+        
+        
       </div>
     </div>
  
-    <h1>PRINCIPAL cena SELECCIONADO {{ cena_sel }}</h1>
-    <select name="c">
-      <option value="-----">Plato Principal</option>
+    <div class="row">
+      <div class="d-flex justify-content-center">
+        <h3>Principal Cena</h3>
+        <select name="c">
+          <option value="-----"></option>
 
 
-      {% for principal in principales_presel %}
-         <option value="{{ principal }}" {% if principal == cena_sel %}selected{% endif %}>{{ principal }}</option>
-      {% endfor %}
+          {% for principal in principales_presel %}
+            <option value="{{ principal }}" {% if principal == cena_sel %}selected{% endif %}>{{ principal }}</option>
+          {% endfor %}
 
-    </select>
+        </select>
+     </div>
+   </div>
 
     <div class="row">
       <div class="d-flex justify-content-center">
-        <div>SALSA 1</div>
-        <div>SALSA 2</div>
-        <div>SALSA 3</div>
+       
+                <h3>Salsas</h3>
+
+        <select name="salsa3">
+          <option value="-----"></option>
+          {% for salsa in salsas_presel %}
+            <option value="{{ salsa }}" {% if salsa == salsa3_sel %}selected{% endif %}>{{ salsa }}</option>          
+          {% endfor %}
+        </select> 
+
+
+        <select name="salsa4">
+          <option value="-----"></option>
+          {% for salsa in salsas_presel %}
+            <option value="{{ salsa }}" {% if salsa == salsa4_sel %}selected{% endif %}>{{ salsa }}</option>          
+          {% endfor %}
+        </select> 
+
+
       </div>
     </div>
 
     <div class="row">
       <div class="d-flex justify-content-center">
+        <h3>Guarniciones</h3>
 
         <select name="guarnicion3">
-          <option value="-----">Guarnición 3</option>
+          <option value="-----"></option>
 
           {% for guarnicion in guarniciones_presel %}
             <option value="{{ guarnicion }}" {% if guarnicion == guar3_sel %}selected{% endif %}>{{ guarnicion }}</option>
@@ -230,7 +276,7 @@
         </select>
 
         <select name="guarnicion4">
-          <option value="-----">Guarnición 4</option>
+          <option value="-----"></option>
 
           {% for guarnicion in guarniciones_presel %}
            <option value="{{ guarnicion }}" {% if guarnicion == guar4_sel %}selected{% endif %}>{{ guarnicion }}</option>                    
@@ -241,11 +287,13 @@
       </div>
     </div>
     <div class="row">
-      <div class="d-flex justify-content-center">
+       <div class="d-flex justify-content-center">
+        <h3>Postre</h3>
+
         <select name="postre2">
-          <option value="-----">Postre 2</option>
+          <option value="-----"></option>
           {% for postre in postres_presel %}
-          <option value="{{ postre }}">{{ postre }}</option>
+            <option value="{{ postre }}" {% if postre == post2_sel %}selected{% endif %}>{{ postre }}</option> 
           {% endfor %}
         </select>
 
@@ -254,7 +302,7 @@
     </div>
   </div>
 
-  <button type="submit">Enviar</button>
+  <button type="submit">Guardar Menú</button>
 </form>
 
 

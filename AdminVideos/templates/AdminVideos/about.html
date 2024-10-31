@@ -3,24 +3,18 @@
 {% load static %}
 
 {% block principal %}
-<div class="album py-2 bg-light">
-  <div class="container">
-  <div class="d-flex justify-content-center">
-    <img src="{{user.profile.avatar_url}}" height="300">
-
-  <section class="py-1 text-center container">
-     <div class="row py-lg-5">
-       <div class="col-lg-8 col-md-8 mx-auto">
-         <h1 class="fw-light">Sobre 'qué comemos' v1.0.</h1>
+<div class="container"> 
+  <div class="row">
+      <div class="d-flex flex-column align-items-center">
+        <img src="/media/avatares/logo.png" height="200" alt="Logo">
+        <h1 class="fw-light">Sobre 'qué comemos' v1.0.</h1>
         <p class="lead text-body-secondary">Explicación</p>
         <p></p>
         <h2 class="fw-light">Sobre mi.</h2>
         <p></p>
         <h6> Explicación.</h6>
       </div>
-      </div>
-  </section>
   </div>
-</div> 
 </div>
+
 {% endblock %}

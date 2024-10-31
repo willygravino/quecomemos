@@ -83,6 +83,18 @@ def grabar_menu_elegido(request):
         guarnicion4 = request.POST.get("guarnicion4")
         postre1 = request.POST.get("postre1")
         postre2 = request.POST.get("postre2")
+        salsa1 = request.POST.get("salsa1")
+        salsa2 = request.POST.get("salsa2")
+        salsa3 = request.POST.get("salsa3")
+        salsa4 = request.POST.get("salsa4")
+        dip1 = request.POST.get("dip1")
+        dip2 = request.POST.get("dip2")
+        dip3 = request.POST.get("dip3")
+        dip4 = request.POST.get("dip4")
+        trago1 = request.POST.get("trago1")
+        trago2 = request.POST.get("trago2")
+        trago2 = request.POST.get("trago2")
+       
 
         registro_existente = ElegidosXDia.objects.filter(user=usuario, el_dia_en_que_comemos=fecha).first()
 
@@ -154,6 +166,39 @@ def grabar_menu_elegido(request):
             post2_ingredientes =  Plato.objects.filter(nombre_plato=postre2).values("ingredientes").first()
             post2_ingredientes = post2_ingredientes['ingredientes'] if post2_ingredientes else None
 
+            dip1_ingredientes =  Plato.objects.filter(nombre_plato=dip1).values("ingredientes").first()
+            dip1_ingredientes = dip1_ingredientes['ingredientes'] if dip1_ingredientes else None
+
+            dip2_ingredientes =  Plato.objects.filter(nombre_plato=dip2).values("ingredientes").first()
+            dip2_ingredientes = dip2_ingredientes['ingredientes'] if dip2_ingredientes else None
+
+            dip3_ingredientes =  Plato.objects.filter(nombre_plato=dip3).values("ingredientes").first()
+            dip3_ingredientes = dip3_ingredientes['ingredientes'] if dip3_ingredientes else None
+
+            dip4_ingredientes =  Plato.objects.filter(nombre_plato=dip4).values("ingredientes").first()
+            dip4_ingredientes = dip4_ingredientes['ingredientes'] if dip4_ingredientes else None
+
+            dip4_ingredientes =  Plato.objects.filter(nombre_plato=dip4).values("ingredientes").first()
+            dip4_ingredientes = dip4_ingredientes['ingredientes'] if dip4_ingredientes else None
+
+            salsa1_ingredientes =  Plato.objects.filter(nombre_plato=salsa1).values("ingredientes").first()
+            salsa1_ingredientes = salsa1_ingredientes['ingredientes'] if salsa1_ingredientes else None
+
+            salsa2_ingredientes =  Plato.objects.filter(nombre_plato=salsa2).values("ingredientes").first()
+            salsa2_ingredientes = salsa2_ingredientes['ingredientes'] if salsa2_ingredientes else None
+
+            salsa3_ingredientes =  Plato.objects.filter(nombre_plato=salsa3).values("ingredientes").first()
+            salsa3_ingredientes = salsa3_ingredientes['ingredientes'] if salsa3_ingredientes else None
+
+            salsa4_ingredientes =  Plato.objects.filter(nombre_plato=salsa4).values("ingredientes").first()
+            salsa4_ingredientes = salsa4_ingredientes['ingredientes'] if salsa4_ingredientes else None
+            
+            trago1_ingredientes =  Plato.objects.filter(nombre_plato=trago1).values("ingredientes").first()
+            trago1_ingredientes = trago1_ingredientes['ingredientes'] if trago1_ingredientes else None
+
+            trago2_ingredientes =  Plato.objects.filter(nombre_plato=trago2).values("ingredientes").first()
+            trago2_ingredientes = trago2_ingredientes['ingredientes'] if trago2_ingredientes else None
+
             # Crear el diccionario de platos para este día
             platos_del_dia = {
                 "almuerzo": {"plato": almuerzo, "ingredientes": almuerzo_ingredientes, "elegido": True},
@@ -170,6 +215,17 @@ def grabar_menu_elegido(request):
                 "entrada4": {"plato": entrada4, "ingredientes": ent4_ingredientes, "elegido": True},
                 "postre1": {"plato": postre1, "ingredientes": post1_ingredientes, "elegido": True},
                 "postre2": {"plato": postre2, "ingredientes": post2_ingredientes, "elegido": True},
+                "dip1": {"plato": dip1, "ingredientes": dip1_ingredientes, "elegido": True},
+                "dip2": {"plato": dip2, "ingredientes": dip2_ingredientes, "elegido": True},
+                "dip3": {"plato": dip3, "ingredientes": dip3_ingredientes, "elegido": True},
+                "dip4": {"plato": dip4, "ingredientes": dip4_ingredientes, "elegido": True},
+                "salsa1": {"plato": salsa1, "ingredientes": salsa1_ingredientes, "elegido": True},
+                "salsa2": {"plato": salsa2, "ingredientes": salsa2_ingredientes, "elegido": True},
+                "salsa3": {"plato": salsa3, "ingredientes": salsa3_ingredientes, "elegido": True},
+                "salsa4": {"plato": salsa4, "ingredientes": salsa4_ingredientes, "elegido": True},
+                "trago1": {"plato": trago1, "ingredientes": trago1_ingredientes, "elegido": True},
+                "trago2": {"plato": trago2, "ingredientes": trago2_ingredientes, "elegido": True},
+
             }
 
             if registro_existente:
@@ -842,7 +898,7 @@ def FiltroDePlatos (request):
 
         guarniciones_presel = Elegidos.objects.filter(usuario=usuario, tipo_plato="Guarnicion").values_list('nombre_plato_elegido', flat=True)
 
-        salsas_presel = Elegidos.objects.filter(usuario=usuario, tipo_plato="Guarnicion").values_list('nombre_plato_elegido', flat=True)
+        salsas_presel = Elegidos.objects.filter(usuario=usuario, tipo_plato="Trago").values_list('nombre_plato_elegido', flat=True)
 
         tragos_presel = Elegidos.objects.filter(usuario=usuario, tipo_plato="Trago").values_list('nombre_plato_elegido', flat=True)
 
@@ -900,7 +956,7 @@ def FiltroDePlatos (request):
                 "principales_presel": principales_presel,
                 "tragos_presel": tragos_presel,
                 "postres_presel": postres_presel,
-                "salsa_presel": salsas_presel,
+                "salsas_presel": salsas_presel,
                 "dips_presel": dips_presel
                }
 
@@ -931,19 +987,7 @@ def formulario_dia (request, dia):
 
     # platos_elegidos = Elegidos.objects.filter(usuario=request.user).values_list('nombre_plato_elegido', flat=True)
 
-    principales_presel = Elegidos.objects.filter(usuario=request.user, tipo_plato="Principal").values_list('nombre_plato_elegido', flat=True)
     
-    guarniciones_presel = Elegidos.objects.filter(usuario=request.user, tipo_plato="Guarnicion").values_list('nombre_plato_elegido', flat=True)
-
-    salsas_presel = Elegidos.objects.filter(usuario=request.user, tipo_plato="Guarnicion").values_list('nombre_plato_elegido', flat=True)
-
-    tragos_presel = Elegidos.objects.filter(usuario=request.user, tipo_plato="Trago").values_list('nombre_plato_elegido', flat=True)
-
-    dips_presel = Elegidos.objects.filter(usuario=request.user, tipo_plato="Dip").values_list('nombre_plato_elegido', flat=True)
-
-    postres_presel = Elegidos.objects.filter(usuario=request.user, tipo_plato="Postre").values_list('nombre_plato_elegido', flat=True)
-
-    entradas_presel = Elegidos.objects.filter(usuario=request.user, tipo_plato="Entrada").values_list('nombre_plato_elegido', flat=True)
 
     if plato_dia and plato_dia.platos_que_comemos:
         almuerzo_sel = plato_dia.platos_que_comemos.get("almuerzo", {}).get("plato")
@@ -956,7 +1000,20 @@ def formulario_dia (request, dia):
         ent2_sel = plato_dia.platos_que_comemos.get("entrada2", {}).get("plato")
         ent3_sel = plato_dia.platos_que_comemos.get("entrada3", {}).get("plato")
         ent4_sel = plato_dia.platos_que_comemos.get("entrada4", {}).get("plato")
-       
+        salsa1_sel = plato_dia.platos_que_comemos.get("salsa1", {}).get("plato")
+        salsa2_sel = plato_dia.platos_que_comemos.get("salsa2", {}).get("plato")
+        salsa3_sel = plato_dia.platos_que_comemos.get("salsa3", {}).get("plato")
+        salsa4_sel = plato_dia.platos_que_comemos.get("salsa4", {}).get("plato")
+        trago1_sel = plato_dia.platos_que_comemos.get("trago1", {}).get("plato")
+        trago2_sel = plato_dia.platos_que_comemos.get("trago2", {}).get("plato")
+        dip1_sel = plato_dia.platos_que_comemos.get("dip1", {}).get("plato")
+        dip2_sel = plato_dia.platos_que_comemos.get("dip2", {}).get("plato")
+        dip3_sel = plato_dia.platos_que_comemos.get("dip3", {}).get("plato")
+        dip4_sel = plato_dia.platos_que_comemos.get("dip4", {}).get("plato")
+        post1_sel = plato_dia.platos_que_comemos.get("postre1", {}).get("plato")
+        post2_sel = plato_dia.platos_que_comemos.get("postre1", {}).get("plato")
+        
+      
     else: 
          almuerzo_sel = None
          cena_sel = None
@@ -968,20 +1025,53 @@ def formulario_dia (request, dia):
          ent2_sel = None
          ent3_sel = None
          ent4_sel = None
-          
+         salsa1_sel= None
+         salsa2_sel= None          
+         salsa3_sel= None
+         salsa4_sel= None
+         trago1_sel = None
+         trago2_sel = None
+         dip1_sel = None
+         dip2_sel = None
+         dip3_sel = None
+         dip4_sel = None
+         post1_sel = None
+         post2_sel = None
 
-    # platos_elegidos_por_dia = {}
+   
+        
+    # Primero obtén el queryset y conviértelo en un set
+    guarniciones_presel = set(Elegidos.objects.filter(usuario=request.user, tipo_plato="Guarnicion").values_list('nombre_plato_elegido', flat=True))
+    
+    principales_presel = set(Elegidos.objects.filter(usuario=request.user, tipo_plato="Principal").values_list('nombre_plato_elegido', flat=True))
+    principales_presel.update([almuerzo_sel, cena_sel])
 
-    # # Suponiendo que elegidos_por_dia sea tu diccionario
-    # for objeto_elegido in plato_dia:
-    #     fecha = objeto_elegido.el_dia_en_que_comemos
-    #     plato_almuerzo = objeto_elegido.platos_que_comemos.get("almuerzo", {}).get("plato", None)
-    #     plato_cena = objeto_elegido.platos_que_comemos.get("cena", {}).get("plato", None)
-    #     platos_elegidos_por_dia[fecha] = {"almuerzo": plato_almuerzo, "cena": plato_cena}
+    salsas_presel = set(Elegidos.objects.filter(usuario=request.user, 
+    tipo_plato="Salsa").values_list('nombre_plato_elegido', flat=True))
 
-    # # Convertir el diccionario en una lista de tuplas
-    # platos_elegidos_por_dia_lista = list(platos_preseleccionados.items())
+    tragos_presel = set(Elegidos.objects.filter(usuario=request.user, tipo_plato="Trago").values_list('nombre_plato_elegido', flat=True))
 
+    dips_presel = set(Elegidos.objects.filter(usuario=request.user, tipo_plato="Dip").values_list('nombre_plato_elegido', flat=True))
+
+    postres_presel = set(Elegidos.objects.filter(usuario=request.user, tipo_plato="Postre").values_list('nombre_plato_elegido', flat=True))
+
+    entradas_presel = set(Elegidos.objects.filter(usuario=request.user, tipo_plato="Entrada").values_list('nombre_plato_elegido', flat=True))
+
+    # Agrega las variables adicionales al set (esto evitará duplicados automáticamente)
+    guarniciones_presel.update([guar1_sel, guar2_sel, guar3_sel, guar4_sel])
+    salsas_presel.update([salsa1_sel, salsa2_sel, salsa3_sel, salsa4_sel])
+    tragos_presel.update([trago1_sel, trago2_sel])
+    dips_presel.update([dip1_sel, dip2_sel, dip3_sel, dip4_sel])
+    postres_presel.update([post1_sel, post2_sel])
+    entradas_presel.update([ent1_sel, ent2_sel, ent3_sel, ent4_sel])
+
+    # Convertir cada set en lista después de agregar los valores adicionales
+    guarniciones_presel = list(guarniciones_presel)
+    salsas_presel = list(salsas_presel)
+    tragos_presel = list(tragos_presel)
+    dips_presel = list(dips_presel)
+    postres_presel = list(postres_presel)
+    entradas_presel = list(entradas_presel)
 
     context = {
         'menu_dia': plato_dia,
@@ -996,12 +1086,25 @@ def formulario_dia (request, dia):
         "ent2_sel": ent2_sel,
         "ent3_sel": ent3_sel,
         "ent4_sel": ent4_sel,
+        "salsa1_sel": salsa1_sel,
+        "salsa2_sel": salsa2_sel,
+        "salsa3_sel": salsa3_sel,
+        "salsa4_sel": salsa4_sel,
+        "trago1_sel": trago1_sel,
+        "trago2_sel": trago2_sel,
+        "dip1_sel": dip1_sel,
+        "dip2_sel": dip2_sel,
+        "dip3_sel": dip3_sel,
+        "dip4_sel": dip4_sel,
+        "post1_sel": post1_sel,
+        "post2_sel": post2_sel, 
+        
         "guarniciones_presel": guarniciones_presel,
         "entradas_presel": entradas_presel,
         "principales_presel": principales_presel,
         "tragos_presel": tragos_presel,
         "postres_presel": postres_presel,
-        "salsa_presel": salsas_presel,
+        "salsas_presel": salsas_presel,
         "dips_presel": dips_presel,
 
     }
