@@ -27,11 +27,18 @@
         <div class="col">
           <div class="p-1 d-flex flex-wrap">
             <div class=" d-flex justify-content-center align-items-center">
-            <a class="bg-primary" href="{% url 'videos-create' %}">
-               <div class="m-3 text-white p-2 small border border-dark"> 
-               <!-- <a class="nav-link"  href="#" data-toggle="modal" data-target="#IngresoModal"> -->
+            <!-- <a class="bg-primary" href="{% url 'videos-create' %}"> -->
+              <a class="bg-primary m-3 text-white p-2 small border border-dark" href="{% url 'videos-create' %}?tipopag={{ request.GET.tipopag|default:'' }}">
+                AGREGAR{% if request.GET.tipopag %} {{ request.GET.tipopag }}{% else %} PLATO{% endif %}
+            </a>
+              <!-- <a class="bg-primary m-3 text-white p-2 small border border-dark" href="{% url 'videos-create' %}?tipopag={{ request.GET.tipopag }}">AGREGAR {% if request.GET.tipopag != "ppal" %}{{ request.GET.tipopag }} {% else %} PLATO {% endif %}
+
+              </a> -->
+
+               <!-- <div class="m-3 text-white p-2 small border border-dark"> 
+             <a class="nav-link"  href="#" data-toggle="modal" data-target="#IngresoModal"> 
                  <p>AGREGAR PLATO</p>
-               </div>
+               </div> -->
             </a>                        
           </div>
 

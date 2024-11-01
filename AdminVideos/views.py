@@ -3,6 +3,7 @@ from contextvars import Context
 import copy
 import json
 import locale
+from urllib import request
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
@@ -92,7 +93,6 @@ def grabar_menu_elegido(request):
         dip3 = request.POST.get("dip3")
         dip4 = request.POST.get("dip4")
         trago1 = request.POST.get("trago1")
-        trago2 = request.POST.get("trago2")
         trago2 = request.POST.get("trago2")
        
 
@@ -522,7 +522,7 @@ def menu_elegido(request):
                 "almuerzo": almuerzo_que_comemos,
                 "almuerzo_elegido": almuerzo_elegido,  # puede hargodearse a TRUE
                 "cena": cena_que_comemos,
-                "cena_elegida": cena_elegida, # puede hargodearse a TRUE
+                "cena_elegida": cena_elegida, # puede harcodearse a TRUE
                 "almuerzo_info": almuerzo_info,
                 "cena_info": cena_info,
                 "variedades": almuerzo_variedades,
@@ -658,28 +658,26 @@ class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 class PlatoCreate(LoginRequiredMixin, CreateView):
     model = Plato
     form_class = PlatoForm
-
-
-    template_name = 'AdminVideos/plato_update.html'
+    # template_name = 'AdminVideos/platos_update.html'
 
     def get_template_names(self):
         # Obtener el valor del parámetro 'template' desde la URL
-        template_param = self.request.GET.get('template', '')
+        template_param = self.request.GET.get('tipopag')
 
         # Dependiendo del valor de 'template', asignar una plantilla diferente
-        if template_param == 'entrada':
+        if template_param == 'Entrada':
             return ['AdminVideos/entrada_update.html']
-        elif template_param == 'dip':
+        elif template_param == 'Dip':
             return ['AdminVideos/dip_update.html']
-        elif template_param == 'principal':
-            return ['AdminVideos/plato_update.html']
-        elif template_param == 'trago':
+        elif template_param == 'Principal':
+            return ['AdminVideos/plato_ppal_update.html']
+        elif template_param == 'Trago':
             return ['AdminVideos/trago_update.html']
-        elif template_param == 'salsa':
+        elif template_param == 'Salsa':
             return ['AdminVideos/salsa_update.html']
-        elif template_param == 'guarnicion':
+        elif template_param == 'Guarnicion':
             return ['AdminVideos/guarnicion_update.html']
-        elif template_param == 'postre':
+        elif template_param == 'Postre':
             return ['AdminVideos/postre_update.html']
         else:
             # Plantilla por defecto
@@ -1011,7 +1009,7 @@ def formulario_dia (request, dia):
         dip3_sel = plato_dia.platos_que_comemos.get("dip3", {}).get("plato")
         dip4_sel = plato_dia.platos_que_comemos.get("dip4", {}).get("plato")
         post1_sel = plato_dia.platos_que_comemos.get("postre1", {}).get("plato")
-        post2_sel = plato_dia.platos_que_comemos.get("postre1", {}).get("plato")
+        post2_sel = plato_dia.platos_que_comemos.get("postre2", {}).get("plato")
         
       
     else: 
