@@ -29,17 +29,9 @@
             <div class=" d-flex justify-content-center align-items-center">
             <!-- <a class="bg-primary" href="{% url 'videos-create' %}"> -->
               <a class="bg-primary m-3 text-white p-2 small border border-dark" href="{% url 'videos-create' %}?tipopag={{ request.GET.tipopag|default:'' }}">
-                AGREGAR{% if request.GET.tipopag %} {{ request.GET.tipopag }}{% else %} PLATO{% endif %}
+                {% if request.GET.tipopag != "Dash" %} AGREGAR {{ request.GET.tipopag }}{% else %} AGREGAR PRINCIPAL{% endif %}
             </a>
-              <!-- <a class="bg-primary m-3 text-white p-2 small border border-dark" href="{% url 'videos-create' %}?tipopag={{ request.GET.tipopag }}">AGREGAR {% if request.GET.tipopag != "ppal" %}{{ request.GET.tipopag }} {% else %} PLATO {% endif %}
-
-              </a> -->
-
-               <!-- <div class="m-3 text-white p-2 small border border-dark"> 
-             <a class="nav-link"  href="#" data-toggle="modal" data-target="#IngresoModal"> 
-                 <p>AGREGAR PLATO</p>
-               </div> -->
-            </a>                        
+        
           </div>
 
             {% for plato in platos %}
@@ -68,7 +60,7 @@
                           {% endif %}
                       {% endfor %}
 
-                      <form action="{% url 'plato-elegido' %}" method="GET">
+                      <form action="{% url 'plato-preseleccionado' %}" method="GET">
                         <input type="hidden" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
                       <input type="hidden" name="tipo-plato" value="{{ plato.tipo }}">   <!--  Incluir tipo-plato -->
 

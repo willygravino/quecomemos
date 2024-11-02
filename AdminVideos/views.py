@@ -35,15 +35,12 @@ def index(request):
 def about(request):
     return render(request, "AdminVideos/about.html")
 
-# LA SIGUIENTE FUNCIÓN TIENE QUE VER CON LOS PLATOS PRESELECCIONADOS PARA LOS MENÚES
-def plato_elegido(request):
+def plato_preseleccionado(request):
     if request.method == 'GET':
         nombre_plato = request.GET.get('opcion1')
         plato_tipo = request.GET.get('tipo-plato')
-
         borrar = request.GET.get('borrar')
         tipo_pag = request.GET.get('tipopag')  # Obtener el parámetro 'tipo-pag' de la URL
-
 
         usuario = request.user  # Obtener el usuario logueado
 
@@ -230,14 +227,11 @@ def grabar_menu_elegido(request):
 
             if registro_existente:
                     # Actualizar el registro existente
-
                     if almuerzo == registro_existente.platos_que_comemos["almuerzo"]["plato"]:
                         platos_del_dia["almuerzo"]["elegido"] = registro_existente.platos_que_comemos["almuerzo"]["elegido"]
                     if cena == registro_existente.platos_que_comemos["cena"]["plato"]:
                         platos_del_dia["cena"]["elegido"] = registro_existente.platos_que_comemos["cena"]["elegido"]
 
-                #  registro_existente_platos = registro_existente.platos_que_comemos
-                #  actualizar_datos(registro_existente_platos, platos_del_dia)
                     registro_existente.platos_que_comemos = platos_del_dia
                     registro_existente.save()
             else:
@@ -248,56 +242,54 @@ def grabar_menu_elegido(request):
         return JsonResponse({'error': 'El método de solicitud debe ser POST'})
 
 
-def lista_y_plan(request):
-    lista_de_compras = []
+# def lista_y_plan(request):
+#     lista_de_compras = []
 
-    lista_de_compras = request.POST.getlist("ingrediente_a_comprar")
+#     lista_de_compras = request.POST.getlist("ingrediente_a_comprar")
 
-    lista_de_ingredientes = set()
+#     lista_de_ingredientes = set()
 
-    no_incluir = set()
+#     no_incluir = set()
 
-    # Obtener el perfil del usuario actual
-    perfil = get_object_or_404(Profile, user=request.user)
+#     # Obtener el perfil del usuario actual
+#     perfil = get_object_or_404(Profile, user=request.user)
 
-    set_compras = set(lista_de_compras)
-    # Identificar elementos que están en lista_de_ingredientes pero no en set_compras
-    ingredientes_no_comprados_1 = lista_de_ingredientes - set_compras
-    ingredientes_no_comprados = ingredientes_no_comprados_1 - no_incluir
-    if ingredientes_no_comprados:
-            for ingrediente_nuevo in ingredientes_no_comprados:
-                if ingrediente_nuevo not in perfil.ingredientes_que_tengo:
-                    # Actualizar el campo ingredientes_que_tengo
-                    perfil.ingredientes_que_tengo.append(ingrediente_nuevo)
-                    # Guardar el perfil actualizado
-                    perfil.save()
+#     set_compras = set(lista_de_compras)
+#     # Identificar elementos que están en lista_de_ingredientes pero no en set_compras
+#     ingredientes_no_comprados_1 = lista_de_ingredientes - set_compras
+#     ingredientes_no_comprados = ingredientes_no_comprados_1 - no_incluir
+#     if ingredientes_no_comprados:
+#             for ingrediente_nuevo in ingredientes_no_comprados:
+#                 if ingrediente_nuevo not in perfil.ingredientes_que_tengo:
+#                     # Actualizar el campo ingredientes_que_tengo
+#                     perfil.ingredientes_que_tengo.append(ingrediente_nuevo)
+#                     # Guardar el perfil actualizado
+#                     perfil.save()
 
-    if lista_de_compras:
-            for ingrediente_a_comprar in lista_de_compras:
-                    if ingrediente_a_comprar in perfil.ingredientes_que_tengo:
-                        # Eliminar el ingrediente de la lista
-                        perfil.ingredientes_que_tengo.remove(ingrediente_a_comprar)
-                        # Guardar el perfil actualizado
-                        perfil.save()
+#     if lista_de_compras:
+#             for ingrediente_a_comprar in lista_de_compras:
+#                     if ingrediente_a_comprar in perfil.ingredientes_que_tengo:
+#                         # Eliminar el ingrediente de la lista
+#                         perfil.ingredientes_que_tengo.remove(ingrediente_a_comprar)
+#                         # Guardar el perfil actualizado
+#                         perfil.save()
 
-      # Generar el mensaje de WhatsApp
-    mensaje_whatsapp = "Lista de compras:\n"
-    if lista_de_compras:
-        mensaje_whatsapp += "\n".join(lista_de_compras)
-    mensaje_whatsapp = mensaje_whatsapp.replace("\n", "%0A")  # Reemplazar saltos de línea para la URL
+#       # Generar el mensaje de WhatsApp
+#     mensaje_whatsapp = "Lista de compras:\n"
+#     if lista_de_compras:
+#         mensaje_whatsapp += "\n".join(lista_de_compras)
+#     mensaje_whatsapp = mensaje_whatsapp.replace("\n", "%0A")  # Reemplazar saltos de línea para la URL
 
-    context = {
-        "lista_de_compras": "hola",
-        "mensaje_whatsapp": mensaje_whatsapp
-    }
+#     context = {
+#         "lista_de_compras": "hola",
+#         "mensaje_whatsapp": mensaje_whatsapp
+#     }
 
-    return render(request, 'AdminVideos/lista_y_plan.html', context)
-
-
+#     return render(request, 'AdminVideos/lista_y_plan.html', context)
 
 
 @login_required
-def menu_elegido(request):
+def lista_de_compras(request):
     locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')  # Configura la localización a español
     # Obtener la fecha actual
     today = date.today()
@@ -652,8 +644,18 @@ class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
         plato.save()
 
+         # Actualizar Preseleccionados y Seleccionados
+        self.actualizar_preseleccionados(plato)
+    
         return redirect(self.success_url)
 
+def actualizar_preseleccionados(self, plato):
+        # Aquí puedes agregar el código para actualizar otros modelos que referencian el plato
+        # Ejemplo:
+        otros_registros = OtroModelo.objects.filter(plato=plato)
+        for registro in otros_registros:
+            registro.nombre_plato = plato.nombre  # o el campo que sea adecuado
+            registro.save()
 
 class PlatoCreate(LoginRequiredMixin, CreateView):
     model = Plato
@@ -669,7 +671,7 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             return ['AdminVideos/entrada_update.html']
         elif template_param == 'Dip':
             return ['AdminVideos/dip_update.html']
-        elif template_param == 'Principal':
+        elif template_param == 'Principal' or template_param == 'Dash':
             return ['AdminVideos/plato_ppal_update.html']
         elif template_param == 'Trago':
             return ['AdminVideos/trago_update.html']
@@ -845,6 +847,9 @@ def FiltroDePlatos (request):
     # TOMAR EL TIPO DEL MENÚ    !!!!!!!!!!!!!!
     # Obtener el valor del parámetro 'tipo' desde la URL
     tipo_parametro = request.GET.get('tipopag', '')
+    if tipo_parametro == "Dash":
+        tipo_parametro = ""
+
     if tipo_parametro:
        platos = platos.filter(tipo=tipo_parametro)
 

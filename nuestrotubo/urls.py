@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path
 from django.contrib.auth.views import LogoutView
 
-from AdminVideos.views import formulario_dia, index, PlatoUpdate, PlatoDelete, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_y_plan, menu_elegido, plato_elegido, grabar_menu_elegido,SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, user_logout # VistaInicial ,Logout, MensajeCreate, MensajeList, MensajeDelete, PlatoList, PlatosMineList, PlatosElegidosMenu, elecion_de_lista, PlatosDeOtros,, LogtViews, MenuElegido, lista_de_compras
+from AdminVideos.views import formulario_dia, index, PlatoUpdate, PlatoDelete, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, plato_preseleccionado, grabar_menu_elegido,SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, user_logout # VistaInicial ,Logout, MensajeCreate, MensajeList, MensajeDelete, PlatoList, PlatosMineList, PlatosElegidosMenu, elecion_de_lista, PlatosDeOtros,, LogtViews, MenuElegido, lista_de_compras
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -25,21 +25,16 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', index, name="index"),
-    path('plato/elegido', plato_elegido, name="plato-elegido"),
-    # path('', plato_elegido, name="plato-elegido"),
+    path('plato/elegido', plato_preseleccionado, name="plato-preseleccionado"),
     path('plato/grabar', grabar_menu_elegido, name="grabar-menu"),
-    path('menu/elegido',  menu_elegido, name="menu-elegido"),
+    path('menu/elegido',  lista_de_compras, name="menu-elegido"),
     path('formulario/dia/<str:dia>/',  formulario_dia, name="formulario-dia"),
-    path('lista/compras-y-plan', lista_y_plan, name="lista-y-plan"),
+    # path('lista/compras-y-plan', lista_y_plan, name="lista-y-plan"),
     path('menu/random', SugerenciasRandom.as_view(), name="random"),
-    # path('pagina/inicial', pagina_inicial, name="pagina-inicial"),
     path('videos/list/filtro', FiltroDePlatos, name="filtro-de-platos"),
-    # path('platos-del-dia', PlatosDelDia, name="platos-del-dia"),
     path('videos/reiniciar/sugeridos', reiniciar_sugeridos, name="reiniciar-sugeridos"),
     path('videos/<pk>/update', PlatoUpdate.as_view(), name="videos-update"),
-    # path('videos/<pk>/delete',plato_delete, name="videos-delete"),
     path('videos/<pk>/delete', PlatoDelete.as_view(), name="videos-delete"),
-
     path('videos/<pk>/detail', PlatoDetail.as_view(), name="videos-detail"),
     path('videos/create', PlatoCreate.as_view(), name="videos-create"),
     path('login', Login.as_view(), name="login"),
