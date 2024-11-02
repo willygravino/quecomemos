@@ -110,9 +110,9 @@ class Plato(models.Model):
 # ESTO DEBERÍA BORRAR HAMBURGUESA DE TODOS LOS USUARIOS PORQUE SI ALGUIEN LA PRESELECCIONÓ, YA NO ESTARÁ
 @receiver(post_delete, sender=Plato)
 def eliminar_registros_relacionados(sender, instance, **kwargs):
-    Elegidos.objects.filter(usuario=instance.propietario, nombre_plato_elegido=instance.nombre_plato).delete()
+    Preseleccionados.objects.filter(usuario=instance.propietario, nombre_plato_elegido=instance.nombre_plato).delete()
     
-class Elegidos(models.Model):
+class Preseleccionados(models.Model):
     usuario = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="platos_elegidos", null=True, blank=True)
     # EL SIGUIENTE CAMPO DEBERÍA LLAMARSE "PLATOS_PRESELECCIONADOS"
     nombre_plato_elegido = models.CharField(max_length=30)

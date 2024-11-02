@@ -1,3 +1,38 @@
 if usuario:
 platos_elegidos = Elegidos.objects.filter(usuario=usuario, tipo_plato="Principal").values('nombre_plato_elegido')
 guarniciones_presel = Elegidos.objects.filter(usuario=usuario, tipo_plato="Guarnicion").values('nombre_plato_elegido')
+
+
+     <!-- {% if platos.guarnicion1.plato %}
+                        <input type="checkbox" id="guar1{{ fecha }}" name="{{ platos.guarnicion1.plato }}{{ fecha|date:"d M. Y"|lower }}"
+                            value="{{ platos.guarnicion1.plato }}" {% if platos.guarnicion1.elegido %} checked {% endif %}>
+                        <label for="platos.guarnicion1.plato{{ fecha }}">Guarnicion 1 incluida</label>
+                    {% else %}
+                        <p>No se encontró guarnicion 1.</p>
+                    {% endif %} -->
+
+                    <!-- {% for i in 1..4 %}
+                        {% with guarnicion=platos|get:"guarnicion"|add:i %}
+                        {% if guarnicion.plato %}
+                            <input type="checkbox" id="guar{{ i }}{{ fecha }}" name="{{ guarnicion.plato }}{{ fecha|date:"d M. Y"|lower }}"
+                                value="{{ guarnicion.plato }}" {% if guarnicion.elegido %} checked {% endif %}>
+                            <label for="guar{{ i }}{{ fecha }}">Guarnicion {{ i }} incluida</label>
+                        {% else %}
+                            <p>No se encontró guarnicion {{ i }}.</p>
+                        {% endif %}
+                        {% endwith %}
+                    {% endfor %} -->
+
+                    <!-- {% for i in 1|to:4 %}
+                        {% with guarnicion="guarnicion"|stringformat:"s"|add:i|stringformat:"d" %}
+                            {% if platos|get_item:guarnicion.plato %}
+                                <input type="checkbox" id="guar{{ i }}{{ fecha }}" 
+                                    name="{{ platos|get_item:guarnicion.plato }}{{ fecha|date:"d M. Y"|lower }}"
+                                    value="{{ platos|get_item:guarnicion.plato }}" 
+                                    {% if platos|get_item:guarnicion.elegido %} checked {% endif %}>
+                                <label for="guar{{ i }}{{ fecha }}">Guarnición {{ i }} incluida</label>
+                            {% else %}
+                                <p>No se encontró guarnición {{ i }}.</p>
+                            {% endif %}
+                        {% endwith %}
+                    {% endfor %} -->
