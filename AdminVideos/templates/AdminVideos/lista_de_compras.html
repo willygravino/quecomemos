@@ -10,10 +10,13 @@
     <section>
         <h1>Menúes Programados</h1>
 
+        <h5 class="small fs-7">LOS ITEMS {{los_items}}</h5>
+
+
         <form action="{% url 'menu-elegido' %}" method="post">
             {% csrf_token %}
 
-<h6>platos por día: {{ platos_por_dia }}</h6>
+    <!-- <h6>POST DATA: {{ post_data }}</h6>  -->
 
             {% for fecha, platos in platos_por_dia.items %}
 
@@ -22,20 +25,20 @@
                     <h5>{{ fecha }}
                     </h5>
 
-                    <h5>ALMUERZO</h5>
+                    <h5 class="bg-primary text-white p-2 rounded">ALMUERZO</h5> <!-- Fondo azul con texto blanco -->
 
 
                     {# Entradas #}
                     {% if platos.entrada1.plato %}
-                        <h5>la entrada 1 {{platos.entrada1.plato}}</h5>
 
                         <input type="checkbox" id="ent1{{ fecha }}" 
                             name="{{ platos.entrada1.plato }}{{ fecha|date:"d M. Y"|lower }}"
                             value="{{ platos.entrada1.plato }}" 
                             {% if platos.entrada1.elegido %} checked {% endif %}>
-                        <label for="ent1{{ fecha }}">Entrada 1 incluida</label>
-                    {% else %}
-                        <p>No se encontró entrada 1.</p>
+                        <label for="ent1{{ fecha }}">ENT 1 -{{platos.entrada1.plato}}</label>
+                        <h5 class="small fs-7">{{platos.entrada1.ingredientes}}</h5>
+                        <!-- % else %
+                        <p>No se encontró entrada 1.</p> -->
                     {% endif %}
                     <p></p>
 
@@ -44,9 +47,11 @@
                             name="{{ platos.entrada2.plato }}{{ fecha|date:"d M. Y"|lower }}"
                             value="{{ platos.entrada2.plato }}" 
                             {% if platos.entrada2.elegido %} checked {% endif %}>
-                        <label for="ent2{{ fecha }}">Entrada 2 incluida</label>
-                    {% else %}
-                        <p>No se encontró entrada 2.</p>
+                        <label for="ent2{{ fecha }}">ENT 2 - {{platos.entrada2.plato}}</label>
+                        <h5 class="small fs-7">{{platos.entrada2.ingredientes}}</h5>
+<!-- 
+                     % else %
+                        <p>No se encontró entrada 2.</p> -->
                     {% endif %}
                     <p></p>
 
@@ -58,9 +63,11 @@
                             name="{{ platos.dip1.plato }}{{ fecha|date:"d M. Y"|lower }}"
                             value="{{ platos.dip1.plato }}" 
                             {% if platos.dip1.elegido %} checked {% endif %}>
-                        <label for="dip1{{ fecha }}">Dip 1 incluido</label>
-                    {% else %}
-                        <p>No se encontró dip 1.</p>
+                        <label for="dip1{{ fecha }}">DIP 1 - {{ platos.dip1.plato }}</label>
+                        <h5 class="small fs-7">{{platos.dip1.ingredientes}}</h5>
+<!-- 
+                     % else %
+                        <p>No se encontró dip 1.</p> -->
                     {% endif %}
                     <p></p>
 
@@ -69,9 +76,11 @@
                             name="{{ platos.dip2.plato }}{{ fecha|date:"d M. Y"|lower }}"
                             value="{{ platos.dip2.plato }}" 
                             {% if platos.dip2.elegido %} checked {% endif %}>
-                        <label for="dip2{{ fecha }}">Dip 2 incluido</label>
-                    {% else %}
-                        <p>No se encontró dip 2.</p>
+                        <label for="dip2{{ fecha }}">DIP 2 - {{ platos.dip2.plato }}</label>
+                        <h5 class="small fs-7">{{platos.dip2.ingredientes}}</h5>
+<!-- 
+                     % else %
+                        <p>No se encontró dip 2.</p> -->
                     {% endif %}
                     <p></p>
 
@@ -81,40 +90,39 @@
                             name="{{ platos.trago1.plato }}{{ fecha|date:"d M. Y"|lower }}"
                             value="{{ platos.trago1.plato }}" 
                             {% if platos.trago1.elegido %} checked {% endif %}>
-                        <label for="trago1{{ fecha }}">Trago 1 incluido</label>
-                    {% else %}
-                        <p>No se encontró trago 1.</p>
+                        <label for="trago1{{ fecha }}">TRAGO 1 - {{ platos.trago1.plato }}</label>
+                        <h5 class="small fs-7">{{platos.trago2.ingredientes}}</h5>
                     {% endif %}
                     <p></p>
 
                     {% if platos.almuerzo %}
-
-                        <div class="plato-info">
-                            <h6 class="card-subtitle mb-2 text-muted">>>>>{{ platos.almuerzo }}</h6>
-                            <p class="card-text">{{ platos.almuerzo_info }}</p>
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                        
+                            <h6 class="card-subtitle mb-2 text-muted">PLATO PRINCIPAL ALMUERZO</h6>
 
                             {% if platos.almuerzo_info %}
                                 <input type="checkbox" id="inc_almuerzo_{{ fecha }}" name="{{ platos.almuerzo }}{{ fecha|date:"d M. Y"|lower }}"
                                     value="{{ platos.almuerzo_info }}" {% if platos.almuerzo_elegido %} checked {% endif %}>
-                                <label for="inc_almuerzo_{{ fecha }}">Plato incluido</label>
-                            {% else %}
-                                <p>No se encontraron ingredientes para el almuerzo.</p>
+                                <label for="inc_almuerzo_{{ fecha }}">{{ platos.almuerzo }}</label>
+                                <h5 class="small fs-7">{{ platos.almuerzo_info }}</h5>
                             {% endif %}
 
                             {% for key, value in platos.variedades.items %}
                                 {% if value.variedad %}
-                                    <p>Variedad: {{ value.variedad }}</p>
+                                <p class="bg-warning text-dark p-2 rounded small">VARIEDADES / ADICIONALES</p> <!-- Fuente más pequeña con fondo amarillo -->
 
-                                    <h5>Ingredientes variedad: {{value.ingredientes_de_variedades}}</h5>
+                                    <!-- <h5>Ingredientes variedad: {{value.ingredientes_de_variedades}}</h5> -->
                                     <input type="checkbox" id="incluir{{key}}" name="{{ value.variedad }}{{ fecha|date:"d M. Y"|lower }}"
                                         value="{{value.ingredientes_de_variedades}}" {% if value.elegido %} checked {% endif %}>
-                                    <label for="incluir{{key}}">Variedad incluida</label>
+                                    <label for="incluir{{key}}">{{ value.variedad }}</label>
+                                    <h5 class="small fs-7">{{value.ingredientes_de_variedades}}</h5>
+
                                 {% endif %}
                             {% endfor %}
-                    {% else %}
-                        <p>NO HAY ALMUERZO.</p>
+                        </div>
+                    </div>
                     {% endif %}
-                    </div><br>
 
                     {# Salsas #}
                     {% if platos.salsa1.plato %}
@@ -122,9 +130,11 @@
                             name="{{ platos.salsa1.plato }}{{ fecha|date:"d M. Y"|lower }}"
                             value="{{ platos.salsa1.plato }}" 
                             {% if platos.salsa1.elegido %} checked {% endif %}>
-                        <label for="salsa1{{ fecha }}">Salsa 1 incluida</label>
-                    {% else %}
-                        <p>No se encontró salsa 1.</p>
+                        <label for="salsa1{{ fecha }}">SALS 1 - {{ platos.salsa1.plato }}</label>
+                        <h5 class="small fs-7">{{ platos.salsa1.ingredientes }}</h5>
+<!-- 
+                     % else %
+                        <p>No se encontró salsa 1.</p> -->
                     {% endif %}
                     <p></p>
 
@@ -133,22 +143,27 @@
                             name="{{ platos.salsa2.plato }}{{ fecha|date:"d M. Y"|lower }}"
                             value="{{ platos.salsa2.plato }}" 
                             {% if platos.salsa2.elegido %} checked {% endif %}>
-                        <label for="salsa2{{ fecha }}">Salsa 2 incluida</label>
-                    {% else %}
-                        <p>No se encontró salsa 2.</p>
+                        <label for="salsa2{{ fecha }}">SALS 2 - {{ platos.salsa2.plato }}</label>
+                        <h5 class="small fs-7">{{ platos.salsa2.ingredientes }}</h5>
+<!-- 
+                     % else %
+                        <p>No se encontró salsa 2.</p> -->
                     {% endif %}
                     <p></p>
-
-                  
+     
 
                     {% if platos.guarnicion1.plato %}
                         <input type="checkbox" id="guar1{{ fecha }}" 
                             name="{{ platos.guarnicion1.plato }}{{ fecha|date:"d M. Y"|lower }}"
                             value="{{ platos.guarnicion1.plato }}" 
                             {% if platos.guarnicion1.elegido %} checked {% endif %}>
-                        <label for="guar1{{ fecha }}">Guarnición 1 incluida</label>
-                    {% else %}
-                        <p>No se encontró guarnición 1.</p>
+                        <label for="guar1{{ fecha }}">GUAR 1 - {{ platos.guarnicion1.plato }}</label>
+                        <h5 class="small fs-7">{{ platos.guarnicion1.ingredientes }}</h5>
+                        <h5 class="small fs-7">valor de guar1_elegido >>>> {{ platos.guarnicion1.elegido }}<<</h5>
+
+<!-- 
+                     % else %
+                        <p>No se encontró guarnición 1.</p> -->
                     {% endif %}
 
                     <p></p>
@@ -157,9 +172,11 @@
                             name="{{ platos.guarnicion2.plato }}{{ fecha|date:"d M. Y"|lower }}"
                             value="{{ platos.guarnicion2.plato }}" 
                             {% if platos.guarnicion2.elegido %} checked {% endif %}>
-                        <label for="guar2{{ fecha }}">Guarnición 2 incluida</label>
-                    {% else %}
-                        <p>No se encontró guarnición 2.</p>
+                        <label for="guar2{{ fecha }}">GUAR 2 - {{ platos.guarnicion2.plato }}</label>
+                        <h5 class="small fs-7">{{ platos.guarnicion2.ingredientes }}</h5>
+<!-- 
+                     % else %
+                        <p>No se encontró guarnición 2.</p> -->
                     {% endif %}                    
                     <p></p>
 
@@ -169,23 +186,26 @@
                             name="{{ platos.postre1.plato }}{{ fecha|date:"d M. Y"|lower }}"
                             value="{{ platos.postre1.plato }}" 
                             {% if platos.postre1.elegido %} checked {% endif %}>
-                        <label for="postre1{{ fecha }}">Postre 1 incluido</label>
-                    {% else %}
-                        <p>No se encontró postre 1.</p>
+                        <label for="postre1{{ fecha }}">POST 1 - {{ platos.postre1.plato }}</label>
+                        <h5 class="small fs-7">{{ platos.postre1.ingredientes }}</h5>
+<!-- 
+                     % else %
+                        <p>No se encontró postre 1.</p> -->
                     {% endif %}
                     <p></p>
 
-                    <h5>CENA</h5>
-
+                    <h5 class="bg-primary text-white p-2 rounded">CENA</h5> <!-- Fondo azul con texto blanco -->
 
                     {% if platos.entrada3.plato %}
                         <input type="checkbox" id="ent3{{ fecha }}" 
                             name="{{ platos.entrada3.plato }}{{ fecha|date:"d M. Y"|lower }}"
                             value="{{ platos.entrada3.plato }}" 
                             {% if platos.entrada3.elegido %} checked {% endif %}>
-                        <label for="ent3{{ fecha }}">Entrada 3 incluida</label>
-                    {% else %}
-                        <p>No se encontró entrada 3.</p>
+                        <label for="ent3{{ fecha }}">ENT 3 - {{platos.entrada3.plato}}</label>
+                        <h5 class="small fs-7">{{ platos.entrada3.ingredientes }}</h5>
+<!-- 
+                     % else %
+                        <p>No se encontró entrada 3.</p> -->
                     {% endif %}
                     <p></p>
 
@@ -194,9 +214,11 @@
                             name="{{ platos.entrada4.plato }}{{ fecha|date:"d M. Y"|lower }}"
                             value="{{ platos.entrada4.plato }}" 
                             {% if platos.entrada4.elegido %} checked {% endif %}>
-                        <label for="ent4{{ fecha }}">Entrada 4 incluida</label>
-                    {% else %}
-                        <p>No se encontró entrada 4.</p>
+                        <label for="ent4{{ fecha }}">ENT 4 - {{platos.entrada4.plato}}</label>
+                        <h5 class="small fs-7">{{ platos.entrada4.ingredientes }}</h5>
+<!-- 
+                     % else %
+                        <p>No se encontró entrada 4.</p> -->
                     {% endif %}
                     <p></p>
 
@@ -205,9 +227,11 @@
                             name="{{ platos.dip3.plato }}{{ fecha|date:"d M. Y"|lower }}"
                             value="{{ platos.dip3.plato }}" 
                             {% if platos.dip3.elegido %} checked {% endif %}>
-                        <label for="dip3{{ fecha }}">Dip 3 incluido</label>
-                    {% else %}
-                        <p>No se encontró dip 3.</p>
+                        <label for="dip3{{ fecha }}">DIP 3 - {{ platos.dip3.plato }}</label>
+                        <h5 class="small fs-7">{{platos.dip3.ingredientes}}</h5>
+<!-- 
+                     % else %
+                        <p>No se encontró dip 3.</p> -->
                     {% endif %}
                     <p></p>
 
@@ -216,9 +240,11 @@
                             name="{{ platos.dip4.plato }}{{ fecha|date:"d M. Y"|lower }}"
                             value="{{ platos.dip4.plato }}" 
                             {% if platos.dip4.elegido %} checked {% endif %}>
-                        <label for="dip4{{ fecha }}">Dip 4 incluido</label>
-                    {% else %}
-                        <p>No se encontró dip 4.</p>
+                        <label for="dip4{{ fecha }}">DIP 4 - {{ platos.dip4.plato }}</label>
+                        <h5 class="small fs-7">{{platos.dip4.ingredientes}}</h5>
+<!-- 
+                     % else %
+                        <p>No se encontró dip 4.</p> -->
                     {% endif %}
                     <p></p>
 
@@ -227,55 +253,51 @@
                             name="{{ platos.trago2.plato }}{{ fecha|date:"d M. Y"|lower }}"
                             value="{{ platos.trago2.plato }}" 
                             {% if platos.trago2.elegido %} checked {% endif %}>
-                        <label for="trago2{{ fecha }}">Trago 2 incluido</label>
-                    {% else %}
-                        <p>No se encontró trago 2.</p>
+                        <label for="trago2{{ fecha }}">TRAGO 2 - {{ platos.trago2.plato }}</label>
+                        <h5 class="small fs-7">{{platos.trago2.ingredientes}}</h5>
+
                     {% endif %}
                     <p></p>
-
-
-                    {% if platos.cena %}
-
-                        <div class="plato-info">
-                            {% if platos.cena_info %}
-                                <h6 class="card-subtitle mb-2 text-muted">{{ platos.cena }}</h6>
-
-                                <p class="card-text">{{ platos.cena_info }}</p>
-
-                                <input type="checkbox" id="{{ platos.cena }}" name="{{ platos.cena }}{{ fecha|date:"d M. Y"|lower }}"
-                                    value="{{ platos.cena_info }}"  {% if platos.cena_elegida %} checked {% endif %}>
-                                <label for="inc_cena_{{ fecha }}">Incluir Plato</label>
-                            {% else %}
-                              <p>No se encontraron ingredientes para la cena.</p>
-                            {% endif %}
-                        </div>
-
-                        {% for key, value in platos.variedades_cena.items %}
-                            {% if value.variedad %}
-                            <p>Variedad: {{ value.variedad }}</p>
-
-                            <h5>Ingredientes variedad: {{value.ingredientes_de_variedades}}</h5>
-                            <input type="checkbox" id="incluir{{key}}" name="{{ value.variedad }}{{ fecha|date:"d M. Y"|lower }}"
-                                value="{{value.ingredientes_de_variedades}}"  {% if value.elegido %} checked {% endif %}>
-                            <label for="incluir{{key}}">Variedad incluida</label>
-                            {% endif %}
-                        {% endfor %}
-
-                    {% else %}
-                        <p>NO HAY CENA.</p>
-                    {% endif %}
-                    </div><br>    
                     
-                        <p></p>
+                    {% if platos.cena %}
+                        <div class="card bg-light mb-3">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-2 text-muted">PLATO PRINCIPAL CENA</h6>
+                                {% if platos.cena %}
+                                    <div class="plato-info">
 
+                                        {% if platos.cena_info %}
+                                            <input type="checkbox" id="{{ platos.cena }}" name="{{ platos.cena }}{{ fecha|date:"d M. Y"|lower }}"
+                                                value="{{ platos.cena_info }}"  {% if platos.cena_elegida %} checked {% endif %}>
+                                            <label for="inc_cena_{{ fecha }}">{{ platos.cena }}</label>
+                                            <h5 class="small fs-7">{{ platos.cena_info }}</h5>
+                                        {% endif %}
+
+                                        {% for key, value in platos.variedades_cena.items %}
+                                            {% if value.variedad %}
+                                                <p class="bg-warning text-dark p-2 rounded small">VARIEDADES / ADICIONALES</p> <!-- Fuente más pequeña con fondo amarillo -->
+                                                <input type="checkbox" id="incluir{{key}}" name="{{ value.variedad }}{{ fecha|date:"d M. Y"|lower }}"
+                                                    value="{{value.ingredientes_de_variedades}}"  {% if value.elegido %} checked {% endif %}>
+                                                <label for="incluir{{key}}">{{ value.variedad }}</label>
+                                                <h5 class="small fs-7">{{value.ingredientes_de_variedades}}</h5>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    
                     {% if platos.salsa3.plato %}
                         <input type="checkbox" id="salsa3{{ fecha }}" 
                             name="{{ platos.salsa3.plato }}{{ fecha|date:"d M. Y"|lower }}"
                             value="{{ platos.salsa3.plato }}" 
                             {% if platos.salsa3.elegido %} checked {% endif %}>
-                        <label for="salsa3{{ fecha }}">Salsa 3 incluida</label>
-                    {% else %}
-                        <p>No se encontró salsa 3.</p>
+                        <label for="salsa3{{ fecha }}">SALS 3 - {{ platos.salsa3.plato }}</label>
+                        <h5 class="small fs-7">{{ platos.salsa3.ingredientes }}</h5>
+
+                    <!-- % else %
+                        <p>No se encontró salsa 3.</p> -->
                     {% endif %}
                     <p></p>
 
@@ -284,9 +306,11 @@
                             name="{{ platos.salsa4.plato }}{{ fecha|date:"d M. Y"|lower }}"
                             value="{{ platos.salsa4.plato }}" 
                             {% if platos.salsa4.elegido %} checked {% endif %}>
-                        <label for="salsa4{{ fecha }}">Salsa 4 incluida</label>
-                    {% else %}
-                        <p>No se encontró salsa 4.</p>
+                        <label for="salsa4{{ fecha }}">SALS 4 - {{ platos.salsa4.plato }}</label>
+                        <h5 class="small fs-7">{{ platos.salsa4.ingredientes }}</h5>
+<!-- 
+                     % else %
+                        <p>No se encontró salsa 4.</p> -->
                     {% endif %}
                     <p></p>
 
@@ -295,9 +319,11 @@
                             name="{{ platos.guarnicion3.plato }}{{ fecha|date:"d M. Y"|lower }}"
                             value="{{ platos.guarnicion3.plato }}" 
                             {% if platos.guarnicion3.elegido %} checked {% endif %}>
-                        <label for="guar3{{ fecha }}">Guarnición 3 incluida</label>
-                    {% else %}
-                        <p>No se encontró guarnición 3.</p>
+                        <label for="guar3{{ fecha }}">GUAR 3 - {{ platos.guarnicion3.plato }}</label>
+                        <h5 class="small fs-7">{{ platos.guarnicion3.ingredientes }}</h5>
+
+                    <!-- % else %
+                        <p>No se encontró guarnición 3.</p> -->
                     {% endif %}
                     <p></p>
 
@@ -306,9 +332,11 @@
                             name="{{ platos.guarnicion4.plato }}{{ fecha|date:"d M. Y"|lower }}"
                             value="{{ platos.guarnicion4.plato }}" 
                             {% if platos.guarnicion4.elegido %} checked {% endif %}>
-                        <label for="guar4{{ fecha }}">Guarnición 4 incluida</label>
-                    {% else %}
-                        <p>No se encontró guarnición 4.</p>
+                        <label for="guar4{{ fecha }}">GUAR 4 - {{ platos.guarnicion4.plato }}</label>
+                        <h5 class="small fs-7">{{ platos.guarnicion4.ingredientes }}</h5>
+
+                    <!-- % else %
+                        <p>No se encontró guarnición 4.</p> -->
                     {% endif %}
                     <p></p>
                  
@@ -318,9 +346,11 @@
                             name="{{ platos.postre2.plato }}{{ fecha|date:"d M. Y"|lower }}"
                             value="{{ platos.postre2.plato }}" 
                             {% if platos.postre2.elegido %} checked {% endif %}>
-                        <label for="postre2{{ fecha }}">Postre 2 incluido</label>
-                    {% else %}
-                        <p>No se encontró postre 2.</p>
+                        <label for="postre1{{ fecha }}">POST 2 - {{ platos.postre1.plato }}</label>
+                        <h5 class="small fs-7">{{ platos.postre1.ingredientes }}</h5>
+                        
+                    <!-- % else %
+                        <p>No se encontró postre 2.</p> -->
                     {% endif %}
                     <p></p>
 
