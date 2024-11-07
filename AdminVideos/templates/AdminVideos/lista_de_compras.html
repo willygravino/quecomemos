@@ -10,7 +10,9 @@
     <section>
         <h1>Menúes Programados</h1>
 
-        <h5 class="small fs-7">LOS ITEMS {{los_items}}</h5>
+        <h5 >LOS ITEMS {{los_items}}</h5>
+        <!-- <h5 >LOS platos por día {{platos_por_dia}}</h5> -->
+
 
 
         <form action="{% url 'menu-elegido' %}" method="post">
@@ -346,8 +348,8 @@
                             name="{{ platos.postre2.plato }}{{ fecha|date:"d M. Y"|lower }}"
                             value="{{ platos.postre2.plato }}" 
                             {% if platos.postre2.elegido %} checked {% endif %}>
-                        <label for="postre1{{ fecha }}">POST 2 - {{ platos.postre1.plato }}</label>
-                        <h5 class="small fs-7">{{ platos.postre1.ingredientes }}</h5>
+                        <label for="postre2{{ fecha }}">POST 2 - {{ platos.postre2.plato }}</label>
+                        <h5 class="small fs-7">{{ platos.postre2.ingredientes }}</h5>
                         
                     <!-- % else %
                         <p>No se encontró postre 2.</p> -->
