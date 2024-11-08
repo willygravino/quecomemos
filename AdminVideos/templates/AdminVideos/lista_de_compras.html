@@ -9,9 +9,11 @@
 
     <section>
         <h1>Menúes Programados</h1>
-
+<!-- 
         <h5 >LOS ITEMS {{los_items}}</h5>
-        <!-- <h5 >LOS platos por día {{platos_por_dia}}</h5> -->
+        <h5 >LOS platos por día {{platos_por_dia}}</h5> -->
+
+        <!-- <h5 >HAY COMENTARIO??? {{hay_comentario}}</h5> -->
 
 
 
@@ -372,7 +374,9 @@
         <form>
 
             <h3>EDITA LISTA DE COMPRAS</h3>
-            <!-- <p>ingredientes_separados_por_comas: {{ ingredientes_separados_por_comas }}</p> -->
+             <!-- <p>ingredientes_separados_por_comas: {{ ingredientes_separados_por_comas }}</p>   
+            <p>lista de compras: {{ lista_de_compras }}</p>   -->
+            <!-- <p>no incluir: {{ no_incluir }}</p> -->
 
             <!-- <div class="row">
                 <div class="d-flex"> -->
@@ -385,7 +389,7 @@
                             <!-- <h3>comentario >>{{ valor.comentario }}<<</h3>  -->
 
                             <label for="{{ ingrediente }}">{{ ingrediente }}</label>
-                            <input type="text" id="{{ ingrediente }}_detalle" name="{{ ingrediente }}_detalle" placeholder="Comentario">
+                            <input type="text" id="{{ ingrediente }}_detalle" value="{{ valor.comentario }}" name="{{ ingrediente }}_detalle">
 
                             <br>
                         {% endfor %}
@@ -413,7 +417,8 @@
           <ul>
             {% for item in lista_de_compras %}
               <li>{{ item }}</li>
-            {% endfor %}
+            {% endfor %} 
+            <!-- <p>lista de compras: {{ mensaje_whatsapp }}</p>   -->
 
             <a href="https://wa.me/5491145342640?text={{ mensaje_whatsapp }}" target="_blank">Enviar lista por WhatsApp</a>
 

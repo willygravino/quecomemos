@@ -5,7 +5,7 @@
 {% block un_video %}
 
 
-{% if tipo_de_vista_estable == "random-todos" or tipo_de_vista_estable == "random-con-mios" %}
+<!-- {% if tipo_de_vista_estable == "random-todos" or tipo_de_vista_estable == "random-con-mios" %}
   <h6>CANTIDAD DE PLATOS SUGERIDOS {{ cantidad_platos_sugeridos }}</h6>
   <h6>CANTIDAD SUGERIBLES SEGUN FILTRO {{ cantidad_platos_sugeribles }}</h6>
   {% if cantidad_platos_sugeridos >= cantidad_platos_sugeribles %}
@@ -16,8 +16,86 @@
       <button type="submit">Reiniciar sugeribles para volver a sugerir</button>
     </form>
   {% endif %}
-{% endif %}
+{% endif %} -->
 
+
+
+<div class="container">
+
+  <div class="row">
+      <div class="col">
+
+        <!-- <h1> pre-elegidos: {{ elegidos }} </h1>
+        <h1> principales presel: {{ principales_presel }} </h1>
+        <h1> guarnic: {{ guarniciones_presel }} </h1> -->
+
+
+        <!-- <p >PLATOS ELEGIDOS POR DÍA LISTA {{platos_elegidos_por_dia_lista }}</p> -->
+
+
+        <div class="mb-4 d-flex flex-wrap justify-content-between">
+
+        <a href="{% url 'formulario-dia' dia=dias_desde_hoy.0.0|date:'Y-m-d' %}" class= {% if platos_elegidos_por_dia_lista.0.1.almuerzo != None or platos_elegidos_por_dia_lista.0.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %} >
+          <div class=" text-white p-3 small border border-dark al"> 
+            <p >{{ dias_desde_hoy.0.0|date:"l j" }}</p>
+              <!-- <p >Almuerzo: {{platos_elegidos_por_dia_lista.0.1.almuerzo}}</p>
+              <p >Cena: {{platos_elegidos_por_dia_lista.0.1.cena}}</p> -->
+            </div>
+        </a>
+
+        <a href="{% url 'formulario-dia' dia=dias_desde_hoy.1.0|date:'Y-m-d' %}" class={% if platos_elegidos_por_dia_lista.1.1.almuerzo != None or platos_elegidos_por_dia_lista.1.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %}>
+          <div class="text-white p-3 small border border-dark al"> 
+            <p>{{ dias_desde_hoy.1.0|date:"l j" }}</p>
+              <!-- <p >Almuerzo: {{platos_elegidos_por_dia_lista.1.1.almuerzo}}</p>
+              <p >Cena: {{platos_elegidos_por_dia_lista.1.1.cena}}</p> -->
+            </div>
+          </a>
+          
+
+          <a href="{% url 'formulario-dia' dia=dias_desde_hoy.2.0|date:'Y-m-d' %}" class={% if platos_elegidos_por_dia_lista.2.1.almuerzo != None or platos_elegidos_por_dia_lista.2.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %}>
+            <div class=" text-white p-3 small border border-dark al"> 
+              <p>{{ dias_desde_hoy.2.0|date:"l j" }}</p>
+            <!-- <p >Almuerzo: {{platos_elegidos_por_dia_lista.2.1.almuerzo}}</p>
+            <p >Cena: {{platos_elegidos_por_dia_lista.2.1.cena}}</p> -->
+           </div>
+          </a>
+
+          <a href="{% url 'formulario-dia' dia=dias_desde_hoy.3.0|date:'Y-m-d' %}" class={% if platos_elegidos_por_dia_lista.3.1.almuerzo != None or platos_elegidos_por_dia_lista.3.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %}>
+            <div class=" text-white p-3 small border border-dark al"> 
+              <p>{{ dias_desde_hoy.3.0|date:"l j" }}</p>
+              <!-- <p >Almuerzo: {{platos_elegidos_por_dia_lista.3.1.almuerzo}}</p>
+              <p >Cena: {{platos_elegidos_por_dia_lista.3.1.cena}}</p> -->
+            </div>
+          </a>
+
+          <a href="{% url 'formulario-dia' dia=dias_desde_hoy.4.0|date:'Y-m-d' %}" class={% if platos_elegidos_por_dia_lista.4.1.almuerzo != None or platos_elegidos_por_dia_lista.4.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %}>
+            <div class="text-white p-3 small border border-dark al"> 
+              <p>{{ dias_desde_hoy.4.0|date:"l j" }}</p>
+              <!-- <p >Almuerzo: {{platos_elegidos_por_dia_lista.4.1.almuerzo}}</p>
+              <p >Cena: {{platos_elegidos_por_dia_lista.4.1.cena}}</p> -->
+            </div>
+          </a>
+
+          <a href="{% url 'formulario-dia' dia=dias_desde_hoy.5.0|date:'Y-m-d' %}" class={% if platos_elegidos_por_dia_lista.5.1.almuerzo != None or platos_elegidos_por_dia_lista.5.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %}>
+            <div class="text-white p-3 small border border-dark al"> 
+              <p>{{ dias_desde_hoy.5.0|date:"l j" }}</p>
+              <!-- <p >Almuerzo: {{platos_elegidos_por_dia_lista.5.1.almuerzo}}</p>
+              <p >Cena: {{platos_elegidos_por_dia_lista.5.1.cena}}</p> -->
+            </div>
+          </a>
+
+          <a href="{% url 'formulario-dia' dia=dias_desde_hoy.6.0|date:'Y-m-d' %}" class={% if platos_elegidos_por_dia_lista.6.1.almuerzo != None or platos_elegidos_por_dia_lista.6.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %}>
+            <div class="text-white p-3 small border border-dark al"> 
+              <p>{{ dias_desde_hoy.6.0|date:"l j" }}</p>
+              <!-- <p >Almuerzo: {{platos_elegidos_por_dia_lista.6.1.almuerzo}}</p>
+              <p >Cena: {{platos_elegidos_por_dia_lista.6.1.cena}}</p> -->
+            </div>
+          </a>
+
+        </div>
+      </div>
+  </div>
+</div>
 
 <section>
   {% if not platos %}
@@ -92,82 +170,5 @@
 </section>
 
 
-
-<div class="container">
-
-  <div class="row">
-      <div class="col">
-
-        <!-- <h1> pre-elegidos: {{ elegidos }} </h1>
-        <h1> principales presel: {{ principales_presel }} </h1>
-        <h1> guarnic: {{ guarniciones_presel }} </h1> -->
-
-
-        <!-- <p >PLATOS ELEGIDOS POR DÍA LISTA {{platos_elegidos_por_dia_lista }}</p> -->
-
-
-        <div class="d-flex flex-wrap justify-content-between">
-
-        <a href="{% url 'formulario-dia' dia=dias_desde_hoy.0.0|date:'Y-m-d' %}" class= {% if platos_elegidos_por_dia_lista.0.1.almuerzo != None or platos_elegidos_por_dia_lista.0.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %} >
-            <div class="mb-0 text-white p-2 small border border-dark">
-              <p >{{ dias_desde_hoy.0.0|date:"l j" }}</p>
-              <p >Almuerzo: {{platos_elegidos_por_dia_lista.0.1.almuerzo}}</p>
-              <p >Cena: {{platos_elegidos_por_dia_lista.0.1.cena}}</p>
-            </div>
-        </a>
-
-        <a href="{% url 'formulario-dia' dia=dias_desde_hoy.1.0|date:'Y-m-d' %}" class={% if platos_elegidos_por_dia_lista.1.1.almuerzo != None or platos_elegidos_por_dia_lista.1.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %}>
-            <div class="mb-0 text-white p-2 small border border-dark"> 
-              <p>{{ dias_desde_hoy.1.0|date:"l j" }}</p>
-              <p >Almuerzo: {{platos_elegidos_por_dia_lista.1.1.almuerzo}}</p>
-              <p >Cena: {{platos_elegidos_por_dia_lista.1.1.cena}}</p>
-            </div>
-          </a>
-          
-
-          <a href="{% url 'formulario-dia' dia=dias_desde_hoy.2.0|date:'Y-m-d' %}" class={% if platos_elegidos_por_dia_lista.2.1.almuerzo != None or platos_elegidos_por_dia_lista.2.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %}>
-           <div class="mb-0 text-white p-2 small border border-dark"> 
-            <p>{{ dias_desde_hoy.2.0|date:"l j" }}</p>
-            <p >Almuerzo: {{platos_elegidos_por_dia_lista.2.1.almuerzo}}</p>
-            <p >Cena: {{platos_elegidos_por_dia_lista.2.1.cena}}</p>
-           </div>
-          </a>
-
-          <a href="{% url 'formulario-dia' dia=dias_desde_hoy.3.0|date:'Y-m-d' %}" class={% if platos_elegidos_por_dia_lista.3.1.almuerzo != None or platos_elegidos_por_dia_lista.3.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %}>
-            <div class="mb-0 text-white p-2 small border border-dark"> 
-              <p>{{ dias_desde_hoy.3.0|date:"l j" }}</p>
-              <p >Almuerzo: {{platos_elegidos_por_dia_lista.3.1.almuerzo}}</p>
-              <p >Cena: {{platos_elegidos_por_dia_lista.3.1.cena}}</p>
-            </div>
-          </a>
-
-          <a href="{% url 'formulario-dia' dia=dias_desde_hoy.4.0|date:'Y-m-d' %}" class={% if platos_elegidos_por_dia_lista.4.1.almuerzo != None or platos_elegidos_por_dia_lista.4.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %}>
-            <div class="mb-0 text-white p-2 smal border border-dark"> 
-              <p>{{ dias_desde_hoy.4.0|date:"l j" }}</p>
-              <p >Almuerzo: {{platos_elegidos_por_dia_lista.4.1.almuerzo}}</p>
-              <p >Cena: {{platos_elegidos_por_dia_lista.4.1.cena}}</p>
-            </div>
-          </a>
-
-          <a href="{% url 'formulario-dia' dia=dias_desde_hoy.5.0|date:'Y-m-d' %}" class={% if platos_elegidos_por_dia_lista.5.1.almuerzo != None or platos_elegidos_por_dia_lista.5.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %}>
-            <div class="mb-0 text-white p-2 small border border-dark"> 
-              <p>{{ dias_desde_hoy.5.0|date:"l j" }}</p>
-              <p >Almuerzo: {{platos_elegidos_por_dia_lista.5.1.almuerzo}}</p>
-              <p >Cena: {{platos_elegidos_por_dia_lista.5.1.cena}}</p>
-            </div>
-          </a>
-
-          <a href="{% url 'formulario-dia' dia=dias_desde_hoy.6.0|date:'Y-m-d' %}" class={% if platos_elegidos_por_dia_lista.6.1.almuerzo != None or platos_elegidos_por_dia_lista.6.1.cena != None %} "bg-success" {% else %}"bg-primary" {% endif %}>
-            <div class="mb-0 text-white p-2 small border border-dark"> 
-              <p>{{ dias_desde_hoy.6.0|date:"l j" }}</p>
-              <p >Almuerzo: {{platos_elegidos_por_dia_lista.6.1.almuerzo}}</p>
-              <p >Cena: {{platos_elegidos_por_dia_lista.6.1.cena}}</p>
-            </div>
-          </a>
-
-        </div>
-      </div>
-  </div>
-</div>
 
 {% endblock %}

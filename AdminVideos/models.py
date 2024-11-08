@@ -145,6 +145,8 @@ class Profile(models.Model):
      nombre_completo = models.CharField(max_length=80, blank=False)
      avatar = models.ImageField(upload_to="avatares", null=True, blank=True)
      ingredientes_que_tengo = models.JSONField(default=list, blank=True)
+    #  por qué default list?
+     comentarios = models.JSONField(default=list, blank=True) 
 
      @property
      def avatar_url(self):

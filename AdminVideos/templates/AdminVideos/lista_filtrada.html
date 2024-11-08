@@ -5,6 +5,7 @@
 {% block filtro %}
 
 <form method="POST">
+  <div class="">
 
   {% csrf_token %}
   <span>Medios: {{ formulario.medios }}</span>
@@ -12,16 +13,16 @@
   <span>Preparación: {{ formulario.preparacion }}</span>
   <!-- <span>Tipo: {{ formulario.tipo }}</span> -->
 
-  <br>
+  <!-- <br> -->
 
   {% for field in formulario.tipo_de_vista %}
-
-      <input type="radio" class="btn-check" name="{{field.data.name}}" id="id_{{field.data.name}}{{field.data.index}}" value="{{field.data.value}}" autocomplete="off" {% if field.data.selected %}checked{% endif %}>
+    <input type="radio" class="btn-check" name="{{field.data.name}}" id="id_{{field.data.name}}{{field.data.index}}" value="{{field.data.value}}" autocomplete="off" {% if field.data.selected %}checked{% endif %}>
 
       <label class="btn btn-secondary" for="id_{{field.data.name}}{{field.data.index}}">{{field.data.value}}</label>
   {% endfor %}
     
     <button type="submit" class="btn btn-primary">Filtrar</button>
+  </div>
 
   </form>
 

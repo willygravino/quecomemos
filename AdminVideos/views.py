@@ -375,6 +375,10 @@ def lista_de_compras(request):
 
     platos_por_dia = {}
 
+    no_incluir =""
+
+    hay_comentario = "no hay comentario"
+
     lista_de_ingredientes = set()
 
     ingredientes_unicos = {}  # Diccionario para almacenar ingredientes a comprar, estado, comentario
@@ -388,6 +392,8 @@ def lista_de_compras(request):
     perfil = get_object_or_404(Profile, user=request.user)
 
     if request.method == 'POST':
+                hay_comentario = "TAMPOCO hay comentario"
+
                 no_incluir = set()
                 # items = {} la necesito acá pero la muevo para ver contexto
 
@@ -453,8 +459,6 @@ def lista_de_compras(request):
                                 "elegido": items_resultados.get(item_nombre, {}).get(item_nombre, {}).get("elegido")
                             }
                             })
-
-                       
 
                     cena_que_comemos = platos_dia.get("cena", {}).get("plato", [])
                     cena_info = platos_dia.get("cena", {}).get("ingredientes", [])
@@ -539,6 +543,7 @@ def lista_de_compras(request):
                     # Identificar elementos que están en lista_de_ingredientes pero no en set_compras
                     ingredientes_no_comprados_1 = lista_de_ingredientes - set_compras
                     ingredientes_no_comprados = ingredientes_no_comprados_1 - no_incluir
+
                     if ingredientes_no_comprados:
                             for ingrediente_nuevo in ingredientes_no_comprados:
                                 if ingrediente_nuevo not in perfil.ingredientes_que_tengo:
@@ -547,6 +552,10 @@ def lista_de_compras(request):
                                     # Guardar el perfil actualizado
                                     perfil.save()
 
+                                    # # Obtener el comentario del request.POST usando la clave construida
+                                    # clave_comentario = f"{ingrediente_nuevo}_detalle"
+                                    # el_comentario = request.POST.get(clave_comentario, '')
+                            
                     if lista_de_compras:
                             for ingrediente_a_comprar in lista_de_compras:
                                  if ingrediente_a_comprar in perfil.ingredientes_que_tengo:
@@ -554,18 +563,58 @@ def lista_de_compras(request):
                                     perfil.ingredientes_que_tengo.remove(ingrediente_a_comprar)
                                     # Guardar el perfil actualizado
                                     perfil.save()
+                                    
+                    el_comentario = ""
 
                     if lista_de_ingredientes:
                        for ingrediente in lista_de_ingredientes:
-                                       if ingrediente in perfil.ingredientes_que_tengo:
-                                         ingredientes_unicos [ingrediente] = {
-                                            "comentario": "<comentario>",
-                                            "estado": "tengo" }
+                            if ingrediente in no_incluir:
+                                 for item in perfil.comentarios:
+                                    ingrediente_archivado, comentario = item.split("%", 1)  # Dividir en ingrediente y comentario
+                                    if ingrediente_archivado == ingrediente:
+                                            el_comentario = comentario
+                                            # ingrediente_final = ingrediente_archivado
+                            else:     
+                                # Obtener el comentario del request.POST usando la clave construida
+                                clave_comentario = f"{ingrediente}_detalle"
+                                el_comentario = request.POST.get(clave_comentario, '')
+                                # hay_comentario = el_coment
 
-                                       else:
-                                            ingredientes_unicos [ingrediente] = {
-                                            "comentario": "<comentario>",
-                                            "estado": "no-tengo" }
+                                actualizado = False
+                                
+                                # Recorrer la lista y buscar el comentario asociado
+                                for item in perfil.comentarios:
+                                    ingrediente_archivado, comentario = item.split("%", 1)  # Dividir en ingrediente y comentario
+                                    if ingrediente_archivado == ingrediente:
+                                        if el_comentario:
+                                            # Variable de control para saber si se actualizó algún elemento
+                                            actualizado = True
+                                            # Actualizar el comentario del ingrediente
+                                            perfil.comentarios[perfil.comentarios.index(item)] = f"{ingrediente}%{el_comentario}"
+                                        else:
+                                            actualizado = True
+                                            # Eliminar el comentario del ingrediente
+                                            perfil.comentarios.remove(item)
+                                            
+                                if not actualizado and el_comentario:
+                                    # Unir el ingrediente nuevo con el comentario, separado por '%'
+                                    ingrediente_con_comentario = f"{ingrediente}%{el_comentario}"
+                                    # Actualizar el campo ingredientes_que_tengo
+                                    perfil.comentarios.append(ingrediente_con_comentario)
+                                    
+                                # Guardar el perfil actualizado
+                                perfil.save()
+                            
+                            if ingrediente in perfil.ingredientes_que_tengo:
+                                ingredientes_unicos [ingrediente] = {
+                                "comentario": el_comentario,
+                                "estado": "tengo" }
+
+                            else:
+                                ingredientes_unicos [ingrediente] = {
+                                "comentario": el_comentario,
+                                "estado": "no-tengo" }
+                                       
 
                   
                     platos_por_dia[menu_del_dia.el_dia_en_que_comemos].update({
@@ -624,17 +673,7 @@ def lista_de_compras(request):
                     if value["elegido"] == True:
                         ingredientes = value['ingredientes_de_variedades']
                         lista_de_ingredientes.update({ingrediente.strip() for ingrediente in ingredientes.split(',')})
-
-            if lista_de_ingredientes:
-                for ingrediente in lista_de_ingredientes:
-                    if ingrediente in perfil.ingredientes_que_tengo:
-                        ingredientes_unicos [ingrediente] = {
-                            "comentario": "<comentario>",
-                            "estado": "tengo" }
-                    else:
-                        ingredientes_unicos [ingrediente] = {
-                            "comentario": "<comentario>",
-                            "estado": "no-tengo" }
+ 
 
             # Lista de claves de los distintos tipos de platos a procesar, incluyendo las guarniciones
             tipos_de_platos = ["entrada1", "entrada2", "entrada3", "entrada4",
@@ -653,9 +692,10 @@ def lista_de_compras(request):
                 plato = platos_dia.get(tipo, {})
                 # Obtén los ingredientes de cada plato o guarnición
                 ingredientes = plato.get("ingredientes")
-                
+                elegido = plato.get("elegido")
+                                
                 # Verifica que los ingredientes existan y no sean None
-                if ingredientes:
+                if ingredientes and elegido:
                     # Divide los ingredientes por comas y actualiza el conjunto
                     lista_de_ingredientes.update({ingrediente.strip() for ingrediente in ingredientes.split(',')})
 
@@ -677,14 +717,51 @@ def lista_de_compras(request):
                platos_por_dia[menu_del_dia.el_dia_en_que_comemos][tipo] = {
                         "plato": plato.get("plato"),
                         "ingredientes": plato.get("ingredientes"),
-                        "elegido": plato.get("elegido", True)
+                        "elegido": plato.get("elegido")
                     }        
+               
+            if lista_de_ingredientes:
+                for ingrediente in lista_de_ingredientes:
+                    el_comentario = ""
+                    # Recorrer la lista y buscar el comentario asociado
+                    for item in perfil.comentarios:
+                        # if "%" in item:
+                        ingrediente_archivado, comentario = item.split("%", 1)  # Dividir en ingrediente y comentario
+                        if ingrediente_archivado == ingrediente:
+                            el_comentario = comentario
+                                
+                    if ingrediente in perfil.ingredientes_que_tengo:
+                        ingredientes_unicos [ingrediente] = {
+                            "comentario": el_comentario,
+                            "estado": "tengo" }
+                    else:
+                        ingredientes_unicos [ingrediente] = {
+                            "comentario": el_comentario,
+                            "estado": "no-tengo" }   
 
     # Generar el mensaje de WhatsApp
     mensaje_whatsapp = "Lista de compras:\n"
-    if lista_de_compras:
-        mensaje_whatsapp += "\n".join(lista_de_compras)
-    mensaje_whatsapp = mensaje_whatsapp.replace("\n", "%0A")  # Reemplazar saltos de línea para la URL
+
+    lista_de_compras =[]
+    # Recorrer el diccionario para formatear los ingredientes que no tienes
+    for ingrediente, detalles in ingredientes_unicos.items():
+        if detalles["estado"] == "no-tengo":
+            comentario = detalles["comentario"]
+            # Formatear el ingrediente con el comentario si está presente
+            if comentario:
+                mensaje_whatsapp += f"• {ingrediente} ({comentario})\n"
+                lista_de_compras.append(f"{ingrediente} ({comentario})")
+
+            else:
+                mensaje_whatsapp += f"• {ingrediente}\n"
+                lista_de_compras.append(f"{ingrediente}")
+
+
+    # Reemplazar los saltos de línea para que sean compatibles con la URL de WhatsApp
+    mensaje_whatsapp = mensaje_whatsapp.replace("\n", "%0A")
+    # if ingredientes_unicos:
+    #     mensaje_whatsapp += "\n".join(ingredientes_unicos)
+    # mensaje_whatsapp = mensaje_whatsapp.replace("\n", "%0A")  # Reemplazar saltos de línea para la URL
 
     context = {
         'platos_por_dia': platos_por_dia,
@@ -692,6 +769,10 @@ def lista_de_compras(request):
         'post_data': request.POST,
         "los_items": items_resultados,
         "lista_de_compras": lista_de_compras,
+        "no_incluir": no_incluir,
+
+        # "hay_comentario": hay_comentario,
+
         "ingredientes_no_comprados": ingredientes_no_comprados,
         "mensaje_whatsapp": mensaje_whatsapp
     }
@@ -966,7 +1047,7 @@ def FiltroDePlatos (request):
     platos_elegidos = Preseleccionados.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
 
     if request.method == "POST":
-            post_o_no = "POST, DEFINE INICIALES"
+            # post_o_no = "POST, DEFINE INICIALES"
 
             form = PlatoFilterForm(request.POST)
 
@@ -988,7 +1069,7 @@ def FiltroDePlatos (request):
                 request.session['calorias_estable'] = calorias
 
     else:
-        pasa_por_aca = "PASA POR NO-POST"
+        # pasa_por_aca = "PASA POR NO-POST"
         items_iniciales = {
                         'tipo_de_vista': tipo_de_vista_estable,
                         'medios': medios,
@@ -997,16 +1078,17 @@ def FiltroDePlatos (request):
                         # 'tipo': tipo,
                         'calorias': calorias
                     }
-        post_o_no = "NO POST, MANDA INICIALES"+tipo_de_vista_estable
+        # post_o_no = "NO POST, MANDA INICIALES"+tipo_de_vista_estable
         form = PlatoFilterForm(initial=items_iniciales)
 
-    pasa_por_aca = "PASA"
+    # pasa_por_aca = "PASA"
 
     platos = Plato.objects.all()
 
     # TOMAR EL TIPO DEL MENÚ    !!!!!!!!!!!!!!
     # Obtener el valor del parámetro 'tipo' desde la URL
     tipo_parametro = request.GET.get('tipopag', '')
+
     if tipo_parametro == "Dash":
         tipo_parametro = ""
 
@@ -1051,7 +1133,7 @@ def FiltroDePlatos (request):
             for plato in platos_sugeridos:
                 Sugeridos.objects.get_or_create(usuario_de_sugeridos=usuario, nombre_plato_sugerido=plato.nombre_plato)
     else:
-        pasa_por_aca ="SUMA TODOS"+tipo_de_vista
+        # pasa_por_aca ="SUMA TODOS"+tipo_de_vista
         platos = Plato.objects.all()
 
     if usuario:
