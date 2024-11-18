@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path
 from django.contrib.auth.views import LogoutView
 
-from AdminVideos.views import formulario_dia, index, PlatoUpdate, PlatoDelete, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, plato_preseleccionado, grabar_menu_elegido,SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, user_logout # VistaInicial ,Logout, MensajeCreate, MensajeList, MensajeDelete, PlatoList, PlatosMineList, PlatosElegidosMenu, elecion_de_lista, PlatosDeOtros,, LogtViews, MenuElegido, lista_de_compras
+from AdminVideos.views import formulario_dia, index, PlatoUpdate, PlatoDelete, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, plato_preseleccionado, grabar_menu_elegido,SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, user_logout, desmarcar_todo # VistaInicial ,Logout, MensajeCreate, MensajeList, MensajeDelete, PlatoList, PlatosMineList, PlatosElegidosMenu, elecion_de_lista, PlatosDeOtros,, LogtViews, MenuElegido, lista_de_compras
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -29,6 +29,7 @@ urlpatterns = [
     path('plato/grabar', grabar_menu_elegido, name="grabar-menu"),
     path('menu/elegido',  lista_de_compras, name="menu-elegido"),
     path('formulario/dia/<str:dia>/',  formulario_dia, name="formulario-dia"),
+    path('desmarcar/',  desmarcar_todo, name="desmarcar-todo"),
     # path('lista/compras-y-plan', lista_y_plan, name="lista-y-plan"),
     path('menu/random', SugerenciasRandom.as_view(), name="random"),
     path('videos/list/filtro', FiltroDePlatos, name="filtro-de-platos"),

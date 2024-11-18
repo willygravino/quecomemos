@@ -1,161 +1,27 @@
-<!DOCTYPE html>
-<html lang="es-AR">
-
-<head>
-    {% load static %}
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-
-    <title>SB Admin 2 - Register</title>
-
-    <!-- Custom fonts for this template-->
-    <link href="{% static 'AdminVideos/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
-    <link
-        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-        rel="stylesheet">
-
-    <!-- Custom styles for this template-->
-    <link href="{% static 'AdminVideos/css/sb-admin-2.min.css' %}" rel="stylesheet">
-
-</head>
-
-<body class="bg-gradient-primary">
-
-    <div class="container">
-
-        <div class="card o-hidden border-0 shadow-lg my-5">
-            <div class="card-body p-0">
-                <!-- Nested Row within Card Body -->
-                <div class="row">
-                    <div class="col-lg-5 d-none d-lg-block bg-register-image"></div>
-                    <div class="col-lg-7">
-                        <div class="p-5">
-                            <div class="text-center">
-                                <h1 class="h4 text-gray-900 mb-4">Create an Account!</h1>
-                            </div>
-                            <form class="user">
-                                <div class="form-group row">
-                                    <div class="col-sm-6 mb-3 mb-sm-0">
-                                        <!-- <input type="text" class="form-control form-control-user" id="exampleFirstName"
-                                            placeholder="First Name"> -->
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <!-- <input type="text" class="form-control form-control-user" id="exampleLastName"
-                                            placeholder="Last Name"> -->
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <input type="text" name="username" class="form-control form-control-user" autocapitalize="none" autocomplete="username" autofocus="" required="" aria-describedby="id_username_helptext" id="id_username" placeholder="Nombre de Usuario">
-<!-- 
-                                    <input type="text" name="username" maxlength="150" autocapitalize="none" autocomplete="username" autofocus="" required="" aria-describedby="id_username_helptext" id="id_username"> -->
-                                    
-                                </div>
-                                <div class="form-group row">
-                                    <div class="col-sm-6 mb-3 mb-sm-0">
-                                        <input type="password" name="password1" autocomplete="new-password" required="" aria-describedby="id_password1_helptext" id="id_password1" class="form-control form-control-user" placeholder="Password">
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <input type="password" class="form-control form-control-user"
-                                            id="exampleRepeatPassword" placeholder="Repetí Password">
-                                    </div>
-                                </div>
-                                <!-- <a href="login.html" class="btn btn-primary btn-user btn-block">
-                                    Regitrar Cuenta
-                                </a> -->
-
-                                <input type="submit" class="btn btn-primary btn-user btn-block" value="Registrarse">
-
-
-                                <hr>
-                                <!-- <a href="index.html" class="btn btn-google btn-user btn-block">
-                                    <i class="fab fa-google fa-fw"></i> Register with Google
-                                </a>
-                                <a href="index.html" class="btn btn-facebook btn-user btn-block">
-                                    <i class="fab fa-facebook-f fa-fw"></i> Register with Facebook
-                                </a> -->
-                            </form>
-                            <hr>
-                            <div class="text-center">
-                                <a class="small" href="forgot-password.html">Forgot Password?</a>
-                            </div>
-                            <div class="text-center">
-                                <a class="small" href="{% url 'login' %}">Already have an account? Login!</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+{% if user.is_authenticated %}
+    {% if user.profile.nombre_completo != "" %}
+      {% if not platos%}
+        <div class="col-lg-6 col-md-8 mx-auto">
+          {% block mensaje %}{% endblock %}
         </div>
+      {% else %}
+        <div class="col-lg-10 col-md-8 mx-auto">
+          {% block titulo_ok %}{% endblock %}
+        </div>
+      {% endif %}
 
-    </div>
-
-  <!-- Bootstrap core JavaScript-->
-  <script src="/AdminVideos/static/AdminVideos/vendor/jquery/jquery.min.js"></script>
-  <script src="/AdminVideos/static/AdminVideos/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-  <!-- Core plugin JavaScript-->
-  <script src="/AdminVideos/static/AdminVideos/vendor/jquery-easing/jquery.easing.min.js"></script>
-
-  <!-- Custom scripts for all pages-->
-  <script src="/AdminVideos/static/AdminVideos/js/sb-admin-2.min.js"></script>
-
-
-</body>
-
-</html>
-
-{% block principal %}
-<div style="margin-top:40px">
-    <form method="post" enctype="multipart/form-data">
-        <center>
-            <p>
-                {% csrf_token %}
-                {{form.as_p}}
-                <input type="submit" value="Registrarse">
-            </p>
-        </center>
-    </form>
-</div>
-{% endblock %}
-
-if usuario:
-platos_elegidos = Elegidos.objects.filter(usuario=usuario, tipo_plato="Principal").values('nombre_plato_elegido')
-guarniciones_presel = Elegidos.objects.filter(usuario=usuario, tipo_plato="Guarnicion").values('nombre_plato_elegido')
-
-
-     <!-- {% if platos.guarnicion1.plato %}
-                        <input type="checkbox" id="guar1{{ fecha }}" name="{{ platos.guarnicion1.plato }}{{ fecha|date:"d M. Y"|lower }}"
-                            value="{{ platos.guarnicion1.plato }}" {% if platos.guarnicion1.elegido %} checked {% endif %}>
-                        <label for="platos.guarnicion1.plato{{ fecha }}">Guarnicion 1 incluida</label>
-                    {% else %}
-                        <p>No se encontró guarnicion 1.</p>
-                    {% endif %} -->
-
-                    <!-- {% for i in 1..4 %}
-                        {% with guarnicion=platos|get:"guarnicion"|add:i %}
-                        {% if guarnicion.plato %}
-                            <input type="checkbox" id="guar{{ i }}{{ fecha }}" name="{{ guarnicion.plato }}{{ fecha|date:"d M. Y"|lower }}"
-                                value="{{ guarnicion.plato }}" {% if guarnicion.elegido %} checked {% endif %}>
-                            <label for="guar{{ i }}{{ fecha }}">Guarnicion {{ i }} incluida</label>
-                        {% else %}
-                            <p>No se encontró guarnicion {{ i }}.</p>
-                        {% endif %}
-                        {% endwith %}
-                    {% endfor %} -->
-
-                    <!-- {% for i in 1|to:4 %}
-                        {% with guarnicion="guarnicion"|stringformat:"s"|add:i|stringformat:"d" %}
-                            {% if platos|get_item:guarnicion.plato %}
-                                <input type="checkbox" id="guar{{ i }}{{ fecha }}" 
-                                    name="{{ platos|get_item:guarnicion.plato }}{{ fecha|date:"d M. Y"|lower }}"
-                                    value="{{ platos|get_item:guarnicion.plato }}" 
-                                    {% if platos|get_item:guarnicion.elegido %} checked {% endif %}>
-                                <label for="guar{{ i }}{{ fecha }}">Guarnición {{ i }} incluida</label>
-                            {% else %}
-                                <p>No se encontró guarnición {{ i }}.</p>
-                            {% endif %}
-                        {% endwith %}
-                    {% endfor %} -->
+    {% endif %}
+    
+  {% else %}
+    <section class="py-0 text-center container">
+      <div class="row py-lg-1">
+        <div class="col-lg-10 col-md-8 mx-auto">
+          <h1 class="fw-light"> Logueate para comenzar. </h1>
+          <p>
+            <a href="{% url 'login' %}" class="btn btn-primary my-2">Login</a>
+            <a href="{% url 'signup' %}" class="btn btn-secondary my-2">Registrarse</a>
+          </p>
+        </div>
+      </div>
+    </section>
+  {% endif %}

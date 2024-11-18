@@ -133,7 +133,7 @@
             <hr class="sidebar-divider d-none d-md-block">
 
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'menu-elegido' %}">
+                <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Dash">
                     <!-- DERIVAR A MENU DE DÍAS -->
                     <i class="fa-solid fa-calendar-days" style="font-size: 2rem;"></i>
                     <span>Menú</span>
@@ -368,6 +368,10 @@
                 {% block filtro %}
                 {% endblock %}
 
+
+                 <!-- Divider -->
+                <hr>
+                
                 <!-- Begin Page Content -->
 
                 <div class="container-fluid">

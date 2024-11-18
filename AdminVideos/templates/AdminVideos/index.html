@@ -5,32 +5,7 @@
 {% block principal %}
 
 <!-- <main> -->
-  {% if user.is_authenticated %}
-  {% if user.profile.nombre_completo != "" %}
-  {% if not platos%}
-  <div class="col-lg-6 col-md-8 mx-auto">
-    {% block mensaje %}{% endblock %}
-  </div>
-  {% else %}
-  <div class="col-lg-10 col-md-8 mx-auto">
-    {% block titulo_ok %}{% endblock %}
-  </div>
-  {% endif %}
-
-  {% endif %}
-  {% else %}
-  <section class="py-0 text-center container">
-    <div class="row py-lg-1">
-      <div class="col-lg-10 col-md-8 mx-auto">
-        <h1 class="fw-light"> Logueate para comenzar. </h1>
-        <p>
-          <a href="{% url 'login' %}" class="btn btn-primary my-2">Login</a>
-          <a href="{% url 'signup' %}" class="btn btn-secondary my-2">Registrarse</a>
-        </p>
-      </div>
-    </div>
-  </section>
-  {% endif %}
+  
 
   {% block un_video %}
   {% endblock %}

@@ -12,21 +12,21 @@ class Plato(models.Model):
     ingredientes = models.CharField('Ingresá los ingredientes, separados por coma', max_length=120, blank=True)
 
     INDISTINTO = '-'
-    HORNO = 'horno'
-    COCINA = 'cocina'
-    PARRILA = 'parrilla'
-    WOK = 'wok'
-    SIN_COCCION = 'sin coccion'
+    HORNO = 'Horno'
+    COCINA = 'Cocina'
+    PARRILA = 'Parrilla'
+    WOK = 'Wok'
+    SIN_COCCION = 'Sin coccion'
     
     MEDIOS_CHOICES = [
         (INDISTINTO, '-'),
-        (HORNO, 'horno'),
-        (COCINA, 'cocina'),
-        (PARRILA, 'parrilla'),
-        (WOK,'wok'),
-        (SIN_COCCION,'sin cocción'),
+        (HORNO, 'Horno'),
+        (COCINA, 'Cocina'),
+        (PARRILA, 'Parrilla'),
+        (WOK,'Wok'),
+        (SIN_COCCION,'Sin cocción'),
     ]
-    medios = models.CharField(max_length=20, choices=MEDIOS_CHOICES, default=INDISTINTO, null=True)
+    medios = models.CharField(max_length=20, choices=MEDIOS_CHOICES, default=COCINA, null=True)
    
     INDISTINTO = '-'
     COMUN = 'Común'
@@ -38,18 +38,21 @@ class Plato(models.Model):
         (ESPECIAL, 'Especial'),
         
     ]
-    categoria = models.CharField(max_length=20, choices=CATEGORIA_CHOICES, default=INDISTINTO, null=True)
+    categoria = models.CharField(max_length=20, choices=CATEGORIA_CHOICES, default=COMUN, null=True)
 
     INDISTINTO = '-'
     POCO = 'Poco'
     NADA = 'Nada'
+    NORMAL = 'Normal'
        
     PREPA_CHOICES = [
         (INDISTINTO, '-'),
         (POCO, 'Poco'),
         (NADA, 'Nada'),
+        (NORMAL, 'Normal'),
+
     ]
-    preparacion = models.CharField(max_length=20, choices=PREPA_CHOICES, default=INDISTINTO, null=True)
+    preparacion = models.CharField(max_length=20, choices=PREPA_CHOICES, default=NORMAL, null=True)
 
     INDISTINTO = '-'
     ENTRADA = 'Entrada'
@@ -92,7 +95,7 @@ class Plato(models.Model):
    
     ]
 
-    calorias = models.CharField(max_length=20, choices=CALORIAS_CHOICES, default=INDISTINTO,null=True)  
+    calorias = models.CharField(max_length=20, choices=CALORIAS_CHOICES, default=NORMAL,null=True)  
 
     propietario = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="propietario")
     image = models.ImageField("Subí una imagen que identifique al plato (o un fotograma del mismo)", upload_to="videos/", null=True, blank=True)

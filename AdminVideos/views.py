@@ -1049,10 +1049,7 @@ def FiltroDePlatos (request):
 
     # Establecer la configuración regional a español
     locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
-
-    # Obtiene la fecha actual
-    # fecha_actual = datetime.now().date()
-
+    
     # Obtener la fecha y hora actuales
     fecha_actual = datetime.datetime.now().date()
 
@@ -1078,8 +1075,6 @@ def FiltroDePlatos (request):
     medios = request.session.get('medios_estable', "None")
     categoria = request.session.get('categoria_estable', "None")
     preparacion = request.session.get('preparacion_estable', "None")
-    # tipo = request.session.get('tipo_estable', "None")
-
     calorias = request.session.get('calorias_estable', "None")
 
     usuario = request.user
@@ -1087,10 +1082,10 @@ def FiltroDePlatos (request):
     platos_a_sugerir = ""
     tipo_de_vista = tipo_de_vista_estable
 
-    platos_elegidos = Preseleccionados.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
+    # SI NO FINCIONA BIEN, ACTIVARLO AGAIN!!
+    # platos_preseleccionados = Preseleccionados.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
 
     if request.method == "POST":
-            # post_o_no = "POST, DEFINE INICIALES"
 
             form = PlatoFilterForm(request.POST)
 
@@ -1099,7 +1094,6 @@ def FiltroDePlatos (request):
                 medios = form.cleaned_data.get('medios')
                 categoria = form.cleaned_data.get('categoria')
                 preparacion = form.cleaned_data.get('preparacion')
-                # tipo = form.cleaned_data.get('tipo')
                 calorias = form.cleaned_data.get('calorias')
 
                 # Guardar el valor de tipo_de_vista en la sesión
@@ -1108,27 +1102,21 @@ def FiltroDePlatos (request):
                 request.session['medios_estable'] = medios
                 request.session['categoria_estable'] = categoria
                 request.session['preparacion_estable'] = preparacion
-                # request.session['tipo_estable'] = tipo
                 request.session['calorias_estable'] = calorias
 
     else:
-        # pasa_por_aca = "PASA POR NO-POST"
         items_iniciales = {
                         'tipo_de_vista': tipo_de_vista_estable,
                         'medios': medios,
                         'categoria': categoria,
                         'preparacion': preparacion,
-                        # 'tipo': tipo,
                         'calorias': calorias
                     }
-        # post_o_no = "NO POST, MANDA INICIALES"+tipo_de_vista_estable
+ 
         form = PlatoFilterForm(initial=items_iniciales)
-
-    # pasa_por_aca = "PASA"
 
     platos = Plato.objects.all()
 
-    # TOMAR EL TIPO DEL MENÚ    !!!!!!!!!!!!!!
     # Obtener el valor del parámetro 'tipo' desde la URL
     tipo_parametro = request.GET.get('tipopag', '')
 
@@ -1180,75 +1168,101 @@ def FiltroDePlatos (request):
         platos = Plato.objects.all()
 
     if usuario:
-        platos_elegidos = Preseleccionados.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
+        platos_preseleccionados = Preseleccionados.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
 
-        principales_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Principal").values_list('nombre_plato_elegido', flat=True)
+        # principales_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Principal").values_list('nombre_plato_elegido', flat=True)
 
-        guarniciones_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Guarnicion").values_list('nombre_plato_elegido', flat=True)
+        # guarniciones_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Guarnicion").values_list('nombre_plato_elegido', flat=True)
 
-        salsas_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Trago").values_list('nombre_plato_elegido', flat=True)
+        # salsas_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Trago").values_list('nombre_plato_elegido', flat=True)
 
-        tragos_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Trago").values_list('nombre_plato_elegido', flat=True)
+        # tragos_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Trago").values_list('nombre_plato_elegido', flat=True)
 
-        dips_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Dip").values_list('nombre_plato_elegido', flat=True)
+        # dips_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Dip").values_list('nombre_plato_elegido', flat=True)
 
-        postres_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Postre").values_list('nombre_plato_elegido', flat=True)
+        # postres_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Postre").values_list('nombre_plato_elegido', flat=True)
 
-        entradas_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Entrada").values_list('nombre_plato_elegido', flat=True)
+        # entradas_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Entrada").values_list('nombre_plato_elegido', flat=True)
 
 
     # Obtén el número de platos sugeridos para el usuario actual
-    cantidad_platos_sugeridos = Sugeridos.objects.filter(usuario_de_sugeridos=usuario).count()
+    # cantidad_platos_sugeridos = Sugeridos.objects.filter(usuario_de_sugeridos=usuario).count()
+
+    # Filtra las fechas únicas en `el_dia_en_que_comemos` para los objetos del usuario actual
+    fechas_existentes = ElegidosXDia.objects.filter(user=request.user,el_dia_en_que_comemos__gte=fecha_actual).values_list('el_dia_en_que_comemos', flat=True).distinct()
+
 
     # Obtén los objetos ElegidosXDia asociados al usuario actual
-    elegidos_por_dia = ElegidosXDia.objects.filter(user=request.user)
+    # elegidos_por_dia = ElegidosXDia.objects.filter(user=request.user)
 
-    platos_elegidos_por_dia = {}
+    # # Obtén los objetos ElegidosXDia asociados al usuario actual
+    # elegidos_por_dia = ElegidosXDia.objects.filter(user=request.user, el_dia_en_que_comemos__gte=fecha_actual)
 
-        # Suponiendo que elegidos_por_dia sea tu diccionario
 
-    for objeto_elegido in elegidos_por_dia:
-        fecha = objeto_elegido.el_dia_en_que_comemos
-        plato_almuerzo = objeto_elegido.platos_que_comemos.get("almuerzo", {}).get("plato", None)
-        plato_cena = objeto_elegido.platos_que_comemos.get("cena", {}).get("plato", None)
-        platos_elegidos_por_dia[fecha] = {"almuerzo": plato_almuerzo, "cena": plato_cena}
 
-    platos_preseleccionados={}
 
-    for i in range(7):
-        fecha = fecha_actual + datetime.timedelta(days=i)
-        if fecha in platos_elegidos_por_dia:  # Verificar si la fecha ya está en platos_elegidos_por_dia
-            platos_preseleccionados[fecha] = platos_elegidos_por_dia[fecha]
-        else:
-            platos_preseleccionados[fecha] = {'almuerzo': None, 'cena': None}
 
-    # Convertir el diccionario en una lista de tuplas
-    platos_elegidos_por_dia_lista = list(platos_preseleccionados.items())
+
+    # platos_elegidos_por_dia = {}
+
+    # # Suponiendo que elegidos_por_dia sea tu diccionario
+
+    # for objeto_elegido in elegidos_por_dia:
+    #     fecha = objeto_elegido.el_dia_en_que_comemos
+    #     plato_almuerzo = objeto_elegido.platos_que_comemos.get("almuerzo", {}).get("plato", None)
+    #     plato_cena = objeto_elegido.platos_que_comemos.get("cena", {}).get("plato", None)
+    #     platos_elegidos_por_dia[fecha] = {"almuerzo": plato_almuerzo, "cena": plato_cena}
+    
+
+    # platos_seleccionados={}
+
+    # for i in range(7):
+    #     fecha = fecha_actual + datetime.timedelta(days=i)
+    #     if fecha in platos_elegidos_por_dia:  # Verificar si la fecha ya está en platos_elegidos_por_dia
+    #         platos_seleccionados[fecha] = platos_elegidos_por_dia[fecha]
+    #     else:
+    #         platos_seleccionados[fecha] = {'almuerzo': None, 'cena': None}
+
+    # # Convertir el diccionario en una lista de tuplas
+    # platos_elegidos_por_dia_lista = list(platos_seleccionados.items())
+
+
+
 
     contexto = {
                 'formulario': form,
                 'platos': platos,
-                'elegidos': platos_elegidos,
-                "tipo_de_vista_estable" :  tipo_de_vista_estable,
-                "tipo_de_vista": tipo_de_vista,
-                "tipo": tipo_parametro,
+                'preseleccionados': platos_preseleccionados,
+                # "tipo_de_vista_estable" :  tipo_de_vista_estable,
+                # "tipo_de_vista": tipo_de_vista,
+                # "tipo": tipo_parametro,
                 "dias_desde_hoy": dias_desde_hoy,
-                "nombre_dia_de_la_semana": nombre_dia_semana,
+                "dias_programados": fechas_existentes,
+                # "nombre_dia_de_la_semana": nombre_dia_semana,
                 "cantidad_platos_sugeridos": cantidad_platos_sugeridos,
                 "cantidad_platos_sugeribles": cantidad_platos_sugeribles,
                 "platos_a_sugerir":  platos_a_sugerir,
-                "platos_elegidos_por_dia": platos_elegidos_por_dia,
-                "platos_elegidos_por_dia_lista": platos_elegidos_por_dia_lista,
-                "guarniciones_presel": guarniciones_presel,
-                "entradas_presel": entradas_presel,
-                "principales_presel": principales_presel,
-                "tragos_presel": tragos_presel,
-                "postres_presel": postres_presel,
-                "salsas_presel": salsas_presel,
-                "dips_presel": dips_presel
+                # "platos_elegidos_por_dia": platos_elegidos_por_dia,
+                # "platos_elegidos_por_dia_lista": platos_elegidos_por_dia_lista, ESTE DA EL COLOR A LOS DIAS CON DATOS
+                # "guarniciones_presel": guarniciones_presel,
+                # "entradas_presel": entradas_presel,
+                # "principales_presel": principales_presel,
+                # "tragos_presel": tragos_presel,
+                # "postres_presel": postres_presel,
+                # "salsas_presel": salsas_presel,
+                # "dips_presel": dips_presel
                }
 
     return render(request, 'AdminVideos/lista_filtrada.html', contexto)
+
+
+@login_required
+def desmarcar_todo(request):
+    # Filtra los registros por usuario logueado y tipo de plato
+    Preseleccionados.objects.filter(usuario=request.user).delete()
+
+    # Redirige a la página anterior o a otra URL
+    return redirect(reverse_lazy('filtro-de-platos'))
 
 
 @login_required
