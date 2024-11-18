@@ -46,10 +46,10 @@ def plato_preseleccionado(request):
 
         if borrar == "borrar":
             # Eliminar el plato de la lista de platos Preseleccionados
-            Preseleccionados.objects.filter(usuario=usuario, nombre_plato_elegido=nombre_plato).delete()
+            Preseleccionados.objects.filter(usuario=usuario, nombre_plato_preseleccionado=nombre_plato).delete()
         else:
             # Agregar el plato a la lista de platos Preseleccionados
-            Preseleccionados.objects.get_or_create(usuario=usuario, nombre_plato_elegido=nombre_plato, tipo_plato=plato_tipo)
+            Preseleccionados.objects.get_or_create(usuario=usuario, nombre_plato_preseleccionado=nombre_plato, tipo_plato=plato_tipo)
 
         # Redirigir manteniendo el parámetro 'tipo-pag'
         return redirect(f"{reverse('filtro-de-platos')}?tipopag={tipo_pag}")
@@ -1005,6 +1005,7 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
 
 
 
+
 class Login(LoginView):
     next_page = reverse_lazy("filtro-de-platos")
 
@@ -1087,7 +1088,7 @@ def FiltroDePlatos (request):
     platos_a_sugerir = ""
     tipo_de_vista = tipo_de_vista_estable
 
-    platos_elegidos = Preseleccionados.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
+    platos_preseleccionados = Preseleccionados.objects.filter(usuario=usuario).values_list('nombre_plato_preseleccionado', flat=True)
 
     if request.method == "POST":
             # post_o_no = "POST, DEFINE INICIALES"
@@ -1146,8 +1147,8 @@ def FiltroDePlatos (request):
             platos =  platos.exclude(propietario_id=request.user.id)
 
         if tipo_de_vista == 'preseleccionados':
-            nombres_platos_elegidos = Preseleccionados.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
-            platos = platos.filter(nombre_plato__in=nombres_platos_elegidos)
+            nombres_platos_preseleccionados = Preseleccionados.objects.filter(usuario=usuario).values_list('nombre_plato_preseleccionado', flat=True)
+            platos = platos.filter(nombre_plato__in=nombres_platos_preseleccionados)
 
         if medios and medios != '-':
             platos = platos.filter(medios=medios)
@@ -1180,21 +1181,21 @@ def FiltroDePlatos (request):
         platos = Plato.objects.all()
 
     if usuario:
-        platos_elegidos = Preseleccionados.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
+        platos_preseleccionados = Preseleccionados.objects.filter(usuario=usuario).values_list('nombre_plato_preseleccionado', flat=True)
 
-        principales_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Principal").values_list('nombre_plato_elegido', flat=True)
+        principales_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Principal").values_list('nombre_plato_preseleccionado', flat=True)
 
-        guarniciones_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Guarnicion").values_list('nombre_plato_elegido', flat=True)
+        guarniciones_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Guarnicion").values_list('nombre_plato_preseleccionado', flat=True)
 
-        salsas_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Trago").values_list('nombre_plato_elegido', flat=True)
+        salsas_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Trago").values_list('nombre_plato_preseleccionado', flat=True)
 
-        tragos_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Trago").values_list('nombre_plato_elegido', flat=True)
+        tragos_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Trago").values_list('nombre_plato_preseleccionado', flat=True)
 
-        dips_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Dip").values_list('nombre_plato_elegido', flat=True)
+        dips_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Dip").values_list('nombre_plato_preseleccionado', flat=True)
 
-        postres_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Postre").values_list('nombre_plato_elegido', flat=True)
+        postres_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Postre").values_list('nombre_plato_preseleccionado', flat=True)
 
-        entradas_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Entrada").values_list('nombre_plato_elegido', flat=True)
+        entradas_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Entrada").values_list('nombre_plato_preseleccionado', flat=True)
 
 
     # Obtén el número de platos sugeridos para el usuario actual
@@ -1228,17 +1229,17 @@ def FiltroDePlatos (request):
     contexto = {
                 'formulario': form,
                 'platos': platos,
-                'elegidos': platos_elegidos,
+                'preseleccionados': platos_preseleccionados,
                 "tipo_de_vista_estable" :  tipo_de_vista_estable,
-                "tipo_de_vista": tipo_de_vista,
+                # "tipo_de_vista": tipo_de_vista,
                 "tipo": tipo_parametro,
                 "dias_desde_hoy": dias_desde_hoy,
-                "nombre_dia_de_la_semana": nombre_dia_semana,
+                # "nombre_dia_de_la_semana": nombre_dia_semana,
                 "cantidad_platos_sugeridos": cantidad_platos_sugeridos,
                 "cantidad_platos_sugeribles": cantidad_platos_sugeribles,
                 "platos_a_sugerir":  platos_a_sugerir,
-                "platos_elegidos_por_dia": platos_elegidos_por_dia,
-                "platos_elegidos_por_dia_lista": platos_elegidos_por_dia_lista,
+                # "platos_elegidos_por_dia": platos_elegidos_por_dia,
+                # "platos_elegidos_por_dia_lista": platos_elegidos_por_dia_lista,
                 "guarniciones_presel": guarniciones_presel,
                 "entradas_presel": entradas_presel,
                 "principales_presel": principales_presel,
@@ -1273,7 +1274,7 @@ def formulario_dia (request, dia):
     plato_dia = ElegidosXDia.objects.filter(user=request.user, el_dia_en_que_comemos=dia ).first()
     # dia_grabado = plato_dia.el_dia_en_que_comemos
 
-    # platos_elegidos = Elegidos.objects.filter(usuario=request.user).values_list('nombre_plato_elegido', flat=True)
+    # platos_elegidos = Elegidos.objects.filter(usuario=request.user).values_list('nombre_plato_preseleccionado', flat=True)
 
 
 
@@ -1329,23 +1330,23 @@ def formulario_dia (request, dia):
 
 
     # Primero obtén el queryset y conviértelo en un set
-    guarniciones_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Guarnicion").values_list('nombre_plato_elegido', flat=True))
+    guarniciones_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Guarnicion").values_list('nombre_plato_preseleccionado', flat=True))
 
-    principales_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Principal").values_list('nombre_plato_elegido', flat=True))
+    principales_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Principal").values_list('nombre_plato_preseleccionado', flat=True))
     principales_presel.update([almuerzo_sel, cena_sel])
     # Opcional: si almuerzo_sel o cena_sel pueden ser None, eliminarlos también NO SÉ POR QUÉ AGREGA UN NONE CADENA
     principales_presel.discard(None)
 
     salsas_presel = set(Preseleccionados.objects.filter(usuario=request.user,
-    tipo_plato="Salsa").values_list('nombre_plato_elegido', flat=True))
+    tipo_plato="Salsa").values_list('nombre_plato_preseleccionado', flat=True))
 
-    tragos_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Trago").values_list('nombre_plato_elegido', flat=True))
+    tragos_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Trago").values_list('nombre_plato_preseleccionado', flat=True))
 
-    dips_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Dip").values_list('nombre_plato_elegido', flat=True))
+    dips_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Dip").values_list('nombre_plato_preseleccionado', flat=True))
 
-    postres_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Postre").values_list('nombre_plato_elegido', flat=True))
+    postres_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Postre").values_list('nombre_plato_preseleccionado', flat=True))
 
-    entradas_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Entrada").values_list('nombre_plato_elegido', flat=True))
+    entradas_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Entrada").values_list('nombre_plato_preseleccionado', flat=True))
 
     # Agrega las variables adicionales al set (esto evitará duplicados automáticamente)
     guarniciones_presel.update([guar1_sel, guar2_sel, guar3_sel, guar4_sel])

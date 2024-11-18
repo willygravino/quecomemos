@@ -74,7 +74,7 @@ class Plato(models.Model):
         (TRAGO,'Trago'),
         (GUARNICION,'Guarnicion'),
     ]
-    
+
     tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, null=False, blank=False)
 
     INDISTINTO = '-'
@@ -113,9 +113,9 @@ def eliminar_registros_relacionados(sender, instance, **kwargs):
     Preseleccionados.objects.filter(usuario=instance.propietario, nombre_plato_elegido=instance.nombre_plato).delete()
     
 class Preseleccionados(models.Model):
-    usuario = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="platos_elegidos", null=True, blank=True)
+    usuario = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="platos_preseleccionados", null=True, blank=True)
     # EL SIGUIENTE CAMPO DEBERÍA LLAMARSE "PLATOS_PRESELECCIONADOS"
-    nombre_plato_elegido = models.CharField(max_length=30)
+    nombre_plato_preseleccionado = models.CharField(max_length=30)
     # indica si es guarnicion, salsa, o lo que sea
     tipo_plato = models.CharField(max_length=30, null=True)
 

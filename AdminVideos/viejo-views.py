@@ -906,16 +906,6 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
     # fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria","preparacion", "tipo","calorias", "image"]
 #    fields = '__all__'
 
-    # PARA CORREGIR EN ALGÚN MOMENTO
-    # def dispatch(self, request, *args, **kwargs):
-    #     # Almacena el valor de 'tipopag' en una variable de instancia
-    #     self.template_param = request.GET.get('tipopag')
-    #     return super().dispatch(request, *args, **kwargs)
-
-    # def get_template_names(self):
-    #     # Usa la variable de instancia en lugar de obtener el parámetro de nuevo
-    #     if self.template_param == 'Entrada':
-
     def get_template_names(self):
         # Obtener el valor del parámetro 'template' desde la URL
         template_param = self.request.GET.get('tipopag')
@@ -938,37 +928,9 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         else:
             # Plantilla por defecto
             return [self.template_name]
-        
-    def get_initial(self):
-        # Llama al método original para obtener el diccionario de inicialización
-        initial = super().get_initial()
-         # Obtener el valor del parámetro 'template' desde la URL
-        template_param = self.request.GET.get('tipopag')
-        
-        # Asigna valores predeterminados al campo 'tipo' según el valor de 'template_param'
-        if template_param == 'Entrada':
-            initial['tipo'] = 'Entrada'
-        elif template_param == 'Salsa':
-            initial['tipo'] = 'Salsa'
-        elif template_param == 'Picada':
-            initial['tipo'] = 'Picada'
-        elif template_param == 'Principal' or template_param == 'Dash':
-            initial['tipo'] = 'Principal'
-        elif template_param == 'Postre':
-            initial['tipo'] = 'Postre'
-        elif template_param == 'Torta':
-            initial['tipo'] = 'Torta'
-        elif template_param == 'Dip':
-            initial['tipo'] = 'Dip'
-        elif template_param == 'Trago':
-            initial['tipo'] = 'Trago'
-        elif template_param == 'Guarnicion':
-            initial['tipo'] = 'Guarnicion'
-        else:
-            # Valor por defecto si 'template_param' no coincide con ninguna condición
-            initial['tipo'] = '-'
 
-        return initial
+
+    
 
     def form_valid(self, form):
         plato = form.save(commit=False)
@@ -989,12 +951,8 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         plato.variedades = variedades
         plato.save()
 
+        return redirect(self.success_url)
 
-        # Obtener el parámetro 'tipopag' y pasarlo en la redirección
-        template_param = self.request.GET.get('tipopag')
-        return redirect(reverse("videos-create") + f"?tipopag={template_param}")
-
-        # return redirect(self.success_url)
 
 
 

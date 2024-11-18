@@ -20,6 +20,8 @@
         <form action="{% url 'menu-elegido' %}" method="post">
             {% csrf_token %}
 
+    <!-- <h6>POST DATA: {{ post_data }}</h6>  -->
+
             {% for fecha, platos in platos_por_dia.items %}
 
             <div class="card">
@@ -28,6 +30,7 @@
                     </h5>
 
                     <h5 class="bg-primary text-white p-2 rounded">ALMUERZO</h5> <!-- Fondo azul con texto blanco -->
+
 
                     {# Entradas #}
                     {% if platos.entrada1.plato %}
@@ -360,21 +363,31 @@
             </div>
 
             {% endfor %}
-            <!-- <input type="submit" value="Actualizar"> -->
+            <input type="submit" value="Editar Lista de Compras">
 
     </section>
 </div>
 
 <div class="col-md-4">
 
-        <!-- <form> -->
+    <!-- <section> -->
+        <form>
 
             <h3>EDITA LISTA DE COMPRAS</h3>
+             <!-- <p>ingredientes_separados_por_comas: {{ ingredientes_separados_por_comas }}</p>   
+            <p>lista de compras: {{ lista_de_compras }}</p>   -->
+            <!-- <p>no incluir: {{ no_incluir }}</p> -->
+
+            <!-- <div class="row">
+                <div class="d-flex"> -->
                 
                     {% if ingredientes_separados_por_comas %}
                         {% for ingrediente, valor  in ingredientes_separados_por_comas.items %}
                             <input type="checkbox" id="{{ ingrediente }}" name="ingrediente_a_comprar" value="{{ ingrediente }}"  {% if valor.estado == "no-tengo" %} checked {% endif %}>
-                        
+                            <!-- <h3>ing >>{{ ingrediente }}<<</h3>
+                            <h3>estado >>{{ valor.estado }}<<</h3> -->
+                            <!-- <h3>comentario >>{{ valor.comentario }}<<</h3>  -->
+
                             <label for="{{ ingrediente }}">{{ ingrediente }}</label>
                             <input type="text" id="{{ ingrediente }}_detalle" value="{{ valor.comentario }}" name="{{ ingrediente }}_detalle">
 
@@ -383,7 +396,18 @@
                     {% else %}
                          <p>No hay ingredientes para comprar. Seleccione menúes.</p>
                     {% endif %}
-                                    
+            
+                        <!-- <i class="fa-solid fa-shrimp" style="font-size: 1.3rem;"></i>
+                        <span>imprimir lista de compras</span>
+                    </a>  -->
+
+                    <input type="submit" value="Imprimir lista de compras y Plan">
+                    <!-- <input type="submit" value="Imprimir Plan de Comidas"> -->
+                <!-- </div>
+            </div> -->
+        </form>
+
+    <!-- </section> -->
 </div>
 
 <div class="col-md-4">
@@ -394,21 +418,22 @@
             {% for item in lista_de_compras %}
               <li>{{ item }}</li>
             {% endfor %} 
+            <!-- <p>lista de compras: {{ mensaje_whatsapp }}</p>   -->
 
             <a href="https://wa.me/5491145342640?text={{ mensaje_whatsapp }}" target="_blank">Enviar lista por WhatsApp</a>
 
           </ul>
-
+<!-- 
+           <h2>{{ lista_de_compras }}</h2> -->
         {% else %}
            <h2>NO HAY INGREDIENTES PARA COMPRAR</h2>
         {% endif %}
 
+
+
+
+
     </section>
 </div>
-
-<input type="submit" value="Actualizar">
-
-</form>
-
 
 {% endblock %}

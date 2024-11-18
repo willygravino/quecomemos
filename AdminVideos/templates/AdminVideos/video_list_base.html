@@ -98,20 +98,19 @@
 </div>
 
 <section>
+  <div class="row">
+    <div class="col">
+      <div class="p-1 d-flex flex-wrap">
+        <div class=" d-flex justify-content-center align-items-center">
+        <!-- <a class="bg-primary" href="{% url 'videos-create' %}"> -->
+          <a class="bg-primary m-3 text-white p-2 small border border-dark" href="{% url 'videos-create' %}?tipopag={{ request.GET.tipopag|default:'' }}">
+            {% if request.GET.tipopag != "Dash" %} AGREGAR {{ request.GET.tipopag }}{% else %} AGREGAR PRINCIPAL{% endif %}
+        </a>
+      </div>
   {% if not platos %}
     <h6>No hay platos para mostrar.</h6>
   {% else %}
-      <div class="row">
-        <div class="col">
-          <div class="p-1 d-flex flex-wrap">
-            <div class=" d-flex justify-content-center align-items-center">
-            <!-- <a class="bg-primary" href="{% url 'videos-create' %}"> -->
-              <a class="bg-primary m-3 text-white p-2 small border border-dark" href="{% url 'videos-create' %}?tipopag={{ request.GET.tipopag|default:'' }}">
-                {% if request.GET.tipopag != "Dash" %} AGREGAR {{ request.GET.tipopag }}{% else %} AGREGAR PRINCIPAL{% endif %}
-            </a>
-        
-          </div>
-
+      
             {% for plato in platos %}
             <div class="d-flex flex-row">
               <div class="col-md-4 mb-3">
