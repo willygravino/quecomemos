@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>SB Admin 2 - Register</title>
+    <title>¿Qué cómemos? · V1.0 - Crear cuenta</title>
 
     <!-- Custom fonts for this template-->
     <link href="{% static 'AdminVideos/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
@@ -34,50 +34,56 @@
                     <div class="col-lg-7">
                         <div class="p-5">
                             <div class="text-center">
-                                <h1 class="h4 text-gray-900 mb-4">Create an Account!</h1>
+                                <h1 class="h4 text-gray-900 mb-4">Crear cuenta:</h1>
                             </div>
-                            <form class="user">
-                                <div class="form-group row">
+                            <form class="user" method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                            
+                                <!-- <div class="form-group row">
                                     <div class="col-sm-6 mb-3 mb-sm-0">
                                         <input type="text" class="form-control form-control-user" id="exampleFirstName"
                                             placeholder="First Name">
                                     </div>
+
                                     <div class="col-sm-6">
                                         <input type="text" class="form-control form-control-user" id="exampleLastName"
                                             placeholder="Last Name">
                                     </div>
-                                </div>
+                                </div> -->
+                                
                                 <div class="form-group">
-                                    <input type="email" class="form-control form-control-user" id="exampleInputEmail"
-                                        placeholder="Email Address">
+                                    <input type="text" name="username" class="form-control form-control-user" autocapitalize="none" autocomplete="username" autofocus="" required="" aria-describedby="id_username_helptext" id="id_username"                          placeholder="Usuario">
                                 </div>
+
                                 <div class="form-group row">
                                     <div class="col-sm-6 mb-3 mb-sm-0">
-                                        <input type="password" class="form-control form-control-user"
-                                            id="exampleInputPassword" placeholder="Password">
+                                        <input class="form-control form-control-user"
+                                        type="password" name="password1" autocomplete="new-password" required="" aria-describedby="id_password1_helptext" id="id_password1" placeholder="Contraseña">
                                     </div>
+
                                     <div class="col-sm-6">
-                                        <input type="password" class="form-control form-control-user"
-                                            id="exampleRepeatPassword" placeholder="Repeat Password">
+                                        <input type="password" name="password2" autocomplete="new-password" required="" aria-describedby="id_password2_helptext" id="id_password2" class="form-control form-control-user" placeholder="Repetí la Contraseña">
                                     </div>
+
                                 </div>
-                                <a href="login.html" class="btn btn-primary btn-user btn-block">
-                                    Register Account
-                                </a>
-                                <hr>
+                                <input class="btn btn-primary btn-user btn-block" type="submit" value="Registrarse">
+                                <!-- <a href="login.html" >
+                                    Registrar Cuenta
+                                </a> -->
+                                <!-- <hr>
                                 <a href="index.html" class="btn btn-google btn-user btn-block">
                                     <i class="fab fa-google fa-fw"></i> Register with Google
                                 </a>
                                 <a href="index.html" class="btn btn-facebook btn-user btn-block">
                                     <i class="fab fa-facebook-f fa-fw"></i> Register with Facebook
-                                </a>
+                                </a> -->
                             </form>
                             <hr>
                             <div class="text-center">
-                                <a class="small" href="forgot-password.html">Forgot Password?</a>
+                                <a class="small" href="forgot-password.html">¿Olvidaste tu contraseña?</a>
                             </div>
                             <div class="text-center">
-                                <a class="small" href="{% url 'login' %}">Already have an account? Login!</a>
+                                <a class="small" href="{% url 'login' %}">¿Tenés una cuenta? ¡Logueate!</a>
                             </div>
                         </div>
                     </div>
@@ -102,16 +108,3 @@
 
 </html>
 
-{% block principal %}
-<div style="margin-top:40px">
-    <form method="post" enctype="multipart/form-data">
-        <center>
-            <p>
-                {% csrf_token %}
-                {{form.as_p}}
-                <input type="submit" value="Registrarse">
-            </p>
-        </center>
-    </form>
-</div>
-{% endblock %}

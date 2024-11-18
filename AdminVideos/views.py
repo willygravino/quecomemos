@@ -901,7 +901,10 @@ class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 class PlatoCreate(LoginRequiredMixin, CreateView):
     model = Plato
     form_class = PlatoForm
-    # template_name = 'AdminVideos/platos_update.html'
+    template_name = 'AdminVideos/platos_update.html'
+    success_url = reverse_lazy("videos-create")
+    # fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria","preparacion", "tipo","calorias", "image"]
+#    fields = '__all__'
 
     def get_template_names(self):
         # Obtener el valor del parámetro 'template' desde la URL
@@ -927,9 +930,7 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             return [self.template_name]
 
 
-    success_url = reverse_lazy("videos-create")
-    # fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria","preparacion", "tipo","calorias", "image"]
-#    fields = '__all__'
+    
 
     def form_valid(self, form):
         plato = form.save(commit=False)
@@ -981,7 +982,7 @@ def user_logout(request):
 class ProfileCreate(LoginRequiredMixin, CreateView):
     model = Profile
     success_url = reverse_lazy("filtro-de-platos")
-    fields = ["nombre_completo","avatar"]
+    fields = ["nombre", "apellido", "telefono","avatar"]
 
     def form_valid(self, form):
         el_user = form.save(commit=False)
@@ -992,7 +993,7 @@ class ProfileCreate(LoginRequiredMixin, CreateView):
 class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
     model = Profile
     success_url = reverse_lazy("filtro-de-platos")
-    fields = ["nombre_completo","avatar"]
+    fields = ["nombre", "apellido", "telefono","avatar"]
 
     def test_func(self):
         return Profile.objects.filter(user=self.request.user).exists()

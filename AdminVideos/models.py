@@ -142,7 +142,9 @@ class ElegidosXDia(models.Model):
 
 class Profile(models.Model):
      user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
-     nombre_completo = models.CharField(max_length=80, blank=False)
+     nombre = models.CharField(max_length=50, null=True, blank=True)
+     apellido = models.CharField(max_length=50, null=True, blank=True)
+     telefono = models.CharField(max_length=15, null=True, blank=True)
      avatar = models.ImageField(upload_to="avatares", null=True, blank=True)
      ingredientes_que_tengo = models.JSONField(default=list, blank=True)
     #  por qué default list?
