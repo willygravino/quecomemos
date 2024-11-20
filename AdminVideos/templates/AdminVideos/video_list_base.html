@@ -4,6 +4,7 @@
 
 {% block un_video %}
 
+<!-- ********** EL SISTEMA RANDOM -->
 
 <!-- {% if tipo_de_vista_estable == "random-todos" or tipo_de_vista_estable == "random-con-mios" %}
   <h6>CANTIDAD DE PLATOS SUGERIDOS {{ cantidad_platos_sugeridos }}</h6>
@@ -18,81 +19,32 @@
   {% endif %}
 {% endif %} -->
 
+<!-- ********** EL SISTEMA RANDOM -->
+<!--  
+<p>el_request_quecomemos: {{ el_request_quecomemos }}</p>
+<p>el_request: {{ el_request }}</p> -->
+
 
 
 <div class="container">
 
   <div class="row">
       <div class="col">
-<!-- 
-        <h1> pre-elegidos: {{ preseleccionados }} </h1>
-        <h1> dias programados: {{ dias_programados }} </h1> -->
-
-       <!--  <h1> principales presel: {{ principales_presel }} </h1>
-        <h1> guarnic: {{ guarniciones_presel }} </h1> -->
-
-
-        <!-- <p >PLATOS ELEGIDOS POR DÍA LISTA {{platos_elegidos_por_dia_lista }}</p> -->
-
 
         <div class="d-flex flex-wrap justify-content-between">
 
-        <a href="{% url 'formulario-dia' dia=dias_desde_hoy.0.0|date:'Y-m-d' %}" class= {% if dias_desde_hoy.0.0 in dias_programados %} "bg-success" {% else %}"bg-primary" {% endif %} >
-          <div class=" text-white p-3 small border border-dark al"> 
-            <p >{{ dias_desde_hoy.0.0|date:"l j" }}</p>
-              <!-- <p >Almuerzo: {{platos_elegidos_por_dia_lista.0.1.almuerzo}}</p>
-              <p >Cena: {{platos_elegidos_por_dia_lista.0.1.cena}}</p> -->
-            </div>
-        </a>
-
-        <a href="{% url 'formulario-dia' dia=dias_desde_hoy.1.0|date:'Y-m-d' %}" class={% if dias_desde_hoy.1.0 in dias_programados %} "bg-success" {% else %}"bg-primary" {% endif %}>
-          <div class="text-white p-3 small border border-dark al"> 
-            <p>{{ dias_desde_hoy.1.0|date:"l j" }}</p>
-              <!-- <p >Almuerzo: {{platos_elegidos_por_dia_lista.1.1.almuerzo}}</p>
-              <p >Cena: {{platos_elegidos_por_dia_lista.1.1.cena}}</p> -->
-            </div>
-          </a>
-          
-
-          <a href="{% url 'formulario-dia' dia=dias_desde_hoy.2.0|date:'Y-m-d' %}" class={% if dias_desde_hoy.2.0 in dias_programados %} "bg-success" {% else %}"bg-primary" {% endif %}>
-            <div class=" text-white p-3 small border border-dark al"> 
-              <p>{{ dias_desde_hoy.2.0|date:"l j" }}</p>
-            <!-- <p >Almuerzo: {{platos_elegidos_por_dia_lista.2.1.almuerzo}}</p>
-            <p >Cena: {{platos_elegidos_por_dia_lista.2.1.cena}}</p> -->
-           </div>
-          </a>
-
-          <a href="{% url 'formulario-dia' dia=dias_desde_hoy.3.0|date:'Y-m-d' %}" class={% if dias_desde_hoy.3.0 in dias_programados %} "bg-success" {% else %}"bg-primary" {% endif %}>
-            <div class=" text-white p-3 small border border-dark al"> 
-              <p>{{ dias_desde_hoy.3.0|date:"l j" }}</p>
-              <!-- <p >Almuerzo: {{platos_elegidos_por_dia_lista.3.1.almuerzo}}</p>
-              <p >Cena: {{platos_elegidos_por_dia_lista.3.1.cena}}</p> -->
-            </div>
-          </a>
-
-          <a href="{% url 'formulario-dia' dia=dias_desde_hoy.4.0|date:'Y-m-d' %}" class={% if dias_desde_hoy.4.0 in dias_programados %} "bg-success" {% else %}"bg-primary" {% endif %}>
-            <div class="text-white p-3 small border border-dark al"> 
-              <p>{{ dias_desde_hoy.4.0|date:"l j" }}</p>
-              <!-- <p >Almuerzo: {{platos_elegidos_por_dia_lista.4.1.almuerzo}}</p>
-              <p >Cena: {{platos_elegidos_por_dia_lista.4.1.cena}}</p> -->
-            </div>
-          </a>
-
-          <a href="{% url 'formulario-dia' dia=dias_desde_hoy.5.0|date:'Y-m-d' %}" class={% if dias_desde_hoy.5.0 in dias_programados %} "bg-success" {% else %}"bg-primary" {% endif %}>
-            <div class="text-white p-3 small border border-dark al"> 
-              <p>{{ dias_desde_hoy.5.0|date:"l j" }}</p>
-              <!-- <p >Almuerzo: {{platos_elegidos_por_dia_lista.5.1.almuerzo}}</p>
-              <p >Cena: {{platos_elegidos_por_dia_lista.5.1.cena}}</p> -->
-            </div>
-          </a>
-
-          <a href="{% url 'formulario-dia' dia=dias_desde_hoy.6.0|date:'Y-m-d' %}" class={% if dias_desde_hoy.6.0 in dias_programados %} "bg-success" {% else %}"bg-primary" {% endif %}>
-            <div class="text-white p-3 small border border-dark al"> 
-              <p>{{ dias_desde_hoy.6.0|date:"l j" }}</p>
-              <!-- <p >Almuerzo: {{platos_elegidos_por_dia_lista.6.1.almuerzo}}</p>
-              <p >Cena: {{platos_elegidos_por_dia_lista.6.1.cena}}</p> -->
-            </div>
-          </a>
+          {% for dia, platos in dias_desde_hoy %}
+            <a href="{% url 'formulario-dia' dia=dia|date:'Y-m-d' %}" 
+                class={% if dia in dias_programados %} "bg-success" {% else %}"bg-primary" {% endif %}>
+              <div class="text-white p-3 small border border-dark al"> 
+                <p>{{ dia|date:"l j" }}</p>
+                <!-- 
+                <p>Almuerzo: {{ platos.almuerzo }}</p>
+                <p>Cena: {{ platos.cena }}</p>
+                -->
+              </div>
+            </a>
+          {% endfor %}
 
         </div>
       </div>
@@ -106,16 +58,13 @@
   DESMARCAR PRESELECCIONADOS
 </a>
 
-
 <hr>
-
 
 <section>
   <div class="row">
     <div class="col">
       <div class="p-1 d-flex flex-wrap">
         <div class=" d-flex justify-content-center align-items-center">
-        <!-- <a class="bg-primary" href="{% url 'videos-create' %}"> -->
           <a class="bg-primary m-3 text-white p-2 small border border-dark" href="{% url 'videos-create' %}?tipopag={{ request.GET.tipopag|default:'' }}">
             {% if request.GET.tipopag != "Dash" %} AGREGAR {{ request.GET.tipopag }}{% else %} AGREGAR PRINCIPAL{% endif %}
         </a>
@@ -127,7 +76,8 @@
             {% for plato in platos %}
             <div class="d-flex flex-row">
               <div class="col-md-4 mb-3">
-                <div class="card" style="width: 10rem;">
+                <div {% if user.id == plato.propietario.id %} class="card border border-success" {% else %} class="card border border-danger" {% endif %}
+                style="width: 10rem;">
                   <div class="container p-0">
                       <a href="{% url 'videos-detail' plato.id %}">
                         <img src="{{plato.image_url}}" class="img-fluid position-relative object-fit-cover" alt="Imagen del Plato">
@@ -178,10 +128,6 @@
       </div>
     {% endif %}
 
-
-
 </section>
-
-
 
 {% endblock %}

@@ -18,6 +18,8 @@ from datetime import datetime, timedelta
 from .forms import PlatoFilterForm, PlatoForm
 from django.views.generic import TemplateView
 from datetime import date, datetime
+from django.contrib.auth.models import User  # Asegúrate de importar el modelo User
+
 import datetime
 
 
@@ -1068,45 +1070,44 @@ def FiltroDePlatos (request):
         nombre_dia = fecha.strftime('%A')
         dias_desde_hoy.append((fecha, nombre_dia))
 
-    cantidad_platos_sugeribles = 0
-
-    tipo_de_vista_estable = request.session.get('tipo_de_vista_estable', "Todos")
-
     medios = request.session.get('medios_estable', "None")
     categoria = request.session.get('categoria_estable', "None")
     preparacion = request.session.get('preparacion_estable', "None")
     calorias = request.session.get('calorias_estable', "None")
 
-    usuario = request.user
-    cantidad_platos_sugeridos = 0
-    platos_a_sugerir = ""
-    tipo_de_vista = tipo_de_vista_estable
+    quecomemos = request.session.get('quecomemos', "None")
+    misplatos = request.session.get('misplatos', "misplatos")
+    preseleccionados = request.session.get('preseleccionados', "None")
 
-    # SI NO FINCIONA BIEN, ACTIVARLO AGAIN!!
-    # platos_preseleccionados = Preseleccionados.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
+    usuario = request.user
 
     if request.method == "POST":
 
             form = PlatoFilterForm(request.POST)
 
             if form.is_valid():
-                tipo_de_vista = form.cleaned_data.get('tipo_de_vista')
+            
                 medios = form.cleaned_data.get('medios')
                 categoria = form.cleaned_data.get('categoria')
                 preparacion = form.cleaned_data.get('preparacion')
                 calorias = form.cleaned_data.get('calorias')
 
-                # Guardar el valor de tipo_de_vista en la sesión
-                request.session['tipo_de_vista_estable'] =  tipo_de_vista
-                tipo_de_vista_estable = tipo_de_vista
                 request.session['medios_estable'] = medios
                 request.session['categoria_estable'] = categoria
                 request.session['preparacion_estable'] = preparacion
                 request.session['calorias_estable'] = calorias
 
+                quecomemos = request.POST.get('quecomemos')
+                misplatos = request.POST.get('misplatos')
+                preseleccionados = request.POST.get('preseleccionados')
+    
+                request.session['quecomemos'] = quecomemos
+                request.session['misplatos'] = misplatos
+                request.session['preseleccionados'] = preseleccionados
+
     else:
         items_iniciales = {
-                        'tipo_de_vista': tipo_de_vista_estable,
+                       
                         'medios': medios,
                         'categoria': categoria,
                         'preparacion': preparacion,
@@ -1115,142 +1116,51 @@ def FiltroDePlatos (request):
  
         form = PlatoFilterForm(initial=items_iniciales)
 
-    platos = Plato.objects.all()
+    usuario_quecomemos = User.objects.get(username="quecomemos") # type: ignore
+    platos = Plato.objects.filter(propietario__in=[usuario_quecomemos, usuario])
 
+    # TOMAR EL TIPO DEL MENÚ    !!!!!!!!!!!!!!
     # Obtener el valor del parámetro 'tipo' desde la URL
     tipo_parametro = request.GET.get('tipopag', '')
 
-    if tipo_parametro == "Dash":
-        tipo_parametro = ""
-
-    if tipo_parametro:
+    if tipo_parametro and tipo_parametro != "Dash":
        platos = platos.filter(tipo=tipo_parametro)
+    
+    if quecomemos != "quecomemos":
+       platos =  platos.exclude(propietario__username="quecomemos")
 
-    if tipo_de_vista != 'Todos':
-        if tipo_de_vista == 'solo-mios' or tipo_de_vista=="random-con-mios":
-            platos = platos.filter(propietario_id=request.user.id)
+    if misplatos != "misplatos":
+       platos =  platos.exclude(propietario_id=request.user.id)
 
-        if tipo_de_vista == 'de-otros':
-            platos =  platos.exclude(propietario_id=request.user.id)
+    if preseleccionados == "preseleccionados":
+         nombres_platos_elegidos = Preseleccionados.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
+         platos = platos.filter(nombre_plato__in=nombres_platos_elegidos)
 
-        if tipo_de_vista == 'preseleccionados':
-            nombres_platos_elegidos = Preseleccionados.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
-            platos = platos.filter(nombre_plato__in=nombres_platos_elegidos)
+    if medios and medios != '-':
+        platos = platos.filter(medios=medios)
+    if categoria and categoria != '-':
+                    platos = platos.filter(categoria=categoria)
+    if preparacion and preparacion != '-':
+        platos = platos.filter(preparacion=preparacion)
 
-        if medios and medios != '-':
-            platos = platos.filter(medios=medios)
-        if categoria and categoria != '-':
-                        platos = platos.filter(categoria=categoria)
-        if preparacion and preparacion != '-':
-            platos = platos.filter(preparacion=preparacion)
-
-        if calorias and calorias != '-':
-            platos = platos.filter(calorias=calorias)
-
-        if tipo_de_vista=="random-todos" or tipo_de_vista=="random-con-mios":
-            # Obtén los platos sugeridos asociados al usuario logueado
-            platos_sugeridos_usuario = Sugeridos.objects.filter(usuario_de_sugeridos=usuario).values_list('nombre_plato_sugerido', flat=True)
-            platos_a_sugerir = platos
-            cantidad_platos_sugeribles = platos.count()
-            # Excluye los platos sugeridos de la lista general de platos
-            platos = platos.exclude(nombre_plato__in=platos_sugeridos_usuario)
-            platos_a_sugerir = platos
-            # cantidad_platos_sugeribles = platos.count()
-            platos = platos.order_by('?')[:4]
-            # Obtiene los primeros cuatro platos de la lista
-            platos_sugeridos = platos[:4]
-            platos = platos_sugeridos
-            # Crea y guarda una instancia de Sugeridos para cada uno de los primeros platos
-            for plato in platos_sugeridos:
-                Sugeridos.objects.get_or_create(usuario_de_sugeridos=usuario, nombre_plato_sugerido=plato.nombre_plato)
-    else:
-        # pasa_por_aca ="SUMA TODOS"+tipo_de_vista
-        platos = Plato.objects.all()
+    if calorias and calorias != '-':
+        platos = platos.filter(calorias=calorias)
 
     if usuario:
         platos_preseleccionados = Preseleccionados.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
-
-        # principales_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Principal").values_list('nombre_plato_elegido', flat=True)
-
-        # guarniciones_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Guarnicion").values_list('nombre_plato_elegido', flat=True)
-
-        # salsas_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Trago").values_list('nombre_plato_elegido', flat=True)
-
-        # tragos_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Trago").values_list('nombre_plato_elegido', flat=True)
-
-        # dips_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Dip").values_list('nombre_plato_elegido', flat=True)
-
-        # postres_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Postre").values_list('nombre_plato_elegido', flat=True)
-
-        # entradas_presel = Preseleccionados.objects.filter(usuario=usuario, tipo_plato="Entrada").values_list('nombre_plato_elegido', flat=True)
-
-
-    # Obtén el número de platos sugeridos para el usuario actual
-    # cantidad_platos_sugeridos = Sugeridos.objects.filter(usuario_de_sugeridos=usuario).count()
-
+     
     # Filtra las fechas únicas en `el_dia_en_que_comemos` para los objetos del usuario actual
     fechas_existentes = ElegidosXDia.objects.filter(user=request.user,el_dia_en_que_comemos__gte=fecha_actual).values_list('el_dia_en_que_comemos', flat=True).distinct()
-
-
-    # Obtén los objetos ElegidosXDia asociados al usuario actual
-    # elegidos_por_dia = ElegidosXDia.objects.filter(user=request.user)
-
-    # # Obtén los objetos ElegidosXDia asociados al usuario actual
-    # elegidos_por_dia = ElegidosXDia.objects.filter(user=request.user, el_dia_en_que_comemos__gte=fecha_actual)
-
-
-
-
-
-
-    # platos_elegidos_por_dia = {}
-
-    # # Suponiendo que elegidos_por_dia sea tu diccionario
-
-    # for objeto_elegido in elegidos_por_dia:
-    #     fecha = objeto_elegido.el_dia_en_que_comemos
-    #     plato_almuerzo = objeto_elegido.platos_que_comemos.get("almuerzo", {}).get("plato", None)
-    #     plato_cena = objeto_elegido.platos_que_comemos.get("cena", {}).get("plato", None)
-    #     platos_elegidos_por_dia[fecha] = {"almuerzo": plato_almuerzo, "cena": plato_cena}
-    
-
-    # platos_seleccionados={}
-
-    # for i in range(7):
-    #     fecha = fecha_actual + datetime.timedelta(days=i)
-    #     if fecha in platos_elegidos_por_dia:  # Verificar si la fecha ya está en platos_elegidos_por_dia
-    #         platos_seleccionados[fecha] = platos_elegidos_por_dia[fecha]
-    #     else:
-    #         platos_seleccionados[fecha] = {'almuerzo': None, 'cena': None}
-
-    # # Convertir el diccionario en una lista de tuplas
-    # platos_elegidos_por_dia_lista = list(platos_seleccionados.items())
-
-
-
 
     contexto = {
                 'formulario': form,
                 'platos': platos,
                 'preseleccionados': platos_preseleccionados,
-                # "tipo_de_vista_estable" :  tipo_de_vista_estable,
-                # "tipo_de_vista": tipo_de_vista,
-                # "tipo": tipo_parametro,
                 "dias_desde_hoy": dias_desde_hoy,
                 "dias_programados": fechas_existentes,
-                # "nombre_dia_de_la_semana": nombre_dia_semana,
-                "cantidad_platos_sugeridos": cantidad_platos_sugeridos,
-                "cantidad_platos_sugeribles": cantidad_platos_sugeribles,
-                "platos_a_sugerir":  platos_a_sugerir,
-                # "platos_elegidos_por_dia": platos_elegidos_por_dia,
-                # "platos_elegidos_por_dia_lista": platos_elegidos_por_dia_lista, ESTE DA EL COLOR A LOS DIAS CON DATOS
-                # "guarniciones_presel": guarniciones_presel,
-                # "entradas_presel": entradas_presel,
-                # "principales_presel": principales_presel,
-                # "tragos_presel": tragos_presel,
-                # "postres_presel": postres_presel,
-                # "salsas_presel": salsas_presel,
-                # "dips_presel": dips_presel
+                "quecomemos_ck": quecomemos,
+                "misplatos_ck": misplatos,
+                "preseleccionados_ck": preseleccionados,
                }
 
     return render(request, 'AdminVideos/lista_filtrada.html', contexto)

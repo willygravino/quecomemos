@@ -25,3 +25,66 @@
       </div>
     </section>
   {% endif %}
+
+  
+
+
+
+
+
+  <a href="{% url 'formulario-dia' dia=dias_desde_hoy.0.0|date:'Y-m-d' %}" class= {% if dias_desde_hoy.0.0 in dias_programados %} "bg-success" {% else %}"bg-primary" {% endif %} >
+    <div class=" text-white p-3 small border border-dark al"> 
+      <p >{{ dias_desde_hoy.0.0|date:"l j" }}</p>
+        <!-- <p >Almuerzo: {{platos_elegidos_por_dia_lista.0.1.almuerzo}}</p>
+        <p >Cena: {{platos_elegidos_por_dia_lista.0.1.cena}}</p> -->
+      </div>
+  </a>
+
+  <a href="{% url 'formulario-dia' dia=dias_desde_hoy.1.0|date:'Y-m-d' %}" class={% if dias_desde_hoy.1.0 in dias_programados %} "bg-success" {% else %}"bg-primary" {% endif %}>
+    <div class="text-white p-3 small border border-dark al"> 
+      <p>{{ dias_desde_hoy.1.0|date:"l j" }}</p>
+        <!-- <p >Almuerzo: {{platos_elegidos_por_dia_lista.1.1.almuerzo}}</p>
+        <p >Cena: {{platos_elegidos_por_dia_lista.1.1.cena}}</p> -->
+      </div>
+    </a>
+    
+
+    <a href="{% url 'formulario-dia' dia=dias_desde_hoy.2.0|date:'Y-m-d' %}" class={% if dias_desde_hoy.2.0 in dias_programados %} "bg-success" {% else %}"bg-primary" {% endif %}>
+      <div class=" text-white p-3 small border border-dark al"> 
+        <p>{{ dias_desde_hoy.2.0|date:"l j" }}</p>
+      <!-- <p >Almuerzo: {{platos_elegidos_por_dia_lista.2.1.almuerzo}}</p>
+      <p >Cena: {{platos_elegidos_por_dia_lista.2.1.cena}}</p> -->
+     </div>
+    </a>
+
+    <a href="{% url 'formulario-dia' dia=dias_desde_hoy.3.0|date:'Y-m-d' %}" class={% if dias_desde_hoy.3.0 in dias_programados %} "bg-success" {% else %}"bg-primary" {% endif %}>
+      <div class=" text-white p-3 small border border-dark al"> 
+        <p>{{ dias_desde_hoy.3.0|date:"l j" }}</p>
+        <!-- <p >Almuerzo: {{platos_elegidos_por_dia_lista.3.1.almuerzo}}</p>
+        <p >Cena: {{platos_elegidos_por_dia_lista.3.1.cena}}</p> -->
+      </div>
+    </a>
+
+    <a href="{% url 'formulario-dia' dia=dias_desde_hoy.4.0|date:'Y-m-d' %}" class={% if dias_desde_hoy.4.0 in dias_programados %} "bg-success" {% else %}"bg-primary" {% endif %}>
+      <div class="text-white p-3 small border border-dark al"> 
+        <p>{{ dias_desde_hoy.4.0|date:"l j" }}</p>
+        <!-- <p >Almuerzo: {{platos_elegidos_por_dia_lista.4.1.almuerzo}}</p>
+        <p >Cena: {{platos_elegidos_por_dia_lista.4.1.cena}}</p> -->
+      </div>
+    </a>
+
+    <a href="{% url 'formulario-dia' dia=dias_desde_hoy.5.0|date:'Y-m-d' %}" class={% if dias_desde_hoy.5.0 in dias_programados %} "bg-success" {% else %}"bg-primary" {% endif %}>
+      <div class="text-white p-3 small border border-dark al"> 
+        <p>{{ dias_desde_hoy.5.0|date:"l j" }}</p>
+        <!-- <p >Almuerzo: {{platos_elegidos_por_dia_lista.5.1.almuerzo}}</p>
+        <p >Cena: {{platos_elegidos_por_dia_lista.5.1.cena}}</p> -->
+      </div>
+    </a>
+
+    <a href="{% url 'formulario-dia' dia=dias_desde_hoy.6.0|date:'Y-m-d' %}" class={% if dias_desde_hoy.6.0 in dias_programados %} "bg-success" {% else %}"bg-primary" {% endif %}>
+      <div class="text-white p-3 small border border-dark al"> 
+        <p>{{ dias_desde_hoy.6.0|date:"l j" }}</p>
+        <!-- <p >Almuerzo: {{platos_elegidos_por_dia_lista.6.1.almuerzo}}</p>
+        <p >Cena: {{platos_elegidos_por_dia_lista.6.1.cena}}</p> -->
+      </div>
+    </a>

@@ -381,7 +381,9 @@
                             <br>
                         {% endfor %}
                     {% else %}
-                         <p>No hay ingredientes para comprar. Seleccione menúes.</p>
+                    <div class="badge bg-primary text-wrap" style="width: 6rem;">
+                        NO HAY INGREDIENTES PARA COMPRAR
+                      </div>
                     {% endif %}
                                     
 </div>
@@ -400,13 +402,16 @@
           </ul>
 
         {% else %}
-           <h2>NO HAY INGREDIENTES PARA COMPRAR</h2>
+          <div class="badge bg-primary text-wrap" style="width: 6rem;">
+            NO HAY INGREDIENTES PARA COMPRAR
+          </div>
+           <!-- <h2>NO HAY INGREDIENTES PARA COMPRAR</h2> -->
         {% endif %}
 
     </section>
 </div>
 
-<input type="submit" value="Actualizar">
+<input type="submit" value="Actualizar" class="btn btn-success">
 
 </form>
 
