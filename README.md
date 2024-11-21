@@ -1,3 +1,9 @@
+PARA ACTUALIZAR REQUIREMENTS.TXT USAR
+pip freeze > requirements.txt 
+
+
+
+
 # GUILLERMO-GRAVINO-TRABAJO-FINAL
 Proyecto Final Coder House - Python
 Comisión: #48405
