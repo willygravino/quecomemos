@@ -5,10 +5,10 @@
 {% block filtro %}
 
 <form method="POST">
-  <div class="d-flex justify-content-start mx-3 gap-3">
+  <div class="d-flex justify-content-between mx-3 gap-2">
 
     {% csrf_token %}
-<!-- 
+    <!-- 
      <select class="form-select" aria-label="Medios" name="medios" id="id_medios">
             {% for field in formulario.medios %}
               <option value="{{field.data.value}}" {% if field.data.selected %}checked{% endif %}></option>
@@ -16,29 +16,36 @@
             {% endfor %}
       </select> -->
 
-      <span>Medios: {{ formulario.medios }}</span>
+    <span>Medios: {{ formulario.medios }}</span>
     <span>Categoría: {{ formulario.categoria }}</span>
     <span>Preparación: {{ formulario.preparacion }}</span>
-
-
 
     <!-- <span>Tipo: {{ formulario.tipo }}</span> -->
 
     <!-- <br> -->
 
-    <div class="form-check">
-      <input class="form-check-input" type="checkbox" name="quecomemos" value="quecomemos" id="quecomemos" {% if quecomemos_ck == "quecomemos" %} checked {% endif %}>
-      <label class="form-check-label small" for="quecomemos">
-        Sugerencia <br> quecomemos
-      </label>
-    </div>
-
-    <div class="form-check">
-      <input class="form-check-input" type="checkbox" name="misplatos" value="misplatos" id="misplatos" {% if misplatos_ck == "misplatos" %} checked {% endif %}>
-      <label class="form-check-label small" for="misplatos">
-        Mis platos
-      </label>
-    </div>
+    {% if  user.username  != "quecomemos" %}
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="quecomemos" value="quecomemos" id="quecomemos" {% if quecomemos_ck == "quecomemos" %} checked {% endif %}>
+        <label class="form-check-label small" for="quecomemos">
+          Sugerencia <br> quecomemos
+        </label>
+      </div>      
+      
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="misplatos" value="misplatos" id="misplatos" {% if misplatos_ck == "misplatos" %} checked {% endif %}>
+        <label class="form-check-label small" for="misplatos">
+          Mis platos
+        </label>
+      </div>
+      
+    {% else %}
+        <!-- <span class="form-check-label small text-center border rounded bg-success text-white">
+          MODO <br> ADMINISTRADOR
+        </span> -->
+        <!-- Campo oculto -->
+        <input type="hidden" name="misplatos" value="misplatos">
+    {% endif %}
 
     <div class="form-check">
       <input class="form-check-input" type="checkbox" name="preseleccionados" value="preseleccionados" id="preseleccionados" {% if preseleccionados_ck == "preseleccionados" %} checked {% endif %}>

@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path
 from django.contrib.auth.views import LogoutView
 
-from AdminVideos.views import formulario_dia, index, PlatoUpdate, PlatoDelete, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, plato_preseleccionado, grabar_menu_elegido,SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, user_logout, desmarcar_todo # VistaInicial ,Logout, MensajeCreate, MensajeList, MensajeDelete, PlatoList, PlatosMineList, PlatosElegidosMenu, elecion_de_lista, PlatosDeOtros,, LogtViews, MenuElegido, lista_de_compras
+from AdminVideos.views import amigue_borrar, amigues, formulario_dia, index, PlatoUpdate, PlatoDelete, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, plato_preseleccionado, grabar_menu_elegido,SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, sumar_amigue, user_logout, desmarcar_todo, MensajeCreate, MensajeList, MensajeDelete # VistaInicial ,Logout, , PlatoList, PlatosMineList, PlatosElegidosMenu, elecion_de_lista, PlatosDeOtros,, LogtViews, MenuElegido, lista_de_compras
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -27,7 +27,9 @@ urlpatterns = [
     path('', index, name="index"),
     path('plato/elegido', plato_preseleccionado, name="plato-preseleccionado"),
     path('plato/grabar', grabar_menu_elegido, name="grabar-menu"),
-    path('menu/elegido',  lista_de_compras, name="menu-elegido"),
+    path('menu/elegido',lista_de_compras, name="menu-elegido"),
+    path('menu/amigues',amigues, name="amigues"),
+    path('menu/amigues/sumar',sumar_amigue, name="sumar_amigue"),
     path('formulario/dia/<str:dia>/',  formulario_dia, name="formulario-dia"),
     path('desmarcar/',  desmarcar_todo, name="desmarcar-todo"),
     # path('lista/compras-y-plan', lista_y_plan, name="lista-y-plan"),
@@ -44,9 +46,11 @@ urlpatterns = [
     path('perfil/crear', ProfileCreate.as_view(), name="profile-create"),
     path('profile/<pk>/update', ProfileUpdate.as_view(), name="profile-update"),
     path('about', about, name="about"),
-   # path('mensaje/list', MensajeList.as_view(), name="mensaje-list" ),
-   # path('mensaje/create', MensajeCreate.as_view(), name="mensaje-create" ),
-   # path('mensaje/<pk>/delete', MensajeDelete.as_view(), name="mensaje-delete"),
+    path('mensaje/list', MensajeList.as_view(), name="mensaje-list" ),
+    path('mensaje/create', MensajeCreate.as_view(), name="mensaje-create" ),
+    path('mensaje/<pk>/delete', MensajeDelete.as_view(), name="mensaje-delete"),
+    path('menu/amigue/<pk>/borrar', amigue_borrar, name="amigue-borrar"),
+
 
      
 ]

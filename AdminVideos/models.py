@@ -78,7 +78,7 @@ class Plato(models.Model):
         (GUARNICION,'Guarnicion'),
     ]
     
-    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, null=False, blank=False)
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, null=False, default="", blank=False)
 
     INDISTINTO = '-'
     CALORICO = 'Calórico'
@@ -151,7 +151,8 @@ class Profile(models.Model):
      avatar = models.ImageField(upload_to="avatares", null=True, blank=True)
      ingredientes_que_tengo = models.JSONField(default=list, blank=True)
     #  por qué default list?
-     comentarios = models.JSONField(default=list, blank=True) 
+     comentarios = models.JSONField(default=list, blank=True)
+     amigues = models.JSONField(default=list, blank=True)
 
      @property
      def avatar_url(self):
@@ -159,8 +160,9 @@ class Profile(models.Model):
      
      
 class Mensaje(models.Model):
+    usuario_que_envia = models.CharField(max_length=15, null=True, blank=True)
     mensaje = models.TextField(max_length=1000)
-    email = models.EmailField()
+    amistad = models.CharField(max_length=9, null=True, blank=True)
     creado_el = models.DateTimeField(auto_now_add=True) 
     destinatario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="mensajes")
 

@@ -8,7 +8,7 @@
    <section class="py-1 text-center container">
      <div class="row py-lg-1">
        <div class="col-lg-8 col-md-8 mx-auto">
-         <h1 class="fw-light">Completá en formulario para enviar un mensaje al usuario que elijas.</h1>
+         <h1 class="fw-light">Enviar solicitud de amistad a:</h1>
        </div>
      </div>
    </section>
@@ -18,8 +18,28 @@
    <center>
       <p>    
            {% csrf_token %}
-            {{form.as_p}}
-            <input type="submit" value="Enviar">
+           
+           <!-- <label for="id_usuario_que_envia">Usuario que envía: {{user.username}}</label>
+           <input type="text" name="usuario_que_envia" maxlength="15" id="id_usuario_que_envia">
+           <br><br> -->
+
+           <input type="hidden" name="usuario_que_envia" value="{{ user.username }}">
+           
+           <textarea name="mensaje" cols="40" rows="10" maxlength="1000" required="" aria-invalid="true" id="id_mensaje"></textarea>
+
+           <p>
+            <label for="id_amistad">Amistad:</label>
+            <input type="text" name="amistad" maxlength="9" id="id_amistad">
+          </p>
+                   
+          </select>
+           <select name="destinatario" required=""  aria-invalid="true" id="id_destinatario">
+            {% for choice in form.fields.destinatario.choices %}
+              <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+            {% endfor %}
+          </select>
+
+           <input type="submit" value="Enviar">
       </p>
     </center>
 </form>

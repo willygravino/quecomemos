@@ -1,0 +1,16 @@
+{% extends "AdminVideos/index.html" %}
+
+{% load static %}
+
+{% block un_video %}
+
+<h1>Lista de Amigues</h1>
+<ul>
+  {% for amigue in amigues %}
+  <!-- TODO ESTO TAL VEZ HAY QUE HACERLO EN REALIDAD CON ID QUE ES ÚNICO, AUNQUE USUARUI TAMBIÉN DEBERÍA SERLO /// -->
+    <li>{{ amigue }}</li> <a href="{% url 'amigue-borrar' amigue %}">Borrar</a>
+
+  {% endfor %}
+</ul>
+
+{% endblock %}

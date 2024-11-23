@@ -2,44 +2,54 @@
 
 {% load static %}
 
- {% block principal %}
- 
-    
-{% if mensajes %} 
-    {% for mensaje in mensajes  %}
-    <section class="py-1 text-center container">
-      <div class="row py-lg-1">
-        <div class="col-lg-8 col-md-8 mx-auto">
-          <h1 class="fw-light">Mis Mensajes.</h1>
-          <p class="lead text-body-secondary">Estos son los mensajes que dejaron para vos.</p>
+{% block principal %}
 
-        </div>
+{% if mensajes %} 
+  <section class="py-1 text-center container">
+    <div class="row py-lg-1">
+      <div class="col-lg-8 col-md-8 mx-auto">
+        <h1 class="fw-light">Mis Mensajes.</h1>
+        <p class="lead text-body-secondary">Estos son los mensajes que dejaron para vos.</p>
       </div>
-    </section>
-      <center>
-          <p>    
-            <li> Mensaje de: {{mensaje.email}} 
-              <br> 
-                 {{ mensaje.mensaje }}
-              <br>
-              <a href="{% url 'mensaje-delete' mensaje.id %}">Borrar</a>
-              </li>
-          </p>
-        </center>
-    {% endfor %}    
+    </div>
+  </section>
+
+  {% for mensaje in mensajes %}
+    <center>
+      <p>
+        <li>
+          Mensaje de: {{ mensaje.usuario_que_envia }} 
+          <br> 
+          {{ mensaje.mensaje }}
+          
+          {% if mensaje.amistad == "solicitar" %}
+            <!-- Cada mensaje tiene su propio formulario -->
+            <form action="{% url 'sumar_amigue' %}" method="POST">
+              {% csrf_token %}
+              <input type="hidden" name="amigue_usuario" value="{{ mensaje.usuario_que_envia }}">
+              <button type="submit">Aceptar amistad {{ mensaje.usuario_que_envia }}</button>
+            </form>
+          {% endif %}
+          
+          <br>
+          <a href="{% url 'mensaje-delete' mensaje.id %}">Borrar</a>
+        </li>
+      </p>
+    </center>
+  {% endfor %}
+
 {% else %}
-<div class="album py-5 bg-light">
-  <div class="container">
-    <section class="py-1 text-center container">
-      <div class="row py-lg-1">
-        <div class="col-lg-8 col-md-8 mx-auto">
-          <h1 class="fw-light">No te enviaron mensajes aún.</h1>
+  <div class="album py-5 bg-light">
+    <div class="container">
+      <section class="py-1 text-center container">
+        <div class="row py-lg-1">
+          <div class="col-lg-8 col-md-8 mx-auto">
+            <h1 class="fw-light">No te enviaron mensajes aún.</h1>
+          </div>
         </div>
-      </div>
-    </section>
-</div>
-</div> 
- 
-{% endif %}               
-    
+      </section>
+    </div>
+  </div> 
+{% endif %}
+
 {% endblock %}

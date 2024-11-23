@@ -8,7 +8,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from AdminVideos.models import Plato, Profile, Mensaje, Preseleccionados, ElegidosXDia, Sugeridos
-from django.http import HttpRequest, JsonResponse
+from django.http import HttpRequest, HttpResponseForbidden, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.forms import UserCreationForm
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
@@ -1080,6 +1080,8 @@ def FiltroDePlatos (request):
     preseleccionados = request.session.get('preseleccionados', "None")
 
     usuario = request.user
+    nombre_usuario = request.user.username
+
 
     if request.method == "POST":
 
@@ -1126,7 +1128,7 @@ def FiltroDePlatos (request):
     if tipo_parametro and tipo_parametro != "Dash":
        platos = platos.filter(tipo=tipo_parametro)
     
-    if quecomemos != "quecomemos":
+    if quecomemos != "quecomemos" and nombre_usuario != "quecomemos":
        platos =  platos.exclude(propietario__username="quecomemos")
 
     if misplatos != "misplatos":
@@ -1324,25 +1326,101 @@ def formulario_dia (request, dia):
     }
     return render(request, 'AdminVideos/formulario_dia.html', context)
 
-# class MensajeCreate(CreateView):
-#   model = Mensaje
-#   success_url = reverse_lazy('filtro-de-platos')
-#   fields = '__all__'
+class MensajeCreate(CreateView):
+   model = Mensaje
+   success_url = reverse_lazy('filtro-de-platos')
+   fields = '__all__'
 
 
-#class MensajeDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
-#   model = Mensaje
-#   context_object_name = "mensaje"
-#   success_url = reverse_lazy("mensaje-list")
+class MensajeDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+   model = Mensaje
+   context_object_name = "mensaje"
+   success_url = reverse_lazy("mensaje-list")
 
-#   def test_func(self):
-#       return Mensaje.objects.filter(destinatario=self.request.user).exists()
+   def test_func(self):
+       return Mensaje.objects.filter(destinatario=self.request.user).exists()
 
 
-#class MensajeList(LoginRequiredMixin, ListView):
-#   model = Mensaje
-#   context_object_name = "mensajes"
+class MensajeList(LoginRequiredMixin, ListView):
+   model = Mensaje
+   context_object_name = "mensajes"
 
- #  def get_queryset(self):
- #      import pdb; pdb.set_trace
- #      return Mensaje.objects.filter(destinatario=self.request.user).all()
+   def get_queryset(self):
+       import pdb; pdb.set_trace
+       return Mensaje.objects.filter(destinatario=self.request.user).all()
+   
+
+@login_required
+def amigues(request):
+    # Obtén el perfil del usuario autenticado
+    profile = request.user.profile
+
+    # Obtén la lista de "amigues" desde el perfil
+    lista_amigues = profile.amigues  # Esto será una lista (por el default=list en JSONField)
+
+    # Pasa la lista como contexto a la plantilla
+    context = {
+        "amigues": lista_amigues,
+    }
+    return render(request, "AdminVideos/amigues.html", context)
+
+@login_required
+def sumar_amigue(request):
+    if request.method == "POST":
+        # Obtén el ID del "amigue" enviado desde el formulario
+        amigue_usuario = request.POST.get("amigue_usuario")
+
+        # Verifica que se haya enviado un ID válido
+        # if not amigue_usuario:
+        #     return HttpResponseForbidden("Solicitud inválida.")
+       
+        # Obtén el perfil del usuario autenticado
+        # user_profile = request.user.profile
+        
+        # Obtener el perfil del usuario actual
+        perfil = get_object_or_404(Profile, user=request.user)
+
+        # Asegúrate de que no se repita en la lista
+        if amigue_usuario not in perfil.amigues:
+            # Agrega el nombre del "amigue" a la lista
+            perfil.amigues.append(amigue_usuario)
+            perfil.save()
+
+         # Construye un diccionario con las variables de contexto
+    contexto = {
+        "amigues": perfil.amigues,  # Lista de amigues actualizada
+    }
+
+
+    # Redirige a una página de confirmación o muestra la lista actualizada
+    return render(request, "AdminVideos/amigues.html", contexto)
+        # return render(request, "AdminVideos/lista_filtrada.html", {"amigues": user_profile.amigues})
+
+
+    # Si no es un método POST, devuelve un error
+    return HttpResponseForbidden("Método no permitido.")
+
+@login_required
+def amigue_borrar(request, pk):
+    # Obtener el perfil del usuario autenticado
+    perfil = request.user.profile
+
+    # Verificar si el ID del amigue existe en la lista de amigues
+    if pk in perfil.amigues:
+        perfil.amigues.remove(pk)
+        perfil.save()  # Guardar los cambios en el perfil
+
+        # Redirigir o retornar un JSON según sea necesario
+        # if request.is_ajax():
+        #     return JsonResponse({'success': True, 'message': 'Amigue eliminado.'})
+        # return redirect('ruta_deseada')  # Reemplazar con el nombre de la vista donde redirigir
+
+    # Si el amigue no existe, retornar un mensaje de error
+    # if request.is_ajax():
+        # return JsonResponse({'success': False, 'message': 'Amigue no encontrado.'})
+              # Construye un diccionario con las variables de contexto
+    contexto = {
+        "amigues": perfil.amigues,  # Lista de amigues actualizada
+    }
+    return render(request, "AdminVideos/amigues.html", contexto)
+  
