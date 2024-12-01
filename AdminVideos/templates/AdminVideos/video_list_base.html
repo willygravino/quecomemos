@@ -4,7 +4,7 @@
 
 {% block lista_platos %}
 
-<!-- <p>TIPO PAG: {{ parametro }}</p> -->
+ <p>PALABRA CLAVE: {{ palabraclave }}</p> 
 
 
 
@@ -63,10 +63,7 @@
                     </div>
                 </div>
                 <div class="mt-1">
-                    <!-- {% if user.id != plato.propietario.id %}
-                      <small class="text-muted">Subido por {{ plato.propietario }}</small>
-                    {% endif %} -->
-                    <!-- <br> -->
+                 
                     <small class="mtext-success"> {{ plato.tipo }} /</small>
                     <!-- <p>Lunes 1 - Almuerzo</p> ASIGNACION AQUÍ -->
 
@@ -97,10 +94,7 @@
                           <button type="submit" class="btn btn-primary"  style="font-size: 12px; padding: 2px 5px;">Preseleccionar</button>
                       {% endif %}
 
-                      <!-- <small class="text-muted">Subido por {{ plato.propietario }}</small> -->
-
                       {% if plato.propietario != user %}
-                          <input type="checkbox" id="borrar" name="borrar" value="borrar" checked style="display: none;">
                           <button type="submit" class="btn btn-success" style="font-size: 12px; padding: 2px 5px;">AGREGAR A MI LISTA</button>
                       {% endif %}
                   </form>

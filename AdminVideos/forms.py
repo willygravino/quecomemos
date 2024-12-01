@@ -6,6 +6,11 @@ class PlatoFilterForm(forms.Form):
     medios = forms.ChoiceField(choices=Plato.MEDIOS_CHOICES, required=False)
     categoria = forms.ChoiceField(choices=Plato.CATEGORIA_CHOICES, required=False)
     preparacion = forms.ChoiceField(choices=Plato.PREPA_CHOICES, required=False)
+    palabra_clave = forms.CharField(
+        max_length=30, 
+        required=False, 
+        widget=forms.TextInput(attrs={'placeholder': 'Buscar por palabra clave'})
+    )    
     tipo = forms.ChoiceField(choices=Plato.TIPO_CHOICES, required=False)
     calorias = forms.ChoiceField(choices=Plato.CALORIAS_CHOICES, required=False)
     

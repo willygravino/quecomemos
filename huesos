@@ -1,30 +1,29 @@
-   
-                        {% for amigue in amigues %}
-                        <i class="fa-solid fa-share-nodes" id="menu-trigger" style="cursor: pointer;"></i>
+class PlatoList(ListView):
+    model = Plato
+    context_object_name = "platos"
+    # query = "tomatelas"
 
-                        <select class="form-select d-none" id="menu-select" aria-label="Default select example">
-                            <option value="{{ amigue }}">amigue</option>
-                        </select>
-                      
-                      {% endfor %}
+    def get_queryset(self):
+        # self.query = "tomatelas"
 
-{% if  user.username  != "quecomemos" %}
-<div class="form-check">
-  <input class="form-check-input" type="checkbox" name="quecomemos" value="quecomemos" id="quecomemos" {% if quecomemos_ck == "quecomemos" %} checked {% endif %}>
-  <label class="form-check-label small" for="quecomemos">
-    Sugerencia <br> quecomemos
-  </label>
-</div>      
+        if self.request.user.is_authenticated:
+            try:
+                if self.request.user.profile:
+                        # self.query = "higo"
+                        self.query = self.request.GET.get("la-busqueda")
+                        # query = self.request.user.profile.nombre_completo
+                        if self.query:
+                            object_list = Plato.objects.filter(ingredientes__icontains=self.query)
+                        return object_list
+            except Exception:
+               object_list = Plato.objects.filter(ingredientes__icontains="%%")
+            return object_list
+        else:
+            object_list = Plato.objects.filter(ingredientes__icontains="%%")
+        return object_list
 
-<div class="form-check">
-  <input class="form-check-input" type="checkbox" name="misplatos" value="misplatos" id="misplatos" {% if misplatos_ck == "misplatos" %} checked {% endif %}>
-  <label class="form-check-label small" for="misplatos">
-    Mis platos
-  </label>
-</div>
-
-{% else %}
-  <span class="form-check-label small text-center border rounded bg-success text-white">
-    MODO <br> ADMINISTRADOR
-  </span>
-{% endif %}
+    def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            # Pasar query al contexto
+            context['query'] = self.query
+            return context

@@ -19,6 +19,8 @@ from .forms import PlatoFilterForm, PlatoForm
 from django.views.generic import TemplateView
 from datetime import date, datetime
 from django.contrib.auth.models import User  # Asegúrate de importar el modelo User
+from django.db.models import Q
+
 
 import datetime
 
@@ -779,6 +781,7 @@ def lista_de_compras(request):
 
 class PlatoDetail(DetailView):
     model = Plato
+    # template_name = 'AdminVideos/plato_detail.html'
     context_object_name = "plato"
 
     def get_context_data(self, **kwargs):
@@ -1044,6 +1047,8 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
 @login_required(login_url=reverse_lazy('login'), redirect_field_name=None)
 def FiltroDePlatos (request):
 
+    palabra_clave = ""
+
     # Establecer la configuración regional a español
     locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
     
@@ -1068,7 +1073,8 @@ def FiltroDePlatos (request):
     medios = request.session.get('medios_estable', None)
     categoria = request.session.get('categoria_estable', None)
     preparacion = request.session.get('preparacion_estable', None)
-    calorias = request.session.get('calorias_estable', None)
+    palabra_clave = request.session.get('palabra_clave', None)
+    # calorias = request.session.get('calorias_estable', None)
 
     quecomemos = request.session.get('quecomemos', None)
     misplatos = request.session.get('misplatos', "misplatos")
@@ -1087,12 +1093,16 @@ def FiltroDePlatos (request):
                 medios = form.cleaned_data.get('medios')
                 categoria = form.cleaned_data.get('categoria')
                 preparacion = form.cleaned_data.get('preparacion')
-                calorias = form.cleaned_data.get('calorias')
+                palabra_clave =  form.cleaned_data.get('palabra_clave')
+
+                # calorias = form.cleaned_data.get('calorias')
 
                 request.session['medios_estable'] = medios
                 request.session['categoria_estable'] = categoria
                 request.session['preparacion_estable'] = preparacion
-                request.session['calorias_estable'] = calorias
+                request.session['palabra_clave'] = palabra_clave
+
+                # request.session['calorias_estable'] = calorias
 
                 quecomemos = request.POST.get('quecomemos')
                 misplatos = request.POST.get('misplatos')
@@ -1101,6 +1111,7 @@ def FiltroDePlatos (request):
                 request.session['quecomemos'] = quecomemos
                 request.session['misplatos'] = misplatos
                 request.session['preseleccionados'] = preseleccionados
+ 
 
     else:
         items_iniciales = {
@@ -1108,13 +1119,25 @@ def FiltroDePlatos (request):
                         'medios': medios,
                         'categoria': categoria,
                         'preparacion': preparacion,
-                        'calorias': calorias
+                        'palabra_clave': palabra_clave
+
+                        # 'calorias': calorias
                     }
  
         form = PlatoFilterForm(initial=items_iniciales)
 
     usuario_quecomemos = User.objects.get(username="quecomemos") # type: ignore
     platos = Plato.objects.filter(propietario__in=[usuario_quecomemos, usuario])
+
+
+    # object_list = Plato.objects.filter(ingredientes__icontains=palabra_clave)
+
+    # Filtrar platos del usuario actual con la palabra clave
+    # platos = Plato.objects.filter(propietario__in=[usuario_quecomemos, usuario],ingredientes__icontains=palabra_clave)
+
+
+    platos = Plato.objects.filter(propietario__in=[usuario_quecomemos, usuario]).filter(Q(ingredientes__icontains=palabra_clave) | Q(nombre_plato__icontains=palabra_clave))
+
 
     # TOMAR EL TIPO DEL MENÚ    !!!!!!!!!!!!!!
     # Obtener el valor del parámetro 'tipo' desde la URL
@@ -1140,8 +1163,8 @@ def FiltroDePlatos (request):
     if preparacion and preparacion != '-':
         platos = platos.filter(preparacion=preparacion)
 
-    if calorias and calorias != '-':
-        platos = platos.filter(calorias=calorias)
+    # if calorias and calorias != '-':
+    #     platos = platos.filter(calorias=calorias)
 
     if usuario:
         platos_preseleccionados = Preseleccionados.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
@@ -1165,7 +1188,8 @@ def FiltroDePlatos (request):
                 "misplatos_ck": misplatos,
                 "preseleccionados_ck": preseleccionados,
                 "amigues" : amigues,
-                "parametro": tipo_parametro
+                "parametro": tipo_parametro,
+                "palabraclave": palabra_clave
                }
 
     return render(request, 'AdminVideos/lista_filtrada.html', contexto)
