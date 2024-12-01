@@ -2,109 +2,117 @@
 
 {% load static %}
 
-{% block un_video %}
+{% block lista_platos %}
 
-<div class="container">
+<!-- <p>TIPO PAG: {{ parametro }}</p> -->
 
-  <div class="row">
-      <div class="col">
 
-        <div class="d-flex flex-wrap justify-content-between">
-
-          {% for dia, platos in dias_desde_hoy %}
-            <a href="{% url 'formulario-dia' dia=dia|date:'Y-m-d' %}" 
-                class={% if dia in dias_programados %} "bg-success" {% else %}"bg-primary" {% endif %}>
-              <div class="text-white p-3 small border border-dark al"> 
-                <p>{{ dia|date:"l j" }}</p>
-                <!-- 
-                <p>Almuerzo: {{ platos.almuerzo }}</p>
-                <p>Cena: {{ platos.cena }}</p>
-                -->
-              </div>
-            </a>
-          {% endfor %}
-
-        </div>
-      </div>
-  </div>
-</div>
 
 <!-- Divider -->
-<hr>
+<!-- <hr> -->
 
-<a class="bg-primary m-3 text-white p-2 small border border-dark" href="{% url 'desmarcar-todo' %}">
-  DESMARCAR PRESELECCIONADOS
-</a>
 
-<hr>
+<!-- <p>{{ amigues }}</p> -->
+
+<!-- <hr> -->
 
 <section>
-  <div class="row">
-    <div class="col">
+  <!-- <div class="row"> -->
+    <!-- <div class="col"> -->
       <div class="p-1 d-flex flex-wrap">
-        <div class=" d-flex justify-content-center align-items-center">
-          <a class="bg-primary m-3 text-white p-2 small border border-dark" href="{% url 'videos-create' %}?tipopag={{ request.GET.tipopag|default:'' }}">
-            {% if request.GET.tipopag != "Dash" %} AGREGAR {{ request.GET.tipopag }}{% else %} AGREGAR PRINCIPAL{% endif %}
-        </a>
-      </div>
-  {% if not platos %}
-    <h6>No hay platos para mostrar.</h6>
-  {% else %}
-      
-            {% for plato in platos %}
-            <div class="d-flex flex-row">
-              <div class="col-md-4 mb-3">
-                <div {% if user.id == plato.propietario.id %} class="card border border-success" {% else %} class="card border border-danger" {% endif %}
-                style="width: 10rem;">
-                  <div class="container p-0">
-                      <a href="{% url 'videos-detail' plato.id %}">
-                        <img src="{{plato.image_url}}" class="img-fluid position-relative object-fit-cover" alt="Imagen del Plato">
-                      </a>                        
-                      <div class="position-absolute top-0 start-50 translate-middle-x p-2 text-center text-white bg-dark bg-opacity-10 rounded">
-                          <h6 class="mb-0 small"> {{ plato.nombre_plato }} </h6>
-                      </div>
-                  </div>
-                  <div class="mt-1">
-                      {% if user.id != plato.propietario.id %}
-                        <small class="text-muted">Subido por {{ plato.propietario }}</small>
-                      {% endif %}
-                      <br>
-                      <small class="mtext-success"> {{ plato.tipo }} /</small>
-                      <!-- <p>Lunes 1 - Almuerzo</p> ASIGNACION AQUÍ -->
+        <!-- <div class="row"> -->
+          <!-- <div class="col"> -->
+        <div class=" d-flex align-items-center">
+          <div class="container">
 
-                      {% for key, value in plato.variedades.items %}
+            {% if preseleccionados %}
+              <a class=" badge bg-success text-wrap" href="{% url 'desmarcar-todo' %}">
+                DESMARCAR <br> PRESELECCIONADOS
+              </a>
+         
+            {% endif %}  
+            
+            <br>
 
-                          {% if value.variedad %}
-                            <small class="mtext-success"> {{ value.variedad }} /</small>
-                          {% endif %}
-                      {% endfor %}
-
-                      <form action="{% url 'plato-preseleccionado' %}" method="GET">
-                        <input type="hidden" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
-                      <input type="hidden" name="tipo-plato" value="{{ plato.tipo }}">   <!--  Incluir tipo-plato -->
-
-                        <input type="hidden" name="tipopag" value="{{ request.GET.tipopag }}">  <!-- Incluir tipo-pag -->
-                    
-                        {% if plato.nombre_plato in preseleccionados %}
-                            <input type="checkbox" id="borrar" name="borrar" value="borrar" checked style="display: none;">
-                            <button type="submit" class="btn btn-success" style="font-size: 12px; padding: 2px 5px;">√</button>
-                        {% else %}
-                            <input type="checkbox" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}" checked style="display: none;">
-                            <button type="submit" class="btn btn-primary"  style="font-size: 12px; padding: 2px 5px;">Preseleccionar</button>
-                        {% endif %}
-                    </form>
-
-                   </div>
-
-                </div>
-             </div>
-           </div>
-
-          {% endfor %}
+            <a class="bg-primary text-white small border border-dark" href="{% url 'videos-create' %}?tipopag={{ request.GET.tipopag|default:'' }}">
+              {% if request.GET.tipopag and request.GET.tipopag != "Dash" %} AGREGAR {{ request.GET.tipopag }}{% else %} AGREGAR PRINCIPAL{% endif %}
+            </a>
+         
+            <!-- <h1>ddddd</h1> -->
+          
           </div>
         </div>
+          <!-- </div> -->
+        <!-- </div> -->
+      
+        {% if not platos %}
+          <h6>No hay platos para mostrar.</h6>
+        {% else %}
+      
+        {% for plato in platos %}
+          <div class="d-flex flex-row">
+            <div class="col-md-4 mb-3">
+              <div {% if user.id == plato.propietario.id %} class="card border border-success" {% else %} class="card border border-danger" {% endif %}
+              style="width: 10rem;">
+                <div class="container p-0">
+                    <a href="{% url 'videos-detail' plato.id %}">
+                      <img src="{{plato.image_url}}" class="img-fluid position-relative object-fit-cover" alt="Imagen del Plato">
+                    </a>                        
+                    <div class="position-absolute top-0 start-50 translate-middle-x p-2 text-center text-white bg-dark bg-opacity-10 rounded">
+                        <h6 class="mb-0 small"> {{ plato.nombre_plato }} </h6>
+                    </div>
+                </div>
+                <div class="mt-1">
+                    <!-- {% if user.id != plato.propietario.id %}
+                      <small class="text-muted">Subido por {{ plato.propietario }}</small>
+                    {% endif %} -->
+                    <!-- <br> -->
+                    <small class="mtext-success"> {{ plato.tipo }} /</small>
+                    <!-- <p>Lunes 1 - Almuerzo</p> ASIGNACION AQUÍ -->
+
+                    {% for key, value in plato.variedades.items %}
+
+                        {% if value.variedad %}
+                          <small class="mtext-success"> {{ value.variedad }} /</small>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if amigues %}
+                      <a href="{% url 'videos-detail' plato.id %}">
+                        <i class="fa-solid fa-share-nodes"></i>
+                      </a>               
+                    {% endif %}
+
+                    <form action="{% url 'plato-preseleccionado' %}" method="GET">
+                      <input type="hidden" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
+                    <input type="hidden" name="tipo-plato" value="{{ plato.tipo }}">   <!--  Incluir tipo-plato -->
+
+                      <input type="hidden" name="tipopag" value="{{ request.GET.tipopag }}">  <!-- Incluir tipo-pag -->
+                  
+                      {% if plato.nombre_plato in preseleccionados %}
+                          <input type="checkbox" id="borrar" name="borrar" value="borrar" checked style="display: none;">
+                          <button type="submit" class="btn btn-success" style="font-size: 12px; padding: 2px 5px;">√</button>
+                      {% else %}
+                          <input type="checkbox" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}" checked style="display: none;">
+                          <button type="submit" class="btn btn-primary"  style="font-size: 12px; padding: 2px 5px;">Preseleccionar</button>
+                      {% endif %}
+
+                      <!-- <small class="text-muted">Subido por {{ plato.propietario }}</small> -->
+
+                      {% if plato.propietario != user %}
+                          <input type="checkbox" id="borrar" name="borrar" value="borrar" checked style="display: none;">
+                          <button type="submit" class="btn btn-success" style="font-size: 12px; padding: 2px 5px;">AGREGAR A MI LISTA</button>
+                      {% endif %}
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
       </div>
-    {% endif %}
+    <!-- </div> -->
+  <!-- </div> -->
+{% endif %}
 
 </section>
 

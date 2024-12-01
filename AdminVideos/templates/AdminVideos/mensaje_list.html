@@ -24,11 +24,16 @@
           
           {% if mensaje.amistad == "solicitar" %}
             <!-- Cada mensaje tiene su propio formulario -->
-            <form action="{% url 'sumar_amigue' %}" method="POST">
-              {% csrf_token %}
-              <input type="hidden" name="amigue_usuario" value="{{ mensaje.usuario_que_envia }}">
-              <button type="submit">Aceptar amistad {{ mensaje.usuario_que_envia }}</button>
-            </form>
+            {% if mensaje.usuario_que_envia not in amigues %}
+              <form action="{% url 'sumar_amigue' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="amigue_usuario" value="{{ mensaje.usuario_que_envia }}">
+                <button type="submit">Aceptar amistad {{ mensaje.usuario_que_envia }}</button>
+              </form>
+            {% else %}
+              <p>AMIGO ACEPTADO</p>
+            {% endif %}
+
           {% endif %}
           
           <br>

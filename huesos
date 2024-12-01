@@ -1,3 +1,13 @@
+   
+                        {% for amigue in amigues %}
+                        <i class="fa-solid fa-share-nodes" id="menu-trigger" style="cursor: pointer;"></i>
+
+                        <select class="form-select d-none" id="menu-select" aria-label="Default select example">
+                            <option value="{{ amigue }}">amigue</option>
+                        </select>
+                      
+                      {% endfor %}
+
 {% if  user.username  != "quecomemos" %}
 <div class="form-check">
   <input class="form-check-input" type="checkbox" name="quecomemos" value="quecomemos" id="quecomemos" {% if quecomemos_ck == "quecomemos" %} checked {% endif %}>

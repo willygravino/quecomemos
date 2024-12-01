@@ -23,8 +23,29 @@
    
                 <p></p>
                 {% if user.id == plato.propietario.id %}
-                  <a href="{% url 'videos-delete' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Eliminar</a>
-                   <a href="{% url 'videos-update' plato.id %}" type="button"  class="btn btn-sm btn-outline-secondary">Editar</a> 
+
+                    <!-- <i class="fa-solid fa-share-nodes" style="font-size: 1.5rem;" id="menu-trigger" style="cursor: pointer;"></i> -->
+
+                    <!-- <select class="form-select d-none" id="menu-select" aria-label="Default select example"> -->
+                    <a href="{% url 'videos-update' plato.id %}" type="button"  class="btn btn-sm btn-outline-secondary">Editar</a> 
+
+                    <a href="{% url 'videos-delete' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Eliminar</a>
+
+                    <hr>
+
+                    <!-- <select class="form-select" aria-label="Default select example">
+                    <option selected>Compartir este plato con:</option>
+
+                    {% for amigue in amigues %}                    
+                            <option value="{{ amigue }}">{{ amigue }}</option>
+                    {% endfor %}
+                    </select>
+   -->
+                    
+                  
+                   <!-- <i class="fa-solid fa-share-nodes" style="font-size: 1.5rem;"></i> -->
+
+                 
                   
 
                  <!-- <a class="nav-link"  href="#" data-toggle="modal" data-target="#PlatoModal"> 
@@ -33,20 +54,36 @@
               </div>
             </div>
                  <p></p>
-                 <small class="text-muted">Subido por mi.</small> 
+                 <!-- <small class="text-muted">Subido por mi.</small>  -->
                 {% else %}
               </div>
             </div>
                  <p></p>
-                 <small class="text-muted">Subido por {{ plato.propietario }}</small> 
+                 <small class="text-muted">Sugerendia de Quecomemos</small> 
                 {% endif %}
                   
             </div>
+
+            <form method="post" action="">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <select id="amigue-select" name="amigue" class="form-select" aria-label="Seleccionar amigue">
+                        <option selected disabled>Compartir este plato con:</option>
+                        {% for amigue in amigues %}
+                            <option value="{{ amigue }}">{{ amigue }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Compartir</button>
+            </form>
+
          </div>
         </div>
       <!-- </div> -->
     </div>
 </div>
+
+
 
  <!-- Plato Modal-->
 <!-- <div class="modal fade" id="PlatoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"

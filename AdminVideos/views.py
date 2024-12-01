@@ -261,51 +261,6 @@ def grabar_menu_elegido(request):
         return JsonResponse({'error': 'El método de solicitud debe ser POST'})
 
 
-# def lista_y_plan(request):
-#     lista_de_compras = []
-
-#     lista_de_compras = request.POST.getlist("ingrediente_a_comprar")
-
-#     lista_de_ingredientes = set()
-
-#     no_incluir = set()
-
-#     # Obtener el perfil del usuario actual
-#     perfil = get_object_or_404(Profile, user=request.user)
-
-#     set_compras = set(lista_de_compras)
-#     # Identificar elementos que están en lista_de_ingredientes pero no en set_compras
-#     ingredientes_no_comprados_1 = lista_de_ingredientes - set_compras
-#     ingredientes_no_comprados = ingredientes_no_comprados_1 - no_incluir
-#     if ingredientes_no_comprados:
-#             for ingrediente_nuevo in ingredientes_no_comprados:
-#                 if ingrediente_nuevo not in perfil.ingredientes_que_tengo:
-#                     # Actualizar el campo ingredientes_que_tengo
-#                     perfil.ingredientes_que_tengo.append(ingrediente_nuevo)
-#                     # Guardar el perfil actualizado
-#                     perfil.save()
-
-#     if lista_de_compras:
-#             for ingrediente_a_comprar in lista_de_compras:
-#                     if ingrediente_a_comprar in perfil.ingredientes_que_tengo:
-#                         # Eliminar el ingrediente de la lista
-#                         perfil.ingredientes_que_tengo.remove(ingrediente_a_comprar)
-#                         # Guardar el perfil actualizado
-#                         perfil.save()
-
-#       # Generar el mensaje de WhatsApp
-#     mensaje_whatsapp = "Lista de compras:\n"
-#     if lista_de_compras:
-#         mensaje_whatsapp += "\n".join(lista_de_compras)
-#     mensaje_whatsapp = mensaje_whatsapp.replace("\n", "%0A")  # Reemplazar saltos de línea para la URL
-
-#     context = {
-#         "lista_de_compras": "hola",
-#         "mensaje_whatsapp": mensaje_whatsapp
-#     }
-
-#     return render(request, 'AdminVideos/lista_y_plan.html', context)
-
 
 def procesar_item(platos_dia, item_nombre, menu_del_dia, dia_en_que_comemos_str, request, lista_de_ingredientes, no_incluir):
 
@@ -765,6 +720,28 @@ def lista_de_compras(request):
     #     mensaje_whatsapp += "\n".join(ingredientes_unicos)
     # mensaje_whatsapp = mensaje_whatsapp.replace("\n", "%0A")  # Reemplazar saltos de línea para la URL
 
+# ESTO SE REPITE EN FILTRO DE PLATOS, PODRÍA OPTIMIZARSE?????
+   # Obtener la fecha y hora actuales
+    fecha_actual = datetime.datetime.now().date()
+
+         # Filtra las fechas únicas en `el_dia_en_que_comemos` para los objetos del usuario actual
+    fechas_existentes = ElegidosXDia.objects.filter(user=request.user,el_dia_en_que_comemos__gte=fecha_actual).values_list('el_dia_en_que_comemos', flat=True).distinct()
+
+    # Lista para almacenar los días y sus nombres
+    dias_desde_hoy = [] 
+
+     # Obtener el nombre del día de la semana para la fecha actual
+    nombre_dia_semana = fecha_actual.strftime('%A')
+
+    # Calcular y agregar las fechas y nombres de los días para los próximos 6 días
+    for i in range(1, 7):
+        fecha = fecha_actual + timedelta(days=i)
+        nombre_dia = fecha.strftime('%A')
+        dias_desde_hoy.append((fecha))
+ 
+
+# ***********
+
     context = {
         'platos_por_dia': platos_por_dia,
         'ingredientes_separados_por_comas': ingredientes_unicos,
@@ -772,11 +749,17 @@ def lista_de_compras(request):
         "los_items": items_resultados,
         "lista_de_compras": lista_de_compras,
         "no_incluir": no_incluir,
+        "dias_programados": fechas_existentes,
+        "dias_desde_hoy": dias_desde_hoy,
+
+
+
 
         # "hay_comentario": hay_comentario,
 
         "ingredientes_no_comprados": ingredientes_no_comprados,
-        "mensaje_whatsapp": mensaje_whatsapp
+        "mensaje_whatsapp": mensaje_whatsapp,
+        "parametro" : "lista-compras"
     }
 
     return render(request, 'AdminVideos/lista_de_compras.html', context)
@@ -797,6 +780,18 @@ def lista_de_compras(request):
 class PlatoDetail(DetailView):
     model = Plato
     context_object_name = "plato"
+
+    def get_context_data(self, **kwargs):
+        # Llamar al método original para obtener el contexto base
+        context = super().get_context_data(**kwargs)
+        
+        # Obtener el perfil del usuario actual
+        perfil = get_object_or_404(Profile, user=self.request.user)
+        
+        # Pasar la lista de amigues al contexto
+        context["amigues"] = perfil.amigues  # Lista JSONField desde Profile
+        
+        return context
 
 
 class PlatoDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -1061,23 +1056,23 @@ def FiltroDePlatos (request):
     # Obtener el nombre del día de la semana para la fecha actual
     nombre_dia_semana = fecha_actual.strftime('%A')
 
-    # Agregar la fecha actual y su nombre al inicio de la lista
-    dias_desde_hoy.append((fecha_actual, nombre_dia_semana))
+    # # Agregar la fecha actual y su nombre al inicio de la lista
+    # dias_desde_hoy.append((fecha_actual, nombre_dia_semana))
 
     # Calcular y agregar las fechas y nombres de los días para los próximos 6 días
     for i in range(1, 7):
         fecha = fecha_actual + timedelta(days=i)
         nombre_dia = fecha.strftime('%A')
-        dias_desde_hoy.append((fecha, nombre_dia))
+        dias_desde_hoy.append((fecha))
 
-    medios = request.session.get('medios_estable', "None")
-    categoria = request.session.get('categoria_estable', "None")
-    preparacion = request.session.get('preparacion_estable', "None")
-    calorias = request.session.get('calorias_estable', "None")
+    medios = request.session.get('medios_estable', None)
+    categoria = request.session.get('categoria_estable', None)
+    preparacion = request.session.get('preparacion_estable', None)
+    calorias = request.session.get('calorias_estable', None)
 
-    quecomemos = request.session.get('quecomemos', "None")
+    quecomemos = request.session.get('quecomemos', None)
     misplatos = request.session.get('misplatos', "misplatos")
-    preseleccionados = request.session.get('preseleccionados', "None")
+    preseleccionados = request.session.get('preseleccionados', None)
 
     usuario = request.user
     nombre_usuario = request.user.username
@@ -1123,7 +1118,7 @@ def FiltroDePlatos (request):
 
     # TOMAR EL TIPO DEL MENÚ    !!!!!!!!!!!!!!
     # Obtener el valor del parámetro 'tipo' desde la URL
-    tipo_parametro = request.GET.get('tipopag', '')
+    tipo_parametro = request.GET.get('tipopag', 'Dash')
 
     if tipo_parametro and tipo_parametro != "Dash":
        platos = platos.filter(tipo=tipo_parametro)
@@ -1154,6 +1149,12 @@ def FiltroDePlatos (request):
     # Filtra las fechas únicas en `el_dia_en_que_comemos` para los objetos del usuario actual
     fechas_existentes = ElegidosXDia.objects.filter(user=request.user,el_dia_en_que_comemos__gte=fecha_actual).values_list('el_dia_en_que_comemos', flat=True).distinct()
 
+    # Obtén el perfil del usuario autenticado
+    perfil = get_object_or_404(Profile, user=request.user)
+
+    # Accede al atributo `amigues` desde la instancia
+    amigues = perfil.amigues  # Esto cargará la lista almacenada en JSONField
+    
     contexto = {
                 'formulario': form,
                 'platos': platos,
@@ -1163,6 +1164,8 @@ def FiltroDePlatos (request):
                 "quecomemos_ck": quecomemos,
                 "misplatos_ck": misplatos,
                 "preseleccionados_ck": preseleccionados,
+                "amigues" : amigues,
+                "parametro": tipo_parametro
                }
 
     return render(request, 'AdminVideos/lista_filtrada.html', contexto)
@@ -1349,6 +1352,18 @@ class MensajeList(LoginRequiredMixin, ListView):
        import pdb; pdb.set_trace
        return Mensaje.objects.filter(destinatario=self.request.user).all()
    
+   def get_context_data(self, **kwargs):
+        # Llamar al método original para obtener el contexto base
+        context = super().get_context_data(**kwargs)
+        
+        # Obtener el perfil del usuario actual
+        perfil = get_object_or_404(Profile, user=self.request.user)
+        
+        # Pasar la lista de amigues al contexto
+        context["amigues"] = perfil.amigues  # Lista JSONField desde Profile
+        
+        return context
+   
 
 @login_required
 def amigues(request):
@@ -1361,6 +1376,7 @@ def amigues(request):
     # Pasa la lista como contexto a la plantilla
     context = {
         "amigues": lista_amigues,
+        "parametro" : "amigues"
     }
     return render(request, "AdminVideos/amigues.html", context)
 
@@ -1386,9 +1402,20 @@ def sumar_amigue(request):
             perfil.amigues.append(amigue_usuario)
             perfil.save()
 
+        # Busca el usuario asociado al ID recibido
+        aceptado = get_object_or_404(Profile, user__username=amigue_usuario)
+
+        # Asegúrate de que el username no se repita en la lista
+        if perfil.user.username not in aceptado.amigues:
+            # Agrega el nombre del usuario a la lista
+            aceptado.amigues.append(perfil.user.username)
+            aceptado.save()    
+
          # Construye un diccionario con las variables de contexto
     contexto = {
         "amigues": perfil.amigues,  # Lista de amigues actualizada
+        "aceptado": aceptado,  # Lista de amigues actualizada
+
     }
 
 
@@ -1409,6 +1436,16 @@ def amigue_borrar(request, pk):
     if pk in perfil.amigues:
         perfil.amigues.remove(pk)
         perfil.save()  # Guardar los cambios en el perfil
+
+
+    # Borrar en el registro del amigo también (no será más mi amigo)
+    eliminame = get_object_or_404(Profile, user__username=pk)
+
+    # Asegúrate de que el username tuyo este en la lista de tu amigo
+    if perfil.user.username in eliminame.amigues:
+        # Agrega el nombre del usuario a la lista
+        eliminame.amigues.remove(perfil.user.username)
+        eliminame.save()    
 
         # Redirigir o retornar un JSON según sea necesario
         # if request.is_ajax():

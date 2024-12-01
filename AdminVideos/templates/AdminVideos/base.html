@@ -36,9 +36,7 @@
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'about' %}">
                 <div class="sidebar-brand-icon">
-                    <!-- <i class="fas fa-laugh-wink"></i> -->
                     <img src="/media/avatares/logo.png" height="60" alt="Logo">
-
                 </div>
                 <!-- <div class="sidebar-brand-text mx-3">SB Admin <sup>2</sup></div> -->
             </a>
@@ -47,11 +45,16 @@
             <!-- <hr class="sidebar-divider my-0"> -->
 
             <!-- Nav Item - Dashboard -->
-            <li class="nav-item active">
-                <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Dash">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>Todos</span></a>
-            </li>
+            
+            {% if parametro == "Dash" %} 
+                <li class="nav-item active">
+            {% else %}
+                <li class="nav-item">
+            {% endif %}
+                    <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Dash">
+                        <i class="fas fa-fw fa-tachometer-alt "></i>
+                        <span>Todos {{ parametro }}</span></a>
+                </li>
 
             <!-- Divider -->
             <hr class="sidebar-divider">
@@ -63,101 +66,123 @@
 
             <!-- Nav Item - Utilities Collapse Menu -->
 
-            <!-- {% if user.is_authenticated %} -->
+            {% if parametro == "Entrada" %} 
+                <li class="nav-item active">
+            {% else %}
+                <li class="nav-item">
+            {% endif %}
 
-            <li class="nav-item">
                <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Entrada">
-               <!-- <a class="nav-link" href="{% url 'videos-create' %}"> -->
                     <i class="fa-solid fa-shrimp" style="font-size: 1.3rem;"></i>
                     <span>Entradas</span>
                 </a>
             </li>
 
-            <li class="nav-item">
-                <!-- <a class="nav-link" href="{% url 'videos-create' %}"> -->
+            {% if parametro == "Dip" %} 
+                <li class="nav-item active">
+            {% else %}
+                <li class="nav-item">
+            {% endif %}
+
                 <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Dip">
-
                     <i class="fas fa-solid fa-bowl-rice" style="font-size: 1.3rem;"></i>
-                    <span>Dips</span>
+                    <span>Dips y Salsas</span>
                 </a>
             </li>
 
 
+            {% if parametro == "Principal" %} 
+                <li class="nav-item active">
+            {% else %}
+                <li class="nav-item">
+            {% endif %}
+                    <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Principal">
+                        <i class="fa-solid fa-utensils" style="font-size: 1.3rem;"></i>
+                        <span>Platos Principales</span>
+                    </a>
+                </li>
+            
+            <!-- {% if parametro == "Salsa" %} 
+                <li class="nav-item active">
+            {% else %}
+                <li class="nav-item">
+            {% endif %}
+                    <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Salsa">
+                        <i class="fa-solid fa-pepper-hot" style="font-size: 1.3rem;"></i>
+                        <span>Salsas</span>
+                    </a>
+                </li> -->
 
+            {% if parametro == "Guarnicion" %} 
+                <li class="nav-item active">
+            {% else %}
+                <li class="nav-item">
+            {% endif %}
+                    <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Guarnicion">
+                        <i class="fa-solid fa-plate-wheat" style="font-size: 1.3rem;"></i>
+                        <span>Guarniciones</span>
+                    </a>
+                </li>
 
-            <li class="nav-item">
-                <!-- <a class="nav-link"  href="#" data-toggle="modal" data-target="#PlatoModal"> -->
-                <!-- <a class="nav-link" href="{% url 'videos-create' %}"> -->
-                <!-- <a class="nav-link" href="#" data-toggle="modal" data-target="#PlatoModal"> -->
-               <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Principal">
-                    <i class="fa-solid fa-utensils" style="font-size: 1.3rem;"></i>
-                    <span>Platos Principales</span>
-                </a>
-            </li>
+            {% if parametro == "Postre" %} 
+                <li class="nav-item active">
+            {% else %}
+                <li class="nav-item">
+            {% endif %}
+                    <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Postre">
+                        <i class="fa-solid fa-ice-cream" style="font-size: 1.3rem;"></i>
+                        <span>Postres</span>
+                        <span>Reposterías</span>
+                    </a>
+                </li>
 
-
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Salsa">
-                <!-- <a class="nav-link" href="{% url 'videos-create' %}"> -->
-                    <i class="fa-solid fa-pepper-hot" style="font-size: 1.3rem;"></i>
-                    <span>Salsas</span>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Guarnicion">
-                <!-- <a class="nav-link" href="{% url 'videos-create' %}"> -->
-                    <i class="fa-solid fa-plate-wheat" style="font-size: 1.3rem;"></i>
-                    <span>Guarniciones</span>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <!-- <a class="nav-link" href="{% url 'videos-create' %}"> -->
-                <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Postre">
-
-                    <i class="fa-solid fa-ice-cream" style="font-size: 1.3rem;"></i>
-                    <span>Postres</span>
-                    <span>Reposterías</span>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Trago">
-                    <i class="fa-solid fa-martini-glass-citrus" style="font-size: 1.3rem;"></i>
-                    <span>Tragos</span>
-                </a>
-            </li>
+            {% if parametro == "Trago" %} 
+                <li class="nav-item active">
+            {% else %}
+                <li class="nav-item">
+            {% endif %}                
+                    <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Trago">
+                        <i class="fa-solid fa-martini-glass-citrus" style="font-size: 1.3rem;"></i>
+                        <span>Tragos</span>
+                    </a>
+                </li>
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
-
+<!-- 
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Dash">
-                    <!-- DERIVAR A MENU DE DÍAS -->
+                    DERIVAR A MENU DE DÍAS 
                     <i class="fa-solid fa-calendar-days" style="font-size: 2rem;"></i>
                     <span>Menú</span>
                 </a>
-            </li>
+            </li> -->
 
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'menu-elegido' %}">
-                    <i class="fa-solid fa-list-check" style="font-size: 2rem;"></i>
-                    <span>Lista de Compras</span>
-                </a>
-            </li>
-
-            <!-- {% endif %} -->
+            {% if parametro == "lista-compras" %} 
+                <li class="nav-item active">
+            {% else %}
+                <li class="nav-item">
+            {% endif %}
+                    <a class="nav-link" href="{% url 'menu-elegido' %}">
+                        <i class="fa-solid fa-list-check" style="font-size: 2rem;"></i>
+                        <span>Lista de Compras</span>
+                    </a>
+                </li>
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
 
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'amigues' %}">
-                    <i class="fa-regular fa-address-book" style="font-size: 2rem;"></i>
-                    <span>Amigues</span>
-                </a>
-            </li>
+
+            {% if parametro == "amigues" %} 
+                <li class="nav-item active">
+            {% else %}
+                <li class="nav-item">
+            {% endif %}
+                    <a class="nav-link" href="{% url 'amigues' %}">
+                        <i class="fa-regular fa-address-book" style="font-size: 2rem;"></i>
+                        <span>Amigues</span>
+                    </a>
+                </li>
 
              <!-- Divider -->
              <hr class="sidebar-divider d-none d-md-block">
@@ -225,7 +250,7 @@
                             <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="alertsDropdown">
                                 <h6 class="dropdown-header">
-                                    Alerts Center
+                                    Notificaciones
                                 </h6>
                                 <a class="dropdown-item d-flex align-items-center" href="#">
                                     <div class="mr-3">
@@ -276,7 +301,7 @@
                             <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="messagesDropdown">
                                 <h6 class="dropdown-header">
-                                    Message Center
+                                    Centro de Mensajes
                                 </h6>
                                 <a class="dropdown-item d-flex align-items-center" href="#">
                                     <div class="dropdown-list-image mr-3">
@@ -391,24 +416,49 @@
                 </nav>
                 <!-- End of Topbar -->
 
-                {% block filtro %}
-                {% endblock %}
-
-
-                 <!-- Divider -->
-                <hr>
-                
-                <!-- Begin Page Content -->
-
                 <div class="container-fluid">
 
-                    {% block principal %}
-                    {% endblock %}
+                    <div class="row">
+                        <div class="col">
+                  
+                          <div class="d-flex flex-wrap justify-content-between">
+                            <!-- <p>DIAS DESDE HOY: {{ dias_desde_hoy }}</p>
+                            <p>DIAS programados: {{ dias_programados }}</p> -->
+
+
+                                {% for dia in dias_desde_hoy %}
+                                <a href="{% url 'formulario-dia' dia=dia|date:'Y-m-d' %}" 
+                                    class={% if dia in dias_programados %} "bg-success" {% else %}"bg-primary" {% endif %}>
+                                    <div class="text-white p-3 small border border-dark al"> 
+                                    <p>{{ dia|date:"l j" }}</p>
+                               
+                                    </div>
+                                </a>
+                                {% endfor %}
+                  
+                           </div>
+                        </div>
+                    </div>
+                  <!-- </div> -->
+                  
+                  <hr>
+
+                  {% block filtro %}
+                  {% endblock %}
+                 <!-- Divider -->
+                  <hr>
+                
+                    <!-- Begin Page Content -->
+
+                    <!-- <div class="container-fluid"> -->
+
+                  {% block principal %}
+                  {% endblock %}
+
+                    <!-- </div> -->
+                    <!-- /.container-fluid -->
 
                 </div>
-                <!-- /.container-fluid -->
-
-            </div>
             <!-- End of Main Content -->
 
             <!-- Footer -->

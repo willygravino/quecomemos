@@ -2,13 +2,15 @@
 
 {% load static %}
 
-{% block un_video %}
+{% block lista_platos %}
+
+<h1>{{ aceptado }} </h1>
 
 <h1>Lista de Amigues</h1>
 <ul>
   {% for amigue in amigues %}
   <!-- TODO ESTO TAL VEZ HAY QUE HACERLO EN REALIDAD CON ID QUE ES ÚNICO, AUNQUE USUARUI TAMBIÉN DEBERÍA SERLO /// -->
-    <li>{{ amigue }}</li> <a href="{% url 'amigue-borrar' amigue %}">Borrar</a>
+    <li>{{ amigue }} <a href="{% url 'amigue-borrar' amigue %}">Borrar</a></li>
 
   {% endfor %}
 </ul>

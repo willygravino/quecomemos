@@ -17,19 +17,19 @@
 <form method="post" enctype="multipart/form-data">
    <center>
       <p>    
-           {% csrf_token %}
-           
-           <!-- <label for="id_usuario_que_envia">Usuario que envía: {{user.username}}</label>
-           <input type="text" name="usuario_que_envia" maxlength="15" id="id_usuario_que_envia">
-           <br><br> -->
+          {% csrf_token %}
+          
+          <!-- <label for="id_usuario_que_envia">Usuario que envía: {{user.username}}</label>
+          <input type="text" name="usuario_que_envia" maxlength="15" id="id_usuario_que_envia">
+          <br><br> -->
 
-           <input type="hidden" name="usuario_que_envia" value="{{ user.username }}">
-           
-           <textarea name="mensaje" cols="40" rows="10" maxlength="1000" required="" aria-invalid="true" id="id_mensaje"></textarea>
+          <input type="hidden" name="usuario_que_envia" value="{{ user.username }}">
+          
+          <textarea name="mensaje" cols="40" rows="10" maxlength="1000" required="" aria-invalid="true" id="id_mensaje"></textarea>
 
-           <p>
-            <label for="id_amistad">Amistad:</label>
-            <input type="text" name="amistad" maxlength="9" id="id_amistad">
+          <p>
+          <label for="id_amistad">Amistad:</label>
+          <input type="text" name="amistad" maxlength="9" id="id_amistad">
           </p>
                    
           </select>
