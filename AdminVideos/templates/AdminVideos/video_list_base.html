@@ -4,10 +4,6 @@
 
 {% block lista_platos %}
 
- <p>PALABRA CLAVE: {{ palabraclave }}</p> 
-
-
-
 <!-- Divider -->
 <!-- <hr> -->
 
@@ -37,9 +33,7 @@
             <a class="bg-primary text-white small border border-dark" href="{% url 'videos-create' %}?tipopag={{ request.GET.tipopag|default:'' }}">
               {% if request.GET.tipopag and request.GET.tipopag != "Dash" %} AGREGAR {{ request.GET.tipopag }}{% else %} AGREGAR PRINCIPAL{% endif %}
             </a>
-         
-            <!-- <h1>ddddd</h1> -->
-          
+                   
           </div>
         </div>
           <!-- </div> -->

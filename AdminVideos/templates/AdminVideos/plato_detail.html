@@ -4,9 +4,6 @@
 
 {% block principal %}
 
-<h1>hjdfslkjhfdslkjhdfs</h1>
-
-
 <div class="album py-5 bg-body-tertiary">
   <div class="container">
       <!-- <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3"> -->
@@ -67,10 +64,13 @@
                   
             </div>
 
-            <form method="post" action="">
+            <form method="post" action="{% url 'compartir-plato' %}">
                 {% csrf_token %}
+               
                 <div class="mb-3">
                     <select id="amigue-select" name="amigue" class="form-select" aria-label="Seleccionar amigue">
+                       <!-- Campo oculto para enviar el plato.id -->
+                        <input type="hidden" name="plato_id" value="{{ plato.id }}">
                         <option selected disabled>Compartir este plato con:</option>
                         {% for amigue in amigues %}
                             <option value="{{ amigue }}">{{ amigue }}</option>

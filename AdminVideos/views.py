@@ -1073,7 +1073,7 @@ def FiltroDePlatos (request):
     medios = request.session.get('medios_estable', None)
     categoria = request.session.get('categoria_estable', None)
     preparacion = request.session.get('preparacion_estable', None)
-    palabra_clave = request.session.get('palabra_clave', None)
+    palabra_clave = request.session.get('palabra_clave', "")
     # calorias = request.session.get('calorias_estable', None)
 
     quecomemos = request.session.get('quecomemos', None)
@@ -1188,8 +1188,7 @@ def FiltroDePlatos (request):
                 "misplatos_ck": misplatos,
                 "preseleccionados_ck": preseleccionados,
                 "amigues" : amigues,
-                "parametro": tipo_parametro,
-                "palabraclave": palabra_clave
+                "parametro": tipo_parametro
                }
 
     return render(request, 'AdminVideos/lista_filtrada.html', contexto)
@@ -1357,6 +1356,59 @@ class MensajeCreate(CreateView):
    model = Mensaje
    success_url = reverse_lazy('filtro-de-platos')
    fields = '__all__'
+
+# class compartir_plato(CreateView):
+#    model = Mensaje
+#    success_url = reverse_lazy('filtro-de-platos')
+#    fields = '__all__'    
+
+
+class compartir_plato(CreateView):
+    model = Mensaje
+    template_name = 'AdminVideos/compartir_plato.html'
+    success_url = reverse_lazy('filtro-de-platos')
+
+
+    fields = ['mensaje']  # Solo incluimos el campo del mensaje, ya que otros se asignarán automáticamente
+
+    def get_context_data(self, **kwargs):
+        # Obtén el contexto base de la vista
+        context = super().get_context_data(**kwargs)
+
+        # Recupera el plato_id y el amigue del request GET o POST
+        plato_id = self.request.POST.get('plato_id')
+        amigue = self.request.POST.get('amigue')
+
+        # Agrega plato y amigue al contexto
+        context['plato_id'] = plato_id
+        context['amigue'] = amigue
+
+        # Opcional: Si necesitas el objeto Plato, búscalo con get_object_or_404
+        # if plato_id:
+        #     context['plato'] = get_object_or_404(Plato, id=plato_id)
+
+        return context
+
+    def form_valid(self, form):
+        # Obtén los datos necesarios del request
+        plato_id = self.request.POST.get('plato_id')
+        amigue_username = self.request.POST.get('amigue')  # Supone que el valor es el nombre de usuario
+
+        # Busca el plato y el destinatario
+        plato = get_object_or_404(Plato, id=plato_id)
+        destinatario = get_object_or_404(User, username=amigue_username)
+
+        # Obtén el mensaje que el usuario escribió en el formulario
+        mensaje_usuario = form.cleaned_data.get('mensaje')
+    
+        # Completa los datos automáticos del mensaje
+        form.instance.usuario_que_envia = self.request.user.username
+        form.instance.destinatario = destinatario
+        form.instance.amistad = plato_id  # aqui mando el plato que se comparte
+        form.instance.mensaje = f"{mensaje_usuario} Comparto con vos el plato {plato.nombre_plato}"
+
+
+        return super().form_valid(form)
 
 
 class MensajeDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):

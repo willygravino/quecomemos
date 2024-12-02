@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path
 from django.contrib.auth.views import LogoutView
 
-from AdminVideos.views import amigue_borrar, amigues, formulario_dia, index, PlatoUpdate, PlatoDelete, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, plato_preseleccionado, grabar_menu_elegido,SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, sumar_amigue, user_logout, desmarcar_todo, MensajeCreate, MensajeList, MensajeDelete # VistaInicial ,Logout, , PlatoList, PlatosMineList, PlatosElegidosMenu, elecion_de_lista, PlatosDeOtros,, LogtViews, MenuElegido, lista_de_compras
+from AdminVideos.views import amigue_borrar, amigues, compartir_plato, formulario_dia, index, PlatoUpdate, PlatoDelete, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, plato_preseleccionado, grabar_menu_elegido,SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, sumar_amigue, user_logout, desmarcar_todo, MensajeCreate, MensajeList, MensajeDelete # VistaInicial ,Logout, , PlatoList, PlatosMineList, PlatosElegidosMenu, elecion_de_lista, PlatosDeOtros,, LogtViews, MenuElegido, lista_de_compras
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -32,8 +32,10 @@ urlpatterns = [
     path('menu/amigues/sumar',sumar_amigue, name="sumar_amigue"),
     path('formulario/dia/<str:dia>/',  formulario_dia, name="formulario-dia"),
     path('desmarcar/',  desmarcar_todo, name="desmarcar-todo"),
+    path('compartir/',  compartir_plato.as_view(), name="compartir-plato"),
+
     # path('lista/compras-y-plan', lista_y_plan, name="lista-y-plan"),
-    path('menu/random', SugerenciasRandom.as_view(), name="random"),
+    # path('menu/random', SugerenciasRandom.as_view(), name="random"),
     path('videos/list/filtro', FiltroDePlatos, name="filtro-de-platos"),
     path('videos/reiniciar/sugeridos', reiniciar_sugeridos, name="reiniciar-sugeridos"),
     path('videos/<pk>/update', PlatoUpdate.as_view(), name="videos-update"),

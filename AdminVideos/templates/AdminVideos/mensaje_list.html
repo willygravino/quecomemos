@@ -22,19 +22,27 @@
           <br> 
           {{ mensaje.mensaje }}
           
-          {% if mensaje.amistad == "solicitar" %}
-            <!-- Cada mensaje tiene su propio formulario -->
-            {% if mensaje.usuario_que_envia not in amigues %}
-              <form action="{% url 'sumar_amigue' %}" method="POST">
-                {% csrf_token %}
-                <input type="hidden" name="amigue_usuario" value="{{ mensaje.usuario_que_envia }}">
-                <button type="submit">Aceptar amistad {{ mensaje.usuario_que_envia }}</button>
-              </form>
-            {% else %}
-              <p>AMIGO ACEPTADO</p>
-            {% endif %}
+          {% if mensaje.amistad %}
+              {% if mensaje.amistad == "solicitar" %}
+                <!-- Cada mensaje tiene su propio formulario -->
+                {% if mensaje.usuario_que_envia not in amigues %}
+                  <form action="{% url 'sumar_amigue' %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="amigue_usuario" value="{{ mensaje.usuario_que_envia }}">
+                    <button type="submit">Aceptar amistad {{ mensaje.usuario_que_envia }}</button>
+                  </form>
+                {% else %}
+                  <p>AMIGO ACEPTADO</p>
+                {% endif %}
 
-          {% endif %}
+              {% else %}
+                <form action="" method="POST">
+                  {% csrf_token %}
+                  <input type="hidden" name="" value="">
+                  <button type="submit">agregar a mi lista el plato {{mensaje.amistad}} que envía {{ mensaje.usuario_que_envia }}</button>
+                </form>
+              {% endif %}
+           {% endif %}
           
           <br>
           <a href="{% url 'mensaje-delete' mensaje.id %}">Borrar</a>
