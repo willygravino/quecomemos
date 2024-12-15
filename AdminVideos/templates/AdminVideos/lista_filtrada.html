@@ -5,7 +5,7 @@
 {% block filtro %}
 
 <form method="POST">
-  <div class="d-flex justify-content-between mx-3 gap-2">
+  <div class="d-flex justify-content-between mx-3 gap-2 flex-wrap">
 
     {% csrf_token %}
     <!-- 
@@ -19,13 +19,9 @@
     <span>Medios: {{ formulario.medios }}</span>
     <span>Categoría: {{ formulario.categoria }}</span>
     <span>Preparación: {{ formulario.preparacion }}</span>
-    <span>Palabra clave: {{ formulario.palabra_clave }}</span>
 
-
-    <!-- <span>Tipo: {{ formulario.tipo }}</span> -->
-
-    <!-- <br> -->
-
+    <input type="search" placeholder="Buscar por palabra clave" {{ formulario.palabra_clave }}
+  
     {% if  user.username  != "quecomemos" %}
       <div class="form-check">
         <input class="form-check-input" type="checkbox" name="quecomemos" value="quecomemos" id="quecomemos" {% if quecomemos_ck == "quecomemos" %} checked {% endif %}>

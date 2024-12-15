@@ -1,0 +1,35 @@
+/* Ocultar el checkbox predeterminado */
+/* input[type="checkbox"] {
+    display: none;
+} */
+
+/* Estilo para el contenedor del checkbox personalizado */
+.custom-checkbox {
+   
+    /* display: none; */
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    background-color: transparent;
+    border: 2px solid #ccc;
+    border-radius: 50%;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* Forma de corazón cuando está marcado */
+.custom-checkbox:before {
+    content: '';
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    background-color: transparent;
+    clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 50% 80%, 18% 100%, 0% 38%);
+    transition: all 0.3s ease;
+}
+
+/* Cambiar el corazón a rojo si está marcado */
+input[type="checkbox"]:checked + .custom-checkbox:before {
+    background-color: red;
+}

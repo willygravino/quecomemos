@@ -365,9 +365,9 @@
     </section>
 </div>
 
-<div class="col-md-4">
 
-        <!-- <form> -->
+
+<div class="col-md-4">
 
             <h3>EDITA LISTA DE COMPRAS</h3>
                 
@@ -376,7 +376,7 @@
                             <input type="checkbox" id="{{ ingrediente }}" name="ingrediente_a_comprar" value="{{ ingrediente }}"  {% if valor.estado == "no-tengo" %} checked {% endif %}>
                         
                             <label for="{{ ingrediente }}">{{ ingrediente }}</label>
-                            <input type="text" id="{{ ingrediente }}_detalle" value="{{ valor.comentario }}" name="{{ ingrediente }}_detalle">
+                            <input type="search"  class="DocSearch-Input" id="{{ ingrediente }}_detalle" value="{{ valor.comentario }}" name="{{ ingrediente }}_detalle">
 
                             <br>
                         {% endfor %}
@@ -405,7 +405,6 @@
           <div class="badge bg-primary text-wrap" style="width: 6rem;">
             NO HAY INGREDIENTES PARA COMPRAR
           </div>
-           <!-- <h2>NO HAY INGREDIENTES PARA COMPRAR</h2> -->
         {% endif %}
 
     </section>

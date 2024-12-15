@@ -39,6 +39,10 @@ def index(request):
 def about(request):
     return render(request, "AdminVideos/about.html")
 
+# FUNCIÓN QUE SALVA EN SESSION LOS PRESELECCIONADOS
+
+# FUNCIÓN QUE MANDA DE LA SESIÓN A LA BASE DE DATOS LOS PRESELECCIONADOS
+
 def plato_preseleccionado(request):
     if request.method == 'GET':
         nombre_plato = request.GET.get('opcion1')
@@ -1356,6 +1360,16 @@ class MensajeCreate(CreateView):
    model = Mensaje
    success_url = reverse_lazy('filtro-de-platos')
    fields = '__all__'
+   
+   def form_valid(self, form):
+        # Asigna el valor predeterminado al campo 'amistad'
+        form.instance.amistad = "solicitar"
+        return super().form_valid(form)
+   
+   def get_form(self, form_class=None):
+    form = super().get_form(form_class)
+    form.fields['destinatario'].queryset = User.objects.exclude(id=self.request.user.id)
+    return form
 
 # class compartir_plato(CreateView):
 #    model = Mensaje
@@ -1405,8 +1419,8 @@ class compartir_plato(CreateView):
         form.instance.usuario_que_envia = self.request.user.username
         form.instance.destinatario = destinatario
         form.instance.amistad = plato_id  # aqui mando el plato que se comparte
-        form.instance.mensaje = f"{mensaje_usuario} Comparto con vos el plato {plato.nombre_plato}"
-
+        form.instance.nombre_plato_compartido = {plato.nombre_plato}
+        form.instance.mensaje = {mensaje_usuario}
 
         return super().form_valid(form)
 
@@ -1425,18 +1439,36 @@ class MensajeList(LoginRequiredMixin, ListView):
    context_object_name = "mensajes"
 
    def get_queryset(self):
-       import pdb; pdb.set_trace
+    #    import pdb; pdb.set_trace
        return Mensaje.objects.filter(destinatario=self.request.user).all()
    
    def get_context_data(self, **kwargs):
         # Llamar al método original para obtener el contexto base
         context = super().get_context_data(**kwargs)
+
+        # Extraer el campo "amistad" de todos los mensajes del queryset
+        mensajes = self.get_queryset()  # Obtén todos los mensajes del usuario
+        platos_ids = []
+
+        # Iterar sobre los mensajes para extraer IDs de platos
+        for mensaje in mensajes:
+            if mensaje.amistad != "solicitar":
+               platos_ids.append(mensaje.amistad)
+
+        # Eliminar duplicados en caso de que un plato esté repetido
+        platos_ids = list(set(platos_ids))
         
         # Obtener el perfil del usuario actual
         perfil = get_object_or_404(Profile, user=self.request.user)
         
         # Pasar la lista de amigues al contexto
         context["amigues"] = perfil.amigues  # Lista JSONField desde Profile
+
+        # Consultar los objetos Plato correspondientes
+        platos_compartidos = Plato.objects.filter(id__in=platos_ids)
+
+        # Crear un diccionario con los platos para acceso rápido en la plantilla
+        context["platos_dict"] = {plato.id: plato for plato in platos_compartidos}
         
         return context
    

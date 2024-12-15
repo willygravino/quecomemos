@@ -17,36 +17,59 @@
   {% for mensaje in mensajes %}
     <center>
       <p>
-        <li>
-          Mensaje de: {{ mensaje.usuario_que_envia }} 
-          <br> 
-          {{ mensaje.mensaje }}
+
+          <div class="card mx-auto w-75" >
+            <div class="card-body">
+              <h5 class="card-title">Mensaje de {{ mensaje.usuario_que_envia }}</h5>
+              <!-- <h6 class="card-subtitle mb-2 text-body-secondary">Card subtitle</h6> -->
+              <p class="card-text border">{{ mensaje.mensaje }}</p>
+              <p class="card-text small text-muted" align="right"><i>{{mensaje.creado_el}}</i>
+              <a href="#" class="card-link">Responder</a></p>
+              <!-- <a href="#" class="card-link">Another link</a> -->
+           
           
           {% if mensaje.amistad %}
               {% if mensaje.amistad == "solicitar" %}
                 <!-- Cada mensaje tiene su propio formulario -->
                 {% if mensaje.usuario_que_envia not in amigues %}
+
                   <form action="{% url 'sumar_amigue' %}" method="POST">
                     {% csrf_token %}
                     <input type="hidden" name="amigue_usuario" value="{{ mensaje.usuario_que_envia }}">
                     <button type="submit">Aceptar amistad {{ mensaje.usuario_que_envia }}</button>
                   </form>
+             
+    
                 {% else %}
                   <p>AMIGO ACEPTADO</p>
                 {% endif %}
 
               {% else %}
+ 
                 <form action="" method="POST">
                   {% csrf_token %}
                   <input type="hidden" name="" value="">
                   <button type="submit">agregar a mi lista el plato {{mensaje.amistad}} que envía {{ mensaje.usuario_que_envia }}</button>
+                  
+                    <!-- <img src="{{platos_dict.id.image_url}}" class="img-fluid position-relative object-fit-cover" alt="Imagen del Plato"> -->
+
+                  <a class="dropdown-item" href="#" data-toggle="modal" data-target="#PlatoModal{{mensaje.amistad}}">
+                    Ver plato {{mensaje.nombre_plato_compartido}}
+                 </a>
+
+                 <a class="btn btn-primary" href="">Agregar a mi lista</a>
+                 <a class="btn btn-primary" href="">Rechazar</a>
+                 
                 </form>
               {% endif %}
            {% endif %}
           
           <br>
           <a href="{% url 'mensaje-delete' mensaje.id %}">Borrar</a>
-        </li>
+
+           <!-- cierre de card -->
+          </div>
+        </div>
       </p>
     </center>
   {% endfor %}
@@ -64,5 +87,35 @@
     </div>
   </div> 
 {% endif %}
+
+
+{% for plato_id, plato in platos_dict.items %}
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="PlatoModal{{ plato_id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">¿Querés salir?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+
+                <li>ID: {{ plato_id }}</li>
+                <li>Nombre: {{ plato.nombre_plato }}</li>
+                <li>Descripción: {{ plato.descripcion_plato }}</li>
+                <li>Precio: {{ plato.ingredientes }}</li>
+                <img src="{{plato.image_url}}" class="img-fluid position-relative object-fit-cover" alt="Imagen del Plato">
+                <div class="modal-footer">
+                    <a class="btn btn-primary" href="">Agregar a mi lista</a>
+                    <a class="btn btn-primary" href="">Rechazar</a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %} 
 
 {% endblock %}

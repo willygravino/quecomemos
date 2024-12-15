@@ -4,7 +4,7 @@
 <head>
    {% load static %}
 
-   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
@@ -250,5 +250,21 @@
   
         
     
-  
-  </body></html>
+  <!-- ESTE SCRIPT PARA MANTENER EL SCROLL CUANDO SE VA DE LA PÁGINA -->
+  <script>
+    // Guarda la posición del scroll antes de cambiar de página
+    window.addEventListener('beforeunload', () => {
+        localStorage.setItem('scrollPosition', window.scrollY);
+    });
+
+    // Cuando se carga la página, restaura la posición del scroll
+    window.addEventListener('load', () => {
+        const scrollPosition = localStorage.getItem('scrollPosition');
+        if (scrollPosition) {
+            window.scrollTo(0, parseInt(scrollPosition, 10));
+        }
+    });
+</script>
+
+  </body>
+  </html>

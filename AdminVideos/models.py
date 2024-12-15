@@ -163,7 +163,9 @@ class Mensaje(models.Model):
     usuario_que_envia = models.CharField(max_length=15, null=True, blank=True)
     mensaje = models.TextField(max_length=1000)
     amistad = models.CharField(max_length=9, null=True, blank=True)
+    nombre_plato_compartido =  models.CharField(max_length=30, null=True, blank=True)
     creado_el = models.DateTimeField(auto_now_add=True) 
     destinatario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="mensajes")
+
 
 
