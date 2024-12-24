@@ -43,6 +43,8 @@
           <h6>No hay platos para mostrar.</h6>
         {% else %}
       
+        <h1>preselllllls {{ preseleccionados }}</h1>
+
         {% for plato in platos %}
           <div class="d-flex flex-row">
             <div class="col-md-4 mb-3">
@@ -74,29 +76,29 @@
                       </a>               
                     {% endif %}
 
-                    <form action="{% url 'plato-preseleccionado' %}" method="GET">
-                      <input type="hidden" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}">
-                      <input type="hidden" name="tipo-plato" value="{{ plato.tipo }}">   <!--  Incluir tipo-plato -->
-                      <input type="hidden" name="tipopag" value="{{ request.GET.tipopag }}">  <!-- Incluir tipo-pag -->
-
-                      {% if plato.nombre_plato in preseleccionados %}
-                          <input type="checkbox" id="borrar" name="borrar" value="borrar" checked style="display: none;">
-                          <button type="submit" class="btn btn-success" style="font-size: 12px; padding: 2px 5px;">√</button>
-                      {% else %}
-                          <input type="checkbox" id="opcion{{ plato.id }}" name="opcion1" value="{{ plato.nombre_plato }}" checked style="display: none;">
-                          <button type="submit" class="btn btn-primary"  style="font-size: 12px; padding: 2px 5px;">Preseleccionar</button>
-                      {% endif %}
+                    <div>
+                      <button 
+                          class="btn {% if plato.nombre_plato in preseleccionados %}btn-success{% else %}btn-primary{% endif %}" 
+                          style="font-size: 12px; padding: 2px 5px;"
+                          data-plato-id="{{ plato.id }}"
+                          data-nombre-plato="{{ plato.nombre_plato }}"
+                          data-tipo-plato="{{ plato.tipo }}"
+                          data-tipopag="{{ request.GET.tipopag }}"
+                          data-accion="{% if plato.nombre_plato in preseleccionados %}borrar{% else %}preseleccionar{% endif %}">
+                          {% if plato.nombre_plato in preseleccionados %}√{% else %}Preseleccionar{% endif %}
+                      </button>
+                    </div>
                       
-                      <!-- PRUEBA HTML del checkbox -->
-                      <label>
-                        <input type="checkbox" id="preseles" name="" value="" {% if plato.nombre_plato in preseleccionados %} checked {% endif %} style="display: none;">
-                        <span class="custom-checkbox"></span>
-                      </label>
+                    <!-- PRUEBA HTML del checkbox -->
+                    <label>
+                      <input type="checkbox" id="preseles" name="" value="" {% if plato.nombre_plato in preseleccionados %} checked {% endif %} style="display: none;">
+                      <span class="custom-checkbox"></span>
+                    </label>
 
-                      {% if plato.propietario != user %}
-                          <button type="submit" class="btn btn-success" style="font-size: 12px; padding: 2px 5px;">AGREGAR A MI LISTA</button>
-                      {% endif %}
-                  </form>
+                    {% if plato.propietario != user %}
+                        <button type="submit" class="btn btn-success" style="font-size: 12px; padding: 2px 5px;">AGREGAR A MI LISTA</button>
+                    {% endif %}
+                 
                 </div>
               </div>
             </div>
@@ -108,5 +110,59 @@
 {% endif %}
 
 </section>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+      const buttons = document.querySelectorAll("button[data-plato-id]");
+  
+      buttons.forEach(button => {
+          button.addEventListener("click", function (event) {
+              event.preventDefault(); // Previene el comportamiento predeterminado
+  
+              const nombrePlato = this.dataset.nombrePlato;
+              const tipoPlato = this.dataset.tipoPlato;
+              const tipopag = this.dataset.tipopag;
+              const accion = this.dataset.accion;
+  
+              // Construir la URL con los parámetros
+              const url = `{% url 'plato-preseleccionado' %}?opcion1=${encodeURIComponent(nombrePlato)}&tipoplato=${encodeURIComponent(tipoPlato)}&tipopag=${encodeURIComponent(tipopag)}&accion=${encodeURIComponent(accion)}`;
+  
+              // Realizar la solicitud GET
+              fetch(url, {
+                  method: "GET",
+              })
+              .then(response => {
+                  if (!response.ok) {
+                      throw new Error(`Error en la solicitud: ${response.statusText}`);
+                  }
+                  return response.json(); // Procesar la respuesta como JSON
+              })
+              .then(data => {
+                  if (data.success) {
+                      // Actualizar el estado del botón dinámicamente
+                      if (accion === "borrar") {
+                          this.classList.remove("btn-success");
+                          this.classList.add("btn-primary");
+                          this.textContent = "Preseleccionar";
+                          this.dataset.accion = "preseleccionar";
+                      } else {
+                          this.classList.remove("btn-primary");
+                          this.classList.add("btn-success");
+                          this.textContent = "√";
+                          this.dataset.accion = "borrar";
+                      }
+                  } else {
+                      console.error("Acción no fue exitosa:", data);
+                  }
+              })
+              .catch(error => {
+                  console.error("Error:", error); // Mostrar errores en consola
+              });
+          });
+      });
+  });
+</script>
+
+
 
 {% endblock %}

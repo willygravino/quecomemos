@@ -43,28 +43,119 @@ def about(request):
 
 # FUNCIÓN QUE MANDA DE LA SESIÓN A LA BASE DE DATOS LOS PRESELECCIONADOS
 
+from django.http import JsonResponse
+from django.shortcuts import redirect, reverse
+
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.shortcuts import redirect
+from django.urls import reverse
+
 def plato_preseleccionado(request):
     if request.method == 'GET':
+        # Obtener parámetros de la solicitud
         nombre_plato = request.GET.get('opcion1')
-        plato_tipo = request.GET.get('tipo-plato')
-        borrar = request.GET.get('borrar')
-        tipo_pag = request.GET.get('tipopag')  # Obtener el parámetro 'tipo-pag' de la URL
+        plato_tipo = request.GET.get('tipoplato')
+        accion = request.GET.get('accion')
+        tipo_pag = request.GET.get('tipopag')
 
-        usuario = request.user  # Obtener el usuario logueado
+        # Validar parámetros necesarios
+        if not nombre_plato or not plato_tipo:
+            return JsonResponse({"error": "Faltan parámetros necesarios"}, status=400)
 
-        if borrar == "borrar":
-            # Eliminar el plato de la lista de platos Preseleccionados
+        # Obtener el usuario logueado
+        usuario = request.user
+
+        # Realizar acción según el valor de 'accion'
+        if accion == "borrar":
+            # Eliminar el plato de la lista de platos preseleccionados
             Preseleccionados.objects.filter(usuario=usuario, nombre_plato_elegido=nombre_plato).delete()
+            resultado = "borrar"
         else:
-            # Agregar el plato a la lista de platos Preseleccionados
+            # Agregar el plato a la lista de platos preseleccionados
             Preseleccionados.objects.get_or_create(usuario=usuario, nombre_plato_elegido=nombre_plato, tipo_plato=plato_tipo)
+            resultado = "preseleccionar"
 
-        # Redirigir manteniendo el parámetro 'tipo-pag'
-        return redirect(f"{reverse('filtro-de-platos')}?tipopag={tipo_pag}")
+        # Actualizar la lista de preseleccionados
+        preseleccionados = list(
+            Preseleccionados.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
+        )
 
+        # # Verificar si es una solicitud AJAX
+        # if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        #     # Responder con JSON si es una solicitud AJAX
+        return JsonResponse({
+                "success": True,
+                "accion": resultado,
+                "preseleccionados": preseleccionados,
+            })
+        # else:
+        #     # Redirigir si no es una solicitud AJAX
+        #     return redirect(f"{reverse('filtro-de-platos')}?tipopag={"verga"}")
     else:
-        # Manejar solicitudes POST u otras solicitudes que no sean GET
+        # Responder con error si el método no es GET
         return JsonResponse({"error": "Método no permitido"}, status=405)
+
+
+
+# def plato_preseleccionado(request):
+#     if request.method == 'GET':
+#         nombre_plato = request.GET.get('opcion1')
+#         plato_tipo = request.GET.get('tipoplato')
+#         accion = request.GET.get('accion')
+#         tipo_pag = request.GET.get('tipopag')
+
+#         if not nombre_plato or not plato_tipo:  # Verifica que los parámetros necesarios existan
+#             return JsonResponse({"error": "Faltan parámetros necesarios"}, status=400)
+
+#         usuario = request.user  # Obtener el usuario logueado
+
+#         if accion == "borrar":
+#             # Eliminar el plato de la lista de platos preseleccionados
+#             Preseleccionados.objects.filter(usuario=usuario, nombre_plato_elegido=nombre_plato).delete()
+#         else:
+#             # Agregar el plato a la lista de platos preseleccionados
+#             Preseleccionados.objects.get_or_create(usuario=usuario, nombre_plato_elegido=nombre_plato, tipo_plato=plato_tipo)
+
+#         if request.is_ajax():
+#             # Si es una solicitud AJAX, devolvemos una respuesta JSON
+#             return JsonResponse({"success": True, "accion": "borrar" or "preseleccionar"})
+#         else:
+#             # Si no es AJAX, redirigimos
+#             return redirect(f"{reverse('filtro-de-platos')}?tipopag={tipo_pag}")
+
+#         if request.is_ajax():
+#             # Si es una solicitud AJAX, devolvemos una respuesta JSON
+#             return JsonResponse({"success": True, "accion": "borrar" or "preseleccionar"})
+#         else:
+#             # Si no es AJAX, redirigimos
+#             return redirect(f"{reverse('filtro-de-platos')}?tipopag={tipo_pag}")
+#     else:
+#         return JsonResponse({"error": "Método no permitido"}, status=405)
+
+
+
+# def plato_preseleccionado(request):
+#     if request.method == 'GET':
+#         nombre_plato = request.GET.get('opcion1')
+#         plato_tipo = request.GET.get('tipo-plato')
+#         borrar = request.GET.get('borrar')
+#         tipo_pag = request.GET.get('tipopag')  # Obtener el parámetro 'tipo-pag' de la URL
+
+#         usuario = request.user  # Obtener el usuario logueado
+
+#         if borrar == "borrar":
+#             # Eliminar el plato de la lista de platos Preseleccionados
+#             Preseleccionados.objects.filter(usuario=usuario, nombre_plato_elegido=nombre_plato).delete()
+#         else:
+#             # Agregar el plato a la lista de platos Preseleccionados
+#             Preseleccionados.objects.get_or_create(usuario=usuario, nombre_plato_elegido=nombre_plato, tipo_plato=plato_tipo)
+
+#         # Redirigir manteniendo el parámetro 'tipo-pag'
+#         return redirect(f"{reverse('filtro-de-platos')}?tipopag={tipo_pag}")
+
+#     else:
+#         # Manejar solicitudes POST u otras solicitudes que no sean GET
+#         return JsonResponse({"error": "Método no permitido"}, status=405)
 
 # Función auxiliar para convertir 'None' (cadena) a None (tipo NoneType) / NO ENTIENDO POR QUÉ FUNCIONA ESTO ASÍ (DE OTRO MODO NO FUNCIONA) if value == 'None' or value == ''
 def limpiar_none(value):
