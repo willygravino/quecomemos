@@ -1,29 +1,193 @@
-class PlatoList(ListView):
-    model = Plato
-    context_object_name = "platos"
-    # query = "tomatelas"
+{% extends "AdminVideos/index.html" %}
 
-    def get_queryset(self):
-        # self.query = "tomatelas"
+{% load static %}
 
-        if self.request.user.is_authenticated:
-            try:
-                if self.request.user.profile:
-                        # self.query = "higo"
-                        self.query = self.request.GET.get("la-busqueda")
-                        # query = self.request.user.profile.nombre_completo
-                        if self.query:
-                            object_list = Plato.objects.filter(ingredientes__icontains=self.query)
-                        return object_list
-            except Exception:
-               object_list = Plato.objects.filter(ingredientes__icontains="%%")
-            return object_list
-        else:
-            object_list = Plato.objects.filter(ingredientes__icontains="%%")
-        return object_list
+{% block lista_platos %}
 
-    def get_context_data(self, **kwargs):
-            context = super().get_context_data(**kwargs)
-            # Pasar query al contexto
-            context['query'] = self.query
-            return context
+<!-- Divider -->
+<!-- <hr> -->
+
+
+<!-- <p>{{ amigues }}</p> -->
+
+<!-- <hr> -->
+
+<section>
+  <!-- <div class="row"> -->
+    <!-- <div class="col"> -->
+      <div class="p-1 d-flex flex-wrap">
+        <!-- <div class="row"> -->
+          <!-- <div class="col"> -->
+        <div class=" d-flex align-items-center">
+          <div class="container">
+
+            {% if preseleccionados %}
+              <a class=" badge bg-success text-wrap" href="{% url 'desmarcar-todo' %}">
+                DESMARCAR <br> PRESELECCIONADOS
+              </a>
+         
+            {% endif %}  
+            
+            <br>
+
+            <a class="bg-primary text-white small border border-dark" href="{% url 'videos-create' %}?tipopag={{ request.GET.tipopag|default:'' }}">
+              {% if request.GET.tipopag and request.GET.tipopag != "Dash" %} AGREGAR {{ request.GET.tipopag }}{% else %} AGREGAR PRINCIPAL{% endif %}
+            </a>
+                   
+          </div>
+        </div>
+          <!-- </div> -->
+        <!-- </div> -->
+      
+        {% if not platos %}
+          <h6>No hay platos para mostrar.</h6>
+        {% else %}
+      
+        <h1>pres {{ preseleccionados }}</h1>
+
+        <section>
+          <div class="p-1 d-flex flex-wrap" id="platos-container">
+            {% for plato in platos %}
+              <div class="d-flex flex-row">
+                <div class="col-md-4 mb-3">
+                  <div {% if user.id == plato.propietario.id %} class="card border border-success" {% else %} class="card border border-danger" {% endif %}
+                  style="width: 10rem;">
+                    <div class="container p-0">
+                        <a href="{% url 'videos-detail' plato.id %}">
+                          <img src="{{plato.image_url}}" class="img-fluid position-relative object-fit-cover" alt="Imagen del Plato">
+                        </a>                        
+                        <div class="position-absolute top-0 start-50 translate-middle-x p-2 text-center text-white bg-dark bg-opacity-10 rounded">
+                            <h6 class="mb-0 small"> {{ plato.nombre_plato }} </h6>
+                        </div>
+                    </div>
+                    <div class="mt-1">
+                    
+                        <small class="mtext-success"> {{ plato.tipo }} /</small>
+                        <!-- <p>Lunes 1 - Almuerzo</p> ASIGNACION AQUÍ -->
+
+                        {% for key, value in plato.variedades.items %}
+
+                            {% if value.variedad %}
+                              <small class="mtext-success"> {{ value.variedad }} /</small>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if amigues %}
+                          <a href="{% url 'videos-detail' plato.id %}">
+                            <i class="fa-solid fa-share-nodes"></i>
+                          </a>               
+                        {% endif %}
+
+                        <div>
+                          <button 
+                              class="btn {% if plato.nombre_plato in preseleccionados %}btn-success{% else %}btn-primary{% endif %}" 
+                              style="font-size: 12px; padding: 2px 5px;"
+                              data-plato-id="{{ plato.id }}"
+                              data-nombre-plato="{{ plato.nombre_plato }}"
+                              data-tipo-plato="{{ plato.tipo }}"
+                              data-tipopag="{{ request.GET.tipopag }}"
+                              data-accion="{% if plato.nombre_plato in preseleccionados %}borrar{% else %}preseleccionar{% endif %}">
+                              {% if plato.nombre_plato in preseleccionados %}√{% else %}Preseleccionar{% endif %}
+                          </button>
+                        </div>
+                          
+                        <!-- PRUEBA HTML del checkbox 
+                        <label>
+                          <input type="checkbox" id="preseles" name="" value="" {% if plato.nombre_plato in preseleccionados %} checked {% endif %} style="display: none;">
+                          <span class="custom-checkbox"></span>
+                        </label>-->
+
+                        {% if plato.propietario != user %}
+                            <button type="submit" class="btn btn-success" style="font-size: 12px; padding: 2px 5px;">AGREGAR A MI LISTA</button>
+                        {% endif %}
+                    
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </section>
+
+      </div>
+    <!-- </div> -->
+  <!-- </div> -->
+{% endif %}
+
+</section>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+      const buttons = document.querySelectorAll("button[data-plato-id]");
+
+      buttons.forEach(button => {
+          button.addEventListener("click", function (event) {
+              event.preventDefault(); // Previene el comportamiento predeterminado
+
+              const nombrePlato = this.dataset.nombrePlato;
+              const tipoPlato = this.dataset.tipoPlato;
+              const tipopag = this.dataset.tipopag;
+              const accion = this.dataset.accion;
+
+              // Construir la URL con los parámetros
+              const url = `{% url 'plato-preseleccionado' %}?opcion1=${encodeURIComponent(nombrePlato)}&tipoplato=${encodeURIComponent(tipoPlato)}&tipopag=${encodeURIComponent(tipopag)}&accion=${encodeURIComponent(accion)}`;
+
+              // Realizar la solicitud GET
+              fetch(url, {
+                  method: "GET",
+              })
+              .then(response => {
+                  if (!response.ok) {
+                      throw new Error(`Error en la solicitud: ${response.statusText}`);
+                  }
+                  return response.json(); // Procesar la respuesta como JSON
+              })
+              .then(data => {
+                  if (data.success) {
+                      // Actualizar el estado del botón dinámicamente
+                      if (accion === "borrar") {
+                          this.classList.remove("btn-success");
+                          this.classList.add("btn-primary");
+                          this.textContent = "Preseleccionar";
+                          this.dataset.accion = "preseleccionar";
+                      } else {
+                          this.classList.remove("btn-primary");
+                          this.classList.add("btn-success");
+                          this.textContent = "√";
+                          this.dataset.accion = "borrar";
+                      }
+
+                      // Actualizar los platos mostrados
+                      const platosContainer = document.querySelector("#platos-container"); // Asegúrate de darle un ID al contenedor de los platos
+                      platosContainer.innerHTML = ''; // Limpiar los platos actuales
+
+                      // Recorrer los platos y agregar los nuevos
+                      data.platos.forEach(plato => {
+                          // Crear y agregar cada plato al contenedor de platos
+                          const platoCard = document.createElement("div");
+                          platoCard.classList.add("col-md-4", "mb-3");
+                          platoCard.innerHTML = `
+                              <div class="card" style="width: 10rem;">
+                                  <img src="${plato.image_url}" class="img-fluid" alt="${plato.nombre_plato}">
+                                  <div class="card-body">
+                                      <h5 class="card-title">${plato.nombre_plato}</h5>
+                                      <p class="card-text">${plato.tipo}</p>
+                                  </div>
+                              </div>
+                          `;
+                          platosContainer.appendChild(platoCard);
+                      });
+                  } else {
+                      console.error("Acción no fue exitosa:", data);
+                  }
+              })
+              .catch(error => {
+                  console.error("Error:", error); // Mostrar errores en consola
+              });
+          });
+      });
+  });
+</script>
+
+
+{% endblock %}

@@ -153,6 +153,9 @@ class Profile(models.Model):
     #  por qué default list?
      comentarios = models.JSONField(default=list, blank=True)
      amigues = models.JSONField(default=list, blank=True)
+     sugeridos_descartados = models.JSONField(default=list, blank=True)
+     sugeridos_importados = models.JSONField(default=list, blank=True)
+
 
      @property
      def avatar_url(self):

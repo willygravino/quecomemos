@@ -43,7 +43,7 @@
           <h6>No hay platos para mostrar.</h6>
         {% else %}
       
-        <h1>preselllllls {{ preseleccionados }}</h1>
+        <!-- <h1>preselllllls {{ preseleccionados }}</h1> -->
 
         {% for plato in platos %}
           <div class="d-flex flex-row">
@@ -90,13 +90,16 @@
                     </div>
                       
                     <!-- PRUEBA HTML del checkbox -->
-                    <label>
+                    <!-- <label>
                       <input type="checkbox" id="preseles" name="" value="" {% if plato.nombre_plato in preseleccionados %} checked {% endif %} style="display: none;">
                       <span class="custom-checkbox"></span>
-                    </label>
+                    </label> -->
 
                     {% if plato.propietario != user %}
-                        <button type="submit" class="btn btn-success" style="font-size: 12px; padding: 2px 5px;">AGREGAR A MI LISTA</button>
+                        <!-- <button type="submit" class="btn btn-success" style="font-size: 12px; padding: 2px 5px;">AGREGAR A MI LISTA</button> -->
+                        <a href="{% url 'agregar-a-mi-lista' plato.id %}" class="btn btn-success" style="font-size: 12px; padding: 2px 5px;">AGREGAR A MI LISTA</a>
+                        <a href="{% url 'descartar-sugerido' plato.nombre_plato %}" class="btn btn-success" style="font-size: 12px; padding: 2px 5px;">NO ME INTERESA ESTE PLATO</a>
+
                     {% endif %}
                  
                 </div>
