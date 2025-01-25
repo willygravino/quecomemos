@@ -29,15 +29,15 @@ import datetime
 
 
 def obtener_parametros_sesion(request):
-    
+
     # Recupera los parámetros de sesión y los valores de los parámetros URL.
-    
+
     # Recuperar parámetros de sesión
     medios = request.session.get('medios_estable', None)
     categoria = request.session.get('categoria_estable', None)
     preparacion = request.session.get('preparacion_estable', None)
     palabra_clave = request.session.get('palabra_clave', "")
-    
+
     quecomemos = request.session.get('quecomemos', None)
     misplatos = request.session.get('misplatos', "misplatos")
     preseleccionados = request.session.get('preseleccionados', None)
@@ -234,8 +234,27 @@ def plato_preseleccionado(request):
 def limpiar_none(value):
     return None if value == 'None' or value == '' else value
 
+def agregar_plato(diccionario, clave, plato, ingredientes):
+    """
+    Agrega un plato al diccionario si el plato no es None.
+
+    :param diccionario: Diccionario donde se agregará el plato.
+    :param clave: Clave en el diccionario (por ejemplo, "guarnicion1").
+    :param plato: Nombre del plato.
+    :param ingredientes: Ingredientes del plato.
+    :param elegido: Indica si el plato está elegido. Por defecto, True.
+    """
+    if plato is not None:
+        diccionario[clave] = {
+            "plato": plato,
+            "ingredientes": ingredientes,
+            "elegido": True
+        }
+
 def grabar_menu_elegido(request):
     if request.method == 'POST':
+
+        platos_del_dia = {}
         # Obtener el usuario logueado
         usuario = request.user
 
@@ -243,8 +262,10 @@ def grabar_menu_elegido(request):
 
         # Obtener las fechas y platos elegidos del formulario
         fecha = limpiar_none(request.POST.get("fecha"))
-        almuerzo = limpiar_none(request.POST.get("a"))
-        cena = limpiar_none(request.POST.get("c"))
+
+
+        almuerzo = limpiar_none(request.POST.get("almuerzo"))
+        cena = limpiar_none(request.POST.get("cena"))
         entrada1 = limpiar_none(request.POST.get("entrada1"))
         entrada2 = limpiar_none(request.POST.get("entrada2"))
         entrada3 = limpiar_none(request.POST.get("entrada3"))
@@ -265,7 +286,6 @@ def grabar_menu_elegido(request):
         dip4 = limpiar_none(request.POST.get("dip4"))
         trago1 = limpiar_none(request.POST.get("trago1"))
         trago2 = limpiar_none(request.POST.get("trago2"))
-
 
         registro_existente = ElegidosXDia.objects.filter(user=usuario, el_dia_en_que_comemos=fecha).first()
 
@@ -320,17 +340,41 @@ def grabar_menu_elegido(request):
             guar1_ingredientes =  Plato.objects.filter(nombre_plato=guarnicion1).values("ingredientes").first()
             guar1_ingredientes = guar1_ingredientes['ingredientes'] if guar1_ingredientes else None
 
+            # Agregar guarnicion1
+            agregar_plato(platos_del_dia, "guarnicion1", guarnicion1, guar1_ingredientes)
+
+
+            # # Si guar1_ingredientes no es None, lo agregamos al diccionario
+            # if guarnicion1 is not None:
+            #     platos_del_dia["guarnicion1"] = {
+            #         "plato": guarnicion1,
+            #         "ingredientes": guar1_ingredientes,
+            #         "elegido": True
+            #     }
+
             guar2_ingredientes =  Plato.objects.filter(nombre_plato=guarnicion2).values("ingredientes").first()
             guar2_ingredientes = guar2_ingredientes['ingredientes'] if guar2_ingredientes else None
+
+             # Agregar
+            agregar_plato(platos_del_dia, "guarnicion2", guarnicion2, guar2_ingredientes)
 
             guar3_ingredientes =  Plato.objects.filter(nombre_plato=guarnicion3).values("ingredientes").first()
             guar3_ingredientes = guar3_ingredientes['ingredientes'] if guar3_ingredientes else None
 
+            # Agregar
+            agregar_plato(platos_del_dia, "guarnicion3", guarnicion3, guar3_ingredientes)
+
             guar4_ingredientes =  Plato.objects.filter(nombre_plato=guarnicion4).values("ingredientes").first()
             guar4_ingredientes = guar4_ingredientes['ingredientes'] if guar4_ingredientes else None
 
+            # Agregar
+            agregar_plato(platos_del_dia, "guarnicion4", guarnicion4, guar4_ingredientes)
+
             ent1_ingredientes =  Plato.objects.filter(nombre_plato=entrada1).values("ingredientes").first()
             ent1_ingredientes = ent1_ingredientes['ingredientes'] if ent1_ingredientes else None
+
+            # Agregar
+            agregar_plato(platos_del_dia, "entrada1", entrada1, ent1_ingredientes)
 
             ent2_ingredientes =  Plato.objects.filter(nombre_plato=entrada2).values("ingredientes").first()
             ent2_ingredientes = ent2_ingredientes['ingredientes'] if ent2_ingredientes else None
@@ -380,47 +424,68 @@ def grabar_menu_elegido(request):
             trago2_ingredientes =  Plato.objects.filter(nombre_plato=trago2).values("ingredientes").first()
             trago2_ingredientes = trago2_ingredientes['ingredientes'] if trago2_ingredientes else None
 
-            # Crear el diccionario de platos para este día
-            platos_del_dia = {
+            agregar_plato(platos_del_dia, "entrada2", entrada2, ent2_ingredientes)
+            agregar_plato(platos_del_dia, "entrada3", entrada3, ent3_ingredientes)
+            agregar_plato(platos_del_dia, "entrada4", entrada4, ent4_ingredientes)
+
+            agregar_plato(platos_del_dia, "postre1", postre1, post1_ingredientes)
+            agregar_plato(platos_del_dia, "postre2", postre2, post2_ingredientes)
+
+            agregar_plato(platos_del_dia, "dip1", dip1, dip1_ingredientes)
+            agregar_plato(platos_del_dia, "dip2", dip2, dip2_ingredientes)
+            agregar_plato(platos_del_dia, "dip3", dip3, dip3_ingredientes)
+            agregar_plato(platos_del_dia, "dip4", dip4, dip4_ingredientes)
+
+            agregar_plato(platos_del_dia, "salsa1", salsa1, salsa1_ingredientes)
+            agregar_plato(platos_del_dia, "salsa2", salsa2, salsa2_ingredientes)
+            agregar_plato(platos_del_dia, "salsa3", salsa3, salsa3_ingredientes)
+            agregar_plato(platos_del_dia, "salsa4", salsa4, salsa4_ingredientes)
+
+            agregar_plato(platos_del_dia, "trago1", trago1, trago1_ingredientes)
+            agregar_plato(platos_del_dia, "trago2", trago2, trago2_ingredientes)
+
+            # # Datos nuevos a agregar
+            almuerzo_cena = {
                 "almuerzo": {"plato": almuerzo, "ingredientes": almuerzo_ingredientes, "elegido": True},
                 "variedades_almuerzo": variedad_almuerzo_con_elegidos,
                 "cena": {"plato": cena, "ingredientes": cena_ingredientes, "elegido": True},
                 "variedades_cena": variedad_cena_con_elegidos,
-                "guarnicion1": {"plato": guarnicion1, "ingredientes": guar1_ingredientes, "elegido": True},
-                "guarnicion2": {"plato": guarnicion2, "ingredientes": guar2_ingredientes, "elegido": True},
-                "guarnicion3": {"plato": guarnicion3, "ingredientes": guar3_ingredientes, "elegido": True},
-                "guarnicion4": {"plato": guarnicion4, "ingredientes": guar4_ingredientes, "elegido": True},
-                "entrada1": {"plato": entrada1, "ingredientes": ent1_ingredientes, "elegido": True},
-                "entrada2": {"plato": entrada2, "ingredientes": ent2_ingredientes, "elegido": True},
-                "entrada3": {"plato": entrada3, "ingredientes": ent3_ingredientes, "elegido": True},
-                "entrada4": {"plato": entrada4, "ingredientes": ent4_ingredientes, "elegido": True},
-                "postre1": {"plato": postre1, "ingredientes": post1_ingredientes, "elegido": True},
-                "postre2": {"plato": postre2, "ingredientes": post2_ingredientes, "elegido": True},
-                "dip1": {"plato": dip1, "ingredientes": dip1_ingredientes, "elegido": True},
-                "dip2": {"plato": dip2, "ingredientes": dip2_ingredientes, "elegido": True},
-                "dip3": {"plato": dip3, "ingredientes": dip3_ingredientes, "elegido": True},
-                "dip4": {"plato": dip4, "ingredientes": dip4_ingredientes, "elegido": True},
-                "salsa1": {"plato": salsa1, "ingredientes": salsa1_ingredientes, "elegido": True},
-                "salsa2": {"plato": salsa2, "ingredientes": salsa2_ingredientes, "elegido": True},
-                "salsa3": {"plato": salsa3, "ingredientes": salsa3_ingredientes, "elegido": True},
-                "salsa4": {"plato": salsa4, "ingredientes": salsa4_ingredientes, "elegido": True},
-                "trago1": {"plato": trago1, "ingredientes": trago1_ingredientes, "elegido": True},
-                "trago2": {"plato": trago2, "ingredientes": trago2_ingredientes, "elegido": True},
-
+                # "guarnicion2": {"plato": guarnicion2, "ingredientes": guar2_ingredientes, "elegido": True},
+                # "guarnicion3": {"plato": guarnicion3, "ingredientes": guar3_ingredientes, "elegido": True},
+                # "guarnicion4": {"plato": guarnicion4, "ingredientes": guar4_ingredientes, "elegido": True},
+                # "entrada1": {"plato": entrada1, "ingredientes": ent1_ingredientes, "elegido": True},
+                # "entrada2": {"plato": entrada2, "ingredientes": ent2_ingredientes, "elegido": True},
+                # "entrada3": {"plato": entrada3, "ingredientes": ent3_ingredientes, "elegido": True},
+                # "entrada4": {"plato": entrada4, "ingredientes": ent4_ingredientes, "elegido": True},
+                # "postre1": {"plato": postre1, "ingredientes": post1_ingredientes, "elegido": True},
+                # "postre2": {"plato": postre2, "ingredientes": post2_ingredientes, "elegido": True},
+                # "dip1": {"plato": dip1, "ingredientes": dip1_ingredientes, "elegido": True},
+                # "dip2": {"plato": dip2, "ingredientes": dip2_ingredientes, "elegido": True},
+                # "dip3": {"plato": dip3, "ingredientes": dip3_ingredientes, "elegido": True},
+                # "dip4": {"plato": dip4, "ingredientes": dip4_ingredientes, "elegido": True},
+                # "salsa1": {"plato": salsa1, "ingredientes": salsa1_ingredientes, "elegido": True},
+                # "salsa2": {"plato": salsa2, "ingredientes": salsa2_ingredientes, "elegido": True},
+                # "salsa3": {"plato": salsa3, "ingredientes": salsa3_ingredientes, "elegido": True},
+                # "salsa4": {"plato": salsa4, "ingredientes": salsa4_ingredientes, "elegido": True},
+                # "trago1": {"plato": trago1, "ingredientes": trago1_ingredientes, "elegido": True},
+                # "trago2": {"plato": trago2, "ingredientes": trago2_ingredientes, "elegido": True},
             }
 
-            
+            platos_del_dia.update(almuerzo_cena)
 
             if registro_existente:
                     # Actualizar el registro existente
-                    if almuerzo == registro_existente.platos_que_comemos["almuerzo"]["plato"]:
-                        platos_del_dia["almuerzo"]["elegido"] = registro_existente.platos_que_comemos["almuerzo"]["elegido"]
+                    if "almuerzo" in registro_existente.platos_que_comemos:
+                        if almuerzo == registro_existente.platos_que_comemos["almuerzo"]["plato"]:
+                            platos_del_dia["almuerzo"]["elegido"] = registro_existente.platos_que_comemos["almuerzo"]["elegido"]
 
-                    if cena == registro_existente.platos_que_comemos["cena"]["plato"]:
-                        platos_del_dia["cena"]["elegido"] = registro_existente.platos_que_comemos["cena"]["elegido"]
+                    if "cena" in registro_existente.platos_que_comemos:
+                        if cena == registro_existente.platos_que_comemos["cena"]["plato"]:
+                            platos_del_dia["cena"]["elegido"] = registro_existente.platos_que_comemos["cena"]["elegido"]
 
-                    if guarnicion1 == registro_existente.platos_que_comemos["guarnicion1"]["plato"]:
-                        platos_del_dia["guarnicion1"]["elegido"] = registro_existente.platos_que_comemos["guarnicion1"]["elegido"]
+                    if "guarnicion1" in registro_existente.platos_que_comemos:
+                         if guarnicion1 == registro_existente.platos_que_comemos["guarnicion1"]["plato"]:
+                            platos_del_dia["guarnicion1"]["elegido"] = registro_existente.platos_que_comemos["guarnicion1"]["elegido"]
 
 
                     registro_existente.platos_que_comemos = platos_del_dia
@@ -511,7 +576,12 @@ def lista_de_compras(request):
     lista_de_ingredientes = set()
 
     ingredientes_unicos = {}  # Diccionario para almacenar ingredientes a comprar, estado, comentario
-    # dia_en_que_comemos_str = ""
+    
+    # estas dos definiciones de variables tal vez se puedan sacar
+    dia_en_que_comemos_str = ""
+    buscar_cena_por_dia = ""
+    # xxxxxxxx
+    
     ingredientes_no_comprados = []
     lista_de_compras = []
 
@@ -521,16 +591,16 @@ def lista_de_compras(request):
     perfil = get_object_or_404(Profile, user=request.user)
 
     if request.method == 'POST':
-               
+
                 no_incluir = set()
                 # items = {} la necesito acá pero la muevo para ver contexto
 
                 lista_de_compras = request.POST.getlist("ingrediente_a_comprar")
-                
+
                 for menu_del_dia in menues_del_usuario:
                     platos_dia = menu_del_dia.platos_que_comemos
                     # Convertir dia_en_que_comemos a cadena con un formato específico
-                    dia_en_que_comemos_str = menu_del_dia.el_dia_en_que_comemos.strftime('%d %b. %Y')
+                    dia_en_que_comemos_str = menu_del_dia.el_dia_en_que_comemos.strftime('%d %b %Y')
 
                     almuerzo_que_comemos = platos_dia.get("almuerzo", {}).get("plato", [])
                     almuerzo_info = platos_dia.get("almuerzo", {}).get("ingredientes", [])
@@ -597,7 +667,6 @@ def lista_de_compras(request):
                         buscar_cena_por_dia = cena_que_comemos + dia_en_que_comemos_str
                     else:
                          buscar_cena_por_dia = None
-
 
                     if buscar_cena_por_dia in request.POST:
                           cena_elegida = True
@@ -756,7 +825,7 @@ def lista_de_compras(request):
                     })
 
     else:
-       
+
         for menu_del_dia in menues_del_usuario:
             platos_dia = menu_del_dia.platos_que_comemos
 
@@ -905,7 +974,7 @@ def lista_de_compras(request):
     nombre_dia_semana = fecha_actual.strftime('%A')
 
     # Calcular y agregar las fechas y nombres de los días para los próximos 6 días
-    for i in range(1, 7):
+    for i in range(0, 6):
         fecha = fecha_actual + timedelta(days=i)
         nombre_dia = fecha.strftime('%A')
         dias_desde_hoy.append((fecha))
@@ -922,6 +991,10 @@ def lista_de_compras(request):
         "no_incluir": no_incluir,
         "dias_programados": fechas_existentes,
         "dias_desde_hoy": dias_desde_hoy,
+        "dia_en_que_comemos_str": dia_en_que_comemos_str,
+        "buscar_cena_por_dia" : buscar_cena_por_dia,
+        "claves_en_el_request" : request.POST.keys(),
+
 
 
 
@@ -985,10 +1058,10 @@ def eliminar_plato(request, plato_id):
     # Comprobar si el usuario actual es el propietario del plato
     if plato.propietario != request.user:
         raise Http404("No tienes permiso para eliminar este plato.")
-    
+
     # Actualizar la lista sugeridos_descartados del perfil del usuario
     # profile = request.user.profile
-    
+
     # Obtener el perfil del usuario actual
     perfil = get_object_or_404(Profile, user=request.user)
 
@@ -999,7 +1072,7 @@ def eliminar_plato(request, plato_id):
 
     # Eliminar el plato de la base de datos
     plato.delete()
-        
+
     # # Eliminar el plato de la base de datos
     # plato.delete()
 
@@ -1238,14 +1311,14 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
 
 
 def filtrar_platos(
-    usuario, 
-    tipo_parametro, 
-    quecomemos, 
-    misplatos, 
-    preseleccionados, 
-    medios, 
-    categoria, 
-    preparacion, 
+    usuario,
+    tipo_parametro,
+    quecomemos,
+    misplatos,
+    preseleccionados,
+    medios,
+    categoria,
+    preparacion,
     palabra_clave
 ):
 
@@ -1264,7 +1337,7 @@ def filtrar_platos(
             # Excluir platos descartados
             platos_descartados = usuario.profile.sugeridos_descartados
             if platos_descartados:
-                query &= ~Q(nombre_plato__in=platos_descartados)    
+                query &= ~Q(nombre_plato__in=platos_descartados)
 
         if misplatos == "misplatos":
             query |= Q(propietario=usuario)
@@ -1302,7 +1375,7 @@ def FiltroDePlatos (request):
     fecha_actual = datetime.datetime.now().date()
 
     # # Calcular y agregar las fechas y nombres de los días para los próximos 6 días
-    dias_desde_hoy = [(fecha_actual + timedelta(days=i)) for i in range(1, 7)]
+    dias_desde_hoy = [(fecha_actual + timedelta(days=i)) for i in range(0, 6)]
 
 
     # Recuperar los parámetros desde la sesión y la URL

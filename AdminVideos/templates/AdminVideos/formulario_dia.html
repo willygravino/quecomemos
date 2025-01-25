@@ -53,23 +53,19 @@
         {% endif %} -->
 
         <select name="entrada1">
-          <option value="">---</option>
+          <option value=None>---</option>
           {% for entrada in entradas_presel %}
             <option value="{{ entrada }}" {% if entrada == ent1_sel %}selected{% endif %}>{{ entrada }}</option>          
           {% endfor %}
         </select>
-
-        
+       
         
         <select name="entrada2">
-          <option value="">---</option>
+          <option value=None>---</option>
           {% for entrada in entradas_presel %}
             <option value="{{ entrada }}" {% if entrada == ent2_sel %}selected{% endif %}>{{ entrada }}</option>          
           {% endfor %}
           
-          <!-- {% if ent2_sel is None %}
-           <option value="---" selected>---</option>
-          {% endif %} -->
         </select>
       </div>
     </div>
@@ -109,7 +105,7 @@
     <div class="row">
       <div class="d-flex justify-content-center">
     <h3>Principal Almuerzo</h3>
-    <select name="a">
+    <select name="almuerzo">
       <option value= None>---</option>
       {% for principal in principales_presel %}
       <option value="{{ principal }}" {% if principal == almuerzo_sel %}selected{% endif %}>{{ principal }}</option>
@@ -240,7 +236,7 @@
     <div class="row">
       <div class="d-flex justify-content-center">
         <h3>Principal Cena</h3>
-        <select name="c">
+        <select name="cena">
           <option value= None>---</option>
           {% for principal in principales_presel %}
             <option value="{{ principal }}" {% if principal == cena_sel %}selected{% endif %}>{{ principal }}</option>
