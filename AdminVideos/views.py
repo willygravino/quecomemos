@@ -1,14 +1,10 @@
-import ast
-from contextvars import Context
-import copy
-import json
 import locale
-from urllib import request
+from django.contrib import messages  # Para mostrar mensajes al usuario
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from AdminVideos.models import Plato, Profile, Mensaje, Preseleccionados, ElegidosXDia, Sugeridos
-from django.http import Http404, HttpRequest, HttpResponseForbidden, JsonResponse
+from django.http import Http404, HttpResponseForbidden, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.forms import UserCreationForm
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
@@ -22,7 +18,7 @@ from django.contrib.auth.models import User  # Asegúrate de importar el modelo 
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import redirect, reverse
-from django.http import JsonResponse, HttpResponseBadRequest
+from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 import datetime
@@ -35,7 +31,7 @@ def obtener_parametros_sesion(request):
     # Recuperar parámetros de sesión
     medios = request.session.get('medios_estable', None)
     categoria = request.session.get('categoria_estable', None)
-    preparacion = request.session.get('preparacion_estable', None)
+    dificultad = request.session.get('dificultad_estable', None)
     palabra_clave = request.session.get('palabra_clave', "")
 
     quecomemos = request.session.get('quecomemos', None)
@@ -49,7 +45,7 @@ def obtener_parametros_sesion(request):
     # usuario = request.user
 
     # Devolver las variables por separado
-    return tipo_parametro, quecomemos, misplatos, preseleccionados, medios, categoria, preparacion, palabra_clave
+    return tipo_parametro, quecomemos, misplatos, preseleccionados, medios, categoria, dificultad, palabra_clave
 
 class SugerenciasRandom(TemplateView):
     template_name = 'AdminVideos/random.html'
@@ -76,31 +72,6 @@ def descartar_sugerido(request, nombre_plato):
 
     return redirect('filtro-de-platos')
 
-
-def agregar_a_mi_lista(request, plato_id):
-    # Obtener el plato a copiar
-    plato_original = get_object_or_404(Plato, id=plato_id)
-
-    # Crear una copia del plato, asignando el nuevo propietario
-    nuevo_plato = Plato.objects.create(
-        nombre_plato=plato_original.nombre_plato,
-        # nombre_plato=f"{plato_original.id} - {plato_original.nombre_plato}",  # Agregar el ID al nombre del plato
-        receta=plato_original.receta,
-        descripcion_plato=plato_original.descripcion_plato,
-        ingredientes=plato_original.ingredientes,
-        medios=plato_original.medios,
-        categoria=plato_original.categoria,
-        preparacion=plato_original.preparacion,
-        tipo=plato_original.tipo,
-        calorias=plato_original.calorias,
-        propietario=request.user,  # Asignar al usuario logueado
-        image=plato_original.image,  # Copiar la imagen si aplica
-        variedades=plato_original.variedades,
-    )
-
-
-    # Redirigir a la vista para descartar el plato después de agregarlo
-    return redirect('descartar-sugerido', nombre_plato=plato_original.nombre_plato)
 
 def descartar_sugerido(request, nombre_plato):
     # Obtener el perfil del usuario logueado
@@ -1066,9 +1037,14 @@ def eliminar_plato(request, plato_id):
     perfil = get_object_or_404(Profile, user=request.user)
 
     # Eliminar el plato de la lista de sugeridos_descartados si está allí
-    # if plato_id in perfil.sugeridos_descartados:
-    perfil.sugeridos_descartados.remove(plato.nombre_plato)
-    perfil.save()
+    if plato.nombre_plato in perfil.sugeridos_descartados:
+        perfil.sugeridos_descartados.remove(plato.nombre_plato)
+        perfil.save()
+
+  # Eliminar el plato de la lista de sugeridos_importados si está allí
+    if plato.nombre_plato in perfil.sugeridos_importados:
+        perfil.sugeridos_importados.remove(plato.nombre_plato)
+        perfil.save()
 
     # Eliminar el plato de la base de datos
     plato.delete()
@@ -1172,7 +1148,7 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
     form_class = PlatoForm
     template_name = 'AdminVideos/platos_update.html'
     success_url = reverse_lazy("videos-create")
-    # fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria","preparacion", "tipo","calorias", "image"]
+    # fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria","dificultad", "tipo","calorias", "image"]
 #    fields = '__all__'
 
     # PARA CORREGIR EN ALGÚN MOMENTO
@@ -1318,7 +1294,8 @@ def filtrar_platos(
     preseleccionados,
     medios,
     categoria,
-    preparacion,
+    dificultad,
+    # PREPARACIÓN = DIFICULTAD
     palabra_clave
 ):
 
@@ -1356,8 +1333,8 @@ def filtrar_platos(
         if categoria and categoria != '-':
             query &= Q(categoria=categoria)
 
-        if preparacion and preparacion != '-':
-            query &= Q(preparacion=preparacion)
+        if dificultad and dificultad != '-':
+            query &= Q(dificultad=dificultad)
 
         if palabra_clave:
             query &= Q(ingredientes__icontains=palabra_clave) | Q(nombre_plato__icontains=palabra_clave)
@@ -1379,7 +1356,7 @@ def FiltroDePlatos (request):
 
 
     # Recuperar los parámetros desde la sesión y la URL
-    tipo_parametro, quecomemos, misplatos, preseleccionados, medios, categoria, preparacion, palabra_clave = obtener_parametros_sesion(request)
+    tipo_parametro, quecomemos, misplatos, preseleccionados, medios, categoria, dificultad, palabra_clave = obtener_parametros_sesion(request)
 
     # Obtener el usuario actual
     usuario = request.user
@@ -1393,12 +1370,12 @@ def FiltroDePlatos (request):
 
                 medios = form.cleaned_data.get('medios')
                 categoria = form.cleaned_data.get('categoria')
-                preparacion = form.cleaned_data.get('preparacion')
+                dificultad = form.cleaned_data.get('dificultad')
                 palabra_clave =  form.cleaned_data.get('palabra_clave')
 
                 request.session['medios_estable'] = medios
                 request.session['categoria_estable'] = categoria
-                request.session['preparacion_estable'] = preparacion
+                request.session['dificultad_estable'] = dificultad
                 request.session['palabra_clave'] = palabra_clave
 
                 quecomemos = request.POST.get('quecomemos')
@@ -1414,7 +1391,7 @@ def FiltroDePlatos (request):
 
                         'medios': medios,
                         'categoria': categoria,
-                        'preparacion': preparacion,
+                        'dificultad': dificultad,
                         'palabra_clave': palabra_clave
 
                     }
@@ -1430,7 +1407,7 @@ def FiltroDePlatos (request):
         preseleccionados=preseleccionados,
         medios=medios,
         categoria=categoria,
-        preparacion=preparacion,
+        dificultad=dificultad,
         palabra_clave=palabra_clave
     )
 
@@ -1812,3 +1789,83 @@ def amigue_borrar(request, pk):
         "amigues": perfil.amigues,  # Lista de amigues actualizada
     }
     return render(request, "AdminVideos/amigues.html", contexto)
+
+@login_required
+def agregar_plato_compartido(request, pk):
+    # Recuperar el plato original
+    plato_original = get_object_or_404(Plato, pk=pk)
+
+    # Verificar si ya existe un plato con el mismo nombre para el usuario logueado
+    if Plato.objects.filter(nombre_plato=plato_original.nombre_plato, propietario=request.user).exists():
+        # Mostrar un mensaje de error
+        messages.error(request, "Ya tienes un plato con este nombre.")
+        return redirect('mensaje-list')  # Redirigir a una página (puedes ajustar según sea necesario)
+
+    # Crear un nuevo plato para el usuario logueado
+    nuevo_plato = Plato(
+        nombre_plato=plato_original.nombre_plato,
+        receta=plato_original.receta,
+        descripcion_plato=plato_original.descripcion_plato,
+        ingredientes=plato_original.ingredientes,
+        medios=plato_original.medios,
+        categoria=plato_original.categoria,
+        dificultad=plato_original.dificultad,
+        tipo=plato_original.tipo,
+        calorias=plato_original.calorias,
+        propietario=request.user,  # Asignar al usuario logueado
+        image=plato_original.image,
+        variedades=plato_original.variedades,
+        proviene_de= plato_original.propietario
+    )
+
+    # Guardar el nuevo plato en la base de datos
+    nuevo_plato.save()
+
+
+    # Mostrar un mensaje de éxito
+    messages.success(request, "El plato se agregó exitosamente.")
+
+
+    # Redirigir a una página (puedes cambiar la redirección según sea necesario)
+    return redirect('mensaje-list')
+
+
+
+def agregar_a_mi_lista(request, plato_id):
+    # Obtener el plato a copiar
+    plato_original = get_object_or_404(Plato, id=plato_id)
+
+    # Obtener el perfil del usuario logueado
+    profile = request.user.profile
+
+    # # Verificar si ya existe un plato con el mismo nombre para el usuario logueado
+    # if Plato.objects.filter(nombre_plato=plato_original.nombre_plato, propietario=request.user).exists():
+    #     # Mostrar un mensaje de error
+    #     messages.error(request, "Ya tienes un plato con este nombre.")
+    #     return redirect('filtro-de-platos')  # Redirigir a una página (puedes ajustar según sea necesario)
+    
+    # Crear una copia del plato, asignando el nuevo propietario
+    nuevo_plato = Plato.objects.create(
+        nombre_plato=plato_original.nombre_plato,
+        # nombre_plato=f"{plato_original.id} - {plato_original.nombre_plato}",  # Agregar el ID al nombre del plato
+        receta=plato_original.receta,
+        descripcion_plato=plato_original.descripcion_plato,
+        ingredientes=plato_original.ingredientes,
+        medios=plato_original.medios,
+        categoria=plato_original.categoria,
+        dificultad=plato_original.dificultad,
+        tipo=plato_original.tipo,
+        calorias=plato_original.calorias,
+        propietario=request.user,  # Asignar al usuario logueado
+        image=plato_original.image,  # Copiar la imagen si aplica
+        variedades=plato_original.variedades,
+        proviene_de= plato_original.propietario
+    )
+
+  # Verificar si el plato_id ya está en la lista para evitar duplicados
+    if plato_original.nombre_plato not in profile.sugeridos_importados:
+        profile.sugeridos_importados.append(plato_original.nombre_plato)  # Agregar el ID del plato a la lista
+        profile.save()  # Guardar los cambios en el perfil
+
+    # Redirigir a la vista para descartar el plato después de agregarlo
+    return redirect('descartar-sugerido', nombre_plato=plato_original.nombre_plato)

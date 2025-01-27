@@ -17,9 +17,15 @@
                 <p class="card-text">Receta: {{ plato.receta }}</p>
                 <p class="card-text">Medios: {{ plato.medios }}</p>
                 <p class="card-text">Categoría: {{ plato.categoria }}</p>
-                <p class="card-text">Preparación: {{ plato.preparacion }}</p>
+                <p class="card-text">Dificultad: {{ plato.dificultad }}</p>
                 <p class="card-text">Tipo: {{ plato.tipo }}</p>
                 <p class="card-text">Calorías: {{ plato.calorias }}</p>
+               
+                {% if plato.proviene_de %}
+                  <p class="card-text text-success fw-bold">
+                    Importado de la lista de {{ plato.proviene_de }}
+                  </p>
+                {% endif %}
    
                 <p></p>
                 {% if user.id == plato.propietario.id %}

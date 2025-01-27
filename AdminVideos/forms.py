@@ -5,7 +5,7 @@ from .models import Plato
 class PlatoFilterForm(forms.Form):
     medios = forms.ChoiceField(choices=Plato.MEDIOS_CHOICES, required=False)
     categoria = forms.ChoiceField(choices=Plato.CATEGORIA_CHOICES, required=False)
-    preparacion = forms.ChoiceField(choices=Plato.PREPA_CHOICES, required=False)
+    dificultad = forms.ChoiceField(choices=Plato.PREPA_CHOICES, required=False)
     palabra_clave = forms.CharField(
         max_length=30, 
         required=False, 
@@ -31,5 +31,5 @@ class PlatoForm(forms.ModelForm):
   
     class Meta:
         model = Plato
-        fields = ["nombre_plato", "receta", "descripcion_plato", "ingredientes", "medios", "categoria", "preparacion", "tipo", "calorias", "image"]
+        fields = ["nombre_plato", "receta", "descripcion_plato", "ingredientes", "medios", "categoria", "dificultad", "tipo", "calorias", "image"]
     

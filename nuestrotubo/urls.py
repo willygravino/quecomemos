@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path
 from django.contrib.auth.views import LogoutView
 
-from AdminVideos.views import agregar_a_mi_lista, amigue_borrar, amigues, compartir_plato, descartar_sugerido, eliminar_plato, formulario_dia, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, plato_preseleccionado, grabar_menu_elegido,SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, sumar_amigue, user_logout, desmarcar_todo, MensajeCreate, MensajeList, MensajeDelete # PlatoDelete, VistaInicial ,Logout, , PlatoList, PlatosMineList, PlatosElegidosMenu, elecion_de_lista, PlatosDeOtros,, LogtViews, MenuElegido, lista_de_compras
+from AdminVideos.views import agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, compartir_plato, descartar_sugerido, eliminar_plato, formulario_dia, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, plato_preseleccionado, grabar_menu_elegido,SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, sumar_amigue, user_logout, desmarcar_todo, MensajeCreate, MensajeList, MensajeDelete # PlatoDelete, VistaInicial ,Logout, , PlatoList, PlatosMineList, PlatosElegidosMenu, elecion_de_lista, PlatosDeOtros,, LogtViews, MenuElegido, lista_de_compras
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -29,14 +29,15 @@ urlpatterns = [
     path('plato/grabar', grabar_menu_elegido, name="grabar-menu"),
     path('menu/elegido',lista_de_compras, name="menu-elegido"),
     path('menu/amigues',amigues, name="amigues"),
-    path('menu/amigues/sumar',sumar_amigue, name="sumar_amigue"),
+    path('menu/amigues/sumar',sumar_amigue, name="sumar-amigue"),
     path('formulario/dia/<str:dia>/',  formulario_dia, name="formulario-dia"),
     path('desmarcar/',  desmarcar_todo, name="desmarcar-todo"),
     path('compartir/',  compartir_plato.as_view(), name="compartir-plato"),
     path('agregar-a-mi-lista/<int:plato_id>/', agregar_a_mi_lista, name='agregar-a-mi-lista'),
     path('descartar-sugerido/<str:nombre_plato>/', descartar_sugerido, name='descartar-sugerido'),
+    path('agregar-compartido/<int:pk>/', agregar_plato_compartido, name='agregar-plato-compartido'),
 
-
+            
 
     # path('lista/compras-y-plan', lista_y_plan, name="lista-y-plan"),
     # path('menu/random', SugerenciasRandom.as_view(), name="random"),

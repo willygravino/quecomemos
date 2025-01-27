@@ -33,7 +33,7 @@
                 <!-- Cada mensaje tiene su propio formulario -->
                 {% if mensaje.usuario_que_envia not in amigues %}
 
-                  <form action="{% url 'sumar_amigue' %}" method="POST">
+                  <form action="{% url 'sumar-amigue' %}" method="POST">
                     {% csrf_token %}
                     <input type="hidden" name="amigue_usuario" value="{{ mensaje.usuario_que_envia }}">
                     <button type="submit">Aceptar amistad {{ mensaje.usuario_que_envia }}</button>
@@ -57,10 +57,8 @@
                     Ver plato {{mensaje.nombre_plato_compartido}}
                  </a>
 
-                 <a class="btn btn-primary" href="">Agregar a mi lista</a>
+                 <a class="btn btn-primary" href="{% url 'agregar-plato-compartido' mensaje.amistad %}">Agregar a mi lista</a>
                  <a class="btn btn-primary" href="">Rechazar</a>
-                 
-                </form>
               {% endif %}
            {% endif %}
           
@@ -116,6 +114,14 @@
             </div>
         </div>
     </div>
-    {% endfor %} 
+    {% endfor %}
+
+    {% if messages %}
+      <ul class="messages">
+          {% for message in messages %}
+              <li class="alert alert-{{ message.tags }}">{{ message }}</li>
+          {% endfor %}
+      </ul>
+    {% endif %}
 
 {% endblock %}
