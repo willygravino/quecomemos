@@ -70,19 +70,23 @@
                   
             </div>
 
+            <strong><h3>amigues {{ amigues }}</h3></strong>
+
+
             {% if amigues %}
 
               <form method="post" action="{% url 'compartir-plato' %}">
                   {% csrf_token %}
                 
                   <div class="mb-3">
+                    <h3 >Compartir este plato con:</h3>
+
                       <select id="amigue-select" name="amigue" class="form-select" aria-label="Seleccionar amigue">
                         <!-- Campo oculto para enviar el plato.id -->
-                          <input type="hidden" name="plato_id" value="{{ plato.id }}">
-                          <option selected disabled>Compartir este plato con:</option>
                           {% for amigue in amigues %}
                               <option value="{{ amigue }}">{{ amigue }}</option>
                           {% endfor %}
+                          <input type="hidden" name="plato_id" value="{{ plato.id }}">
                       </select>
                   </div>
                   <button type="submit" class="btn btn-primary">Compartir</button>

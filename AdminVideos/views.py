@@ -1433,7 +1433,8 @@ def FiltroDePlatos (request):
                 "misplatos_ck": misplatos,
                 "preseleccionados_ck": preseleccionados,
                 "amigues" : amigues,
-                "parametro": tipo_parametro
+                "parametro": tipo_parametro,
+                "mensajes": Mensaje.objects.filter(destinatario=request.user).all()
                }
 
     return render(request, 'AdminVideos/lista_filtrada.html', contexto)
@@ -1587,7 +1588,7 @@ def formulario_dia (request, dia):
     }
     return render(request, 'AdminVideos/formulario_dia.html', context)
 
-class MensajeCreate(CreateView):
+class SolicitarAmistad(CreateView):
    model = Mensaje
    success_url = reverse_lazy('filtro-de-platos')
    fields = '__all__'
@@ -1601,6 +1602,36 @@ class MensajeCreate(CreateView):
     form = super().get_form(form_class)
     form.fields['destinatario'].queryset = User.objects.exclude(id=self.request.user.id)
     return form
+
+
+class EnviarMensaje(LoginRequiredMixin, CreateView):
+    model = Mensaje
+    success_url = reverse_lazy('filtro-de-platos')
+    fields = ['mensaje', 'destinatario']
+
+    def form_valid(self, form):
+        # Asigna valores predeterminados a campos específicos
+        form.instance.usuario_que_envia = self.request.user.username
+        form.instance.amistad = "mensaje"
+        return super().form_valid(form)
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+
+        # Obtiene los amigos del usuario actual
+        amigues_names = (
+            Profile.objects.filter(user=self.request.user)
+            .values_list('amigues', flat=True)
+            .first()
+        )
+
+        # Filtra solo los destinatarios en la lista de amigos si existe
+        if amigues_names:
+            form.fields['destinatario'].queryset = User.objects.filter(username__in=amigues_names)
+        else:
+            form.fields['destinatario'].queryset = User.objects.none()
+
+        return form
 
 class compartir_plato(CreateView):
     model = Mensaje
@@ -1673,7 +1704,7 @@ class MensajeList(LoginRequiredMixin, ListView):
 
         # Iterar sobre los mensajes para extraer IDs de platos
         for mensaje in mensajes:
-            if mensaje.amistad != "solicitar":
+            if mensaje.amistad != "solicitar" and mensaje.amistad != "mensaje" :
                platos_ids.append(mensaje.amistad)
 
         # Eliminar duplicados en caso de que un plato esté repetido

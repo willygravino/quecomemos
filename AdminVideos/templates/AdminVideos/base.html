@@ -292,7 +292,7 @@
                                 <a class="dropdown-item text-center small text-gray-500" href="#">Mostrar Todas Las Notificaciones</a>
                             </div>
                         </li>
-
+                        
                         <!-- Nav Item - Messages -->
                         <li class="nav-item dropdown no-arrow mx-1">
                             <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button"
@@ -358,8 +358,122 @@
                                     <strong>Recibidos</strong>
                                 </a>
 
-                                <a href="{% url 'mensaje-create' %}" class="dropdown-item text-center small ">
+                                <a href="{% url 'solicitar-amistad' %}" class="dropdown-item text-center small ">
                                     <strong>Solicitar amistad</strong>
+                                </a>
+
+                                <a href="{% url 'enviar-mensaje' %}" class="dropdown-item text-center small ">
+                                    <strong>Enviar mensaje</strong>
+                                </a>
+                                
+                                <a href="" class="dropdown-item text-center small">
+                                    <strong>Enviados</strong>
+                                </a>
+                                
+                            </div>
+                        </li>
+
+                        <!-- Nav Item - CHAT -->
+                         
+                        <li class="nav-item dropdown no-arrow mx-1">
+                            <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fa-solid fa-comments"></i>
+                                <!-- Counter - Messages -->
+                                <span class="badge badge-danger badge-counter">7</span>
+                            </a>
+                            <!-- Dropdown - Messages -->
+                            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="messagesDropdown">
+                                <h6 class="dropdown-header">
+                                    Chat
+                                </h6>
+
+                                <!-- % for chat in chats % -->
+                                {% for mensaje in mensajes %}
+                                    <p>
+
+                                        <div class="card mx-auto w-75" >
+                                            <div class="card-body">
+                                            <h5 class="card-title">Mensaje de {{ mensaje.usuario_que_envia }}</h5>
+                                            <!-- <h6 class="card-subtitle mb-2 text-body-secondary">Card subtitle</h6> -->
+                                            <p class="card-text border">{{ mensaje.mensaje }}</p>
+                                            <p class="card-text small text-muted" align="right"><i>{{mensaje.creado_el}}</i>
+                                            <a href="#" class="card-link">Responder</a></p>
+                                            <!-- <a href="#" class="card-link">Another link</a> -->
+                                        
+                                        
+                                        {% if mensaje.amistad %}
+                                            {% if mensaje.amistad == "solicitar" or mensaje.amistad == "mensaje" %}
+                                                <!-- Cada mensaje tiene su propio formulario -->
+                                                {% if mensaje.usuario_que_envia not in amigues %}
+
+                                                <form action="{% url 'sumar-amigue' %}" method="POST">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="amigue_usuario" value="{{ mensaje.usuario_que_envia }}">
+                                                    <button type="submit">Aceptar amistad {{ mensaje.usuario_que_envia }}</button>
+                                                </form>
+                                            
+                                    
+                                                {% else %}
+                                                <p>AMIGO ACEPTADO</p>
+                                                {% endif %}
+
+                                            {% else %}
+                                
+                                                <form action="" method="POST">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="" value="">
+                                                <button type="submit">agregar a mi lista el plato {{mensaje.amistad}} que envía {{ mensaje.usuario_que_envia }}</button>
+                                                
+                                                    <!-- <img src="{{platos_dict.id.image_url}}" class="img-fluid position-relative object-fit-cover" alt="Imagen del Plato"> -->
+
+                                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#PlatoModal{{mensaje.amistad}}">
+                                                    Ver plato {{mensaje.nombre_plato_compartido}}
+                                                </a>
+
+                                                <a class="btn btn-primary" href="{% url 'agregar-plato-compartido' mensaje.amistad %}">Agregar a mi lista</a>
+                                                <a class="btn btn-primary" href="">Rechazar</a>
+                                            {% endif %}
+                                        {% endif %}
+                                        
+                                        <br>
+                                        <a href="{% url 'mensaje-delete' mensaje.id %}">Borrar</a>
+
+                                        <!-- cierre de card -->
+                                        </div>
+                                        </div>
+                                    </p>
+                                    </center>
+                                {% endfor %}
+
+                                <!-- cada una  -->
+                                <a class="dropdown-item d-flex align-items-center" href="#">
+                                    <div class="dropdown-list-image mr-3">
+                                        <img class="rounded-circle" src="img/undraw_profile_1.svg" alt="...">
+                                        <div class="status-indicator bg-success"></div>
+                                    </div>
+                                    <div class="font-weight-bold">
+                                        <div class="text-truncate">Hi there! I am wondering if you can help me with a
+                                            problem I've been having.</div>
+                                        <div class="small text-gray-500">Emily Fowler · 58m</div>
+                                    </div>
+                                </a>
+
+                                <!-- ----------- -->
+
+                                <a class="dropdown-item text-center small text-gray-500" href="#">Leer más mensajes</a>
+
+                                <a href="{% url 'mensaje-list' %}" class="dropdown-item text-center small ">
+                                    <strong>Recibidos</strong>
+                                </a>
+
+                                <a href="{% url 'solicitar-amistad' %}" class="dropdown-item text-center small ">
+                                    <strong>Solicitar amistad</strong>
+                                </a>
+
+                                <a href="{% url 'enviar-mensaje' %}" class="dropdown-item text-center small ">
+                                    <strong>Enviar mensaje</strong>
                                 </a>
                                 
                                 <a href="" class="dropdown-item text-center small">
@@ -370,7 +484,8 @@
                         </li>
 
                         <div class="topbar-divider d-none d-sm-block"></div>
-                      
+
+
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" id="userDropdown" role="button"
                                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
