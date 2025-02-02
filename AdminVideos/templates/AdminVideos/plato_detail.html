@@ -13,6 +13,7 @@
               <div class="card-body">
                 <strong><h3>{{ plato.nombre_plato }}</h3></strong>
                 <strong><p class="card-text">Ingredientes: {{ plato.ingredientes }}</p></strong>
+                <br>
                 <p class="card-text">Descripción: {{ plato.descripcion_plato }}</p>
                 <p class="card-text">Receta: {{ plato.receta }}</p>
                 <p class="card-text">Medios: {{ plato.medios }}</p>
@@ -70,7 +71,6 @@
                   
             </div>
 
-            <strong><h3>amigues {{ amigues }}</h3></strong>
 
 
             {% if amigues %}
@@ -79,7 +79,7 @@
                   {% csrf_token %}
                 
                   <div class="mb-3">
-                    <h3 >Compartir este plato con:</h3>
+                    <h6>Compartir este plato con:</h6>
 
                       <select id="amigue-select" name="amigue" class="form-select" aria-label="Seleccionar amigue">
                         <!-- Campo oculto para enviar el plato.id -->

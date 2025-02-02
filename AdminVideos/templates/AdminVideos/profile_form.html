@@ -8,6 +8,8 @@
     <center>
       <p>
         {% csrf_token %}
+        <h5>Nombre de Usuario registrado: {{user.profile.user}}</h5>
+        <br>
         {{form.as_p}}
         <input type="submit" value="Actualizar">
       </p>

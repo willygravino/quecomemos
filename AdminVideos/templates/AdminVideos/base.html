@@ -48,8 +48,8 @@
             <!-- <hr class="sidebar-divider my-0"> -->
 
             <!-- Nav Item - Dashboard -->
-            
-            {% if parametro == "Dash" %} 
+
+            {% if parametro == "Dash" %}
                 <li class="nav-item active">
             {% else %}
                 <li class="nav-item">
@@ -70,7 +70,7 @@
 
             <!-- Nav Item - Utilities Collapse Menu -->
 
-            {% if parametro == "Entrada" %} 
+            {% if parametro == "Entrada" %}
                 <li class="nav-item active">
             {% else %}
                 <li class="nav-item">
@@ -82,7 +82,7 @@
                 </a>
             </li>
 
-            {% if parametro == "Dip" %} 
+            {% if parametro == "Dip" %}
                 <li class="nav-item active">
             {% else %}
                 <li class="nav-item">
@@ -95,7 +95,7 @@
             </li>
 
 
-            {% if parametro == "Principal" %} 
+            {% if parametro == "Principal" %}
                 <li class="nav-item active">
             {% else %}
                 <li class="nav-item">
@@ -105,8 +105,8 @@
                         <span>Platos Principales</span>
                     </a>
                 </li>
-            
-            <!-- {% if parametro == "Salsa" %} 
+
+            <!-- {% if parametro == "Salsa" %}
                 <li class="nav-item active">
             {% else %}
                 <li class="nav-item">
@@ -117,7 +117,7 @@
                     </a>
                 </li> -->
 
-            {% if parametro == "Guarnicion" %} 
+            {% if parametro == "Guarnicion" %}
                 <li class="nav-item active">
             {% else %}
                 <li class="nav-item">
@@ -128,7 +128,7 @@
                     </a>
                 </li>
 
-            {% if parametro == "Postre" %} 
+            {% if parametro == "Postre" %}
                 <li class="nav-item active">
             {% else %}
                 <li class="nav-item">
@@ -140,11 +140,11 @@
                     </a>
                 </li>
 
-            {% if parametro == "Trago" %} 
+            {% if parametro == "Trago" %}
                 <li class="nav-item active">
             {% else %}
                 <li class="nav-item">
-            {% endif %}                
+            {% endif %}
                     <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Trago">
                         <i class="fa-solid fa-martini-glass-citrus" style="font-size: 1.3rem;"></i>
                         <span>Tragos</span>
@@ -153,16 +153,16 @@
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
-<!-- 
+<!--
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Dash">
-                    DERIVAR A MENU DE DÍAS 
+                    DERIVAR A MENU DE DÍAS
                     <i class="fa-solid fa-calendar-days" style="font-size: 2rem;"></i>
                     <span>Menú</span>
                 </a>
             </li> -->
 
-            {% if parametro == "lista-compras" %} 
+            {% if parametro == "lista-compras" %}
                 <li class="nav-item active">
             {% else %}
                 <li class="nav-item">
@@ -177,7 +177,7 @@
             <hr class="sidebar-divider d-none d-md-block">
 
 
-            {% if parametro == "amigues" %} 
+            {% if parametro == "amigues" %}
                 <li class="nav-item active">
             {% else %}
                 <li class="nav-item">
@@ -292,17 +292,17 @@
                                 <a class="dropdown-item text-center small text-gray-500" href="#">Mostrar Todas Las Notificaciones</a>
                             </div>
                         </li>
-                        
+
                         <!-- Nav Item - Messages -->
-                        <li class="nav-item dropdown no-arrow mx-1">
+                        <!-- <li class="nav-item dropdown no-arrow mx-1">
                             <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-envelope fa-fw"></i>
+                                <i class="fas fa-envelope fa-fw"></i> -->
                                 <!-- Counter - Messages -->
-                                <span class="badge badge-danger badge-counter">7</span>
-                            </a>
+                                <!-- <span class="badge badge-danger badge-counter">7</span>
+                            </a> -->
                             <!-- Dropdown - Messages -->
-                            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                            <!-- <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="messagesDropdown">
                                 <h6 class="dropdown-header">
                                     Centro de Mensajes
@@ -365,16 +365,16 @@
                                 <a href="{% url 'enviar-mensaje' %}" class="dropdown-item text-center small ">
                                     <strong>Enviar mensaje</strong>
                                 </a>
-                                
+
                                 <a href="" class="dropdown-item text-center small">
                                     <strong>Enviados</strong>
                                 </a>
-                                
+
                             </div>
-                        </li>
+                        </li> -->
 
                         <!-- Nav Item - CHAT -->
-                         
+
                         <li class="nav-item dropdown no-arrow mx-1">
                             <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -383,86 +383,56 @@
                                 <span class="badge badge-danger badge-counter">7</span>
                             </a>
                             <!-- Dropdown - Messages -->
-                            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in overflow-auto" style="max-height: 600px;"
                                 aria-labelledby="messagesDropdown">
                                 <h6 class="dropdown-header">
                                     Chat
                                 </h6>
 
-                                <!-- % for chat in chats % -->
-                                {% for mensaje in mensajes %}
-                                    <p>
 
-                                        <div class="card mx-auto w-75" >
-                                            <div class="card-body">
-                                            <h5 class="card-title">Mensaje de {{ mensaje.usuario_que_envia }}</h5>
-                                            <!-- <h6 class="card-subtitle mb-2 text-body-secondary">Card subtitle</h6> -->
-                                            <p class="card-text border">{{ mensaje.mensaje }}</p>
-                                            <p class="card-text small text-muted" align="right"><i>{{mensaje.creado_el}}</i>
-                                            <a href="#" class="card-link">Responder</a></p>
-                                            <!-- <a href="#" class="card-link">Another link</a> -->
-                                        
-                                        
-                                        {% if mensaje.amistad %}
-                                            {% if mensaje.amistad == "solicitar" or mensaje.amistad == "mensaje" %}
-                                                <!-- Cada mensaje tiene su propio formulario -->
-                                                {% if mensaje.usuario_que_envia not in amigues %}
-
-                                                <form action="{% url 'sumar-amigue' %}" method="POST">
-                                                    {% csrf_token %}
-                                                    <input type="hidden" name="amigue_usuario" value="{{ mensaje.usuario_que_envia }}">
-                                                    <button type="submit">Aceptar amistad {{ mensaje.usuario_que_envia }}</button>
-                                                </form>
-                                            
-                                    
-                                                {% else %}
-                                                <p>AMIGO ACEPTADO</p>
-                                                {% endif %}
-
-                                            {% else %}
-                                
-                                                <form action="" method="POST">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="" value="">
-                                                <button type="submit">agregar a mi lista el plato {{mensaje.amistad}} que envía {{ mensaje.usuario_que_envia }}</button>
-                                                
-                                                    <!-- <img src="{{platos_dict.id.image_url}}" class="img-fluid position-relative object-fit-cover" alt="Imagen del Plato"> -->
-
-                                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#PlatoModal{{mensaje.amistad}}">
-                                                    Ver plato {{mensaje.nombre_plato_compartido}}
-                                                </a>
-
-                                                <a class="btn btn-primary" href="{% url 'agregar-plato-compartido' mensaje.amistad %}">Agregar a mi lista</a>
-                                                <a class="btn btn-primary" href="">Rechazar</a>
-                                            {% endif %}
-                                        {% endif %}
-                                        
-                                        <br>
-                                        <a href="{% url 'mensaje-delete' mensaje.id %}">Borrar</a>
-
-                                        <!-- cierre de card -->
-                                        </div>
-                                        </div>
-                                    </p>
-                                    </center>
-                                {% endfor %}
 
                                 <!-- cada una  -->
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="dropdown-list-image mr-3">
-                                        <img class="rounded-circle" src="img/undraw_profile_1.svg" alt="...">
-                                        <div class="status-indicator bg-success"></div>
-                                    </div>
-                                    <div class="font-weight-bold">
-                                        <div class="text-truncate">Hi there! I am wondering if you can help me with a
-                                            problem I've been having.</div>
-                                        <div class="small text-gray-500">Emily Fowler · 58m</div>
-                                    </div>
-                                </a>
+
+                                {% for usuario, mensajes in mensajes.items %}
+                                    <a class="dropdown-item d-flex align-items-center" href="{% url 'mensaje-list' %}">
+                                        <div class="dropdown-list-image mr-3">
+                                            <!-- <img class="rounded-circle" src="img/undraw_profile_1.svg" alt="..."> -->
+                                            <img class="rounded-circle" src="{{ mensajes.avatar_url }}" alt="{{ usuario }}">
+
+                                            {% if not mensajes.mensajes.0.leido %}
+                                                <div class="status-indicator bg-success"></div>
+                                            {% endif %}
+                                            
+                                        </div>
+                                        <div class="font-weight-bold">
+                                            <div class="text-truncate">{{ usuario }}</div>
+                                            
+                                            <!-- Utilizamos d-flex para que los elementos se alineen en la misma fila -->
+                                            <div class="d-flex justify-content-between">
+                                                <!-- Mensaje -->
+                                                <div class="small text-truncate"> {{ mensajes.mensajes.0.mensaje }}  </div>
+
+                                                <!-- Fecha de creación -->
+                                                <div class="small text-gray-600">
+                                                    {% if mensajes.mensajes.0.creado_el == 0 %}
+                                                        Hoy
+                                                    {% else %}
+                                                        {{ mensajes.mensajes.0.creado_el }} días
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <!-- text-gray-500 -->
+                                        </div>
+                                    </a>
+                                    {% empty %}
+                                    <p>No tienes mensajes.</p>
+                                {% endfor %}
+
+
 
                                 <!-- ----------- -->
 
-                                <a class="dropdown-item text-center small text-gray-500" href="#">Leer más mensajes</a>
+                                <!-- <a class="dropdown-item text-center small text-gray-500" href="#">Leer más mensajes</a> -->
 
                                 <a href="{% url 'mensaje-list' %}" class="dropdown-item text-center small ">
                                     <strong>Recibidos</strong>
@@ -475,11 +445,11 @@
                                 <a href="{% url 'enviar-mensaje' %}" class="dropdown-item text-center small ">
                                     <strong>Enviar mensaje</strong>
                                 </a>
-                                
+
                                 <a href="" class="dropdown-item text-center small">
                                     <strong>Enviados</strong>
                                 </a>
-                                
+
                             </div>
                         </li>
 
@@ -508,14 +478,14 @@
                                         <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                         Actualizar Perfil
                                     </a>
-            
+
                                 {% else %}
                                     <a class="dropdown-item" href="{% url 'profile-create' %}">
                                         <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                         Completar Perfil
                                     </a>
-                                    
-                                {% endif %}    
+
+                                {% endif %}
 
                                 <a class="dropdown-item" href="#">
                                     <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
@@ -527,45 +497,46 @@
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Salir
                                 </a>
-                            </div> 
+                            </div>
                         </li>
-                        
+
                     </ul>
 
                 </nav>
+
                 <!-- End of Topbar -->
 
                 <div class="container-fluid">
 
                     <div class="row">
                         <div class="col">
-                  
+
                           <div class="d-flex flex-wrap justify-content-between">
                             <!-- <p>DIAS DESDE HOY: {{ dias_desde_hoy }}</p>
                             <p>DIAS programados: {{ dias_programados }}</p> -->
 
 
                                 {% for dia in dias_desde_hoy %}
-                                <a href="{% url 'formulario-dia' dia=dia|date:'Y-m-d' %}" 
+                                <a href="{% url 'formulario-dia' dia=dia|date:'Y-m-d' %}"
                                     class={% if dia in dias_programados %} "bg-success" {% else %}"bg-primary" {% endif %}>
-                                    <div class="text-white p-3 small border border-dark al"> 
+                                    <div class="text-white p-3 small border border-dark al">
                                     <p>{{ dia|date:"l j" }}</p>
-                               
+
                                     </div>
                                 </a>
                                 {% endfor %}
-                  
+
                            </div>
                         </div>
                     </div>
                   <!-- </div> -->
-                  
+
                   <hr>
 
                   {% block filtro %}
                   {% endblock %}
                  <!-- Divider -->
-                
+
                     <!-- Begin Page Content -->
 
                     <!-- <div class="container-fluid"> -->

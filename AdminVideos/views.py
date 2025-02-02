@@ -1,3 +1,4 @@
+from itertools import groupby
 import locale
 from django.contrib import messages  # Para mostrar mensajes al usuario
 from django.contrib.auth import logout
@@ -22,6 +23,8 @@ from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 import datetime
+from django.utils import timezone
+
 
 
 def obtener_parametros_sesion(request):
@@ -1423,6 +1426,38 @@ def FiltroDePlatos (request):
     # Accede al atributo `amigues` desde la instancia
     amigues = perfil.amigues  # Esto cargará la lista almacenada en JSONField
 
+    # el avatar
+    avatar = perfil.avatar_url
+
+    mensajes_x_usuario = Mensaje.objects.filter(destinatario=request.user).all()
+
+    mensajes_x_usuario = Mensaje.objects.filter(destinatario=request.user).order_by('-creado_el')
+
+
+    # Calcular los días transcurridos
+    for mensaje in mensajes_x_usuario:
+        # Calcular los días transcurridos desde la fecha de creación hasta el día de hoy
+        diferencia = timezone.now() - mensaje.creado_el
+        mensaje.creado_el = diferencia.days  # Añadir un nuevo atributo calculado
+
+    # Agrupar los mensajes por usuario
+    mensajes_agrupados = {
+        usuario: {
+            "avatar_url":  getattr(User.objects.get(username=usuario).profile, 'avatar_url', '/media/avatares/logo.png'),
+            "mensajes": list(mensajes)
+        }
+        for usuario, mensajes in groupby(mensajes_x_usuario, key=lambda x: x.usuario_que_envia)
+    }
+
+    # Agrupar mensajes por usuario
+    # mensajes_agrupados = {
+    #     usuario: list(mensajes) 
+    #     for usuario, mensajes in groupby(mensajes_x_usuario, key=lambda x: x.usuario_que_envia)
+    # }
+
+# mensajes_agrupados ahora es un diccionario donde cada clave es un usuario,
+# y cada valor es la lista de mensajes de ese usuario.
+
     contexto = {
                 'formulario': form,
                 'platos': platos,
@@ -1434,7 +1469,7 @@ def FiltroDePlatos (request):
                 "preseleccionados_ck": preseleccionados,
                 "amigues" : amigues,
                 "parametro": tipo_parametro,
-                "mensajes": Mensaje.objects.filter(destinatario=request.user).all()
+                "mensajes": mensajes_agrupados
                }
 
     return render(request, 'AdminVideos/lista_filtrada.html', contexto)

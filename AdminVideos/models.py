@@ -170,6 +170,9 @@ class Mensaje(models.Model):
     nombre_plato_compartido =  models.CharField(max_length=30, null=True, blank=True)
     creado_el = models.DateTimeField(auto_now_add=True) 
     destinatario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="mensajes")
+    # Nuevo campo para el estado de leído
+    leido = models.BooleanField(default=False)  # Se marca como no leído por defecto
 
 
-
+    def __str__(self):
+        return f"Mensaje de {self.usuario_que_envia} a {self.destinatario.username}"
