@@ -1504,124 +1504,130 @@ def formulario_dia (request, dia):
     # Busca los datos del día seleccionado
     plato_dia = ElegidosXDia.objects.filter(user=request.user, el_dia_en_que_comemos=dia ).first()
 
-    if plato_dia and plato_dia.platos_que_comemos:
-        almuerzo_sel = plato_dia.platos_que_comemos.get("almuerzo", {}).get("plato")
-        cena_sel = plato_dia.platos_que_comemos.get("cena", {}).get("plato")
-        guar1_sel = plato_dia.platos_que_comemos.get("guarnicion1", {}).get("plato")
-        guar2_sel = plato_dia.platos_que_comemos.get("guarnicion2", {}).get("plato")
-        guar3_sel = plato_dia.platos_que_comemos.get("guarnicion3", {}).get("plato")
-        guar4_sel = plato_dia.platos_que_comemos.get("guarnicion4", {}).get("plato")
-        ent1_sel = plato_dia.platos_que_comemos.get("entrada1", {}).get("plato")
-        ent2_sel = plato_dia.platos_que_comemos.get("entrada2", {}).get("plato")
-        ent3_sel = plato_dia.platos_que_comemos.get("entrada3", {}).get("plato")
-        ent4_sel = plato_dia.platos_que_comemos.get("entrada4", {}).get("plato")
-        salsa1_sel = plato_dia.platos_que_comemos.get("salsa1", {}).get("plato")
-        salsa2_sel = plato_dia.platos_que_comemos.get("salsa2", {}).get("plato")
-        salsa3_sel = plato_dia.platos_que_comemos.get("salsa3", {}).get("plato")
-        salsa4_sel = plato_dia.platos_que_comemos.get("salsa4", {}).get("plato")
-        trago1_sel = plato_dia.platos_que_comemos.get("trago1", {}).get("plato")
-        trago2_sel = plato_dia.platos_que_comemos.get("trago2", {}).get("plato")
-        dip1_sel = plato_dia.platos_que_comemos.get("dip1", {}).get("plato")
-        dip2_sel = plato_dia.platos_que_comemos.get("dip2", {}).get("plato")
-        dip3_sel = plato_dia.platos_que_comemos.get("dip3", {}).get("plato")
-        dip4_sel = plato_dia.platos_que_comemos.get("dip4", {}).get("plato")
-        post1_sel = plato_dia.platos_que_comemos.get("postre1", {}).get("plato")
-        post2_sel = plato_dia.platos_que_comemos.get("postre2", {}).get("plato")
+    # if plato_dia and plato_dia.platos_que_comemos:
+    #     almuerzo_sel = plato_dia.platos_que_comemos.get("almuerzo", {}).get("plato")
+    #     cena_sel = plato_dia.platos_que_comemos.get("cena", {}).get("plato")
+    #     guar1_sel = plato_dia.platos_que_comemos.get("guarnicion1", {}).get("plato")
+    #     guar2_sel = plato_dia.platos_que_comemos.get("guarnicion2", {}).get("plato")
+    #     guar3_sel = plato_dia.platos_que_comemos.get("guarnicion3", {}).get("plato")
+    #     guar4_sel = plato_dia.platos_que_comemos.get("guarnicion4", {}).get("plato")
+    #     ent1_sel = plato_dia.platos_que_comemos.get("entrada1", {}).get("plato")
+    #     ent2_sel = plato_dia.platos_que_comemos.get("entrada2", {}).get("plato")
+    #     ent3_sel = plato_dia.platos_que_comemos.get("entrada3", {}).get("plato")
+    #     ent4_sel = plato_dia.platos_que_comemos.get("entrada4", {}).get("plato")
+    #     salsa1_sel = plato_dia.platos_que_comemos.get("salsa1", {}).get("plato")
+    #     salsa2_sel = plato_dia.platos_que_comemos.get("salsa2", {}).get("plato")
+    #     salsa3_sel = plato_dia.platos_que_comemos.get("salsa3", {}).get("plato")
+    #     salsa4_sel = plato_dia.platos_que_comemos.get("salsa4", {}).get("plato")
+    #     trago1_sel = plato_dia.platos_que_comemos.get("trago1", {}).get("plato")
+    #     trago2_sel = plato_dia.platos_que_comemos.get("trago2", {}).get("plato")
+    #     dip1_sel = plato_dia.platos_que_comemos.get("dip1", {}).get("plato")
+    #     dip2_sel = plato_dia.platos_que_comemos.get("dip2", {}).get("plato")
+    #     dip3_sel = plato_dia.platos_que_comemos.get("dip3", {}).get("plato")
+    #     dip4_sel = plato_dia.platos_que_comemos.get("dip4", {}).get("plato")
+    #     post1_sel = plato_dia.platos_que_comemos.get("postre1", {}).get("plato")
+    #     post2_sel = plato_dia.platos_que_comemos.get("postre2", {}).get("plato")
 
-    else:
-         almuerzo_sel = None
-         cena_sel = None
-         guar1_sel = None
-         guar2_sel = None
-         guar3_sel = None
-         guar4_sel = None
-         ent1_sel = None
-         ent2_sel = None
-         ent3_sel = None
-         ent4_sel = None
-         salsa1_sel= None
-         salsa2_sel= None
-         salsa3_sel= None
-         salsa4_sel= None
-         trago1_sel = None
-         trago2_sel = None
-         dip1_sel = None
-         dip2_sel = None
-         dip3_sel = None
-         dip4_sel = None
-         post1_sel = None
-         post2_sel = None
+    # else:
+    #      almuerzo_sel = None
+    #      cena_sel = None
+    #      guar1_sel = None
+    #      guar2_sel = None
+    #      guar3_sel = None
+    #      guar4_sel = None
+    #      ent1_sel = None
+    #      ent2_sel = None
+    #      ent3_sel = None
+    #      ent4_sel = None
+    #      salsa1_sel= None
+    #      salsa2_sel= None
+    #      salsa3_sel= None
+    #      salsa4_sel= None
+    #      trago1_sel = None
+    #      trago2_sel = None
+    #      dip1_sel = None
+    #      dip2_sel = None
+    #      dip3_sel = None
+    #      dip4_sel = None
+    #      post1_sel = None
+    #      post2_sel = None
 
-    # Primero obtén el queryset y conviértelo en un set
-    guarniciones_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Guarnicion").values_list('nombre_plato_elegido', flat=True))
+    # # Primero obtén el queryset y conviértelo en un set
+    # guarniciones_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Guarnicion").values_list('nombre_plato_elegido', flat=True))
 
-    principales_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Principal").values_list('nombre_plato_elegido', flat=True))
-    principales_presel.update([almuerzo_sel, cena_sel])
-    # Opcional: si almuerzo_sel o cena_sel pueden ser None, eliminarlos también NO SÉ POR QUÉ AGREGA UN NONE CADENA
-    principales_presel.discard(None)
+    # principales_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Principal").values_list('nombre_plato_elegido', flat=True))
+    # principales_presel.update([almuerzo_sel, cena_sel])
+    # # Opcional: si almuerzo_sel o cena_sel pueden ser None, eliminarlos también NO SÉ POR QUÉ AGREGA UN NONE CADENA
+    # principales_presel.discard(None)
 
-    salsas_presel = set(Preseleccionados.objects.filter(usuario=request.user,
-    tipo_plato="Salsa").values_list('nombre_plato_elegido', flat=True))
+    # salsas_presel = set(Preseleccionados.objects.filter(usuario=request.user,
+    # tipo_plato="Salsa").values_list('nombre_plato_elegido', flat=True))
 
-    tragos_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Trago").values_list('nombre_plato_elegido', flat=True))
+    # tragos_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Trago").values_list('nombre_plato_elegido', flat=True))
 
-    dips_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Dip").values_list('nombre_plato_elegido', flat=True))
+    # dips_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Dip").values_list('nombre_plato_elegido', flat=True))
 
-    postres_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Postre").values_list('nombre_plato_elegido', flat=True))
+    # postres_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Postre").values_list('nombre_plato_elegido', flat=True))
 
-    entradas_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Entrada").values_list('nombre_plato_elegido', flat=True))
+    # entradas_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Entrada").values_list('nombre_plato_elegido', flat=True))
 
-    # Agrega las variables adicionales al set (esto evitará duplicados automáticamente)
-    guarniciones_presel.update([guar1_sel, guar2_sel, guar3_sel, guar4_sel])
-    salsas_presel.update([salsa1_sel, salsa2_sel, salsa3_sel, salsa4_sel])
-    tragos_presel.update([trago1_sel, trago2_sel])
-    dips_presel.update([dip1_sel, dip2_sel, dip3_sel, dip4_sel])
-    postres_presel.update([post1_sel, post2_sel])
-    entradas_presel.update([ent1_sel, ent2_sel, ent3_sel, ent4_sel])
+    # # Agrega las variables adicionales al set (esto evitará duplicados automáticamente)
+    # guarniciones_presel.update([guar1_sel, guar2_sel, guar3_sel, guar4_sel])
+    # salsas_presel.update([salsa1_sel, salsa2_sel, salsa3_sel, salsa4_sel])
+    # tragos_presel.update([trago1_sel, trago2_sel])
+    # dips_presel.update([dip1_sel, dip2_sel, dip3_sel, dip4_sel])
+    # postres_presel.update([post1_sel, post2_sel])
+    # entradas_presel.update([ent1_sel, ent2_sel, ent3_sel, ent4_sel])
 
-    # Convertir cada set en lista después de agregar los valores adicionales Y SACAR NONE!!!! ESTO HAY QUE REVISARLO, POR QUÉ CARGABA UN NONE??????
-    guarniciones_presel = [item for item in guarniciones_presel if item is not  None]
-    salsas_presel = [item for item in salsas_presel if item is not None]
-    tragos_presel = [item for item in tragos_presel if item is not None]
-    dips_presel = [item for item in dips_presel if item is not None]
-    postres_presel = [item for item in postres_presel if item is not None]
-    entradas_presel = [item for item in entradas_presel if item is not None]
+    # # Convertir cada set en lista después de agregar los valores adicionales Y SACAR NONE!!!! ESTO HAY QUE REVISARLO, POR QUÉ CARGABA UN NONE??????
+    # guarniciones_presel = [item for item in guarniciones_presel if item is not  None]
+    # salsas_presel = [item for item in salsas_presel if item is not None]
+    # tragos_presel = [item for item in tragos_presel if item is not None]
+    # dips_presel = [item for item in dips_presel if item is not None]
+    # postres_presel = [item for item in postres_presel if item is not None]
+    # entradas_presel = [item for item in entradas_presel if item is not None]
 
+    # context = {
+    #     'menu_dia': plato_dia,
+    #     'dia_del_menu': dia,
+    #     "almuerzo_sel": almuerzo_sel,
+    #     "cena_sel": cena_sel,
+    #     "guar1_sel": guar1_sel,
+    #     "guar2_sel": guar2_sel,
+    #     "guar3_sel": guar3_sel,
+    #     "guar4_sel": guar4_sel,
+    #     "ent1_sel": ent1_sel,
+    #     "ent2_sel": ent2_sel,
+    #     "ent3_sel": ent3_sel,
+    #     "ent4_sel": ent4_sel,
+    #     "salsa1_sel": salsa1_sel,
+    #     "salsa2_sel": salsa2_sel,
+    #     "salsa3_sel": salsa3_sel,
+    #     "salsa4_sel": salsa4_sel,
+    #     "trago1_sel": trago1_sel,
+    #     "trago2_sel": trago2_sel,
+    #     "dip1_sel": dip1_sel,
+    #     "dip2_sel": dip2_sel,
+    #     "dip3_sel": dip3_sel,
+    #     "dip4_sel": dip4_sel,
+    #     "post1_sel": post1_sel,
+    #     "post2_sel": post2_sel,
+
+    #     "guarniciones_presel": guarniciones_presel,
+    #     "entradas_presel": entradas_presel,
+    #     "principales_presel": principales_presel,
+    #     "tragos_presel": tragos_presel,
+    #     "postres_presel": postres_presel,
+    #     "salsas_presel": salsas_presel,
+    #     "dips_presel": dips_presel,
+
+    # }
+
+    # Pasar los datos al contexto de la plantilla
     context = {
         'menu_dia': plato_dia,
-        'dia_del_menu': dia,
-        "almuerzo_sel": almuerzo_sel,
-        "cena_sel": cena_sel,
-        "guar1_sel": guar1_sel,
-        "guar2_sel": guar2_sel,
-        "guar3_sel": guar3_sel,
-        "guar4_sel": guar4_sel,
-        "ent1_sel": ent1_sel,
-        "ent2_sel": ent2_sel,
-        "ent3_sel": ent3_sel,
-        "ent4_sel": ent4_sel,
-        "salsa1_sel": salsa1_sel,
-        "salsa2_sel": salsa2_sel,
-        "salsa3_sel": salsa3_sel,
-        "salsa4_sel": salsa4_sel,
-        "trago1_sel": trago1_sel,
-        "trago2_sel": trago2_sel,
-        "dip1_sel": dip1_sel,
-        "dip2_sel": dip2_sel,
-        "dip3_sel": dip3_sel,
-        "dip4_sel": dip4_sel,
-        "post1_sel": post1_sel,
-        "post2_sel": post2_sel,
-
-        "guarniciones_presel": guarniciones_presel,
-        "entradas_presel": entradas_presel,
-        "principales_presel": principales_presel,
-        "tragos_presel": tragos_presel,
-        "postres_presel": postres_presel,
-        "salsas_presel": salsas_presel,
-        "dips_presel": dips_presel,
-
     }
+
     return render(request, 'AdminVideos/formulario_dia.html', context)
 
 class SolicitarAmistad(CreateView):
@@ -2058,17 +2064,26 @@ class AsignarPlato(View):
         menu_dia, created = ElegidosXDia.objects.get_or_create(
             user=request.user,
             el_dia_en_que_comemos=fecha_comida,
-            defaults={"platos_que_comemos": []}
+            defaults={"platos_que_comemos": {}}
         )
+# Contar las instancias del plato con el mismo tipo (ej. "Salsa")
+        count = sum(1 for key in menu_dia.platos_que_comemos if key.startswith(plato.tipo))
 
-        # Agregar el plato al menú del día si no está ya en la lista
-        if comida not in menu_dia.platos_que_comemos:
-            menu_dia.platos_que_comemos.append({comida: plato.nombre_plato})
+        # Crear la clave dinámica para platos del mismo tipo
+        if count > 0:
+            key = f"{plato.tipo}{count + 1}"
         else:
-            messages.warning(request, "El plato ya está asignado para esta comida.")
-            return redirect('filtro-de-platos')
+            key = plato.tipo  # Si no hay otros de ese tipo, usamos la clave original
 
-        # Guardar la instancia
+        # Asignar el plato con la clave dinámica
+        ingredientes = plato.ingredientes  # Ajusta esto según tu lógica de negocio
+        menu_dia.platos_que_comemos[key] = {
+            "plato": plato.nombre_plato,
+            "ingredientes": ingredientes,
+            "elegido": True
+        }
+
+        # Guardar la instancia actualizada
         menu_dia.save()
         messages.success(request, "Plato asignado correctamente.")
         
