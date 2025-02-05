@@ -51,9 +51,15 @@
               <div {% if user.id == plato.propietario.id %} class="card border border-success" {% else %} class="card border border-danger" {% endif %}
               style="width: 10rem;">
                 <div class="container p-0">
-                    <a href="{% url 'videos-detail' plato.id %}">
+                    <!-- <a href="">
                       <img src="{{plato.image_url}}" class="img-fluid position-relative object-fit-cover" alt="Imagen del Plato">
-                    </a>                        
+                    </a>                         -->
+                    
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#asignarPlatoModal"
+             onclick="setPlatoInfo('{{ plato.id }}', '{{ plato.image_url }}', '{{ plato.nombre_plato }}', '{{ plato.descripcion_plato }}')">
+            <img src="{{ plato.image_url }}" class="img-fluid object-fit-cover" alt="Imagen del Plato">
+          </a>
+                    
                     <div class="position-absolute top-0 start-50 translate-middle-x p-2 text-center text-white bg-dark bg-opacity-10 rounded">
                         <h6 class="mb-0 small"> {{ plato.nombre_plato }} </h6>
                     </div>
@@ -75,6 +81,9 @@
                         <i class="fa-solid fa-share-nodes"></i>
                       </a>               
                     {% endif %}
+                    <a href="{% url 'videos-detail' plato.id %}">
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </a>   
 
                     <div>
                       <button 
@@ -113,6 +122,7 @@
 {% endif %}
 
 </section>
+
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
@@ -166,6 +176,67 @@
   });
 </script>
 
+<!-- Modal para asignar plato -->
+<div class="modal fade" id="asignarPlatoModal" tabindex="-1" aria-labelledby="asignarPlatoLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="asignarPlatoLabel">Asignar Plato</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{% url 'asignar-plato' %}" method="POST">
+        {% csrf_token %}
+        <div class="modal-body">
+          <!-- Campo oculto para el ID del plato -->
+          <input type="hidden" name="plato_id" id="platoIdInput">
+          
+          <!-- Información del Plato -->
+          <div class="text-center mb-3">
+            <img id="platoImage" src="" alt="Imagen del Plato" class="img-fluid rounded mb-2" style="max-height: 200px;">
+            <h5 id="platoNombre" class="fw-bold mt-1"></h5>
+            <p id="platoDescripcion" class="text-muted"></p>
+          </div>
+
+          <!-- Selector del día -->
+          <div class="mb-3">
+            <label for="diaSeleccionado" class="form-label">Seleccionar día:</label>
+            <select name="dia" id="diaSeleccionado" class="form-select">
+              {% for dia in dias_desde_hoy %}
+              <option value="{{ dia|date:'Y-m-d' }}">{{ dia|date:"l j" }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Selector del tipo de comida -->
+          <div class="mb-3">
+            <label for="comidaSeleccionada" class="form-label">Seleccionar comida:</label>
+            <select name="comida" id="comidaSeleccionada" class="form-select">
+              <option value="desayuno">Desayuno</option>
+              <option value="almuerzo">Almuerzo</option>
+              <option value="merienda">Merienda</option>
+              <option value="cena">Cena</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Asignar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Función para pasar información del plato al modal
+  function setPlatoInfo(platoId, imageUrl, nombre, descripcion) {
+    document.getElementById("platoIdInput").value = platoId;
+    document.getElementById("platoImage").src = imageUrl;
+    document.getElementById("platoNombre").textContent = nombre;
+    document.getElementById("platoDescripcion").textContent = descripcion;
+  }
+</script>
 
 
 {% endblock %}

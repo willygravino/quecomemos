@@ -1767,49 +1767,49 @@ class MensajeDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
        return Mensaje.objects.filter(destinatario=self.request.user).exists()
 
 
-class Chat(LoginRequiredMixin, ListView):
-   model = Mensaje
-   context_object_name = "mensajes"
-   template_name = 'AdminVideos/chat.html'
+# class Chat(LoginRequiredMixin, ListView):
+#    model = Mensaje
+#    context_object_name = "mensajes"
+#    template_name = 'AdminVideos/chat.html'
 
-   def get_queryset(self):
-        destinatario_username = self.kwargs["usuario"]
+#    def get_queryset(self):
+#         destinatario_username = self.kwargs["usuario"]
 
-        # Filtrar mensajes enviados o recibidos entre el usuario actual y el destinatario
-        return Mensaje.objects.filter(
-            Q(usuario_que_envia=self.request.user.username, destinatario__username=destinatario_username) |
-            Q(usuario_que_envia=destinatario_username, destinatario=self.request.user)
-        ).order_by('creado_el')
+#         # Filtrar mensajes enviados o recibidos entre el usuario actual y el destinatario
+#         return Mensaje.objects.filter(
+#             Q(usuario_que_envia=self.request.user.username, destinatario__username=destinatario_username) |
+#             Q(usuario_que_envia=destinatario_username, destinatario=self.request.user)
+#         ).order_by('creado_el')
 
-   def get_context_data(self, **kwargs):
-        # Llamar al método original para obtener el contexto base
-        context = super().get_context_data(**kwargs)
+#    def get_context_data(self, **kwargs):
+#         # Llamar al método original para obtener el contexto base
+#         context = super().get_context_data(**kwargs)
 
-        # Extraer el campo "amistad" de todos los mensajes del queryset
-        mensajes = self.get_queryset()  # Obtén todos los mensajes del usuario
-        platos_ids = []
+#         # Extraer el campo "amistad" de todos los mensajes del queryset
+#         mensajes = self.get_queryset()  # Obtén todos los mensajes del usuario
+#         platos_ids = []
 
-        # Iterar sobre los mensajes para extraer IDs de platos
-        for mensaje in mensajes:
-            if mensaje.amistad != "solicitar" and mensaje.amistad != "mensaje" :
-               platos_ids.append(mensaje.amistad)
+#         # Iterar sobre los mensajes para extraer IDs de platos
+#         for mensaje in mensajes:
+#             if mensaje.amistad != "solicitar" and mensaje.amistad != "mensaje" :
+#                platos_ids.append(mensaje.amistad)
 
-        # Eliminar duplicados en caso de que un plato esté repetido
-        platos_ids = list(set(platos_ids))
+#         # Eliminar duplicados en caso de que un plato esté repetido
+#         platos_ids = list(set(platos_ids))
 
-        # Obtener el perfil del usuario actual
-        perfil = get_object_or_404(Profile, user=self.request.user)
+#         # Obtener el perfil del usuario actual
+#         perfil = get_object_or_404(Profile, user=self.request.user)
 
-        # Pasar la lista de amigues al contexto
-        context["amigues"] = perfil.amigues  # Lista JSONField desde Profile
+#         # Pasar la lista de amigues al contexto
+#         context["amigues"] = perfil.amigues  # Lista JSONField desde Profile
 
-        # Consultar los objetos Plato correspondientes
-        platos_compartidos = Plato.objects.filter(id__in=platos_ids)
+#         # Consultar los objetos Plato correspondientes
+#         platos_compartidos = Plato.objects.filter(id__in=platos_ids)
 
-        # Crear un diccionario con los platos para acceso rápido en la plantilla
-        context["platos_dict"] = {plato.id: plato for plato in platos_compartidos}
+#         # Crear un diccionario con los platos para acceso rápido en la plantilla
+#         context["platos_dict"] = {plato.id: plato for plato in platos_compartidos}
 
-        return context
+#         return context
 
 # class Chat(LoginRequiredMixin, ListView):
 #    model = Mensaje
@@ -1855,12 +1855,12 @@ class Chat(LoginRequiredMixin, ListView):
 
 #         return context
    
-# class Chat(View):
+class Chat(View):
 
-#     def get(self, request, nombre_usuario):
-#         usuario = get_object_or_404(User, username=nombre_usuario)
-#         mensajes = Mensaje.objects.filter(destinatario=request.user, usuario_que_envia=usuario.username)
-#         return render(request, 'chat.html', {'usuario': usuario, 'mensajes': mensajes})
+    def get(self, request, nombre_usuario):
+        usuario = get_object_or_404(User, username=nombre_usuario)
+        mensajes = Mensaje.objects.filter(destinatario=request.user, usuario_que_envia=usuario.username)
+        return render(request, 'chat.html', {'usuario': usuario, 'mensajes': mensajes})
 
 
 @login_required
@@ -2038,3 +2038,38 @@ def agregar_a_mi_lista(request, plato_id):
 
     # Redirigir a la vista para descartar el plato después de agregarlo
     return redirect('descartar-sugerido', nombre_plato=plato_original.nombre_plato)
+
+
+
+class AsignarPlato(View):
+    def post(self, request):
+        plato_id = request.POST.get('plato_id')
+        dia = request.POST.get('dia')
+        comida = request.POST.get('comida')
+        
+
+        # Buscar el plato
+        plato = Plato.objects.get(id=plato_id)
+        
+        # Convertir string a fecha usando el módulo completo
+        fecha_comida = datetime.datetime.strptime(dia, "%Y-%m-%d").date()
+        
+        # Buscar o crear la instancia del día
+        menu_dia, created = ElegidosXDia.objects.get_or_create(
+            user=request.user,
+            el_dia_en_que_comemos=fecha_comida,
+            defaults={"platos_que_comemos": []}
+        )
+
+        # Agregar el plato al menú del día si no está ya en la lista
+        if comida not in menu_dia.platos_que_comemos:
+            menu_dia.platos_que_comemos.append({comida: plato.nombre_plato})
+        else:
+            messages.warning(request, "El plato ya está asignado para esta comida.")
+            return redirect('filtro-de-platos')
+
+        # Guardar la instancia
+        menu_dia.save()
+        messages.success(request, "Plato asignado correctamente.")
+        
+        return redirect('filtro-de-platos')
