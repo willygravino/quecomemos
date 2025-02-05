@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from AdminVideos.views import EnviarMensaje, agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, compartir_plato, descartar_sugerido, eliminar_plato, formulario_dia, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, plato_preseleccionado, grabar_menu_elegido,SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, sumar_amigue, user_logout, desmarcar_todo, SolicitarAmistad, MensajeList, MensajeDelete # PlatoDelete, VistaInicial ,Logout, , PlatoList, PlatosMineList, PlatosElegidosMenu, elecion_de_lista, PlatosDeOtros,, LogtViews, MenuElegido, lista_de_compras
+from AdminVideos.views import Chat, EnviarMensaje, agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, compartir_plato, descartar_sugerido, eliminar_plato, formulario_dia, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, plato_preseleccionado, grabar_menu_elegido,SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, sumar_amigue, user_logout, desmarcar_todo, SolicitarAmistad, MensajeDelete # PlatoDelete, VistaInicial ,Logout, , PlatoList, PlatosMineList, PlatosElegidosMenu, elecion_de_lista, PlatosDeOtros,, LogtViews, MenuElegido, lista_de_compras
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -54,9 +54,10 @@ urlpatterns = [
     path('perfil/crear', ProfileCreate.as_view(), name="profile-create"),
     path('profile/<pk>/update', ProfileUpdate.as_view(), name="profile-update"),
     path('about', about, name="about"),
-    path('mensaje/list', MensajeList.as_view(), name="mensaje-list" ),
+    # path('mensaje/list'
+    path('chat/<str:usuario>', Chat.as_view(), name='chat'),
     path('solicitar/amistad', SolicitarAmistad.as_view(), name="solicitar-amistad" ),
-    path('mensaje/enviar', EnviarMensaje.as_view(), name="enviar-mensaje" ),
+    path('mensaje/<str:usuario>/enviar', EnviarMensaje.as_view(), name="enviar-mensaje" ),
 
     path('mensaje/<pk>/delete', MensajeDelete.as_view(), name="mensaje-delete"),
     path('menu/amigue/<pk>/borrar', amigue_borrar, name="amigue-borrar"),

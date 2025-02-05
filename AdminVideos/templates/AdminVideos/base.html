@@ -354,7 +354,7 @@
                                 </a>
                                 <a class="dropdown-item text-center small text-gray-500" href="#">Leer más mensajes</a>
 
-                                <a href="{% url 'mensaje-list' %}" class="dropdown-item text-center small ">
+                                <a href="% url 'mensaje-list' %" class="dropdown-item text-center small ">
                                     <strong>Recibidos</strong>
                                 </a>
 
@@ -362,7 +362,7 @@
                                     <strong>Solicitar amistad</strong>
                                 </a>
 
-                                <a href="{% url 'enviar-mensaje' %}" class="dropdown-item text-center small ">
+                                <a href="% url 'enviar-mensaje' %" class="dropdown-item text-center small ">
                                     <strong>Enviar mensaje</strong>
                                 </a>
 
@@ -394,7 +394,7 @@
                                 <!-- cada una  -->
 
                                 {% for usuario, mensajes in mensajes.items %}
-                                    <a class="dropdown-item d-flex align-items-center" href="{% url 'mensaje-list' %}">
+                                    <a class="dropdown-item d-flex align-items-center" href="{% url 'enviar-mensaje' usuario %}"">
                                         <div class="dropdown-list-image mr-3">
                                             <!-- <img class="rounded-circle" src="img/undraw_profile_1.svg" alt="..."> -->
                                             <img class="rounded-circle" src="{{ mensajes.avatar_url }}" alt="{{ usuario }}">
@@ -434,21 +434,22 @@
 
                                 <!-- <a class="dropdown-item text-center small text-gray-500" href="#">Leer más mensajes</a> -->
 
-                                <a href="{% url 'mensaje-list' %}" class="dropdown-item text-center small ">
+                                <!-- <a href="% url 'mensaje-list' %" class="dropdown-item text-center small ">
                                     <strong>Recibidos</strong>
-                                </a>
+                                </a> -->
 
                                 <a href="{% url 'solicitar-amistad' %}" class="dropdown-item text-center small ">
                                     <strong>Solicitar amistad</strong>
                                 </a>
 
-                                <a href="{% url 'enviar-mensaje' %}" class="dropdown-item text-center small ">
+                                <!-- <a href="" class="dropdown-item text-center small "> 
                                     <strong>Enviar mensaje</strong>
-                                </a>
-
+                                </a> -->
+                                <!-- % url 'enviar-mensaje' % -->
+<!-- 
                                 <a href="" class="dropdown-item text-center small">
                                     <strong>Enviados</strong>
-                                </a>
+                                </a> -->
 
                             </div>
                         </li>

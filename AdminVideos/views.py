@@ -4,6 +4,7 @@ from django.contrib import messages  # Para mostrar mensajes al usuario
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
+from django.views import View
 from AdminVideos.models import Plato, Profile, Mensaje, Preseleccionados, ElegidosXDia, Sugeridos
 from django.http import Http404, HttpResponseForbidden, JsonResponse
 from django.urls import reverse, reverse_lazy
@@ -1627,6 +1628,8 @@ class SolicitarAmistad(CreateView):
    model = Mensaje
    success_url = reverse_lazy('filtro-de-platos')
    fields = '__all__'
+   template_name = 'AdminVideos/solicitar_amistad.html'
+
 
    def form_valid(self, form):
         # Asigna el valor predeterminado al campo 'amistad'
@@ -1637,36 +1640,79 @@ class SolicitarAmistad(CreateView):
     form = super().get_form(form_class)
     form.fields['destinatario'].queryset = User.objects.exclude(id=self.request.user.id)
     return form
-
-
+   
 class EnviarMensaje(LoginRequiredMixin, CreateView):
     model = Mensaje
     success_url = reverse_lazy('filtro-de-platos')
+    template_name = 'AdminVideos/enviar_mensaje.html'
     fields = ['mensaje', 'destinatario']
 
+    def get_destinatario(self):
+        return get_object_or_404(User, username=self.kwargs.get("usuario"))
+
     def form_valid(self, form):
-        # Asigna valores predeterminados a campos específicos
         form.instance.usuario_que_envia = self.request.user.username
         form.instance.amistad = "mensaje"
         return super().form_valid(form)
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-
-        # Obtiene los amigos del usuario actual
-        amigues_names = (
-            Profile.objects.filter(user=self.request.user)
-            .values_list('amigues', flat=True)
-            .first()
-        )
-
-        # Filtra solo los destinatarios en la lista de amigos si existe
-        if amigues_names:
-            form.fields['destinatario'].queryset = User.objects.filter(username__in=amigues_names)
-        else:
-            form.fields['destinatario'].queryset = User.objects.none()
-
+        destinatario = self.get_destinatario()
+        form.fields['destinatario'].queryset = User.objects.filter(username=destinatario.username)
+        form.initial['destinatario'] = destinatario
         return form
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        destinatario = self.get_destinatario()
+
+        mensajes = Mensaje.objects.filter(
+            Q(usuario_que_envia=self.request.user.username, destinatario__username=destinatario.username) |
+            Q(usuario_que_envia=destinatario.username, destinatario=self.request.user)
+        ).order_by('creado_el')
+
+        context["mensajes"] = mensajes
+                
+        # Obtener el perfil del usuario actual
+        perfil = get_object_or_404(Profile, user=self.request.user)
+
+        # Pasar la lista de amigues al contexto
+        context["amigues"] = perfil.amigues  # Lista JSONField desde Profile
+      
+        return context
+
+
+    
+# class EnviarMensaje(LoginRequiredMixin, CreateView):
+#     model = Mensaje
+#     success_url = reverse_lazy('filtro-de-platos')
+#     template_name = 'AdminVideos/enviar_mensaje.html'
+
+#     fields = ['mensaje', 'destinatario']
+
+#     def form_valid(self, form):
+#         # Asigna valores predeterminados a campos específicos
+#         form.instance.usuario_que_envia = self.request.user.username
+#         form.instance.amistad = "mensaje"
+#         return super().form_valid(form)
+
+#     def get_form(self, form_class=None):
+#         form = super().get_form(form_class)
+
+#         # Obtiene los amigos del usuario actual
+#         amigues_names = (
+#             Profile.objects.filter(user=self.request.user)
+#             .values_list('amigues', flat=True)
+#             .first()
+#         )
+
+#         # Filtra solo los destinatarios en la lista de amigos si existe
+#         if amigues_names:
+#             form.fields['destinatario'].queryset = User.objects.filter(username__in=amigues_names)
+#         else:
+#             form.fields['destinatario'].queryset = User.objects.none()
+
+#         return form
 
 class compartir_plato(CreateView):
     model = Mensaje
@@ -1721,13 +1767,19 @@ class MensajeDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
        return Mensaje.objects.filter(destinatario=self.request.user).exists()
 
 
-class MensajeList(LoginRequiredMixin, ListView):
+class Chat(LoginRequiredMixin, ListView):
    model = Mensaje
    context_object_name = "mensajes"
+   template_name = 'AdminVideos/chat.html'
 
    def get_queryset(self):
-    #    import pdb; pdb.set_trace
-       return Mensaje.objects.filter(destinatario=self.request.user).all()
+        destinatario_username = self.kwargs["usuario"]
+
+        # Filtrar mensajes enviados o recibidos entre el usuario actual y el destinatario
+        return Mensaje.objects.filter(
+            Q(usuario_que_envia=self.request.user.username, destinatario__username=destinatario_username) |
+            Q(usuario_que_envia=destinatario_username, destinatario=self.request.user)
+        ).order_by('creado_el')
 
    def get_context_data(self, **kwargs):
         # Llamar al método original para obtener el contexto base
@@ -1758,6 +1810,57 @@ class MensajeList(LoginRequiredMixin, ListView):
         context["platos_dict"] = {plato.id: plato for plato in platos_compartidos}
 
         return context
+
+# class Chat(LoginRequiredMixin, ListView):
+#    model = Mensaje
+#    context_object_name = "mensajes"
+#    template_name = 'AdminVideos/chat.html'
+
+#    def get_queryset(self):
+#         destinatario_username = self.kwargs["usuario"]
+
+#         # Filtrar mensajes enviados o recibidos entre el usuario actual y el destinatario
+#         return Mensaje.objects.filter(
+#             Q(usuario_que_envia=self.request.user.username, destinatario__username=destinatario_username) |
+#             Q(usuario_que_envia=destinatario_username, destinatario=self.request.user)
+#         ).order_by('creado_el')
+
+#    def get_context_data(self, **kwargs):
+#         # Llamar al método original para obtener el contexto base
+#         context = super().get_context_data(**kwargs)
+
+#         # Extraer el campo "amistad" de todos los mensajes del queryset
+#         mensajes = self.get_queryset()  # Obtén todos los mensajes del usuario
+#         platos_ids = []
+
+#         # Iterar sobre los mensajes para extraer IDs de platos
+#         for mensaje in mensajes:
+#             if mensaje.amistad != "solicitar" and mensaje.amistad != "mensaje" :
+#                platos_ids.append(mensaje.amistad)
+
+#         # Eliminar duplicados en caso de que un plato esté repetido
+#         platos_ids = list(set(platos_ids))
+
+#         # Obtener el perfil del usuario actual
+#         perfil = get_object_or_404(Profile, user=self.request.user)
+
+#         # Pasar la lista de amigues al contexto
+#         context["amigues"] = perfil.amigues  # Lista JSONField desde Profile
+
+#         # Consultar los objetos Plato correspondientes
+#         platos_compartidos = Plato.objects.filter(id__in=platos_ids)
+
+#         # Crear un diccionario con los platos para acceso rápido en la plantilla
+#         context["platos_dict"] = {plato.id: plato for plato in platos_compartidos}
+
+#         return context
+   
+# class Chat(View):
+
+#     def get(self, request, nombre_usuario):
+#         usuario = get_object_or_404(User, username=nombre_usuario)
+#         mensajes = Mensaje.objects.filter(destinatario=request.user, usuario_que_envia=usuario.username)
+#         return render(request, 'chat.html', {'usuario': usuario, 'mensajes': mensajes})
 
 
 @login_required

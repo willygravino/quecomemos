@@ -142,7 +142,7 @@ class ElegidosXDia(models.Model):
     platos_que_comemos = models.JSONField(null=True, blank=True)
 
     def __str__(self):
-         return f'Menu Elegido {self.id}' 
+         return f'Menu Elegido {self.el_dia_en_que_comemos}' 
 
 class Profile(models.Model):
      user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
@@ -157,10 +157,12 @@ class Profile(models.Model):
      sugeridos_descartados = models.JSONField(default=list, blank=True)
      sugeridos_importados = models.JSONField(default=list, blank=True)
 
-
      @property
      def avatar_url(self):
         return self.avatar.url if self.avatar else '/media/avatares/logo.png'
+     
+     def __str__(self):
+        return f"Perfil de {self.user}"
      
      
 class Mensaje(models.Model):

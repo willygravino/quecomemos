@@ -5,19 +5,14 @@
 {% block principal %}
 
 {% if mensajes %} 
-  <div class="container mt-4">
-    <div class="row">
-      <div class="col-md-4">
-        <div class="p-3 bg-light text-center">Chat</div>
-      </div>
-      <div class="col-md-4">
-        <div class="p-3 bg-light text-center">Solicitudes de amistad</div>
-      </div>
-      <div class="col-md-4">
-        <div class="p-3 bg-light text-center">Platos compartidos</div>
+  <section class="py-1 text-center container">
+    <div class="row py-lg-1">
+      <div class="col-lg-8 col-md-8 mx-auto">
+        <h1 class="fw-light">Mis Mensajes.</h1>
+        <p class="lead text-body-secondary">Estos son los mensajes que dejaron para vos.</p>
       </div>
     </div>
-  </div>
+  </section>
 
   {% for mensaje in mensajes %}
     <center>
@@ -34,7 +29,7 @@
            
           
           {% if mensaje.amistad %}
-              {% if mensaje.amistad == "solicitar" or mensaje.amistad == "mensaje" %}
+              {% if mensaje.amistad == "solicitar" %}
                 <!-- Cada mensaje tiene su propio formulario -->
                 {% if mensaje.usuario_que_envia not in amigues %}
 
@@ -92,7 +87,6 @@
 {% endif %}
 
 
-
 {% for plato_id, plato in platos_dict.items %}
 
     <!-- Logout Modal-->
@@ -110,7 +104,7 @@
                 <li>ID: {{ plato_id }}</li>
                 <li>Nombre: {{ plato.nombre_plato }}</li>
                 <li>Descripción: {{ plato.descripcion_plato }}</li>
-                <li>Ingredientes: {{ plato.ingredientes }}</li>
+                <li>Precio: {{ plato.ingredientes }}</li>
                 <img src="{{plato.image_url}}" class="img-fluid position-relative object-fit-cover" alt="Imagen del Plato">
                 <div class="modal-footer">
                     <a class="btn btn-primary" href="">Agregar a mi lista</a>

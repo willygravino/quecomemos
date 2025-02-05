@@ -1,0 +1,81 @@
+{% extends "AdminVideos/base.html" %}
+
+{% load static %}
+
+{% block principal %}
+
+<h5>Soy {{user.profile.user}}</h5>
+
+{% if mensajes %} 
+  {% for mensaje in mensajes %}
+  <!-- {% if mensaje.usuario_que_envia == user.username %} {{mensaje.usuario_que_envia}} {{user.username}} ES IGUAL {% else %} {{mensaje.usuario_que_envia}} {{user.username}} NO ES IGUAL {% endif %} -->
+      <p> 
+            <!-- <h5 class="card-title" {% if mensaje.usuario_que_envia == user.username %} align="right" {% else %} align="left" {% endif %}
+              >Mensaje de {{ mensaje.usuario_que_envia }}</h5> -->
+              
+              <p class="card-text" {% if mensaje.usuario_que_envia == user.username %} align="left" {% else %} align="right" {% endif %}>{{ mensaje.mensaje }}</p>
+              <p class="small text-muted" {% if mensaje.usuario_que_envia == user.username %} align="left" {% else %} align="right" {% endif %}>{{mensaje.creado_el}}</p>
+                
+          <!-- <a href="{% url 'mensaje-delete' mensaje.id %}">Borrar</a> -->
+
+           <!-- cierre de card -->
+          <!-- </div>
+        </div> -->
+      </p>
+
+  {% endfor %}
+
+{% else %}
+  <div class="album py-5 bg-light">
+    <div class="container">
+      <section class="py-1 text-center container">
+        <div class="row py-lg-1">
+          <div class="col-lg-8 col-md-8 mx-auto">
+            <h1 class="fw-light">No te enviaron mensajes aún.</h1>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div> 
+{% endif %}
+
+
+
+{% for plato_id, plato in platos_dict.items %}
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="PlatoModal{{ plato_id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">¿Querés salir?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+
+                <li>ID: {{ plato_id }}</li>
+                <li>Nombre: {{ plato.nombre_plato }}</li>
+                <li>Descripción: {{ plato.descripcion_plato }}</li>
+                <li>Ingredientes: {{ plato.ingredientes }}</li>
+                <img src="{{plato.image_url}}" class="img-fluid position-relative object-fit-cover" alt="Imagen del Plato">
+                <div class="modal-footer">
+                    <a class="btn btn-primary" href="">Agregar a mi lista</a>
+                    <a class="btn btn-primary" href="">Rechazar</a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% if messages %}
+      <ul class="messages">
+          {% for message in messages %}
+              <li class="alert alert-{{ message.tags }}">{{ message }}</li>
+          {% endfor %}
+      </ul>
+    {% endif %}
+
+{% endblock %}

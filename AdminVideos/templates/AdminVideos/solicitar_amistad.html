@@ -1,0 +1,57 @@
+{% extends "AdminVideos/base.html" %}
+
+{% load static %}
+
+{% block principal %}
+
+<div class="album py-5 bg-light">
+   <section class="py-1 text-center container">
+     <div class="row py-lg-1">
+       <div class="col-lg-8 col-md-8 mx-auto">
+         <h1 class="fw-light">
+            <h1 class="fw-light">SOLICITAR AMISTAD</h1>
+        </h1>
+       </div>
+     </div>
+   </section>
+</div> 
+
+<form method="post" enctype="multipart/form-data">
+   <center>
+          
+          {% csrf_token %}
+
+          <select name="destinatario" required=""  aria-invalid="true" id="id_destinatario">
+            {% for choice in form.fields.destinatario.choices %}
+              
+                 <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+
+              
+            {% endfor %}
+          </select>
+
+           <input type="submit" value="Enviar">
+
+           <p></p>
+          
+          <!-- <label for="id_usuario_que_envia">Usuario que envía: {{user.username}}</label>
+          <input type="text" name="usuario_que_envia" maxlength="15" id="id_usuario_que_envia">
+          <br><br> -->
+
+          <input type="hidden" name="usuario_que_envia" value="{{ user.username }}">
+          
+          <textarea name="mensaje" cols="40" rows="10" maxlength="1000" required="" aria-invalid="true" id="id_mensaje"></textarea>
+
+          <p></p>
+
+          <!-- <p>
+          <label for="id_amistad">Amistad:</label>
+          <input type="text" name="amistad" maxlength="9" id="id_amistad">
+          </p> -->
+                   
+           
+      z
+    </center>
+</form>
+
+{% endblock %}
