@@ -200,7 +200,7 @@
         <!-- End of Sidebar -->
 
         <!-- Content Wrapper -->
-        <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content-wrapper" style="background-color: rgb(222, 220, 220);" class="d-flex flex-column">
 
             <!-- Main Content -->
             <div id="content">
@@ -256,28 +256,7 @@
                                 <h6 class="dropdown-header">
                                     Notificaciones
                                 </h6>
-                                <!-- <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="mr-3">
-                                        <div class="icon-circle bg-primary">
-                                            <i class="fas fa-file-alt text-white"></i>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div class="small text-gray-500">December 12, 2019</div>
-                                        <span class="font-weight-bold">A new monthly report is ready to download!</span>
-                                    </div>
-                                </a> -->
-                                <!-- <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="mr-3">
-                                        <div class="icon-circle bg-success">
-                                            <i class="fas fa-donate text-white"></i>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div class="small text-gray-500">December 7, 2019</div>
-                                        $290.29 has been deposited into your account!
-                                    </div>
-                                </a> -->
+                               
                                 <a class="dropdown-item d-flex align-items-center" href="#">
                                     <div class="mr-3">
                                         <div class="icon-circle bg-warning">
@@ -293,87 +272,7 @@
                             </div>
                         </li>
 
-                        <!-- Nav Item - Messages -->
-                        <!-- <li class="nav-item dropdown no-arrow mx-1">
-                            <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-envelope fa-fw"></i> -->
-                                <!-- Counter - Messages -->
-                                <!-- <span class="badge badge-danger badge-counter">7</span>
-                            </a> -->
-                            <!-- Dropdown - Messages -->
-                            <!-- <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                                aria-labelledby="messagesDropdown">
-                                <h6 class="dropdown-header">
-                                    Centro de Mensajes
-                                </h6>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="dropdown-list-image mr-3">
-                                        <img class="rounded-circle" src="img/undraw_profile_1.svg" alt="...">
-                                        <div class="status-indicator bg-success"></div>
-                                    </div>
-                                    <div class="font-weight-bold">
-                                        <div class="text-truncate">Hi there! I am wondering if you can help me with a
-                                            problem I've been having.</div>
-                                        <div class="small text-gray-500">Emily Fowler · 58m</div>
-                                    </div>
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="dropdown-list-image mr-3">
-                                        <img class="rounded-circle" src="img/undraw_profile_2.svg" alt="...">
-                                        <div class="status-indicator"></div>
-                                    </div>
-                                    <div>
-                                        <div class="text-truncate">I have the photos that you ordered last month, how
-                                            would you like them sent to you?</div>
-                                        <div class="small text-gray-500">Jae Chun · 1d</div>
-                                    </div>
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="dropdown-list-image mr-3">
-                                        <img class="rounded-circle" src="img/undraw_profile_3.svg" alt="...">
-                                        <div class="status-indicator bg-warning"></div>
-                                    </div>
-                                    <div>
-                                        <div class="text-truncate">Last month's report looks great, I am very happy with
-                                            the progress so far, keep up the good work!</div>
-                                        <div class="small text-gray-500">Morgan Alvarez · 2d</div>
-                                    </div>
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                    <div class="dropdown-list-image mr-3">
-                                        <img class="rounded-circle" src="https://source.unsplash.com/Mv9hjnEUHR4/60x60"
-                                            alt="...">
-                                        <div class="status-indicator bg-success"></div>
-                                    </div>
-                                    <div>
-                                        <div class="text-truncate">Am I a good boy? The reason I ask is because someone
-                                            told me that people say this to all dogs, even if they aren't good...</div>
-                                        <div class="small text-gray-500">Chicken the Dog · 2w</div>
-                                    </div>
-                                </a>
-                                <a class="dropdown-item text-center small text-gray-500" href="#">Leer más mensajes</a>
-
-                                <a href="% url 'mensaje-list' %" class="dropdown-item text-center small ">
-                                    <strong>Recibidos</strong>
-                                </a>
-
-                                <a href="{% url 'solicitar-amistad' %}" class="dropdown-item text-center small ">
-                                    <strong>Solicitar amistad</strong>
-                                </a>
-
-                                <a href="% url 'enviar-mensaje' %" class="dropdown-item text-center small ">
-                                    <strong>Enviar mensaje</strong>
-                                </a>
-
-                                <a href="" class="dropdown-item text-center small">
-                                    <strong>Enviados</strong>
-                                </a>
-
-                            </div>
-                        </li> -->
-
-                        <!-- Nav Item - CHAT -->
+                       <!-- Nav Item - CHAT -->
 
                         <li class="nav-item dropdown no-arrow mx-1">
                             <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button"
@@ -402,11 +301,11 @@
                                             {% if not mensajes.mensajes.0.leido %}
                                                 <div class="status-indicator bg-success"></div>
                                             {% endif %}
-                                            
+
                                         </div>
                                         <div class="font-weight-bold">
                                             <div class="text-truncate">{{ usuario }}</div>
-                                            
+
                                             <!-- Utilizamos d-flex para que los elementos se alineen en la misma fila -->
                                             <div class="d-flex justify-content-between">
                                                 <!-- Mensaje -->
@@ -428,28 +327,10 @@
                                     <p>No tienes mensajes.</p>
                                 {% endfor %}
 
-
-
-                                <!-- ----------- -->
-
-                                <!-- <a class="dropdown-item text-center small text-gray-500" href="#">Leer más mensajes</a> -->
-
-                                <!-- <a href="% url 'mensaje-list' %" class="dropdown-item text-center small ">
-                                    <strong>Recibidos</strong>
-                                </a> -->
-
                                 <a href="{% url 'solicitar-amistad' %}" class="dropdown-item text-center small ">
                                     <strong>Solicitar amistad</strong>
                                 </a>
 
-                                <!-- <a href="" class="dropdown-item text-center small "> 
-                                    <strong>Enviar mensaje</strong>
-                                </a> -->
-                                <!-- % url 'enviar-mensaje' % -->
-<!-- 
-                                <a href="" class="dropdown-item text-center small">
-                                    <strong>Enviados</strong>
-                                </a> -->
 
                             </div>
                         </li>
@@ -507,53 +388,68 @@
 
                 <!-- End of Topbar -->
 
-                <div class="container-fluid">
-
-                    <div class="row">
-                        <div class="col">
-
-                          <div class="d-flex flex-wrap justify-content-between">
-                            <!-- <p>DIAS DESDE HOY: {{ dias_desde_hoy }}</p>
-                            <p>DIAS programados: {{ dias_programados }}</p> -->
+                
 
 
-                                {% for dia in dias_desde_hoy %}
-                                <a href="{% url 'formulario-dia' dia=dia|date:'Y-m-d' %}"
-                                    class={% if dia in dias_programados %} "bg-success" {% else %}"bg-primary" {% endif %}>
-                                    <div class="text-white p-3 small border border-dark al">
-                                    <p>{{ dia|date:"l j" }}</p>
 
-                                    </div>
-                                </a>
-                                {% endfor %}
 
-                           </div>
-                        </div>
+        <div class="container-fluid" style="background-color: rgb(222, 220, 220);">
+            <!-- Nav Tabs -->
+            <ul class="nav nav-tabs" id="diasTab" role="tablist">
+                {% for dia in dias_desde_hoy %}
+                <li class="nav-item  " role="presentation">
+                    <button 
+                    class="nav-link {% if forloop.first %}active{% else %}  {% endif %}" 
+                    id="tab-{{ dia|date:'Ymd' }}" data-bs-toggle="tab" data-bs-target="#tab-content-{{ dia|date:'Ymd' }}" type="button" role="tab" aria-controls="tab-content-{{ dia|date:'Ymd' }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+                        {{ dia|date:"l j" }}
+                    </button>
+                </li>
+                {% endfor %}
+            </ul>
+
+
+            <!-- Tab Content -->
+            <div class="tab-content bg-white" id="diasTabContent">
+                {% for dia in dias_desde_hoy %}
+                    <div class="tab-pane {% if forloop.first %}show active{% endif %}" 
+                    id="tab-content-{{ dia|date:'Ymd' }}" role="tabpanel" aria-labelledby="tab-{{ dia|date:'Ymd' }}">
+                        <!-- <a href="{% url 'formulario-dia' dia=dia|date:'Y-m-d' %}" class="text-decoration-none"> -->
+                        
+                            <div class="text-dark p-1 small ">
+                                <p class="mb-1">Programado día {{ dia|date:"l j" }}</p>
+                                <p class="mb-1">Plato 1 <button class="btn btn-danger btn-sm p-1">X</button></p>
+                                <p class="mb-1">Plato 2 <button class="btn btn-danger btn-sm p-1">X</button></p>
+                                <p class="mb-1">Plato 3 <button class="btn btn-danger btn-sm p-1">X</button></p>
+                                <p class="mb-1">Plato 4 <button class="btn btn-danger btn-sm p-1">X</button></p>
+                            </div>
                     </div>
-                  <!-- </div> -->
+                {% endfor %}
 
-                  <hr>
-
-                  {% block filtro %}
-                  {% endblock %}
-                 <!-- Divider -->
-
-                    <!-- Begin Page Content -->
-
-                    <!-- <div class="container-fluid"> -->
-                  {% block principal %}
-                  {% endblock %}
-
-                    <!-- </div> -->
-                    <!-- /.container-fluid -->
-
+                <div class="shadow rounded p-2 m-2">
+                    {% block filtro %}
+                    {% endblock %}
                 </div>
+            
+                <div class="my-3">
+                    {% block principal %}
+                    {% endblock %}
+                </div>
+
             </div>
+
+
+          
+
+        </div>
+
+
+
+
 
             <!-- End of Main Content -->
 
             <!-- Footer -->
-            <footer class="sticky-footer bg-white">
+            <footer class="sticky-footer"  style="background-color: rgb(222, 220, 220);">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
                         <span>Copyright ¿Qué comemos? V1.0© 2024</span>
@@ -618,4 +514,3 @@
 </body>
 
 </html>
-

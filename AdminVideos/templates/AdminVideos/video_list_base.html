@@ -55,10 +55,9 @@
                       <img src="{{plato.image_url}}" class="img-fluid position-relative object-fit-cover" alt="Imagen del Plato">
                     </a>                         -->
                     
-                    <a href="#" data-bs-toggle="modal" data-bs-target="#asignarPlatoModal"
-             onclick="setPlatoInfo('{{ plato.id }}', '{{ plato.image_url }}', '{{ plato.nombre_plato }}', '{{ plato.descripcion_plato }}')">
-            <img src="{{ plato.image_url }}" class="img-fluid object-fit-cover" alt="Imagen del Plato">
-          </a>
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#asignarPlatoModal" onclick="setPlatoInfo('{{ plato.id }}', '{{ plato.image_url }}', '{{ plato.nombre_plato }}', '{{ plato.descripcion_plato }}')">
+                      <img src="{{ plato.image_url }}" class="img-fluid object-fit-cover" alt="Imagen del Plato">
+                    </a>
                     
                     <div class="position-absolute top-0 start-50 translate-middle-x p-2 text-center text-white bg-dark bg-opacity-10 rounded">
                         <h6 class="mb-0 small"> {{ plato.nombre_plato }} </h6>

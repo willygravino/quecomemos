@@ -1569,7 +1569,7 @@ def formulario_dia (request, dia):
 
     # postres_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Postre").values_list('nombre_plato_elegido', flat=True))
 
-    # entradas_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Entrada").values_list('nombre_plato_elegido', flat=True))
+    entradas_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Entrada").values_list('nombre_plato_elegido', flat=True))
 
     # # Agrega las variables adicionales al set (esto evitará duplicados automáticamente)
     # guarniciones_presel.update([guar1_sel, guar2_sel, guar3_sel, guar4_sel])
@@ -1626,6 +1626,8 @@ def formulario_dia (request, dia):
     # Pasar los datos al contexto de la plantilla
     context = {
         'menu_dia': plato_dia,
+        'TIPO_CHOICES': Plato.TIPO_CHOICES,  # Pasa los TIPO_CHOICES al contexto
+        "entradas_presel": entradas_presel
     }
 
     return render(request, 'AdminVideos/formulario_dia.html', context)
