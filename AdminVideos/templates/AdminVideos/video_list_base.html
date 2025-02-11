@@ -47,9 +47,9 @@
 
         {% for plato in platos %}
           <div class="d-flex flex-row">
-            <div class="col-md-4 mb-3">
+            <div class="col-md-2 mb-2">
               <div {% if user.id == plato.propietario.id %} class="card border border-success" {% else %} class="card border border-danger" {% endif %}
-              style="width: 10rem;">
+              style="width: 6rem;">
                 <div class="container p-0">
                     <!-- <a href="">
                       <img src="{{plato.image_url}}" class="img-fluid position-relative object-fit-cover" alt="Imagen del Plato">
@@ -59,13 +59,13 @@
                       <img src="{{ plato.image_url }}" class="img-fluid object-fit-cover" alt="Imagen del Plato">
                     </a>
                     
-                    <div class="position-absolute top-0 start-50 translate-middle-x p-2 text-center text-white bg-dark bg-opacity-10 rounded">
+                    <div class="position-absolute top-0 mt-1 start-50 translate-middle-x text-center text-white bg-dark rounded">
                         <h6 class="mb-0 small"> {{ plato.nombre_plato }} </h6>
                     </div>
                 </div>
-                <div class="mt-1">
+                <div class="mt-0">
                  
-                    <small class="mtext-success"> {{ plato.tipo }} /</small>
+                    <small class=""> {{ plato.tipo }} /</small>
                     <!-- <p>Lunes 1 - Almuerzo</p> ASIGNACION AQUÍ -->
 
                     {% for key, value in plato.variedades.items %}
@@ -195,16 +195,12 @@
             <h5 id="platoNombre" class="fw-bold mt-1"></h5>
             <p id="platoDescripcion" class="text-muted"></p>
           </div>
+        
+          <!-- Campo oculto para almacenar el día activo -->
+          <input type="hidden" name="dia" id="diaSeleccionado">
 
-          <!-- Selector del día -->
-          <div class="mb-3">
-            <label for="diaSeleccionado" class="form-label">Seleccionar día:</label>
-            <select name="dia" id="diaSeleccionado" class="form-select">
-              {% for dia in dias_desde_hoy %}
-              <option value="{{ dia|date:'Y-m-d' }}">{{ dia|date:"l j" }}</option>
-              {% endfor %}
-            </select>
-          </div>
+          <!-- Muestra el día activo en el modal -->
+          <h2>Asignar al día <span id="diaActivoTexto"></span></h2>
 
           <!-- Selector del tipo de comida -->
           <div class="mb-3">

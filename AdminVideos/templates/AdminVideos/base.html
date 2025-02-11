@@ -399,8 +399,9 @@
                 {% for dia in dias_desde_hoy %}
                 <li class="nav-item  " role="presentation">
                     <button 
-                    class="nav-link {% if forloop.first %}active{% else %}  {% endif %}" 
-                    id="tab-{{ dia|date:'Ymd' }}" data-bs-toggle="tab" data-bs-target="#tab-content-{{ dia|date:'Ymd' }}" type="button" role="tab" aria-controls="tab-content-{{ dia|date:'Ymd' }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+                    class="nav-link {% if dia_activo == dia|date:'Y-m-d' %}active{% elif forloop.first and not dia_activo %}active{% endif %}" 
+
+                    id="tab-{{ dia|date:'Y-m-d' }}" data-bs-toggle="tab" data-bs-target="#tab-content-{{ dia|date:'Ymd' }}" type="button" role="tab" aria-controls="tab-content-{{ dia|date:'Ymd' }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
                         {{ dia|date:"l j" }}
                     </button>
                 </li>
@@ -412,8 +413,9 @@
             <div class="tab-content bg-white" id="diasTabContent">
                 {% for dia in dias_desde_hoy %}
                     <div class="tab-pane {% if forloop.first %}show active{% endif %}" 
-                    id="tab-content-{{ dia|date:'Ymd' }}" role="tabpanel" aria-labelledby="tab-{{ dia|date:'Ymd' }}">
-                        <!-- <a href="{% url 'formulario-dia' dia=dia|date:'Y-m-d' %}" class="text-decoration-none"> -->
+                    id="tab-content-{{ dia|date:'Y-m-d' }}"
+                    role="tabpanel"
+                    aria-labelledby="tab-{{ dia|date:'Y-m-d' }}">
                         
                             <div class="text-dark p-1 small ">
                                 <p class="mb-1">Programado día {{ dia|date:"l j" }}</p>
@@ -490,6 +492,25 @@
             </div>
         </div>
     </div>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let modal = document.getElementById("asignarPlatoModal");
+      
+            modal.addEventListener("show.bs.modal", function() {
+                let tabActivo = document.querySelector(".nav-link.active"); 
+                if (tabActivo) {
+                    let diaActivo = tabActivo.id.replace("tab-", ""); 
+      
+                    // Asignar el valor al input oculto y al texto visible en el modal
+                    document.getElementById("diaSeleccionado").value = diaActivo;
+                    document.getElementById("diaActivoTexto").textContent = diaActivo;
+                }
+            });
+        });
+      </script>
+      
 
     <!-- Bootstrap core JavaScript-->
     <script src="/AdminVideos/static/AdminVideos/vendor/jquery/jquery.min.js"></script>
