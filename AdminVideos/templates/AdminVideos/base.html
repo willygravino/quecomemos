@@ -17,10 +17,11 @@
     <link
         href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
         rel="stylesheet">
-    <link href="{% static 'AdminVideos/css/sb-admin-2.min.css' %}" rel="stylesheet">
-
+    
     <!-- mi css -->
     <link href="{% static 'AdminVideos/css/mi-css.css' %}" rel="stylesheet">
+    
+    <link href="{% static 'AdminVideos/css/sb-admin-2.min.css' %}" rel="stylesheet">
 
     <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"> -->
 
@@ -285,7 +286,7 @@
                             <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in overflow-auto" style="max-height: 600px;"
                                 aria-labelledby="messagesDropdown">
                                 <h6 class="dropdown-header">
-                                    Chat
+                                    Centro de Mensajes
                                 </h6>
 
 
@@ -391,6 +392,30 @@
                 
 
 
+<!-- <ul>
+    {% for fecha in dias_desde_hoy %}
+        <li>dias desde hoy {{ dias_desde_hoy }}</li>
+    {% empty %}
+        <li>No hay fechas disponibles</li>
+    {% endfor %}
+</ul>
+<ul>
+    {% for fecha in dias_programados %}
+        <li>dias programados {{ fecha }}</li>
+    {% empty %}
+        <li>No hay fechas disponibles</li>
+    {% endfor %}
+</ul> -->
+<!-- 
+<ul>
+    {% for fecha in platos_dia_x_dia.items %}
+        <li>platos dia por día {{ fecha }}</li>
+    {% empty %}
+        <li>No hay fechas disponibles</li>
+    {% endfor %}
+</ul> -->
+
+<!-- <p>{{ platos_dia_x_dia }}</p> -->
 
 
         <div class="container-fluid" style="background-color: rgb(222, 220, 220);">
@@ -401,43 +426,61 @@
                     <button 
                     class="nav-link {% if dia_activo == dia|date:'Y-m-d' %}active{% elif forloop.first and not dia_activo %}active{% endif %}" 
 
-                    id="tab-{{ dia|date:'Y-m-d' }}" data-bs-toggle="tab" data-bs-target="#tab-content-{{ dia|date:'Ymd' }}" type="button" role="tab" aria-controls="tab-content-{{ dia|date:'Ymd' }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+                    id="tab-{{ dia|date:'Y-m-d' }}" data-bs-toggle="tab" data-bs-target="#tab-content-{{ dia|date:'Y-m-d' }}" type="button" role="tab" aria-controls="tab-content-{{ dia|date:'Y-m-d' }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
                         {{ dia|date:"l j" }}
                     </button>
                 </li>
                 {% endfor %}
             </ul>
-
-
+           
             <!-- Tab Content -->
             <div class="tab-content bg-white" id="diasTabContent">
                 {% for dia in dias_desde_hoy %}
-                    <div class="tab-pane {% if forloop.first %}show active{% endif %}" 
-                    id="tab-content-{{ dia|date:'Y-m-d' }}"
-                    role="tabpanel"
-                    aria-labelledby="tab-{{ dia|date:'Y-m-d' }}">
-                        
-                            <div class="text-dark p-1 small ">
-                                <p class="mb-1">Programado día {{ dia|date:"l j" }}</p>
-                                <p class="mb-1">Plato 1 <button class="btn btn-danger btn-sm p-1">X</button></p>
-                                <p class="mb-1">Plato 2 <button class="btn btn-danger btn-sm p-1">X</button></p>
-                                <p class="mb-1">Plato 3 <button class="btn btn-danger btn-sm p-1">X</button></p>
-                                <p class="mb-1">Plato 4 <button class="btn btn-danger btn-sm p-1">X</button></p>
+                    <div class="tab-pane {% if dia_activo == dia|date:'Y-m-d' %}active{% elif forloop.first and not dia_activo %}active{% endif %}" 
+                        id="tab-content-{{ dia|date:'Y-m-d' }}"
+                        role="tabpanel"
+                        aria-labelledby="tab-{{ dia|date:'Y-m-d' }}">
+
+                        <div class="text-dark p-1 small">
+                            <!-- <p class="mb-1">Programado día {{ dia|date:"l j" }}</p>  -->
+                            <div class="row d-flex align-items-start">
+                                <div class="col  p-2 overflow-auto" style="max-height: 100px;">
+                                    <!-- Buscamos los platos para este día -->
+                                    {% for dia_plato in platos_dia_x_dia %}
+                                        {% if dia_plato.0 == dia %}
+                                            {% if dia_plato.1 %}
+                                                {% for plato in dia_plato.1 %}
+                                                    <p class="mb-1 ml-3 d-flex align-items-center">
+                                                        {{ plato }}
+                                                        <button class="btn btn-sm p-0 ml-2" title="Eliminar">
+                                                            <i class="fa-solid fa-trash-can"></i>
+                                                        </button>
+                                                    </p>
+                                                {% endfor %}
+                                            {% else %}
+                                                <p>No hay platos asignados para este día.</p>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
                             </div>
+                        </div>
                     </div>
                 {% endfor %}
 
-                <div class="shadow rounded p-2 m-2">
-                    {% block filtro %}
-                    {% endblock %}
-                </div>
-            
-                <div class="my-3">
-                    {% block principal %}
-                    {% endblock %}
-                </div>
 
-            </div>
+
+                            <div class="shadow rounded p-2 m-2">
+                                {% block filtro %}
+                                {% endblock %}
+                            </div>
+                        
+                            <div class="my-3">
+                                {% block principal %}
+                                {% endblock %}
+                            </div>
+
+                        </div>
 
 
           
@@ -495,22 +538,64 @@
 
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            let modal = document.getElementById("asignarPlatoModal");
-      
-            modal.addEventListener("show.bs.modal", function() {
-                let tabActivo = document.querySelector(".nav-link.active"); 
-                if (tabActivo) {
-                    let diaActivo = tabActivo.id.replace("tab-", ""); 
-      
-                    // Asignar el valor al input oculto y al texto visible en el modal
-                    document.getElementById("diaSeleccionado").value = diaActivo;
-                    document.getElementById("diaActivoTexto").textContent = diaActivo;
-                }
+    document.addEventListener("DOMContentLoaded", function() {
+        // 1. Manejar la apertura del modal y asignar el día activo al modal
+        let modal = document.getElementById("asignarPlatoModal");
+  
+        modal.addEventListener("show.bs.modal", function() {
+            let tabActivo = document.querySelector(".nav-link.active"); 
+            if (tabActivo) {
+                let diaActivo = tabActivo.id.replace("tab-", ""); 
+
+                // Asignar el valor al input oculto y al texto visible en el modal
+                document.getElementById("diaSeleccionado").value = diaActivo;
+                document.getElementById("diaActivoTexto").textContent = diaActivo;
+            }
+        });
+
+        // 2. Manejar el cambio de pestaña para actualizar el contenido dinámicamente
+        document.querySelectorAll('.nav-link[data-bs-toggle="pill"]').forEach(tab => {
+            tab.addEventListener('shown.bs.tab', function(event) {
+                let diaSeleccionado = event.target.getAttribute('aria-controls');  // Obtiene el id del tab activado
+                cargarPlatosDia(diaSeleccionado);  // Actualiza el contenido de la pestaña activa
             });
         });
-      </script>
-      
+
+        // 3. Función para cargar platos para un día específico
+        function cargarPlatosDia(diaActivo) {
+            // Llama a una vista en Django para obtener los platos del día seleccionado
+            // Suponiendo que tienes una vista que devuelve los platos por día
+            fetch(`/obtener_platos/${diaActivo}/`)
+                .then(response => response.json())
+                .then(data => {
+                    let contenido = '';
+                    if (data.platos && data.platos.length > 0) {
+                        data.platos.forEach(function(plato) {
+                            contenido += `
+                                <p class="mb-1 ml-3 d-flex align-items-center">
+                                    ${plato}
+                                    <button class="btn btn-sm p-0 ml-2" title="Eliminar">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </p>`;
+                        });
+                    } else {
+                        contenido = '<p>No hay platos asignados para este día.</p>';
+                    }
+
+                    // Actualizar el contenido de la pestaña correspondiente
+                    document.querySelector(`#${diaActivo} .row`).innerHTML = contenido;
+                })
+                .catch(error => {
+                    console.error('Error al cargar los platos:', error);
+                });
+        }
+
+        // 4. Al cargar la página, mostrar los platos del día activo
+        const diaActivo = '{{ dia_activo|date:"Y-m-d" }}';  // Obtener el día activo del contexto
+        cargarPlatosDia(diaActivo);  // Cargar los platos para el día activo
+    });
+</script>
 
     <!-- Bootstrap core JavaScript-->
     <script src="/AdminVideos/static/AdminVideos/vendor/jquery/jquery.min.js"></script>

@@ -1,3 +1,4 @@
+from collections import defaultdict
 from itertools import groupby
 import locale
 from django.contrib import messages  # Para mostrar mensajes al usuario
@@ -1271,6 +1272,9 @@ def filtrar_platos(
         # Aplicar la consulta
         return Plato.objects.filter(query)
 
+
+
+
 @login_required(login_url=reverse_lazy('login'), redirect_field_name=None)
 def FiltroDePlatos (request):
     # Configuración regional y fechas
@@ -1386,6 +1390,27 @@ def FiltroDePlatos (request):
 
     dia_activo = request.session.get('dia_activo', None)  # 🟢 Recuperamos la fecha activa
 
+    # Inicializar un diccionario donde cada fecha tendrá una lista de platos
+    platos_dia_x_dia = defaultdict(list)
+
+    # Obtener los registros completos para cada fecha y extraer los platos
+    registros = ElegidosXDia.objects.filter(user=request.user,el_dia_en_que_comemos__in=fechas_existentes).values('el_dia_en_que_comemos', 'platos_que_comemos')
+    
+    for registro in registros:
+        fec = registro['el_dia_en_que_comemos']
+        pla = registro['platos_que_comemos'] or {}  # Asegurarte de que no sea None y es un diccionario vacío si no hay platos
+        # Accede solo al nombre del plato de cada clave dentro de 'platos_que_comemos'
+        for plato in pla.values():
+            plato_nombre = plato['plato']  # Accedes al nombre del plato
+            platos_dia_x_dia[fec].append(plato_nombre)  # Añades el nombre del plato a la lista
+
+    # Convertir defaultdict a dict antes de pasarlo a la plantilla
+    platos_dia_x_dia = dict(platos_dia_x_dia)
+
+
+    # Convertir defaultdict a lista de tuplas (dia, platos) antes de pasarlo a la plantilla
+    platos_dia_por_dia = [(fec, platos) for fec, platos in platos_dia_x_dia.items()] 
+
     contexto = {
                 'formulario': form,
                 'platos': platos,
@@ -1398,7 +1423,8 @@ def FiltroDePlatos (request):
                 "amigues" : amigues,
                 "parametro": tipo_parametro,
                 "mensajes": mensajes_agrupados,
-                'dia_activo': dia_activo  # 🟢 Pasamos la variable a la plantilla
+                'dia_activo': dia_activo,
+                "platos_dia_x_dia": platos_dia_por_dia
 
                }
 
