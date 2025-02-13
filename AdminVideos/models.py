@@ -1,8 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.dispatch import receiver
-from django.db.models.signals import post_delete  # Agrega esta línea
-
 
 
 class Plato(models.Model):
@@ -111,22 +108,6 @@ class Plato(models.Model):
     def __str__(self):
         return f"{self.id} - {self.nombre_plato}"
     
-# ESTO DEBERÍA BORRAR HAMBURGUESA DE TODOS LOS USUARIOS PORQUE SI ALGUIEN LA PRESELECCIONÓ, YA NO ESTARÁ
-@receiver(post_delete, sender=Plato)
-def eliminar_registros_relacionados(sender, instance, **kwargs):
-    Preseleccionados.objects.filter(usuario=instance.propietario, nombre_plato_elegido=instance.nombre_plato).delete()
-    
-class Preseleccionados(models.Model):
-    usuario = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="platos_elegidos", null=True, blank=True)
-    # EL SIGUIENTE CAMPO DEBERÍA LLAMARSE "PLATOS_PRESELECCIONADOS"
-    nombre_plato_elegido = models.CharField(max_length=30)
-    # indica si es guarnicion, salsa, o lo que sea
-    tipo_plato = models.CharField(max_length=30, null=True)
-
-
-    # id_usuario_que_lo_cargo = models.CharField(max_length=30)
-  
-    # usuario = models.OneToOneField(to=User, on_delete=models.CASCADE, related_name="platos_elegidos", null=True, blank=True)
 
 class Sugeridos(models.Model):    
      usuario_de_sugeridos = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="usuario_sugeridos", null=True, blank=True)

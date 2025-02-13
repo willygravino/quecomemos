@@ -21,12 +21,12 @@
         <div class=" d-flex align-items-center">
           <div class="container">
 
-            {% if preseleccionados %}
+            <!-- {% if preseleccionados %}
               <a class=" badge bg-success text-wrap" href="{% url 'desmarcar-todo' %}">
                 DESMARCAR <br> PRESELECCIONADOS
               </a>
          
-            {% endif %}  
+            {% endif %}   -->
             
             <br>
 
@@ -85,7 +85,7 @@
                     </a>   
 
                     <div>
-                      <button 
+                      <!-- <button 
                           class="btn {% if plato.nombre_plato in preseleccionados %}btn-success{% else %}btn-primary{% endif %}" 
                           style="font-size: 12px; padding: 2px 5px;"
                           data-plato-id="{{ plato.id }}"
@@ -94,7 +94,7 @@
                           data-tipopag="{{ request.GET.tipopag }}"
                           data-accion="{% if plato.nombre_plato in preseleccionados %}borrar{% else %}preseleccionar{% endif %}">
                           {% if plato.nombre_plato in preseleccionados %}√{% else %}Preseleccionar{% endif %}
-                      </button>
+                      </button> -->
                     </div>
                       
                     <!-- PRUEBA HTML del checkbox -->
@@ -123,7 +123,7 @@
 </section>
 
 
-<script>
+<!-- <script>
   document.addEventListener("DOMContentLoaded", function () {
       const buttons = document.querySelectorAll("button[data-plato-id]");
   
@@ -137,7 +137,7 @@
               const accion = this.dataset.accion;
   
               // Construir la URL con los parámetros
-              const url = `{% url 'plato-preseleccionado' %}?opcion1=${encodeURIComponent(nombrePlato)}&tipoplato=${encodeURIComponent(tipoPlato)}&tipopag=${encodeURIComponent(tipopag)}&accion=${encodeURIComponent(accion)}`;
+              const url = `% url 'plato-preseleccionado' %}?opcion1=${encodeURIComponent(nombrePlato)}&tipoplato=${encodeURIComponent(tipoPlato)}&tipopag=${encodeURIComponent(tipopag)}&accion=${encodeURIComponent(accion)}`;
   
               // Realizar la solicitud GET
               fetch(url, {
@@ -173,7 +173,7 @@
           });
       });
   });
-</script>
+</script> -->
 
 <!-- Modal para asignar plato -->
 <div class="modal fade" id="asignarPlatoModal" tabindex="-1" aria-labelledby="asignarPlatoLabel" aria-hidden="true">

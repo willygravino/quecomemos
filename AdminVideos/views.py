@@ -6,7 +6,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
-from AdminVideos.models import Plato, Profile, Mensaje, Preseleccionados, ElegidosXDia, Sugeridos
+from AdminVideos.models import Plato, Profile, Mensaje,  ElegidosXDia, Sugeridos
 from django.http import Http404, HttpResponseForbidden, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.forms import UserCreationForm
@@ -19,9 +19,7 @@ from django.views.generic import TemplateView
 from datetime import date, datetime
 from django.contrib.auth.models import User  # Asegúrate de importar el modelo User
 from django.db.models import Q
-from django.http import JsonResponse
 from django.shortcuts import redirect, reverse
-from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 import datetime
@@ -41,7 +39,7 @@ def obtener_parametros_sesion(request):
 
     quecomemos = request.session.get('quecomemos', None)
     misplatos = request.session.get('misplatos', "misplatos")
-    preseleccionados = request.session.get('preseleccionados', None)
+    # preseleccionados = request.session.get('preseleccionados', None)
 
     # Obtener el valor del parámetro 'tipo' desde la URL
     tipo_parametro = request.GET.get('tipopag', 'Dash')
@@ -50,7 +48,7 @@ def obtener_parametros_sesion(request):
     # usuario = request.user
 
     # Devolver las variables por separado
-    return tipo_parametro, quecomemos, misplatos, preseleccionados, medios, categoria, dificultad, palabra_clave
+    return tipo_parametro, quecomemos, misplatos, medios, categoria, dificultad, palabra_clave
 
 class SugerenciasRandom(TemplateView):
     template_name = 'AdminVideos/random.html'
@@ -75,61 +73,6 @@ def descartar_sugerido(request, nombre_plato):
 
     return redirect('filtro-de-platos')
 
-def plato_preseleccionado(request):
-    if request.method == 'GET':
-        # Obtener parámetros de la solicitud
-        nombre_plato = request.GET.get('opcion1')
-        plato_tipo = request.GET.get('tipoplato')
-        accion = request.GET.get('accion')
-        # tipo_pag = request.GET.get('tipopag')
-
-        # # Validar parámetros necesarios
-        # if not nombre_plato or not plato_tipo:
-        #     return JsonResponse({"error": "Faltan parámetros necesarios"}, status=400)
-
-        # Obtener el usuario logueado
-        usuario = request.user
-
-        # Realizar acción según el valor de 'accion'
-        if accion == "borrar":
-            # Eliminar el plato de la lista de platos preseleccionados
-            Preseleccionados.objects.filter(usuario=usuario, nombre_plato_elegido=nombre_plato).delete()
-            resultado = "borrar"
-        else:
-            # Agregar el plato a la lista de platos preseleccionados
-            Preseleccionados.objects.get_or_create(usuario=usuario, nombre_plato_elegido=nombre_plato, tipo_plato=plato_tipo)
-            resultado = "preseleccionar"
-
-        # Actualizar la lista de preseleccionados
-        preseleccionados = list(
-            Preseleccionados.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
-        )
-
-        # vista_preseleccionados = request.session.get('preseleccionados', None)
-        # if vista_preseleccionados == "preseleccionados":
-        #     return JsonResponse({
-        #         "success": True,
-        #         "accion": resultado,
-        #         "preseleccionados": preseleccionados,
-        #         "plato_eliminado" : nombre_plato
-        #     })
-
-        # # Verificar si es una solicitud AJAX
-        # if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        #     # Responder con JSON si es una solicitud AJAX
-        # else:
-        return JsonResponse({
-                "success": True,
-                "accion": resultado,
-                "preseleccionados": preseleccionados
-            })
-        # else:
-        #     # Redirigir si no es una solicitud AJAX
-        #     return redirect(f"{reverse('filtro-de-platos')}?tipopag={"verga"}")
-    else:
-        # Responder con error si el método no es GET
-        return JsonResponse({"error": "Método no permitido"}, status=405)
-
 
 
 def limpiar_none(value):
@@ -151,253 +94,6 @@ def agregar_plato(diccionario, clave, plato, ingredientes):
             "ingredientes": ingredientes,
             "elegido": True
         }
-
-def grabar_menu_elegido(request):
-    if request.method == 'POST':
-
-        platos_del_dia = {}
-        # Obtener el usuario logueado
-        usuario = request.user
-
-        # AQUÍ, PONER LAS INSTRUCCIONES ADECUADAS PARA BORRAR LOS REGISTROS DE DÍAS MÁS ALLÁ DE 45 DÍAS ATRÁS; DE ESTE MODO SE PODRÁ CALCULAR LO QUE SE COMIÓ EN LOS ÚLTIMOS 45 DÍAS "HACE 45 DÍAS QUE NO COMÉS PESCADO"
-
-        # Obtener las fechas y platos elegidos del formulario
-        fecha = limpiar_none(request.POST.get("fecha"))
-
-
-        almuerzo = limpiar_none(request.POST.get("almuerzo"))
-        cena = limpiar_none(request.POST.get("cena"))
-        entrada1 = limpiar_none(request.POST.get("entrada1"))
-        entrada2 = limpiar_none(request.POST.get("entrada2"))
-        entrada3 = limpiar_none(request.POST.get("entrada3"))
-        entrada4 = limpiar_none(request.POST.get("entrada4"))
-        guarnicion1 = limpiar_none(request.POST.get("guarnicion1"))
-        guarnicion2 = limpiar_none(request.POST.get("guarnicion2"))
-        guarnicion3 = limpiar_none(request.POST.get("guarnicion3"))
-        guarnicion4 = limpiar_none(request.POST.get("guarnicion4"))
-        postre1 = limpiar_none(request.POST.get("postre1"))
-        postre2 = limpiar_none(request.POST.get("postre2"))
-        salsa1 = limpiar_none(request.POST.get("salsa1"))
-        salsa2 = limpiar_none(request.POST.get("salsa2"))
-        salsa3 = limpiar_none(request.POST.get("salsa3"))
-        salsa4 = limpiar_none(request.POST.get("salsa4"))
-        dip1 = limpiar_none(request.POST.get("dip1"))
-        dip2 = limpiar_none(request.POST.get("dip2"))
-        dip3 = limpiar_none(request.POST.get("dip3"))
-        dip4 = limpiar_none(request.POST.get("dip4"))
-        trago1 = limpiar_none(request.POST.get("trago1"))
-        trago2 = limpiar_none(request.POST.get("trago2"))
-
-        registro_existente = ElegidosXDia.objects.filter(user=usuario, el_dia_en_que_comemos=fecha).first()
-
-        if registro_existente and all(item is None for item in [almuerzo, cena, entrada1, entrada2, entrada3, entrada4, guarnicion1, guarnicion2, guarnicion3, guarnicion4, postre1, postre2, salsa1, salsa2, salsa3, salsa4, dip1, dip2, dip3, dip4, trago1, trago2]):
-                registro_existente.delete()
-
-        # if registro_existente and almuerzo is None and cena is None:
-        #     registro_existente.delete()
-
-        # if almuerzo is not None and cena is not None:
-
-        # Condición para verificar que alguno de los datos no sea None
-        if any(item is not None for item in [
-            almuerzo, cena, entrada1, entrada2, entrada3, entrada4,
-            guarnicion1, guarnicion2, guarnicion3, guarnicion4,
-            postre1, postre2, salsa1, salsa2, salsa3, salsa4,
-            dip1, dip2, dip3, dip4, trago1, trago2]):
-
-            # Obtener datos de almuerzo y cena
-            almuerzo_result = Plato.objects.filter(nombre_plato=almuerzo).values("ingredientes", "variedades").first()
-            almuerzo_variedades = almuerzo_result['variedades'] if almuerzo_result else None
-            almuerzo_ingredientes = almuerzo_result['ingredientes'] if almuerzo_result else None
-
-            variedad_almuerzo_con_elegidos = {}
-            if almuerzo_variedades:
-                for variedad, detalles_variedad in almuerzo_variedades.items():
-                    if registro_existente and almuerzo == registro_existente.platos_que_comemos["almuerzo"]["plato"]:
-                            elegido = registro_existente.platos_que_comemos["variedades_almuerzo"][variedad]["elegido"]
-                    else: elegido = True
-                    variedad_almuerzo_con_elegidos[variedad] = {
-                        "variedad": detalles_variedad.get("variedad", ""),
-                        "ingredientes_de_variedades": detalles_variedad.get("ingredientes_de_variedades", []),
-                        "elegido": elegido
-                    }
-
-            cena_result  = Plato.objects.filter(nombre_plato=cena).values("ingredientes", "variedades").first()
-            cena_variedades = cena_result['variedades'] if cena_result else None
-            cena_ingredientes = cena_result['ingredientes'] if cena_result else None
-
-            variedad_cena_con_elegidos = {}
-            if cena_variedades:
-                for variedad, detalles_variedad in cena_variedades.items():
-                    if registro_existente and cena == registro_existente.platos_que_comemos["cena"]["plato"]:
-                            elegido = registro_existente.platos_que_comemos["variedades_cena"][variedad]["elegido"]
-                    else: elegido = True
-                    variedad_cena_con_elegidos[variedad] = {
-                        "variedad": detalles_variedad.get("variedad", ""),
-                        "ingredientes_de_variedades": detalles_variedad.get("ingredientes_de_variedades", []),
-                        "elegido": elegido
-                    }
-
-            guar1_ingredientes =  Plato.objects.filter(nombre_plato=guarnicion1).values("ingredientes").first()
-            guar1_ingredientes = guar1_ingredientes['ingredientes'] if guar1_ingredientes else None
-
-            # Agregar guarnicion1
-            agregar_plato(platos_del_dia, "guarnicion1", guarnicion1, guar1_ingredientes)
-
-
-            # # Si guar1_ingredientes no es None, lo agregamos al diccionario
-            # if guarnicion1 is not None:
-            #     platos_del_dia["guarnicion1"] = {
-            #         "plato": guarnicion1,
-            #         "ingredientes": guar1_ingredientes,
-            #         "elegido": True
-            #     }
-
-            guar2_ingredientes =  Plato.objects.filter(nombre_plato=guarnicion2).values("ingredientes").first()
-            guar2_ingredientes = guar2_ingredientes['ingredientes'] if guar2_ingredientes else None
-
-             # Agregar
-            agregar_plato(platos_del_dia, "guarnicion2", guarnicion2, guar2_ingredientes)
-
-            guar3_ingredientes =  Plato.objects.filter(nombre_plato=guarnicion3).values("ingredientes").first()
-            guar3_ingredientes = guar3_ingredientes['ingredientes'] if guar3_ingredientes else None
-
-            # Agregar
-            agregar_plato(platos_del_dia, "guarnicion3", guarnicion3, guar3_ingredientes)
-
-            guar4_ingredientes =  Plato.objects.filter(nombre_plato=guarnicion4).values("ingredientes").first()
-            guar4_ingredientes = guar4_ingredientes['ingredientes'] if guar4_ingredientes else None
-
-            # Agregar
-            agregar_plato(platos_del_dia, "guarnicion4", guarnicion4, guar4_ingredientes)
-
-            ent1_ingredientes =  Plato.objects.filter(nombre_plato=entrada1).values("ingredientes").first()
-            ent1_ingredientes = ent1_ingredientes['ingredientes'] if ent1_ingredientes else None
-
-            # Agregar
-            agregar_plato(platos_del_dia, "entrada1", entrada1, ent1_ingredientes)
-
-            ent2_ingredientes =  Plato.objects.filter(nombre_plato=entrada2).values("ingredientes").first()
-            ent2_ingredientes = ent2_ingredientes['ingredientes'] if ent2_ingredientes else None
-
-            ent3_ingredientes =  Plato.objects.filter(nombre_plato=entrada3).values("ingredientes").first()
-            ent3_ingredientes = ent3_ingredientes['ingredientes'] if ent3_ingredientes else None
-
-            ent4_ingredientes =  Plato.objects.filter(nombre_plato=entrada4).values("ingredientes").first()
-            ent4_ingredientes = ent4_ingredientes['ingredientes'] if ent4_ingredientes else None
-
-            post1_ingredientes =  Plato.objects.filter(nombre_plato=postre1).values("ingredientes").first()
-            post1_ingredientes = post1_ingredientes['ingredientes'] if post1_ingredientes else None
-
-            post2_ingredientes =  Plato.objects.filter(nombre_plato=postre2).values("ingredientes").first()
-            post2_ingredientes = post2_ingredientes['ingredientes'] if post2_ingredientes else None
-
-            dip1_ingredientes =  Plato.objects.filter(nombre_plato=dip1).values("ingredientes").first()
-            dip1_ingredientes = dip1_ingredientes['ingredientes'] if dip1_ingredientes else None
-
-            dip2_ingredientes =  Plato.objects.filter(nombre_plato=dip2).values("ingredientes").first()
-            dip2_ingredientes = dip2_ingredientes['ingredientes'] if dip2_ingredientes else None
-
-            dip3_ingredientes =  Plato.objects.filter(nombre_plato=dip3).values("ingredientes").first()
-            dip3_ingredientes = dip3_ingredientes['ingredientes'] if dip3_ingredientes else None
-
-            dip4_ingredientes =  Plato.objects.filter(nombre_plato=dip4).values("ingredientes").first()
-            dip4_ingredientes = dip4_ingredientes['ingredientes'] if dip4_ingredientes else None
-
-            dip4_ingredientes =  Plato.objects.filter(nombre_plato=dip4).values("ingredientes").first()
-            dip4_ingredientes = dip4_ingredientes['ingredientes'] if dip4_ingredientes else None
-
-            salsa1_ingredientes =  Plato.objects.filter(nombre_plato=salsa1).values("ingredientes").first()
-            salsa1_ingredientes = salsa1_ingredientes['ingredientes'] if salsa1_ingredientes else None
-
-            salsa2_ingredientes =  Plato.objects.filter(nombre_plato=salsa2).values("ingredientes").first()
-            salsa2_ingredientes = salsa2_ingredientes['ingredientes'] if salsa2_ingredientes else None
-
-            salsa3_ingredientes =  Plato.objects.filter(nombre_plato=salsa3).values("ingredientes").first()
-            salsa3_ingredientes = salsa3_ingredientes['ingredientes'] if salsa3_ingredientes else None
-
-            salsa4_ingredientes =  Plato.objects.filter(nombre_plato=salsa4).values("ingredientes").first()
-            salsa4_ingredientes = salsa4_ingredientes['ingredientes'] if salsa4_ingredientes else None
-
-            trago1_ingredientes =  Plato.objects.filter(nombre_plato=trago1).values("ingredientes").first()
-            trago1_ingredientes = trago1_ingredientes['ingredientes'] if trago1_ingredientes else None
-
-            trago2_ingredientes =  Plato.objects.filter(nombre_plato=trago2).values("ingredientes").first()
-            trago2_ingredientes = trago2_ingredientes['ingredientes'] if trago2_ingredientes else None
-
-            agregar_plato(platos_del_dia, "entrada2", entrada2, ent2_ingredientes)
-            agregar_plato(platos_del_dia, "entrada3", entrada3, ent3_ingredientes)
-            agregar_plato(platos_del_dia, "entrada4", entrada4, ent4_ingredientes)
-
-            agregar_plato(platos_del_dia, "postre1", postre1, post1_ingredientes)
-            agregar_plato(platos_del_dia, "postre2", postre2, post2_ingredientes)
-
-            agregar_plato(platos_del_dia, "dip1", dip1, dip1_ingredientes)
-            agregar_plato(platos_del_dia, "dip2", dip2, dip2_ingredientes)
-            agregar_plato(platos_del_dia, "dip3", dip3, dip3_ingredientes)
-            agregar_plato(platos_del_dia, "dip4", dip4, dip4_ingredientes)
-
-            agregar_plato(platos_del_dia, "salsa1", salsa1, salsa1_ingredientes)
-            agregar_plato(platos_del_dia, "salsa2", salsa2, salsa2_ingredientes)
-            agregar_plato(platos_del_dia, "salsa3", salsa3, salsa3_ingredientes)
-            agregar_plato(platos_del_dia, "salsa4", salsa4, salsa4_ingredientes)
-
-            agregar_plato(platos_del_dia, "trago1", trago1, trago1_ingredientes)
-            agregar_plato(platos_del_dia, "trago2", trago2, trago2_ingredientes)
-
-            # # Datos nuevos a agregar
-            almuerzo_cena = {
-                "almuerzo": {"plato": almuerzo, "ingredientes": almuerzo_ingredientes, "elegido": True},
-                "variedades_almuerzo": variedad_almuerzo_con_elegidos,
-                "cena": {"plato": cena, "ingredientes": cena_ingredientes, "elegido": True},
-                "variedades_cena": variedad_cena_con_elegidos,
-                # "guarnicion2": {"plato": guarnicion2, "ingredientes": guar2_ingredientes, "elegido": True},
-                # "guarnicion3": {"plato": guarnicion3, "ingredientes": guar3_ingredientes, "elegido": True},
-                # "guarnicion4": {"plato": guarnicion4, "ingredientes": guar4_ingredientes, "elegido": True},
-                # "entrada1": {"plato": entrada1, "ingredientes": ent1_ingredientes, "elegido": True},
-                # "entrada2": {"plato": entrada2, "ingredientes": ent2_ingredientes, "elegido": True},
-                # "entrada3": {"plato": entrada3, "ingredientes": ent3_ingredientes, "elegido": True},
-                # "entrada4": {"plato": entrada4, "ingredientes": ent4_ingredientes, "elegido": True},
-                # "postre1": {"plato": postre1, "ingredientes": post1_ingredientes, "elegido": True},
-                # "postre2": {"plato": postre2, "ingredientes": post2_ingredientes, "elegido": True},
-                # "dip1": {"plato": dip1, "ingredientes": dip1_ingredientes, "elegido": True},
-                # "dip2": {"plato": dip2, "ingredientes": dip2_ingredientes, "elegido": True},
-                # "dip3": {"plato": dip3, "ingredientes": dip3_ingredientes, "elegido": True},
-                # "dip4": {"plato": dip4, "ingredientes": dip4_ingredientes, "elegido": True},
-                # "salsa1": {"plato": salsa1, "ingredientes": salsa1_ingredientes, "elegido": True},
-                # "salsa2": {"plato": salsa2, "ingredientes": salsa2_ingredientes, "elegido": True},
-                # "salsa3": {"plato": salsa3, "ingredientes": salsa3_ingredientes, "elegido": True},
-                # "salsa4": {"plato": salsa4, "ingredientes": salsa4_ingredientes, "elegido": True},
-                # "trago1": {"plato": trago1, "ingredientes": trago1_ingredientes, "elegido": True},
-                # "trago2": {"plato": trago2, "ingredientes": trago2_ingredientes, "elegido": True},
-            }
-
-            platos_del_dia.update(almuerzo_cena)
-
-            if registro_existente:
-                    # Actualizar el registro existente
-                    if "almuerzo" in registro_existente.platos_que_comemos:
-                        if almuerzo == registro_existente.platos_que_comemos["almuerzo"]["plato"]:
-                            platos_del_dia["almuerzo"]["elegido"] = registro_existente.platos_que_comemos["almuerzo"]["elegido"]
-
-                    if "cena" in registro_existente.platos_que_comemos:
-                        if cena == registro_existente.platos_que_comemos["cena"]["plato"]:
-                            platos_del_dia["cena"]["elegido"] = registro_existente.platos_que_comemos["cena"]["elegido"]
-
-                    if "guarnicion1" in registro_existente.platos_que_comemos:
-                         if guarnicion1 == registro_existente.platos_que_comemos["guarnicion1"]["plato"]:
-                            platos_del_dia["guarnicion1"]["elegido"] = registro_existente.platos_que_comemos["guarnicion1"]["elegido"]
-
-
-                    registro_existente.platos_que_comemos = platos_del_dia
-                    registro_existente.save()
-            else:
-                ElegidosXDia.objects.create(user=usuario, el_dia_en_que_comemos=fecha, platos_que_comemos=platos_del_dia)
-
-        return redirect(reverse_lazy("filtro-de-platos"))
-    else:
-        return JsonResponse({'error': 'El método de solicitud debe ser POST'})
-
 
 
 def procesar_item(platos_dia, item_nombre, menu_del_dia, dia_en_que_comemos_str, request, lista_de_ingredientes, no_incluir):
@@ -451,13 +147,6 @@ def procesar_item(platos_dia, item_nombre, menu_del_dia, dia_en_que_comemos_str,
 
     # Retornar los valores que necesitarás fuera de la función
     return resultado,  lista_de_ingredientes, no_incluir
-
-# valores que necesito
-#    "guarnicion1": {"plato": guarnicion1, "ingredientes": ing_guar1, "elegido": guar1_elegido},
-
-# lista de ingredientes
-
-# no incluir
 
 
 @login_required
@@ -895,13 +584,6 @@ def lista_de_compras(request):
         "dia_en_que_comemos_str": dia_en_que_comemos_str,
         "buscar_cena_por_dia" : buscar_cena_por_dia,
         "claves_en_el_request" : request.POST.keys(),
-
-
-
-
-
-        # "hay_comentario": hay_comentario,
-
         "ingredientes_no_comprados": ingredientes_no_comprados,
         "mensaje_whatsapp": mensaje_whatsapp,
         "parametro" : "lista-compras"
@@ -911,20 +593,9 @@ def lista_de_compras(request):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 class PlatoDetail(DetailView):
     model = Plato
-    # template_name = 'AdminVideos/plato_detail.html'
+    template_name = 'AdminVideos/plato_detail.html'
     context_object_name = "plato"
 
     def get_context_data(self, **kwargs):
@@ -939,16 +610,6 @@ class PlatoDetail(DetailView):
 
         return context
 
-
-# class PlatoDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
-#     model = Plato
-#     context_object_name = "plato"
-#     success_url = reverse_lazy("filtro-de-platos")
-
-#     def test_func(self):
-#         user_id = self.request.user.id
-#         plato_id =  self.kwargs.get("pk")
-#         return Plato.objects.filter(propietario=user_id, id=plato_id).exists()
 
 
 @login_required
@@ -983,13 +644,6 @@ def eliminar_plato(request, plato_id):
     # plato.delete()
 
     return redirect('filtro-de-platos')  # Redirigir a la página de filtro de platos
-
-
-
-
-
-
-
 
 
 
@@ -1060,36 +714,16 @@ class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
         plato.save()
 
-        #  # Actualizar Preseleccionados y Seleccionados
-        # self.actualizar_preseleccionados(plato)
 
         return redirect(self.success_url)
 
-# def actualizar_preseleccionados(self, plato):
-#         # Aquí puedes agregar el código para actualizar otros modelos que referencian el plato
-#         # Ejemplo:
-#         otros_registros = OtroModelo.objects.filter(plato=plato)
-#         for registro in otros_registros:
-#             registro.nombre_plato = plato.nombre  # o el campo que sea adecuado
-#             registro.save()
 
 class PlatoCreate(LoginRequiredMixin, CreateView):
     model = Plato
     form_class = PlatoForm
     template_name = 'AdminVideos/platos_update.html'
     success_url = reverse_lazy("videos-create")
-    # fields = ["nombre_plato","receta","descripcion_plato","ingredientes","medios","categoria","dificultad", "tipo","calorias", "image"]
-#    fields = '__all__'
-
-    # PARA CORREGIR EN ALGÚN MOMENTO
-    # def dispatch(self, request, *args, **kwargs):
-    #     # Almacena el valor de 'tipopag' en una variable de instancia
-    #     self.template_param = request.GET.get('tipopag')
-    #     return super().dispatch(request, *args, **kwargs)
-
-    # def get_template_names(self):
-    #     # Usa la variable de instancia en lugar de obtener el parámetro de nuevo
-    #     if self.template_param == 'Entrada':
+  
 
     def get_template_names(self):
         # Obtener el valor del parámetro 'template' desde la URL
@@ -1173,13 +807,6 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
 
 
 
-
-
-
-
-
-
-
 class Login(LoginView):
     next_page = reverse_lazy("filtro-de-platos")
 
@@ -1221,11 +848,9 @@ def filtrar_platos(
     tipo_parametro,
     quecomemos,
     misplatos,
-    preseleccionados,
     medios,
     categoria,
     dificultad,
-    # PREPARACIÓN = DIFICULTAD
     palabra_clave
 ):
 
@@ -1251,11 +876,6 @@ def filtrar_platos(
 
         if tipo_parametro and tipo_parametro != "Dash":
             query &= Q(tipo=tipo_parametro)
-
-        if preseleccionados == "preseleccionados":
-            nombres_platos_elegidos = list(Preseleccionados.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True))
-            if nombres_platos_elegidos:
-                query &= Q(nombre_plato__in=nombres_platos_elegidos)
 
         if medios and medios != '-':
             query &= Q(medios=medios)
@@ -1289,7 +909,7 @@ def FiltroDePlatos (request):
 
 
     # Recuperar los parámetros desde la sesión y la URL
-    tipo_parametro, quecomemos, misplatos, preseleccionados, medios, categoria, dificultad, palabra_clave = obtener_parametros_sesion(request)
+    tipo_parametro, quecomemos, misplatos, medios, categoria, dificultad, palabra_clave = obtener_parametros_sesion(request)
 
     # Obtener el usuario actual
     usuario = request.user
@@ -1313,11 +933,9 @@ def FiltroDePlatos (request):
 
                 quecomemos = request.POST.get('quecomemos')
                 misplatos = request.POST.get('misplatos')
-                preseleccionados = request.POST.get('preseleccionados')
 
                 request.session['quecomemos'] = quecomemos
                 request.session['misplatos'] = misplatos
-                request.session['preseleccionados'] = preseleccionados
 
     else:
         items_iniciales = {
@@ -1337,16 +955,13 @@ def FiltroDePlatos (request):
         tipo_parametro=tipo_parametro,
         quecomemos=quecomemos,
         misplatos=misplatos,
-        preseleccionados=preseleccionados,
         medios=medios,
         categoria=categoria,
         dificultad=dificultad,
         palabra_clave=palabra_clave
     )
 
-    if usuario:
-        platos_preseleccionados = Preseleccionados.objects.filter(usuario=usuario).values_list('nombre_plato_elegido', flat=True)
-
+   
     # Filtra las fechas únicas en `el_dia_en_que_comemos` para los objetos del usuario actual
     fechas_existentes = ElegidosXDia.objects.filter(user=request.user,el_dia_en_que_comemos__gte=fecha_actual).values_list('el_dia_en_que_comemos', flat=True).distinct()
 
@@ -1379,11 +994,7 @@ def FiltroDePlatos (request):
         for usuario, mensajes in groupby(mensajes_x_usuario, key=lambda x: x.usuario_que_envia)
     }
 
-    # Agrupar mensajes por usuario
-    # mensajes_agrupados = {
-    #     usuario: list(mensajes) 
-    #     for usuario, mensajes in groupby(mensajes_x_usuario, key=lambda x: x.usuario_que_envia)
-    # }
+    
 
 # mensajes_agrupados ahora es un diccionario donde cada clave es un usuario,
 # y cada valor es la lista de mensajes de ese usuario.
@@ -1414,12 +1025,10 @@ def FiltroDePlatos (request):
     contexto = {
                 'formulario': form,
                 'platos': platos,
-                'preseleccionados': platos_preseleccionados,
                 "dias_desde_hoy": dias_desde_hoy,
                 "dias_programados": fechas_existentes,
                 "quecomemos_ck": quecomemos,
                 "misplatos_ck": misplatos,
-                "preseleccionados_ck": preseleccionados,
                 "amigues" : amigues,
                 "parametro": tipo_parametro,
                 "mensajes": mensajes_agrupados,
@@ -1430,14 +1039,6 @@ def FiltroDePlatos (request):
 
     return render(request, 'AdminVideos/lista_filtrada.html', contexto)
 
-
-@login_required
-def desmarcar_todo(request):
-    # Filtra los registros por usuario logueado y tipo de plato
-    Preseleccionados.objects.filter(usuario=request.user).delete()
-
-    # Redirige a la página anterior o a otra URL
-    return redirect(reverse_lazy('filtro-de-platos'))
 
 
 @login_required
@@ -1454,138 +1055,6 @@ def reiniciar_sugeridos(request):
     # Redireccionar a una página de confirmación o a donde sea necesario
     return redirect(reverse_lazy('filtro-de-platos'))
 
-
-def formulario_dia (request, dia):
-    # Busca los datos del día seleccionado
-    plato_dia = ElegidosXDia.objects.filter(user=request.user, el_dia_en_que_comemos=dia ).first()
-
-    # if plato_dia and plato_dia.platos_que_comemos:
-    #     almuerzo_sel = plato_dia.platos_que_comemos.get("almuerzo", {}).get("plato")
-    #     cena_sel = plato_dia.platos_que_comemos.get("cena", {}).get("plato")
-    #     guar1_sel = plato_dia.platos_que_comemos.get("guarnicion1", {}).get("plato")
-    #     guar2_sel = plato_dia.platos_que_comemos.get("guarnicion2", {}).get("plato")
-    #     guar3_sel = plato_dia.platos_que_comemos.get("guarnicion3", {}).get("plato")
-    #     guar4_sel = plato_dia.platos_que_comemos.get("guarnicion4", {}).get("plato")
-    #     ent1_sel = plato_dia.platos_que_comemos.get("entrada1", {}).get("plato")
-    #     ent2_sel = plato_dia.platos_que_comemos.get("entrada2", {}).get("plato")
-    #     ent3_sel = plato_dia.platos_que_comemos.get("entrada3", {}).get("plato")
-    #     ent4_sel = plato_dia.platos_que_comemos.get("entrada4", {}).get("plato")
-    #     salsa1_sel = plato_dia.platos_que_comemos.get("salsa1", {}).get("plato")
-    #     salsa2_sel = plato_dia.platos_que_comemos.get("salsa2", {}).get("plato")
-    #     salsa3_sel = plato_dia.platos_que_comemos.get("salsa3", {}).get("plato")
-    #     salsa4_sel = plato_dia.platos_que_comemos.get("salsa4", {}).get("plato")
-    #     trago1_sel = plato_dia.platos_que_comemos.get("trago1", {}).get("plato")
-    #     trago2_sel = plato_dia.platos_que_comemos.get("trago2", {}).get("plato")
-    #     dip1_sel = plato_dia.platos_que_comemos.get("dip1", {}).get("plato")
-    #     dip2_sel = plato_dia.platos_que_comemos.get("dip2", {}).get("plato")
-    #     dip3_sel = plato_dia.platos_que_comemos.get("dip3", {}).get("plato")
-    #     dip4_sel = plato_dia.platos_que_comemos.get("dip4", {}).get("plato")
-    #     post1_sel = plato_dia.platos_que_comemos.get("postre1", {}).get("plato")
-    #     post2_sel = plato_dia.platos_que_comemos.get("postre2", {}).get("plato")
-
-    # else:
-    #      almuerzo_sel = None
-    #      cena_sel = None
-    #      guar1_sel = None
-    #      guar2_sel = None
-    #      guar3_sel = None
-    #      guar4_sel = None
-    #      ent1_sel = None
-    #      ent2_sel = None
-    #      ent3_sel = None
-    #      ent4_sel = None
-    #      salsa1_sel= None
-    #      salsa2_sel= None
-    #      salsa3_sel= None
-    #      salsa4_sel= None
-    #      trago1_sel = None
-    #      trago2_sel = None
-    #      dip1_sel = None
-    #      dip2_sel = None
-    #      dip3_sel = None
-    #      dip4_sel = None
-    #      post1_sel = None
-    #      post2_sel = None
-
-    # # Primero obtén el queryset y conviértelo en un set
-    # guarniciones_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Guarnicion").values_list('nombre_plato_elegido', flat=True))
-
-    # principales_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Principal").values_list('nombre_plato_elegido', flat=True))
-    # principales_presel.update([almuerzo_sel, cena_sel])
-    # # Opcional: si almuerzo_sel o cena_sel pueden ser None, eliminarlos también NO SÉ POR QUÉ AGREGA UN NONE CADENA
-    # principales_presel.discard(None)
-
-    # salsas_presel = set(Preseleccionados.objects.filter(usuario=request.user,
-    # tipo_plato="Salsa").values_list('nombre_plato_elegido', flat=True))
-
-    # tragos_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Trago").values_list('nombre_plato_elegido', flat=True))
-
-    # dips_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Dip").values_list('nombre_plato_elegido', flat=True))
-
-    # postres_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Postre").values_list('nombre_plato_elegido', flat=True))
-
-    entradas_presel = set(Preseleccionados.objects.filter(usuario=request.user, tipo_plato="Entrada").values_list('nombre_plato_elegido', flat=True))
-
-    # # Agrega las variables adicionales al set (esto evitará duplicados automáticamente)
-    # guarniciones_presel.update([guar1_sel, guar2_sel, guar3_sel, guar4_sel])
-    # salsas_presel.update([salsa1_sel, salsa2_sel, salsa3_sel, salsa4_sel])
-    # tragos_presel.update([trago1_sel, trago2_sel])
-    # dips_presel.update([dip1_sel, dip2_sel, dip3_sel, dip4_sel])
-    # postres_presel.update([post1_sel, post2_sel])
-    # entradas_presel.update([ent1_sel, ent2_sel, ent3_sel, ent4_sel])
-
-    # # Convertir cada set en lista después de agregar los valores adicionales Y SACAR NONE!!!! ESTO HAY QUE REVISARLO, POR QUÉ CARGABA UN NONE??????
-    # guarniciones_presel = [item for item in guarniciones_presel if item is not  None]
-    # salsas_presel = [item for item in salsas_presel if item is not None]
-    # tragos_presel = [item for item in tragos_presel if item is not None]
-    # dips_presel = [item for item in dips_presel if item is not None]
-    # postres_presel = [item for item in postres_presel if item is not None]
-    # entradas_presel = [item for item in entradas_presel if item is not None]
-
-    # context = {
-    #     'menu_dia': plato_dia,
-    #     'dia_del_menu': dia,
-    #     "almuerzo_sel": almuerzo_sel,
-    #     "cena_sel": cena_sel,
-    #     "guar1_sel": guar1_sel,
-    #     "guar2_sel": guar2_sel,
-    #     "guar3_sel": guar3_sel,
-    #     "guar4_sel": guar4_sel,
-    #     "ent1_sel": ent1_sel,
-    #     "ent2_sel": ent2_sel,
-    #     "ent3_sel": ent3_sel,
-    #     "ent4_sel": ent4_sel,
-    #     "salsa1_sel": salsa1_sel,
-    #     "salsa2_sel": salsa2_sel,
-    #     "salsa3_sel": salsa3_sel,
-    #     "salsa4_sel": salsa4_sel,
-    #     "trago1_sel": trago1_sel,
-    #     "trago2_sel": trago2_sel,
-    #     "dip1_sel": dip1_sel,
-    #     "dip2_sel": dip2_sel,
-    #     "dip3_sel": dip3_sel,
-    #     "dip4_sel": dip4_sel,
-    #     "post1_sel": post1_sel,
-    #     "post2_sel": post2_sel,
-
-    #     "guarniciones_presel": guarniciones_presel,
-    #     "entradas_presel": entradas_presel,
-    #     "principales_presel": principales_presel,
-    #     "tragos_presel": tragos_presel,
-    #     "postres_presel": postres_presel,
-    #     "salsas_presel": salsas_presel,
-    #     "dips_presel": dips_presel,
-
-    # }
-
-    # Pasar los datos al contexto de la plantilla
-    context = {
-        'menu_dia': plato_dia,
-        'TIPO_CHOICES': Plato.TIPO_CHOICES,  # Pasa los TIPO_CHOICES al contexto
-        "entradas_presel": entradas_presel
-    }
-
-    return render(request, 'AdminVideos/formulario_dia.html', context)
 
 class SolicitarAmistad(CreateView):
    model = Mensaje
@@ -1645,37 +1114,6 @@ class EnviarMensaje(LoginRequiredMixin, CreateView):
         return context
 
 
-    
-# class EnviarMensaje(LoginRequiredMixin, CreateView):
-#     model = Mensaje
-#     success_url = reverse_lazy('filtro-de-platos')
-#     template_name = 'AdminVideos/enviar_mensaje.html'
-
-#     fields = ['mensaje', 'destinatario']
-
-#     def form_valid(self, form):
-#         # Asigna valores predeterminados a campos específicos
-#         form.instance.usuario_que_envia = self.request.user.username
-#         form.instance.amistad = "mensaje"
-#         return super().form_valid(form)
-
-#     def get_form(self, form_class=None):
-#         form = super().get_form(form_class)
-
-#         # Obtiene los amigos del usuario actual
-#         amigues_names = (
-#             Profile.objects.filter(user=self.request.user)
-#             .values_list('amigues', flat=True)
-#             .first()
-#         )
-
-#         # Filtra solo los destinatarios en la lista de amigos si existe
-#         if amigues_names:
-#             form.fields['destinatario'].queryset = User.objects.filter(username__in=amigues_names)
-#         else:
-#             form.fields['destinatario'].queryset = User.objects.none()
-
-#         return form
 
 class compartir_plato(CreateView):
     model = Mensaje
@@ -1730,93 +1168,6 @@ class MensajeDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
        return Mensaje.objects.filter(destinatario=self.request.user).exists()
 
 
-# class Chat(LoginRequiredMixin, ListView):
-#    model = Mensaje
-#    context_object_name = "mensajes"
-#    template_name = 'AdminVideos/chat.html'
-
-#    def get_queryset(self):
-#         destinatario_username = self.kwargs["usuario"]
-
-#         # Filtrar mensajes enviados o recibidos entre el usuario actual y el destinatario
-#         return Mensaje.objects.filter(
-#             Q(usuario_que_envia=self.request.user.username, destinatario__username=destinatario_username) |
-#             Q(usuario_que_envia=destinatario_username, destinatario=self.request.user)
-#         ).order_by('creado_el')
-
-#    def get_context_data(self, **kwargs):
-#         # Llamar al método original para obtener el contexto base
-#         context = super().get_context_data(**kwargs)
-
-#         # Extraer el campo "amistad" de todos los mensajes del queryset
-#         mensajes = self.get_queryset()  # Obtén todos los mensajes del usuario
-#         platos_ids = []
-
-#         # Iterar sobre los mensajes para extraer IDs de platos
-#         for mensaje in mensajes:
-#             if mensaje.amistad != "solicitar" and mensaje.amistad != "mensaje" :
-#                platos_ids.append(mensaje.amistad)
-
-#         # Eliminar duplicados en caso de que un plato esté repetido
-#         platos_ids = list(set(platos_ids))
-
-#         # Obtener el perfil del usuario actual
-#         perfil = get_object_or_404(Profile, user=self.request.user)
-
-#         # Pasar la lista de amigues al contexto
-#         context["amigues"] = perfil.amigues  # Lista JSONField desde Profile
-
-#         # Consultar los objetos Plato correspondientes
-#         platos_compartidos = Plato.objects.filter(id__in=platos_ids)
-
-#         # Crear un diccionario con los platos para acceso rápido en la plantilla
-#         context["platos_dict"] = {plato.id: plato for plato in platos_compartidos}
-
-#         return context
-
-# class Chat(LoginRequiredMixin, ListView):
-#    model = Mensaje
-#    context_object_name = "mensajes"
-#    template_name = 'AdminVideos/chat.html'
-
-#    def get_queryset(self):
-#         destinatario_username = self.kwargs["usuario"]
-
-#         # Filtrar mensajes enviados o recibidos entre el usuario actual y el destinatario
-#         return Mensaje.objects.filter(
-#             Q(usuario_que_envia=self.request.user.username, destinatario__username=destinatario_username) |
-#             Q(usuario_que_envia=destinatario_username, destinatario=self.request.user)
-#         ).order_by('creado_el')
-
-#    def get_context_data(self, **kwargs):
-#         # Llamar al método original para obtener el contexto base
-#         context = super().get_context_data(**kwargs)
-
-#         # Extraer el campo "amistad" de todos los mensajes del queryset
-#         mensajes = self.get_queryset()  # Obtén todos los mensajes del usuario
-#         platos_ids = []
-
-#         # Iterar sobre los mensajes para extraer IDs de platos
-#         for mensaje in mensajes:
-#             if mensaje.amistad != "solicitar" and mensaje.amistad != "mensaje" :
-#                platos_ids.append(mensaje.amistad)
-
-#         # Eliminar duplicados en caso de que un plato esté repetido
-#         platos_ids = list(set(platos_ids))
-
-#         # Obtener el perfil del usuario actual
-#         perfil = get_object_or_404(Profile, user=self.request.user)
-
-#         # Pasar la lista de amigues al contexto
-#         context["amigues"] = perfil.amigues  # Lista JSONField desde Profile
-
-#         # Consultar los objetos Plato correspondientes
-#         platos_compartidos = Plato.objects.filter(id__in=platos_ids)
-
-#         # Crear un diccionario con los platos para acceso rápido en la plantilla
-#         context["platos_dict"] = {plato.id: plato for plato in platos_compartidos}
-
-#         return context
    
 class Chat(View):
 

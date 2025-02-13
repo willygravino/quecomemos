@@ -23,8 +23,6 @@
     
     <link href="{% static 'AdminVideos/css/sb-admin-2.min.css' %}" rel="stylesheet">
 
-    <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"> -->
-
     <title>¿Qué cómemos? · V1.0</title>
 
 
@@ -32,7 +30,7 @@
 
 <body id="page-top" class="sidebar-toggled">
     <!-- Page Wrapper -->
-    <div id="wrapper">
+    <div id="wrapper" style="background-color: rgb(255, 255, 0);">
 
         <!-- Sidebar -->
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion toggled" id="accordionSidebar">
@@ -42,13 +40,7 @@
                 <div class="sidebar-brand-icon">
                     <img src="/media/avatares/logo.png" height="60" alt="Logo">
                 </div>
-                <!-- <div class="sidebar-brand-text mx-3">SB Admin <sup>2</sup></div> -->
             </a>
-
-            <!-- Divider -->
-            <!-- <hr class="sidebar-divider my-0"> -->
-
-            <!-- Nav Item - Dashboard -->
 
             {% if parametro == "Dash" %}
                 <li class="nav-item active">
@@ -56,7 +48,6 @@
                 <li class="nav-item">
             {% endif %}
                     <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Dash">
-                        <!-- <i class="fas fa-fw fa-tachometer-alt "></i> -->
                         <i class="fa-solid fa-grip" style="font-size: 2rem;"></i>
                         <span>Todos</span></a>
                 </li>
@@ -64,11 +55,7 @@
             <!-- Divider -->
             <hr class="sidebar-divider">
 
-             <!-- Heading -->
-             <!-- <div class="sidebar-heading">
-                AGREGAR
-            </div> -->
-
+          
             <!-- Nav Item - Utilities Collapse Menu -->
 
             {% if parametro == "Entrada" %}
@@ -107,16 +94,6 @@
                     </a>
                 </li>
 
-            <!-- {% if parametro == "Salsa" %}
-                <li class="nav-item active">
-            {% else %}
-                <li class="nav-item">
-            {% endif %}
-                    <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Salsa">
-                        <i class="fa-solid fa-pepper-hot" style="font-size: 1.3rem;"></i>
-                        <span>Salsas</span>
-                    </a>
-                </li> -->
 
             {% if parametro == "Guarnicion" %}
                 <li class="nav-item active">
@@ -154,14 +131,6 @@
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
-<!--
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Dash">
-                    DERIVAR A MENU DE DÍAS
-                    <i class="fa-solid fa-calendar-days" style="font-size: 2rem;"></i>
-                    <span>Menú</span>
-                </a>
-            </li> -->
 
             {% if parametro == "lista-compras" %}
                 <li class="nav-item active">
@@ -201,7 +170,7 @@
         <!-- End of Sidebar -->
 
         <!-- Content Wrapper -->
-        <div id="content-wrapper" style="background-color: rgb(222, 220, 220);" class="d-flex flex-column">
+        <div id="content-wrapper" style="background-color: rgb(255, 0, 255);" class="d-flex flex-column">
 
             <!-- Main Content -->
             <div id="content">
@@ -213,8 +182,6 @@
                     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
                         <i class="fa fa-bars"></i>
                     </button>
-
-
 
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
@@ -389,124 +356,88 @@
 
                 <!-- End of Topbar -->
 
+                <div class="container" style="background-color: rgb(147, 18, 18);">
+                    <!-- Nav Tabs -->
+                    <ul class="nav nav-tabs m-0" id="diasTab" role="tablist">
+                        {% for dia in dias_desde_hoy %}
+                        <li class="nav-item  " role="presentation">
+                            <button 
+                            class="nav-link {% if dia_activo == dia|date:'Y-m-d' %}active{% elif forloop.first and not dia_activo %}active{% endif %}" 
+
+                            id="tab-{{ dia|date:'Y-m-d' }}" data-bs-toggle="tab" data-bs-target="#tab-content-{{ dia|date:'Y-m-d' }}" type="button" role="tab" aria-controls="tab-content-{{ dia|date:'Y-m-d' }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+                                {{ dia|date:"l j"|capfirst }}
+
+                            </button>
+                        </li>
+                        {% endfor %}
+                    </ul>
                 
+                    <!-- Tab Content -->
+                    <div class="tab-content bg-white" id="diasTabContent">
+                        {% for dia in dias_desde_hoy %}
+                            <div class="tab-pane {% if dia_activo == dia|date:'Y-m-d' %}active{% elif forloop.first and not dia_activo %}active{% endif %}" 
+                                id="tab-content-{{ dia|date:'Y-m-d' }}"
+                                role="tabpanel"
+                                aria-labelledby="tab-{{ dia|date:'Y-m-d' }}">
 
-
-<!-- <ul>
-    {% for fecha in dias_desde_hoy %}
-        <li>dias desde hoy {{ dias_desde_hoy }}</li>
-    {% empty %}
-        <li>No hay fechas disponibles</li>
-    {% endfor %}
-</ul>
-<ul>
-    {% for fecha in dias_programados %}
-        <li>dias programados {{ fecha }}</li>
-    {% empty %}
-        <li>No hay fechas disponibles</li>
-    {% endfor %}
-</ul> -->
-<!-- 
-<ul>
-    {% for fecha in platos_dia_x_dia.items %}
-        <li>platos dia por día {{ fecha }}</li>
-    {% empty %}
-        <li>No hay fechas disponibles</li>
-    {% endfor %}
-</ul> -->
-
-<!-- <p>{{ platos_dia_x_dia }}</p> -->
-
-
-        <div class="container-fluid" style="background-color: rgb(222, 220, 220);">
-            <!-- Nav Tabs -->
-            <ul class="nav nav-tabs" id="diasTab" role="tablist">
-                {% for dia in dias_desde_hoy %}
-                <li class="nav-item  " role="presentation">
-                    <button 
-                    class="nav-link {% if dia_activo == dia|date:'Y-m-d' %}active{% elif forloop.first and not dia_activo %}active{% endif %}" 
-
-                    id="tab-{{ dia|date:'Y-m-d' }}" data-bs-toggle="tab" data-bs-target="#tab-content-{{ dia|date:'Y-m-d' }}" type="button" role="tab" aria-controls="tab-content-{{ dia|date:'Y-m-d' }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
-                        {{ dia|date:"l j" }}
-                    </button>
-                </li>
-                {% endfor %}
-            </ul>
-           
-            <!-- Tab Content -->
-            <div class="tab-content bg-white" id="diasTabContent">
-                {% for dia in dias_desde_hoy %}
-                    <div class="tab-pane {% if dia_activo == dia|date:'Y-m-d' %}active{% elif forloop.first and not dia_activo %}active{% endif %}" 
-                        id="tab-content-{{ dia|date:'Y-m-d' }}"
-                        role="tabpanel"
-                        aria-labelledby="tab-{{ dia|date:'Y-m-d' }}">
-
-                        <div class="text-dark p-1 small">
-                            <!-- <p class="mb-1">Programado día {{ dia|date:"l j" }}</p>  -->
-                            <div class="row d-flex align-items-start">
-                                <div class="col  p-2 overflow-auto" style="max-height: 100px;">
-                                    <!-- Buscamos los platos para este día -->
-                                    {% for dia_plato in platos_dia_x_dia %}
-                                        {% if dia_plato.0 == dia %}
-                                            {% if dia_plato.1 %}
-                                                {% for plato in dia_plato.1 %}
-                                                    <p class="mb-1 ml-3 d-flex align-items-center">
-                                                        {{ plato }}
-                                                        <button class="btn btn-sm p-0 ml-2" title="Eliminar">
-                                                            <i class="fa-solid fa-trash-can"></i>
-                                                        </button>
-                                                    </p>
-                                                {% endfor %}
-                                            {% else %}
-                                                <p>No hay platos asignados para este día.</p>
-                                            {% endif %}
-                                        {% endif %}
-                                    {% endfor %}
+                                <div class="text-dark p-1 small">
+                                    <!-- <p class="mb-1">Programado día {{ dia|date:"l j" }}</p>  -->
+                                    <div class="row d-flex align-items-start">
+                                        <div class="col  p-2 overflow-auto" style="max-height: 100px;">
+                                            <!-- Buscamos los platos para este día -->
+                                            {% for dia_plato in platos_dia_x_dia %}
+                                                {% if dia_plato.0 == dia %}
+                                                    {% if dia_plato.1 %}
+                                                        {% for plato in dia_plato.1 %}
+                                                            <p class="mb-1 ml-3 d-flex align-items-center">
+                                                                {{ plato }}
+                                                                <button class="btn btn-sm p-0 ml-2" title="Eliminar">
+                                                                    <i class="fa-solid fa-trash-can"></i>
+                                                                </button>
+                                                            </p>
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <p>No hay platos asignados para este día.</p>
+                                                    {% endif %}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+                        {% endfor %}
+
+                        <div class="shadow rounded p-2 m-2">
+                            {% block filtro %}
+                            {% endblock %}
+                        </div>
+    
+                        <div class="my-3">
+                            {% block principal %}
+                            {% endblock %}
                         </div>
                     </div>
-                {% endfor %}
 
+                    
+                </div>
 
-
-                            <div class="shadow rounded p-2 m-2">
-                                {% block filtro %}
-                                {% endblock %}
-                            </div>
-                        
-                            <div class="my-3">
-                                {% block principal %}
-                                {% endblock %}
-                            </div>
-
-                        </div>
-
-
-          
-
-        </div>
-
-
-
-
-
+               
+            </div>
+                
             <!-- End of Main Content -->
 
             <!-- Footer -->
             <footer class="sticky-footer"  style="background-color: rgb(222, 220, 220);">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright ¿Qué comemos? V1.0© 2024</span>
+                        <span>Copyright ¿Qué comemos? V1.0© 2025</span>
                     </div>
                 </div>
             </footer>
             <!-- End of Footer -->
 
-
         </div>
         <!-- End of Content Wrapper -->
-
     </div>
     <!-- End of Page Wrapper -->
 

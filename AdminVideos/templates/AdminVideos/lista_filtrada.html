@@ -8,21 +8,12 @@
   <div class="d-flex justify-content-between mx-3 gap-2 flex-wrap">
 
     {% csrf_token %}
-    <!-- 
-     <select class="form-select" aria-label="Medios" name="medios" id="id_medios">
-            {% for field in formulario.medios %}
-              <option value="{{field.data.value}}" {% if field.data.selected %}checked{% endif %}></option>
-
-            {% endfor %}
-      </select> -->
 
     <span>Medios: {{ formulario.medios }}</span>
     <span>Categoría: {{ formulario.categoria }}</span>
     <span>Dificultad: {{ formulario.dificultad }}</span>
 
-    <input type="search" placeholder="Buscar por palabra clave" {{ formulario.palabra_clave }}
-  
-    {% if  user.username  != "quecomemos" %}
+    <input type="search" placeholder="Buscar por palabra clave" {{ formulario.palabra_clave }} {% if  user.username  != "quecomemos" %}
       <div class="form-check">
         <input class="form-check-input" type="checkbox" name="quecomemos" value="quecomemos" id="quecomemos" {% if quecomemos_ck == "quecomemos" %} checked {% endif %}>
         <label class="form-check-label small" for="quecomemos">
@@ -38,27 +29,10 @@
       </div>
       
     {% else %}
-        <!-- <span class="form-check-label small text-center border rounded bg-success text-white">
-          MODO <br> ADMINISTRADOR
-        </span> -->
         <!-- Campo oculto -->
         <input type="hidden" name="misplatos" value="misplatos">
     {% endif %}
-
-    <div class="form-check">
-      <input class="form-check-input" type="checkbox" name="preseleccionados" value="preseleccionados" id="preseleccionados" {% if preseleccionados_ck == "preseleccionados" %} checked {% endif %}>
-      <label class="form-check-label small" for="preseleccionados">
-        Preseleccionados
-      </label>
-    </div>
-
-        <!--
-          {% for field in formulario.tipo_de_vista %}
-            <input type="radio" class="btn-check" name="{{field.data.name}}" id="id_{{field.data.name}}{{field.data.index}}" value="{{field.data.value}}" autocomplete="off" {% if field.data.selected %}checked{% endif %}>
-
-              <label class="btn btn-secondary" for="id_{{field.data.name}}{{field.data.index}}">{{field.data.value}}</label>
-          {% endfor %}
-            -->
+       
     <button type="submit" class="btn btn-primary">Filtrar</button>
   </div>
 </form>

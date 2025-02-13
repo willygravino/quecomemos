@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from AdminVideos.views import Chat, EnviarMensaje, agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, compartir_plato, descartar_sugerido, eliminar_plato, formulario_dia, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, plato_preseleccionado, grabar_menu_elegido,SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, sumar_amigue, user_logout, desmarcar_todo, SolicitarAmistad, MensajeDelete, AsignarPlato # PlatoDelete, VistaInicial ,Logout, , PlatoList, PlatosMineList, PlatosElegidosMenu, elecion_de_lista, PlatosDeOtros,, LogtViews, MenuElegido, lista_de_compras
+from AdminVideos.views import Chat, EnviarMensaje, agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, compartir_plato, descartar_sugerido, eliminar_plato, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, sumar_amigue, user_logout, SolicitarAmistad, MensajeDelete, AsignarPlato 
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -24,28 +24,17 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', index, name="index"),
-    path('plato/elegido', plato_preseleccionado, name="plato-preseleccionado"),
-    path('plato/grabar', grabar_menu_elegido, name="grabar-menu"),
     path('menu/elegido',lista_de_compras, name="menu-elegido"),
     path('menu/amigues',amigues, name="amigues"),
     path('menu/amigues/sumar',sumar_amigue, name="sumar-amigue"),
-    path('formulario/dia/<str:dia>/',  formulario_dia, name="formulario-dia"),
-    path('desmarcar/',  desmarcar_todo, name="desmarcar-todo"),
     path('compartir/',  compartir_plato.as_view(), name="compartir-plato"),
     path('agregar-a-mi-lista/<int:plato_id>/', agregar_a_mi_lista, name='agregar-a-mi-lista'),
     path('descartar-sugerido/<str:nombre_plato>/', descartar_sugerido, name='descartar-sugerido'),
     path('agregar-compartido/<int:pk>/', agregar_plato_compartido, name='agregar-plato-compartido'),
-
-            
-
-    # path('lista/compras-y-plan', lista_y_plan, name="lista-y-plan"),
-    # path('menu/random', SugerenciasRandom.as_view(), name="random"),
     path('videos/list/filtro', FiltroDePlatos, name="filtro-de-platos"),
     path('videos/reiniciar/sugeridos', reiniciar_sugeridos, name="reiniciar-sugeridos"),
     path('videos/<pk>/update', PlatoUpdate.as_view(), name="videos-update"),
-    # path('videos/<pk>/delete', PlatoDelete.as_view(), name="videos-delete"),
     path('eliminar-plato/<int:plato_id>/', eliminar_plato, name='eliminar-plato'),
-
     path('videos/<pk>/detail', PlatoDetail.as_view(), name="videos-detail"),
     path('videos/create', PlatoCreate.as_view(), name="videos-create"),
     path('login', Login.as_view(), name="login"),
@@ -54,16 +43,12 @@ urlpatterns = [
     path('perfil/crear', ProfileCreate.as_view(), name="profile-create"),
     path('profile/<pk>/update', ProfileUpdate.as_view(), name="profile-update"),
     path('about', about, name="about"),
-    # path('mensaje/list'
     path('chat/<str:usuario>', Chat.as_view(), name='chat'),
     path('solicitar/amistad', SolicitarAmistad.as_view(), name="solicitar-amistad" ),
     path('mensaje/<str:usuario>/enviar', EnviarMensaje.as_view(), name="enviar-mensaje" ),
-
     path('mensaje/<pk>/delete', MensajeDelete.as_view(), name="mensaje-delete"),
     path('menu/amigue/<pk>/borrar', amigue_borrar, name="amigue-borrar"),
     path('asignar/plato', AsignarPlato.as_view(), name="asignar-plato"), # type: ignore
-
-
      
 ]
 

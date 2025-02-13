@@ -6,10 +6,10 @@
 
 <div class="album py-5 bg-body-tertiary">
   <div class="container">
-      <!-- <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3"> -->
-        <div class="col">
-            <div class="card shadow-sm">
-              <img class="card-img-top" style="height: 225px; width: 100%; display: block" src="{{plato.image_url}}" data-holder-rendered="true">
+    <div class="row justify-content-center"> <!-- Centra la tarjeta en el contenedor -->
+      <div class="col-md-6 col-lg-6"> <!-- Limita el ancho en dispositivos medianos y grandes -->
+        <div class="card shadow-sm">
+          <img class="card-img-top" style="height: 225px; width: 100%; display: block" src="{{plato.image_url}}" data-holder-rendered="true">
               <div class="card-body">
                 <strong><h3>{{ plato.nombre_plato }}</h3></strong>
                 <strong><p class="card-text">Ingredientes: {{ plato.ingredientes }}</p></strong>
@@ -31,37 +31,19 @@
                 <p></p>
                 {% if user.id == plato.propietario.id %}
 
-                    <!-- <i class="fa-solid fa-share-nodes" style="font-size: 1.5rem;" id="menu-trigger" style="cursor: pointer;"></i> -->
-
-                    <!-- <select class="form-select d-none" id="menu-select" aria-label="Default select example"> -->
+                    
                     <a href="{% url 'videos-update' plato.id %}" type="button"  class="btn btn-sm btn-outline-secondary">Editar</a> 
 
                     <a href="{% url 'eliminar-plato' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Eliminar</a>
 
                     <hr>
 
-                    <!-- <select class="form-select" aria-label="Default select example">
-                    <option selected>Compartir este plato con:</option>
-
-                    {% for amigue in amigues %}                    
-                            <option value="{{ amigue }}">{{ amigue }}</option>
-                    {% endfor %}
-                    </select>
-   -->
-                    
-                  
-                   <!-- <i class="fa-solid fa-share-nodes" style="font-size: 1.5rem;"></i> -->
-
-                 
-                  
-
-                 <!-- <a class="nav-link"  href="#" data-toggle="modal" data-target="#PlatoModal"> 
-                  <span>Editar</span></a> -->
+                  </div>
+  
 
               </div>
             </div>
                  <p></p>
-                 <!-- <small class="text-muted">Subido por mi.</small>  -->
                 {% else %}
               </div>
             </div>
@@ -82,7 +64,6 @@
                     <h6>Compartir este plato con:</h6>
 
                       <select id="amigue-select" name="amigue" class="form-select" aria-label="Seleccionar amigue">
-                        <!-- Campo oculto para enviar el plato.id -->
                           {% for amigue in amigues %}
                               <option value="{{ amigue }}">{{ amigue }}</option>
                           {% endfor %}
@@ -95,7 +76,6 @@
 
          </div>
         </div>
-      <!-- </div> -->
     </div>
 </div>
 
