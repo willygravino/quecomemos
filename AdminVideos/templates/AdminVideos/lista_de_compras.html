@@ -9,14 +9,15 @@
 
         <!-- <h5 >menues_del_usuario {{ menues_del_usuario|dictsort:"el_dia_en_que_comemos" }}</h5>  -->
 
-        <h5 >ingredientes_con_tengo_y_comentario {{ingredientes_con_tengo_y_comentario}}</h5> 
+        <!-- <h5 >ingredientes_con_tengo_y_comentario {{ingredientes_con_tengo_y_comentario}}</h5> 
         <h5 >lista_de_ingredientes {{lista_de_ingredientes}}</h5> 
         <h5 >platos_seleccionados {{platos_seleccionados}}</h5> 
         <h5 >ingredientes_elegidos {{ingredientes_elegidos}}</h5> 
         <h5 >ingredientes NO elegidos {{no_elegidos}}</h5> 
         
-        <h5 >variedades_seleccionadas {{variedades_seleccionadas}}</h5> 
-        
+        <h5 >variedades_seleccionadas {{variedades_seleccionadas}}</h5>  -->
+        <h5 >comentarios{{comentarios}}</h5> 
+
 
 
 
@@ -101,7 +102,7 @@
                             <input type="checkbox" id="{{ ingrediente }}" name="ingrediente_a_comprar" value="{{ ingrediente }}"  {% if valor.estado == "no-tengo" %} checked {% endif %}>
                         
                             <label for="{{ ingrediente }}">{{ ingrediente }}</label>
-                            <input type="search"  class="DocSearch-Input" id="{{ ingrediente }}_detalle" value="{{ valor.comentario }}" name="{{ ingrediente }}_detalle">
+                            <input type="search"  class="DocSearch-Input" id="{{ ingrediente }}_comentario" value="{{ valor.comentario }}" name="{{ ingrediente }}_comentario">
 
                             <br>
                         {% endfor %}

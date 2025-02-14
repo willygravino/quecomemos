@@ -167,6 +167,7 @@ def lista_de_compras(request):
     variedades_seleccionadas = defaultdict(set)
     ingredientes_elegidos = set()
     no_elegidos = set()
+    comentarios = set()
 
     
     # Filtrar los objetos de ElegidosXDia para excluir aquellos cuya fecha sea anterior a la fecha actual
@@ -220,6 +221,46 @@ def lista_de_compras(request):
             menu.platos_que_comemos = platos
             menu.save()
 
+            comentarios_perfil = perfil.comentarios  # Accede a los comentarios guardados
+
+            # Si el campo JSON está vacío o no es una lista, inicialízalo
+            if not isinstance(comentarios_perfil, list):
+                comentarios_perfil = []
+
+            comentarios_post = {}
+
+            # Recorre los datos del formulario buscando comentarios
+            for key, value in request.POST.items():
+                if key.endswith("_comentario"):  
+                    ingrediente = key.replace("_comentario", "")  # Extrae el ingrediente
+                    comentario_limpio = value.strip()  # Quita espacios extra
+
+                    if comentario_limpio:  # Solo guarda si el comentario no está vacío
+                        comentarios_post[ingrediente] = comentario_limpio
+
+            # Actualiza los comentarios en el perfil del usuario
+            nuevos_comentarios = []
+            ingredientes_actualizados = set(comentarios_post.keys())
+
+            for comentario in comentarios_perfil:
+                ingrediente_existente, _ = comentario.split("%", 1) if "%" in comentario else (comentario, "")
+                
+                if ingrediente_existente in ingredientes_actualizados:
+                    nuevos_comentarios.append(f"{ingrediente_existente}%{comentarios_post[ingrediente_existente]}")
+                    ingredientes_actualizados.remove(ingrediente_existente)  # Ya lo actualizamos
+                else:
+                    nuevos_comentarios.append(comentario)  # Mantiene los comentarios que no se modificaron
+
+            # Agrega los nuevos comentarios que no existían antes
+            for ingrediente, nuevo_comentario in comentarios_post.items():
+                if ingrediente in ingredientes_actualizados:
+                    nuevos_comentarios.append(f"{ingrediente}%{nuevo_comentario}")
+
+            # Guarda los comentarios actualizados en el perfil del usuario
+            perfil.comentarios = nuevos_comentarios
+            perfil.save()
+
+
     # Recorrer los menús del usuario
     for menu in menues_del_usuario:
         platos = menu.platos_que_comemos or {}  # Asegura que no sea None (debe ser un diccionario)
@@ -236,7 +277,6 @@ def lista_de_compras(request):
                     if variedad.get("elegido"):  # Verificar si la variedad está marcada como elegida
                         lista_de_ingredientes.update(map(str.strip, variedad["ingredientes"].split(",")))
 
-                       
 
     # Convertir a lista ordenada
     # lista_de_ingredientes = sorted(lista_de_ingredientes)
@@ -259,15 +299,6 @@ def lista_de_compras(request):
                 perfil.ingredientes_que_tengo.append(ingrediente)
                 # Guardar el perfil actualizado
                 perfil.save()       
-
-                    # if lista_de_compras:
-                    #         for ingrediente_a_comprar in lista_de_compras:
-                    #              if ingrediente_a_comprar in perfil.ingredientes_que_tengo:
-                    #                 # Eliminar el ingrediente de la lista
-                    #                 perfil.ingredientes_que_tengo.remove(ingrediente_a_comprar)
-                    #                 # Guardar el perfil actualizado
-                    #                 perfil.save()
-
 
     if lista_de_ingredientes:
         for ingrediente in lista_de_ingredientes:
@@ -320,6 +351,7 @@ def lista_de_compras(request):
         "platos_seleccionados": platos_seleccionados,
         "ingredientes_elegidos": ingredientes_elegidos,
         "variedades_seleccionadas":variedades_seleccionadas,
+        "comentarios": comentarios,
 
         "ingredientes_no_comprados": ingredientes_no_comprados,
         "mensaje_whatsapp": mensaje_whatsapp, # MENSAJE FORMATEADO PARA WHATSAPP
