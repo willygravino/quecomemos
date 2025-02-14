@@ -1,22 +1,7 @@
-<div class="text-dark p-1 small">
-  <p class="mb-1">Programado día {{ dia|date:"l j" }}</p>
-  <div class="row">
-      <div class="col">
-          <p>Desayuno</p>
-          <p class="mb-1">Plato 1 <button class="btn btn-danger btn-sm p-1">X</button></p>
-      </div>
-      <div class="col">
-          <p>Almuerzo</p>
-          <p class="mb-1">Plato 2 <button class="btn btn-danger btn-sm p-1">X</button></p>
-      </div>
-      <div class="col">
-          <p>Merienda</p>
-          <p class="mb-1">Plato 3 <button class="btn btn-danger btn-sm p-1">X</button></p>
-      </div>
-      <div class="col">
-          <p>Cena</p>
+<h5 >ingredientes_con_tengo_y_comentario {{ingredientes_con_tengo_y_comentario}}</h5> 
+<h5 >lista_de_ingredientes {{lista_de_ingredientes}}</h5> 
+<h5 >platos_seleccionados {{platos_seleccionados}}</h5> 
+<h5 >ingredientes_elegidos {{ingredientes_elegidos}}</h5> 
+<h5 >ingredientes NO elegidos {{no_elegidos}}</h5> 
 
-          <p class="mb-1">Plato 4 <button class="btn btn-danger btn-sm p-1">X</button></p>
-      </div>
-  </div>
-</div>
+<h5 >variedades_seleccionadas {{variedades_seleccionadas}}</h5> 

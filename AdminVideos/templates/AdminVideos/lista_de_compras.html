@@ -6,10 +6,21 @@
 
 <div class="row">
     <div class="col-md-4">
-        <h5 >ingredientes_separados_por_comas {{ingredientes_separados_por_comas}}</h5> 
-        <h5 >lista_de_ingredientes {{lista_de_ingredientes}}</h5> 
 
-       <h5 >LOS platos por día {{platos_por_dia}}</h5> 
+        <!-- <h5 >menues_del_usuario {{ menues_del_usuario|dictsort:"el_dia_en_que_comemos" }}</h5>  -->
+
+        <h5 >ingredientes_con_tengo_y_comentario {{ingredientes_con_tengo_y_comentario}}</h5> 
+        <h5 >lista_de_ingredientes {{lista_de_ingredientes}}</h5> 
+        <h5 >platos_seleccionados {{platos_seleccionados}}</h5> 
+        <h5 >ingredientes_elegidos {{ingredientes_elegidos}}</h5> 
+        <h5 >ingredientes NO elegidos {{no_elegidos}}</h5> 
+        
+        <h5 >variedades_seleccionadas {{variedades_seleccionadas}}</h5> 
+        
+
+
+
+       <!-- <h5 >LOS platos por día {{platos_por_dia}}</h5>   -->
 <!-- 
         <h5 >el request {{el_request}}</h5>
 
@@ -17,64 +28,65 @@
         <h5 >buscar cena por día /{{buscar_cena_por_dia}}/</h5>
         <h5 >claves en el request /{{claves_en_el_request}}/</h5> -->
 
-    <section>
-        <h4>Menúes Programados</h4>
 
-        <form action="{% url 'menu-elegido' %}" method="post">
-            {% csrf_token %}
+        <section>
+            <h4>Menúes Programados</h4>
         
-            {% for fecha, platos in platos_por_dia.items %}
-            <div class="card">
-                <div class="card-body">
-                 
-        
-                    <h5 class="bg-primary text-white p-2 rounded">{{ fecha }}</h5> <!-- Fondo azul con texto blanco -->
-        
-                    {% for plato_id, datos in platos.items %}
-                        <div class="form-check">
-                            <input 
-                                type="checkbox" 
-                                id="plato{{ plato_id }}_{{ fecha|date:'Ymd' }}" 
-                                name="plato_seleccionado" 
-                                value="{{ plato_id }}" 
-                                class="form-check-input"
-                                {% if datos.elegido %} checked {% endif %}
-                            >
-                            <label for="plato{{ plato_id }}_{{ fecha|date:'Ymd' }}" class="form-check-label">
-                                {{ datos.plato }} - {{ datos.tipo }} ({{ datos.comida }})
-                            </label>
-                            <p class="small text-muted">{{ datos.ingredientes }}</p>
-                        </div>
-        
-                        <!-- Recorrer variedades si existen -->
-                        {% if datos.variedades %}
-                            <div class="ml-4">
-                                {% for variedad_id, variedad in datos.variedades.items %}
-                                    <div class="form-check">
-                                        <input 
-                                            type="checkbox" 
-                                            id="variedad{{ variedad_id }}_{{ plato_id }}_{{ fecha|date:'Ymd' }}" 
-                                            name="variedad_seleccionada" 
-                                            value="{{ plato_id }}|{{ variedad.nombre }}" 
-                                            class="form-check-input"
-                                            {% if variedad.elegido %} checked {% endif %}
-                                        >
-                                        <label for="variedad{{ variedad_id }}_{{ plato_id }}_{{ fecha|date:'Ymd' }}" class="form-check-label">
-                                            → {{ variedad.nombre }} ({{ variedad.ingredientes }})
-                                        </label>
-                                    </div>
-                                {% endfor %}
+            <form action="{% url 'menu-elegido' %}" method="post">
+                {% csrf_token %}
+            
+                {% for menu in menues_del_usuario %}
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="bg-primary text-white p-2 rounded">{{ menu.el_dia_en_que_comemos|date:"l j F Y" }}</h5> <!-- Fondo azul con texto blanco -->
+            
+                        {% for plato_id, datos in menu.platos_que_comemos.items %}
+                            <div class="form-check">
+                                <input 
+                                    type="checkbox" 
+                                    id="plato{{ plato_id }}_{{ menu.el_dia_en_que_comemos|date:'Ymd' }}" 
+                                    name="plato_seleccionado" 
+                                    value="{{ plato_id }}_{{ menu.el_dia_en_que_comemos|date:'Ymd' }}" 
+                                    class="form-check-input"
+                                    {% if datos.elegido %} checked {% endif %}
+                                >
+                                <label for="plato{{ plato_id }}_{{ menu.el_dia_en_que_comemos|date:'Ymd' }}" class="form-check-label">
+                                    {{ datos.plato }} - {{ datos.tipo }} ({{ datos.comida }})
+                                </label>
+                                <p class="small text-muted">{{ datos.ingredientes }}</p>
                             </div>
-                        {% endif %}
-        
-                    {% endfor %}
+            
+                            <!-- Recorrer variedades si existen -->
+                            {% if datos.variedades %}
+                                <div class="ml-4">
+                                    {% for variedad_id, variedad in datos.variedades.items %}
+                                        <div class="form-check">
+                                            <input 
+                                                type="checkbox" 
+                                                id="variedad{{ variedad_id }}_{{ plato_id }}_{{ menu.el_dia_en_que_comemos|date:'Ymd' }}" 
+                                                name="variedad_seleccionada" 
+                                                value="{{ plato_id }}|{{ variedad.nombre }}" 
+                                                class="form-check-input"
+                                                {% if variedad.elegido %} checked {% endif %}
+                                            >
+                                            <label for="variedad{{ variedad_id }}_{{ plato_id }}_{{ menu.el_dia_en_que_comemos|date:'Ymd' }}" class="form-check-label">
+                                                → {{ variedad.nombre }} ({{ variedad.ingredientes }})
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+            
+                        {% endfor %}
+                    </div>
                 </div>
-            </div>
-            {% empty %}
-            <p>No hay platos asignados.</p>
-            {% endfor %}
+                {% empty %}
+                    <p>No hay platos asignados.</p>
+                {% endfor %}
+            
+        </section>
         
-</section>
+
 
 </div>
 
@@ -84,8 +96,8 @@
 
             <h3>EDITA LISTA DE COMPRAS</h3>
                 
-                    {% if ingredientes_separados_por_comas %}
-                        {% for ingrediente, valor  in ingredientes_separados_por_comas.items %}
+                    {% if ingredientes_con_tengo_y_comentario %}
+                        {% for ingrediente, valor  in ingredientes_con_tengo_y_comentario.items %}
                             <input type="checkbox" id="{{ ingrediente }}" name="ingrediente_a_comprar" value="{{ ingrediente }}"  {% if valor.estado == "no-tengo" %} checked {% endif %}>
                         
                             <label for="{{ ingrediente }}">{{ ingrediente }}</label>
