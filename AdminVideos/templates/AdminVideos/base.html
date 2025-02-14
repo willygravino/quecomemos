@@ -356,6 +356,8 @@
 
                 <!-- End of Topbar -->
 
+<h1>dia activo {{dia_activo}}</h1>
+
                 <div class="container" style="background-color: rgb(147, 18, 18);">
                     <!-- Nav Tabs -->
                     <ul class="nav nav-tabs m-0" id="diasTab" role="tablist">
@@ -467,7 +469,69 @@
         </div>
     </div>
 
+   
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let modal = document.getElementById("asignarPlatoModal");
+      
+            modal.addEventListener("show.bs.modal", function() {
+                let tabActivo = document.querySelector(".nav-link.active"); 
+                if (tabActivo) {
+                    let diaActivo = tabActivo.id.replace("tab-", ""); 
+      
+                    // Asignar el valor al input oculto y al texto visible en el modal
+                    document.getElementById("diaSeleccionado").value = diaActivo;
+                    document.getElementById("diaActivoTexto").textContent = diaActivo;
+                }
+            });
+        });
+      </script>
+       
 
+<!-- JavaScript para manejar la recarga del contenido cuando se cambia de pestaña -->
+<!-- <script>
+    $(document).ready(function() {
+        // Recargar el contenido de la pestaña activa al cargar la página
+        var diaActivo = '{{ dia_activo|date:"Y-m-d" }}';  // Fecha del día activo, pasado como contexto
+        cargarPlatosDia(diaActivo);
+
+        // Evento cuando se cambia de pestaña
+        $('a[data-bs-toggle="pill"]').on('shown.bs.tab', function (e) {
+            var diaSeleccionado = $(e.target).attr('aria-controls');  // Obtiene el id del tab activado
+            cargarPlatosDia(diaSeleccionado);  // Actualiza el contenido de la pestaña
+        });
+    });
+
+    // Función para cargar platos dinámicamente
+    function cargarPlatosDia(diaActivo) {
+        // Aquí puedes hacer una llamada AJAX para cargar los platos para el día seleccionado
+        // Por ejemplo:
+        $.ajax({
+            url: '/obtener_platos/' + diaActivo + '/',  // Asume que tienes un endpoint en Django que devuelve platos para este día
+            method: 'GET',
+            success: function(response) {
+                // Actualiza el contenido de la pestaña correspondiente
+                var contenido = '';
+                if (response.platos.length > 0) {
+                    response.platos.forEach(function(plato) {
+                        contenido += '<p class="mb-1 ml-3 d-flex align-items-center">' + plato + 
+                                      '<button class="btn btn-sm p-0 ml-2" title="Eliminar">' +
+                                      '<i class="fa-solid fa-trash-can"></i></button></p>';
+                    });
+                } else {
+                    contenido = '<p>No hay platos asignados para este día.</p>';
+                }
+
+                // Encuentra el div correspondiente a la pestaña activa
+                $('#tab-content-' + diaActivo).find('.row').html(contenido);
+            },
+            error: function() {
+                alert('Error al cargar los platos.');
+            }
+        });
+    }
+</script> -->
+<!-- 
     <script>
     document.addEventListener("DOMContentLoaded", function() {
         // 1. Manejar la apertura del modal y asignar el día activo al modal
@@ -526,7 +590,7 @@
         const diaActivo = '{{ dia_activo|date:"Y-m-d" }}';  // Obtener el día activo del contexto
         cargarPlatosDia(diaActivo);  // Cargar los platos para el día activo
     });
-</script>
+</script> -->
 
     <!-- Bootstrap core JavaScript-->
     <script src="/AdminVideos/static/AdminVideos/vendor/jquery/jquery.min.js"></script>

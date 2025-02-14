@@ -416,115 +416,52 @@ def lista_de_compras(request):
 
     else:
 
-        for menu_del_dia in menues_del_usuario:
-            platos_dia = menu_del_dia.platos_que_comemos
+        platos_por_dia = defaultdict(dict)  # Diccionario donde cada fecha tendrá sus platos
 
-            # almuerzo_que_comemos = platos_dia.get("almuerzo", {}).get("plato", [])
-            almuerzo_que_comemos = platos_dia.get("almuerzo", {}).get("plato", None)
+        for menu in menues_del_usuario:
+            fecha = menu.el_dia_en_que_comemos  # Accede al atributo del modelo
+            platos = menu.platos_que_comemos or {}  # Asegura que no sea None (debe ser un diccionario)
 
-            almuerzo_info = platos_dia.get("almuerzo", {}).get("ingredientes", [])
-            almuerzo_elegido = platos_dia.get("almuerzo", {}).get("elegido", []) # podría precindirse de esto si hardcodeamos a True mas abajo
+            platos_por_dia[fecha].update(platos)  # Agrega los platos al día correspondiente
 
-            cena_que_comemos = platos_dia.get("cena", {}).get("plato", [])
-            cena_info = platos_dia.get("cena", {}).get("ingredientes", [])
-            cena_elegida = platos_dia.get("cena", {}).get("elegido", []) # podría precindirse de esto si hardcodeamos a True mas abajo
-
-            almuerzo_variedades = platos_dia.get("variedades_almuerzo", {})
-
-            # Iterar a través del diccionario y extraer los ingredientes
-            if almuerzo_variedades:
-                for key, value in almuerzo_variedades.items():
-                    if value["elegido"] == True:
-                        ingredientes = value['ingredientes_de_variedades']
-                        lista_de_ingredientes.update({ingrediente.strip() for ingrediente in ingredientes.split(',')})
-
-            cena_variedades = platos_dia.get("variedades_cena", {})
-
-            # Iterar a través del diccionario y extraer los ingredientes
-            if cena_variedades:
-                for key, value in cena_variedades.items():
-                    if value["elegido"] == True:
-                        ingredientes = value['ingredientes_de_variedades']
-                        lista_de_ingredientes.update({ingrediente.strip() for ingrediente in ingredientes.split(',')})
-
-            if almuerzo_info and almuerzo_elegido:
-                     lista_de_ingredientes.update({ingrediente.strip() for ingrediente in almuerzo_info.split(',')})
-
-            if cena_info and cena_elegida:
-                    lista_de_ingredientes.update({ingrediente.strip() for ingrediente in cena_info.split(',')})
-
-            # # ingredientes_separados_por_comas
-
-            # if cena_variedades:
-            #     for key, value in cena_variedades.items():
-            #         if value["elegido"] == True:
-            #             ingredientes = value['ingredientes_de_variedades']
-            #             lista_de_ingredientes.update({ingrediente.strip() for ingrediente in ingredientes.split(',')})
+        # Convertir defaultdict a dict antes de enviarlo al contexto
+        platos_por_dia = dict(platos_por_dia)
 
 
-            # Lista de claves de los distintos tipos de platos a procesar, incluyendo las guarniciones
-            tipos_de_platos = ["entrada1", "entrada2", "entrada3", "entrada4",
-                            "postre1", "postre2",
-                            "dip1", "dip2", "dip3", "dip4",
-                            "salsa1", "salsa2", "salsa3", "salsa4",
-                            "trago1", "trago2",
-                            "guarnicion1", "guarnicion2", "guarnicion3", "guarnicion4"]
+        # Recorrer los días y los platos
+        for platos in platos_por_dia.values():
+            for datos in platos.values():
+                # Si el plato está elegido, añadir sus ingredientes
+                if datos.get("elegido"):
+                   lista_de_ingredientes.update(map(str.strip, datos["ingredientes"].split(",")))
 
-            # Inicializa el conjunto para los ingredientes
-            # lista_de_ingredientes = set()
+                # Recorrer las variedades si existen
+                if "variedades" in datos:
+                    for variedad in datos["variedades"].values():
+                        if variedad.get("elegido"):  # Verificar si la variedad está marcada como elegida
+                            lista_de_ingredientes.update(map(str.strip, variedad["ingredientes"].split(",")))
 
-            # Itera sobre cada clave en la lista
-            for tipo in tipos_de_platos:
-                # Accede al diccionario de cada plato o guarnición
-                plato = platos_dia.get(tipo, {})
-                # Obtén los ingredientes de cada plato o guarnición
-                ingredientes = plato.get("ingredientes")
-                elegido = plato.get("elegido")
+        # Convertir a lista ordenada
+        lista_de_ingredientes = sorted(lista_de_ingredientes)
 
-                # Verifica que los ingredientes existan y no sean None
-                if ingredientes and elegido:
-                    # Divide los ingredientes por comas y actualiza el conjunto
-                    lista_de_ingredientes.update({ingrediente.strip() for ingrediente in ingredientes.split(',')})
+        if lista_de_ingredientes:
+            for ingrediente in lista_de_ingredientes:
+                el_comentario = ""
+                # Recorrer la lista y buscar el comentario asociado
+                for item in perfil.comentarios:
+                    # if "%" in item:
+                    ingrediente_archivado, comentario = item.split("%", 1)  # Dividir en ingrediente y comentario
+                    if ingrediente_archivado == ingrediente:
+                        el_comentario = comentario
 
-            # Inicializa el diccionario base con las claves fijas
-            platos_por_dia[menu_del_dia.el_dia_en_que_comemos] = {
-                "almuerzo": almuerzo_que_comemos,
-                "almuerzo_elegido": almuerzo_elegido,  # puede harcodearse a TRUE
-                "cena": cena_que_comemos,
-                "cena_elegida": cena_elegida,  # puede harcodearse a TRUE
-                "almuerzo_info": almuerzo_info,
-                "cena_info": cena_info,
-                "variedades": almuerzo_variedades,
-                "variedades_cena": cena_variedades,
-            }
-
-            # Itera sobre cada tipo de plato y sus elementos para agregar al diccionario
-            for tipo in tipos_de_platos:
-               plato = platos_dia.get(tipo, {})
-               platos_por_dia[menu_del_dia.el_dia_en_que_comemos][tipo] = {
-                        "plato": plato.get("plato"),
-                        "ingredientes": plato.get("ingredientes"),
-                        "elegido": plato.get("elegido")
-                    }
-
-            if lista_de_ingredientes:
-                for ingrediente in lista_de_ingredientes:
-                    el_comentario = ""
-                    # Recorrer la lista y buscar el comentario asociado
-                    for item in perfil.comentarios:
-                        # if "%" in item:
-                        ingrediente_archivado, comentario = item.split("%", 1)  # Dividir en ingrediente y comentario
-                        if ingrediente_archivado == ingrediente:
-                            el_comentario = comentario
-
-                    if ingrediente in perfil.ingredientes_que_tengo:
-                        ingredientes_unicos [ingrediente] = {
-                            "comentario": el_comentario,
-                            "estado": "tengo" }
-                    else:
-                        ingredientes_unicos [ingrediente] = {
-                            "comentario": el_comentario,
-                            "estado": "no-tengo" }
+                if ingrediente in perfil.ingredientes_que_tengo:
+                    ingredientes_unicos [ingrediente] = {
+                        "comentario": el_comentario,
+                        "estado": "tengo" }
+                else:
+                    ingredientes_unicos [ingrediente] = {
+                        "comentario": el_comentario,
+                        "estado": "no-tengo" }
 
     # Generar el mensaje de WhatsApp
     mensaje_whatsapp = "Lista de compras:\n"
@@ -577,6 +514,7 @@ def lista_de_compras(request):
         'ingredientes_separados_por_comas': ingredientes_unicos,
         'el_request': request.POST,
         "los_items": items_resultados,
+        "lista_de_ingredientes": lista_de_ingredientes,
         "lista_de_compras": lista_de_compras,
         "no_incluir": no_incluir,
         "dias_programados": fechas_existentes,
@@ -665,8 +603,8 @@ class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         # ingredientes_separados_por_comas = []
 
         for key, value in variedades_en_base.items():
-            variedad = value.get('variedad', '')
-            ingredientes_variedad = value.get('ingredientes_de_variedades',"")
+            variedad = value.get('nombre', '')
+            ingredientes_variedad = value.get('ingredientes',"")
 
             # Agregar la variedad al diccionario de variedades
             variedades[key] = variedad
@@ -706,8 +644,8 @@ class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
                 if value:
                   variedades['variedad' + numero_variedad] = {
-                    'variedad': value,
-                    'ingredientes_de_variedades': self.request.POST.get(ingredientes_key)
+                    'nombre': value,
+                    'ingredientes': self.request.POST.get(ingredientes_key)
                    }
 
         plato.variedades = variedades
@@ -793,11 +731,10 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             # ingredientes_variedad = [ingrediente.strip() for ingrediente in ingredientes_variedad_str.split(',')] if ingredientes_variedad_str else []
 
             if variedad:  # Verificar si la variedad no está vacía
-                variedades[f"variedad{i}"] = {"variedad": variedad, "ingredientes_de_variedades": ingredientes_variedad_str}
+                variedades[f"variedad{i}"] = {"nombre": variedad, "ingredientes": ingredientes_variedad_str, "elegido": True}
 
         plato.variedades = variedades
         plato.save()
-
 
         # Obtener el parámetro 'tipopag' y pasarlo en la redirección
         template_param = self.request.GET.get('tipopag')
@@ -937,6 +874,9 @@ def FiltroDePlatos (request):
                 request.session['quecomemos'] = quecomemos
                 request.session['misplatos'] = misplatos
 
+                request.session['dia_activo'] = dia_activo
+
+
     else:
         items_iniciales = {
 
@@ -994,11 +934,6 @@ def FiltroDePlatos (request):
         for usuario, mensajes in groupby(mensajes_x_usuario, key=lambda x: x.usuario_que_envia)
     }
 
-    
-
-# mensajes_agrupados ahora es un diccionario donde cada clave es un usuario,
-# y cada valor es la lista de mensajes de ese usuario.
-
     dia_activo = request.session.get('dia_activo', None)  # 🟢 Recuperamos la fecha activa
 
     # Inicializar un diccionario donde cada fecha tendrá una lista de platos
@@ -1017,7 +952,6 @@ def FiltroDePlatos (request):
 
     # Convertir defaultdict a dict antes de pasarlo a la plantilla
     platos_dia_x_dia = dict(platos_dia_x_dia)
-
 
     # Convertir defaultdict a lista de tuplas (dia, platos) antes de pasarlo a la plantilla
     platos_dia_por_dia = [(fec, platos) for fec, platos in platos_dia_x_dia.items()] 
@@ -1169,12 +1103,12 @@ class MensajeDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 
    
-class Chat(View):
+# class Chat(View):
 
-    def get(self, request, nombre_usuario):
-        usuario = get_object_or_404(User, username=nombre_usuario)
-        mensajes = Mensaje.objects.filter(destinatario=request.user, usuario_que_envia=usuario.username)
-        return render(request, 'chat.html', {'usuario': usuario, 'mensajes': mensajes})
+#     def get(self, request, nombre_usuario):
+#         usuario = get_object_or_404(User, username=nombre_usuario)
+#         mensajes = Mensaje.objects.filter(destinatario=request.user, usuario_que_envia=usuario.username)
+#         return render(request, 'chat.html', {'usuario': usuario, 'mensajes': mensajes})
 
 
 @login_required
@@ -1360,41 +1294,40 @@ class AsignarPlato(View):
         plato_id = request.POST.get('plato_id')
         dia = request.POST.get('dia')
         comida = request.POST.get('comida')
-        
+
         # Buscar el plato
-        plato = Plato.objects.get(id=plato_id)
-        
-        # Convertir string a fecha usando el módulo completo
+        try:
+            plato = Plato.objects.get(id=plato_id)
+        except Plato.DoesNotExist:
+            messages.error(request, "El plato no existe.")
+            return redirect('filtro-de-platos')
+
+        # Convertir el string de fecha a objeto date
         fecha_comida = datetime.datetime.strptime(dia, "%Y-%m-%d").date()
 
         # Guardar la fecha en la sesión para recordar la pestaña activa
-        request.session['dia_activo'] = dia  # 🟢 Guardamos el día en la sesión
-        
-        # Buscar o crear la instancia del día
+        request.session['dia_activo'] = dia  
+
+        # Buscar o crear el registro del día
         menu_dia, created = ElegidosXDia.objects.get_or_create(
             user=request.user,
             el_dia_en_que_comemos=fecha_comida,
             defaults={"platos_que_comemos": {}}
         )
-# Contar las instancias del plato con el mismo tipo (ej. "Salsa")
-        count = sum(1 for key in menu_dia.platos_que_comemos if key.startswith(plato.tipo))
 
-        # Crear la clave dinámica para platos del mismo tipo
-        if count > 0:
-            key = f"{plato.tipo}{count + 1}"
-        else:
-            key = plato.tipo  # Si no hay otros de ese tipo, usamos la clave original
-
-        # Asignar el plato con la clave dinámica
-        ingredientes = plato.ingredientes  # Ajusta esto según tu lógica de negocio
-        menu_dia.platos_que_comemos[key] = {
+        # Asignar el plato en el diccionario usando el ID como clave
+        menu_dia.platos_que_comemos[str(plato.id)] = {
             "plato": plato.nombre_plato,
-            "ingredientes": ingredientes,
+            "tipo": plato.tipo,
+            "ingredientes": plato.ingredientes,
+            "comida": comida,
+            "variedades": plato.variedades,
             "elegido": True
         }
 
-        # Guardar la instancia actualizada
+        # Guardar los cambios en la base de datos
         menu_dia.save()
         messages.success(request, "Plato asignado correctamente.")
         
         return redirect('filtro-de-platos')
+
