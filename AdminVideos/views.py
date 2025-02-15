@@ -156,20 +156,11 @@ def lista_de_compras(request):
     today = date.today()
     
     lista_de_ingredientes = set()
-
     ingredientes_unicos = {}  # Diccionario para almacenar ingredientes a comprar, estado, comentario
-        
-    ingredientes_no_comprados = []
     lista_de_compras = set()
-
- # Diccionarios auxiliares
-    platos_seleccionados = set()
-    variedades_seleccionadas = defaultdict(set)
-    ingredientes_elegidos = set()
     no_elegidos = set()
-    comentarios = set()
+    ingredientes_elegidos = set()
 
-    
     # Filtrar los objetos de ElegidosXDia para excluir aquellos cuya fecha sea anterior a la fecha actual
     menues_del_usuario = ElegidosXDia.objects.filter(user=request.user, el_dia_en_que_comemos__gte=today).order_by('el_dia_en_que_comemos')
 
@@ -177,6 +168,9 @@ def lista_de_compras(request):
     perfil = get_object_or_404(Profile, user=request.user)
 
     if request.method == 'POST':
+    
+         # Diccionarios auxiliares
+        variedades_seleccionadas = defaultdict(set)
 
         platos_seleccionados = set(request.POST.getlist("plato_seleccionado"))  # Captura todos los valores correctamente
         ingredientes_elegidos = set(request.POST.getlist("ingrediente_a_comprar"))
@@ -198,17 +192,11 @@ def lista_de_compras(request):
                 if clave_fecha in platos_seleccionados:
                     # Marcar como elegido
                     datos["elegido"] = True
-                    # # Agregar ingredientes del plato
-                    # ingredientes_elegidos.update(
-                    #     ingrediente.strip() for ingrediente in datos["ingredientes"].split(",")
-                    # )
-                    # Procesar variedades
+                 
                     for variedad_id, variedad_data in datos.get("variedades", {}).items():
                         if variedad_data["nombre"] in variedades_seleccionadas[plato_id]:
                             variedad_data["elegido"] = True
-                            # ingredientes_elegidos.update(
-                            #     ingrediente.strip() for ingrediente in variedad_data["ingredientes"].split(",")
-                            # )
+                           
                         else:
                             variedad_data["elegido"] = False
                 else:
@@ -221,45 +209,48 @@ def lista_de_compras(request):
             menu.platos_que_comemos = platos
             menu.save()
 
-            comentarios_perfil = perfil.comentarios  # Accede a los comentarios guardados
+        # Suponiendo que perfil.comentarios contiene una lista de cadenas en el formato "ingrediente%comentario"
+        comentarios_guardados_lista = perfil.comentarios
+        comentarios_guardados = {}
+ 
+        if comentarios_guardados_lista:
+            # Recorrer los comentarios guardados y convertirlos en un diccionario
+            for item in comentarios_guardados_lista:
+                ingrediente, comentario = item.split("%", 1)  # Divide en ingrediente y comentario
+                comentarios_guardados[ingrediente] = comentario  # Guarda en el diccionario
+                       
+        comentarios_posteados = {}
 
-            # Si el campo JSON está vacío o no es una lista, inicialízalo
-            if not isinstance(comentarios_perfil, list):
-                comentarios_perfil = []
+        for key, value in request.POST.items():
+            if key.endswith("_comentario"):  # Filtra solo los comentarios
+                ingrediente = key.replace("_comentario", "")  # Extraer el ingrediente del nombre del campo
+                comentario_posteado = value.strip()  # Eliminar espacios en blanco al inicio y al final
 
-            comentarios_post = {}
+                # Guarda el comentario (puede ser vacío)
+                comentarios_posteados[ingrediente] = comentario_posteado
 
-            # Recorre los datos del formulario buscando comentarios
-            for key, value in request.POST.items():
-                if key.endswith("_comentario"):  
-                    ingrediente = key.replace("_comentario", "")  # Extrae el ingrediente
-                    comentario_limpio = value.strip()  # Quita espacios extra
-
-                    if comentario_limpio:  # Solo guarda si el comentario no está vacío
-                        comentarios_post[ingrediente] = comentario_limpio
-
-            # Actualiza los comentarios en el perfil del usuario
-            nuevos_comentarios = []
-            ingredientes_actualizados = set(comentarios_post.keys())
-
-            for comentario in comentarios_perfil:
-                ingrediente_existente, _ = comentario.split("%", 1) if "%" in comentario else (comentario, "")
+        # Recorremos el diccionario de comentarios guardados
+        for ingrediente_posteado, comentario_posteado in comentarios_posteados.items():
+            if ingrediente_posteado in comentarios_guardados:  # Verificamos si el ingrediente está en ambos diccionarios
+                # Obtenemos el comentario guardado 
+                comentario_guardado = comentarios_guardados[ingrediente_posteado]
+                # prepara el registro nuevo por si lo usa
+                registro = f"{ingrediente_posteado}%{comentario_guardado}"
+                if not comentario_posteado:
+                    # Eliminar el comentario del ingrediente
+                    perfil.comentarios.remove(registro)
+                elif comentario_posteado != comentario_guardado:
+                     # Actualizar el comentario del ingrediente
+                    perfil.comentarios[perfil.comentarios.index(registro)] = f"{ingrediente_posteado}%{comentario_posteado}"
+                       
+            elif comentario_posteado:
+                # Unir el ingrediente nuevo con el comentario, separado por '%'
+                ingrediente_con_comentario = f"{ingrediente_posteado}%{comentario_posteado}"
+                # Actualizar el campo ingredientes_que_tengo
+                perfil.comentarios.append(ingrediente_con_comentario)
+            # Guardar los cambios en el perfil
+            perfil.save()    
                 
-                if ingrediente_existente in ingredientes_actualizados:
-                    nuevos_comentarios.append(f"{ingrediente_existente}%{comentarios_post[ingrediente_existente]}")
-                    ingredientes_actualizados.remove(ingrediente_existente)  # Ya lo actualizamos
-                else:
-                    nuevos_comentarios.append(comentario)  # Mantiene los comentarios que no se modificaron
-
-            # Agrega los nuevos comentarios que no existían antes
-            for ingrediente, nuevo_comentario in comentarios_post.items():
-                if ingrediente in ingredientes_actualizados:
-                    nuevos_comentarios.append(f"{ingrediente}%{nuevo_comentario}")
-
-            # Guarda los comentarios actualizados en el perfil del usuario
-            perfil.comentarios = nuevos_comentarios
-            perfil.save()
-
 
     # Recorrer los menús del usuario
     for menu in menues_del_usuario:
@@ -276,12 +267,6 @@ def lista_de_compras(request):
                 for variedad_id, variedad in datos["variedades"].items():
                     if variedad.get("elegido"):  # Verificar si la variedad está marcada como elegida
                         lista_de_ingredientes.update(map(str.strip, variedad["ingredientes"].split(",")))
-
-
-    # Convertir a lista ordenada
-    # lista_de_ingredientes = sorted(lista_de_ingredientes)
-
-    
 
     if ingredientes_elegidos:
         no_elegidos = lista_de_ingredientes - ingredientes_elegidos
@@ -341,21 +326,12 @@ def lista_de_compras(request):
   
 
     context = {
-        # 'el_request': request.POST,
-        "no_elegidos": no_elegidos,
         'menues_del_usuario': menues_del_usuario,
         'ingredientes_con_tengo_y_comentario': ingredientes_unicos, # DICT TODOS LOS INGREDIENTES, CON TENGO Y COMENTARIO
-        # "lista_de_ingredientes": lista_de_ingredientes,
         "lista_de_compras": lista_de_compras, # LISTA DE COMPRAS PARA VERLO EN ENVAR A WHATS APP
-        # "no_incluir": no_incluir,
-        "platos_seleccionados": platos_seleccionados,
-        "ingredientes_elegidos": ingredientes_elegidos,
-        "variedades_seleccionadas":variedades_seleccionadas,
-        "comentarios": comentarios,
-
-        "ingredientes_no_comprados": ingredientes_no_comprados,
         "mensaje_whatsapp": mensaje_whatsapp, # MENSAJE FORMATEADO PARA WHATSAPP
-        "parametro" : "lista-compras"
+        "parametro" : "lista-compras",
+    
     }
 
     return render(request, 'AdminVideos/lista_de_compras.html', context)
