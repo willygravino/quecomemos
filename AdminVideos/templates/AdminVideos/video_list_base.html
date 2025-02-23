@@ -25,24 +25,24 @@
               <a class=" badge bg-success text-wrap" href="{% url 'desmarcar-todo' %}">
                 DESMARCAR <br> PRESELECCIONADOS
               </a>
-         
+
             {% endif %}   -->
-            
+
             <br>
 
             <a class="bg-primary text-white small border border-dark" href="{% url 'videos-create' %}?tipopag={{ request.GET.tipopag|default:'' }}">
               {% if request.GET.tipopag and request.GET.tipopag != "Dash" %} AGREGAR {{ request.GET.tipopag }}{% else %} AGREGAR PRINCIPAL{% endif %}
             </a>
-                   
+
           </div>
         </div>
           <!-- </div> -->
         <!-- </div> -->
-      
+
         {% if not platos %}
           <h6>No hay platos para mostrar.</h6>
         {% else %}
-      
+
         <!-- <h1>preselllllls {{ preseleccionados }}</h1> -->
 
         {% for plato in platos %}
@@ -54,18 +54,18 @@
                     <!-- <a href="">
                       <img src="{{plato.image_url}}" class="img-fluid position-relative object-fit-cover" alt="Imagen del Plato">
                     </a>                         -->
-                    
-                    <a href="#" data-bs-toggle="modal" data-bs-target="#asignarPlatoModal" onclick="setPlatoInfo('{{ plato.id }}', '{{ plato.image_url }}', '{{ plato.nombre_plato }}', '{{ plato.descripcion_plato }}')">
+
+                    <a href="{% url 'videos-detail' plato.id %}">
                       <img src="{{ plato.image_url }}" class="img-fluid object-fit-cover" alt="Imagen del Plato">
                     </a>
-                    
+
                     <div class="position-absolute top-0 mt-1 start-50 translate-middle-x text-center text-white bg-dark rounded">
                         <h6 class="mb-0 small"> {{ plato.nombre_plato }} </h6>
                     </div>
                 </div>
                 <div class="mt-0">
-                 
-                    <small class=""> {{ plato.tipo }} /</small>
+
+                    <!-- <small class=""> {{ plato.tipo }} /</small> -->
                     <!-- <p>Lunes 1 - Almuerzo</p> ASIGNACION AQUÍ -->
 
                     {% for key, value in plato.variedades.items %}
@@ -75,18 +75,36 @@
                         {% endif %}
                     {% endfor %}
 
-                    {% if amigues %}
-                      <a href="{% url 'videos-detail' plato.id %}">
-                        <i class="fa-solid fa-share-nodes"></i>
-                      </a>               
-                    {% endif %}
-                    <a href="{% url 'videos-detail' plato.id %}">
-                      <i class="fa-solid fa-pen-to-square"></i>
-                    </a>   
+                    <div class="d-inline-flex gap-2 align-items-center justify-content-center">
+                      {% if amigues %}
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#compartirModal">
+                          <i class="fa-solid fa-share-nodes"></i>
+                        </a>
+                      {% endif %}
+
+
+                      <!-- <a href="{% url 'videos-detail' plato.id %}">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                      </a>
+                      -->
+
+                      <a href="#" data-bs-toggle="modal" data-bs-target="#asignarPlatoModal" class="btn btn-sm btn-primary p-0" onclick="setPlatoInfo('{{ plato.id }}')">
+                        Programar
+                      </a>
+<!--
+                      <button type="button" class="btn btn-secondary"
+                              data-bs-toggle="popover" data-bs-placement="right"
+                              data-bs-custom-class="custom-popover"
+                              data-bs-title="Custom popover"
+                              data-bs-content="This popover is themed via CSS variables.">
+                        Custom popover
+                      </button> -->
+
+                    </div>
 
                     <div>
-                      <!-- <button 
-                          class="btn {% if plato.nombre_plato in preseleccionados %}btn-success{% else %}btn-primary{% endif %}" 
+                      <!-- <button
+                          class="btn {% if plato.nombre_plato in preseleccionados %}btn-success{% else %}btn-primary{% endif %}"
                           style="font-size: 12px; padding: 2px 5px;"
                           data-plato-id="{{ plato.id }}"
                           data-nombre-plato="{{ plato.nombre_plato }}"
@@ -96,7 +114,7 @@
                           {% if plato.nombre_plato in preseleccionados %}√{% else %}Preseleccionar{% endif %}
                       </button> -->
                     </div>
-                      
+
                     <!-- PRUEBA HTML del checkbox -->
                     <!-- <label>
                       <input type="checkbox" id="preseles" name="" value="" {% if plato.nombre_plato in preseleccionados %} checked {% endif %} style="display: none;">
@@ -109,7 +127,7 @@
                         <a href="{% url 'descartar-sugerido' plato.nombre_plato %}" class="btn btn-success" style="font-size: 12px; padding: 2px 5px;">NO ME INTERESA ESTE PLATO</a>
 
                     {% endif %}
-                 
+
                 </div>
               </div>
             </div>
@@ -126,19 +144,19 @@
 <!-- <script>
   document.addEventListener("DOMContentLoaded", function () {
       const buttons = document.querySelectorAll("button[data-plato-id]");
-  
+
       buttons.forEach(button => {
           button.addEventListener("click", function (event) {
               event.preventDefault(); // Previene el comportamiento predeterminado
-  
+
               const nombrePlato = this.dataset.nombrePlato;
               const tipoPlato = this.dataset.tipoPlato;
               const tipopag = this.dataset.tipopag;
               const accion = this.dataset.accion;
-  
+
               // Construir la URL con los parámetros
               const url = `% url 'plato-preseleccionado' %}?opcion1=${encodeURIComponent(nombrePlato)}&tipoplato=${encodeURIComponent(tipoPlato)}&tipopag=${encodeURIComponent(tipopag)}&accion=${encodeURIComponent(accion)}`;
-  
+
               // Realizar la solicitud GET
               fetch(url, {
                   method: "GET",
@@ -175,50 +193,74 @@
   });
 </script> -->
 
+<!-- Modal para compartir plato -->
+<div class="modal fade" id="compartirModal" tabindex="-1" aria-labelledby="compartirModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <!-- <div class="modal-header">
+        <h5 class="modal-title" id="compartirModalLabel">Compartir plato</h5>
+        
+      </div> -->
+      <div class="modal-body">
+        <form method="post" action="{% url 'compartir-plato' %}">
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <h6>Compartir este plato con:</h6>
+            <select id="amigue-select" name="amigue" class="form-select" aria-label="Seleccionar amigue">
+              {% for amigue in amigues %}
+                <option value="{{ amigue }}">{{ amigue }}</option>
+              {% endfor %}
+            </select>
+            <input type="hidden" name="plato_id" value="{{ plato.id }}">
+          </div>
+
+          <button type="submit" class="btn btn-primary">Compartir</button>
+
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button> 
+          
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <!-- Modal para asignar plato -->
 <div class="modal fade" id="asignarPlatoModal" tabindex="-1" aria-labelledby="asignarPlatoLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="asignarPlatoLabel">Asignar Plato</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
+     
       <form action="{% url 'asignar-plato' %}" method="POST">
         {% csrf_token %}
         <div class="modal-body">
           <!-- Campo oculto para el ID del plato -->
           <input type="hidden" name="plato_id" id="platoIdInput">
-          
-          <!-- Información del Plato -->
-          <div class="text-center mb-3">
-            <img id="platoImage" src="" alt="Imagen del Plato" class="img-fluid rounded mb-2" style="max-height: 200px;">
-            <h5 id="platoNombre" class="fw-bold mt-1"></h5>
-            <p id="platoDescripcion" class="text-muted"></p>
-          </div>
-        
+
           <!-- Campo oculto para almacenar el día activo -->
           <input type="hidden" name="dia" id="diaSeleccionado">
 
-          <!-- Muestra el día activo en el modal -->
-          <h2>Asignar al día <span id="diaActivoTexto"></span></h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
 
           <!-- Selector del tipo de comida -->
-          <div class="mb-3">
+          <div class="mb-1">
             <label for="comidaSeleccionada" class="form-label">Seleccionar comida:</label>
             <select name="comida" id="comidaSeleccionada" class="form-select">
               <option value="desayuno">Desayuno</option>
               <option value="almuerzo">Almuerzo</option>
               <option value="merienda">Merienda</option>
               <option value="cena">Cena</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </select> 
+        
           <button type="submit" class="btn btn-primary">Asignar</button>
-        </div>
+
+
       </form>
+
+    </div>
+  </div> 
+
     </div>
   </div>
 </div>
@@ -227,9 +269,9 @@
   // Función para pasar información del plato al modal
   function setPlatoInfo(platoId, imageUrl, nombre, descripcion) {
     document.getElementById("platoIdInput").value = platoId;
-    document.getElementById("platoImage").src = imageUrl;
-    document.getElementById("platoNombre").textContent = nombre;
-    document.getElementById("platoDescripcion").textContent = descripcion;
+    // document.getElementById("platoImage").src = imageUrl;
+    // document.getElementById("platoNombre").textContent = nombre;
+    // document.getElementById("platoDescripcion").textContent = descripcion;
   }
 </script>
 

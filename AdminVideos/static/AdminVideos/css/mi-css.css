@@ -3,6 +3,7 @@
     display: none;
 } */
 
+
 /* Estilo para el contenedor del checkbox personalizado */
 .custom-checkbox {
    
@@ -33,3 +34,13 @@
 input[type="checkbox"]:checked + .custom-checkbox:before {
     background-color: red;
 }
+
+/* NO FUNCIONA! */
+.custom-popover {
+    --bs-popover-max-width: 200px;
+    --bs-popover-border-color: var(--bd-violet-bg);
+    --bs-popover-header-bg: var(--bd-violet-bg);
+    --bs-popover-header-color: var(--bs-white);
+    --bs-popover-body-padding-x: 1rem;
+    --bs-popover-body-padding-y: .5rem;
+  }

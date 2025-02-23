@@ -612,6 +612,15 @@
     <!-- VIEJA PLANTILLA SCRIPT -->
 
     <script src="/AdminVideos/static/AdminVideos/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Inicialización de Popover -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+            const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+        });
+    </script>
+
 </body>
 
 </html>
