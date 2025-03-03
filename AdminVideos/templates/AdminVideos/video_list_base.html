@@ -13,21 +13,11 @@
 <!-- <hr> -->
 
 <section>
-  <!-- <div class="row"> -->
-    <!-- <div class="col"> -->
+  
       <div class="p-1 d-flex flex-wrap">
-        <!-- <div class="row"> -->
-          <!-- <div class="col"> -->
+       
         <div class=" d-flex align-items-center">
           <div class="container">
-
-            <!-- {% if preseleccionados %}
-              <a class=" badge bg-success text-wrap" href="{% url 'desmarcar-todo' %}">
-                DESMARCAR <br> PRESELECCIONADOS
-              </a>
-
-            {% endif %}   -->
-
             <br>
 
             <a class="bg-primary text-white small border border-dark" href="{% url 'videos-create' %}?tipopag={{ request.GET.tipopag|default:'' }}">
@@ -36,14 +26,12 @@
 
           </div>
         </div>
-          <!-- </div> -->
-        <!-- </div> -->
+     
 
         {% if not platos %}
           <h6>No hay platos para mostrar.</h6>
         {% else %}
 
-        <!-- <h1>preselllllls {{ preseleccionados }}</h1> -->
 
         {% for plato in platos %}
           <div class="d-flex flex-row">
@@ -140,59 +128,6 @@
 
 </section>
 
-
-<!-- <script>
-  document.addEventListener("DOMContentLoaded", function () {
-      const buttons = document.querySelectorAll("button[data-plato-id]");
-
-      buttons.forEach(button => {
-          button.addEventListener("click", function (event) {
-              event.preventDefault(); // Previene el comportamiento predeterminado
-
-              const nombrePlato = this.dataset.nombrePlato;
-              const tipoPlato = this.dataset.tipoPlato;
-              const tipopag = this.dataset.tipopag;
-              const accion = this.dataset.accion;
-
-              // Construir la URL con los parámetros
-              const url = `% url 'plato-preseleccionado' %}?opcion1=${encodeURIComponent(nombrePlato)}&tipoplato=${encodeURIComponent(tipoPlato)}&tipopag=${encodeURIComponent(tipopag)}&accion=${encodeURIComponent(accion)}`;
-
-              // Realizar la solicitud GET
-              fetch(url, {
-                  method: "GET",
-              })
-              .then(response => {
-                  if (!response.ok) {
-                      throw new Error(`Error en la solicitud: ${response.statusText}`);
-                  }
-                  return response.json(); // Procesar la respuesta como JSON
-              })
-              .then(data => {
-                  if (data.success) {
-                      // Actualizar el estado del botón dinámicamente
-                      if (accion === "borrar") {
-                          this.classList.remove("btn-success");
-                          this.classList.add("btn-primary");
-                          this.textContent = "Preseleccionar";
-                          this.dataset.accion = "preseleccionar";
-                      } else {
-                          this.classList.remove("btn-primary");
-                          this.classList.add("btn-success");
-                          this.textContent = "√";
-                          this.dataset.accion = "borrar";
-                      }
-                  } else {
-                      console.error("Acción no fue exitosa:", data);
-                  }
-              })
-              .catch(error => {
-                  console.error("Error:", error); // Mostrar errores en consola
-              });
-          });
-      });
-  });
-</script> -->
-
 <!-- Modal para compartir plato -->
 <div class="modal fade" id="compartirModal" tabindex="-1" aria-labelledby="compartirModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -240,6 +175,9 @@
           <!-- Campo oculto para almacenar el día activo -->
           <input type="hidden" name="dia" id="diaSeleccionado">
 
+            <!-- Muestra el día activo en el modal -->
+            <h2>Asignar al día <span id="diaActivoTexto"></span></h2>
+
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 
 
@@ -267,7 +205,7 @@
 
 <script>
   // Función para pasar información del plato al modal
-  function setPlatoInfo(platoId, imageUrl, nombre, descripcion) {
+  function setPlatoInfo(platoId) {
     document.getElementById("platoIdInput").value = platoId;
     // document.getElementById("platoImage").src = imageUrl;
     // document.getElementById("platoNombre").textContent = nombre;

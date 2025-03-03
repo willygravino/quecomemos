@@ -64,10 +64,15 @@
                 <li class="nav-item">
             {% endif %}
 
-               <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Entrada">
+                <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Entrada{% if dia_activo %}&dia_activo={{ dia_activo }}{% endif %}">
                     <i class="fa-solid fa-shrimp" style="font-size: 1.3rem;"></i>
                     <span>Entradas</span>
                 </a>
+
+               <!-- <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Entrada">
+                    <i class="fa-solid fa-shrimp" style="font-size: 1.3rem;"></i>
+                    <span>Entradas</span>
+                </a> -->
             </li>
 
             {% if parametro == "Dip" %}
@@ -356,7 +361,10 @@
 
                 <!-- End of Topbar -->
 
-<!-- <h1>dia activo {{dia_activo}}</h1> -->
+<h1>dia activo {{dia_activo}}</h1> 
+<!-- 
+<h6>pla {{pla}}</h6>  -->
+
 
                 <div class="container" style="background-color: rgb(147, 18, 18);">
                     <!-- Nav Tabs -->
@@ -386,23 +394,114 @@
                                     <!-- <p class="mb-1">Programado día {{ dia|date:"l j" }}</p>  -->
                                     <div class="row d-flex align-items-start">
                                         <div class="col  p-2 overflow-auto" style="max-height: 100px;">
+
+                                            
+
                                             <!-- Buscamos los platos para este día -->
-                                            {% for dia_plato in platos_dia_x_dia %}
+                                            <!-- {% for dia_plato in platos_dia_x_dia %}
                                                 {% if dia_plato.0 == dia %}
                                                     {% if dia_plato.1 %}
-                                                        {% for plato in dia_plato.1 %}
+                                                        {% for plato, comida in dia_plato.1 %}
                                                             <p class="mb-1 ml-3 d-flex align-items-center">
-                                                                {{ plato }}
-                                                                <button class="btn btn-sm p-0 ml-2" title="Eliminar">
+                                                                {{ plato }} {{dia}} {{comida}}
+
+                                                                <a href="" class="btn btn-sm p-0 ml-2" title="Eliminar">
                                                                     <i class="fa-solid fa-trash-can"></i>
-                                                                </button>
+                                                                </a>
+                                                                
                                                             </p>
                                                         {% endfor %}
                                                     {% else %}
                                                         <p>No hay platos asignados para este día.</p>
                                                     {% endif %}
                                                 {% endif %}
+                                            {% endfor %} -->
+
+                                            {% for dia_plato in platos_dia_x_dia.items %}
+                                                {% if dia_plato.0 == dia %}
+                                                    <div class="row">
+                                                        <!-- Desayuno -->
+                                                        <div class="col-md-3">
+                                                            
+                                                            <h6 class="fw-bold">Desayuno</h6>
+                                                            {% if dia_plato.1.desayuno %}
+                                                                {% for plato in dia_plato.1.desayuno %}
+                                                                    <p class="mb-1 ml-3 d-flex align-items-center">
+                                                                        {{ plato }}
+                                                                        <a href="" class="btn btn-sm p-0 ml-2" title="Eliminar">
+                                                                            <i class="fa-solid fa-trash-can"></i>
+                                                                        </a>
+                                                                    </p>
+                                                                {% endfor %}
+                                                            {% else %}
+                                                                <p>No hay platos.</p>
+                                                            {% endif %}
+                                                        </div>
+                                            
+                                                        <!-- Almuerzo -->
+                                                        <div class="col-md-3">
+                                                            <h6 class="fw-bold">Almuerzo</h6>
+                                                            {% if dia_plato.1.almuerzo %}
+                                                                {% for plato in dia_plato.1.almuerzo %}
+                                                                    <p class="mb-1 ml-3 d-flex align-items-center">
+                                                                        {{ plato }}
+                                                                        <a href="" class="btn btn-sm p-0 ml-2" title="Eliminar">
+                                                                            <i class="fa-solid fa-trash-can"></i>
+                                                                        </a>
+                                                                    </p>
+                                                                {% endfor %}
+                                                            {% else %}
+                                                                <p>No hay platos.</p>
+                                                            {% endif %}
+                                                        </div>
+                                            
+                                                        <!-- Merienda -->
+                                                        <div class="col-md-3">
+                                                            <h6 class="fw-bold">Merienda</h6>
+                                                            {% if dia_plato.1.merienda %}
+                                                                {% for plato in dia_plato.1.merienda %}
+                                                                    <p class="mb-1 ml-3 d-flex align-items-center">
+                                                                        {{ plato }}
+                                                                        <a href="" class="btn btn-sm p-0 ml-2" title="Eliminar">
+                                                                            <i class="fa-solid fa-trash-can"></i>
+                                                                        </a>
+                                                                    </p>
+                                                                {% endfor %}
+                                                            {% else %}
+                                                                <p>No hay platos.</p>
+                                                            {% endif %}
+                                                        </div>
+                                            
+                                                        <!-- Cena -->
+                                                        <div class="col-md-3">
+                                                            <h6 class="fw-bold">Cena</h6>
+                                                            {% if dia_plato.1.cena %}
+                                                                {% for plato in dia_plato.1.cena %}
+                                                                    <p class="mb-1 ml-3 d-flex align-items-center">
+                                                                        {{ plato }}
+                                                                        <a href="" class="btn btn-sm p-0 ml-2" title="Eliminar">
+                                                                            <i class="fa-solid fa-trash-can"></i>
+                                                                        </a>
+                                                                    </p>
+                                                                {% endfor %}
+                                                            {% else %}
+                                                                <p>No hay platos.</p>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
                                             {% endfor %}
+                                        
+
+
+
+
+
+
+
+
+
+
                                         </div>
                                     </div>
                                 </div>
@@ -469,22 +568,91 @@
         </div>
     </div>
 
-   
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            // Detectamos el tab activo al hacer clic en los enlaces de navegación
+            document.querySelectorAll(".nav-link").forEach(link => {
+                link.addEventListener("click", function(event) {
+                    let activeTab = document.querySelector(".nav-tabs .nav-link.active");
+                    if (activeTab) {
+                        let diaActivo = activeTab.id.replace("tab-", "");  // Extraemos la fecha de la pestaña activa
+                        let url = new URL(this.href, window.location.origin);
+                        url.searchParams.set("dia_activo", diaActivo);  // Agregamos el día a la URL
+                        this.href = url.toString();  // Actualizamos el `href`
+                    }
+                });
+            });
+        });
+    </script>
+    
+   
+    <script>
+
+        // COMBINA AMBOS SCRIPT
+
+        document.addEventListener("DOMContentLoaded", function() {
             let modal = document.getElementById("asignarPlatoModal");
-      
-            modal.addEventListener("show.bs.modal", function() {
-                let tabActivo = document.querySelector(".nav-link.active"); 
+            let tabs = document.querySelectorAll(".nav-link");
+
+            // Función para actualizar los valores
+            function actualizarDiaActivo() {
+                let tabActivo = document.querySelector(".nav-link.active");
                 if (tabActivo) {
-                    let diaActivo = tabActivo.id.replace("tab-", ""); 
-      
-                    // Asignar el valor al input oculto y al texto visible en el modal
+                    let diaActivo = tabActivo.id.replace("tab-", "");
                     document.getElementById("diaSeleccionado").value = diaActivo;
                     document.getElementById("diaActivoTexto").textContent = diaActivo;
                 }
+            }
+
+            // Evento al abrir el modal
+            modal.addEventListener("show.bs.modal", actualizarDiaActivo);
+
+            // Evento al hacer clic en las pestañas
+            tabs.forEach(tab => {
+                tab.addEventListener("click", actualizarDiaActivo);
             });
         });
+
+        // MODAL PARA ESCUCHAR EL CAMBIO DE TAB
+
+        // document.addEventListener("DOMContentLoaded", function() {
+        //     // Selecciona todas las pestañas
+        //     let tabs = document.querySelectorAll(".nav-link");
+
+        //     // Añade un evento click a cada pestaña
+        //     tabs.forEach(tab => {
+        //         tab.addEventListener("click", function() {
+                    
+        //             // Obtiene la pestaña activa después del clic
+        //             let tabActivo = document.querySelector(".nav-link.active");
+        //             if (tabActivo) {
+        //                 let diaActivo = tabActivo.id.replace("tab-", "");
+
+        //                 // Asignar el valor al input oculto y al texto visible
+        //                 document.getElementById("diaSeleccionado").value = diaActivo;
+        //                 document.getElementById("diaActivoTexto").textContent = diaActivo;
+        //             }
+        //         });
+        //     });
+        // });
+
+        
+        // VIEJO MODAL, FUNCIONA!
+
+        // document.addEventListener("DOMContentLoaded", function() {
+        //     let modal = document.getElementById("asignarPlatoModal");
+      
+        //     modal.addEventListener("show.bs.modal", function() {
+        //         let tabActivo = document.querySelector(".nav-link.active"); 
+        //         if (tabActivo) {
+        //             let diaActivo = tabActivo.id.replace("tab-", ""); 
+      
+        //             // Asignar el valor al input oculto y al texto visible en el modal
+        //             document.getElementById("diaSeleccionado").value = diaActivo;
+        //             document.getElementById("diaActivoTexto").textContent = diaActivo;
+        //         }
+        //     });
+        // });
       </script>
        
 
