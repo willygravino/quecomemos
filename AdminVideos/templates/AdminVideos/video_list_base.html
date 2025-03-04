@@ -48,7 +48,7 @@
                     </a>
 
                     <div class="position-absolute top-0 mt-1 start-50 translate-middle-x text-center text-white bg-dark rounded">
-                        <h6 class="mb-0 small"> {{ plato.nombre_plato }} </h6>
+                        <h6 class="mb-0 small"> {{ plato.nombre_plato }}  {{ plato.id }}</h6>
                     </div>
                 </div>
                 <div class="mt-0">
@@ -65,7 +65,7 @@
 
                     <div class="d-inline-flex gap-2 align-items-center justify-content-center">
                       {% if amigues %}
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#compartirModal">
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#compartirModal" onclick="setPlatoInfo('{{ plato.id }}')">
                           <i class="fa-solid fa-share-nodes"></i>
                         </a>
                       {% endif %}
@@ -141,14 +141,15 @@
           {% csrf_token %}
 
           <div class="mb-3">
-            <h6>Compartir este plato con:</h6>
+            <h6>Compartir este plato  {{ plato.id }} con:</h6>
             <select id="amigue-select" name="amigue" class="form-select" aria-label="Seleccionar amigue">
               {% for amigue in amigues %}
                 <option value="{{ amigue }}">{{ amigue }}</option>
               {% endfor %}
             </select>
-            <input type="hidden" name="plato_id" value="{{ plato.id }}">
-          </div>
+          <!-- Campo oculto donde se establecerá el plato id dinámicamente -->
+          <input type="hidden" name="plato_id" id="platoIdInput">
+        </div>
 
           <button type="submit" class="btn btn-primary">Compartir</button>
 

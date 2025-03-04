@@ -915,7 +915,6 @@ class compartir_plato(CreateView):
     template_name = 'AdminVideos/compartir_plato.html'
     success_url = reverse_lazy('filtro-de-platos')
 
-
     fields = ['mensaje']  # Solo incluimos el campo del mensaje, ya que otros se asignarán automáticamente
 
     def get_context_data(self, **kwargs):
