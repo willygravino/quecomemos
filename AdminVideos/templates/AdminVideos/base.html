@@ -428,9 +428,11 @@
                                                                 {% for plato in dia_plato.1.desayuno %}
                                                                     <p class="mb-1 ml-3 d-flex align-items-center">
                                                                         {{ plato }}
-                                                                        <a href="" class="btn btn-sm p-0 ml-2" title="Eliminar">
+
+                                                                        <a href="{% url 'eliminar-programado' nombre_plato=plato comida='desayuno' fecha=dia %}" class="btn btn-sm p-0 ml-2" title="Eliminar">
                                                                             <i class="fa-solid fa-trash-can"></i>
                                                                         </a>
+                                                                      
                                                                     </p>
                                                                 {% endfor %}
                                                             {% else %}
@@ -445,7 +447,7 @@
                                                                 {% for plato in dia_plato.1.almuerzo %}
                                                                     <p class="mb-1 ml-3 d-flex align-items-center">
                                                                         {{ plato }}
-                                                                        <a href="" class="btn btn-sm p-0 ml-2" title="Eliminar">
+                                                                        <a href="{% url 'eliminar-programado' nombre_plato=plato comida='almuerzo' fecha=dia %}" class="btn btn-sm p-0 ml-2" title="Eliminar">
                                                                             <i class="fa-solid fa-trash-can"></i>
                                                                         </a>
                                                                     </p>
@@ -462,9 +464,14 @@
                                                                 {% for plato in dia_plato.1.merienda %}
                                                                     <p class="mb-1 ml-3 d-flex align-items-center">
                                                                         {{ plato }}
-                                                                        <a href="" class="btn btn-sm p-0 ml-2" title="Eliminar">
+
+                                                                        <a href="{% url 'eliminar-programado' nombre_plato=plato comida='merienda' fecha=dia %}" class="btn btn-sm p-0 ml-2" title="Eliminar">
                                                                             <i class="fa-solid fa-trash-can"></i>
                                                                         </a>
+
+
+
+
                                                                     </p>
                                                                 {% endfor %}
                                                             {% else %}
@@ -479,9 +486,13 @@
                                                                 {% for plato in dia_plato.1.cena %}
                                                                     <p class="mb-1 ml-3 d-flex align-items-center">
                                                                         {{ plato }}
-                                                                        <a href="" class="btn btn-sm p-0 ml-2" title="Eliminar">
+
+
+                                                                        <a href="{% url 'eliminar-programado' nombre_plato=plato comida='cena' fecha=dia %}" class="btn btn-sm p-0 ml-2" title="Eliminar">
                                                                             <i class="fa-solid fa-trash-can"></i>
                                                                         </a>
+
+
                                                                     </p>
                                                                 {% endfor %}
                                                             {% else %}

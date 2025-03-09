@@ -148,7 +148,7 @@
               {% endfor %}
             </select>
           <!-- Campo oculto donde se establecerá el plato id dinámicamente -->
-          <input type="hidden" name="plato_id" id="platoIdInput">
+          <input type="hidden" name="plato_id" id="platoIdInputCompartir">
         </div>
 
           <button type="submit" class="btn btn-primary">Compartir</button>
@@ -170,8 +170,7 @@
       <form action="{% url 'asignar-plato' %}" method="POST">
         {% csrf_token %}
         <div class="modal-body">
-          <!-- Campo oculto para el ID del plato -->
-          <input type="hidden" name="plato_id" id="platoIdInput">
+         
 
           <!-- Campo oculto para almacenar el día activo -->
           <input type="hidden" name="dia" id="diaSeleccionado">
@@ -191,6 +190,9 @@
               <option value="merienda">Merienda</option>
               <option value="cena">Cena</option>
             </select> 
+
+             <!-- Campo oculto para el ID del plato -->
+          <input type="hidden" name="plato_id" id="platoIdInputAsignar">
         
           <button type="submit" class="btn btn-primary">Asignar</button>
 
@@ -205,13 +207,10 @@
 </div>
 
 <script>
-  // Función para pasar información del plato al modal
   function setPlatoInfo(platoId) {
-    document.getElementById("platoIdInput").value = platoId;
-    // document.getElementById("platoImage").src = imageUrl;
-    // document.getElementById("platoNombre").textContent = nombre;
-    // document.getElementById("platoDescripcion").textContent = descripcion;
-  }
+  document.getElementById("platoIdInputCompartir").value = platoId;
+  document.getElementById("platoIdInputAsignar").value = platoId;
+}
 </script>
 
 

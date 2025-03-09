@@ -22,7 +22,9 @@
                     <h5 class="bg-primary text-white p-2 rounded">{{ menu.el_dia_en_que_comemos|date:"l j F Y" }}</h5> <!-- Fondo azul con texto blanco -->
                 
                             {% for comida, platos in menu.platos_que_comemos.items %}
-                                <h4 class="bg-primary text-white p-2 rounded">{{ comida|title }}</h4> <!-- Nombre de la comida -->
+                            {% if platos %}
+
+                                <h6 class="bg-primary text-white p-1 rounded">{{ comida|title }}</h6> <!-- Nombre de la comida -->
 
                                 {% for plato in platos %}
                                 <div class="form-check">
@@ -60,9 +62,9 @@
                                         {% endfor %}
                                     </div>
                                 {% endif %}
-            
+                                
                             {% endfor %}    
-
+                        {% endif %}
                         {% endfor %}
                     </div>
                 </div>
@@ -122,5 +124,29 @@
 
 </form>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".plato-checkbox").forEach(function (platoCheckbox) {
+            let platoId = platoCheckbox.getAttribute("data-plato-id");
+
+            // Buscar todas las variedades asociadas a este plato
+            let variedades = document.querySelectorAll(`.variedad-checkbox[data-plato-id='${platoId}']`);
+
+            // Función para habilitar/deshabilitar variedades
+            function actualizarVariedades() {
+                let activo = platoCheckbox.checked;
+                variedades.forEach(function (variedad) {
+                    variedad.disabled = !activo;
+                });
+            }
+
+            // Aplicar el estado inicial
+            actualizarVariedades();
+
+            // Escuchar cambios en el checkbox del plato
+            platoCheckbox.addEventListener("change", actualizarVariedades);
+        });
+    });
+</script> 
 
 {% endblock %}

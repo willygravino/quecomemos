@@ -26,7 +26,11 @@
 
           <p>Compartiendo el plato: {{plato_id}}</p>
           <p>Con: {{ amigue }}</p>
-            {{form.as_p}}
+            <!-- {{form.as_p}} -->
+
+            <label for="id_mensaje">Mensaje:</label>
+            <textarea name="mensaje" cols="40" rows="10" maxlength="1000" required="" aria-invalid="true" id="id_mensaje"></textarea>
+
             <input type="submit" value="Enviar">
       </p>
     </center>

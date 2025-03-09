@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from AdminVideos.views import EnviarMensaje, agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, compartir_plato, descartar_sugerido, eliminar_plato, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, sumar_amigue, user_logout, SolicitarAmistad, MensajeDelete, AsignarPlato 
+from AdminVideos.views import EnviarMensaje, agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, compartir_plato, descartar_sugerido, eliminar_plato, eliminar_programado, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, sumar_amigue, user_logout, SolicitarAmistad, MensajeDelete, AsignarPlato 
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -35,7 +35,7 @@ urlpatterns = [
     path('videos/reiniciar/sugeridos', reiniciar_sugeridos, name="reiniciar-sugeridos"),
     path('videos/<pk>/update', PlatoUpdate.as_view(), name="videos-update"),
     path('eliminar-plato/<int:plato_id>/', eliminar_plato, name='eliminar-plato'),
-    # path('eliminar-programado/<str:nombre_plato>/', eliminar_programado, name='eliminar-programado'),
+    path('eliminar/<str:nombre_plato>/<str:comida>/<str:fecha>/', eliminar_programado, name='eliminar-programado'),
 
     path('videos/<pk>/detail', PlatoDetail.as_view(), name="videos-detail"),
     path('videos/create', PlatoCreate.as_view(), name="videos-create"),

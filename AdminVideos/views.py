@@ -24,6 +24,8 @@ from django.shortcuts import redirect
 from django.urls import reverse
 import datetime
 from django.utils import timezone
+from django.views.decorators.http import require_POST
+
 
 
 
@@ -947,8 +949,8 @@ class compartir_plato(CreateView):
         form.instance.usuario_que_envia = self.request.user.username
         form.instance.destinatario = destinatario
         form.instance.amistad = plato_id  # aqui mando el plato que se comparte
-        form.instance.nombre_plato_compartido = {plato.nombre_plato}
-        form.instance.mensaje = {mensaje_usuario}
+        form.instance.nombre_plato_compartido = plato.nombre_plato
+        form.instance.mensaje = mensaje_usuario
 
         return super().form_valid(form)
 
@@ -1199,4 +1201,51 @@ class AsignarPlato(View):
 
 
 
-# def eliminar_programado(request, nombre_plato):
+# def eliminar_programado(request, nombre_plato, comida, fecha):
+#     usuario = request.user
+    
+#     # Obtener el menú del usuario para la fecha especificada
+#     menu = get_object_or_404(ElegidosXDia, user=usuario, el_dia_en_que_comemos=fecha)
+    
+#     # Obtener los platos del menú
+#     platos = menu.platos_que_comemos or {}
+    
+#     if comida in platos:
+#         # Filtrar los platos que no coincidan con el nombre a eliminar
+#         platos[comida] = [plato for plato in platos[comida] if plato["plato"] != nombre_plato]
+        
+#         # Guardar los cambios en la base de datos
+#         menu.platos_que_comemos = platos
+#         menu.save()
+#         # return JsonResponse({"mensaje": "Plato eliminado correctamente"}, status=200)
+    
+#     # return JsonResponse({"error": "No se encontró la comida especificada"}, status=400)
+#     return redirect('filtro-de-platos')
+
+def eliminar_programado(request, nombre_plato, comida, fecha):
+    usuario = request.user
+    
+    # Obtener el menú del usuario para la fecha especificada
+    menu = get_object_or_404(ElegidosXDia, user=usuario, el_dia_en_que_comemos=fecha)
+    
+    # Obtener los platos del menú
+    platos = menu.platos_que_comemos or {}
+    
+    if comida in platos:
+        # Filtrar los platos que no coincidan con el nombre a eliminar
+        platos[comida] = [plato for plato in platos[comida] if plato["plato"] != nombre_plato]
+        
+        # Si la categoría de comida queda vacía, eliminarla del diccionario
+        if not platos[comida]:
+            del platos[comida]
+        
+        # Si todas las categorías están vacías, eliminar el registro de la base de datos
+        if not any(platos.values()):
+            menu.delete()
+        else:
+            # Guardar los cambios en la base de datos
+            menu.platos_que_comemos = platos
+            menu.save()
+    
+    return redirect('filtro-de-platos')
+
