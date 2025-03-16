@@ -16,9 +16,10 @@
     <input type="search" placeholder="Buscar por palabra clave" {{ formulario.palabra_clave }} {% if  user.username  != "quecomemos" %}
       <div class="form-check">
         <input class="form-check-input" type="checkbox" name="quecomemos" value="quecomemos" id="quecomemos" {% if quecomemos_ck == "quecomemos" %} checked {% endif %}>
-        <label class="form-check-label small" for="quecomemos">
+        <!-- <label class="form-check-label small" for="quecomemos">
           Sugerencia <br> quecomemos
-        </label>
+        </label> -->
+        <span>Sugerencias: {{ formulario.dificultad }}</span>
       </div>      
       
       <div class="form-check">
@@ -27,6 +28,12 @@
           Mis platos
         </label>
       </div>
+
+      <span>De estación: {{ formulario.dificultad }}</span>
+
+
+
+
       
     {% else %}
         <!-- Campo oculto -->

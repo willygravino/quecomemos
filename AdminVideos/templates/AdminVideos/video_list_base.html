@@ -27,12 +27,43 @@
           </div>
         </div>
      
-
         {% if not platos %}
           <h6>No hay platos para mostrar.</h6>
         {% else %}
 
+        <div class="container p-0">
+          <div class="row">
+            {% if platos_compartidos %}
+              <div class="col-md-4 mb-3">
+                {% for plato in platos_compartidos %}
+                  <div class="card">
+                      <img src="{{ plato.image_url }}" class="card-img-top" alt="Imagen">
+                      <div class="card-body text-center">
+                          <h5 class="card-title">{{ plato.nombre_plato }}</h5>
+                           (ID: {{ plato.id_plato }}) - Compartido por: <em>{{ plato.quien_comparte }}</em>
+                           <p><strong>Receta:</strong> {{ plato.receta }}</p>
+                           <p><strong>Descripción:</strong> {{ plato.descripcion }}</p>
+                           <p><strong>Ingredientes:</strong> {{ plato.ingredientes }}</p>
+                           <p><strong>Tipo:</strong> {{ plato.tipo }}</p>
 
+                           <a class="btn btn-primary" href="{% url 'agregar-plato-compartido' plato.id_plato %}">Agregar a mi lista</a>
+                           <a class="btn btn-primary" href="">Rechazar</a>
+<!-- 
+                          <button class="btn btn-primary">Incorporar</button>
+                          <button class="btn btn-secondary">Descartar</button> -->
+                      </div>
+                  </div>
+              </div>
+              {% endfor %}
+            {% endif %}
+
+
+
+
+
+          </div>
+      </div>
+        
         {% for plato in platos %}
           <div class="d-flex flex-row">
             <div class="col-md-2 mb-2">

@@ -247,6 +247,8 @@
 
                        <!-- Nav Item - CHAT -->
 
+
+
                         <li class="nav-item dropdown no-arrow mx-1">
                             <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -265,40 +267,37 @@
 
                                 <!-- cada una  -->
 
-                                {% for usuario, mensajes in mensajes.items %}
-                                    <a class="dropdown-item d-flex align-items-center" href="{% url 'enviar-mensaje' usuario %}"">
+                                {% for usuario, mensaje in mensajes.items %}
+                                    <a class="dropdown-item d-flex align-items-center" href="{% url 'enviar-mensaje' usuario %}">
                                         <div class="dropdown-list-image mr-3">
-                                            <!-- <img class="rounded-circle" src="img/undraw_profile_1.svg" alt="..."> -->
-                                            <img class="rounded-circle" src="{{ mensajes.avatar_url }}" alt="{{ usuario }}">
+                                            <img class="rounded-circle" src="{{ mensaje.avatar_url }}" alt="{{ usuario }}">
 
-                                            {% if not mensajes.mensajes.0.leido %}
+                                            {% if not mensaje.mensaje.leido %}
                                                 <div class="status-indicator bg-success"></div>
                                             {% endif %}
-
                                         </div>
                                         <div class="font-weight-bold">
                                             <div class="text-truncate">{{ usuario }}</div>
 
-                                            <!-- Utilizamos d-flex para que los elementos se alineen en la misma fila -->
                                             <div class="d-flex justify-content-between">
                                                 <!-- Mensaje -->
-                                                <div class="small text-truncate"> {{ mensajes.mensajes.0.mensaje }}  </div>
-
+                                                <div class="small text-truncate"> {{ mensaje.mensaje.contenido }} </div>
+                                        
                                                 <!-- Fecha de creación -->
                                                 <div class="small text-gray-600">
-                                                    {% if mensajes.mensajes.0.creado_el == 0 %}
+                                                    {% if mensaje.mensaje.creado_el == 0 %}
                                                         Hoy
                                                     {% else %}
-                                                        {{ mensajes.mensajes.0.creado_el }} días
+                                                    &nbsp;·&nbsp;{{ mensaje.mensaje.creado_el }} días
                                                     {% endif %}
                                                 </div>
                                             </div>
-                                            <!-- text-gray-500 -->
                                         </div>
                                     </a>
-                                    {% empty %}
+                                {% empty %}
                                     <p>No tienes mensajes.</p>
                                 {% endfor %}
+
 
                                 <a href="{% url 'solicitar-amistad' %}" class="dropdown-item text-center small ">
                                     <strong>Solicitar amistad</strong>
@@ -309,6 +308,7 @@
                         </li>
 
                         <div class="topbar-divider d-none d-sm-block"></div>
+
 
 
                         <li class="nav-item dropdown no-arrow">
@@ -362,6 +362,7 @@
                 <!-- End of Topbar -->
 
 <h1>dia activo {{dia_activo}}</h1> 
+
 <!-- 
 <h6>pla {{pla}}</h6>  -->
 
@@ -393,7 +394,7 @@
                                 <div class="text-dark p-1 small">
                                     <!-- <p class="mb-1">Programado día {{ dia|date:"l j" }}</p>  -->
                                     <div class="row d-flex align-items-start">
-                                        <div class="col  p-2 overflow-auto" style="max-height: 100px;">
+                                        <div class="col p-2" style="max-height: 100px; overflow-y: auto; overflow-x: hidden; display: block;">
 
                                             
 

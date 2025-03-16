@@ -18,7 +18,8 @@ from .forms import PlatoFilterForm, PlatoForm
 from django.views.generic import TemplateView
 from datetime import date, datetime
 from django.contrib.auth.models import User  # Asegúrate de importar el modelo User
-from django.db.models import Q
+from django.db.models import Q, Subquery, OuterRef
+
 from django.shortcuts import redirect, reverse
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -686,15 +687,14 @@ def FiltroDePlatos (request):
     # # Calcular y agregar las fechas y nombres de los días para los próximos 6 días
     dias_desde_hoy = [(fecha_actual + timedelta(days=i)) for i in range(0, 6)]
 
-    primer_dia = dias_desde_hoy[0]
+    primer_dia = dias_desde_hoy[0].isoformat()
     
     # Si 'dia_activo' no está en la sesión, asignar el primer día
-    if 'dia_activo' not in request.session:
-        request.session['dia_activo'] = dias_desde_hoy[0].isoformat()  # Convertir a cadena
+    if not request.session['dia_activo'] or request.session['dia_activo'] < primer_dia:
+        request.session['dia_activo'] = primer_dia
 
     # Obtener el día activo y reconvertirlo a tipo date (esto está de más! porque si está en la sesión no hay que volver a convertirlo, entiendo)
-    dia_activo = datetime.datetime.strptime(request.session['dia_activo'], "%Y-%m-%d").date()
-
+    dia_activo = request.session['dia_activo']
 
     # Recuperar el día activo de la URL o la sesión
     # dia_activo = request.GET.get('dia_activo', request.session.get('dia_activo'),dias_desde_hoy[0].isoformat())
@@ -756,13 +756,12 @@ def FiltroDePlatos (request):
         dificultad=dificultad,
         palabra_clave=palabra_clave
     )
-
    
     # Filtra las fechas únicas en `el_dia_en_que_comemos` para los objetos del usuario actual
-    fechas_existentes = ElegidosXDia.objects.filter(user=request.user,el_dia_en_que_comemos__gte=fecha_actual).values_list('el_dia_en_que_comemos', flat=True).distinct()
+    fechas_existentes = ElegidosXDia.objects.filter(user=usuario,el_dia_en_que_comemos__gte=fecha_actual).values_list('el_dia_en_que_comemos', flat=True).distinct()
 
     # Obtén el perfil del usuario autenticado
-    perfil = get_object_or_404(Profile, user=request.user)
+    perfil = get_object_or_404(Profile, user=usuario)
 
     # Accede al atributo `amigues` desde la instancia
     amigues = perfil.amigues  # Esto cargará la lista almacenada en JSONField
@@ -770,28 +769,72 @@ def FiltroDePlatos (request):
     # el avatar
     avatar = perfil.avatar_url
 
-    mensajes_x_usuario = Mensaje.objects.filter(destinatario=request.user).all()
+    # -------------------   LISTA DE PRIMEROS MENSAJES
+    # Subquery para obtener el último mensaje de cada usuario
+    subquery_ultimo_mensaje = (
+        Mensaje.objects.filter(usuario_que_envia=OuterRef('usuario_que_envia'), destinatario=usuario)
+        .order_by('-creado_el')
+        .values('id')[:1]  # Tomamos solo el ID del mensaje más reciente
+    )
 
-    mensajes_x_usuario = Mensaje.objects.filter(destinatario=request.user).order_by('-creado_el')
+    # Filtramos solo los últimos mensajes de cada usuario
+    mensajes_x_usuario = Mensaje.objects.filter(id__in=Subquery(subquery_ultimo_mensaje))
 
-
-    # Calcular los días transcurridos
-    for mensaje in mensajes_x_usuario:
-        # Calcular los días transcurridos desde la fecha de creación hasta el día de hoy
-        diferencia = timezone.now() - mensaje.creado_el
-        mensaje.creado_el = diferencia.days  # Añadir un nuevo atributo calculado
-
-    # Agrupar los mensajes por usuario
+    # Construimos el diccionario
     mensajes_agrupados = {
-        usuario: {
-            "avatar_url":  getattr(User.objects.get(username=usuario).profile, 'avatar_url', '/media/avatares/logo.png'),
-            "mensajes": list(mensajes)
+        mensaje.usuario_que_envia if isinstance(mensaje.usuario_que_envia, str) else mensaje.usuario_que_envia.username: {
+            "avatar_url": getattr(
+                mensaje.usuario_que_envia.profile, 'avatar_url', '/media/avatares/logo.png'
+            ) if hasattr(mensaje.usuario_que_envia, 'profile') else '/media/avatares/logo.png',
+            "mensaje": {
+                "contenido": mensaje.mensaje,
+                "creado_el": (timezone.now() - mensaje.creado_el).days,
+                "leido": mensaje.leido
+            }
         }
-        for usuario, mensajes in groupby(mensajes_x_usuario, key=lambda x: x.usuario_que_envia)
+        for mensaje in mensajes_x_usuario
+    }
+    
+    # ------------------- LISTA DE PLATOS COMPARTIDOS
+
+    # Filtrar mensajes recibidos por el usuario logueado y que contienen un plato compartido
+    mensajes_platos_compartidos = Mensaje.objects.filter(destinatario=usuario).exclude(amistad__in=["mensaje", "solicitar"])
+
+    # # Obtener los IDs de los platos compartidos desde el campo 'amistad'
+    # ids_platos_compartidos = {msg.amistad for msg in mensajes_platos_compartidos if msg.amistad}
+
+# ESTO CREO QUE NO ES EFICIENTE PORQUE YA RECORRÍ TODA LA LSITA DE PLATOS YU AHORA LA RECORRO DE NUEVO PARA OBTENER LOS ID
+    # Obtener los platos que ya tiene el usuario logueado
+    platos_usuario = Plato.objects.filter(propietario=usuario)
+    ids_platos_usuario = {plato.id for plato in platos_usuario}
+
+    # Obtener solo los platos compartidos que NO estén en la base del usuario
+    ids_platos_compartidos = {
+        msg.amistad for msg in mensajes_platos_compartidos 
+        if msg.amistad and msg.amistad not in ids_platos_usuario
     }
 
-    dia_activo = request.session.get('dia_activo', None)  # 🟢 Recuperamos la fecha activa
+    # Buscar los platos correspondientes en la base de datos
+    datos_platos = {str(plato.id): plato for plato in Plato.objects.filter(id__in=ids_platos_compartidos)}
 
+
+    # Extraer los platos compartidos de los mensajes
+    platos_compartidos = [
+       { "id_plato": msg.amistad,
+         "nombre_plato": msg.nombre_plato_compartido,
+         "quien_comparte": msg.usuario_que_envia,
+         "receta": datos_platos[msg.amistad].receta if msg.amistad in datos_platos else "",
+         "descripcion": datos_platos[msg.amistad].descripcion_plato if msg.amistad in datos_platos else "",
+         "ingredientes": datos_platos[msg.amistad].ingredientes if msg.amistad in datos_platos else "",
+         "tipo": datos_platos[msg.amistad].tipo if msg.amistad in datos_platos else "",
+         "image_url": datos_platos[msg.amistad].image_url if msg.amistad in datos_platos else "" 
+           }
+        for msg in mensajes_platos_compartidos if msg.nombre_plato_compartido
+    ]
+
+    # ---------------
+
+    dia_activo = request.session.get('dia_activo', None)  # 🟢 Recuperamos la fecha activa
 
     # Inicializar un diccionario donde cada fecha tendrá listas separadas para cada tipo de comida
     platos_dia_x_dia = defaultdict(lambda: {"desayuno": [], "almuerzo": [], "merienda": [], "cena": []})
@@ -830,7 +873,8 @@ def FiltroDePlatos (request):
                 "mensajes": mensajes_agrupados,
                 'dia_activo': dia_activo,
                 "platos_dia_x_dia": platos_dia_x_dia,
-                "pla": pla
+                "pla": pla,
+                "platos_compartidos": platos_compartidos,
 
                }
 
@@ -958,7 +1002,7 @@ class compartir_plato(CreateView):
 class MensajeDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
    model = Mensaje
    context_object_name = "mensaje"
-   success_url = reverse_lazy("mensaje-list")
+   success_url = reverse_lazy("filtro-de-platos")
 
    def test_func(self):
        return Mensaje.objects.filter(destinatario=self.request.user).exists()
@@ -1071,7 +1115,7 @@ def agregar_plato_compartido(request, pk):
     if Plato.objects.filter(nombre_plato=plato_original.nombre_plato, propietario=request.user).exists():
         # Mostrar un mensaje de error
         messages.error(request, "Ya tienes un plato con este nombre.")
-        return redirect('mensaje-list')  # Redirigir a una página (puedes ajustar según sea necesario)
+        return redirect('filtro-de-platos')  # Redirigir a una página (puedes ajustar según sea necesario)
 
     # Crear un nuevo plato para el usuario logueado
     nuevo_plato = Plato(
@@ -1099,7 +1143,7 @@ def agregar_plato_compartido(request, pk):
 
 
     # Redirigir a una página (puedes cambiar la redirección según sea necesario)
-    return redirect('mensaje-list')
+    return redirect('filtro-de-platos')
 
 
 
