@@ -9,6 +9,7 @@
 
 <h5>Soy {{user.profile.user}}</h5>
 
+<h5>AMIGUES {{amigues}}</h5>
 
 {% if mensajes %}
   {% for mensaje in mensajes %}
@@ -30,16 +31,23 @@
 
       {% elif mensaje.amistad == "solicitar" %}
         <!-- Cada mensaje tiene su propio formulario -->
-        {% if mensaje.usuario_que_envia not in amigues %}
+         
+        <h5>importado? {{mensaje.importado}}</h5>
+
+        {% if not mensaje.importado %}
         <div
         class="d-flex justify-content-start  mb-3">
           <div class="bg-light text-dark p-1 rounded-3 shadow-sm" style="max-width: 75%; background-color: rgb(0, 98, 255);">
             <p class="mb-0">Solicitud de amistad de {{ mensaje.usuario_que_envia }}</p>
+            <p class="mb-0">MENSAJE ID {{ mensaje.id }}</p>
+
             <p class="small text-muted text-center" style="font-size: 0.75rem;">Ver Perfil</p>
 
             <form action="{% url 'sumar-amigue' %}" method="POST" class="d-flex justify-content-center gap-1">
               {% csrf_token %}
               <input type="hidden" name="amigue_usuario" value="{{ mensaje.usuario_que_envia }}">
+              <input type="hidden" name="mensaje_id" value="{{ mensaje.id }}">
+
               <button class="btn btn-primary" type="submit">Aceptar</button>
               <button class="btn btn-secondary" type="button" onclick="alert('Solicitud rechazada - gestionar la vista para eliminarla' )">Rechazar</button>
             </form>
@@ -72,6 +80,10 @@
           <div class="bg-light text-dark p-3 rounded-3 shadow-sm" style="max-width: 75%;">
             <p class="mb-1">COMPARTIR PLATO!!!!!!!!!!</p>
             <p class="small text-muted text-end" style="font-size: 0.75rem;">{{ mensaje.creado_el }}</p>
+            <p class="small text-muted text-end" style="font-size: 0.75rem;">Plato compartido {{ mensaje.amistad }}</p>
+            <p class="small text-muted text-end" style="font-size: 0.75rem;">ACEPTADO? SI - NO</p>
+
+
           </div>
         </div>
       {% endif %}

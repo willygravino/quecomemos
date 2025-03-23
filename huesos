@@ -1,70 +1,15 @@
+Sí, puedes hacer un git push de solo un archivo específico, como el archivo de tu base de datos. Sin embargo, Git no permite hacer push de un solo archivo directamente, pero puedes hacer un commit solo de ese archivo y luego hacer push.
 
-    <script>
+Pasos para hacer push de solo un archivo:
+Añadir solo el archivo de la base de datos al commit:
 
-        // COMBINA AMBOS SCRIPT
 
-        document.addEventListener("DOMContentLoaded", function() {
-            let modal = document.getElementById("asignarPlatoModal");
-            let tabs = document.querySelectorAll(".nav-link");
+git add nombre_de_tu_base_de_datos.db
+Crear un commit solo con ese archivo:
 
-            // Función para actualizar los valores
-            function actualizarDiaActivo() {
-                let tabActivo = document.querySelector(".nav-link.active");
-                if (tabActivo) {
-                    let diaActivo = tabActivo.id.replace("tab-", "");
-                    document.getElementById("diaSeleccionado").value = diaActivo;
-                    document.getElementById("diaActivoTexto").textContent = diaActivo;
-                }
-            }
 
-            // Evento al abrir el modal
-            modal.addEventListener("show.bs.modal", actualizarDiaActivo);
+git commit -m "Actualización de la base de datos"
+Hacer push solo de ese commit:
 
-            // Evento al hacer clic en las pestañas
-            tabs.forEach(tab => {
-                tab.addEventListener("click", actualizarDiaActivo);
-            });
-        });
 
-        // MODAL PARA ESCUCHAR EL CAMBIO DE TAB
-
-        // document.addEventListener("DOMContentLoaded", function() {
-        //     // Selecciona todas las pestañas
-        //     let tabs = document.querySelectorAll(".nav-link");
-
-        //     // Añade un evento click a cada pestaña
-        //     tabs.forEach(tab => {
-        //         tab.addEventListener("click", function() {
-                    
-        //             // Obtiene la pestaña activa después del clic
-        //             let tabActivo = document.querySelector(".nav-link.active");
-        //             if (tabActivo) {
-        //                 let diaActivo = tabActivo.id.replace("tab-", "");
-
-        //                 // Asignar el valor al input oculto y al texto visible
-        //                 document.getElementById("diaSeleccionado").value = diaActivo;
-        //                 document.getElementById("diaActivoTexto").textContent = diaActivo;
-        //             }
-        //         });
-        //     });
-        // });
-
-        
-        // VIEJO MODAL, FUNCIONA!
-
-        // document.addEventListener("DOMContentLoaded", function() {
-        //     let modal = document.getElementById("asignarPlatoModal");
-      
-        //     modal.addEventListener("show.bs.modal", function() {
-        //         let tabActivo = document.querySelector(".nav-link.active"); 
-        //         if (tabActivo) {
-        //             let diaActivo = tabActivo.id.replace("tab-", ""); 
-      
-        //             // Asignar el valor al input oculto y al texto visible en el modal
-        //             document.getElementById("diaSeleccionado").value = diaActivo;
-        //             document.getElementById("diaActivoTexto").textContent = diaActivo;
-        //         }
-        //     });
-        // });
-      </script>
-       
+git push origin nombre-de-tu-rama

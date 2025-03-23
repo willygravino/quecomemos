@@ -1,0 +1,49 @@
+{% extends "AdminVideos/index.html" %}
+
+{% load static %}
+
+{% block lista_platos %}
+
+<h2>Historial de Mensajes</h2>
+
+<!-- Mensajes -->
+{% if mensajes %}
+    <h3>Mensajes Recibidos</h3>
+    <table border="1">
+        <tr>
+            <th>Enviado por</th>
+            <th>Mensaje</th>
+            <th>Fecha</th>
+            <th>Leído</th>
+        </tr>
+        {% for mensaje in mensajes %}
+        <tr>
+            <td>{{ mensaje.usuario_que_envia }}</td>
+            <td>{{ mensaje.mensaje }}</td>
+            <td>{{ mensaje.creado_el }}</td>
+            <td>{{ mensaje.leido|yesno:"Sí,No" }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <p>No tienes mensajes.</p>
+{% endif %}
+
+<!-- Platos Descartados e Importados -->
+<h3>Platos Descartados</h3>
+<ul>
+    {% for plato in platos_descartados %}
+        <li>{{ plato }}</li>
+    {% endfor %}
+</ul>
+
+<h3>Platos Importados</h3>
+<ul>
+    {% for plato in platos_importados %}
+        <li>{{ plato }}</li>
+    {% endfor %}
+</ul>
+
+
+
+{% endblock %}

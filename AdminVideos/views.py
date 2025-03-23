@@ -65,18 +65,6 @@ def about(request):
 
 
 
-def descartar_sugerido(request, nombre_plato):
-    # Obtener el perfil del usuario logueado
-    profile = request.user.profile
-
-    # Verificar si el plato_id ya está en la lista para evitar duplicados
-    if nombre_plato not in profile.sugeridos_descartados:
-        profile.sugeridos_descartados.append(nombre_plato)  # Agregar el ID del plato a la lista
-        profile.save()  # Guardar los cambios en el perfil
-
-    return redirect('filtro-de-platos')
-
-
 
 def limpiar_none(value):
     return None if value == 'None' or value == '' else value
@@ -409,13 +397,13 @@ def eliminar_plato(request, plato_id):
     perfil = get_object_or_404(Profile, user=request.user)
 
     # Eliminar el plato de la lista de sugeridos_descartados si está allí
-    if plato.nombre_plato in perfil.sugeridos_descartados:
-        perfil.sugeridos_descartados.remove(plato.nombre_plato)
+    if plato.id_original in perfil.sugeridos_descartados:
+        perfil.sugeridos_descartados.remove(plato.id_original)
         perfil.save()
 
   # Eliminar el plato de la lista de sugeridos_importados si está allí
-    if plato.nombre_plato in perfil.sugeridos_importados:
-        perfil.sugeridos_importados.remove(plato.nombre_plato)
+    if plato.id_original in perfil.sugeridos_importados:
+        perfil.sugeridos_importados.remove(plato.id_original)
         perfil.save()
 
     # Eliminar el plato de la base de datos
@@ -649,7 +637,9 @@ def filtrar_platos(
             # Excluir platos descartados
             platos_descartados = usuario.profile.sugeridos_descartados
             if platos_descartados:
-                query &= ~Q(nombre_plato__in=platos_descartados)
+                # query &= ~Q(nombre_plato__in=platos_descartados)
+                query &= ~Q(id__in=platos_descartados)  # Usamos el id del plato para excluirlo
+
 
         if misplatos == "misplatos":
             query |= Q(propietario=usuario)
@@ -689,12 +679,15 @@ def FiltroDePlatos (request):
 
     primer_dia = dias_desde_hoy[0].isoformat()
     
-    # Si 'dia_activo' no está en la sesión, asignar el primer día
-    if not request.session['dia_activo'] or request.session['dia_activo'] < primer_dia:
+    # Obtener el día activo de la sesión o asignar el primer día si no está definido
+    dia_activo = request.session.get('dia_activo', primer_dia)
+
+    # Si 'dia_activo' es menor que el primer día, reasignarlo
+    if dia_activo < primer_dia:
         request.session['dia_activo'] = primer_dia
 
-    # Obtener el día activo y reconvertirlo a tipo date (esto está de más! porque si está en la sesión no hay que volver a convertirlo, entiendo)
-    dia_activo = request.session['dia_activo']
+    # # Obtener el día activo y reconvertirlo a tipo date (esto está de más! porque si está en la sesión no hay que volver a convertirlo, entiendo)
+    # dia_activo = request.session['dia_activo']
 
     # Recuperar el día activo de la URL o la sesión
     # dia_activo = request.GET.get('dia_activo', request.session.get('dia_activo'),dias_desde_hoy[0].isoformat())
@@ -795,44 +788,37 @@ def FiltroDePlatos (request):
         for mensaje in mensajes_x_usuario
     }
     
-    # ------------------- LISTA DE PLATOS COMPARTIDOS
+# ------------------- LISTA DE PLATOS COMPARTIDOS
 
-    # Filtrar mensajes recibidos por el usuario logueado y que contienen un plato compartido
-    mensajes_platos_compartidos = Mensaje.objects.filter(destinatario=usuario).exclude(amistad__in=["mensaje", "solicitar"])
+    # MENSAJES CON PLATOS COMPARTIDOS QUE AÚN NO FUERON IMPORTADOS
+    mensajes_platos_compartidos = Mensaje.objects.filter(destinatario=usuario, importado=False).exclude(amistad__in=["mensaje", "solicitar"])
 
-    # # Obtener los IDs de los platos compartidos desde el campo 'amistad'
-    # ids_platos_compartidos = {msg.amistad for msg in mensajes_platos_compartidos if msg.amistad}
-
-# ESTO CREO QUE NO ES EFICIENTE PORQUE YA RECORRÍ TODA LA LSITA DE PLATOS YU AHORA LA RECORRO DE NUEVO PARA OBTENER LOS ID
-    # Obtener los platos que ya tiene el usuario logueado
-    platos_usuario = Plato.objects.filter(propietario=usuario)
-    ids_platos_usuario = {plato.id for plato in platos_usuario}
-
-    # Obtener solo los platos compartidos que NO estén en la base del usuario
-    ids_platos_compartidos = {
-        msg.amistad for msg in mensajes_platos_compartidos 
-        if msg.amistad and msg.amistad not in ids_platos_usuario
-    }
+    # Obtener los IDs de los platos compartidos junto con el ID del mensaje
+    ids_platos_compartidos = {msg.amistad: msg.id for msg in mensajes_platos_compartidos if msg.amistad}
 
     # Buscar los platos correspondientes en la base de datos
-    datos_platos = {str(plato.id): plato for plato in Plato.objects.filter(id__in=ids_platos_compartidos)}
-
+    los_platos_compartidos = {
+        str(plato.id): plato for plato in Plato.objects.filter(id__in=ids_platos_compartidos)
+    }
 
     # Extraer los platos compartidos de los mensajes
     platos_compartidos = [
-       { "id_plato": msg.amistad,
-         "nombre_plato": msg.nombre_plato_compartido,
-         "quien_comparte": msg.usuario_que_envia,
-         "receta": datos_platos[msg.amistad].receta if msg.amistad in datos_platos else "",
-         "descripcion": datos_platos[msg.amistad].descripcion_plato if msg.amistad in datos_platos else "",
-         "ingredientes": datos_platos[msg.amistad].ingredientes if msg.amistad in datos_platos else "",
-         "tipo": datos_platos[msg.amistad].tipo if msg.amistad in datos_platos else "",
-         "image_url": datos_platos[msg.amistad].image_url if msg.amistad in datos_platos else "" 
-           }
+        {
+            "id_plato": msg.amistad,
+            "mensaje_id": msg.id,  # Agregar el ID del mensaje del cual proviene
+            "nombre_plato": msg.nombre_plato_compartido,
+            "quien_comparte": msg.usuario_que_envia,
+            "receta": los_platos_compartidos[msg.amistad].receta if msg.amistad in los_platos_compartidos else "",
+            "descripcion": los_platos_compartidos[msg.amistad].descripcion_plato if msg.amistad in los_platos_compartidos else "",
+            "ingredientes": los_platos_compartidos[msg.amistad].ingredientes if msg.amistad in los_platos_compartidos else "",
+            "tipo": los_platos_compartidos[msg.amistad].tipo if msg.amistad in los_platos_compartidos else "",
+            "image_url": los_platos_compartidos[msg.amistad].image_url if msg.amistad in los_platos_compartidos else ""
+        }
         for msg in mensajes_platos_compartidos if msg.nombre_plato_compartido
     ]
 
-    # ---------------
+# ---------------------
+
 
     dia_activo = request.session.get('dia_activo', None)  # 🟢 Recuperamos la fecha activa
 
@@ -873,7 +859,8 @@ def FiltroDePlatos (request):
                 "mensajes": mensajes_agrupados,
                 'dia_activo': dia_activo,
                 "platos_dia_x_dia": platos_dia_x_dia,
-                "pla": pla,
+                # "idesplatos": ids_platos_importados,
+                # "ides_descartable": ids_platos_compartidos,
                 "platos_compartidos": platos_compartidos,
 
                }
@@ -903,17 +890,29 @@ class SolicitarAmistad(CreateView):
    fields = '__all__'
    template_name = 'AdminVideos/solicitar_amistad.html'
 
-
    def form_valid(self, form):
         # Asigna el valor predeterminado al campo 'amistad'
         form.instance.amistad = "solicitar"
         return super().form_valid(form)
-
-   def get_form(self, form_class=None):
-    form = super().get_form(form_class)
-    form.fields['destinatario'].queryset = User.objects.exclude(id=self.request.user.id)
-    return form
    
+   def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        
+        # Obtener el perfil del usuario autenticado
+        perfil_usuario = self.request.user.profile
+        
+        # Obtener la lista de amigos (amigues) del usuario actual (en base al nombre de usuario)
+        amigos = perfil_usuario.amigues
+        
+        # Obtener los usuarios que no son amigos, excluyendo al usuario actual
+        usuarios_no_amigos = User.objects.exclude(id=self.request.user.id)  # Excluir al usuario actual
+        
+        # Filtrar usuarios que no estén en la lista de amigos (compara nombre de usuario)
+        usuarios_no_amigos = usuarios_no_amigos.exclude(username__in=amigos)
+        
+        form.fields['destinatario'].queryset = usuarios_no_amigos
+        return form
+      
 class EnviarMensaje(LoginRequiredMixin, CreateView):
     model = Mensaje
     success_url = reverse_lazy('filtro-de-platos')
@@ -1025,11 +1024,56 @@ def amigues(request):
     }
     return render(request, "AdminVideos/amigues.html", context)
 
+
+
+# @login_required
+# def historial(request):
+#     # Obtener todos los mensajes donde el usuario es el destinatario, ordenados por fecha de creación (más recientes primero)
+#     mensajes = Mensaje.objects.filter(destinatario=request.user).order_by("-creado_el")
+
+#     # Pasar los mensajes al contexto
+#     context = {
+#         "mensajes": mensajes
+#     }
+
+#     return render(request, "AdminVideos/historial.html", context)  # Usa la plantilla adecuada
+
+
+
+@login_required
+def historial(request):
+    # Obtener el perfil del usuario autenticado
+    profile = request.user.profile
+
+    # Obtener todos los mensajes donde el usuario es el destinatario, ordenados por fecha de creación
+    # mensajes = Mensaje.objects.filter(destinatario=request.user).order_by("-creado_el")
+
+    # Obtener todos los mensajes donde el usuario es el destinatario o el que los envió, ordenados por fecha de creación
+    mensajes = Mensaje.objects.filter(
+        Q(destinatario=request.user) | Q(usuario_que_envia=request.user.username)
+    ).order_by("-creado_el")
+
+    # Formatear los platos descartados e importados
+    platos_descartados = [f"Descartado {plato}" for plato in profile.sugeridos_descartados]
+    platos_importados = [f"Agregado {plato}" for plato in profile.sugeridos_importados]
+
+    # Pasar todos los datos al contexto
+    context = {
+        "mensajes": mensajes,
+        "platos_descartados": platos_descartados,
+        "platos_importados": platos_importados,
+    }
+
+    return render(request, "AdminVideos/historial.html", context)
+
+
 @login_required
 def sumar_amigue(request):
     if request.method == "POST":
         # Obtén el ID del "amigue" enviado desde el formulario
         amigue_usuario = request.POST.get("amigue_usuario")
+        mensaje_id = request.POST.get("mensaje_id")
+
 
         # Verifica que se haya enviado un ID válido
         # if not amigue_usuario:
@@ -1056,6 +1100,12 @@ def sumar_amigue(request):
             aceptado.amigues.append(perfil.user.username)
             aceptado.save()
 
+        # Marcar el mensaje como "importado" si el mensaje ID es válido
+        if mensaje_id:
+            mensaje = get_object_or_404(Mensaje, id=mensaje_id)
+            mensaje.importado = True
+            mensaje.save()
+
          # Construye un diccionario con las variables de contexto
     contexto = {
         "amigues": perfil.amigues,  # Lista de amigues actualizada
@@ -1063,14 +1113,9 @@ def sumar_amigue(request):
 
     }
 
-
     # Redirige a una página de confirmación o muestra la lista actualizada
     return render(request, "AdminVideos/amigues.html", contexto)
-        # return render(request, "AdminVideos/lista_filtrada.html", {"amigues": user_profile.amigues})
 
-
-    # Si no es un método POST, devuelve un error
-    return HttpResponseForbidden("Método no permitido.")
 
 @login_required
 def amigue_borrar(request, pk):
@@ -1107,18 +1152,18 @@ def amigue_borrar(request, pk):
     return render(request, "AdminVideos/amigues.html", contexto)
 
 @login_required
-def agregar_plato_compartido(request, pk):
+def agregar_plato_compartido(request, pk, mensaje_id):
     # Recuperar el plato original
     plato_original = get_object_or_404(Plato, pk=pk)
 
+    # NO VOY A PREGUNTAR, SIMPLEMENTE LO AGREGA PORQUE PUEDO TENER PLATOS CON EL MISMO NOMBRE
     # Verificar si ya existe un plato con el mismo nombre para el usuario logueado
-    if Plato.objects.filter(nombre_plato=plato_original.nombre_plato, propietario=request.user).exists():
-        # Mostrar un mensaje de error
-        messages.error(request, "Ya tienes un plato con este nombre.")
-        return redirect('filtro-de-platos')  # Redirigir a una página (puedes ajustar según sea necesario)
+    # if Plato.objects.filter(nombre_plato=plato_original.nombre_plato, propietario=request.user).exists():
+    #     messages.error(request, "Ya tienes un plato con este nombre.")
+    #     return redirect('filtro-de-platos')
 
     # Crear un nuevo plato para el usuario logueado
-    nuevo_plato = Plato(
+    nuevo_plato = Plato.objects.create(
         nombre_plato=plato_original.nombre_plato,
         receta=plato_original.receta,
         descripcion_plato=plato_original.descripcion_plato,
@@ -1128,23 +1173,75 @@ def agregar_plato_compartido(request, pk):
         dificultad=plato_original.dificultad,
         tipo=plato_original.tipo,
         calorias=plato_original.calorias,
-        propietario=request.user,  # Asignar al usuario logueado
+        propietario=request.user,  
         image=plato_original.image,
         variedades=plato_original.variedades,
-        proviene_de= plato_original.propietario
+        proviene_de=plato_original.propietario,
+        id_original=plato_original.id 
     )
 
-    # Guardar el nuevo plato en la base de datos
-    nuevo_plato.save()
+    # Recuperar el mensaje por su ID
+    mensaje = get_object_or_404(Mensaje, pk=mensaje_id)
 
+    # Marcar el mensaje como importado
+    mensaje.importado = True
+    mensaje.save()
 
     # Mostrar un mensaje de éxito
-    messages.success(request, "El plato se agregó exitosamente.")
+    messages.success(request, "El plato se agregó exitosamente y el mensaje ha sido actualizado.")
 
-
-    # Redirigir a una página (puedes cambiar la redirección según sea necesario)
+    # Redirigir a la página de filtro de platos
     return redirect('filtro-de-platos')
 
+# def agregar_plato_compartido(request, pk, mensaje_id):
+#     # Recuperar el plato original
+#     plato_original = get_object_or_404(Plato, pk=pk)
+
+#     # Verificar si ya existe un plato con el mismo nombre para el usuario logueado
+#     if Plato.objects.filter(nombre_plato=plato_original.nombre_plato, propietario=request.user).exists():
+#         # Mostrar un mensaje de error
+#         messages.error(request, "Ya tienes un plato con este nombre.")
+#         return redirect('filtro-de-platos')  # Redirigir a una página (puedes ajustar según sea necesario)
+
+#     # Crear un nuevo plato para el usuario logueado
+#     nuevo_plato = Plato(
+#         nombre_plato=plato_original.nombre_plato,
+#         receta=plato_original.receta,
+#         descripcion_plato=plato_original.descripcion_plato,
+#         ingredientes=plato_original.ingredientes,
+#         medios=plato_original.medios,
+#         categoria=plato_original.categoria,
+#         dificultad=plato_original.dificultad,
+#         tipo=plato_original.tipo,
+#         calorias=plato_original.calorias,
+#         propietario=request.user,  # Asignar al usuario logueado
+#         image=plato_original.image,
+#         variedades=plato_original.variedades,
+#         proviene_de= plato_original.propietario,
+#         # id_original = plato_original.id 
+#     )
+
+#     # Guardar el nuevo plato en la base de datos
+#     nuevo_plato.save()
+
+#     # Mostrar un mensaje de éxito
+#     messages.success(request, "El plato se agregó exitosamente.")
+
+
+#     # Redirigir a una página (puedes cambiar la redirección según sea necesario)
+#     return redirect('filtro-de-platos')
+
+
+def descartar_sugerido(request, plato_id):
+    # Obtener el perfil del usuario logueado
+    profile = request.user.profile
+
+    # Verificar si el plato_id ya está en la lista para evitar duplicados
+    if plato_id not in profile.sugeridos_descartados:
+        profile.sugeridos_descartados.append(plato_id)  # Agregar el ID del plato a la lista
+        profile.save()  # Guardar los cambios en el perfil
+
+    return redirect('filtro-de-platos')
 
 
 def agregar_a_mi_lista(request, plato_id):
@@ -1175,16 +1272,17 @@ def agregar_a_mi_lista(request, plato_id):
         propietario=request.user,  # Asignar al usuario logueado
         image=plato_original.image,  # Copiar la imagen si aplica
         variedades=plato_original.variedades,
-        proviene_de= plato_original.propietario
+        proviene_de= plato_original.propietario,
+        id_original=plato_original.id         
     )
 
   # Verificar si el plato_id ya está en la lista para evitar duplicados
     if plato_original.nombre_plato not in profile.sugeridos_importados:
-        profile.sugeridos_importados.append(plato_original.nombre_plato)  # Agregar el ID del plato a la lista
+        profile.sugeridos_importados.append(plato_id)  # Agregar el ID del plato a la lista
         profile.save()  # Guardar los cambios en el perfil
 
     # Redirigir a la vista para descartar el plato después de agregarlo
-    return redirect('descartar-sugerido', nombre_plato=plato_original.nombre_plato)
+    return redirect('descartar-sugerido', plato_id=plato_id)
 
 
 
@@ -1245,26 +1343,6 @@ class AsignarPlato(View):
 
 
 
-# def eliminar_programado(request, nombre_plato, comida, fecha):
-#     usuario = request.user
-    
-#     # Obtener el menú del usuario para la fecha especificada
-#     menu = get_object_or_404(ElegidosXDia, user=usuario, el_dia_en_que_comemos=fecha)
-    
-#     # Obtener los platos del menú
-#     platos = menu.platos_que_comemos or {}
-    
-#     if comida in platos:
-#         # Filtrar los platos que no coincidan con el nombre a eliminar
-#         platos[comida] = [plato for plato in platos[comida] if plato["plato"] != nombre_plato]
-        
-#         # Guardar los cambios en la base de datos
-#         menu.platos_que_comemos = platos
-#         menu.save()
-#         # return JsonResponse({"mensaje": "Plato eliminado correctamente"}, status=200)
-    
-#     # return JsonResponse({"error": "No se encontró la comida especificada"}, status=400)
-#     return redirect('filtro-de-platos')
 
 def eliminar_programado(request, nombre_plato, comida, fecha):
     usuario = request.user

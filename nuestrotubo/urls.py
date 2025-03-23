@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from AdminVideos.views import EnviarMensaje, agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, compartir_plato, descartar_sugerido, eliminar_plato, eliminar_programado, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, sumar_amigue, user_logout, SolicitarAmistad, MensajeDelete, AsignarPlato 
+from AdminVideos.views import EnviarMensaje, agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, compartir_plato, descartar_sugerido, eliminar_plato, eliminar_programado, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, sumar_amigue, user_logout, SolicitarAmistad, MensajeDelete, AsignarPlato 
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -26,11 +26,13 @@ urlpatterns = [
     path('', index, name="index"),
     path('menu/elegido',lista_de_compras, name="menu-elegido"),
     path('menu/amigues',amigues, name="amigues"),
+    path('menu/historial',historial, name="historial"),
     path('menu/amigues/sumar',sumar_amigue, name="sumar-amigue"),
     path('compartir/',  compartir_plato.as_view(), name="compartir-plato"),
     path('agregar-a-mi-lista/<int:plato_id>/', agregar_a_mi_lista, name='agregar-a-mi-lista'),
-    path('descartar-sugerido/<str:nombre_plato>/', descartar_sugerido, name='descartar-sugerido'),
-    path('agregar-compartido/<int:pk>/', agregar_plato_compartido, name='agregar-plato-compartido'),
+    # path('descartar-sugerido/<str:nombre_plato>/', descartar_sugerido, name='descartar-sugerido'),
+    path('descartar-sugerido/<int:plato_id>/', descartar_sugerido, name='descartar-sugerido'),
+    path('agregar-compartido/<int:pk>/<int:mensaje_id>/', agregar_plato_compartido, name='agregar-plato-compartido'),
     path('videos/list/filtro', FiltroDePlatos, name="filtro-de-platos"),
     path('videos/reiniciar/sugeridos', reiniciar_sugeridos, name="reiniciar-sugeridos"),
     path('videos/<pk>/update', PlatoUpdate.as_view(), name="videos-update"),

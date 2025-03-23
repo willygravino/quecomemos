@@ -8,6 +8,7 @@ class Plato(models.Model):
     descripcion_plato = models.CharField(max_length=300, blank=True)
     ingredientes = models.CharField('Ingresá los ingredientes, separados por coma', max_length=400, blank=True)
     proviene_de = models.CharField(max_length=20, null=True)
+    id_original = models.IntegerField(null=True, blank=True)
 
     INDISTINTO = '-'
     HORNO = 'Horno'
@@ -155,7 +156,8 @@ class Mensaje(models.Model):
     destinatario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="mensajes")
     # Nuevo campo para el estado de leído
     leido = models.BooleanField(default=False)  # Se marca como no leído por defecto
-
-
+    importado = models.BooleanField(default=False)  # Se marca como no leído por defecto
+    borrado_antes = models.BooleanField(default=False)  # Se marca como no leído por defecto
+       
     def __str__(self):
-        return f"Mensaje de {self.usuario_que_envia} a {self.destinatario.username}"
+        return f"{self.id} - Mensaje de {self.usuario_que_envia} a {self.destinatario.username}"

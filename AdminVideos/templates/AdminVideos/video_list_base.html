@@ -45,8 +45,10 @@
                            <p><strong>Descripción:</strong> {{ plato.descripcion }}</p>
                            <p><strong>Ingredientes:</strong> {{ plato.ingredientes }}</p>
                            <p><strong>Tipo:</strong> {{ plato.tipo }}</p>
+                           <p><strong> MENSAJE ID:</strong> {{ plato.mensaje_id }}</p>
 
-                           <a class="btn btn-primary" href="{% url 'agregar-plato-compartido' plato.id_plato %}">Agregar a mi lista</a>
+
+                           <a class="btn btn-primary" href="{% url 'agregar-plato-compartido' plato.id_plato plato.mensaje_id %}">Agregar a mi lista</a>
                            <a class="btn btn-primary" href="">Rechazar</a>
 <!-- 
                           <button class="btn btn-primary">Incorporar</button>
@@ -143,7 +145,7 @@
                     {% if plato.propietario != user %}
                         <!-- <button type="submit" class="btn btn-success" style="font-size: 12px; padding: 2px 5px;">AGREGAR A MI LISTA</button> -->
                         <a href="{% url 'agregar-a-mi-lista' plato.id %}" class="btn btn-success" style="font-size: 12px; padding: 2px 5px;">AGREGAR A MI LISTA</a>
-                        <a href="{% url 'descartar-sugerido' plato.nombre_plato %}" class="btn btn-success" style="font-size: 12px; padding: 2px 5px;">NO ME INTERESA ESTE PLATO</a>
+                        <a href="{% url 'descartar-sugerido' plato.id %}" class="btn btn-success" style="font-size: 12px; padding: 2px 5px;">NO ME INTERESA ESTE PLATO</a>
 
                     {% endif %}
 
