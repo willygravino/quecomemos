@@ -6,7 +6,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
-from AdminVideos.models import Plato, Profile, Mensaje,  ElegidosXDia, Sugeridos
+from AdminVideos.models import Lugar, Plato, Profile, Mensaje,  ElegidosXDia, Sugeridos
 from django.http import Http404, HttpResponseForbidden, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.forms import UserCreationForm
@@ -14,7 +14,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView, D
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from datetime import datetime, timedelta
-from .forms import PlatoFilterForm, PlatoForm
+from .forms import LugarForm, PlatoFilterForm, PlatoForm
 from django.views.generic import TemplateView
 from datetime import date, datetime
 from django.contrib.auth.models import User  # Asegúrate de importar el modelo User
@@ -487,6 +487,78 @@ class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return redirect(self.success_url)
 
 
+class CrearLugar(LoginRequiredMixin, CreateView):
+    model = Lugar
+    form_class = LugarForm
+    template_name = 'AdminVideos/crearlugar_form.html'
+    success_url = reverse_lazy("crear-lugar")
+  
+
+    # def get_template_names(self):
+    #     # Obtener el valor del parámetro 'template' desde la URL
+    #     template_param = self.request.GET.get('tipopag')
+
+    #     # Dependiendo del valor de 'template', asignar una plantilla diferente
+    #     if template_param == 'Entrada':
+    #         return ['AdminVideos/entrada_update.html']
+    #     elif template_param == 'Dip':
+    #         return ['AdminVideos/dip_update.html']
+    #     elif template_param == 'Principal' or template_param == 'Dash':
+    #         return ['AdminVideos/plato_ppal_update.html']
+    #     elif template_param == 'Trago':
+    #         return ['AdminVideos/trago_update.html']
+    #     elif template_param == 'Salsa':
+    #         return ['AdminVideos/salsa_update.html']
+    #     elif template_param == 'Guarnicion':
+    #         return ['AdminVideos/guarnicion_update.html']
+    #     elif template_param == 'Postre':
+    #         return ['AdminVideos/postre_update.html']
+    #     elif template_param == 'Delivery':
+    #         return ['AdminVideos/delivery.html']
+    #     elif template_param == 'Comerafuera':
+    #         return ['AdminVideos/comerafuera.html']
+
+    #     else:
+    #         # Plantilla por defecto
+    #         return [self.template_name]
+
+    # def get_initial(self):
+    #     # Llama al método original para obtener el diccionario de inicialización
+    #     initial = super().get_initial()
+    #      # Obtener el valor del parámetro 'template' desde la URL
+    #     template_param = self.request.GET.get('tipopag')
+
+    #     # Asigna valores predeterminados al campo 'tipo' según el valor de 'template_param'
+    #     if template_param == 'Delivery':
+    #         initial['tipo'] = 'Delivery'
+    #     elif template_param == 'Comerafuera':
+    #         initial['tipo'] = 'Comer afuera'
+        
+    #     return initial
+    
+    def form_invalid(self, form):
+        print("Errores en el formulario:", form.errors)
+        return super().form_invalid(form)
+
+    def form_valid(self, form):
+        lugar = form.save(commit=False)
+        lugar.propietario = self.request.user
+
+        # Obtener el valor del parámetro 'template' desde la URL
+        template_param = self.request.GET.get('tipopag')
+
+        if template_param == 'Delivery':
+            lugar.delivery = True
+        elif template_param == 'Comerafuera':
+            lugar.delivery = False
+
+        lugar.save()
+       
+        # Obtener el parámetro 'tipopag' y pasarlo en la redirección
+        template_param = self.request.GET.get('tipopag')
+        return redirect(reverse("crear-lugar") + f"?tipopag={template_param}")
+
+
 class PlatoCreate(LoginRequiredMixin, CreateView):
     model = Plato
     form_class = PlatoForm
@@ -513,6 +585,11 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             return ['AdminVideos/guarnicion_update.html']
         elif template_param == 'Postre':
             return ['AdminVideos/postre_update.html']
+        elif template_param == 'Delivery':
+            return ['AdminVideos/delivery.html']
+        elif template_param == 'Comerafuera':
+            return ['AdminVideos/comerafuera.html']
+
         else:
             # Plantilla por defecto
             return [self.template_name]
@@ -542,11 +619,19 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             initial['tipo'] = 'Trago'
         elif template_param == 'Guarnicion':
             initial['tipo'] = 'Guarnicion'
+        elif template_param == 'Delivery':
+            initial['tipo'] = 'Delivery'
+        elif template_param == 'Comerafuera':
+            initial['tipo'] = 'Comer afuera'
         else:
             # Valor por defecto si 'template_param' no coincide con ninguna condición
             initial['tipo'] = '-'
 
         return initial
+    
+    def form_invalid(self, form):
+        print("Errores en el formulario:", form.errors)
+        return super().form_invalid(form)
 
     def form_valid(self, form):
         plato = form.save(commit=False)
@@ -558,9 +643,7 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             variedad = form.cleaned_data.get(f'variedad{i}')
             ingredientes_variedad_str = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
 
-            # Convertir la cadena de ingredientes en una lista
-            # ingredientes_variedad = [ingrediente.strip() for ingrediente in ingredientes_variedad_str.split(',')] if ingredientes_variedad_str else []
-
+        
             if variedad:  # Verificar si la variedad no está vacía
                 variedades[f"variedad{i}"] = {"nombre": variedad, "ingredientes": ingredientes_variedad_str, "elegido": True}
 
@@ -571,7 +654,6 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         template_param = self.request.GET.get('tipopag')
         return redirect(reverse("videos-create") + f"?tipopag={template_param}")
 
-        # return redirect(self.success_url)
 
 
 
@@ -661,7 +743,6 @@ def filtrar_platos(
 
         # Aplicar la consulta
         return Plato.objects.filter(query)
-
 
 
 
@@ -846,6 +927,7 @@ def FiltroDePlatos (request):
     # Convertir defaultdict a dict antes de pasarlo a la plantilla
     platos_dia_x_dia = dict(platos_dia_x_dia)
 
+    lugares = Lugar.objects.filter(propietario=request.user)
 
     contexto = {
                 'formulario': form,
@@ -862,6 +944,7 @@ def FiltroDePlatos (request):
                 # "idesplatos": ids_platos_importados,
                 # "ides_descartable": ids_platos_compartidos,
                 "platos_compartidos": platos_compartidos,
+                "lugares": lugares
 
                }
 
@@ -953,7 +1036,8 @@ class EnviarMensaje(LoginRequiredMixin, CreateView):
       
         return context
 
-
+class compartir_lugar(CreateView):
+     pass
 
 class compartir_plato(CreateView):
     model = Mensaje
@@ -1285,61 +1369,139 @@ def agregar_a_mi_lista(request, plato_id):
     return redirect('descartar-sugerido', plato_id=plato_id)
 
 
-
 class AsignarPlato(View):
+
     def post(self, request):
-        plato_id = request.POST.get('plato_id')
+        tipo = request.POST.get('tipo_elemento')
+        objeto_id = request.POST.get('plato_id')  # Puede ser plato o lugar, el nombre del campo puede generalizarse si quieres
         dia = request.POST.get('dia')
         comida = request.POST.get('comida')
 
-        # Buscar el plato
-        try:
-            plato = Plato.objects.get(id=plato_id)
-        except Plato.DoesNotExist:
-            messages.error(request, "El plato no existe.")
-            return redirect('filtro-de-platos')
-
-        # Convertir el string de fecha a objeto date
         fecha_comida = datetime.datetime.strptime(dia, "%Y-%m-%d").date()
+        request.session['dia_activo'] = dia
 
-        # Guardar la fecha en la sesión para recordar la pestaña activa
-        request.session['dia_activo'] = dia  
-
-        # Buscar o crear el registro del día
-        menu_dia, created = ElegidosXDia.objects.get_or_create(
+        menu_dia, _ = ElegidosXDia.objects.get_or_create(
             user=request.user,
             el_dia_en_que_comemos=fecha_comida,
-            defaults={"platos_que_comemos": {}}
-        ) # menu_dia es un OBJETO DE LA BASE DE DATOS
+            defaults={"platos_que_comemos": {}, "lugares_que_visitamos": {}}  # Si usas otro campo para lugares
+        )
 
-        # Verificar si ya hay un plato con la misma comida en ese día
-        platos_que_comemos = menu_dia.platos_que_comemos  # Diccionario almacenado en la BD - PLATOS QUE COMEMOS ES UN DICCIONARIO CON LOS DATOS DE ESE OBJETO DE LA BD
+        if tipo == "plato":
+            try:
+                plato = Plato.objects.get(id=objeto_id)
+            except Plato.DoesNotExist:
+                messages.error(request, "El plato no existe.")
+                return redirect('filtro-de-platos')
 
-        # Asegurar que `comida` sea una lista en `platos_que_comemos`
-        if not isinstance(platos_que_comemos.get(comida), list):
-            platos_que_comemos[comida] = []
-       
-       # Verificar si el plato ya está en la lista
-        if any(plato["id_plato"] == plato_id for plato in platos_que_comemos[comida]):
-            messages.warning(request, f"El plato {plato.nombre_plato} ya está asignado a {comida}.")
-        else:
-            # Agregar el nuevo plato a la lista
-            platos_que_comemos[comida].append({
-                "id_plato": plato_id,
-                "plato": plato.nombre_plato,
-                "tipo": plato.tipo,
-                "ingredientes": plato.ingredientes,
-                "variedades": {variedad_id: {"nombre": datos["nombre"], "ingredientes": datos["ingredientes"], "elegido": True}
-                   for variedad_id, datos in plato.variedades.items()},  # Agrega elegido: True a cada variedad
-                "elegido": True
-            })
-            
-        # Guardar los cambios en la base de datos
-        menu_dia.platos_que_comemos = platos_que_comemos
+            data = menu_dia.platos_que_comemos
+            if not isinstance(data.get(comida), list):
+                data[comida] = []
+
+            if any(p["id_plato"] == objeto_id for p in data[comida]):
+                messages.warning(request, f"El plato {plato.nombre_plato} ya está asignado a {comida}.")
+            else:
+                data[comida].append({
+                    "id_plato": objeto_id,
+                    "plato": plato.nombre_plato,
+                    "tipo": plato.tipo,
+                    "ingredientes": plato.ingredientes,
+                    "variedades": {
+                        vid: {
+                            "nombre": info["nombre"],
+                            "ingredientes": info["ingredientes"],
+                            "elegido": True
+                        } for vid, info in plato.variedades.items()
+                    },
+                    "elegido": True
+                })
+                messages.success(request, f"Plato {plato.nombre_plato} asignado correctamente a {comida}.")
+            menu_dia.platos_que_comemos = data
+
+        elif tipo == "lugar":
+                    try:
+                        lugar = Lugar.objects.get(id=objeto_id)
+                    except Lugar.DoesNotExist:
+                        messages.error(request, "El lugar no existe.")
+                        return redirect('filtro-de-platos')
+                    
+                    data = menu_dia.platos_que_comemos
+
+                    data[comida].append({
+                        "id_plato": objeto_id,
+                        "plato": lugar.nombre,  # Para mantener la clave "plato"
+                        "tipo": "lugar",
+                        "direccion": lugar.direccion,
+                        "telefono": lugar.telefono,
+                        "elegido": True,
+                        "tipo_elemento": "lugar"
+                    })
+
+                    messages.success(request, f"Lugar {lugar.nombre} asignado correctamente a {comida}.")
+
+        menu_dia.platos_que_comemos = data
         menu_dia.save()
-        messages.success(request, f"Plato {plato.nombre_plato} asignado correctamente a {comida}.")
-            
+
         return redirect('filtro-de-platos')
+
+        # menu_dia.save()
+        # return redirect('filtro-de-platos')
+
+
+# class AsignarPlato(View):
+    
+#     def post(self, request):
+#         plato_id = request.POST.get('plato_id')
+#         dia = request.POST.get('dia')
+#         comida = request.POST.get('comida')
+
+#         # Buscar el plato
+#         try:
+#             plato = Plato.objects.get(id=plato_id)
+#         except Plato.DoesNotExist:
+#             messages.error(request, "El plato no existe.")
+#             return redirect('filtro-de-platos')
+
+#         # Convertir el string de fecha a objeto date
+#         fecha_comida = datetime.datetime.strptime(dia, "%Y-%m-%d").date()
+
+#         # Guardar la fecha en la sesión para recordar la pestaña activa
+#         request.session['dia_activo'] = dia  
+
+#         # Buscar o crear el registro del día
+#         menu_dia, created = ElegidosXDia.objects.get_or_create(
+#             user=request.user,
+#             el_dia_en_que_comemos=fecha_comida,
+#             defaults={"platos_que_comemos": {}}
+#         ) # menu_dia es un OBJETO DE LA BASE DE DATOS
+
+#         # Verificar si ya hay un plato con la misma comida en ese día
+#         platos_que_comemos = menu_dia.platos_que_comemos  # Diccionario almacenado en la BD - PLATOS QUE COMEMOS ES UN DICCIONARIO CON LOS DATOS DE ESE OBJETO DE LA BD
+
+#         # Asegurar que `comida` sea una lista en `platos_que_comemos`
+#         if not isinstance(platos_que_comemos.get(comida), list):
+#             platos_que_comemos[comida] = []
+       
+#        # Verificar si el plato ya está en la lista
+#         if any(plato["id_plato"] == plato_id for plato in platos_que_comemos[comida]):
+#             messages.warning(request, f"El plato {plato.nombre_plato} ya está asignado a {comida}.")
+#         else:
+#             # Agregar el nuevo plato a la lista
+#             platos_que_comemos[comida].append({
+#                 "id_plato": plato_id,
+#                 "plato": plato.nombre_plato,
+#                 "tipo": plato.tipo,
+#                 "ingredientes": plato.ingredientes,
+#                 "variedades": {variedad_id: {"nombre": datos["nombre"], "ingredientes": datos["ingredientes"], "elegido": True}
+#                    for variedad_id, datos in plato.variedades.items()},  # Agrega elegido: True a cada variedad
+#                 "elegido": True
+#             })
+            
+#         # Guardar los cambios en la base de datos
+#         menu_dia.platos_que_comemos = platos_que_comemos
+#         menu_dia.save()
+#         messages.success(request, f"Plato {plato.nombre_plato} asignado correctamente a {comida}.")
+            
+#         return redirect('filtro-de-platos')
 
 
 

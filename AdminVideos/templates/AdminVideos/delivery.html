@@ -1,0 +1,30 @@
+{% extends "AdminVideos/platos_update.html" %}
+
+
+{% block tipo-de-formulario %}
+    <h1 class="fw-light">DELIVERY NUEVO.</h1>
+{% endblock %}
+
+
+{% block items %}
+
+<p>Nombre del lugar: {{ form.nombre_plato }}</p>
+<p>Comentarios: {{ form.descripcion_plato }}</p>
+<p>Dirección: {{ form.direccion }}</p>
+ <p>Teléfono:
+    {{ form.telefono }} </p>
+
+
+
+<p>Tipo de plato: {{ form.tipo }}</p>
+
+    <p>Enlace: {{ form.enlace }}</p>
+
+    <p>Imagen: {{ form.image }}</p>
+
+
+{% endblock %}
+
+
+{% block variedades %}
+{% endblock %}

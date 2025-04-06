@@ -1,3 +1,87 @@
+
+
+<script>
+  function setPlatoInfo(platoId) {
+  document.getElementById("platoIdInputCompartir").value = platoId;
+  document.getElementById("platoIdInputAsignar").value = platoId;
+}
+</script>
+
+<!-- Modal para compartir plato -->
+<div class="modal fade" id="compartirModal" tabindex="-1" aria-labelledby="compartirModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <!-- <div class="modal-header">
+        <h5 class="modal-title" id="compartirModalLabel">Compartir plato</h5>
+        
+      </div> -->
+      <div class="modal-body">
+        <form method="post" action="{% url 'compartir-plato' %}">
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <h6>Compartir este plato  {{ plato.id }} con:</h6>
+            <select id="amigue-select" name="amigue" class="form-select" aria-label="Seleccionar amigue">
+              {% for amigue in amigues %}
+                <option value="{{ amigue }}">{{ amigue }}</option>
+              {% endfor %}
+            </select>
+          <!-- Campo oculto donde se establecerá el plato id dinámicamente -->
+          <input type="hidden" name="plato_id" id="platoIdInputCompartir">
+        </div>
+
+          <button type="submit" class="btn btn-primary">Compartir</button>
+
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button> 
+          
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal para asignar plato -->
+<div class="modal fade" id="asignarPlatoModal" tabindex="-1" aria-labelledby="asignarPlatoLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+     
+      <form action="{% url 'asignar-plato' %}" method="POST">
+        {% csrf_token %}
+        <div class="modal-body">
+         
+
+          <!-- Campo oculto para almacenar el día activo -->
+          <input type="hidden" name="dia" id="diaSeleccionado">
+
+            <!-- Muestra el día activo en el modal -->
+            <h2>Asignar al día <span id="diaActivoTexto"></span></h2>
+
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+
+          <!-- Selector del tipo de comida -->
+          <div class="mb-1">
+            <label for="comidaSeleccionada" class="form-label">Seleccionar comida:</label>
+            <select name="comida" id="comidaSeleccionada" class="form-select">
+              <option value="desayuno">Desayuno</option>
+              <option value="almuerzo">Almuerzo</option>
+              <option value="merienda">Merienda</option>
+              <option value="cena">Cena</option>
+            </select> 
+
+             <!-- Campo oculto para el ID del plato -->
+          <input type="hidden" name="plato_id" id="platoIdInputAsignar">
+        
+          <button type="submit" class="btn btn-primary">Asignar</button>
+
+
+      </form>
+
+    </div>
+  </div> 
+
+
 Sí, puedes hacer un git push de solo un archivo específico, como el archivo de tu base de datos. Sin embargo, Git no permite hacer push de un solo archivo directamente, pero puedes hacer un commit solo de ese archivo y luego hacer push.
 
 Pasos para hacer push de solo un archivo:

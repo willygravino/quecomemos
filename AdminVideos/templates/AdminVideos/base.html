@@ -68,11 +68,7 @@
                     <i class="fa-solid fa-shrimp" style="font-size: 1.3rem;"></i>
                     <span>Entradas</span>
                 </a>
-
-               <!-- <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Entrada">
-                    <i class="fa-solid fa-shrimp" style="font-size: 1.3rem;"></i>
-                    <span>Entradas</span>
-                </a> -->
+          
             </li>
 
             {% if parametro == "Dip" %}
@@ -133,6 +129,35 @@
                         <span>Tragos</span>
                     </a>
                 </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider d-none d-md-block">
+
+      
+
+            {% if parametro == "Delivery" %}
+            <li class="nav-item active">
+        {% else %}
+            <li class="nav-item">
+        {% endif %}
+                <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Delivery">
+                    <i class="fa-solid fa-mobile-screen-button" style="font-size: 1.3rem;"></i>
+                    <span>Delivery</span>
+                </a>
+            </li>
+
+           
+
+            {% if parametro == "Comerafuera" %}
+            <li class="nav-item active">
+        {% else %}
+            <li class="nav-item">
+        {% endif %}
+                <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Comerafuera">
+                    <i class="fa-solid fa-person-walking-dashed-line-arrow-right" style="font-size: 1.3rem;"></i>
+                    <span>Comer afuera</span>
+                </a>
+            </li>
 
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">

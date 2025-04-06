@@ -1,6 +1,6 @@
 
 from django import forms
-from .models import Plato
+from .models import Lugar, Plato
 
 class PlatoFilterForm(forms.Form):
     medios = forms.ChoiceField(choices=Plato.MEDIOS_CHOICES, required=False)
@@ -31,5 +31,20 @@ class PlatoForm(forms.ModelForm):
   
     class Meta:
         model = Plato
-        fields = ["nombre_plato", "receta", "descripcion_plato", "ingredientes", "medios", "categoria", "dificultad", "tipo", "calorias", "image"]
+        fields = ["nombre_plato", "receta", "descripcion_plato", "ingredientes", "medios", "categoria", "dificultad", "tipo", "calorias", "enlace", "image"]
+    
+class LugarForm(forms.ModelForm):
+    class Meta:
+        model = Lugar
+        fields = ['nombre', 'direccion', 'telefono', 'enlace', 'dias_horarios', 'image']
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre del lugar'}),
+            'direccion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Dirección'}),
+            'telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Teléfono'}),
+            'enlace': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'Página web o enlace'}),
+            'dias_horarios': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Días y horarios de atención'}),
+            'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        }
+
+
     

@@ -21,6 +21,14 @@
                 <p class="card-text">Dificultad: {{ plato.dificultad }}</p>
                 <p class="card-text">Tipo: {{ plato.tipo }}</p>
                 <p class="card-text">Calorías: {{ plato.calorias }}</p>
+                {% if plato.enlace %}
+                <p class="card-text">
+                    <a href="{{ plato.enlace }}" target="_blank">{{ plato.enlace }}</a>
+                </p>
+               {% endif %}
+
+               <p class="card-text">Contacto: {{ plato.teléfono }}</p>
+
                
                 {% if plato.proviene_de %}
                   <p class="card-text text-success fw-bold">

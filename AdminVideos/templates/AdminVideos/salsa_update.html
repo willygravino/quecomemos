@@ -5,5 +5,30 @@
     <h1 class="fw-light">INGRESAR SALSA.</h1>
 {% endblock %}
 
+{% block items %}
+
+
+            <p>Nombre del Plato: {{ form.nombre_plato }}</p>
+            <p>Receta: {{ form.receta }}</p>
+            <p>Descripción del Plato: {{ form.descripcion_plato }}</p>
+            <p>Ingredientes: {{ form.ingredientes }}</p>
+            <p>Medios de cocción:
+                {{ form.medios }} </p>
+            <p>Categoría:
+                {{ form.categoria }} </p>
+            <p>Preparación:
+                {{ form.dificultad }} </p>
+            <p>Calorías:
+                {{ form.calorias }} </p>
+
+
+            <p>Tipo de plato: {{ form.tipo }}</p>
+
+       
+                <p>Enlace: {{ form.enlace }}</p>
+
+                <p>Imagen: {{ form.image }}</p>
+                {% endblock %}
+
 {% block variedades %}
 {% endblock %}

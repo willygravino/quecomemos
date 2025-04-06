@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from AdminVideos.views import EnviarMensaje, agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, compartir_plato, descartar_sugerido, eliminar_plato, eliminar_programado, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, sumar_amigue, user_logout, SolicitarAmistad, MensajeDelete, AsignarPlato 
+from AdminVideos.views import CrearLugar, EnviarMensaje,  agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, compartir_lugar, compartir_plato, descartar_sugerido, eliminar_plato, eliminar_programado, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, sumar_amigue, user_logout, SolicitarAmistad, MensajeDelete, AsignarPlato 
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -29,11 +29,14 @@ urlpatterns = [
     path('menu/historial',historial, name="historial"),
     path('menu/amigues/sumar',sumar_amigue, name="sumar-amigue"),
     path('compartir/',  compartir_plato.as_view(), name="compartir-plato"),
+    path('compartir/lugar',  compartir_lugar.as_view(), name="compartir-lugar"),
+
     path('agregar-a-mi-lista/<int:plato_id>/', agregar_a_mi_lista, name='agregar-a-mi-lista'),
     # path('descartar-sugerido/<str:nombre_plato>/', descartar_sugerido, name='descartar-sugerido'),
     path('descartar-sugerido/<int:plato_id>/', descartar_sugerido, name='descartar-sugerido'),
     path('agregar-compartido/<int:pk>/<int:mensaje_id>/', agregar_plato_compartido, name='agregar-plato-compartido'),
     path('videos/list/filtro', FiltroDePlatos, name="filtro-de-platos"),
+    # path('lugares', Lugares, name="lugares"),
     path('videos/reiniciar/sugeridos', reiniciar_sugeridos, name="reiniciar-sugeridos"),
     path('videos/<pk>/update', PlatoUpdate.as_view(), name="videos-update"),
     path('eliminar-plato/<int:plato_id>/', eliminar_plato, name='eliminar-plato'),
@@ -41,6 +44,7 @@ urlpatterns = [
 
     path('videos/<pk>/detail', PlatoDetail.as_view(), name="videos-detail"),
     path('videos/create', PlatoCreate.as_view(), name="videos-create"),
+    path('lugar/crear', CrearLugar.as_view(), name="crear-lugar"),
     path('login', Login.as_view(), name="login"),
     path('registration/logout/', user_logout, name='logout'),
     path('signup', SignUp.as_view(), name="signup"),

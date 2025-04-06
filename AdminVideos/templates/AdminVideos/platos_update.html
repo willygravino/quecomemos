@@ -16,31 +16,30 @@
     </section>
 </div>
 
+    {% if form.errors %}
+        <div style="color: red;">
+            <p><strong>Errores en el formulario:</strong></p>
+            <ul>
+                {% for field, errors in form.errors.items %}
+                    <li>{{ field }}: {{ errors|join:", " }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
 <div style="margin-top:40px">
     <center>
 
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <p>Nombre del Plato: {{ form.nombre_plato }}</p>
-            <p>Receta: {{ form.receta }}</p>
-            <p>Descripción del Plato: {{ form.descripcion_plato }}</p>
-            <p>Ingredientes: {{ form.ingredientes }}</p>
-            <p>Medios de cocción:
-                {{ form.medios }} </p>
-            <p>Categoría:
-                {{ form.categoria }} </p>
-            <p>Preparación:
-                {{ form.dificultad }} </p>
-            <p>Calorías:
-                {{ form.calorias }} </p>
 
+            {% block items %}
+            {% endblock %}
 
-            <p>Tipo de plato: {{ form.tipo }}</p>
 
                 {% block variedades %}
                 {% endblock %}
 
-                <p>Imagen: {{ form.image }}</p>
                 <button type="submit">Guardar</button>
 
         </form>

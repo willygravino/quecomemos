@@ -4,13 +4,6 @@
 
 {% block lista_platos %}
 
-<!-- Divider -->
-<!-- <hr> -->
-
-
-<!-- <p>{{ amigues }}</p> -->
-
-<!-- <hr> -->
 
 <section>
   
@@ -19,10 +12,26 @@
         <div class=" d-flex align-items-center">
           <div class="container">
             <br>
-
-            <a class="bg-primary text-white small border border-dark" href="{% url 'videos-create' %}?tipopag={{ request.GET.tipopag|default:'' }}">
-              {% if request.GET.tipopag and request.GET.tipopag != "Dash" %} AGREGAR {{ request.GET.tipopag }}{% else %} AGREGAR PRINCIPAL{% endif %}
-            </a>
+            
+            {% with tipopag=request.GET.tipopag %}
+            {% if tipopag == "Delivery" or tipopag == "Comerafuera" %}
+              <a class="bg-primary text-white small border border-dark" href="{% url 'crear-lugar' %}?tipopag={{ tipopag|default:'' }}">
+                {% if tipopag and tipopag != "Dash" %}
+                  AGREGAR {{ tipopag }}
+                {% else %}
+                  AGREGAR PRINCIPAL
+                {% endif %}
+              </a>
+            {% else %}
+              <a class="bg-primary text-white small border border-dark" href="{% url 'videos-create' %}?tipopag={{ tipopag|default:'' }}">
+                {% if tipopag and tipopag != "Dash" %}
+                  AGREGAR {{ tipopag }}
+                {% else %}
+                  AGREGAR PRINCIPAL
+                {% endif %}
+              </a>
+            {% endif %}
+          {% endwith %}
 
           </div>
         </div>
@@ -50,9 +59,7 @@
 
                            <a class="btn btn-primary" href="{% url 'agregar-plato-compartido' plato.id_plato plato.mensaje_id %}">Agregar a mi lista</a>
                            <a class="btn btn-primary" href="">Rechazar</a>
-<!-- 
-                          <button class="btn btn-primary">Incorporar</button>
-                          <button class="btn btn-secondary">Descartar</button> -->
+
                       </div>
                   </div>
               </div>
@@ -69,25 +76,24 @@
         {% for plato in platos %}
           <div class="d-flex flex-row">
             <div class="col-md-2 mb-2">
-              <div {% if user.id == plato.propietario.id %} class="card border border-success" {% else %} class="card border border-danger" {% endif %}
+              <div {% if user.id == plato.propietario.id and not plato.id_original %} class="card  border-success border-4" {% elif user.id == plato.propietario.id and plato.id_original %} class="card  border-warning border-4" {% elif user.id != plato.propietario.id %} class="card  border-danger border-3" {% endif %}
               style="width: 6rem;">
+
                 <div class="container p-0">
-                    <!-- <a href="">
-                      <img src="{{plato.image_url}}" class="img-fluid position-relative object-fit-cover" alt="Imagen del Plato">
-                    </a>                         -->
+              
 
                     <a href="{% url 'videos-detail' plato.id %}">
                       <img src="{{ plato.image_url }}" class="img-fluid object-fit-cover" alt="Imagen del Plato">
                     </a>
 
                     <div class="position-absolute top-0 mt-1 start-50 translate-middle-x text-center text-white bg-dark rounded">
-                        <h6 class="mb-0 small"> {{ plato.nombre_plato }}  {{ plato.id }}</h6>
+                        <h6 class="mb-0 small"> {{ plato.nombre_plato }}</h6>
+
+                
+                     
                     </div>
                 </div>
                 <div class="mt-0">
-
-                    <!-- <small class=""> {{ plato.tipo }} /</small> -->
-                    <!-- <p>Lunes 1 - Almuerzo</p> ASIGNACION AQUÍ -->
 
                     {% for key, value in plato.variedades.items %}
 
@@ -104,46 +110,19 @@
                       {% endif %}
 
 
-                      <!-- <a href="{% url 'videos-detail' plato.id %}">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                      </a>
-                      -->
-
-                      <a href="#" data-bs-toggle="modal" data-bs-target="#asignarPlatoModal" class="btn btn-sm btn-primary p-0" onclick="setPlatoInfo('{{ plato.id }}')">
+                      <a href="#" data-bs-toggle="modal" data-bs-target="#asignarPlatoModal" class="btn btn-sm btn-primary p-0" onclick="setPlatoInfo('{{ plato.id }}', 'plato')">
                         Programar
                       </a>
-<!--
-                      <button type="button" class="btn btn-secondary"
-                              data-bs-toggle="popover" data-bs-placement="right"
-                              data-bs-custom-class="custom-popover"
-                              data-bs-title="Custom popover"
-                              data-bs-content="This popover is themed via CSS variables.">
-                        Custom popover
-                      </button> -->
+
 
                     </div>
 
                     <div>
-                      <!-- <button
-                          class="btn {% if plato.nombre_plato in preseleccionados %}btn-success{% else %}btn-primary{% endif %}"
-                          style="font-size: 12px; padding: 2px 5px;"
-                          data-plato-id="{{ plato.id }}"
-                          data-nombre-plato="{{ plato.nombre_plato }}"
-                          data-tipo-plato="{{ plato.tipo }}"
-                          data-tipopag="{{ request.GET.tipopag }}"
-                          data-accion="{% if plato.nombre_plato in preseleccionados %}borrar{% else %}preseleccionar{% endif %}">
-                          {% if plato.nombre_plato in preseleccionados %}√{% else %}Preseleccionar{% endif %}
-                      </button> -->
+                 
                     </div>
 
-                    <!-- PRUEBA HTML del checkbox -->
-                    <!-- <label>
-                      <input type="checkbox" id="preseles" name="" value="" {% if plato.nombre_plato in preseleccionados %} checked {% endif %} style="display: none;">
-                      <span class="custom-checkbox"></span>
-                    </label> -->
-
                     {% if plato.propietario != user %}
-                        <!-- <button type="submit" class="btn btn-success" style="font-size: 12px; padding: 2px 5px;">AGREGAR A MI LISTA</button> -->
+                 
                         <a href="{% url 'agregar-a-mi-lista' plato.id %}" class="btn btn-success" style="font-size: 12px; padding: 2px 5px;">AGREGAR A MI LISTA</a>
                         <a href="{% url 'descartar-sugerido' plato.id %}" class="btn btn-success" style="font-size: 12px; padding: 2px 5px;">NO ME INTERESA ESTE PLATO</a>
 
@@ -155,11 +134,41 @@
           </div>
         {% endfor %}
       </div>
-    <!-- </div> -->
-  <!-- </div> -->
+ 
 {% endif %}
 
 </section>
+{% if not lugares %}
+    <h6>No hay lugares para mostrar.</h6>
+  {% else %}
+    <div class="container p-0">
+      <div class="row">
+        {% for lugar in lugares %}
+          <div class="col-md-4 mb-3">
+            <div class="card h-100">
+              <img src="{{ lugar.image_url }}" class="card-img-top" alt="Imagen de {{ lugar.nombre }}">
+              <div class="card-body text-center">
+                <h5 class="card-title">{{ lugar.nombre }}</h5>
+                <p><strong>Dirección:</strong> {{ lugar.direccion }}</p>
+                <p><strong>Teléfono:</strong> {{ lugar.telefono }}</p>
+                <p><strong>Horario:</strong> {{ lugar.dias_horarios }}</p>
+                {% if lugar.enlace %}
+                  <p><a href="{{ lugar.enlace }}" target="_blank">Ver más</a></p>
+                {% endif %}
+                
+                <a href="#" data-bs-toggle="modal" data-bs-target="#asignarPlatoModal" class="btn btn-sm btn-primary p-0" onclick="setPlatoInfo('{{ lugar.id }}', 'lugar')">
+                  Programar
+                </a>
+
+                <a class="btn btn-primary mb-1" href="">Editar</a>
+                <a class="btn btn-danger" href="">Eliminar</a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
 
 <!-- Modal para compartir plato -->
 <div class="modal fade" id="compartirModal" tabindex="-1" aria-labelledby="compartirModalLabel" aria-hidden="true">
@@ -226,7 +235,10 @@
 
              <!-- Campo oculto para el ID del plato -->
           <input type="hidden" name="plato_id" id="platoIdInputAsignar">
-        
+
+          <!-- Campo oculto para el tipo de elemento -->
+          <input type="hidden" name="tipo_elemento" id="tipoObjeto">
+       
           <button type="submit" class="btn btn-primary">Asignar</button>
 
 
@@ -240,9 +252,10 @@
 </div>
 
 <script>
-  function setPlatoInfo(platoId) {
+  function setPlatoInfo(platoId, tipo) {
   document.getElementById("platoIdInputCompartir").value = platoId;
   document.getElementById("platoIdInputAsignar").value = platoId;
+  document.getElementById('tipoObjeto').value = tipo;
 }
 </script>
 

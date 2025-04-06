@@ -1,6 +1,25 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+class Lugar(models.Model):
+    nombre = models.CharField(max_length=100)
+    direccion = models.CharField(max_length=255, blank=True, null=True)
+    telefono = models.CharField(max_length=20, blank=True, null=True)
+    enlace = models.URLField(max_length=200, blank=True, null=True)
+    propietario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="lugares")
+    dias_horarios = models.CharField(max_length=255, blank=True, null=True)  # Nuevo campo
+    image = models.ImageField("Subí una imagen del lugar", upload_to="videos/", null=True, blank=True)
+    delivery = models.BooleanField(default=True)  # Se marca como no delivery para distinguit el lugar de comerafuera (es false si es comerafuera)
+
+    @property
+    def image_url(self):
+        try:
+            return self.image.url
+        except (ValueError, FileNotFoundError):
+            return '/media/avatares/lugar.png'
+
+    def __str__(self):
+        return self.nombre
 
 class Plato(models.Model):
     nombre_plato = models.CharField(max_length=30)
@@ -9,7 +28,9 @@ class Plato(models.Model):
     ingredientes = models.CharField('Ingresá los ingredientes, separados por coma', max_length=400, blank=True)
     proviene_de = models.CharField(max_length=20, null=True)
     id_original = models.IntegerField(null=True, blank=True)
+    enlace = models.URLField(max_length=200, blank=True, null=True)
 
+   
     INDISTINTO = '-'
     HORNO = 'Horno'
     COCINA = 'Cocina'
@@ -74,7 +95,8 @@ class Plato(models.Model):
         (TORTA,'Torta'),
         (UNTABLE,'Dip'),
         (TRAGO,'Trago'),
-        (GUARNICION,'Guarnicion'),
+        (GUARNICION,'Guarnicion')
+
     ]
     
     tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, null=False, default="", blank=False)
