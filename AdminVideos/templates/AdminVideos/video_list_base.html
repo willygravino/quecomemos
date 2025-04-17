@@ -104,7 +104,7 @@
 
                     <div class="d-inline-flex gap-2 align-items-center justify-content-center">
                       {% if amigues %}
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#compartirModal" onclick="setPlatoInfo('{{ plato.id }}')">
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#compartirModal" onclick="setPlatoInfo('{{ plato.id }}', 'plato')">
                           <i class="fa-solid fa-share-nodes"></i>
                         </a>
                       {% endif %}
@@ -155,6 +155,12 @@
                 {% if lugar.enlace %}
                   <p><a href="{{ lugar.enlace }}" target="_blank">Ver más</a></p>
                 {% endif %}
+
+                {% if amigues %}
+                <a href="#" data-bs-toggle="modal" data-bs-target="#compartirModal" onclick="setPlatoInfo('{{ lugar.id }}', 'lugar')">
+                  <i class="fa-solid fa-share-nodes"></i>
+                </a>
+                {% endif %}
                 
                 <a href="#" data-bs-toggle="modal" data-bs-target="#asignarPlatoModal" class="btn btn-sm btn-primary p-0" onclick="setPlatoInfo('{{ lugar.id }}', 'lugar')">
                   Programar
@@ -190,7 +196,11 @@
               {% endfor %}
             </select>
           <!-- Campo oculto donde se establecerá el plato id dinámicamente -->
-          <input type="hidden" name="plato_id" id="platoIdInputCompartir">
+          <input type="hidden" name="id_elemento" id="platoIdInputCompartir">
+
+          <!-- Campo oculto para el tipo de elemento -->
+          <input type="hidden" name="tipo_elemento" id="tipoObjetoCompartir">
+
         </div>
 
           <button type="submit" class="btn btn-primary">Compartir</button>
@@ -237,7 +247,7 @@
           <input type="hidden" name="plato_id" id="platoIdInputAsignar">
 
           <!-- Campo oculto para el tipo de elemento -->
-          <input type="hidden" name="tipo_elemento" id="tipoObjeto">
+          <input type="hidden" name="tipo_elemento" id="tipoObjetoAsignar">
        
           <button type="submit" class="btn btn-primary">Asignar</button>
 
@@ -253,10 +263,14 @@
 
 <script>
   function setPlatoInfo(platoId, tipo) {
-  document.getElementById("platoIdInputCompartir").value = platoId;
-  document.getElementById("platoIdInputAsignar").value = platoId;
-  document.getElementById('tipoObjeto').value = tipo;
-}
+    // Compartir
+    document.getElementById("platoIdInputCompartir").value = platoId;
+    document.getElementById("tipoObjetoCompartir").value = tipo;
+
+    // Asignar
+    document.getElementById("platoIdInputAsignar").value = platoId;
+    document.getElementById("tipoObjetoAsignar").value = tipo;
+  }
 </script>
 
 

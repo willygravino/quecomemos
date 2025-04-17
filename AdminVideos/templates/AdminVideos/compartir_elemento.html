@@ -9,7 +9,7 @@
    <section class="py-1 text-center container">
      <div class="row py-lg-1">
        <div class="col-lg-8 col-md-8 mx-auto">
-         <h1 class="fw-light">Completá en formulario para enviar un mensaje al usuario que elijas.</h1>
+         <h1 class="fw-light">Completá el formulario para enviar un mensaje al usuario que elijas.</h1>
        </div>
      </div>
    </section>
@@ -19,13 +19,22 @@
    <center>
       <p>    
            {% csrf_token %}
-            <!-- Campo oculto para enviar plato_id -->
-          <input type="hidden" name="plato_id" value="{{ plato_id }}">
+            <!-- Campo oculto para enviar plato id o lugar id-->
+          <input type="hidden" name="id_elemento" value="{{ id_elemento }}">
+
           <!-- Campo oculto para enviar el nombre del amigue -->
           <input type="hidden" name="amigue" value="{{ amigue }}">
 
-          <p>Compartiendo el plato: {{plato_id}}</p>
+          <!-- Campo oculto para enviar el nombre del amigue -->
+          <input type="hidden" name="tipo_mensaje" value="{{ tipo_elemento }}">
+          <!-- <p>tipo mensaje:{{tipo_mensaje}}</p> -->
+
+          
+          <p>Compartiendo el {{ tipo_elemento }}: {{id_elemento}}</p>
+
           <p>Con: {{ amigue }}</p>
+          <p>Tipo elemento: {{ tipo_elemento }}</p>
+
             <!-- {{form.as_p}} -->
 
             <label for="id_mensaje">Mensaje:</label>

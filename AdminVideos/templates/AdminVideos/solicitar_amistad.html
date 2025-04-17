@@ -4,6 +4,22 @@
 
 {% block principal %}
 
+{% if form.errors %}
+  <div class="alert alert-danger">
+    <p>Corrige los siguientes errores:</p>
+    <ul>
+      {% for field, errors in form.errors.items %}
+          <ul>
+            {% for error in errors %}
+              {{ error }}
+            {% endfor %}
+          </ul>
+
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}
+
 <div class="album py-5 bg-light">
    <section class="py-1 text-center container">
      <div class="row py-lg-1">
@@ -39,6 +55,8 @@
           <br><br> -->
 
           <input type="hidden" name="usuario_que_envia" value="{{ user.username }}">
+
+          <input type="hidden" name="tipo_mensaje" value="amistad">
           
           <textarea name="mensaje" cols="40" rows="10" maxlength="1000" required="" aria-invalid="true" id="id_mensaje"></textarea>
 

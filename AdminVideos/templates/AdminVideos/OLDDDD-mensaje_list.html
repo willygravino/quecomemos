@@ -14,7 +14,12 @@
     </div>
   </section>
 
+
+GFDGDFGDFDGFDFGFGDFGDDGFDFGFDGFGDDFG
+
   {% for mensaje in mensajes %}
+  <h1>MENSAJE.TIPO_MENSAJE  {mensaje.tipo_mensaje%}</h1>
+
     <center>
       <p>
 
@@ -28,9 +33,8 @@
               <!-- <a href="#" class="card-link">Another link</a> -->
            
           
-          {% if mensaje.amistad %}
-              {% if mensaje.amistad == "solicitar" %}
-                <!-- Cada mensaje tiene su propio formulario -->
+          {% if mensaje.tipo_mensaje == "amistad" %}
+             
                 {% if mensaje.usuario_que_envia not in amigues %}
 
                   <form action="{% url 'sumar-amigue' %}" method="POST">
@@ -44,27 +48,8 @@
                   <p>AMIGO ACEPTADO</p>
                 {% endif %}
 
-              {% else %}
- 
-                <form action="" method="POST">
-                  {% csrf_token %}
-                  <input type="hidden" name="" value="">
-                  <button type="submit">agregar a mi lista el plato {{mensaje.amistad}} que envía {{ mensaje.usuario_que_envia }}</button>
-                  
-                    <!-- <img src="{{platos_dict.id.image_url}}" class="img-fluid position-relative object-fit-cover" alt="Imagen del Plato"> -->
-
-                  <a class="dropdown-item" href="#" data-toggle="modal" data-target="#PlatoModal{{mensaje.amistad}}">
-                    Ver plato {{mensaje.nombre_plato_compartido}}
-                 </a>
-
-                 <a class="btn btn-primary" href="{% url 'agregar-plato-compartido' mensaje.amistad %}">Agregar a mi lista</a>
-                 <a class="btn btn-primary" href="">Rechazar</a>
-              {% endif %}
-           {% endif %}
-          
-          <br>
-          <a href="{% url 'mensaje-delete' mensaje.id %}">Borrar</a>
-
+          {% endif %}
+       
            <!-- cierre de card -->
           </div>
         </div>

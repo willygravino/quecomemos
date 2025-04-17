@@ -251,11 +251,7 @@ def lista_de_compras(request):
 
     # Recorrer los menús del usuario
     for menu in menues_del_usuario:
-        # platos = menu.platos_que_comemos or {}  # Asegura que no sea None (debe ser un diccionario)
-        # platos = menu['platos_que_comemos'] or {} 
-           # Acceder correctamente a platos_que_comemos como un atributo de objeto
         platos = menu.platos_que_comemos or []  # Asegurar que no sea None, sino una lista vacía
-
 
         # Recorrer las comidas del usuario (desayuno, almuerzo, cena, etc.)
         for comida, lista_platos in platos.items():
@@ -767,12 +763,6 @@ def FiltroDePlatos (request):
     if dia_activo < primer_dia:
         request.session['dia_activo'] = primer_dia
 
-    # # Obtener el día activo y reconvertirlo a tipo date (esto está de más! porque si está en la sesión no hay que volver a convertirlo, entiendo)
-    # dia_activo = request.session['dia_activo']
-
-    # Recuperar el día activo de la URL o la sesión
-    # dia_activo = request.GET.get('dia_activo', request.session.get('dia_activo'),dias_desde_hoy[0].isoformat())
-
     pla = ""
 
     # Recuperar los parámetros desde la sesión y la URL
@@ -819,17 +809,29 @@ def FiltroDePlatos (request):
 
         form = PlatoFilterForm(initial=items_iniciales)
 
-    # Llamar a la función filtrar_platos pasando las variables recuperadas
-    platos = filtrar_platos(
-        usuario=usuario,
-        tipo_parametro=tipo_parametro,
-        quecomemos=quecomemos,
-        misplatos=misplatos,
-        medios=medios,
-        categoria=categoria,
-        dificultad=dificultad,
-        palabra_clave=palabra_clave
-    )
+    if tipo_parametro == "Delivery":
+        lugares = Lugar.objects.filter(propietario=request.user, delivery=True)
+        platos = ""
+
+
+    elif tipo_parametro == "Comerafuera": 
+        lugares = Lugar.objects.filter(propietario=request.user, delivery=False)
+        platos = ""
+
+
+    else:
+        lugares = ""
+        # Llamar a la función filtrar_platos pasando las variables recuperadas
+        platos = filtrar_platos(
+            usuario=usuario,
+            tipo_parametro=tipo_parametro,
+            quecomemos=quecomemos,
+            misplatos=misplatos,
+            medios=medios,
+            categoria=categoria,
+            dificultad=dificultad,
+            palabra_clave=palabra_clave
+        )
    
     # Filtra las fechas únicas en `el_dia_en_que_comemos` para los objetos del usuario actual
     fechas_existentes = ElegidosXDia.objects.filter(user=usuario,el_dia_en_que_comemos__gte=fecha_actual).values_list('el_dia_en_que_comemos', flat=True).distinct()
@@ -872,10 +874,10 @@ def FiltroDePlatos (request):
 # ------------------- LISTA DE PLATOS COMPARTIDOS
 
     # MENSAJES CON PLATOS COMPARTIDOS QUE AÚN NO FUERON IMPORTADOS
-    mensajes_platos_compartidos = Mensaje.objects.filter(destinatario=usuario, importado=False).exclude(amistad__in=["mensaje", "solicitar"])
+    mensajes_platos_compartidos = Mensaje.objects.filter(destinatario=usuario, importado=False).exclude(tipo_mensaje__in=["mensaje", "solicitar"])
 
     # Obtener los IDs de los platos compartidos junto con el ID del mensaje
-    ids_platos_compartidos = {msg.amistad: msg.id for msg in mensajes_platos_compartidos if msg.amistad}
+    ids_platos_compartidos = {msg.id_elemento: msg.id for msg in mensajes_platos_compartidos if msg.id_elemento}
 
     # Buscar los platos correspondientes en la base de datos
     los_platos_compartidos = {
@@ -885,17 +887,17 @@ def FiltroDePlatos (request):
     # Extraer los platos compartidos de los mensajes
     platos_compartidos = [
         {
-            "id_plato": msg.amistad,
+            "id_plato": msg.id_elemento,
             "mensaje_id": msg.id,  # Agregar el ID del mensaje del cual proviene
-            "nombre_plato": msg.nombre_plato_compartido,
+            "nombre_plato": msg.nombre_elemento_compartido,
             "quien_comparte": msg.usuario_que_envia,
-            "receta": los_platos_compartidos[msg.amistad].receta if msg.amistad in los_platos_compartidos else "",
-            "descripcion": los_platos_compartidos[msg.amistad].descripcion_plato if msg.amistad in los_platos_compartidos else "",
-            "ingredientes": los_platos_compartidos[msg.amistad].ingredientes if msg.amistad in los_platos_compartidos else "",
-            "tipo": los_platos_compartidos[msg.amistad].tipo if msg.amistad in los_platos_compartidos else "",
-            "image_url": los_platos_compartidos[msg.amistad].image_url if msg.amistad in los_platos_compartidos else ""
+            "receta": los_platos_compartidos[msg.id_elemento].receta if msg.id_elemento in los_platos_compartidos else "",
+            "descripcion": los_platos_compartidos[msg.id_elemento].descripcion_plato if msg.id_elemento in los_platos_compartidos else "",
+            "ingredientes": los_platos_compartidos[msg.id_elemento].ingredientes if msg.id_elemento in los_platos_compartidos else "",
+            "tipo": los_platos_compartidos[msg.id_elemento].tipo if msg.id_elemento in los_platos_compartidos else "",
+            "image_url": los_platos_compartidos[msg.id_elemento].image_url if msg.id_elemento in los_platos_compartidos else ""
         }
-        for msg in mensajes_platos_compartidos if msg.nombre_plato_compartido
+        for msg in mensajes_platos_compartidos if msg.nombre_elemento_compartido
     ]
 
 # ---------------------
@@ -927,7 +929,6 @@ def FiltroDePlatos (request):
     # Convertir defaultdict a dict antes de pasarlo a la plantilla
     platos_dia_x_dia = dict(platos_dia_x_dia)
 
-    lugares = Lugar.objects.filter(propietario=request.user)
 
     contexto = {
                 'formulario': form,
@@ -975,8 +976,9 @@ class SolicitarAmistad(CreateView):
 
    def form_valid(self, form):
         # Asigna el valor predeterminado al campo 'amistad'
-        form.instance.amistad = "solicitar"
+        form.instance.tipo_mensaje = "amistad"
         return super().form_valid(form)
+   
    
    def get_form(self, form_class=None):
         form = super().get_form(form_class)
@@ -1007,7 +1009,7 @@ class EnviarMensaje(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.usuario_que_envia = self.request.user.username
-        form.instance.amistad = "mensaje"
+        form.instance.tipo_mensaje = "texto"
         return super().form_valid(form)
 
     def get_form(self, form_class=None):
@@ -1036,12 +1038,13 @@ class EnviarMensaje(LoginRequiredMixin, CreateView):
       
         return context
 
-class compartir_lugar(CreateView):
-     pass
+from .models import Plato, Lugar, Mensaje  # Asegúrate de importar los modelos necesarios
 
-class compartir_plato(CreateView):
+
+
+class compartir_elemento(CreateView):
     model = Mensaje
-    template_name = 'AdminVideos/compartir_plato.html'
+    template_name = 'AdminVideos/compartir_elemento.html'
     success_url = reverse_lazy('filtro-de-platos')
 
     fields = ['mensaje']  # Solo incluimos el campo del mensaje, ya que otros se asignarán automáticamente
@@ -1050,33 +1053,48 @@ class compartir_plato(CreateView):
         # Obtén el contexto base de la vista
         context = super().get_context_data(**kwargs)
 
-        # Recupera el plato_id y el amigue del request GET o POST
-        plato_id = self.request.POST.get('plato_id')
+        # Recupera el elemento_id y el amigue del request POST
+        id_elemento = self.request.POST.get('id_elemento')
         amigue = self.request.POST.get('amigue')
+        tipo_elemento = self.request.POST.get('tipo_elemento')
 
         # Agrega plato y amigue al contexto
-        context['plato_id'] = plato_id
+        context['id_elemento'] = id_elemento
         context['amigue'] = amigue
+        context['tipo_elemento'] = tipo_elemento
 
         return context
 
     def form_valid(self, form):
         # Obtén los datos necesarios del request
-        plato_id = self.request.POST.get('plato_id')
+        id_elemento = self.request.POST.get('id_elemento')
         amigue_username = self.request.POST.get('amigue')  # Supone que el valor es el nombre de usuario
-
-        # Busca el plato y el destinatario
-        plato = get_object_or_404(Plato, id=plato_id)
-        destinatario = get_object_or_404(User, username=amigue_username)
 
         # Obtén el mensaje que el usuario escribió en el formulario
         mensaje_usuario = form.cleaned_data.get('mensaje')
+        tipo_mensaje = self.request.POST.get('tipo_mensaje')
+
+        if tipo_mensaje == "plato":
+            # Busca el plato y el destinatario
+            plato = get_object_or_404(Plato, id=id_elemento)
+            # plato = Plato.objects.get(id=id_elemento)
+            form.instance.nombre_elemento_compartido = plato.nombre_plato
+            form.instance.tipo_mensaje = "plato"
+        elif tipo_mensaje == "lugar":
+            lugar = Lugar.objects.get(id=id_elemento)
+            form.instance.nombre_elemento_compartido = lugar.nombre
+        
+            if lugar.delivery:
+                form.instance.tipo_mensaje = "delivery"
+            else: 
+                form.instance.tipo_mensaje = "comerafuera"
+
+        destinatario = get_object_or_404(User, username=amigue_username)
 
         # Completa los datos automáticos del mensaje
         form.instance.usuario_que_envia = self.request.user.username
         form.instance.destinatario = destinatario
-        form.instance.amistad = plato_id  # aqui mando el plato que se comparte
-        form.instance.nombre_plato_compartido = plato.nombre_plato
+        form.instance.id_elemento = id_elemento  # aqui mando el ID DEL ELEMENTO que se comparte
         form.instance.mensaje = mensaje_usuario
 
         return super().form_valid(form)
@@ -1108,19 +1126,6 @@ def amigues(request):
     }
     return render(request, "AdminVideos/amigues.html", context)
 
-
-
-# @login_required
-# def historial(request):
-#     # Obtener todos los mensajes donde el usuario es el destinatario, ordenados por fecha de creación (más recientes primero)
-#     mensajes = Mensaje.objects.filter(destinatario=request.user).order_by("-creado_el")
-
-#     # Pasar los mensajes al contexto
-#     context = {
-#         "mensajes": mensajes
-#     }
-
-#     return render(request, "AdminVideos/historial.html", context)  # Usa la plantilla adecuada
 
 
 
@@ -1383,7 +1388,7 @@ class AsignarPlato(View):
         menu_dia, _ = ElegidosXDia.objects.get_or_create(
             user=request.user,
             el_dia_en_que_comemos=fecha_comida,
-            defaults={"platos_que_comemos": {}, "lugares_que_visitamos": {}}  # Si usas otro campo para lugares
+            defaults={"platos_que_comemos": {}}  # Si usas otro campo para lugares
         )
 
         if tipo == "plato":
@@ -1415,6 +1420,7 @@ class AsignarPlato(View):
                     "elegido": True
                 })
                 messages.success(request, f"Plato {plato.nombre_plato} asignado correctamente a {comida}.")
+            
             menu_dia.platos_que_comemos = data
 
         elif tipo == "lugar":
@@ -1425,18 +1431,23 @@ class AsignarPlato(View):
                         return redirect('filtro-de-platos')
                     
                     data = menu_dia.platos_que_comemos
+                    if not isinstance(data.get(comida), list):
+                       data[comida] = []
 
-                    data[comida].append({
-                        "id_plato": objeto_id,
-                        "plato": lugar.nombre,  # Para mantener la clave "plato"
-                        "tipo": "lugar",
-                        "direccion": lugar.direccion,
-                        "telefono": lugar.telefono,
-                        "elegido": True,
-                        "tipo_elemento": "lugar"
-                    })
+                    if any(p["id_plato"] == objeto_id for p in data[comida]):
+                        messages.warning(request, f"El lugar {lugar.nombre_lugar} ya está asignado a {comida}.")
+                    else:
+                        data[comida].append({
+                            "id_plato": objeto_id,
+                            "plato": lugar.nombre,  # Para mantener la clave "plato"
+                            "tipo": "lugar",
+                            "direccion": lugar.direccion,
+                            "telefono": lugar.telefono,
+                            # "elegido": True,
+                            # "tipo_elemento": "lugar"
+                        })
 
-                    messages.success(request, f"Lugar {lugar.nombre} asignado correctamente a {comida}.")
+                        messages.success(request, f"Lugar {lugar.nombre} asignado correctamente a {comida}.")
 
         menu_dia.platos_que_comemos = data
         menu_dia.save()
