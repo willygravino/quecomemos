@@ -94,7 +94,6 @@ def agregar_plato(diccionario, clave, plato, ingredientes):
             "elegido": True
         }
 
-
 def procesar_item(platos_dia, item_nombre, menu_del_dia, dia_en_que_comemos_str, request, lista_de_ingredientes, no_incluir):
 
     resultado = {}
@@ -772,6 +771,8 @@ def FiltroDePlatos (request):
         request.session['dia_activo'] = primer_dia
 
     pla = ""
+ 
+    dias_programados = set()  # Usamos set para evitar fechas repetidas
 
     # Recuperar los parámetros desde la sesión y la URL
     tipo_parametro, quecomemos, misplatos, medios, categoria, dificultad, palabra_clave = obtener_parametros_sesion(request)
@@ -924,6 +925,7 @@ def FiltroDePlatos (request):
 
     for registro in registros:
         fec = registro['el_dia_en_que_comemos']  # Fecha del registro
+        dias_programados.add(fec)  # <--- Aquí sumás la fecha
         pla = registro['platos_que_comemos'] or {}  # Asegurar que es un diccionario
 
         for comida, lista_platos in pla.items():  # Iterar comidas (desayuno, almuerzo, etc.)
@@ -942,7 +944,7 @@ def FiltroDePlatos (request):
                 'formulario': form,
                 'platos': platos,
                 "dias_desde_hoy": dias_desde_hoy,
-                "dias_programados": fechas_existentes,
+                "dias_programados": dias_programados,
                 "quecomemos_ck": quecomemos,
                 "misplatos_ck": misplatos,
                 "amigues" : amigues,

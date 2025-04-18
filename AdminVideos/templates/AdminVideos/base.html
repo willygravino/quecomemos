@@ -30,7 +30,7 @@
 
 <body id="page-top" class="sidebar-toggled">
     <!-- Page Wrapper -->
-    <div id="wrapper" style="background-color: rgb(255, 255, 0);">
+    <div id="wrapper" style="background-color: rgb(255, 255, 255);">
 
         <!-- Sidebar -->
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion toggled" id="accordionSidebar">
@@ -150,9 +150,9 @@
 
             {% if parametro == "Comerafuera" %}
             <li class="nav-item active">
-        {% else %}
-            <li class="nav-item">
-        {% endif %}
+            {% else %}
+                <li class="nav-item">
+            {% endif %}
                 <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Comerafuera">
                     <i class="fa-solid fa-person-walking-dashed-line-arrow-right" style="font-size: 1.3rem;"></i>
                     <span>Comer afuera</span>
@@ -188,12 +188,12 @@
                     </a>
                 </li>
 
-            <li class="nav-item">
+            <!-- <li class="nav-item">
                 <a class="nav-link" href="{% url 'historial' %}">
                     <i class="fa-solid fa-box-archive" style="font-size: 2rem;"></i>
                     <span>Historial</span>
                 </a>
-            </li>
+            </li> -->
 
 
 
@@ -210,7 +210,10 @@
         <!-- End of Sidebar -->
 
         <!-- Content Wrapper -->
-        <div id="content-wrapper" style="background-color: rgb(255, 0, 255);" class="d-flex flex-column">
+        <div id="content-wrapper" style="background-color: rgb(255, 255, 255)5);" class="d-flex flex-column">
+        
+        <!-- COLOR PARA UBICAR
+        <div id="content-wrapper" style="background-color: rgb(255, 0, 255);" class="d-flex flex-column"></div> -->
 
             <!-- Main Content -->
             <div id="content">
@@ -395,13 +398,11 @@
 
                 <!-- End of Topbar -->
 
-<h1>dia activo {{dia_activo}}</h1>  
+<!-- <h1>dia activo {{dia_activo}}</h1>  
 
-<!-- 
-<h6>pla {{pla}}</h6>  -->
+<h1>programados {{dias_programados}}</h1>   -->
 
-
-                <div class="container" style="background-color: rgb(147, 18, 18);">
+                <div class="container" style="background-color: rgb(199, 199, 199);">
                     <!-- Nav Tabs -->
                     <ul class="nav nav-tabs m-0" id="diasTab" role="tablist">
                         {% for dia in dias_desde_hoy %}
@@ -411,7 +412,9 @@
 
                             id="tab-{{ dia|date:'Y-m-d' }}" data-bs-toggle="tab" data-bs-target="#tab-content-{{ dia|date:'Y-m-d' }}" type="button" role="tab" aria-controls="tab-content-{{ dia|date:'Y-m-d' }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
                                 {{ dia|date:"l j"|capfirst }}
-
+                            {% if dia in dias_programados %}
+                                ✅ <!-- O un icono Bootstrap -->
+                            {% endif %}
                             </button>
                         </li>
                         {% endfor %}
@@ -430,28 +433,7 @@
                                     <div class="row d-flex align-items-start">
                                         <div class="col p-2" style="max-height: 100px; overflow-y: auto; overflow-x: hidden; display: block;">
 
-                                            
-
-                                            <!-- Buscamos los platos para este día -->
-                                            <!-- {% for dia_plato in platos_dia_x_dia %}
-                                                {% if dia_plato.0 == dia %}
-                                                    {% if dia_plato.1 %}
-                                                        {% for plato, comida in dia_plato.1 %}
-                                                            <p class="mb-1 ml-3 d-flex align-items-center">
-                                                                {{ plato }} {{dia}} {{comida}}
-
-                                                                <a href="" class="btn btn-sm p-0 ml-2" title="Eliminar">
-                                                                    <i class="fa-solid fa-trash-can"></i>
-                                                                </a>
-                                                                
-                                                            </p>
-                                                        {% endfor %}
-                                                    {% else %}
-                                                        <p>No hay platos asignados para este día.</p>
-                                                    {% endif %}
-                                                {% endif %}
-                                            {% endfor %} -->
-
+                                       
                                             {% for dia_plato in platos_dia_x_dia.items %}
                                                 {% if dia_plato.0 == dia %}
                                                     <div class="row">
