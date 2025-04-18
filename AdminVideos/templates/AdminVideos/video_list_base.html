@@ -76,7 +76,7 @@
         {% for plato in platos %}
           <div class="d-flex flex-row">
             <div class="col-md-2 mb-2">
-              <div {% if user.id == plato.propietario.id and not plato.id_original %} class="card  border-success border-4" {% elif user.id == plato.propietario.id and plato.id_original %} class="card  border-warning border-4" {% elif user.id != plato.propietario.id %} class="card  border-danger border-3" {% endif %}
+              <div {% if user.id == plato.propietario.id and not plato.proviene_de %} class="card  border-success border-4" {% elif user.id == plato.propietario.id and plato.proviene_de %} class="card  border-warning border-4" {% elif user.id != plato.propietario.id %} class="card  border-danger border-3" {% endif %}
               style="width: 6rem;">
 
                 <div class="container p-0">
@@ -168,6 +168,7 @@
 
                 <a class="btn btn-primary mb-1" href="">Editar</a>
                 <a class="btn btn-danger" href="">Eliminar</a>
+                
               </div>
             </div>
           </div>

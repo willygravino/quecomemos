@@ -40,6 +40,8 @@ urlpatterns = [
     path('videos/reiniciar/sugeridos', reiniciar_sugeridos, name="reiniciar-sugeridos"),
     path('videos/<pk>/update', PlatoUpdate.as_view(), name="videos-update"),
     path('eliminar-plato/<int:plato_id>/', eliminar_plato, name='eliminar-plato'),
+    # path('duplicar-plato/<int:plato_id>/', duplicar_plato, name='duplicar-plato'),
+
     path('eliminar/<str:nombre_plato>/<str:comida>/<str:fecha>/', eliminar_programado, name='eliminar-programado'),
 
     path('videos/<pk>/detail', PlatoDetail.as_view(), name="videos-detail"),

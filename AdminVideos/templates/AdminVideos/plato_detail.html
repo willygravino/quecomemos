@@ -32,7 +32,7 @@
                
                 {% if plato.proviene_de %}
                   <p class="card-text text-success fw-bold">
-                    Importado de la lista de {{ plato.proviene_de }}
+                    Plato importado originalmente de la lista de {{ plato.proviene_de }}
                   </p>
                 {% endif %}
    
@@ -42,8 +42,15 @@
                     
                     <a href="{% url 'videos-update' plato.id %}" type="button"  class="btn btn-sm btn-outline-secondary">Editar</a> 
 
-                    <a href="{% url 'eliminar-plato' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Eliminar</a>
+                    <a href="{% url 'agregar-a-mi-lista' plato.id %}?duplicar=true"
+                    type="button" 
+                    class="btn btn-sm btn-outline-secondary" 
+                    title="Si querés modificar la receta de este plato, podés hacer un duplicado para conservar la receta original">
+                    Duplicar
+                  </a>
 
+                    <a href="{% url 'eliminar-plato' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Eliminar</a>
+                  
                     <hr>
 
                   </div>

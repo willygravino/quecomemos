@@ -1000,17 +1000,20 @@ class SolicitarAmistad(CreateView):
       
 class EnviarMensaje(LoginRequiredMixin, CreateView):
     model = Mensaje
-    success_url = reverse_lazy('filtro-de-platos')
+    # success_url = reverse_lazy('enviar-mensaje')
     template_name = 'AdminVideos/enviar_mensaje.html'
     fields = ['mensaje', 'destinatario']
 
     def get_destinatario(self):
         return get_object_or_404(User, username=self.kwargs.get("usuario"))
-
+    
     def form_valid(self, form):
         form.instance.usuario_que_envia = self.request.user.username
         form.instance.tipo_mensaje = "texto"
         return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('enviar-mensaje', kwargs={'usuario': self.kwargs['usuario']})
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
@@ -1039,7 +1042,6 @@ class EnviarMensaje(LoginRequiredMixin, CreateView):
         return context
 
 from .models import Plato, Lugar, Mensaje  # Asegúrate de importar los modelos necesarios
-
 
 
 class compartir_elemento(CreateView):
@@ -1340,15 +1342,26 @@ def agregar_a_mi_lista(request, plato_id):
     # Obtener el perfil del usuario logueado
     profile = request.user.profile
 
+    # Lee el parámetro GET
+    duplicar = request.GET.get('duplicar') == 'true'
+
     # # Verificar si ya existe un plato con el mismo nombre para el usuario logueado
     # if Plato.objects.filter(nombre_plato=plato_original.nombre_plato, propietario=request.user).exists():
     #     # Mostrar un mensaje de error
     #     messages.error(request, "Ya tienes un plato con este nombre.")
     #     return redirect('filtro-de-platos')  # Redirigir a una página (puedes ajustar según sea necesario)
+
+    # Determina el nombre del nuevo plato
+    nombre_copia = f"Copia de {plato_original.nombre_plato}" if duplicar else plato_original.nombre_plato
+
+
+    # Verificar si el plato original pertenece a otro usuario
+    proviene_de = plato_original.propietario if plato_original.propietario != request.user else None
     
+
     # Crear una copia del plato, asignando el nuevo propietario
     nuevo_plato = Plato.objects.create(
-        nombre_plato=plato_original.nombre_plato,
+        nombre_plato=nombre_copia,
         # nombre_plato=f"{plato_original.id} - {plato_original.nombre_plato}",  # Agregar el ID al nombre del plato
         receta=plato_original.receta,
         descripcion_plato=plato_original.descripcion_plato,
@@ -1361,7 +1374,7 @@ def agregar_a_mi_lista(request, plato_id):
         propietario=request.user,  # Asignar al usuario logueado
         image=plato_original.image,  # Copiar la imagen si aplica
         variedades=plato_original.variedades,
-        proviene_de= plato_original.propietario,
+        proviene_de= proviene_de,
         id_original=plato_original.id         
     )
 
