@@ -29,6 +29,14 @@ from django.views.decorators.http import require_POST
 
 
 
+def set_dia_activo(request):
+    if request.method == "POST":
+        dia = request.POST.get("dia_activo")
+        if dia:
+            request.session["dia_activo"] = dia
+            return JsonResponse({"status": "ok"})
+    return JsonResponse({"status": "error"}, status=400)
+
 
 def obtener_parametros_sesion(request):
 
@@ -1228,15 +1236,6 @@ def amigue_borrar(request, pk):
         eliminame.amigues.remove(perfil.user.username)
         eliminame.save()
 
-        # Redirigir o retornar un JSON según sea necesario
-        # if request.is_ajax():
-        #     return JsonResponse({'success': True, 'message': 'Amigue eliminado.'})
-        # return redirect('ruta_deseada')  # Reemplazar con el nombre de la vista donde redirigir
-
-    # Si el amigue no existe, retornar un mensaje de error
-    # if request.is_ajax():
-        # return JsonResponse({'success': False, 'message': 'Amigue no encontrado.'})
-              # Construye un diccionario con las variables de contexto
     contexto = {
         "amigues": perfil.amigues,  # Lista de amigues actualizada
     }
@@ -1246,12 +1245,6 @@ def amigue_borrar(request, pk):
 def agregar_plato_compartido(request, pk, mensaje_id):
     # Recuperar el plato original
     plato_original = get_object_or_404(Plato, pk=pk)
-
-    # NO VOY A PREGUNTAR, SIMPLEMENTE LO AGREGA PORQUE PUEDO TENER PLATOS CON EL MISMO NOMBRE
-    # Verificar si ya existe un plato con el mismo nombre para el usuario logueado
-    # if Plato.objects.filter(nombre_plato=plato_original.nombre_plato, propietario=request.user).exists():
-    #     messages.error(request, "Ya tienes un plato con este nombre.")
-    #     return redirect('filtro-de-platos')
 
     # Crear un nuevo plato para el usuario logueado
     nuevo_plato = Plato.objects.create(
@@ -1284,44 +1277,6 @@ def agregar_plato_compartido(request, pk, mensaje_id):
     # Redirigir a la página de filtro de platos
     return redirect('filtro-de-platos')
 
-# def agregar_plato_compartido(request, pk, mensaje_id):
-#     # Recuperar el plato original
-#     plato_original = get_object_or_404(Plato, pk=pk)
-
-#     # Verificar si ya existe un plato con el mismo nombre para el usuario logueado
-#     if Plato.objects.filter(nombre_plato=plato_original.nombre_plato, propietario=request.user).exists():
-#         # Mostrar un mensaje de error
-#         messages.error(request, "Ya tienes un plato con este nombre.")
-#         return redirect('filtro-de-platos')  # Redirigir a una página (puedes ajustar según sea necesario)
-
-#     # Crear un nuevo plato para el usuario logueado
-#     nuevo_plato = Plato(
-#         nombre_plato=plato_original.nombre_plato,
-#         receta=plato_original.receta,
-#         descripcion_plato=plato_original.descripcion_plato,
-#         ingredientes=plato_original.ingredientes,
-#         medios=plato_original.medios,
-#         categoria=plato_original.categoria,
-#         dificultad=plato_original.dificultad,
-#         tipo=plato_original.tipo,
-#         calorias=plato_original.calorias,
-#         propietario=request.user,  # Asignar al usuario logueado
-#         image=plato_original.image,
-#         variedades=plato_original.variedades,
-#         proviene_de= plato_original.propietario,
-#         # id_original = plato_original.id 
-#     )
-
-#     # Guardar el nuevo plato en la base de datos
-#     nuevo_plato.save()
-
-#     # Mostrar un mensaje de éxito
-#     messages.success(request, "El plato se agregó exitosamente.")
-
-
-#     # Redirigir a una página (puedes cambiar la redirección según sea necesario)
-#     return redirect('filtro-de-platos')
-
 
 def descartar_sugerido(request, plato_id):
     # Obtener el perfil del usuario logueado
@@ -1345,12 +1300,6 @@ def agregar_a_mi_lista(request, plato_id):
     # Lee el parámetro GET
     duplicar = request.GET.get('duplicar') == 'true'
 
-    # # Verificar si ya existe un plato con el mismo nombre para el usuario logueado
-    # if Plato.objects.filter(nombre_plato=plato_original.nombre_plato, propietario=request.user).exists():
-    #     # Mostrar un mensaje de error
-    #     messages.error(request, "Ya tienes un plato con este nombre.")
-    #     return redirect('filtro-de-platos')  # Redirigir a una página (puedes ajustar según sea necesario)
-
     # Determina el nombre del nuevo plato
     nombre_copia = f"Copia de {plato_original.nombre_plato}" if duplicar else plato_original.nombre_plato
 
@@ -1362,7 +1311,6 @@ def agregar_a_mi_lista(request, plato_id):
     # Crear una copia del plato, asignando el nuevo propietario
     nuevo_plato = Plato.objects.create(
         nombre_plato=nombre_copia,
-        # nombre_plato=f"{plato_original.id} - {plato_original.nombre_plato}",  # Agregar el ID al nombre del plato
         receta=plato_original.receta,
         descripcion_plato=plato_original.descripcion_plato,
         ingredientes=plato_original.ingredientes,

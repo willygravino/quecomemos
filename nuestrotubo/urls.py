@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from AdminVideos.views import CrearLugar, EnviarMensaje,  agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, compartir_elemento, descartar_sugerido, eliminar_plato, eliminar_programado, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, sumar_amigue, user_logout, SolicitarAmistad, MensajeDelete, AsignarPlato 
+from AdminVideos.views import CrearLugar, EnviarMensaje,  agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, compartir_elemento, descartar_sugerido, eliminar_plato, eliminar_programado, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, set_dia_activo, sumar_amigue, user_logout, SolicitarAmistad, MensajeDelete, AsignarPlato 
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -58,6 +58,8 @@ urlpatterns = [
     path('mensaje/<pk>/delete', MensajeDelete.as_view(), name="mensaje-delete"),
     path('menu/amigue/<pk>/borrar', amigue_borrar, name="amigue-borrar"),
     path('asignar/plato', AsignarPlato.as_view(), name="asignar-plato"), # type: ignore
+    path("set-dia-activo/", set_dia_activo, name="set-dia-activo"),
+
      
 ]
 
