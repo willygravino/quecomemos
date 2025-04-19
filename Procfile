@@ -1,1 +1,1 @@
-web: nuestrotubo.wsgi
+web: gunicorn nuestrotubo.wsgi:application
