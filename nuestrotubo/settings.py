@@ -40,6 +40,12 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['.railway.app', 'localhost']
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://quecomemos-production.up.railway.app',  # o tu dominio si es otro
+]
+
+CSRF_COOKIE_DOMAIN = '.railway.app'
+SESSION_COOKIE_DOMAIN = '.railway.app'
 
 # Application definition
 
