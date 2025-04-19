@@ -14,4 +14,4 @@ nixPkgs = [
 ]
 
 [phases.install]
-cmds = ["pip install --only-binary=:all: -r requirements.txt"]
+cmds = ["python3 -m pip install -r requirements.txt"]
