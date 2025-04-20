@@ -1,6 +1,6 @@
 [phases.setup]
 nixPkgs = [
-  "python312Full",  # incluye pip
+  "python312Full",
   "freetype",
   "lcms2",
   "libjpeg",
@@ -12,4 +12,8 @@ nixPkgs = [
 ]
 
 [phases.install]
-cmds = ["python3.12 -m pip install -r requirements.txt"]
+cmds = [
+  "python3.12 -m ensurepip --upgrade",  # Asegura que pip esté instalado
+  "python3.12 -m pip install --upgrade pip setuptools",  # Asegura que pip y setuptools estén actualizados
+  "python3.12 -m pip install -r requirements.txt"  # Instalar las dependencias
+]
