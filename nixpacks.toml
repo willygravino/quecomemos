@@ -11,9 +11,10 @@ nixPkgs = [
   "zlib"
 ]
 
+
 [phases.install]
 cmds = [
-  "python3.12 -m ensurepip --upgrade",  # Asegura que pip esté instalado
-  "python3.12 -m pip install --upgrade pip setuptools",  # Asegura que pip y setuptools estén actualizados
-  "python3.12 -m pip install -r requirements.txt"  # Instalar las dependencias
+  "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py",  # Descarga el script oficial de instalación de pip
+  "python3.12 get-pip.py",  # Instala pip usando el script descargado
+  "python3.12 -m pip install -r requirements.txt"  # Instala las dependencias de tu proyecto
 ]
