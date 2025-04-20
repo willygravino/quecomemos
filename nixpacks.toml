@@ -13,7 +13,7 @@ nixPkgs = [
 
 [phases.install]
 cmds = [
-  "python3.11 -m ensurepip --upgrade",  # Aseguramos que pip esté instalado y actualizado
-  "python3.11 -m pip install --upgrade pip setuptools",  # Aseguramos que pip y setuptools estén actualizados
-  "python3.11 -m pip install -r requirements.txt"  # Instalamos las dependencias del proyecto
+  "python3 -m ensurepip --upgrade",  # Aseguramos que pip esté instalado y actualizado
+  "python3 -m pip install --upgrade pip setuptools",  # Aseguramos que pip y setuptools estén actualizados
+  "python3 -m pip install -r requirements.txt"  # Instalamos las dependencias del proyecto
 ]
