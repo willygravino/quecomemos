@@ -1,6 +1,6 @@
 [phases.setup]
 nixPkgs = [
-  "python312.withPackages (ps: with ps; [pip setuptools wheel])",
+  "python311Full",  # ¡Cambiamos a una versión más estable!
   "freetype",
   "lcms2",
   "libjpeg",
@@ -13,6 +13,6 @@ nixPkgs = [
 
 [phases.install]
 cmds = [
-  "pip install --upgrade pip setuptools",  # Ya no hace falta especificar python3.12
-  "pip install -r requirements.txt"
+  "python3.11 -m pip install --upgrade pip setuptools",
+  "python3.11 -m pip install -r requirements.txt"
 ]
