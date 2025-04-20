@@ -1,6 +1,7 @@
 [phases.setup]
 nixPkgs = [
-  "python3.11Full",  # Usamos la versión completa de Python 3.11
+ # "python3.11Full",   Usamos la versión completa de Python 3.11
+  "python311",
   "freetype",  # Fuentes
   "lcms2",  # Gestión de color
   "libjpeg",  # Imágenes JPEG
