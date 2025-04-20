@@ -2,7 +2,7 @@
 [phases.setup]
 nixPkgs = [
   "python312Full",
-  "pipenv",
+  "python312Packages.pip"
   "freetype",
   "lcms2",
   "libjpeg",
