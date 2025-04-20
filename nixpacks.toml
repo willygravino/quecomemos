@@ -1,6 +1,7 @@
 [phases.setup]
 nixPkgs = [
-  "python311Full",  # ¡Cambiamos a una versión más estable!
+  "python311Full",  # Python con pip incluido
+  "pip",            # pip explícitamente
   "freetype",
   "lcms2",
   "libjpeg",
@@ -13,6 +14,5 @@ nixPkgs = [
 
 [phases.install]
 cmds = [
-  "python3.11 -m pip install --upgrade pip setuptools",
-  "python3.11 -m pip install -r requirements.txt"
+  "pip install -r requirements.txt"
 ]
