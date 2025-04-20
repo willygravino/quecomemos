@@ -1,18 +1,18 @@
 [phases.setup]
 nixPkgs = [
-  "python312Full",  # Python 3.12 completo, que incluye pip
-  "freetype",  # Fuentes
-  "lcms2",  # Gestión de color
-  "libjpeg",  # Imágenes JPEG
-  "libpng",  # Imágenes PNG
-  "libwebp",  # Imágenes WebP
-  "openjpeg",  # JPEG2000
-  "libtiff",  # Imágenes TIFF
-  "zlib"  # Compresión
+  "python312.withPackages (ps: with ps; [pip setuptools wheel])",
+  "freetype",
+  "lcms2",
+  "libjpeg",
+  "libpng",
+  "libwebp",
+  "openjpeg",
+  "libtiff",
+  "zlib"
 ]
 
 [phases.install]
 cmds = [
-  "python3.12 -m pip install --upgrade pip setuptools",  # Aseguramos que pip y setuptools estén actualizados
-  "python3.12 -m pip install -r requirements.txt"  # Instalamos las dependencias del proyecto
+  "pip install --upgrade pip setuptools",  # Ya no hace falta especificar python3.12
+  "pip install -r requirements.txt"
 ]
