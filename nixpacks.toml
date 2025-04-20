@@ -1,8 +1,7 @@
-
 [phases.setup]
 nixPkgs = [
   "python312Full",
-  "python312Packages.pip"
+  "pipenv",
   "freetype",
   "lcms2",
   "libjpeg",
@@ -14,4 +13,4 @@ nixPkgs = [
 ]
 
 [phases.install]
-cmds = ["python3 -m pip install -r requirements.txt"]
+cmds = ["python -m pip install -r requirements.txt"]
