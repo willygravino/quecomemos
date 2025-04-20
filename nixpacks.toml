@@ -1,20 +1,18 @@
 [phases.setup]
 nixPkgs = [
-  "python312Full",
-  "freetype",
-  "lcms2",
-  "libjpeg",
-  "libpng",
-  "libwebp",
-  "openjpeg",
-  "libtiff",
-  "zlib"
+  "python312Full",  # Python 3.12 completo, que incluye pip
+  "freetype",  # Fuentes
+  "lcms2",  # Gestión de color
+  "libjpeg",  # Imágenes JPEG
+  "libpng",  # Imágenes PNG
+  "libwebp",  # Imágenes WebP
+  "openjpeg",  # JPEG2000
+  "libtiff",  # Imágenes TIFF
+  "zlib"  # Compresión
 ]
-
 
 [phases.install]
 cmds = [
-  "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py",  # Descarga el script oficial de instalación de pip
-  "python3.12 get-pip.py",  # Instala pip usando el script descargado
-  "python3.12 -m pip install -r requirements.txt"  # Instala las dependencias de tu proyecto
+  "python3.12 -m pip install --upgrade pip setuptools",  # Aseguramos que pip y setuptools estén actualizados
+  "python3.12 -m pip install -r requirements.txt"  # Instalamos las dependencias del proyecto
 ]
