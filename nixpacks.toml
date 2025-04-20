@@ -1,18 +1,19 @@
 [phases.setup]
 nixPkgs = [
-  "python311Full",  # Python con pip incluido
-  "pip",            # pip explícitamente
-  "freetype",
-  "lcms2",
-  "libjpeg",
-  "libpng",
-  "libwebp",
-  "openjpeg",
-  "libtiff",
-  "zlib"
+  "python311",  # Python 3.11
+  "python3.11-pip",  # Instalar pip para Python 3.11
+  "freetype",  # Fuentes
+  "lcms2",  # Gestión de color
+  "libjpeg",  # Imágenes JPEG
+  "libpng",  # Imágenes PNG
+  "libwebp",  # Imágenes WebP
+  "openjpeg",  # JPEG2000
+  "libtiff",  # Imágenes TIFF
+  "zlib"  # Compresión
 ]
 
 [phases.install]
 cmds = [
-  "pip install -r requirements.txt"
+  "python3.11 -m pip install --upgrade pip setuptools",  # Aseguramos que pip y setuptools estén actualizados
+  "python3.11 -m pip install -r requirements.txt"  # Instalamos las dependencias del proyecto
 ]
