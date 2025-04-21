@@ -24,6 +24,8 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', index, name="index"),
+    path('login', Login.as_view(), name="login"),
+
     path('menu/elegido',lista_de_compras, name="menu-elegido"),
     path('menu/amigues',amigues, name="amigues"),
     path('menu/historial',historial, name="historial"),
@@ -47,7 +49,6 @@ urlpatterns = [
     path('videos/<pk>/detail', PlatoDetail.as_view(), name="videos-detail"),
     path('videos/create', PlatoCreate.as_view(), name="videos-create"),
     path('lugar/crear', CrearLugar.as_view(), name="crear-lugar"),
-    path('login', Login.as_view(), name="login"),
     path('registration/logout/', user_logout, name='logout'),
     path('signup', SignUp.as_view(), name="signup"),
     path('perfil/crear', ProfileCreate.as_view(), name="profile-create"),

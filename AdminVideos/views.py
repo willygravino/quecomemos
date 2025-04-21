@@ -65,7 +65,6 @@ class SugerenciasRandom(TemplateView):
     template_name = 'AdminVideos/random.html'
 
 def index(request):
-    #  return render(request, "AdminVideos/lista_filtrada.html")
     return redirect(reverse_lazy("filtro-de-platos"))
 
 def about(request):
