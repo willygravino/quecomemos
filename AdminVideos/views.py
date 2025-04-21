@@ -848,7 +848,12 @@ def FiltroDePlatos (request):
     fechas_existentes = ElegidosXDia.objects.filter(user=usuario,el_dia_en_que_comemos__gte=fecha_actual).values_list('el_dia_en_que_comemos', flat=True).distinct()
 
     # Obtén el perfil del usuario autenticado
-    perfil = get_object_or_404(Profile, user=usuario)
+    # perfil = get_object_or_404(Profile, user=usuario)
+
+    try:
+        perfil = Profile.objects.get(user=usuario)
+    except Profile.DoesNotExist:
+        return redirect('profile-create')  # Asegúrate de tener una vista para que el usuario cree su perfil
 
     # Accede al atributo `amigues` desde la instancia
     amigues = perfil.amigues  # Esto cargará la lista almacenada en JSONField
