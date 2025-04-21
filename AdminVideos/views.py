@@ -148,7 +148,10 @@ def procesar_item(platos_dia, item_nombre, menu_del_dia, dia_en_que_comemos_str,
 
 @login_required
 def lista_de_compras(request):
-    locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')  # Configura la localización a español
+    # locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')  # Configura la localización a español
+
+    locale.setlocale(locale.LC_TIME, 'C')
+
     # Obtener la fecha actual
     today = date.today()
     
