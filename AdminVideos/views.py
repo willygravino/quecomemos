@@ -19,7 +19,7 @@ from django.views.generic import TemplateView
 from datetime import date, datetime
 from django.contrib.auth.models import User  # Asegúrate de importar el modelo User
 from django.db.models import Q, Subquery, OuterRef
-
+from babel.dates import format_datetime
 from django.shortcuts import redirect, reverse
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -756,7 +756,10 @@ def FiltroDePlatos (request):
     locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
     
     # Obtener la fecha y hora actuales
-    fecha_actual = datetime.datetime.now().date()
+    # fecha_actual = datetime.datetime.now().date()
+
+    fecha = format_datetime(datetime.now(), locale='es_ES')
+
 
     # # Calcular y agregar las fechas y nombres de los días para los próximos 6 días
     dias_desde_hoy = [(fecha_actual + timedelta(days=i)) for i in range(0, 6)]
