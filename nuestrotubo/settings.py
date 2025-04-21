@@ -41,7 +41,8 @@ DEBUG = True
 
 # ALLOWED_HOSTS = []
 
-ALLOWED_HOSTS = ['.railway.app', 'localhost']
+ALLOWED_HOSTS = ["127.0.0.1",'.railway.app', 'localhost']
+
 
 CSRF_TRUSTED_ORIGINS = [
     'https://quecomemos-production.up.railway.app',  # o tu dominio si es otro
