@@ -49,7 +49,8 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 CSRF_COOKIE_DOMAIN = '.railway.app'
-SESSION_COOKIE_DOMAIN = '.railway.app'
+
+# COMENTADO EN DESARROLLO >>> SESSION_COOKIE_DOMAIN = '.railway.app'
 
 # Application definition
 
@@ -104,8 +105,16 @@ WSGI_APPLICATION = 'nuestrotubo.wsgi.application'
 #     }
 # }
 
+# El código que tienes actualmente está tomando la configuración de la base de datos de una variable de entorno llamada DATABASE_URL. Esta es una buena práctica para entornos de producción, pero para desarrollo local necesitamos configurarlo explícitamente para que apunte a la base de datos que has creado con PostgreSQL en tu máquina.
+# DATABASES = {
+#     'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
+# }
+
+
 DATABASES = {
-    'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL', 'postgres://guillermo:@localhost:5432/quecomemos_local')
+    )
 }
 
 

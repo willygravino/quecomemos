@@ -384,8 +384,10 @@
                                     Seteos
                                 </a>
 
+
+
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-target="#logoutModal">
+                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Salir
                                 </a>
@@ -485,10 +487,6 @@
                                                                         <a href="{% url 'eliminar-programado' nombre_plato=plato comida='merienda' fecha=dia %}" class="btn btn-sm p-0 ml-2" title="Eliminar">
                                                                             <i class="fa-solid fa-trash-can"></i>
                                                                         </a>
-
-
-
-
                                                                     </p>
                                                                 {% endfor %}
                                                             {% else %}
@@ -519,17 +517,6 @@
                                                     </div>
                                                 {% endif %}
                                             {% endfor %}
-                                        
-
-
-
-
-
-
-
-
-
-
                                         </div>
                                     </div>
                                 </div>
@@ -583,13 +570,13 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel">¿Querés salir?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <button class="close" type="button" data-bs-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
                 <div class="modal-body">Seleccioná "Salir" si estás listo para cerrar la sesión.</div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
                     <a class="btn btn-primary" href="{% url 'logout' %}">Salir</a>
                 </div>
             </div>
@@ -680,35 +667,18 @@
     <script src="{% static 'AdminVideos/js/demo/chart-pie-demo.js' %}"></script>
     <script src="{% static 'AdminVideos/js/bootstrap.bundle.min.js' %}"></script>
 
-    <!-- Bootstrap core JavaScript-->
-    <!-- <script src="/AdminVideos/static/AdminVideos/vendor/jquery/jquery.min.js"></script>
-    <script src="/AdminVideos/static/AdminVideos/vendor/bootstrap/js/bootstrap.bundle.min.js"></script> -->
-
-    <!-- Core plugin JavaScript-->
-    <!-- <script src="/AdminVideos/static/AdminVideos/vendor/jquery-easing/jquery.easing.min.js"></script> -->
-
-    <!-- Custom scripts for all pages-->
-    <!-- <script src="/AdminVideos/static/AdminVideos/js/sb-admin-2.min.js"></script> -->
-
-    <!-- Page level plugins -->
-    <!-- <script src="/AdminVideos/static/AdminVideos/vendor/chart.js/Chart.min.js"></script> -->
-
-    <!-- Page level custom scripts -->
-    <!-- <script src="/AdminVideos/static/AdminVideos/js/demo/chart-area-demo.js"></script>
-    <script src="/AdminVideos/static/AdminVideos/js/demo/chart-pie-demo.js"></script> -->
-
-    <!-- VIEJA PLANTILLA SCRIPT -->
-
-    <!-- <script src="/AdminVideos/static/AdminVideos/js/bootstrap.bundle.min.js"></script> -->
-
-    <!-- Inicialización de Popover -->
+    <!-- Inicialización de Tooltips y Popovers -->
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            // Activar tooltips en los elementos con data-bs-toggle="tooltip"
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            tooltipTriggerList.forEach(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
+            // Inicializar popovers en los elementos con data-bs-toggle="popover"
             const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
-            const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+            popoverTriggerList.forEach(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
         });
     </script>
-
 </body>
 
 </html>
