@@ -414,7 +414,9 @@
                             aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
                                 
                                 <span class="d-none d-md-block">{{ dia|date:"l j"|capfirst }}</span>
-                                <span class="d-block d-md-none">{{ dia|date:"D"}}<br>{{ dia|date:"j" }}</span>
+                                <span class="d-block d-md-none text-center">
+                                    {{ dia|date:"D"|slice:":2"|upper }}<br>{{ dia|date:"j" }}
+                                  </span>
                     
                                 {% if dia in dias_programados %}
                                     ✅
