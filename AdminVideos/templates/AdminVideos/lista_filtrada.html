@@ -5,21 +5,21 @@
 {% block filtro %}
 
 <form method="POST">
-  <div class="d-flex justify-content-between mx-3 gap-2 flex-wrap">
+  <div class="d-flex justify-content-start mx-3 gap-4 flex-wrap">
 
     {% csrf_token %}
 
     <span>Medios: {{ formulario.medios }}</span>
-    <span>Categoría: {{ formulario.categoria }}</span>
-    <span>Dificultad: {{ formulario.dificultad }}</span>
+    <!-- <span>Categoría: {{ formulario.categoria }}</span> -->
+    <!-- <span>Dificultad: {{ formulario.dificultad }}</span> -->
 
     <input type="search" placeholder="Buscar por palabra clave" {{ formulario.palabra_clave }} {% if  user.username  != "quecomemos" %}
       <div class="form-check">
         <input class="form-check-input" type="checkbox" name="quecomemos" value="quecomemos" id="quecomemos" {% if quecomemos_ck == "quecomemos" %} checked {% endif %}>
-        <!-- <label class="form-check-label small" for="quecomemos">
+         <label class="form-check-label small" for="quecomemos">
           Sugerencia <br> quecomemos
-        </label> -->
-        <span>Sugerencias: {{ formulario.dificultad }}</span>
+        </label> 
+         <!-- <span>Sugerencias: {{ formulario.dificultad }}</span>  -->
       </div>      
       
       <div class="form-check">
@@ -29,12 +29,8 @@
         </label>
       </div>
 
-      <span>De estación: {{ formulario.dificultad }}</span>
+      <!-- <span>De estación: {{ formulario.dificultad }}</span> -->
 
-
-
-
-      
     {% else %}
         <!-- Campo oculto -->
         <input type="hidden" name="misplatos" value="misplatos">
