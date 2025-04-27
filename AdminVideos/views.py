@@ -386,6 +386,51 @@ class PlatoDetail(DetailView):
 
 
 
+class LugarDetail(DetailView):
+    model = Lugar
+    template_name = 'AdminVideos/lugar_detail.html'
+    context_object_name = "lugar"
+
+    def get_context_data(self, **kwargs):
+        # Llamar al método original para obtener el contexto base
+        context = super().get_context_data(**kwargs)
+
+        # Obtener el perfil del usuario actual
+        perfil = get_object_or_404(Profile, user=self.request.user)
+
+        # Pasar la lista de amigues al contexto
+        context["amigues"] = perfil.amigues  # Lista JSONField desde Profile
+
+        return context
+    
+
+
+@login_required
+def eliminar_lugar(request, lugar_id):
+    lugar = get_object_or_404(Lugar, id=lugar_id)
+
+    # Verificar si el usuario es el propietario del lugar
+    if lugar.propietario != request.user:
+        raise Http404("No tenés permiso para eliminar este lugar.")
+
+    # Obtener el perfil del usuario actual
+    perfil = get_object_or_404(Profile, user=request.user)
+
+    # Eliminar el lugar si aparece en listas personalizadas (si aplica)
+    if lugar.id in perfil.sugeridos_descartados:
+        perfil.sugeridos_descartados.remove(lugar.id)
+        perfil.save()
+
+    if lugar.id in perfil.sugeridos_importados:
+        perfil.sugeridos_importados.remove(lugar.id)
+        perfil.save()
+
+    # Eliminar el lugar de la base de datos
+    lugar.delete()
+
+    # Redirigir a la página que quieras (modificá este nombre si tenés otra vista)
+    return redirect('filtro-de-platos')
+
 @login_required
 def eliminar_plato(request, plato_id):
     # Verificar que el usuario es el propietario del plato
@@ -419,6 +464,59 @@ def eliminar_plato(request, plato_id):
 
     return redirect('filtro-de-platos')  # Redirigir a la página de filtro de platos
 
+
+
+# class LugarUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+#     model = Lugar
+#     form_class = LugarForm
+#     template_name = 'AdminVideos/lugar_update.html'
+#     success_url = reverse_lazy("filtro-de-platos")
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+
+#         # context['variedades_en_base'] = variedades
+#         # context['ingredientes_variedad'] = ingredientes_por_variedad
+
+#         return context
+
+#     def test_func(self):
+#         user_id = self.request.user.id
+#         lugar_id = self.kwargs.get("pk")
+#         return Lugar.objects.filter(propietario=user_id, id=lugar_id).exists()
+
+#     def form_valid(self, form):
+#         # Guardar el formulario y obtener la instancia del plato
+#         lugar = form.save(commit=False)
+#         lugar.propietario = self.request.user
+
+#         lugar.save()
+
+#         return redirect(self.success_url)
+    
+
+class LugarUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Lugar
+    form_class = LugarForm
+    template_name = 'AdminVideos/lugar_update.html'
+    success_url = reverse_lazy("filtro-de-platos")  # O ponés donde quieras redirigir después
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Podrías agregar aquí cosas extra si quieres mostrar otros datos en el template
+        return context
+
+    def form_valid(self, form):
+        # Este método se ejecuta cuando el formulario es válido
+        lugar = form.save(commit=False)
+        lugar.propietario = self.request.user  # Forzar que el propietario siempre sea el usuario logueado
+        lugar.save()
+        return redirect(self.success_url)
+
+    def test_func(self):
+        # Esto verifica que solo el propietario pueda editar su lugar
+        lugar = self.get_object()
+        return lugar.propietario == self.request.user
 
 
 class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):

@@ -9,13 +9,13 @@
   
       <div class="p-1 d-flex flex-wrap">
        
-        <div class=" d-flex align-items-center">
+        <div class=" d-flex align-items-center mb-3">
           <div class="container">
-            <br>
+            <!-- <br> -->
             
             {% with tipopag=request.GET.tipopag %}
             {% if tipopag == "Delivery" or tipopag == "Comerafuera" %}
-              <a class="bg-primary text-white small border border-dark" href="{% url 'crear-lugar' %}?tipopag={{ tipopag|default:'' }}">
+              <a class="bg-primary text-white small border border-dark rounded" href="{% url 'crear-lugar' %}?tipopag={{ tipopag|default:'' }}">
                 {% if tipopag and tipopag != "Dash" %}
                   AGREGAR {{ tipopag }}
                 {% else %}
@@ -23,7 +23,7 @@
                 {% endif %}
               </a>
             {% else %}
-              <a class="bg-primary text-white small border border-dark" href="{% url 'videos-create' %}?tipopag={{ tipopag|default:'' }}">
+              <a class="bg-primary text-white small border border-dark rounded" href="{% url 'videos-create' %}?tipopag={{ tipopag|default:'' }}">
                 {% if tipopag and tipopag != "Dash" %}
                   AGREGAR {{ tipopag }}
                 {% else %}
@@ -36,7 +36,7 @@
           </div>
         </div>
      
-        {% if not platos %}
+        {% if not platos and not lugares %}
           <h6>No hay platos para mostrar.</h6>
         {% else %}
 
@@ -78,7 +78,7 @@
                 <div class="container p-0">
               
 
-                    <a href="{% url 'videos-detail' plato.id %}">
+                    <a href="{% url 'platos-detail' plato.id %}">
                       <img src="{{ plato.image_url }}" class="img-fluid object-fit-cover" alt="Imagen del Plato">
                     </a>
 
@@ -134,40 +134,43 @@
 {% endif %}
 
 </section>
-{% if not lugares %}
+{% if not lugares and not platos %}
     <h6>No hay lugares para mostrar.</h6>
   {% else %}
     <div class="container p-0">
       <div class="row">
         {% for lugar in lugares %}
-          <div class="col-md-4 mb-3">
-            <div class="card h-100">
-              <img src="{{ lugar.image_url }}" class="card-img-top" alt="Imagen de {{ lugar.nombre }}">
-              <div class="card-body text-center">
-                <h5 class="card-title">{{ lugar.nombre }}</h5>
-                <p><strong>Dirección:</strong> {{ lugar.direccion }}</p>
-                <p><strong>Teléfono:</strong> {{ lugar.telefono }}</p>
-                <p><strong>Horario:</strong> {{ lugar.dias_horarios }}</p>
-                {% if lugar.enlace %}
-                  <p><a href="{{ lugar.enlace }}" target="_blank">Ver más</a></p>
-                {% endif %}
+          <div class="col-6 col-sm-4 col-md-3">
+           
+            <div class="card h-100 shadow-sm rounded-4" style="font-size: 0.9rem; position: relative;">
+              <a href="{% url 'lugar-detail' lugar.id %}" style="position: relative; display: block;">
+                <img src="{{ lugar.image_url }}" class="card-img-top object-fit-cover rounded-top-4" alt="Imagen del Lugar" style="height: 150px; object-fit: cover;">
+                <div style="position: absolute; top: 0; left: 0; right: 0; height: 150px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.4); color: white; font-weight: bold; border-top-left-radius: 1rem; border-top-right-radius: 1rem;">
+                  {{ lugar.nombre }}
+                </div>
+              </a>
 
+              <div class="card-body text-center p-1">
+                <!-- <h6 class="card-title mb-1">{{ lugar.nombre }}</h6> -->
+                <p class="text-muted mb-0" style="font-size: 0.8rem;">{{ lugar.direccion|default:"Sin dirección" }}</p>
+                
                 {% if amigues %}
-                <a href="#" data-bs-toggle="modal" data-bs-target="#compartirModal" onclick="setPlatoInfo('{{ lugar.id }}', 'lugar')">
-                  <i class="fa-solid fa-share-nodes"></i>
-                </a>
+                <div class="mt-2">
+                  <a href="#" data-bs-toggle="modal" data-bs-target="#compartirModal" onclick="setPlatoInfo('{{ lugar.id }}', 'lugar')" class="text-primary me-2">
+                    <i class="fa-solid fa-share-nodes"></i>
+                  </a>
                 {% endif %}
-                
-                <a href="#" data-bs-toggle="modal" data-bs-target="#asignarPlatoModal" class="btn btn-sm btn-primary p-0" onclick="setPlatoInfo('{{ lugar.id }}', 'lugar')">
-                  Programar
-                </a>
+  
+                  <a href="#" data-bs-toggle="modal" data-bs-target="#asignarPlatoModal" class="btn btn-sm btn-primary p-0" onclick="setPlatoInfo('{{ lugar.id }}', 'lugar')" class="btn btn-sm btn-outline-primary">
+                    Programar
+                  </a>
 
-                <a class="btn btn-primary mb-1" href="">Editar</a>
-                <a class="btn btn-danger" href="">Eliminar</a>
-                
+                </div>
               </div>
             </div>
-          </div>
+            
+
+          <!-- </div> -->
         {% endfor %}
       </div>
     </div>

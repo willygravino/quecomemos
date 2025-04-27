@@ -210,16 +210,16 @@
         <!-- End of Sidebar -->
 
         <!-- Content Wrapper -->
-        <div id="content-wrapper" style="background-color: rgb(255, 255, 255)5);" class="d-flex flex-column">
+        <div id="content-wrapper" style="background-color: rgb(242, 242, 242);" class="d-flex flex-column">
         
         <!-- COLOR PARA UBICAR
         <div id="content-wrapper" style="background-color: rgb(255, 0, 255);" class="d-flex flex-column"></div> -->
 
             <!-- Main Content -->
-            <div id="content">
+            <!-- <div id="content"> -->
 
                 <!-- Topbar -->
-                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-2 static-top shadow">
 
                     <!-- Sidebar Toggle (Topbar) -->
                     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
@@ -240,7 +240,7 @@
                                 aria-labelledby="searchDropdown">
                                 <form class="form-inline mr-auto w-100 navbar-search">
                                     <div class="input-group">
-                                        <input type="text" class="form-control bg-light border-0 small"
+                                        <input type="text" class="form-control bg-light small"
                                             placeholder="Search for..." aria-label="Search"
                                             aria-describedby="basic-addon2">
                                         <div class="input-group-append">
@@ -287,7 +287,7 @@
 
 
 
-                        <li class="nav-item dropdown no-arrow mx-1">
+                        <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button"
                                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fa-solid fa-comments"></i>
@@ -384,8 +384,6 @@
                                     Seteos
                                 </a>
 
-
-
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
@@ -400,13 +398,10 @@
 
                 <!-- End of Topbar -->
 
-<!-- <h1>dia activo {{dia_activo}}</h1>  
 
-<h1>programados {{dias_programados}}</h1>   -->
-
-                <div class="container" style="background-color: rgb(199, 199, 199);">
+                <!-- <div class="container" style="background-color: rgb(255, 165, 165);"> -->
                     <!-- Nav Tabs -->
-                    <ul class="nav nav-tabs m-0" id="diasTab" role="tablist">
+                    <ul class="nav nav-tabs" id="diasTab" role="tablist">
                         {% for dia in dias_desde_hoy %}
                         <li class="nav-item  " role="presentation">
                             <button 
@@ -442,7 +437,7 @@
                                                         <!-- Desayuno -->
                                                         <div class="col-md-3">
                                                             
-                                                            <h6 class="fw-bold">Desayuno</h6>
+                                                            <h6 class="fw-bold ml-3 bg-dark text-white p-2 rounded">Desayuno</h6>
                                                             {% if dia_plato.1.desayuno %}
                                                                 {% for plato in dia_plato.1.desayuno %}
                                                                     <p class="mb-1 ml-3 d-flex align-items-center">
@@ -455,13 +450,15 @@
                                                                     </p>
                                                                 {% endfor %}
                                                             {% else %}
-                                                                <p>No hay platos.</p>
+                                                                <p class="mb-1 ml-3 d-flex align-items-center">No hay platos programados.</p>
                                                             {% endif %}
                                                         </div>
                                             
                                                         <!-- Almuerzo -->
                                                         <div class="col-md-3">
-                                                            <h6 class="fw-bold">Almuerzo</h6>
+                                                            <!-- <h6 class="fw-bold">Almuerzo</h6> -->
+                                                            <h6 class="fw-bold ml-3 bg-dark text-white p-2 rounded">Almuerzo</h6>
+
                                                             {% if dia_plato.1.almuerzo %}
                                                                 {% for plato in dia_plato.1.almuerzo %}
                                                                     <p class="mb-1 ml-3 d-flex align-items-center">
@@ -472,13 +469,15 @@
                                                                     </p>
                                                                 {% endfor %}
                                                             {% else %}
-                                                                <p>No hay platos.</p>
+                                                                <p class="mb-1 ml-3 d-flex align-items-center">No hay platos programados.</p>
                                                             {% endif %}
                                                         </div>
                                             
                                                         <!-- Merienda -->
                                                         <div class="col-md-3">
-                                                            <h6 class="fw-bold">Merienda</h6>
+                                                            <!-- <h6 class="fw-bold">Merienda</h6> -->
+                                                            <h6 class="fw-bold ml-3 bg-dark text-white p-2 rounded">Merienda</h6>
+
                                                             {% if dia_plato.1.merienda %}
                                                                 {% for plato in dia_plato.1.merienda %}
                                                                     <p class="mb-1 ml-3 d-flex align-items-center">
@@ -490,13 +489,15 @@
                                                                     </p>
                                                                 {% endfor %}
                                                             {% else %}
-                                                                <p>No hay platos.</p>
+                                                                <p class="mb-1 ml-3 d-flex align-items-center">No hay platos programados.</p>
                                                             {% endif %}
                                                         </div>
                                             
                                                         <!-- Cena -->
                                                         <div class="col-md-3">
-                                                            <h6 class="fw-bold">Cena</h6>
+                                                            <!-- <h6 class="fw-bold">Cena</h6> -->
+                                                            <h6 class="fw-bold ml-3 mr-3 bg-dark text-white p-2 rounded">Cena</h6>
+
                                                             {% if dia_plato.1.cena %}
                                                                 {% for plato in dia_plato.1.cena %}
                                                                     <p class="mb-1 ml-3 d-flex align-items-center">
@@ -511,7 +512,7 @@
                                                                     </p>
                                                                 {% endfor %}
                                                             {% else %}
-                                                                <p>No hay platos.</p>
+                                                                <p class="mb-1 ml-3 d-flex align-items-center">No hay platos programados.</p>
                                                             {% endif %}
                                                         </div>
                                                     </div>
@@ -523,7 +524,7 @@
                             </div>
                         {% endfor %}
 
-                        <div class="shadow rounded p-2 m-2">
+                        <div class="shadow rounded p-2 m-2 mb-0">
                             {% block filtro %}
                             {% endblock %}
                         </div>
@@ -535,10 +536,10 @@
                     </div>
 
                     
-                </div>
+                <!-- </div> -->
 
                
-            </div>
+            <!-- </div> -->
                 
             <!-- End of Main Content -->
 

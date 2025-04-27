@@ -1,0 +1,94 @@
+{% extends "AdminVideos/base.html" %}
+
+{% load static %}
+
+{% block principal %}
+
+<div class="album py-5 bg-body-tertiary">
+  <div class="container">
+    <div class="row justify-content-center"> <!-- Centra la tarjeta en el contenedor -->
+      <div class="col-md-6 col-lg-6"> <!-- Limita el ancho en dispositivos medianos y grandes -->
+        <div class="card shadow-sm">
+          <img class="card-img-top" style="height: 225px; width: 100%; display: block" src="{{lugar.image_url}}" data-holder-rendered="true">
+              <div class="card-body">
+                <strong><h3>{{ lugar.nombre }}</h3></strong>
+               
+                <!-- <p class="card-text">Nombre: {{ lugar.nombre }}</p> -->
+                <p class="card-text">Dirección: {{ lugar.direccion }}</p>
+                <p class="card-text">Teléfono: {{ lugar.telefono }}</p>
+                <!-- <p class="card-text">Enlace: <a href="{{ lugar.enlace }}" target="_blank">{{ lugar.enlace }}</a></p> -->
+                <p class="card-text">Propietario: {{ lugar.propietario }}</p>
+                <p class="card-text">Días y horarios: {{ lugar.dias_horarios }}</p>
+                <p class="card-text">Tipo: {% if lugar.delivery %}Delivery{% else %}Comerafuera{% endif %}</p>
+                <!-- <p class="card-text">Imagen: <img src="{{ lugar.image_url }}" alt="Imagen del lugar" class="img-fluid" /></p> -->
+
+
+
+                {% if lugar.enlace %}
+                <p class="card-text">
+                    <a href="{{ lugar.enlace }}" target="_blank">{{ lugar.enlace }}</a>
+                </p>
+               {% endif %}
+
+               <p class="card-text">Contacto: {{ lugar.teléfono }}</p>
+
+               
+                <!-- {% if lugar.proviene_de %}
+                  <p class="card-text text-success fw-bold">
+                    Plato importado originalmente de la lista de {{ plato.proviene_de }}
+                  </p>
+                {% endif %} -->
+   
+                <p></p>
+                {% if user.id == lugar.propietario.id %}
+                    
+                   <a href="{% url 'lugar-update' lugar.id %}" type="button"  class="btn btn-sm btn-outline-secondary">Editar</a> 
+
+                    <a href="{% url 'eliminar-lugar' lugar.id %}" type="button" class="btn btn-sm btn-outline-secondary">Eliminar</a> 
+
+                    <hr>
+
+                  </div>
+  
+
+              </div>
+            </div>
+                 <p></p>
+                {% else %}
+              </div>
+            </div>
+                 <p></p>
+                 <small class="text-muted">Sugerencia de Quecomemos</small> 
+                {% endif %}
+                  
+            </div>
+
+
+<!-- 
+            {% if amigues %}
+
+              <form method="post" action="{% url 'compartir-plato' %}">
+                  {% csrf_token %}
+                
+                  <div class="mb-3">
+                    <h6>Compartir este plato con:</h6>
+
+                      <select id="amigue-select" name="amigue" class="form-select" aria-label="Seleccionar amigue">
+                          {% for amigue in amigues %}
+                              <option value="{{ amigue }}">{{ amigue }}</option>
+                          {% endfor %}
+                          <input type="hidden" name="plato_id" value="{{ plato.id }}">
+                      </select>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Compartir</button>
+              </form>
+            {% endif %} -->
+
+         </div>
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}
