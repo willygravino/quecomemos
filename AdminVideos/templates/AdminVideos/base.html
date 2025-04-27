@@ -400,11 +400,13 @@
 
 
                 <!-- <div class="container" style="background-color: rgb(255, 165, 165);"> -->
-                    <ul class="nav nav-tabs" id="diasTab" role="tablist">
+
+                    <ul class="nav nav-tabs flex-nowrap overflow-auto border-0" id="diasTab" role="tablist" style="white-space: nowrap;">
+    
                         {% for dia in dias_desde_hoy %}
-                        <li class="nav-item" role="presentation">
+                        <li class="nav-item" role="presentation" style="flex: 0 0 auto;">
                             <button 
-                            class="nav-link {% if dia_activo == dia|date:'Y-m-d' %}active{% elif forloop.first and not dia_activo %}active{% endif %}" 
+                            class="nav-link {% if dia_activo == dia|date:'Y-m-d' %}active{% elif forloop.first and not dia_activo %}active{% endif %} text-center px-2" 
                             id="tab-{{ dia|date:'Y-m-d' }}" 
                             data-bs-toggle="tab" 
                             data-bs-target="#tab-content-{{ dia|date:'Y-m-d' }}" 
@@ -414,9 +416,9 @@
                             aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
                                 
                                 <span class="d-none d-md-block">{{ dia|date:"l j"|capfirst }}</span>
-                                <span class="d-block d-md-none text-center">
+                                <span class="d-block d-md-none">
                                     {{ dia|date:"D"|slice:":2"|upper }}<br>{{ dia|date:"j" }}
-                                  </span>
+                                </span>
                     
                                 {% if dia in dias_programados %}
                                     ✅
@@ -425,6 +427,8 @@
                         </li>
                         {% endfor %}
                     </ul>
+                    
+                 
                 
                     <!-- Tab Content -->
                     <div class="tab-content bg-white" id="diasTabContent">
