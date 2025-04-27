@@ -31,13 +31,16 @@
                 {% endif %}
               </a>
             {% endif %}
-          {% endwith %}
 
           </div>
         </div>
      
-        {% if not platos and not lugares %}
-          <h6>No hay platos para mostrar.</h6>
+        {% if not platos and tipopag != "Delivery" and tipopag != "Comerafuera" %}
+
+          <div class="alert alert-info text-center" role="alert">
+            <i class="bi bi-geo-alt-fill"></i> No hay platos ingresados para mostrar.
+          </div>
+
         {% else %}
 
         <div class="container p-0">
@@ -134,9 +137,11 @@
 {% endif %}
 
 </section>
-{% if not lugares and not platos %}
-    <h6>No hay lugares para mostrar.</h6>
-  {% else %}
+{% if not lugares and tipopag == "Delivery" or tipopag == "Comerafuera" %}
+  <div class="alert alert-info text-center" role="alert">
+    <i class="bi bi-geo-alt-fill"></i> No hay lugares ingresados para mostrar.
+  </div>
+{% else %}
     <div class="container p-0">
       <div class="row">
         {% for lugar in lugares %}
@@ -175,6 +180,8 @@
       </div>
     </div>
   {% endif %}
+  {% endwith %}
+
 
 <!-- Modal para compartir plato -->
 <div class="modal fade" id="compartirModal" tabindex="-1" aria-labelledby="compartirModalLabel" aria-hidden="true">
