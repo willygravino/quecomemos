@@ -62,10 +62,15 @@
 
                             <input type="password" name="password" class="form-control form-control-user" autocomplete="current-password" required="" id="id_password" placeholder="Contraseña">
 
-                                <!-- este es el que va!
-                                <input type="password" name="password" autocomplete="current-password" required="" id="id_password"> -->
-
                           </div>
+
+                          {% if form.is_bound and form.non_field_errors %}
+                            <div class="alert alert-danger" role="alert">
+                              {% for error in form.non_field_errors %}
+                                {{ error }}
+                              {% endfor %}
+                            </div>
+                          {% endif %}
                     
                       <div class="form-group">
                         <div class="custom-control custom-checkbox small">
@@ -77,12 +82,7 @@
                       <input class="btn btn-primary btn-user btn-block" type="submit" value="Iniciar Sesión">
 
                       <hr>
-                      <!-- <a href="index.html" class="btn btn-google btn-user btn-block">
-                        <i class="fab fa-google fa-fw"></i> Login with Google
-                      </a>
-                      <a href="index.html" class="btn btn-facebook btn-user btn-block">
-                        <i class="fab fa-facebook-f fa-fw"></i> Login with Facebook
-                      </a> -->
+                 
                     </form>
 
                     <hr>

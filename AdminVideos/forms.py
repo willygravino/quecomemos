@@ -1,6 +1,8 @@
 
 from django import forms
 from .models import Lugar, Plato
+from django.contrib.auth.forms import AuthenticationForm
+
 
 class PlatoFilterForm(forms.Form):
     medios = forms.ChoiceField(choices=Plato.MEDIOS_CHOICES, required=False)
@@ -47,4 +49,10 @@ class LugarForm(forms.ModelForm):
         }
 
 
-    
+class CustomAuthenticationForm(AuthenticationForm):
+        error_messages = {
+        'invalid_login': (
+            "Usuario o contraseña incorrectos. Por favor, volvé a intentarlo."
+        ),
+        'inactive': ("Esta cuenta está inactiva."),
+    }

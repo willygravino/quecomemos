@@ -14,7 +14,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView, D
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from datetime import datetime, timedelta
-from .forms import LugarForm, PlatoFilterForm, PlatoForm
+from .forms import LugarForm, PlatoFilterForm, PlatoForm, CustomAuthenticationForm
 from django.views.generic import TemplateView
 from datetime import date, datetime
 from django.contrib.auth.models import User  # Asegúrate de importar el modelo User
@@ -26,6 +26,7 @@ from django.urls import reverse
 import datetime
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+
 
 
 
@@ -759,8 +760,8 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
 
 
 
-
 class Login(LoginView):
+    authentication_form = CustomAuthenticationForm
     next_page = reverse_lazy("filtro-de-platos")
 
 

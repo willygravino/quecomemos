@@ -36,48 +36,71 @@
                             <div class="text-center">
                                 <h1 class="h4 text-gray-900 mb-4">Crear cuenta:</h1>
                             </div>
+                            
+
+                         
+
                             <form class="user" method="post" enctype="multipart/form-data">
                                 {% csrf_token %}
                             
-                                <!-- <div class="form-group row">
-                                    <div class="col-sm-6 mb-3 mb-sm-0">
-                                        <input type="text" class="form-control form-control-user" id="exampleFirstName"
-                                            placeholder="First Name">
-                                    </div>
-
-                                    <div class="col-sm-6">
-                                        <input type="text" class="form-control form-control-user" id="exampleLastName"
-                                            placeholder="Last Name">
-                                    </div>
-                                </div> -->
-                                
+                                <!-- Usuario -->
                                 <div class="form-group">
-                                    <input type="text" name="username" class="form-control form-control-user" autocapitalize="none" autocomplete="username" autofocus="" required="" aria-describedby="id_username_helptext" id="id_username"                          placeholder="Usuario">
+                                    <input 
+                                        type="text" 
+                                        name="username" 
+                                        value="{{ form.username.value|default_if_none:'' }}" 
+                                        class="form-control form-control-user {% if form.username.errors %}is-invalid{% endif %}" 
+                                        autocapitalize="none" 
+                                        autocomplete="username" 
+                                        autofocus="" 
+                                        required="" 
+                                        aria-describedby="id_username_helptext" 
+                                        id="id_username" 
+                                        placeholder="Usuario">
+                                    {% if form.is_bound and form.username.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.username.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
                                 </div>
-
+                            
+                                <!-- Contraseña -->
                                 <div class="form-group row">
                                     <div class="col-sm-6 mb-3 mb-sm-0">
                                         <input class="form-control form-control-user"
                                         type="password" name="password1" autocomplete="new-password" required="" aria-describedby="id_password1_helptext" id="id_password1" placeholder="Contraseña">
+                                        {% if form.is_bound and form.password1.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.password1.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
                                     </div>
-
+                            
                                     <div class="col-sm-6">
                                         <input type="password" name="password2" autocomplete="new-password" required="" aria-describedby="id_password2_helptext" id="id_password2" class="form-control form-control-user" placeholder="Repetí la Contraseña">
+                                        {% if form.is_bound and form.password2.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.password2.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
                                     </div>
-
                                 </div>
+                            
                                 <input class="btn btn-primary btn-user btn-block" type="submit" value="Registrarse">
-                                <!-- <a href="login.html" >
-                                    Registrar Cuenta
-                                </a> -->
-                                <!-- <hr>
-                                <a href="index.html" class="btn btn-google btn-user btn-block">
-                                    <i class="fab fa-google fa-fw"></i> Register with Google
-                                </a>
-                                <a href="index.html" class="btn btn-facebook btn-user btn-block">
-                                    <i class="fab fa-facebook-f fa-fw"></i> Register with Facebook
-                                </a> -->
                             </form>
+                            
+                            
+                            
+
+
+
+
                             <hr>
                             <div class="text-center">
                                 <a class="small" href="forgot-password.html">¿Olvidaste tu contraseña?</a>
@@ -92,6 +115,50 @@
         </div>
 
     </div>
+   
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Obtener todos los campos de formulario
+            const usernameField = document.querySelector('#id_username');
+            const password1Field = document.querySelector('#id_password1');
+            const password2Field = document.querySelector('#id_password2');
+        
+            // Inyectar los errores directamente como valores de JavaScript
+            const usernameErrors = {{ form.username.errors|length|default:0 }};
+            const password1Errors = {{ form.password1.errors|length|default:0 }};
+            const password2Errors = {{ form.password2.errors|length|default:0 }};
+        
+            // Activar el campo correspondiente dependiendo del error
+            if (password1Errors > 0 || password2Errors > 0) {
+                // Si hay error en alguna de las contraseñas, poner el foco en el primer campo de contraseña
+                password1Field.focus();
+            } else if (usernameErrors > 0) {
+                // Si hay error en el username, poner el foco en el campo de username
+                usernameField.focus();
+            }
+        
+            // Eliminar mensajes de error y clases 'is-invalid' cuando el usuario empieza a escribir
+            const inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(function(input) {
+                input.addEventListener('input', function() {
+                    // Quitar las clases de error si están presentes
+                    input.classList.remove('is-invalid');
+                        
+                    // Eliminar el texto de error cercano
+                    const formGroup = input.closest('.form-group, .form-group.row, .col-sm-6');
+                    if (formGroup) {
+                        const errorDiv = formGroup.querySelector('.text-danger');
+                        if (errorDiv) {
+                            errorDiv.remove();  // Eliminar el error cuando el usuario empieza a tipear
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+    
+        
+        
 
   <!-- Bootstrap core JavaScript-->
   <script src="/AdminVideos/static/AdminVideos/vendor/jquery/jquery.min.js"></script>
