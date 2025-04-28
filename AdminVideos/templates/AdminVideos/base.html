@@ -439,6 +439,15 @@
                                             <div class="border border-2 border-primary rounded p-4 my-4 bg-light shadow-sm">
                                                 <div class="row d-flex align-items-start">
                                                   <div class="col p-2" style="max-height: 100px; overflow-y: auto; overflow-x: hidden; display: block;">
+                                                    
+                                                    <!-- <div class="d-flex justify-content-center gap-3">
+                                                        <h6 class="fw-bold bg-dark text-white p-2 rounded">Desayuno</h6>
+                                                        <h6 class="fw-bold bg-dark text-white p-2 rounded">Almuerzo</h6>
+                                                        <h6 class="fw-bold bg-dark text-white p-2 rounded">Merienda</h6>
+                                                        <h6 class="fw-bold bg-dark text-white p-2 rounded">Cena</h6>
+                                                      </div>
+                                                       -->
+
                                        
                                             {% for dia_plato in platos_dia_x_dia.items %}
                                                 {% if dia_plato.0 == dia %}
@@ -530,9 +539,9 @@
                                         </div>
                                     </div>                      
                                 </div>
-                                <h5 class="position-absolute top-0 start-50 translate-middle bg-light text-primary px-3" style="transform: translate(-50%, -50%);">
+                                <h6 class="position-absolute top-0 start-50 translate-middle bg-light text-primary px-3" style="transform: translate(-50%, -50%);">
                                     Menú programado
-                                  </h5>
+                                  </h6>
                                 </div>
                                 </div>
                             </div>
