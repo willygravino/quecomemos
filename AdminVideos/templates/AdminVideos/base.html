@@ -200,7 +200,7 @@
         <!-- End of Sidebar -->
 
         <!-- Content Wrapper -->
-        <div id="content-wrapper" style="background-color: rgb(242, 242, 242);" class="d-flex flex-column">
+        <div id="content-wrapper" style="background-color: rgb(230, 230, 230);" class="d-flex flex-column">
         
         <!-- COLOR PARA UBICAR
         <div id="content-wrapper" style="background-color: rgb(255, 0, 255);" class="d-flex flex-column"></div> -->
@@ -447,10 +447,12 @@
                                                         <h6 class="fw-bold bg-dark text-white p-2 rounded">Cena</h6>
                                                       </div>
                                                        -->
+                                                      
 
-                                       
-                                            {% for dia_plato in platos_dia_x_dia.items %}
+                {% if dia in platos_dia_x_dia %}
+                                                       {% for dia_plato in platos_dia_x_dia.items %}
                                                 {% if dia_plato.0 == dia %}
+                                               
                                                     <div class="row">
                                                         <!-- Desayuno -->
                                                         <div class="col-md-3">
@@ -534,14 +536,20 @@
                                                             {% endif %}
                                                         </div>
                                                     </div>
-                                              
 
                                                 {% endif %}
                                             {% endfor %}
+                                            {% else %}
+                                            <h2 class="text-muted text-center mt-4" style="font-size: 1.2rem;">
+                                                                                   
+                                                Aún no programaste ningún plato para este día.
+                                            </h2>
+                                                                               
+                                            {% endif %}      
                                         </div>
                                     </div>                      
                                 </div>
-                                <h6 class="position-absolute top-0 start-50 translate-middle bg-light text-primary px-3" style="transform: translate(-50%, -50%);">
+                                <h6 class="position-absolute top-0 start-50 translate-middle bg-light text-primary px-1" style="transform: translate(-50%, -50%);">
                                     Menú programado
                                   </h6>
                                 </div>
