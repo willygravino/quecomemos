@@ -432,9 +432,13 @@
 
                                 <div class="text-dark p-1 small">
                                     <!-- <p class="mb-1">Programado día {{ dia|date:"l j" }}</p>  -->
-                                    <div class="row d-flex align-items-start">
-                                        <div class="col p-2" style="max-height: 100px; overflow-y: auto; overflow-x: hidden; display: block;">
+                                    <!-- <div class="row d-flex align-items-start">
+                                        <div class="col p-2" style="max-height: 100px; overflow-y: auto; overflow-x: hidden; display: block;"> -->
+                                            <div class="position-relative">
 
+                                            <div class="border border-2 border-primary rounded p-4 my-4 bg-light shadow-sm">
+                                                <div class="row d-flex align-items-start">
+                                                  <div class="col p-2" style="max-height: 100px; overflow-y: auto; overflow-x: hidden; display: block;">
                                        
                                             {% for dia_plato in platos_dia_x_dia.items %}
                                                 {% if dia_plato.0 == dia %}
@@ -524,7 +528,12 @@
                                                 {% endif %}
                                             {% endfor %}
                                         </div>
-                                    </div>
+                                    </div>                      
+                                </div>
+                                <h5 class="position-absolute top-0 start-50 translate-middle bg-light text-primary px-3" style="transform: translate(-50%, -50%);">
+                                    Menú programado
+                                  </h5>
+                                </div>
                                 </div>
                             </div>
                         {% endfor %}
@@ -588,13 +597,6 @@
             </div>
         </div>
     </div>
-
-    <script>
-        document.getElementById('sidebarToggle').addEventListener('click', function() {
-            document.body.classList.toggle('sidebar-toggled');
-        });
-    </script>
-    
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {

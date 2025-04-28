@@ -9,34 +9,36 @@
 
     {% csrf_token %}
 
-    <span>Medios: {{ formulario.medios }}</span>
-    <!-- <span>Categoría: {{ formulario.categoria }}</span> -->
-    <!-- <span>Dificultad: {{ formulario.dificultad }}</span> -->
-
-    <input type="search" placeholder="Buscar por palabra clave" {{ formulario.palabra_clave }} {% if  user.username  != "quecomemos" %}
-      <div class="form-check">
-        <input class="form-check-input" type="checkbox" name="quecomemos" value="quecomemos" id="quecomemos" {% if quecomemos_ck == "quecomemos" %} checked {% endif %}>
-         <label class="form-check-label small" for="quecomemos">
-          Sugerencia <br> quecomemos
-        </label> 
-         <!-- <span>Sugerencias: {{ formulario.dificultad }}</span>  -->
-      </div>      
+    <div class="input-group w-auto">
+      <input 
+        type="search" 
+        class="form-control {% if formulario.palabra_clave.value %} border-danger text-danger {% endif %}" 
+        placeholder="Buscar por palabra clave" 
+        name="palabra_clave" 
+        value="{{ formulario.palabra_clave.value|default:'' }}">
       
-      <div class="form-check">
-        <input class="form-check-input" type="checkbox" name="misplatos" value="misplatos" id="misplatos" {% if misplatos_ck == "misplatos" %} checked {% endif %}>
-        <label class="form-check-label small" for="misplatos">
-          Mis platos
-        </label>
-      </div>
+      <button type="submit" class="btn btn-primary">
+        ➔
+      </button>
+    </div>
 
-      <!-- <span>De estación: {{ formulario.dificultad }}</span> -->
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" name="quecomemos" value="quecomemos" id="quecomemos" {% if quecomemos_ck == "quecomemos" %} checked {% endif %}>
+        <label class="form-check-label small" for="quecomemos">
+        Sugerencia <br> quecomemos
+      </label>
+    </div>
 
-    {% else %}
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" name="misplatos" value="misplatos" id="misplatos" {% if misplatos_ck == "misplatos" %} checked {% endif %}>
+      <label class="form-check-label small" for="misplatos">
+        Mis platos
+      </label>
+    </div>
+
         <!-- Campo oculto -->
         <input type="hidden" name="misplatos" value="misplatos">
-    {% endif %}
-       
-    <button type="submit" class="btn btn-primary">Filtrar</button>
+
   </div>
 </form>
 
