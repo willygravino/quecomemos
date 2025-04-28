@@ -863,7 +863,7 @@ def FiltroDePlatos (request):
     fecha_actual = datetime.datetime.now().date()
 
     # # Calcular y agregar las fechas y nombres de los días para los próximos 6 días
-    dias_desde_hoy = [(fecha_actual + timedelta(days=i)) for i in range(0, 6)]
+    dias_desde_hoy = [(fecha_actual + timedelta(days=i)) for i in range(0, 7)]
 
     primer_dia = dias_desde_hoy[0].isoformat()
     

@@ -1,0 +1,3 @@
+ {% if not dia_plato.1.desayuno and not dia_plato.1.almuerzo and not dia_plato.1.merienda and not dia_plato.1.cena %}
+                                            <h1>no hay platos</h1>
+                                        {% else %}

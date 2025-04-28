@@ -15,8 +15,11 @@
             
             {% with tipopag=request.GET.tipopag %}
             {% if tipopag == "Delivery" or tipopag == "Comerafuera" %}
-              <a class="bg-primary text-white small border border-dark rounded" href="{% url 'crear-lugar' %}?tipopag={{ tipopag|default:'' }}">
-                {% if tipopag and tipopag != "Dash" %}
+            <a 
+            class="bg-gradient-to-r from-primary to-blue-500 text-white text-lg font-bold py-3 px-6 border border-dark rounded-2xl shadow-lg hover:scale-105 transition-transform duration-300 ease-in-out"
+            href="{% url 'crear-lugar' %}?tipopag={{ tipopag|default:'' }}"
+          >
+                           {% if tipopag and tipopag != "Dash" %}
                   AGREGAR {{ tipopag }}
                 {% else %}
                   AGREGAR PRINCIPAL
@@ -43,7 +46,7 @@
 
         {% else %}
 
-        <div class="container p-0">
+        <!-- <div class="container p-0"> -->
           <div class="row">
             {% if platos_compartidos %}
               <div class="col-md-4 mb-3">
@@ -70,7 +73,7 @@
             {% endif %}
 
           </div>
-      </div>
+      <!-- </div> -->
         
         {% for plato in platos %}
           <div class="d-flex flex-row">
