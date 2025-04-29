@@ -457,10 +457,10 @@
                                                         <!-- Desayuno -->
                                                         <div class="col-md-3">
                                                             
-                                                            <h6 class="fw-bold ml-3 bg-dark text-white p-2 rounded">Desayuno</h6>
+                                                            <h6 class="fw-bold ml-1 bg-primary text-white p-1 rounded">Desayuno</h6>
                                                             {% if dia_plato.1.desayuno %}
                                                                 {% for plato in dia_plato.1.desayuno %}
-                                                                    <p class="mb-1 ml-3 d-flex align-items-center">
+                                                                    <p class="mb-1 ml-1 d-flex align-items-center text-primary">
                                                                         {{ plato }}
 
                                                                         <a href="{% url 'eliminar-programado' nombre_plato=plato comida='desayuno' fecha=dia %}" class="btn btn-sm p-0 ml-2" title="Eliminar">
@@ -470,18 +470,18 @@
                                                                     </p>
                                                                 {% endfor %}
                                                             {% else %}
-                                                                <p class="mb-1 ml-3 d-flex align-items-center">No hay platos programados.</p>
+                                                                <p class="mb-1 ml-1 d-flex align-items-center">No hay platos programados.</p>
                                                             {% endif %}
                                                         </div>
                                             
                                                         <!-- Almuerzo -->
                                                         <div class="col-md-3">
                                                             <!-- <h6 class="fw-bold">Almuerzo</h6> -->
-                                                            <h6 class="fw-bold ml-3 bg-dark text-white p-2 rounded">Almuerzo</h6>
+                                                            <h6 class="fw-bold ml-1 bg-primary text-white p-1 rounded">Almuerzo</h6>
 
                                                             {% if dia_plato.1.almuerzo %}
                                                                 {% for plato in dia_plato.1.almuerzo %}
-                                                                    <p class="mb-1 ml-3 d-flex align-items-center">
+                                                                    <p class="mb-1 ml-1 d-flex align-items-center text-primary">
                                                                         {{ plato }}
                                                                         <a href="{% url 'eliminar-programado' nombre_plato=plato comida='almuerzo' fecha=dia %}" class="btn btn-sm p-0 ml-2" title="Eliminar">
                                                                             <i class="fa-solid fa-trash-can"></i>
@@ -489,18 +489,18 @@
                                                                     </p>
                                                                 {% endfor %}
                                                             {% else %}
-                                                                <p class="mb-1 ml-3 d-flex align-items-center">No hay platos programados.</p>
+                                                                <p class="mb-1 ml-1 d-flex align-items-center">No hay platos programados.</p>
                                                             {% endif %}
                                                         </div>
                                             
                                                         <!-- Merienda -->
                                                         <div class="col-md-3">
                                                             <!-- <h6 class="fw-bold">Merienda</h6> -->
-                                                            <h6 class="fw-bold ml-3 bg-dark text-white p-2 rounded">Merienda</h6>
+                                                            <h6 class="fw-bold ml-1 bg-primary text-white p-1 rounded">Merienda</h6>
 
                                                             {% if dia_plato.1.merienda %}
                                                                 {% for plato in dia_plato.1.merienda %}
-                                                                    <p class="mb-1 ml-3 d-flex align-items-center">
+                                                                    <p class="mb-1 ml-1 d-flex align-items-center text-primary">
                                                                         {{ plato }}
 
                                                                         <a href="{% url 'eliminar-programado' nombre_plato=plato comida='merienda' fecha=dia %}" class="btn btn-sm p-0 ml-2" title="Eliminar">
@@ -509,18 +509,18 @@
                                                                     </p>
                                                                 {% endfor %}
                                                             {% else %}
-                                                                <p class="mb-1 ml-3 d-flex align-items-center">No hay platos programados.</p>
+                                                                <p class="mb-1 ml-1 d-flex align-items-center">No hay platos programados.</p>
                                                             {% endif %}
                                                         </div>
                                             
                                                         <!-- Cena -->
                                                         <div class="col-md-3">
                                                             <!-- <h6 class="fw-bold">Cena</h6> -->
-                                                            <h6 class="fw-bold ml-3 mr-3 bg-dark text-white p-2 rounded">Cena</h6>
+                                                            <h6 class="fw-bold ml-1 mr-1 bg-primary text-white p-1 rounded">Cena</h6>
 
                                                             {% if dia_plato.1.cena %}
                                                                 {% for plato in dia_plato.1.cena %}
-                                                                    <p class="mb-1 ml-3 d-flex align-items-center">
+                                                                    <p class="mb-1 ml-1 d-flex align-items-center text-primary">
                                                                         {{ plato }}
 
 
@@ -532,7 +532,7 @@
                                                                     </p>
                                                                 {% endfor %}
                                                             {% else %}
-                                                                <p class="mb-1 ml-3 d-flex align-items-center">No hay platos programados.</p>
+                                                                <p class="mb-1 ml-1 d-flex align-items-center">No hay platos programados.</p>
                                                             {% endif %}
                                                         </div>
                                                     </div>
@@ -540,32 +540,47 @@
                                                 {% endif %}
                                             {% endfor %}
                                             {% else %}
-                                            <h2 class="text-muted text-center mt-4" style="font-size: 1.2rem;">
-                                                                                   
+                                            <h3 class="text-muted text-center mt-1" style="font-size: 1rem;">           
                                                 Aún no programaste ningún plato para este día.
-                                            </h2>
+                                            </h3>
                                                                                
                                             {% endif %}      
                                         </div>
                                     </div>                      
                                 </div>
-                                <h6 class="position-absolute top-0 start-50 translate-middle bg-light text-primary px-1" style="transform: translate(-50%, -50%);">
+                                <span class="fs-7 position-absolute top-0 start-50 translate-middle bg-light text-primary px-1" style="transform: translate(-50%, -50%);">
                                     Menú programado
-                                  </h6>
+                                </span>
                                 </div>
                                 </div>
                             </div>
                         {% endfor %}
 
-                        <div class="shadow rounded p-2 m-2 mb-0">
-                            {% block filtro %}
-                            {% endblock %}
-                        </div>
-    
-                        <div class="my-3">
-                            {% block principal %}
-                            {% endblock %}
-                        </div>
+                        <div class="border border-primary rounded p-2 position-relative m-2">
+
+                            <!-- Título encima del borde -->
+                            <small class="position-absolute top-0 start-50 translate-middle bg-white px-3 text-primary"
+                                style="transform: translate(-50%, -50%);">
+                            Platos para ser programados
+                            </small>
+
+                          
+                            <!-- Contenido de los bloques -->
+                            <div class="shadow rounded p-2 m-2 mb-0">
+                              {% block filtro %}
+                              {% endblock %}
+                            </div>
+                          
+                            <div class="my-3">
+                              {% block principal %}
+                              {% endblock %}
+                            </div>
+                          
+                          </div>
+                          
+
+
+
                     </div>
 
                     
@@ -617,7 +632,7 @@
         </div>
     </div>
 
-    <!-- <script>
+    <script>
         document.addEventListener("DOMContentLoaded", function() {
             // Detectamos el tab activo al hacer clic en los enlaces de navegación
             document.querySelectorAll(".nav-link").forEach(link => {
@@ -691,7 +706,7 @@
             });
         });
     });
-    </script> -->
+    </script>
        
     <script src="{% static 'AdminVideos/vendor/jquery/jquery.min.js' %}"></script>
     <script src="{% static 'AdminVideos/vendor/jquery-easing/jquery.easing.min.js' %}"></script>
@@ -702,7 +717,7 @@
     <script src="{% static 'AdminVideos/js/bootstrap.bundle.min.js' %}"></script>
 
     <!-- Inicialización de Tooltips y Popovers -->
-    <!-- <script>
+    <script>
         document.addEventListener("DOMContentLoaded", function () {
             // Activar tooltips en los elementos con data-bs-toggle="tooltip"
             const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
@@ -712,7 +727,7 @@
             const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
             popoverTriggerList.forEach(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
         });
-    </script> -->
+    </script>
 </body>
 
 </html>

@@ -46,9 +46,10 @@
 
         {% else %}
 
-        <div class="container p-0">
-          <div class="row">
+        
             {% if platos_compartidos %}
+            <div class="container p-0">
+              <div class="row">
               <div class="col-md-4 mb-3">
                 {% for plato in platos_compartidos %}
                   <div class="card">
@@ -70,10 +71,10 @@
                   </div>
               </div>
               {% endfor %}
-            {% endif %}
-
+            </div>
           </div>
-      </div>
+            {% endif %}
+    
         
         {% for plato in platos %}
           <div class="d-flex flex-row">
