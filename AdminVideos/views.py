@@ -998,15 +998,20 @@ def FiltroDePlatos (request):
     ids_platos_compartidos = {msg.id_elemento: msg.id for msg in mensajes_platos_compartidos if msg.id_elemento}
 
     # Buscar los platos correspondientes en la base de datos
+    # los_platos_compartidos = {
+    #     str(plato.id): plato for plato in Plato.objects.filter(id__in=ids_platos_compartidos)
+    # }
+
     los_platos_compartidos = {
-        str(plato.id): plato for plato in Plato.objects.filter(id__in=ids_platos_compartidos)
+        plato.id: plato for plato in Plato.objects.filter(id__in=ids_platos_compartidos)
     }
 
     # Extraer los platos compartidos de los mensajes
     platos_compartidos = [
         {
             "id_plato": msg.id_elemento,
-            "mensaje_id": msg.id,  # Agregar el ID del mensaje del cual proviene
+            "mensaje_id": msg.id, # Agregar el ID del mensaje del cual proviene
+            "mensaje": msg.mensaje,  
             "nombre_plato": msg.nombre_elemento_compartido,
             "quien_comparte": msg.usuario_que_envia,
             "receta": los_platos_compartidos[msg.id_elemento].receta if msg.id_elemento in los_platos_compartidos else "",

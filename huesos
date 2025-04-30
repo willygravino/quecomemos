@@ -1,73 +1,50 @@
 
-<!-- ESTAS SON LAS TARJETAS DE PLATOS, SI ES QUE ESTAMOS EN PLATOS -->
-<section class="w-100 py-5 bg-info text-white">
-  {% for plato in platos %}
-    <div class="d-flex flex-row">
-      <div class="col-md-2 mb-2">
-        <div {% if user.id == plato.propietario.id and not plato.proviene_de %} class="card  border-success border-4" {%
-          elif user.id == plato.propietario.id and plato.proviene_de %} class="card  border-warning border-4" {% elif
-          user.id !=plato.propietario.id %} class="card  border-danger border-3" {% endif %} style="width: 6rem;">
-
-          <div class="container p-0">
-
-
-            <a href="{% url 'platos-detail' plato.id %}">
-              <img src="{{ plato.image_url }}" class="img-thumbnail" alt="Imagen del Plato">
-            </a>
-
-            <div
-              class="position-absolute top-0 mt-1 start-50 translate-middle-x text-center text-white bg-dark rounded">
-              <h6 class="mb-0 small"> {{ plato.nombre_plato }}</h6>
-
-
-
-            </div>
-          </div>
-          <div class="mt-0">
-
-            {% for key, value in plato.variedades.items %}
-
-            {% if value.variedad %}
-            <small class="mtext-success"> {{ value.variedad }} /</small>
-            {% endif %}
-            {% endfor %}
-
-            <div class="d-inline-flex gap-2 align-items-center justify-content-center">
-              {% if amigues %}
-              <a href="#" data-bs-toggle="modal" data-bs-target="#compartirModal"
-                onclick="setPlatoInfo('{{ plato.id }}', 'plato')">
-                <i class="fa-solid fa-share-nodes"></i>
+<section class="w-100 bg-info text-white">
+  <div class="d-flex flex-wrap gap-1 justify-content-center">
+  
+    {% for plato in platos %}
+        <div {% if user.id == plato.propietario.id and not plato.proviene_de %} class="card border-success border-4" {% elif user.id == Plato.propietario.id and plato.proviene_de %} class="card border-warning border-4" {% elif user.id != plato.propietario.id %}class="card  border-danger border-3" {% endif %} style="width: 6rem;">
+              <a href="{% url 'platos-detail' plato.id %}">
+                <img src="{{ plato.image_url }}" class="img-thumbnail" alt="Imagen del Plato">
               </a>
+              <div
+                class="position-absolute top-0 mt-1 start-50 translate-middle-x text-center text-white bg-dark rounded">
+                <h6 class="mb-0 small"> {{ plato.nombre_plato }}</h6>
+              </div>
+        
+              {% for key, value in plato.variedades.items %}
+
+                {% if value.variedad %}
+                  <small class="mtext-success"> {{ value.variedad }} /</small>
+                {% endif %}
+              {% endfor %}
+
+              <div class="d-inline-flex gap-2 align-items-center justify-content-center">
+                  {% if amigues %}
+                  <a href="#" data-bs-toggle="modal" data-bs-target="#compartirModal"
+                    onclick="setPlatoInfo('{{ plato.id }}', 'plato')">
+                    <i class="fa-solid fa-share-nodes"></i>
+                  </a>
+                  {% endif %}
+
+
+                  <a href="#" data-bs-toggle="modal" data-bs-target="#asignarPlatoModal"
+                    class="btn btn-sm btn-primary p-0" onclick="setPlatoInfo('{{ plato.id }}', 'plato')">
+                    Programar
+                  </a>
+
+
+              </div>
+
+              {% if plato.propietario != user %}
+
+                <a href="{% url 'agregar-a-mi-lista' plato.id %}" class="btn btn-success"
+                  style="font-size: 12px; padding: 2px 5px;">AGREGAR A MI LISTA</a>
+                <a href="{% url 'descartar-sugerido' plato.id %}" class="btn btn-success"
+                  style="font-size: 12px; padding: 2px 5px;">NO ME INTERESA ESTE PLATO</a>
+
               {% endif %}
-
-
-              <a href="#" data-bs-toggle="modal" data-bs-target="#asignarPlatoModal"
-                class="btn btn-sm btn-primary p-0" onclick="setPlatoInfo('{{ plato.id }}', 'plato')">
-                Programar
-              </a>
-
-
-            </div>
-
-            <div>
-
-            </div>
-
-            {% if plato.propietario != user %}
-
-            <a href="{% url 'agregar-a-mi-lista' plato.id %}" class="btn btn-success"
-              style="font-size: 12px; padding: 2px 5px;">AGREGAR A MI LISTA</a>
-            <a href="{% url 'descartar-sugerido' plato.id %}" class="btn btn-success"
-              style="font-size: 12px; padding: 2px 5px;">NO ME INTERESA ESTE PLATO</a>
-
-            {% endif %}
-
-          </div>
-        </div>
-      </div>
-    </div>
-    {% endfor %}
+      {% endfor %}
   </div>
 
-  {% endif %}
 </section>
