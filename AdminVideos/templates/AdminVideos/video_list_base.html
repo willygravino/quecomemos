@@ -4,167 +4,128 @@
 
 {% block lista_platos %}
 
-
-<section>
-
-
+<!-- ESTE ES EL BOTÓN DE AGREGAR -->
+<section class="w-100 py-5 bg-danger text-white">
   <div class="container">
-    <!-- <br> -->
-
-    {% with tipopag=request.GET.tipopag %}
-    {% if tipopag == "Delivery" or tipopag == "Comerafuera" %}
-      <div class="d-flex justify-content-center my-3">
-        <a class="btn btn-primary w-75 w-sm-100 text-white border border-dark rounded text-center"
-          href="{% url 'crear-lugar' %}?tipopag={{ tipopag|default:'' }}">
+    <div class="d-flex justify-content-center flex-wrap gap-3">
+      {% with tipopag=request.GET.tipopag %}
+      {% if tipopag == "Delivery" or tipopag == "Comerafuera" %}
+        <a class="btn btn-primary w-75 w-sm-100 text-white border border-dark rounded text-center" href="{% url 'crear-lugar' %}?tipopag={{ tipopag|default:'' }}">
+            {% if tipopag and tipopag != "Dash" %}
+              AGREGAR {{ tipopag }}
+            {% else %}
+              AGREGAR PRINCIPAL
+            {% endif %}
+          </a>
+      
+      {% else %}
+        <a class="btn btn-primary w-75 w-sm-100 text-white border border-dark rounded  text-center" href="{% url 'videos-create' %}?tipopag={{ tipopag|default:'' }}">
           {% if tipopag and tipopag != "Dash" %}
             AGREGAR {{ tipopag }}
           {% else %}
             AGREGAR PRINCIPAL
           {% endif %}
         </a>
-      <!-- </div> -->
-      
-    
-    <!-- <a class="bg-primary text-white small border border-dark rounded" href="{% url 'crear-lugar' %}?tipopag={{ tipopag|default:'' }}">
-        {% if tipopag and tipopag != "Dash" %}
-          AGREGAR {{ tipopag }}
-        {% else %}
-          AGREGAR PRINCIPAL
-        {% endif %}
-      </a> -->
-
-
-    {% else %}
-
-    <div class="d-flex justify-content-center my-3">
-      <a class="btn btn-primary w-75 w-sm-100 text-white border border-dark rounded text-center"
-         href="{% url 'videos-create' %}?tipopag={{ tipopag|default:'' }}">
-        {% if tipopag and tipopag != "Dash" %}
-          AGREGAR {{ tipopag }}
-        {% else %}
-          AGREGAR PRINCIPAL
-        {% endif %}
-      </a>
+      {% endif %}
     </div>
-
-
-    {% endif %}
   </div>
-  <!-- </div> -->
+</section>
 
-  {% if not platos and tipopag != "Delivery" and tipopag != "Comerafuera" %}
+<!-- ESTAS SON LAS TARJETAS DE LUGAR, SI ES QUE ESTAMOS EN EN ESE ITEM -->
+<section class="w-100 py-5 bg-light">
+  <div class="container">
 
-  <div class="alert alert-info text-center" role="alert">
-    <i class="bi bi-geo-alt-fill"></i> No hay platos ingresados para mostrar.
-  </div>
+      {% if not platos and tipopag != "Delivery" and tipopag != "Comerafuera" %}
 
-  {% else %}
-  <div class="p-1 d-flex flex-wrap">
-
-    <div class=" d-flex align-items-center mb-3">
-
-      {% if platos_compartidos %}
-      <div class="container p-0">
-        <div class="row">
-          <div class="col-md-4 mb-3">
-            {% for plato in platos_compartidos %}
-            <div class="card">
-              <img src="{{ plato.image_url }}" class="card-img-top" alt="Imagen">
-              <div class="card-body text-center">
-                <h5 class="card-title">{{ plato.nombre_plato }}</h5>
-                (ID: {{ plato.id_plato }}) - Compartido por: <em>{{ plato.quien_comparte }}</em>
-                <p><strong>Receta:</strong> {{ plato.receta }}</p>
-                <p><strong>Descripción:</strong> {{ plato.descripcion }}</p>
-                <p><strong>Ingredientes:</strong> {{ plato.ingredientes }}</p>
-                <p><strong>Tipo:</strong> {{ plato.tipo }}</p>
-                <p><strong> MENSAJE ID:</strong> {{ plato.mensaje_id }}</p>
-
-
-                <a class="btn btn-primary"
-                  href="{% url 'agregar-plato-compartido' plato.id_plato plato.mensaje_id %}">Agregar a mi lista</a>
-                <a class="btn btn-primary" href="">Rechazar</a>
-
-              </div>
-            </div>
-          </div>
-          {% endfor %}
-        </div>
+      <div class="alert alert-info text-center" role="alert">
+        <i class="bi bi-geo-alt-fill"></i> No hay platos ingresados para mostrar.
       </div>
+
+      {% else %}
+
+
+          {% if platos_compartidos %}
+             <div class="d-flex flex-wrap gap-3">
+                {% for plato in platos_compartidos %}
+                <div class="card">
+                  <img src="{{ plato.image_url }}" class="card-img-top" alt="Imagen">
+                  <div class="card-body text-center">
+                    <h5 class="card-title">{{ plato.nombre_plato }}</h5>
+                    (ID: {{ plato.id_plato }}) - Compartido por: <em>{{ plato.quien_comparte }}</em>
+                    <p><strong>Receta:</strong> {{ plato.receta }}</p>
+                    <p><strong>Descripción:</strong> {{ plato.descripcion }}</p>
+                    <p><strong>Ingredientes:</strong> {{ plato.ingredientes }}</p>
+                    <p><strong>Tipo:</strong> {{ plato.tipo }}</p>
+                    <p><strong> MENSAJE ID:</strong> {{ plato.mensaje_id }}</p>
+
+
+                    <a class="btn btn-primary"
+                      href="{% url 'agregar-plato-compartido' plato.id_plato plato.mensaje_id %}">Agregar a mi lista</a>
+                    <a class="btn btn-primary" href="">Rechazar</a>
+
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
       {% endif %}
 
+  </div>
+</section>
 
-      {% for plato in platos %}
-      <div class="d-flex flex-row">
-        <div class="col-md-2 mb-2">
-          <div {% if user.id == plato.propietario.id and not plato.proviene_de %} class="card  border-success border-4" {%
-            elif user.id == plato.propietario.id and plato.proviene_de %} class="card  border-warning border-4" {% elif
-            user.id !=plato.propietario.id %} class="card  border-danger border-3" {% endif %} style="width: 6rem;">
-
-            <div class="container p-0">
-
-
+<!-- ESTAS SON LAS TARJETAS DE PLATOS, SI ES QUE ESTAMOS EN PLATOS -->
+<section class="w-100 py-5 bg-info text-white">
+    {% for plato in platos %}
+      <div class="d-flex flex-wrap gap-1">
+        <div {% if user.id == plato.propietario.id and not plato.proviene_de %} class="card border-success border-4" {% elif user.id == Plato.propietario.id and plato.proviene_de %} class="card  border-warning border-4" {% elif user.id != plato.propietario.id %}class="card  border-danger border-3" {% endif %} style="width: 6rem;">
               <a href="{% url 'platos-detail' plato.id %}">
                 <img src="{{ plato.image_url }}" class="img-thumbnail" alt="Imagen del Plato">
               </a>
-
               <div
                 class="position-absolute top-0 mt-1 start-50 translate-middle-x text-center text-white bg-dark rounded">
                 <h6 class="mb-0 small"> {{ plato.nombre_plato }}</h6>
-
-
-
               </div>
-            </div>
-            <div class="mt-0">
-
+        
               {% for key, value in plato.variedades.items %}
 
-              {% if value.variedad %}
-              <small class="mtext-success"> {{ value.variedad }} /</small>
-              {% endif %}
+                {% if value.variedad %}
+                  <small class="mtext-success"> {{ value.variedad }} /</small>
+                {% endif %}
               {% endfor %}
 
               <div class="d-inline-flex gap-2 align-items-center justify-content-center">
-                {% if amigues %}
-                <a href="#" data-bs-toggle="modal" data-bs-target="#compartirModal"
-                  onclick="setPlatoInfo('{{ plato.id }}', 'plato')">
-                  <i class="fa-solid fa-share-nodes"></i>
-                </a>
-                {% endif %}
+                  {% if amigues %}
+                  <a href="#" data-bs-toggle="modal" data-bs-target="#compartirModal"
+                    onclick="setPlatoInfo('{{ plato.id }}', 'plato')">
+                    <i class="fa-solid fa-share-nodes"></i>
+                  </a>
+                  {% endif %}
 
 
-                <a href="#" data-bs-toggle="modal" data-bs-target="#asignarPlatoModal"
-                  class="btn btn-sm btn-primary p-0" onclick="setPlatoInfo('{{ plato.id }}', 'plato')">
-                  Programar
-                </a>
+                  <a href="#" data-bs-toggle="modal" data-bs-target="#asignarPlatoModal"
+                    class="btn btn-sm btn-primary p-0" onclick="setPlatoInfo('{{ plato.id }}', 'plato')">
+                    Programar
+                  </a>
 
-
-              </div>
-
-              <div>
 
               </div>
 
               {% if plato.propietario != user %}
 
-              <a href="{% url 'agregar-a-mi-lista' plato.id %}" class="btn btn-success"
-                style="font-size: 12px; padding: 2px 5px;">AGREGAR A MI LISTA</a>
-              <a href="{% url 'descartar-sugerido' plato.id %}" class="btn btn-success"
-                style="font-size: 12px; padding: 2px 5px;">NO ME INTERESA ESTE PLATO</a>
+                <a href="{% url 'agregar-a-mi-lista' plato.id %}" class="btn btn-success"
+                  style="font-size: 12px; padding: 2px 5px;">AGREGAR A MI LISTA</a>
+                <a href="{% url 'descartar-sugerido' plato.id %}" class="btn btn-success"
+                  style="font-size: 12px; padding: 2px 5px;">NO ME INTERESA ESTE PLATO</a>
 
               {% endif %}
 
-            </div>
-          </div>
-        </div>
       </div>
       {% endfor %}
-    </div>
-
-    {% endif %}
-
 </section>
-{% if not lugares and tipopag == "Delivery" or tipopag == "Comerafuera" %}
+
+<!-- ESTAS SON LAS TARJETAS DE LUGARES, SI ES QUE ESTAMOS EN LUGARES -->
+<section class="w-100 py-5 bg-info text-white">
+  {% if not lugares and tipopag == "Delivery" or tipopag == "Comerafuera" %}
 <div class="alert alert-info text-center" role="alert">
   <i class="bi bi-geo-alt-fill"></i> No hay lugares ingresados para mostrar.
 </div>
@@ -185,7 +146,6 @@
         </a>
 
         <div class="card-body text-center p-1">
-          <!-- <h6 class="card-title mb-1">{{ lugar.nombre }}</h6> -->
           <p class="text-muted mb-0" style="font-size: 0.8rem;">{{ lugar.direccion|default:"Sin dirección" }}</p>
 
           {% if amigues %}
@@ -204,14 +164,15 @@
           </div>
         </div>
       </div>
-
-
-      <!-- </div> -->
       {% endfor %}
     </div>
   </div>
   {% endif %}
-  {% endwith %}
+</section>
+
+{% endwith %}
+
+
 
 
   <!-- Modal para compartir plato -->
