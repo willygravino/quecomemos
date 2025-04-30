@@ -43,7 +43,9 @@
              <div class="d-flex flex-wrap gap-2 justify-content-center text-center">
                 {% for plato_compartido in platos_compartidos %}
 
-                 <div class="card w-50 position-relative">
+                 <!-- <div class="card w-25 position-relative"> -->
+                  <div class="card w-100 w-sm-75 w-md-50 w-lg-25 position-relative">
+
 
                   <img src = "{{ plato_compartido.image_url }}" class="img-thumbnail" alt="Imagen">
                   <div class="card-body text-center">
@@ -54,7 +56,7 @@
 
                     <h6>{{ plato_compartido.mensaje }}</h6>
 
-                    <div class=" d-flex gap-1 align-items-center">
+                    <div class=" d-flex gap-1 align-items-center justify-content-center">
                     <a class="btn btn-primary btn-sm"
                       href="{% url 'agregar-plato-compartido' plato_compartido.id_plato plato_compartido.mensaje_id %}">
                       Agregar a mi lista
