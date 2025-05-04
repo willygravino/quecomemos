@@ -1,20 +1,20 @@
 
 from django import forms
-from .models import Lugar, Plato
+from .models import Lugar, Plato, TipoPlato
 from django.contrib.auth.forms import AuthenticationForm
 
 
 class PlatoFilterForm(forms.Form):
     medios = forms.ChoiceField(choices=Plato.MEDIOS_CHOICES, required=False)
     categoria = forms.ChoiceField(choices=Plato.CATEGORIA_CHOICES, required=False)
-    dificultad = forms.ChoiceField(choices=Plato.PREPA_CHOICES, required=False)
+    # dificultad = forms.ChoiceField(choices=Plato.PREPA_CHOICES, required=False)
     palabra_clave = forms.CharField(
         max_length=30, 
         required=False, 
         widget=forms.TextInput(attrs={'placeholder': 'Buscar por palabra clave'})
     )    
     tipo = forms.ChoiceField(choices=Plato.TIPO_CHOICES, required=False)
-    calorias = forms.ChoiceField(choices=Plato.CALORIAS_CHOICES, required=False)
+    calorias = forms.ChoiceField(choices=Plato.ESTACIONALIDAD_CHOICES, required=False)
     
 
 class PlatoForm(forms.ModelForm):
@@ -30,10 +30,18 @@ class PlatoForm(forms.ModelForm):
     ingredientes_de_variedad5 = forms.CharField( max_length=120, required=False)
     variedad6 = forms.CharField(max_length=100, required=False)
     ingredientes_de_variedad6 = forms.CharField( max_length=120, required=False)
+
+    tipos = forms.ModelMultipleChoiceField(
+        queryset=TipoPlato.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
   
     class Meta:
         model = Plato
-        fields = ["nombre_plato", "receta", "descripcion_plato", "ingredientes", "medios", "categoria", "dificultad", "tipo", "calorias", "enlace", "image"]
+        fields = ["nombre_plato", "receta", "descripcion_plato", "ingredientes", "ingredientes_detallados", "medios", "elaboracion", "coccion", "estacionalidad", "tipo", "tipos", "enlace", "image"]
+
+
     
 class LugarForm(forms.ModelForm):
     class Meta:

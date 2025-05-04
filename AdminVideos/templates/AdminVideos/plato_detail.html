@@ -18,9 +18,20 @@
                 <p class="card-text">Receta: {{ plato.receta }}</p>
                 <p class="card-text">Medios: {{ plato.medios }}</p>
                 <p class="card-text">Categoría: {{ plato.categoria }}</p>
-                <p class="card-text">Dificultad: {{ plato.dificultad }}</p>
+                <p class="card-text">Elaboración: {{ plato.elaboracion }}</p>
+                <p class="card-text">Cocción: {{ plato.coccion }}</p>
                 <p class="card-text">Tipo: {{ plato.tipo }}</p>
-                <p class="card-text">Calorías: {{ plato.calorias }}</p>
+                {% if plato.tipos.all %}
+                  <p class="card-text">
+                    <strong>Tipos asociados:</strong>
+                    {% for tipo in plato.tipos.all %}
+                      <span class="badge bg-secondary">{{ tipo.nombre }}</span>
+                    {% empty %}
+                      <span class="text-muted">Sin tipos asociados</span>
+                    {% endfor %}
+                  </p>
+                {% endif %}
+                <p class="card-text">Estacionalidad: {{ plato.estacionalidad }}</p>
                 {% if plato.enlace %}
                 <p class="card-text">
                     <a href="{{ plato.enlace }}" target="_blank">{{ plato.enlace }}</a>
@@ -67,27 +78,6 @@
                 {% endif %}
                   
             </div>
-
-
-<!-- 
-            {% if amigues %}
-
-              <form method="post" action="{% url 'compartir-plato' %}">
-                  {% csrf_token %}
-                
-                  <div class="mb-3">
-                    <h6>Compartir este plato con:</h6>
-
-                      <select id="amigue-select" name="amigue" class="form-select" aria-label="Seleccionar amigue">
-                          {% for amigue in amigues %}
-                              <option value="{{ amigue }}">{{ amigue }}</option>
-                          {% endfor %}
-                          <input type="hidden" name="plato_id" value="{{ plato.id }}">
-                      </select>
-                  </div>
-                  <button type="submit" class="btn btn-primary">Compartir</button>
-              </form>
-            {% endif %} -->
 
          </div>
         </div>

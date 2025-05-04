@@ -23,12 +23,23 @@ class Lugar(models.Model):
         tipo = "Delivery" if self.delivery else "Comerafuera"
         return f"{tipo} - {self.nombre} de {self.propietario}"
 
+class TipoPlato(models.Model):
+    nombre = models.CharField(max_length=30, unique=True)
+
+    def __str__(self):
+        return self.nombre
 
 class Plato(models.Model):
     nombre_plato = models.CharField(max_length=30)
     receta = models.CharField(max_length=80, blank=True)
     descripcion_plato = models.CharField(max_length=300, blank=True)
+    
     ingredientes = models.CharField('Ingresá los ingredientes, separados por coma', max_length=400, blank=True)
+
+    ingredientes_detallados = models.JSONField(
+    null=True, blank=True,
+    help_text="Estructura: [{'ingrediente': 'harina', 'cantidad': 200, 'unidad': 'g'}]"
+)
     proviene_de = models.CharField(max_length=20, null=True)
     id_original = models.IntegerField(null=True, blank=True)
     enlace = models.URLField(max_length=200, blank=True, null=True)
@@ -52,30 +63,19 @@ class Plato(models.Model):
     medios = models.CharField(max_length=20, choices=MEDIOS_CHOICES, default=COCINA, null=True)
    
     INDISTINTO = '-'
-    COMUN = 'Común'
+    COTIDIANO = 'Cotidiano'
     ESPECIAL = 'Especial'
        
     CATEGORIA_CHOICES = [
         (INDISTINTO, '-'),
-        (COMUN, 'Común'),
+        (COTIDIANO, 'Cotidiano'),
         (ESPECIAL, 'Especial'),
         
     ]
-    categoria = models.CharField(max_length=20, choices=CATEGORIA_CHOICES, default=COMUN, null=True)
-
-    INDISTINTO = '-'
-    POCO = 'Poco'
-    NADA = 'Nada'
-    NORMAL = 'Normal'
-       
-    PREPA_CHOICES = [
-        (INDISTINTO, '-'),
-        (POCO, 'Poco'),
-        (NADA, 'Nada'),
-        (NORMAL, 'Normal'),
-
-    ]
-    dificultad = models.CharField(max_length=20, choices=PREPA_CHOICES, default=NORMAL, null=True)
+    categoria = models.CharField(max_length=20, choices=CATEGORIA_CHOICES, default=COTIDIANO, null=True)
+ 
+    elaboracion = models.IntegerField(null=True, blank=True)
+    coccion = models.IntegerField(null=True, blank=True)
 
     INDISTINTO = '-'
     ENTRADA = 'Entrada'
@@ -104,26 +104,27 @@ class Plato(models.Model):
     
     tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, null=False, default="", blank=False)
 
-    INDISTINTO = '-'
-    CALORICO = 'Calórico'
-    LIVIANO = 'Liviano'
-    NORMAL = 'Normal'
-    INVIERNO = 'Plato de invierno'
-  
-    CALORIAS_CHOICES = [
-        (INDISTINTO, '-'),
-        (CALORICO, 'Calórico'),
-        (LIVIANO, 'Liviano'),
-        (NORMAL, 'Normal'),
-        (INVIERNO,'Plato de invierno'),
-   
-    ]
+    tipos = models.ManyToManyField(TipoPlato, blank=True, related_name="platos")
 
-    calorias = models.CharField(max_length=20, choices=CALORIAS_CHOICES, default=NORMAL,null=True)  
+    INDISTINTO = '-'
+    VERANO = 'Verano'
+    INVIERNO = 'Invierno'
+    TODO_EL_AÑO = 'Todo el año'
+  
+    ESTACIONALIDAD_CHOICES = [
+        (INDISTINTO, '-'),
+        (VERANO, 'Verano'),
+        (INVIERNO, 'Invierno'),
+        (TODO_EL_AÑO, 'Todo el año'),
+       ]
+
+    estacionalidad = models.CharField(max_length=20, choices=ESTACIONALIDAD_CHOICES, default=TODO_EL_AÑO,null=True)  
 
     propietario = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="propietario")
+
     image = models.ImageField("Subí una imagen que identifique al plato (o un fotograma del mismo)", upload_to="videos/", null=True, blank=True)
     # fecha_video= models.DateTimeField("Fecha de captura del video:")
+
     variedades = models.JSONField(null=True, blank=True)
 
 

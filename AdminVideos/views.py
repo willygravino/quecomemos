@@ -528,33 +528,19 @@ class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         variedades_en_base = self.object.variedades or {}
 
-        # Crear diccionario para las variedades
         variedades = {}
-       # Crear diccionario para los ingredientes
         ingredientes_por_variedad = {}
-        # ingredientes_separados_por_comas = []
 
         for key, value in variedades_en_base.items():
             variedad = value.get('nombre', '')
-            ingredientes_variedad = value.get('ingredientes',"")
-
-            # Agregar la variedad al diccionario de variedades
+            ingredientes = value.get('ingredientes', '')
             variedades[key] = variedad
-
-            # Convertir la lista de ingredientes en una cadena separada por comas
-            # ingredientes_separados_por_comas = ', '.join(ingredientes_variedad)
-            ingredientes_separados_por_comas = ingredientes_variedad
-
-
-            # Agregar los ingredientes de esta variedad al diccionario de ingredientes
-            ingredientes_por_variedad[key] = ingredientes_separados_por_comas
+            ingredientes_por_variedad[key] = ingredientes
 
         context['variedades_en_base'] = variedades
         context['ingredientes_variedad'] = ingredientes_por_variedad
-
         return context
 
     def test_func(self):
@@ -562,33 +548,101 @@ class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         plato_id = self.kwargs.get("pk")
         return Plato.objects.filter(propietario=user_id, id=plato_id).exists()
 
-
     def form_valid(self, form):
-        # Guardar el formulario y obtener la instancia del plato
         plato = form.save(commit=False)
         plato.propietario = self.request.user
 
-        # Procesar las variedades ingresadas en el formulario
+        # Procesar las variedades del formulario
         variedades = {}
-        for key, value in self.request.POST.items():
-            if key.startswith('variedad'):
-                numero_variedad = key.replace('variedad', '')
-                ingredientes_key = 'ingredientes_de_variedad' + numero_variedad
-                # if value:
-                #    ingredientes_variedades = self.request.POST.get(ingredientes_key)
-
-                if value:
-                  variedades['variedad' + numero_variedad] = {
-                    'nombre': value,
-                    'ingredientes': self.request.POST.get(ingredientes_key)
-                   }
+        for i in range(1, 7):
+            variedad = form.cleaned_data.get(f'variedad{i}')
+            ingredientes = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
+            if variedad:
+                variedades[f'variedad{i}'] = {
+                    'nombre': variedad,
+                    'ingredientes': ingredientes
+                }
 
         plato.variedades = variedades
-
         plato.save()
 
+        # Guardar relaciones ManyToMany (como 'tipos')
+        form.save_m2m()
 
-        return redirect(self.success_url)
+        # return redirect(self.success_url)
+        return redirect(f"{reverse('videos-update', kwargs={'pk': plato.pk})}?modificado=ok")
+
+
+
+# class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+#     model = Plato
+#     form_class = PlatoForm
+#     template_name = 'AdminVideos/plato_ppal_update.html'
+#     success_url = reverse_lazy("filtro-de-platos")
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+
+#         variedades_en_base = self.object.variedades or {}
+
+#         # Crear diccionario para las variedades
+#         variedades = {}
+#        # Crear diccionario para los ingredientes
+#         ingredientes_por_variedad = {}
+#         # ingredientes_separados_por_comas = []
+
+#         for key, value in variedades_en_base.items():
+#             variedad = value.get('nombre', '')
+#             ingredientes_variedad = value.get('ingredientes',"")
+
+#             # Agregar la variedad al diccionario de variedades
+#             variedades[key] = variedad
+
+#             # Convertir la lista de ingredientes en una cadena separada por comas
+#             # ingredientes_separados_por_comas = ', '.join(ingredientes_variedad)
+#             ingredientes_separados_por_comas = ingredientes_variedad
+
+
+#             # Agregar los ingredientes de esta variedad al diccionario de ingredientes
+#             ingredientes_por_variedad[key] = ingredientes_separados_por_comas
+
+#         context['variedades_en_base'] = variedades
+#         context['ingredientes_variedad'] = ingredientes_por_variedad
+
+#         return context
+
+#     def test_func(self):
+#         user_id = self.request.user.id
+#         plato_id = self.kwargs.get("pk")
+#         return Plato.objects.filter(propietario=user_id, id=plato_id).exists()
+
+
+#     def form_valid(self, form):
+#         # Guardar el formulario y obtener la instancia del plato
+#         plato = form.save(commit=False)
+#         plato.propietario = self.request.user
+
+#         # Procesar las variedades ingresadas en el formulario
+#         variedades = {}
+#         for key, value in self.request.POST.items():
+#             if key.startswith('variedad'):
+#                 numero_variedad = key.replace('variedad', '')
+#                 ingredientes_key = 'ingredientes_de_variedad' + numero_variedad
+#                 # if value:
+#                 #    ingredientes_variedades = self.request.POST.get(ingredientes_key)
+
+#                 if value:
+#                   variedades['variedad' + numero_variedad] = {
+#                     'nombre': value,
+#                     'ingredientes': self.request.POST.get(ingredientes_key)
+#                    }
+
+#         plato.variedades = variedades
+
+#         plato.save()
+
+
+#         return redirect(self.success_url)
 
 
 class CrearLugar(LoginRequiredMixin, CreateView):
@@ -662,77 +716,52 @@ class CrearLugar(LoginRequiredMixin, CreateView):
         template_param = self.request.GET.get('tipopag')
         return redirect(reverse("crear-lugar") + f"?tipopag={template_param}")
 
-
 class PlatoCreate(LoginRequiredMixin, CreateView):
     model = Plato
     form_class = PlatoForm
     template_name = 'AdminVideos/platos_update.html'
     success_url = reverse_lazy("videos-create")
-  
 
     def get_template_names(self):
-        # Obtener el valor del parámetro 'template' desde la URL
         template_param = self.request.GET.get('tipopag')
 
-        # Dependiendo del valor de 'template', asignar una plantilla diferente
-        if template_param == 'Entrada':
-            return ['AdminVideos/entrada_update.html']
-        elif template_param == 'Dip':
-            return ['AdminVideos/dip_update.html']
-        elif template_param == 'Principal' or template_param == 'Dash':
-            return ['AdminVideos/plato_ppal_update.html']
-        elif template_param == 'Trago':
-            return ['AdminVideos/trago_update.html']
-        elif template_param == 'Salsa':
-            return ['AdminVideos/salsa_update.html']
-        elif template_param == 'Guarnicion':
-            return ['AdminVideos/guarnicion_update.html']
-        elif template_param == 'Postre':
-            return ['AdminVideos/postre_update.html']
-        elif template_param == 'Delivery':
-            return ['AdminVideos/delivery.html']
-        elif template_param == 'Comerafuera':
-            return ['AdminVideos/comerafuera.html']
+        templates = {
+            'Entrada': 'AdminVideos/entrada_update.html',
+            'Dip': 'AdminVideos/dip_update.html',
+            'Principal': 'AdminVideos/plato_ppal_update.html',
+            'Dash': 'AdminVideos/plato_ppal_update.html',
+            'Trago': 'AdminVideos/trago_update.html',
+            'Salsa': 'AdminVideos/salsa_update.html',
+            'Guarnicion': 'AdminVideos/guarnicion_update.html',
+            'Postre': 'AdminVideos/postre_update.html',
+            'Delivery': 'AdminVideos/delivery.html',
+            'Comerafuera': 'AdminVideos/comerafuera.html',
+        }
 
-        else:
-            # Plantilla por defecto
-            return [self.template_name]
+        return [templates.get(template_param, self.template_name)]
 
     def get_initial(self):
-        # Llama al método original para obtener el diccionario de inicialización
         initial = super().get_initial()
-         # Obtener el valor del parámetro 'template' desde la URL
         template_param = self.request.GET.get('tipopag')
 
-        # Asigna valores predeterminados al campo 'tipo' según el valor de 'template_param'
-        if template_param == 'Entrada':
-            initial['tipo'] = 'Entrada'
-        elif template_param == 'Salsa':
-            initial['tipo'] = 'Salsa'
-        elif template_param == 'Picada':
-            initial['tipo'] = 'Picada'
-        elif template_param == 'Principal' or template_param == 'Dash':
-            initial['tipo'] = 'Principal'
-        elif template_param == 'Postre':
-            initial['tipo'] = 'Postre'
-        elif template_param == 'Torta':
-            initial['tipo'] = 'Torta'
-        elif template_param == 'Dip':
-            initial['tipo'] = 'Dip'
-        elif template_param == 'Trago':
-            initial['tipo'] = 'Trago'
-        elif template_param == 'Guarnicion':
-            initial['tipo'] = 'Guarnicion'
-        elif template_param == 'Delivery':
-            initial['tipo'] = 'Delivery'
-        elif template_param == 'Comerafuera':
-            initial['tipo'] = 'Comer afuera'
-        else:
-            # Valor por defecto si 'template_param' no coincide con ninguna condición
-            initial['tipo'] = '-'
-
+        # Asignar el valor exacto del choice en "tipo"
+        if template_param in dict(Plato.TIPO_CHOICES).keys():
+            initial['tipo'] = template_param
         return initial
-    
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        template_param = self.request.GET.get('tipopag')
+
+        # Inicializar el campo ManyToMany "tipos" si existe un TipoPlato con ese nombre
+        try:
+            tipo_rel = TipoPlato.objects.get(nombre=template_param)
+            form.fields['tipos'].initial = [tipo_rel.pk]
+        except TipoPlato.DoesNotExist:
+            pass  # No pasa nada si no existe
+
+        return form
+
     def form_invalid(self, form):
         print("Errores en el formulario:", form.errors)
         return super().form_invalid(form)
@@ -741,22 +770,154 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         plato = form.save(commit=False)
         plato.propietario = self.request.user
 
-        # Procesar los datos adicionales de variedad e ingredientes
+        # Preparar las variedades antes de guardar el objeto
         variedades = {}
-        for i in range(1, 7):  # Iterar desde 1 hasta 6
+        for i in range(1, 7):
             variedad = form.cleaned_data.get(f'variedad{i}')
             ingredientes_variedad_str = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
-
-        
-            if variedad:  # Verificar si la variedad no está vacía
-                variedades[f"variedad{i}"] = {"nombre": variedad, "ingredientes": ingredientes_variedad_str, "elegido": True}
+            if variedad:
+                variedades[f"variedad{i}"] = {
+                    "nombre": variedad,
+                    "ingredientes": ingredientes_variedad_str,
+                    "elegido": True
+                }
 
         plato.variedades = variedades
         plato.save()
+        form.save_m2m()
 
-        # Obtener el parámetro 'tipopag' y pasarlo en la redirección
         template_param = self.request.GET.get('tipopag')
-        return redirect(reverse("videos-create") + f"?tipopag={template_param}")
+        return redirect(f"{reverse('videos-create')}?tipopag={template_param}&guardado=ok")
+
+
+# class PlatoCreate(LoginRequiredMixin, CreateView):
+#     model = Plato
+#     form_class = PlatoForm
+#     template_name = 'AdminVideos/platos_update.html'
+#     success_url = reverse_lazy("videos-create")
+  
+
+#     def get_template_names(self):
+#         # Obtener el valor del parámetro 'template' desde la URL
+#         template_param = self.request.GET.get('tipopag')
+
+#         # Dependiendo del valor de 'template', asignar una plantilla diferente
+#         if template_param == 'Entrada':
+#             return ['AdminVideos/entrada_update.html']
+#         elif template_param == 'Dip':
+#             return ['AdminVideos/dip_update.html']
+#         elif template_param == 'Principal' or template_param == 'Dash':
+#             return ['AdminVideos/plato_ppal_update.html']
+#         elif template_param == 'Trago':
+#             return ['AdminVideos/trago_update.html']
+#         elif template_param == 'Salsa':
+#             return ['AdminVideos/salsa_update.html']
+#         elif template_param == 'Guarnicion':
+#             return ['AdminVideos/guarnicion_update.html']
+#         elif template_param == 'Postre':
+#             return ['AdminVideos/postre_update.html']
+#         elif template_param == 'Delivery':
+#             return ['AdminVideos/delivery.html']
+#         elif template_param == 'Comerafuera':
+#             return ['AdminVideos/comerafuera.html']
+
+#         else:
+#             # Plantilla por defecto
+#             return [self.template_name]
+
+#     def get_initial(self):
+#         # Llama al método original para obtener el diccionario de inicialización
+#         initial = super().get_initial()
+#          # Obtener el valor del parámetro 'template' desde la URL
+#         template_param = self.request.GET.get('tipopag')
+
+#         # Asigna valores predeterminados al campo 'tipo' según el valor de 'template_param'
+#         if template_param == 'Entrada':
+#             initial['tipo'] = 'Entrada'
+#         elif template_param == 'Salsa':
+#             initial['tipo'] = 'Salsa'
+#         elif template_param == 'Picada':
+#             initial['tipo'] = 'Picada'
+#         elif template_param == 'Principal' or template_param == 'Dash':
+#             initial['tipo'] = 'Principal'
+#         elif template_param == 'Postre':
+#             initial['tipo'] = 'Postre'
+#         elif template_param == 'Torta':
+#             initial['tipo'] = 'Torta'
+#         elif template_param == 'Dip':
+#             initial['tipo'] = 'Dip'
+#         elif template_param == 'Trago':
+#             initial['tipo'] = 'Trago'
+#         elif template_param == 'Guarnicion':
+#             initial['tipo'] = 'Guarnicion'
+#         elif template_param == 'Delivery':
+#             initial['tipo'] = 'Delivery'
+#         elif template_param == 'Comerafuera':
+#             initial['tipo'] = 'Comer afuera'
+#         else:
+#             # Valor por defecto si 'template_param' no coincide con ninguna condición
+#             initial['tipo'] = '-'
+
+#         return initial
+    
+#     def form_invalid(self, form):
+#         print("Errores en el formulario:", form.errors)
+#         return super().form_invalid(form)
+    
+#     def form_valid(self, form):
+#         plato = form.save(commit=False)
+#         plato.propietario = self.request.user
+
+#         # Preparar las variedades antes de guardar el objeto
+#         variedades = {}
+#         for i in range(1, 7):
+#             variedad = form.cleaned_data.get(f'variedad{i}')
+#             ingredientes_variedad_str = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
+#             if variedad:
+#                 variedades[f"variedad{i}"] = {
+#                     "nombre": variedad,
+#                     "ingredientes": ingredientes_variedad_str,
+#                     "elegido": True
+#                 }
+
+#         plato.variedades = variedades
+
+#         # Guardar el objeto (ya incluye variedades)
+#         plato.save()
+
+#         # Guardar relaciones ManyToMany (tipos)
+#         form.save_m2m()
+
+
+#         template_param = self.request.GET.get('tipopag')
+#         return redirect(f"{reverse('videos-create')}?tipopag={template_param}&guardado=ok")
+
+        # # Redirigir
+        # template_param = self.request.GET.get('tipopag')
+        # return redirect(reverse("videos-create") + f"?tipopag={template_param}")
+
+    # def form_valid(self, form):
+    #     plato = form.save(commit=False)
+    #     plato.propietario = self.request.user
+
+    #     # Guardar los tipos seleccionados (many-to-many)
+    #     form.save_m2m()
+
+    #     # Procesar los datos adicionales de variedad e ingredientes
+    #     variedades = {}
+    #     for i in range(1, 7):  # Iterar desde 1 hasta 6
+    #         variedad = form.cleaned_data.get(f'variedad{i}')
+    #         ingredientes_variedad_str = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
+        
+    #         if variedad:  # Verificar si la variedad no está vacía
+    #             variedades[f"variedad{i}"] = {"nombre": variedad, "ingredientes": ingredientes_variedad_str, "elegido": True}
+
+    #     plato.variedades = variedades
+    #     plato.save()
+
+    #     # Obtener el parámetro 'tipopag' y pasarlo en la redirección
+    #     template_param = self.request.GET.get('tipopag')
+    #     return redirect(reverse("videos-create") + f"?tipopag={template_param}")
 
 
 
@@ -1165,7 +1326,7 @@ class EnviarMensaje(LoginRequiredMixin, CreateView):
       
         return context
 
-from .models import Plato, Lugar, Mensaje  # Asegúrate de importar los modelos necesarios
+from .models import Plato, Lugar, Mensaje, TipoPlato  # Asegúrate de importar los modelos necesarios
 
 
 class compartir_elemento(CreateView):
