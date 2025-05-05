@@ -18,3 +18,9 @@ cmds = [
   "/opt/venv/bin/python -m pip install --upgrade pip setuptools",  # Instala pip y setuptools dentro del venv
   "/opt/venv/bin/python -m pip install -r requirements.txt"  # Instala las dependencias en el venv
 ]
+
+
+# Esto no es ideal si estás probando o haciendo cambios que aún no querés aplicar en producción.
+
+[phases.postDeploy]
+cmds = ["python manage.py migrate"]
