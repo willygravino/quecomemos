@@ -12,12 +12,16 @@ nixPkgs = [
   "zlib"  # Compresión
 ]
 
+
 [phases.install]
 cmds = [
-  "python3 -m venv /opt/venv",  # Crea un entorno virtual
-  "/opt/venv/bin/python -m pip install --upgrade pip setuptools",  # Instala pip y setuptools dentro del venv
-  "/opt/venv/bin/python -m pip install -r requirements.txt"  # Instala las dependencias en el venv
+  "pip install --upgrade pip setuptools",
+  "pip install -r requirements.txt"
 ]
 
+
 [phases.postDeploy]
-cmds = ["/opt/venv/bin/python manage.py migrate"]
+cmds = ["python manage.py migrate"]
+
+[start]
+cmd = "gunicorn nuestrotubo.wsgi"
