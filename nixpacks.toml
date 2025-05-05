@@ -20,7 +20,7 @@ cmds = [
 ]
 
 [phases.postDeploy]
-cmds = ["python manage.py migrate"]
+cmds = ["/opt/venv/bin/python manage.py migrate"]
 
 [start]
-cmd = "gunicorn nuestrotubo.wsgi"
+cmd = "/opt/venv/bin/gunicorn nuestrotubo.wsgi"
