@@ -16,7 +16,10 @@ nixPkgs = [
 
 
 [phases.postDeploy]
-cmds = ["python manage.py migrate"]
+  cmds = [
+    "pip install -r requirements.txt",  # Instala las dependencias de requirements.txt
+    "python manage.py migrate"          # Corre las migraciones de Django
+  ]
 
 [start]
 cmd = "gunicorn nuestrotubo.wsgi"
