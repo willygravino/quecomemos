@@ -1,3 +1,5 @@
+providers = ["python"]
+
 [phases.setup]
 nixPkgs = [
  # "python3.11Full",   Usamos la versión completa de Python 3.11
