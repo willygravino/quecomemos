@@ -1,6 +1,6 @@
 
 from django import forms
-from .models import Lugar, Plato, TipoPlato
+from .models import Ingrediente, IngredienteEnPlato, Lugar, Plato, TipoPlato
 from django.contrib.auth.forms import AuthenticationForm
 
 
@@ -39,10 +39,51 @@ class PlatoForm(forms.ModelForm):
   
     class Meta:
         model = Plato
-        fields = ["nombre_plato", "receta", "descripcion_plato", "ingredientes", "ingredientes_detallados", "medios", "elaboracion", "coccion", "estacionalidad", "tipo", "tipos", "enlace", "image"]
+        fields = ["nombre_plato", "receta", "descripcion_plato", "ingredientes", "porciones", "medios", "elaboracion", "coccion", "estacionalidad", "tipo", "tipos", "enlace", "image"]
+
+# class IngredienteEnPlatoForm(forms.ModelForm):
+#     class Meta:
+#         model = IngredienteEnPlato
+#         fields = ['ingrediente', 'cantidad', 'unidad']
 
 
-    
+class IngredienteEnPlatoForm(forms.ModelForm):
+    nombre_ingrediente = forms.CharField(
+        max_length=100,
+        label="Ingrediente",
+        help_text="Escribí el nombre del ingrediente",
+    )
+
+    # class Meta:
+    #     model = IngredienteEnPlato
+    #     fields = ['cantidad', 'unidad']  # No mostramos el campo FK directamente
+
+    class Meta:
+        model = IngredienteEnPlato
+        fields = ['cantidad', 'unidad']
+        labels = {
+            'cantidad': 'Cantidad',     # Podés modificar o quitar la etiqueta
+            'unidad': '',               # Esto quita la etiqueta de 'unidad'
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Si el formulario tiene instancia, precargamos nombre_ingrediente
+        if self.instance and self.instance.pk:
+            self.fields['nombre_ingrediente'].initial = self.instance.ingrediente.nombre
+
+    def clean_nombre_ingrediente(self):
+        nombre = self.cleaned_data['nombre_ingrediente'].strip()
+        if not nombre:
+            raise forms.ValidationError("El nombre del ingrediente no puede estar vacío.")
+        return nombre
+
+    def save(self, commit=True):
+        nombre = self.cleaned_data['nombre_ingrediente']
+        ingrediente_obj, created = Ingrediente.objects.get_or_create(nombre__iexact=nombre, defaults={'nombre': nombre})
+        self.instance.ingrediente = ingrediente_obj
+        return super().save(commit=commit)
+  
 class LugarForm(forms.ModelForm):
     class Meta:
         model = Lugar

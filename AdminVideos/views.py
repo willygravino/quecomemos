@@ -4,9 +4,10 @@ import locale
 from django.contrib import messages  # Para mostrar mensajes al usuario
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
+from django.forms import inlineformset_factory
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
-from AdminVideos.models import Lugar, Plato, Profile, Mensaje,  ElegidosXDia, Sugeridos
+from AdminVideos.models import IngredienteEnPlato, Lugar, Plato, Profile, Mensaje,  ElegidosXDia, Sugeridos, TipoPlato
 from django.http import Http404, HttpResponseForbidden, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.forms import UserCreationForm
@@ -14,7 +15,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView, D
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from datetime import datetime, timedelta
-from .forms import LugarForm, PlatoFilterForm, PlatoForm, CustomAuthenticationForm
+from .forms import IngredienteEnPlatoForm, LugarForm, PlatoFilterForm, PlatoForm, CustomAuthenticationForm
 from django.views.generic import TemplateView
 from datetime import date, datetime
 from django.contrib.auth.models import User  # Asegúrate de importar el modelo User
@@ -278,19 +279,6 @@ def lista_de_compras(request):
 
 
 
-# for registro in registros:
-#         fec = registro['el_dia_en_que_comemos']  # Fecha del registro
-#         pla = registro['platos_que_comemos'] or {}  # Asegurar que es un diccionario
-
-#         for comida, lista_platos in pla.items():  # Iterar comidas (desayuno, almuerzo, etc.)
-#             for plato in lista_platos:  # Iterar cada plato dentro de la lista
-#                 plato_nombre = plato.get('plato', 'Desconocido')
-
-#                 # Añadir a la lista de la comida correspondiente
-#                 if comida in platos_dia_x_dia[fec]:  
-#                     platos_dia_x_dia[fec][comida].append(plato_nombre)
-
-
 
 
 
@@ -467,34 +455,6 @@ def eliminar_plato(request, plato_id):
 
 
 
-# class LugarUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-#     model = Lugar
-#     form_class = LugarForm
-#     template_name = 'AdminVideos/lugar_update.html'
-#     success_url = reverse_lazy("filtro-de-platos")
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-
-#         # context['variedades_en_base'] = variedades
-#         # context['ingredientes_variedad'] = ingredientes_por_variedad
-
-#         return context
-
-#     def test_func(self):
-#         user_id = self.request.user.id
-#         lugar_id = self.kwargs.get("pk")
-#         return Lugar.objects.filter(propietario=user_id, id=lugar_id).exists()
-
-#     def form_valid(self, form):
-#         # Guardar el formulario y obtener la instancia del plato
-#         lugar = form.save(commit=False)
-#         lugar.propietario = self.request.user
-
-#         lugar.save()
-
-#         return redirect(self.success_url)
-    
 
 class LugarUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Lugar
@@ -652,48 +612,6 @@ class CrearLugar(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy("crear-lugar")
   
 
-    # def get_template_names(self):
-    #     # Obtener el valor del parámetro 'template' desde la URL
-    #     template_param = self.request.GET.get('tipopag')
-
-    #     # Dependiendo del valor de 'template', asignar una plantilla diferente
-    #     if template_param == 'Entrada':
-    #         return ['AdminVideos/entrada_update.html']
-    #     elif template_param == 'Dip':
-    #         return ['AdminVideos/dip_update.html']
-    #     elif template_param == 'Principal' or template_param == 'Dash':
-    #         return ['AdminVideos/plato_ppal_update.html']
-    #     elif template_param == 'Trago':
-    #         return ['AdminVideos/trago_update.html']
-    #     elif template_param == 'Salsa':
-    #         return ['AdminVideos/salsa_update.html']
-    #     elif template_param == 'Guarnicion':
-    #         return ['AdminVideos/guarnicion_update.html']
-    #     elif template_param == 'Postre':
-    #         return ['AdminVideos/postre_update.html']
-    #     elif template_param == 'Delivery':
-    #         return ['AdminVideos/delivery.html']
-    #     elif template_param == 'Comerafuera':
-    #         return ['AdminVideos/comerafuera.html']
-
-    #     else:
-    #         # Plantilla por defecto
-    #         return [self.template_name]
-
-    # def get_initial(self):
-    #     # Llama al método original para obtener el diccionario de inicialización
-    #     initial = super().get_initial()
-    #      # Obtener el valor del parámetro 'template' desde la URL
-    #     template_param = self.request.GET.get('tipopag')
-
-    #     # Asigna valores predeterminados al campo 'tipo' según el valor de 'template_param'
-    #     if template_param == 'Delivery':
-    #         initial['tipo'] = 'Delivery'
-    #     elif template_param == 'Comerafuera':
-    #         initial['tipo'] = 'Comer afuera'
-        
-    #     return initial
-    
     def form_invalid(self, form):
         print("Errores en el formulario:", form.errors)
         return super().form_invalid(form)
@@ -715,6 +633,128 @@ class CrearLugar(LoginRequiredMixin, CreateView):
         # Obtener el parámetro 'tipopag' y pasarlo en la redirección
         template_param = self.request.GET.get('tipopag')
         return redirect(reverse("crear-lugar") + f"?tipopag={template_param}")
+    
+
+# IngredienteFormSet = inlineformset_factory(
+#     Plato,
+#     IngredienteEnPlato,
+#     form=IngredienteEnPlatoForm,
+#     extra=1,  # Cantidad de formularios vacíos que querés mostrar
+#     can_delete=True
+# )
+
+# class PlatoCreate(LoginRequiredMixin, CreateView):
+#     model = Plato
+#     form_class = PlatoForm
+#     template_name = 'AdminVideos/platos_update.html'
+#     success_url = reverse_lazy("videos-create")
+
+#     def get_template_names(self):
+#         template_param = self.request.GET.get('tipopag')
+
+#         templates = {
+#             'Entrada': 'AdminVideos/entrada_update.html',
+#             'Dip': 'AdminVideos/dip_update.html',
+#             'Principal': 'AdminVideos/plato_ppal_update.html',
+#             'Dash': 'AdminVideos/plato_ppal_update.html',
+#             'Trago': 'AdminVideos/trago_update.html',
+#             'Salsa': 'AdminVideos/salsa_update.html',
+#             'Guarnicion': 'AdminVideos/guarnicion_update.html',
+#             'Postre': 'AdminVideos/postre_update.html',
+#             'Delivery': 'AdminVideos/delivery.html',
+#             'Comerafuera': 'AdminVideos/comerafuera.html',
+#         }
+
+#         return [templates.get(template_param, self.template_name)]
+
+#     def get_initial(self):
+#         initial = super().get_initial()
+#         template_param = self.request.GET.get('tipopag')
+
+#         # Asignar el valor exacto del choice en "tipo"
+#         if template_param in dict(Plato.TIPO_CHOICES).keys():
+#             initial['tipo'] = template_param
+#         return initial
+
+#     def get_form(self, form_class=None):
+#         form = super().get_form(form_class)
+#         template_param = self.request.GET.get('tipopag')
+
+#         # Inicializar el campo ManyToMany "tipos" si existe un TipoPlato con ese nombre
+#         try:
+#             tipo_rel = TipoPlato.objects.get(nombre=template_param)
+#             form.fields['tipos'].initial = [tipo_rel.pk]
+#         except TipoPlato.DoesNotExist:
+#             pass  # No pasa nada si no existe
+
+#         return form
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         if self.request.POST:
+#             context['ingrediente_formset'] = IngredienteFormSet(self.request.POST)
+#         else:
+#             context['ingrediente_formset'] = IngredienteFormSet()
+#         return context
+
+#     def form_valid(self, form):
+#         # plato = form.save(commit=False)
+#         # plato.propietario = self.request.user
+#         context = self.get_context_data()
+#         ingrediente_formset = context['ingrediente_formset']
+
+#         if ingrediente_formset.is_valid():
+#             plato = form.save(commit=False)
+#             plato.propietario = self.request.user
+
+#             # Preparar las variedades antes de guardar el objeto
+#             variedades = {}
+#             for i in range(1, 7):
+#                 variedad = form.cleaned_data.get(f'variedad{i}')
+#                 ingredientes_variedad_str = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
+#                 if variedad:
+#                     variedades[f"variedad{i}"] = {
+#                         "nombre": variedad,
+#                         "ingredientes": ingredientes_variedad_str,
+#                         "elegido": True
+#                     }
+
+#             plato.variedades = variedades
+#             plato.save()
+#             form.save_m2m()
+
+#             # Guardar los ingredientes
+#             ingrediente_formset.instance = plato
+#             ingrediente_formset.save()
+
+#             template_param = self.request.GET.get('tipopag')
+
+#             return redirect(f"{reverse('videos-create')}?tipopag={template_param}&guardado=ok")
+#         else:
+#            return self.form_invalid(form)
+    
+#     def form_invalid(self, form):
+#         print("Errores en el formulario:", form.errors)
+#         return super().form_invalid(form)
+
+
+
+# IngredienteFormSet = inlineformset_factory(
+#     Plato,
+#     IngredienteEnPlato,
+#     form=IngredienteEnPlatoForm,
+#     extra=1,  # Mostrar solo 1 formulario al inicio
+#     can_delete=True
+# )
+
+
+IngredienteFormSet = inlineformset_factory(
+    Plato,
+    IngredienteEnPlato,
+    form=IngredienteEnPlatoForm,
+    extra=1,
+    can_delete=True
+)
 
 class PlatoCreate(LoginRequiredMixin, CreateView):
     model = Plato
@@ -724,7 +764,6 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
 
     def get_template_names(self):
         template_param = self.request.GET.get('tipopag')
-
         templates = {
             'Entrada': 'AdminVideos/entrada_update.html',
             'Dip': 'AdminVideos/dip_update.html',
@@ -737,14 +776,11 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             'Delivery': 'AdminVideos/delivery.html',
             'Comerafuera': 'AdminVideos/comerafuera.html',
         }
-
         return [templates.get(template_param, self.template_name)]
 
     def get_initial(self):
         initial = super().get_initial()
         template_param = self.request.GET.get('tipopag')
-
-        # Asignar el valor exacto del choice en "tipo"
         if template_param in dict(Plato.TIPO_CHOICES).keys():
             initial['tipo'] = template_param
         return initial
@@ -752,174 +788,72 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         template_param = self.request.GET.get('tipopag')
-
-        # Inicializar el campo ManyToMany "tipos" si existe un TipoPlato con ese nombre
         try:
             tipo_rel = TipoPlato.objects.get(nombre=template_param)
             form.fields['tipos'].initial = [tipo_rel.pk]
         except TipoPlato.DoesNotExist:
-            pass  # No pasa nada si no existe
-
+            pass
         return form
 
-    def form_invalid(self, form):
-        print("Errores en el formulario:", form.errors)
-        return super().form_invalid(form)
-
-    def form_valid(self, form):
-        plato = form.save(commit=False)
-        plato.propietario = self.request.user
-
-        # Preparar las variedades antes de guardar el objeto
-        variedades = {}
-        for i in range(1, 7):
-            variedad = form.cleaned_data.get(f'variedad{i}')
-            ingredientes_variedad_str = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
-            if variedad:
-                variedades[f"variedad{i}"] = {
-                    "nombre": variedad,
-                    "ingredientes": ingredientes_variedad_str,
-                    "elegido": True
-                }
-
-        plato.variedades = variedades
-        plato.save()
-        form.save_m2m()
-
-        template_param = self.request.GET.get('tipopag')
-        return redirect(f"{reverse('videos-create')}?tipopag={template_param}&guardado=ok")
-
-
-# class PlatoCreate(LoginRequiredMixin, CreateView):
-#     model = Plato
-#     form_class = PlatoForm
-#     template_name = 'AdminVideos/platos_update.html'
-#     success_url = reverse_lazy("videos-create")
-  
-
-#     def get_template_names(self):
-#         # Obtener el valor del parámetro 'template' desde la URL
-#         template_param = self.request.GET.get('tipopag')
-
-#         # Dependiendo del valor de 'template', asignar una plantilla diferente
-#         if template_param == 'Entrada':
-#             return ['AdminVideos/entrada_update.html']
-#         elif template_param == 'Dip':
-#             return ['AdminVideos/dip_update.html']
-#         elif template_param == 'Principal' or template_param == 'Dash':
-#             return ['AdminVideos/plato_ppal_update.html']
-#         elif template_param == 'Trago':
-#             return ['AdminVideos/trago_update.html']
-#         elif template_param == 'Salsa':
-#             return ['AdminVideos/salsa_update.html']
-#         elif template_param == 'Guarnicion':
-#             return ['AdminVideos/guarnicion_update.html']
-#         elif template_param == 'Postre':
-#             return ['AdminVideos/postre_update.html']
-#         elif template_param == 'Delivery':
-#             return ['AdminVideos/delivery.html']
-#         elif template_param == 'Comerafuera':
-#             return ['AdminVideos/comerafuera.html']
-
-#         else:
-#             # Plantilla por defecto
-#             return [self.template_name]
-
-#     def get_initial(self):
-#         # Llama al método original para obtener el diccionario de inicialización
-#         initial = super().get_initial()
-#          # Obtener el valor del parámetro 'template' desde la URL
-#         template_param = self.request.GET.get('tipopag')
-
-#         # Asigna valores predeterminados al campo 'tipo' según el valor de 'template_param'
-#         if template_param == 'Entrada':
-#             initial['tipo'] = 'Entrada'
-#         elif template_param == 'Salsa':
-#             initial['tipo'] = 'Salsa'
-#         elif template_param == 'Picada':
-#             initial['tipo'] = 'Picada'
-#         elif template_param == 'Principal' or template_param == 'Dash':
-#             initial['tipo'] = 'Principal'
-#         elif template_param == 'Postre':
-#             initial['tipo'] = 'Postre'
-#         elif template_param == 'Torta':
-#             initial['tipo'] = 'Torta'
-#         elif template_param == 'Dip':
-#             initial['tipo'] = 'Dip'
-#         elif template_param == 'Trago':
-#             initial['tipo'] = 'Trago'
-#         elif template_param == 'Guarnicion':
-#             initial['tipo'] = 'Guarnicion'
-#         elif template_param == 'Delivery':
-#             initial['tipo'] = 'Delivery'
-#         elif template_param == 'Comerafuera':
-#             initial['tipo'] = 'Comer afuera'
-#         else:
-#             # Valor por defecto si 'template_param' no coincide con ninguna condición
-#             initial['tipo'] = '-'
-
-#         return initial
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     if self.request.POST:
+    #         context['formset'] = IngredienteFormSet(self.request.POST)
+    #     else:
+    #         context['formset'] = IngredienteFormSet()
+    #     return context
     
-#     def form_invalid(self, form):
-#         print("Errores en el formulario:", form.errors)
-#         return super().form_invalid(form)
-    
-#     def form_valid(self, form):
-#         plato = form.save(commit=False)
-#         plato.propietario = self.request.user
-
-#         # Preparar las variedades antes de guardar el objeto
-#         variedades = {}
-#         for i in range(1, 7):
-#             variedad = form.cleaned_data.get(f'variedad{i}')
-#             ingredientes_variedad_str = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
-#             if variedad:
-#                 variedades[f"variedad{i}"] = {
-#                     "nombre": variedad,
-#                     "ingredientes": ingredientes_variedad_str,
-#                     "elegido": True
-#                 }
-
-#         plato.variedades = variedades
-
-#         # Guardar el objeto (ya incluye variedades)
-#         plato.save()
-
-#         # Guardar relaciones ManyToMany (tipos)
-#         form.save_m2m()
-
-
-#         template_param = self.request.GET.get('tipopag')
-#         return redirect(f"{reverse('videos-create')}?tipopag={template_param}&guardado=ok")
-
-        # # Redirigir
-        # template_param = self.request.GET.get('tipopag')
-        # return redirect(reverse("videos-create") + f"?tipopag={template_param}")
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.method == 'POST':
+            context['ingrediente_formset'] = IngredienteFormSet(self.request.POST)
+        else:
+            context['ingrediente_formset'] = IngredienteFormSet()
+        return context
 
     # def form_valid(self, form):
-    #     plato = form.save(commit=False)
-    #     plato.propietario = self.request.user
+    #     context = self.get_context_data()
+    #     formset = context['formset']
+    #     if formset.is_valid():
+    #         plato = form.save(commit=False)
+    #         plato.propietario = self.request.user
 
-    #     # Guardar los tipos seleccionados (many-to-many)
-    #     form.save_m2m()
+    def form_valid(self, form):
+        context = self.get_context_data()
+        ingrediente_formset = context['ingrediente_formset']
 
-    #     # Procesar los datos adicionales de variedad e ingredientes
-    #     variedades = {}
-    #     for i in range(1, 7):  # Iterar desde 1 hasta 6
-    #         variedad = form.cleaned_data.get(f'variedad{i}')
-    #         ingredientes_variedad_str = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
+        if ingrediente_formset.is_valid():
+            plato = form.save(commit=False)
+            plato.propietario = self.request.user
+
+            # Preparar variedades
+            variedades = {}
+            for i in range(1, 7):
+                variedad = form.cleaned_data.get(f'variedad{i}')
+                ingredientes_variedad_str = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
+                if variedad:
+                    variedades[f"variedad{i}"] = {
+                        "nombre": variedad,
+                        "ingredientes": ingredientes_variedad_str,
+                        "elegido": True
+                    }
+
+            plato.variedades = variedades
+            plato.save()
+            form.save_m2m()
+
+            ingrediente_formset.instance = plato
+            ingrediente_formset.save()
+
+            template_param = self.request.GET.get('tipopag')
+            return redirect(f"{reverse('videos-create')}?tipopag={template_param}&guardado=ok")
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
         
-    #         if variedad:  # Verificar si la variedad no está vacía
-    #             variedades[f"variedad{i}"] = {"nombre": variedad, "ingredientes": ingredientes_variedad_str, "elegido": True}
-
-    #     plato.variedades = variedades
-    #     plato.save()
-
-    #     # Obtener el parámetro 'tipopag' y pasarlo en la redirección
-    #     template_param = self.request.GET.get('tipopag')
-    #     return redirect(reverse("videos-create") + f"?tipopag={template_param}")
-
-
+    def form_invalid(self, form):
+        context = self.get_context_data(form=form)
+        return self.render_to_response(context)
+        
 
 class Login(LoginView):
     authentication_form = CustomAuthenticationForm
@@ -1326,7 +1260,7 @@ class EnviarMensaje(LoginRequiredMixin, CreateView):
       
         return context
 
-from .models import Plato, Lugar, Mensaje, TipoPlato  # Asegúrate de importar los modelos necesarios
+# from .models import IngredienteEnPlato, Plato, Lugar, Mensaje, TipoPlato  # Asegúrate de importar los modelos necesarios
 
 
 class compartir_elemento(CreateView):

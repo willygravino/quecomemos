@@ -28,7 +28,7 @@ class TipoPlato(models.Model):
 
     def __str__(self):
         return self.nombre
-
+    
 class Plato(models.Model):
     nombre_plato = models.CharField(max_length=30)
     receta = models.CharField(max_length=80, blank=True)
@@ -36,13 +36,11 @@ class Plato(models.Model):
     
     ingredientes = models.CharField('Ingresá los ingredientes, separados por coma', max_length=400, blank=True)
 
-    ingredientes_detallados = models.JSONField(
-    null=True, blank=True,
-    help_text="Estructura: [{'ingrediente': 'harina', 'cantidad': 200, 'unidad': 'g'}]"
-)
+    # ingredientes_detallados = models.JSONField(null=True, blank=True,help_text="Estructura: [{'ingrediente': 'harina', 'cantidad': 200, 'unidad': 'g'}]")
     proviene_de = models.CharField(max_length=20, null=True)
     id_original = models.IntegerField(null=True, blank=True)
     enlace = models.URLField(max_length=200, blank=True, null=True)
+    porciones = models.PositiveIntegerField(default=1, help_text="Cantidad de porciones que rinde este plato")
 
    
     INDISTINTO = '-'
@@ -127,7 +125,6 @@ class Plato(models.Model):
 
     variedades = models.JSONField(null=True, blank=True)
 
-
     @property
     def image_url(self):
         return self.image.url if self.image else '/media/avatares/logo.png'
@@ -135,6 +132,46 @@ class Plato(models.Model):
     def __str__(self):
         return f"{self.id} - {self.nombre_plato} de {self.propietario}"
     
+
+class Ingrediente(models.Model):
+    nombre = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.nombre
+    
+
+# class IngredienteEnPlato(models.Model):
+#     plato = models.ForeignKey(Plato, on_delete=models.CASCADE, related_name='ingredientes_en_plato')
+#     ingrediente = models.ForeignKey(Ingrediente, on_delete=models.CASCADE)
+#     cantidad = models.FloatField(null=True, blank=True)
+#     unidad = models.CharField(max_length=20, blank=True)  # Ej: g, ml, cucharadas, unidades, etc.
+
+#     def __str__(self):
+#         return f"{self.cantidad or ''} {self.unidad} de {self.ingrediente} en {self.plato}"
+    
+
+class IngredienteEnPlato(models.Model):
+    UNIDADES_CHOICES = [
+        ('unidad', 'unidad'),
+        ('gr', 'gr'),
+        ('pizca', 'pizca'),
+        ('mg', 'mg'),
+        ('kg', 'kg'),
+        ('ml', 'ml'),
+        ('cucharada', 'cucharada'),
+        ('cdita', 'cdita'),
+        
+        # Podés agregar más según necesites
+    ]
+
+    plato = models.ForeignKey(Plato, on_delete=models.CASCADE, related_name='ingredientes_en_plato')
+    ingrediente = models.ForeignKey(Ingrediente, on_delete=models.CASCADE)
+    cantidad = models.FloatField(null=True, blank=True)
+    unidad = models.CharField(max_length=20, choices=UNIDADES_CHOICES, default='unidad')
+
+    def __str__(self):
+        return f"{self.cantidad or ''} {self.unidad} de {self.ingrediente} en {self.plato}"
+
 
 class Sugeridos(models.Model):    
      usuario_de_sugeridos = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="usuario_sugeridos", null=True, blank=True)

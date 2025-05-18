@@ -46,6 +46,56 @@
         </form>
 
 
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const addButton = document.getElementById('add-ingrediente');
+  const container = document.getElementById('ingredientes-container');
+
+  const totalFormsInput = document.getElementById('id_ingredientes_en_plato-TOTAL_FORMS');
+
+  addButton.addEventListener('click', function() {
+    let totalForms = parseInt(totalFormsInput.value);
+    const firstForm = container.querySelector('.ingrediente-form');
+
+    // Clonar el primer formulario para mantener estructura
+    const newForm = firstForm.cloneNode(true);
+
+    // Limpiar los valores de inputs en el nuevo formulario
+    newForm.querySelectorAll('input').forEach(input => {
+      // Limpiar el valor
+      if (input.type === 'checkbox' || input.type === 'radio') {
+        input.checked = false;
+      } else {
+        input.value = '';
+      }
+
+      // Actualizar atributos name e id para el formset
+      if (input.name) {
+        input.name = input.name.replace(/-\d+-/, `-${totalForms}-`);
+      }
+      if (input.id) {
+        input.id = input.id.replace(/-\d+-/, `-${totalForms}-`);
+      }
+    });
+
+    // Si hay etiquetas <label> que tienen atributo for, actualizalas también
+    newForm.querySelectorAll('label').forEach(label => {
+      if (label.htmlFor) {
+        label.htmlFor = label.htmlFor.replace(/-\d+-/, `-${totalForms}-`);
+      }
+    });
+
+    // Insertar el nuevo formulario en el contenedor
+    container.appendChild(newForm);
+
+    // Incrementar el contador total de formularios
+    totalFormsInput.value = totalForms + 1;
+  });
+});
+</script>
+
+
+
     </center>
 </div>
 

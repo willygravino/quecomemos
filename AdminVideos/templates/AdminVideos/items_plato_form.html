@@ -2,6 +2,32 @@
 <p>Receta: {{ form.receta }}</p>
 <p>Descripción del Plato: {{ form.descripcion_plato }}</p>
 <p>Ingredientes: {{ form.ingredientes }}</p>
+
+ <!-- Ingredientes -->
+
+
+  <h3>Ingredientes</h3>
+  {{ ingrediente_formset.management_form }}
+
+  <div id="ingredientes-container">
+    {% for form in ingrediente_formset %}
+      <div class="ingrediente-form">
+        {{ form.nombre_ingrediente.label_tag }} {{ form.nombre_ingrediente }}
+        {{ form.cantidad.label_tag }} {{ form.cantidad }}
+        {{ form.unidad.label_tag }} {{ form.unidad }}
+        {% if ingrediente_formset.can_delete %}
+          {{ form.DELETE }} <label>Eliminar</label>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <button type="button" id="add-ingrediente">Agregar otro ingrediente</button>
+<br>
+<br>
+
+<p>Porciones: {{ form.porciones }}</p>
+
 <p>Medios de cocción: {{ form.medios }}</p>
 <p>Preparación: {{ form.elaboracion }}</p>
 <p>Cocción: {{ form.coccion }}</p>
