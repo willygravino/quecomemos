@@ -36,10 +36,24 @@ class PlatoForm(forms.ModelForm):
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
+
+#     tipos = forms.ModelMultipleChoiceField(
+#     queryset=TipoPlato.objects.all(),
+#     widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
+#     required=False
+# )
   
     class Meta:
         model = Plato
         fields = ["nombre_plato", "receta", "descripcion_plato", "ingredientes", "porciones", "medios", "elaboracion", "coccion", "estacionalidad", "tipo", "tipos", "enlace", "image"]
+
+    def clean(self):
+        super().clean()
+        
+        tipos = self.cleaned_data.get("tipos")
+        if not tipos or tipos.count() == 0:
+            raise forms.ValidationError({'tipos': 'Debés seleccionar al menos un tipo de plato.'})
+
 
 # class IngredienteEnPlatoForm(forms.ModelForm):
 #     class Meta:
@@ -66,11 +80,19 @@ class IngredienteEnPlatoForm(forms.ModelForm):
             'unidad': '',               # Esto quita la etiqueta de 'unidad'
         }
 
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Si el formulario tiene instancia, precargamos nombre_ingrediente
-        if self.instance and self.instance.pk:
+
+        # Ordenamos los campos incluyendo el manual
+        self.order_fields(['nombre_ingrediente', 'cantidad', 'unidad'])
+
+        # Si se está editando una instancia existente, precargamos el nombre del ingrediente
+        if self.instance and self.instance.pk and self.instance.ingrediente:
             self.fields['nombre_ingrediente'].initial = self.instance.ingrediente.nombre
+
+        # Agregamos clases Bootstrap como placeholder opcional
+        self.fields['nombre_ingrediente'].widget.attrs.update({'placeholder': 'Ingrediente'})
 
     def clean_nombre_ingrediente(self):
         nombre = self.cleaned_data['nombre_ingrediente'].strip()

@@ -759,6 +759,7 @@ IngredienteFormSet = inlineformset_factory(
 class PlatoCreate(LoginRequiredMixin, CreateView):
     model = Plato
     form_class = PlatoForm
+
     template_name = 'AdminVideos/platos_update.html'
     success_url = reverse_lazy("videos-create")
 
@@ -794,14 +795,6 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         except TipoPlato.DoesNotExist:
             pass
         return form
-
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     if self.request.POST:
-    #         context['formset'] = IngredienteFormSet(self.request.POST)
-    #     else:
-    #         context['formset'] = IngredienteFormSet()
-    #     return context
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -810,13 +803,6 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         else:
             context['ingrediente_formset'] = IngredienteFormSet()
         return context
-
-    # def form_valid(self, form):
-    #     context = self.get_context_data()
-    #     formset = context['formset']
-    #     if formset.is_valid():
-    #         plato = form.save(commit=False)
-    #         plato.propietario = self.request.user
 
     def form_valid(self, form):
         context = self.get_context_data()
@@ -852,7 +838,31 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         
     def form_invalid(self, form):
         context = self.get_context_data(form=form)
+        print("Errores del formulario principal:")
+        print(form.errors)
+
+        ingrediente_formset = context.get('ingrediente_formset')
+        if ingrediente_formset:
+            print("Errores del formset de ingredientes:")
+            for i, f in enumerate(ingrediente_formset.forms):
+                if f.errors:
+                    print(f"Errores en el formulario #{i}: {f.errors}")
+        
         return self.render_to_response(context)
+
+        
+    # def form_invalid(self, form):
+    #     context = self.get_context_data(form=form)
+
+    #     print("Errores del formulario principal:")
+    #     print(form.errors)
+
+    #     ingrediente_formset = context.get('ingrediente_formset')
+    #     if ingrediente_formset:
+    #         print("Errores del formset de ingredientes:")
+    #         print(ingrediente_formset.errors)
+
+    #     return self.render_to_response(context)
         
 
 class Login(LoginView):

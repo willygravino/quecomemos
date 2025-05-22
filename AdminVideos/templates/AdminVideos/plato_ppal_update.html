@@ -1,148 +1,426 @@
-{% extends "AdminVideos/platos_update.html" %}
+{% extends "AdminVideos/base.html" %}
 
-{% block tipo-de-formulario %}
-    <h1 class="fw-light">INGRESO DE PLATO PRINCIPAL.</h1>
-{% endblock %}
+{% load static %}
 
+{% block principal %}
 
-{% block items %}
-
-    {% include "AdminVideos/items_plato_form.html" %}
-
-{% endblock %}
-
-{% block variedades %}
-
-    <div class="container">
-        <div class="accordion" id="accordionExample">
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="headingOne">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
-                        aria-expanded="true" aria-controls="collapseOne">
-                        Variedad 1: <input type="tex" name="variedad1"
-                            value="{{ variedades_en_base.variedad1|default:'' }}">
-                    </button>
-                </h2>
-                <div id="collapseOne" class="accordion-collapse collapse " aria-labelledby="headingOne"
-                    data-bs-parent="#accordionExample">
-                    <div class="accordion-body">
-                        Ingredientes de variedad 1: <input type="text" name="ingredientes_de_variedad1"
-                            value="{{ ingredientes_variedad.variedad1|default:'' }}">
-
-                    </div>
-                </div>
-            </div>
+{% load widget_tweaks %}
 
 
-
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="headingTwo">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                        Variedad 2: <input type="text" name="variedad2"
-                            value="{{ variedades_en_base.variedad2|default:'' }}">
-                    </button>
-                </h2>
-                <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
-                    data-bs-parent="#accordionExample">
-                    <div class="accordion-body">
-
-                        Ingredientes de variedad 2: <input type="text" name="ingredientes_de_variedad2"
-                            value="{{ ingredientes_variedad.variedad2|default:'' }}">
-
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="headingThree">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-
-                        Variedad 3: <input type="text" name="variedad3"
-                            value="{{ variedades_en_base.variedad3|default:'' }}"></p>
-                    </button>
-                </h2>
-                <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree"
-                    data-bs-parent="#accordionExample">
-                    <div class="accordion-body">
-
-
-                        Ingredientes de variedad 3: <input type="text" name="ingredientes_de_variedad3"
-                            value="{{ ingredientes_variedad.variedad3|default:'' }}">
-
-                    </div>
-                </div>
-            </div>
-
-
-
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="headingFour">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
-
-                        Variedad 4: <input type="text" name="variedad4"
-                            value="{{ variedades_en_base.variedad4|default:'' }}">
-                    </button>
-                </h2>
-                <div id="collapseFour" class="accordion-collapse collapse " aria-labelledby="headingOne"
-                    data-bs-parent="#accordionExample">
-                    <div class="accordion-body">
-
-
-                        Ingredientes de variedad 4: <input type="text" name="ingredientes_de_variedad4"
-                            value="{{ ingredientes_variedad.variedad4|default:'' }}">
-
-
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="headingFive">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
-
-                        Variedad 5: <input type="text" name="variedad5"
-                            value="{{ variedades_en_base.variedad5|default:'' }}">
-                    </button>
-                </h2>
-                <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingTwo"
-                    data-bs-parent="#accordionExample">
-                    <div class="accordion-body">
-
-                        Ingredientes de variedad 5: <input type="text" name="ingredientes_de_variedad5"
-                            value="{{ ingredientes_variedad.variedad5|default:'' }}">
-
-                    </div>
-                </div>
-            </div>
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="headingSix">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
-
-                        Variedad 6: <input type="text" name="variedad6"
-                            value="{{ variedades_en_base.variedad6|default:'' }}">
-                    </button>
-                </h2>
-                <div id="collapseSix" class="accordion-collapse collapse" aria-labelledby="headingThree"
-                    data-bs-parent="#accordionExample">
-                    <div class="accordion-body">
-                        Ingredientes de variedad 6: <input type="text" name="ingredientes_de_variedad6"
-                            value="{{ ingredientes_variedad.variedad6|default:'' }}">
-
-                    </div>
-                </div>
+<div class="album py-5 bg-light">
+    <section class="py-1 text-center container">
+        <div class="row py-lg-1">
+            <div class="col-lg-8 col-md-8 mx-auto">
+                <h1 class="fw-light">INGRESO DE PLATO PRINCIPAL.</h1>
             </div>
         </div>
+    </section>
+</div>
+<!-- 
+{% if form.errors %}
+<div style="color: red;">
+    <p><strong>Errores en el formulario:</strong></p>
+    <ul>
+        {% for field, errors in form.errors.items %}
+        <li>{{ field }}: {{ errors|join:", " }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %} -->
+
+<!-- ERRORES DEL FORMULARIO PRINCIPAL -->
+{% if form.errors %}
+<div class="alert alert-danger">
+    <strong>Errores en el formulario:</strong>
+    <ul>
+        {% for field in form %}
+        {% for error in field.errors %}
+        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+        {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<!-- ERRORES DEL FORMSET DE INGREDIENTES (ingrediente_formset) -->
+<!-- {% for form in ingrediente_formset %}
+  <div class="ingrediente-form">
+    {% for field in form.visible_fields %}
+      <div class="form-group">
+        {{ field.label_tag }} {{ field }}
+        {% for error in field.errors %}
+          <div class="text-danger">{{ error }}</div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+
+    {% for error in form.non_field_errors %}
+      <div class="text-danger">{{ error }}</div>
+    {% endfor %}
+  </div>
+{% endfor %} -->
 
 
+<div style="margin-top:40px">
+    <center>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- <p>Nombre del Plato: {{ form.nombre_plato }}</p> -->
+
+            <p>
+                <label for="{{ form.nombre_plato.id_for_label }}">Nombre del Plato:</label><br>
+                {% if form.nombre_plato.errors %}
+                {{ form.nombre_plato|add_class:"form-control is-invalid" }}
+                {% for error in form.nombre_plato.errors %}
+            <div class="invalid-feedback d-block">{{ error }}</div>
+            {% endfor %}
+            {% else %}
+            {{ form.nombre_plato|add_class:"form-control" }}
+            {% endif %}
+            </p>
+
+
+
+
+            <p>Receta: {{ form.receta }}</p>
+            <p>Descripción del Plato: {{ form.descripcion_plato }}</p>
+            <p>Ingredientes: {{ form.ingredientes }}</p>
+
+            <!-- Ingredientes -->
+
+            <h3>Ingredientes</h3>
+            {{ ingrediente_formset.management_form }}
+
+            <div id="ingredientes-container">
+                {% for form in ingrediente_formset %}
+                <div
+                    class="ingrediente-form row align-items-end g-2 mb-2 {% if form.errors %}border border-danger rounded p-2{% endif %}">
+
+
+                    {% with ingrediente=form.nombre_ingrediente cantidad=form.cantidad unidad=form.unidad delete=form.DELETE %}
+
+
+                    <div class="col">
+                        {{ ingrediente.label_tag }}
+                        {% if ingrediente.errors %}
+                        {{ ingrediente|add_class:"form-control is-invalid" }}
+                        {% for error in ingrediente.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                        {% else %}
+                        {{ ingrediente|add_class:"form-control" }}
+                        {% endif %}
+                    </div>
+
+                    <div class="col">
+                        {{ cantidad.label_tag }}
+                        {% if cantidad.errors %}
+                        {{ cantidad|add_class:"form-control is-invalid" }}
+                        {% for error in cantidad.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                        {% else %}
+                        {{ cantidad|add_class:"form-control" }}
+                        {% endif %}
+                    </div>
+
+                    <div class="col">
+                        {{ unidad.label_tag }}
+                        {% if unidad.errors %}
+                        {{ unidad|add_class:"form-control is-invalid" }}
+                        {% for error in unidad.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                        {% else %}
+                        {{ unidad|add_class:"form-control" }}
+                        {% endif %}
+                    </div>
+
+                    <div class="col-auto text-center">
+                        {{ delete.label_tag }}
+                        {{ delete }}
+                    </div>
+
+                    {% endwith %}
+
+                    {% for error in form.non_field_errors %}
+                    <div class="alert alert-danger mt-2">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+
+
+            <button type="button" id="add-ingrediente">Agregar otro ingrediente</button>
+            <br>
+            <br>
+
+            <p>Porciones: {{ form.porciones }}</p>
+
+            <p>Medios de cocción: {{ form.medios }}</p>
+            <p>Preparación: {{ form.elaboracion }}</p>
+            <p>Cocción: {{ form.coccion }}</p>
+            <p>Tipo de plato: {{ form.tipo }}</p>
+            <p>Tipo de plato:</p>
+            {{ form.tipos }}
+            <p>Estacionalidad: {{ form.estacionalidad }}</p>
+            <p>Enlace: {{ form.enlace }}</p>
+            <p>Imagen: {{ form.image }}</p>
+
+            <!-- Variedades -->
+            <div class="container">
+                <div class="accordion" id="accordionExample">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                Variedad 1: <input type="tex" name="variedad1"
+                                    value="{{ variedades_en_base.variedad1|default:'' }}">
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse " aria-labelledby="headingOne"
+                            data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                Ingredientes de variedad 1: <input type="text" name="ingredientes_de_variedad1"
+                                    value="{{ ingredientes_variedad.variedad1|default:'' }}">
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                Variedad 2: <input type="text" name="variedad2"
+                                    value="{{ variedades_en_base.variedad2|default:'' }}">
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                            data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+
+                                Ingredientes de variedad 2: <input type="text" name="ingredientes_de_variedad2"
+                                    value="{{ ingredientes_variedad.variedad2|default:'' }}">
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+
+                                Variedad 3: <input type="text" name="variedad3"
+                                    value="{{ variedades_en_base.variedad3|default:'' }}"></p>
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree"
+                            data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+
+
+                                Ingredientes de variedad 3: <input type="text" name="ingredientes_de_variedad3"
+                                    value="{{ ingredientes_variedad.variedad3|default:'' }}">
+
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingFour">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+
+                                Variedad 4: <input type="text" name="variedad4"
+                                    value="{{ variedades_en_base.variedad4|default:'' }}">
+                            </button>
+                        </h2>
+                        <div id="collapseFour" class="accordion-collapse collapse " aria-labelledby="headingOne"
+                            data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+
+
+                                Ingredientes de variedad 4: <input type="text" name="ingredientes_de_variedad4"
+                                    value="{{ ingredientes_variedad.variedad4|default:'' }}">
+
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingFive">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+
+                                Variedad 5: <input type="text" name="variedad5"
+                                    value="{{ variedades_en_base.variedad5|default:'' }}">
+                            </button>
+                        </h2>
+                        <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                            data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+
+                                Ingredientes de variedad 5: <input type="text" name="ingredientes_de_variedad5"
+                                    value="{{ ingredientes_variedad.variedad5|default:'' }}">
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingSix">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+
+                                Variedad 6: <input type="text" name="variedad6"
+                                    value="{{ variedades_en_base.variedad6|default:'' }}">
+                            </button>
+                        </h2>
+                        <div id="collapseSix" class="accordion-collapse collapse" aria-labelledby="headingThree"
+                            data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                Ingredientes de variedad 6: <input type="text" name="ingredientes_de_variedad6"
+                                    value="{{ ingredientes_variedad.variedad6|default:'' }}">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+
+
+
+            <button type="submit">Guardar</button>
+
+        </form>
+
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const addButton = document.getElementById('add-ingrediente');
+                const container = document.getElementById('ingredientes-container');
+
+                const totalFormsInput = document.getElementById('id_ingredientes_en_plato-TOTAL_FORMS');
+
+                addButton.addEventListener('click', function () {
+                    let totalForms = parseInt(totalFormsInput.value);
+                    const firstForm = container.querySelector('.ingrediente-form');
+
+                    // Clonar el primer formulario para mantener estructura
+                    const newForm = firstForm.cloneNode(true);
+
+                    // Limpiar los valores de inputs en el nuevo formulario
+                    newForm.querySelectorAll('input').forEach(input => {
+                        // Limpiar el valor
+                        if (input.type === 'checkbox' || input.type === 'radio') {
+                            input.checked = false;
+                        } else {
+                            input.value = '';
+                        }
+
+                        // Actualizar atributos name e id para el formset
+                        if (input.name) {
+                            input.name = input.name.replace(/-\d+-/, `-${totalForms}-`);
+                        }
+                        if (input.id) {
+                            input.id = input.id.replace(/-\d+-/, `-${totalForms}-`);
+                        }
+                    });
+
+                    // Si hay etiquetas <label> que tienen atributo for, actualizalas también
+                    newForm.querySelectorAll('label').forEach(label => {
+                        if (label.htmlFor) {
+                            label.htmlFor = label.htmlFor.replace(/-\d+-/, `-${totalForms}-`);
+                        }
+                    });
+
+                    // Insertar el nuevo formulario en el contenedor
+                    container.appendChild(newForm);
+
+                    // Incrementar el contador total de formularios
+                    totalFormsInput.value = totalForms + 1;
+                });
+            });
+        </script>
+
+
+
+    </center>
+</div>
+
+{% if request.GET.guardado == "ok" %}
+<div class="modal show d-block" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.5);">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">¡Guardado exitosamente!</h5>
+            </div>
+            <div class="modal-body">
+                <p>¿Qué querés hacer ahora?</p>
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-primary" href="{{ request.path }}?tipopag={{ request.GET.tipopag }}">Crear otro
+                    plato</a>
+                <a class="btn btn-secondary" href="/">Ir a Home</a>
+            </div>
+        </div>
     </div>
+</div>
+{% endif %}
+
+{% if request.GET.modificado == "ok" %}
+<div class="modal show d-block" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.5);">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">¡Modificado exitosamente!</h5>
+            </div>
+            <div class="modal-body">
+                <p>¿Qué querés hacer ahora?</p>
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-primary" href="/">Ir a Home</a>
+                <a class="btn btn-secondary" href="{% url 'filtro-de-platos' %}">Ver todos mis platos</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 
 
+
+<!-- Modal Bootstrap -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="successModalLabel">¡Guardado exitosamente!</h5>
+            </div>
+            <div class="modal-body">
+                ¿Qué querés hacer ahora?
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-primary" href="{{ request.path }}?tipopag={{ request.GET.tipopag }}">Crear otro
+                    plato</a>
+                <a class="btn btn-secondary" href="/">Ir a Home</a>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}

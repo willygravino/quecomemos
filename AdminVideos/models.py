@@ -102,7 +102,8 @@ class Plato(models.Model):
     
     tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, null=False, default="", blank=False)
 
-    tipos = models.ManyToManyField(TipoPlato, blank=True, related_name="platos")
+    tipos = models.ManyToManyField(TipoPlato, related_name="platos")
+
 
     INDISTINTO = '-'
     VERANO = 'Verano'
