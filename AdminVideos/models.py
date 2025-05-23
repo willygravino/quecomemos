@@ -75,33 +75,6 @@ class Plato(models.Model):
     elaboracion = models.IntegerField(null=True, blank=True)
     coccion = models.IntegerField(null=True, blank=True)
 
-    INDISTINTO = '-'
-    ENTRADA = 'Entrada'
-    SALSA = 'Salsa'
-    PICADA = 'Picada'
-    PRINCIPAL = 'Principal'
-    POSTRE = 'Postre'
-    TORTA = 'Torta'
-    UNTABLE = 'Dip'
-    TRAGO = 'Trago'
-    GUARNICION = 'Guarnicion'
-
-    TIPO_CHOICES = [
-        (INDISTINTO, '-'),
-        (ENTRADA, 'Entrada'),
-        (SALSA, 'Salsa'),
-        (PICADA, 'Picada'),
-        (PRINCIPAL,'Plato Principal'),
-        (POSTRE,'Postre'),
-        (TORTA,'Torta'),
-        (UNTABLE,'Dip'),
-        (TRAGO,'Trago'),
-        (GUARNICION,'Guarnicion')
-
-    ]
-    
-    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES, null=False, default="", blank=False)
-
     tipos = models.ManyToManyField(TipoPlato, related_name="platos")
 
 
@@ -141,14 +114,6 @@ class Ingrediente(models.Model):
         return self.nombre
     
 
-# class IngredienteEnPlato(models.Model):
-#     plato = models.ForeignKey(Plato, on_delete=models.CASCADE, related_name='ingredientes_en_plato')
-#     ingrediente = models.ForeignKey(Ingrediente, on_delete=models.CASCADE)
-#     cantidad = models.FloatField(null=True, blank=True)
-#     unidad = models.CharField(max_length=20, blank=True)  # Ej: g, ml, cucharadas, unidades, etc.
-
-#     def __str__(self):
-#         return f"{self.cantidad or ''} {self.unidad} de {self.ingrediente} en {self.plato}"
     
 
 class IngredienteEnPlato(models.Model):

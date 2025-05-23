@@ -11,22 +11,13 @@
     <section class="py-1 text-center container">
         <div class="row py-lg-1">
             <div class="col-lg-8 col-md-8 mx-auto">
-                <h1 class="fw-light">INGRESO DE PLATO PRINCIPAL.</h1>
+                <h4 class="fw-light">PLATO PRINCIPAL.</h4>
+                <h5 class="fw-bold">FORMULARIO PARA REFACTORIZACIÓN.</h5>
             </div>
         </div>
     </section>
 </div>
-<!-- 
-{% if form.errors %}
-<div style="color: red;">
-    <p><strong>Errores en el formulario:</strong></p>
-    <ul>
-        {% for field, errors in form.errors.items %}
-        <li>{{ field }}: {{ errors|join:", " }}</li>
-        {% endfor %}
-    </ul>
-</div>
-{% endif %} -->
+
 
 <!-- ERRORES DEL FORMULARIO PRINCIPAL -->
 {% if form.errors %}
@@ -44,24 +35,6 @@
     </ul>
 </div>
 {% endif %}
-
-<!-- ERRORES DEL FORMSET DE INGREDIENTES (ingrediente_formset) -->
-<!-- {% for form in ingrediente_formset %}
-  <div class="ingrediente-form">
-    {% for field in form.visible_fields %}
-      <div class="form-group">
-        {{ field.label_tag }} {{ field }}
-        {% for error in field.errors %}
-          <div class="text-danger">{{ error }}</div>
-        {% endfor %}
-      </div>
-    {% endfor %}
-
-    {% for error in form.non_field_errors %}
-      <div class="text-danger">{{ error }}</div>
-    {% endfor %}
-  </div>
-{% endfor %} -->
 
 
 <div style="margin-top:40px">
@@ -165,7 +138,6 @@
             <p>Medios de cocción: {{ form.medios }}</p>
             <p>Preparación: {{ form.elaboracion }}</p>
             <p>Cocción: {{ form.coccion }}</p>
-            <p>Tipo de plato: {{ form.tipo }}</p>
             <p>Tipo de plato:</p>
             {{ form.tipos }}
             <p>Estacionalidad: {{ form.estacionalidad }}</p>

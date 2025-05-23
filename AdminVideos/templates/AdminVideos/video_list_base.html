@@ -10,7 +10,7 @@
     <div class="d-flex justify-content-center flex-wrap gap-3">
       {% with tipopag=request.GET.tipopag %}
       {% if tipopag == "Delivery" or tipopag == "Comerafuera" %}
-        <a class="btn btn-primary w-75 w-sm-100 text-white border border-dark rounded text-center" href="{% url 'crear-lugar' %}?tipopag={{ tipopag|default:'' }}">
+        <a class="btn btn-primary w-75 w-sm-100 text-white border border-dark rounded text-center" href="{% url 'crear-lugar' %}?tipopag={{ tipopag|default:'Dash' }}">
             {% if tipopag and tipopag != "Dash" %}
               AGREGAR {{ tipopag }}
             {% else %}
@@ -19,7 +19,7 @@
           </a>
       
       {% else %}
-        <a class="btn btn-primary w-75 w-sm-100 text-white border border-dark rounded  text-center" href="{% url 'videos-create' %}?tipopag={{ tipopag|default:'' }}">
+        <a class="btn btn-primary w-75 w-sm-100 text-white border border-dark rounded  text-center" href="{% url 'videos-create' %}?tipopag={{ tipopag|default:'Dash' }}">
           {% if tipopag and tipopag != "Dash" %}
             AGREGAR {{ tipopag }}
           {% else %}

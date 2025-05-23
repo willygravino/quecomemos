@@ -13,7 +13,7 @@ class PlatoFilterForm(forms.Form):
         required=False, 
         widget=forms.TextInput(attrs={'placeholder': 'Buscar por palabra clave'})
     )    
-    tipo = forms.ChoiceField(choices=Plato.TIPO_CHOICES, required=False)
+    # tipo = forms.ChoiceField(choices=Plato.TIPO_CHOICES, required=False)
     calorias = forms.ChoiceField(choices=Plato.ESTACIONALIDAD_CHOICES, required=False)
     
 
@@ -36,16 +36,10 @@ class PlatoForm(forms.ModelForm):
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
-
-#     tipos = forms.ModelMultipleChoiceField(
-#     queryset=TipoPlato.objects.all(),
-#     widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
-#     required=False
-# )
   
     class Meta:
         model = Plato
-        fields = ["nombre_plato", "receta", "descripcion_plato", "ingredientes", "porciones", "medios", "elaboracion", "coccion", "estacionalidad", "tipo", "tipos", "enlace", "image"]
+        fields = ["nombre_plato", "receta", "descripcion_plato", "ingredientes", "porciones", "medios", "elaboracion", "coccion", "estacionalidad", "tipos", "enlace", "image"]
 
     def clean(self):
         super().clean()
@@ -54,11 +48,6 @@ class PlatoForm(forms.ModelForm):
         if not tipos or tipos.count() == 0:
             raise forms.ValidationError({'tipos': 'Debés seleccionar al menos un tipo de plato.'})
 
-
-# class IngredienteEnPlatoForm(forms.ModelForm):
-#     class Meta:
-#         model = IngredienteEnPlato
-#         fields = ['ingrediente', 'cantidad', 'unidad']
 
 
 class IngredienteEnPlatoForm(forms.ModelForm):
