@@ -40,7 +40,7 @@ class Plato(models.Model):
     proviene_de = models.CharField(max_length=20, null=True)
     id_original = models.IntegerField(null=True, blank=True)
     enlace = models.URLField(max_length=200, blank=True, null=True)
-    porciones = models.PositiveIntegerField(default=1, help_text="Cantidad de porciones que rinde este plato")
+    porciones = models.PositiveIntegerField(null=True,blank=True, help_text="Cantidad de porciones que rinde este plato")
 
    
     INDISTINTO = '-'
@@ -118,6 +118,7 @@ class Ingrediente(models.Model):
 
 class IngredienteEnPlato(models.Model):
     UNIDADES_CHOICES = [
+        ('','-'),
         ('unidad', 'unidad'),
         ('gr', 'gr'),
         ('pizca', 'pizca'),
@@ -131,9 +132,9 @@ class IngredienteEnPlato(models.Model):
     ]
 
     plato = models.ForeignKey(Plato, on_delete=models.CASCADE, related_name='ingredientes_en_plato')
-    ingrediente = models.ForeignKey(Ingrediente, on_delete=models.CASCADE)
+    ingrediente = models.ForeignKey(Ingrediente, on_delete=models.CASCADE,null=True, blank=True)
     cantidad = models.FloatField(null=True, blank=True)
-    unidad = models.CharField(max_length=20, choices=UNIDADES_CHOICES, default='unidad')
+    unidad = models.CharField(max_length=20, choices=UNIDADES_CHOICES, default='-',null=True, blank=True)
 
     def __str__(self):
         return f"{self.cantidad or ''} {self.unidad} de {self.ingrediente} en {self.plato}"

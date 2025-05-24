@@ -612,17 +612,19 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         "Salsa": ["Salsa", "Dip", "Guarnicion", "Entrada"],
     }
 
-    def get_initial(self):
-        initial = super().get_initial()
-        template_param = self.request.GET.get('tipopag')
-        opciones_disponibles = self.TIPOS_POR_TEMPLATE.get(template_param, [])
-        initial['tipos'] = TipoPlato.objects.filter(nombre__in=opciones_disponibles)
-        return initial
+    # def get_initial(self):
+    #     initial = super().get_initial()
+    #     template_param = self.request.GET.get('tipopag')
+    #     opciones_disponibles = self.TIPOS_POR_TEMPLATE.get(template_param, [])
+    #     initial['tipos'] = TipoPlato.objects.filter(nombre__in=opciones_disponibles)
+    #     return initial
     
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         template_param = self.request.GET.get('tipopag')
+        if template_param == "Dash":
+            template_param = "Principal"
 
         opciones_disponibles = self.TIPOS_POR_TEMPLATE.get(template_param, [])
 
@@ -637,9 +639,15 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             except TipoPlato.DoesNotExist:
                 form.fields['tipos'].initial = []
 
-            # Si hay una sola opción posible, ocultar el campo
+            # if len(opciones_disponibles) == 1:
+            #     form.fields['tipos'].widget = forms.HiddenInput()
+
+            # Si hay una sola opción posible, ocultar el campo pero lo sigue mandando como lista para que lo pueda validar
             if len(opciones_disponibles) == 1:
-                form.fields['tipos'].widget = forms.HiddenInput()
+                tipo_unico = form.fields['tipos'].queryset.first()  # o puedes usar el nombre si prefieres
+                form.fields['tipos'].initial = [tipo_unico.pk]
+                form.fields['tipos'].widget = forms.MultipleHiddenInput()
+
         else:
             # No mostrar ninguna opción si el tipopag no tiene mapeo
             form.fields['tipos'].queryset = TipoPlato.objects.none()

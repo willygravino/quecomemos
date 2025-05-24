@@ -281,8 +281,66 @@
 
         </form>
 
-
         <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const addButton = document.getElementById('add-ingrediente');
+        const container = document.getElementById('ingredientes-container');
+
+        const totalFormsInput = document.getElementById('id_ingredientes_en_plato-TOTAL_FORMS');
+
+        addButton.addEventListener('click', function () {
+            let totalForms = parseInt(totalFormsInput.value);
+            const firstForm = container.querySelector('.ingrediente-form');
+
+            // Clonar el primer formulario para mantener estructura
+            const newForm = firstForm.cloneNode(true);
+
+            // Limpiar y actualizar los valores de inputs
+            newForm.querySelectorAll('input').forEach(input => {
+                if (input.type === 'checkbox' || input.type === 'radio') {
+                    input.checked = false;
+                } else {
+                    input.value = '';
+                }
+
+                if (input.name) {
+                    input.name = input.name.replace(/-\d+-/, `-${totalForms}-`);
+                }
+                if (input.id) {
+                    input.id = input.id.replace(/-\d+-/, `-${totalForms}-`);
+                }
+            });
+
+            // Limpiar y actualizar los valores de selects (como unidad)
+            newForm.querySelectorAll('select').forEach(select => {
+                select.selectedIndex = 0;
+
+                if (select.name) {
+                    select.name = select.name.replace(/-\d+-/, `-${totalForms}-`);
+                }
+                if (select.id) {
+                    select.id = select.id.replace(/-\d+-/, `-${totalForms}-`);
+                }
+            });
+
+            // Actualizar etiquetas <label> si tienen atributo for
+            newForm.querySelectorAll('label').forEach(label => {
+                if (label.htmlFor) {
+                    label.htmlFor = label.htmlFor.replace(/-\d+-/, `-${totalForms}-`);
+                }
+            });
+
+            // Insertar el nuevo formulario en el contenedor
+            container.appendChild(newForm);
+
+            // Incrementar el contador total de formularios
+            totalFormsInput.value = totalForms + 1;
+        });
+    });
+</script>
+
+
+        <!-- <script>
             document.addEventListener("DOMContentLoaded", function () {
                 const addButton = document.getElementById('add-ingrediente');
                 const container = document.getElementById('ingredientes-container');
@@ -328,7 +386,7 @@
                     totalFormsInput.value = totalForms + 1;
                 });
             });
-        </script>
+        </script> -->
 
 
 
