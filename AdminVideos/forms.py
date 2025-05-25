@@ -16,54 +16,124 @@ class PlatoFilterForm(forms.Form):
     # tipo = forms.ChoiceField(choices=Plato.TIPO_CHOICES, required=False)
     calorias = forms.ChoiceField(choices=Plato.ESTACIONALIDAD_CHOICES, required=False)
     
-
+    
 class PlatoForm(forms.ModelForm):
     variedad1 = forms.CharField(max_length=100, required=False)
-    ingredientes_de_variedad1 = forms.CharField( max_length=120, required=False)
+    ingredientes_de_variedad1 = forms.CharField(max_length=120, required=False)
     variedad2 = forms.CharField(max_length=100, required=False)
     ingredientes_de_variedad2 = forms.CharField(max_length=120, required=False)
     variedad3 = forms.CharField(max_length=100, required=False)
-    ingredientes_de_variedad3 = forms.CharField( max_length=120, required=False)
+    ingredientes_de_variedad3 = forms.CharField(max_length=120, required=False)
     variedad4 = forms.CharField(max_length=100, required=False)
-    ingredientes_de_variedad4 = forms.CharField( max_length=120, required=False)
+    ingredientes_de_variedad4 = forms.CharField(max_length=120, required=False)
     variedad5 = forms.CharField(max_length=100, required=False)
-    ingredientes_de_variedad5 = forms.CharField( max_length=120, required=False)
+    ingredientes_de_variedad5 = forms.CharField(max_length=120, required=False)
     variedad6 = forms.CharField(max_length=100, required=False)
-    ingredientes_de_variedad6 = forms.CharField( max_length=120, required=False)
+    ingredientes_de_variedad6 = forms.CharField(max_length=120, required=False)
 
-    tipos = forms.ModelMultipleChoiceField(
-        queryset=TipoPlato.objects.all(),
+    tipos = forms.MultipleChoiceField(
+        choices=Plato.TIPOS_CHOICES,
         widget=forms.CheckboxSelectMultiple,
-        required=False
+        required=False,
+        label="Tipos"
     )
-  
+
     class Meta:
         model = Plato
-        fields = ["nombre_plato", "receta", "descripcion_plato", "ingredientes", "porciones", "medios", "elaboracion", "coccion", "estacionalidad", "tipos", "enlace", "image"]
-
-    def clean(self):
-        super().clean()
-        
-        tipos = self.cleaned_data.get("tipos")
-        if not tipos or tipos.count() == 0:
-            raise forms.ValidationError({'tipos': 'Debés seleccionar al menos un tipo de plato.'})
-        
+        fields = [
+            "nombre_plato", "receta", "descripcion_plato", "ingredientes", 
+            "porciones", "medios", "elaboracion", "coccion", "categoria", 
+            "tipos", "enlace", "image"
+        ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Quitar los labels
-        # for field in ['porciones', 'medios', 'elaboracion', 'coccion', 'enlace']:
-        #     self.fields[field].label = ''
+        if self.instance and self.instance.tipos:
+            self.initial['tipos'] = self.instance.tipos.split(',')
 
-        # Agregar placeholders
+        # Placeholders
         self.fields['porciones'].widget.attrs.update({'placeholder': 'Porciones'})
-        # self.fields['medios'].empty_label = "Medios de cocción"
         self.fields['elaboracion'].widget.attrs.update({'placeholder': 'Preparación (min)'})
         self.fields['coccion'].widget.attrs.update({'placeholder': 'Cocción (min)'})
-        # self.fields['estacionalidad'].empty_label = "Estacionalidad"
         self.fields['enlace'].widget.attrs.update({'placeholder': 'Enlace al video o receta'})
-        # self.fields['estacionalidad'].choices = [('', 'Estaciyyyonialidad')] + list(self.fields['estacionalidad'].choices)
+
+    def clean_tipos(self):
+        return ','.join(self.cleaned_data['tipos'])
+
+    def clean(self):
+        cleaned_data = super().clean()
+        tipos = cleaned_data.get("tipos")
+        if not tipos or len(tipos) == 0:
+            self.add_error('tipos', 'Debés seleccionar al menos un tipo de plato.')
+
+
+# class PlatoForm(forms.ModelForm):
+#     variedad1 = forms.CharField(max_length=100, required=False)
+#     ingredientes_de_variedad1 = forms.CharField( max_length=120, required=False)
+#     variedad2 = forms.CharField(max_length=100, required=False)
+#     ingredientes_de_variedad2 = forms.CharField(max_length=120, required=False)
+#     variedad3 = forms.CharField(max_length=100, required=False)
+#     ingredientes_de_variedad3 = forms.CharField( max_length=120, required=False)
+#     variedad4 = forms.CharField(max_length=100, required=False)
+#     ingredientes_de_variedad4 = forms.CharField( max_length=120, required=False)
+#     variedad5 = forms.CharField(max_length=100, required=False)
+#     ingredientes_de_variedad5 = forms.CharField( max_length=120, required=False)
+#     variedad6 = forms.CharField(max_length=100, required=False)
+#     ingredientes_de_variedad6 = forms.CharField( max_length=120, required=False)
+
+#     # tipos = forms.ModelMultipleChoiceField(
+#     #     queryset=TipoPlato.objects.all(),
+#     #     widget=forms.CheckboxSelectMultiple,
+#     #     required=False
+#     # )
+
+#     tipos = forms.MultipleChoiceField(
+#         choices=Plato.TIPOS_CHOICES,
+#         widget=forms.CheckboxSelectMultiple,
+#         required=False,
+#         label="Tipos"
+#     )
+
+#     class Meta:
+#         model = Plato
+#         fields = '__all__'
+
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         if self.instance and self.instance.tipos:
+#             self.initial['tipos'] = self.instance.tipos.split(',')
+
+#     def clean_tipos(self):
+#         return ','.join(self.cleaned_data['tipos'])
+  
+#     class Meta:
+#         model = Plato
+#         fields = ["nombre_plato", "receta", "descripcion_plato", "ingredientes", "porciones", "medios", "elaboracion", "coccion", "estacionalidad", "tipos", "enlace", "image"]
+
+#     def clean(self):
+#         super().clean()
+        
+#         tipos = self.cleaned_data.get("tipos")
+#         if not tipos or tipos.count() == 0:
+#             raise forms.ValidationError({'tipos': 'Debés seleccionar al menos un tipo de plato.'})
+        
+
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+
+#         # Quitar los labels
+#         # for field in ['porciones', 'medios', 'elaboracion', 'coccion', 'enlace']:
+#         #     self.fields[field].label = ''
+
+#         # Agregar placeholders
+#         self.fields['porciones'].widget.attrs.update({'placeholder': 'Porciones'})
+#         # self.fields['medios'].empty_label = "Medios de cocción"
+#         self.fields['elaboracion'].widget.attrs.update({'placeholder': 'Preparación (min)'})
+#         self.fields['coccion'].widget.attrs.update({'placeholder': 'Cocción (min)'})
+#         # self.fields['estacionalidad'].empty_label = "Estacionalidad"
+#         self.fields['enlace'].widget.attrs.update({'placeholder': 'Enlace al video o receta'})
+#         # self.fields['estacionalidad'].choices = [('', 'Estaciyyyonialidad')] + list(self.fields['estacionalidad'].choices)
 
 
 

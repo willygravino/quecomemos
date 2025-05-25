@@ -357,23 +357,45 @@ def lista_de_compras(request):
 
 
 
+# class PlatoDetail(DetailView):
+#     model = Plato
+#     template_name = 'AdminVideos/plato_detail.html'
+#     context_object_name = "plato"
+
+#     def get_context_data(self, **kwargs):
+#         # Llamar al método original para obtener el contexto base
+#         context = super().get_context_data(**kwargs)
+
+#         # Obtener el perfil del usuario actual
+#         perfil = get_object_or_404(Profile, user=self.request.user)
+
+#         # Pasar la lista de amigues al contexto
+#         context["amigues"] = perfil.amigues  # Lista JSONField desde Profile
+
+#         return context
+
 class PlatoDetail(DetailView):
     model = Plato
     template_name = 'AdminVideos/plato_detail.html'
     context_object_name = "plato"
 
     def get_context_data(self, **kwargs):
-        # Llamar al método original para obtener el contexto base
         context = super().get_context_data(**kwargs)
 
-        # Obtener el perfil del usuario actual
+        # Perfil y amigues (como ya tenés)
         perfil = get_object_or_404(Profile, user=self.request.user)
+        context["amigues"] = perfil.amigues
 
-        # Pasar la lista de amigues al contexto
-        context["amigues"] = perfil.amigues  # Lista JSONField desde Profile
+        # Obtener el plato actual
+        plato = self.get_object()
+
+        # Convertir el campo 'tipos' (string separado por comas) a lista
+        if plato.tipos:
+            context['tipos_lista'] = [t.strip() for t in plato.tipos.split(',')]
+        else:
+            context['tipos_lista'] = []
 
         return context
-
 
 
 class LugarDetail(DetailView):
@@ -611,13 +633,6 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         "Picada": ["Picada","Guarnicion", "Entrada"],
         "Salsa": ["Salsa", "Dip", "Guarnicion", "Entrada"],
     }
-
-    # def get_initial(self):
-    #     initial = super().get_initial()
-    #     template_param = self.request.GET.get('tipopag')
-    #     opciones_disponibles = self.TIPOS_POR_TEMPLATE.get(template_param, [])
-    #     initial['tipos'] = TipoPlato.objects.filter(nombre__in=opciones_disponibles)
-    #     return initial
     
 
     def get_form(self, form_class=None):
@@ -656,13 +671,39 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         return form
 
 
+    # 
+    
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     if self.request.method == 'POST':
+    #         context['ingrediente_formset'] = IngredienteFormSet(self.request.POST)
+    #     else:
+    #         context['ingrediente_formset'] = IngredienteFormSet()
+
+    #     template_param = self.request.GET.get('tipopag')
+    #     if template_param == "Dash":
+    #         template_param = "Principal"
+
+    #     # Pasar la lista de tipos permitidos según el parámetro
+    #     context['items'] = self.TIPOS_POR_TEMPLATE.get(template_param, [])
+
+    #     # También puedes pasar el mismo parametro para que el template lo use (opcional)
+    #     context['tipopag'] = template_param
+
+    #     return context
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        template_param = self.request.GET.get('tipopag')
+        context['items'] = self.TIPOS_POR_TEMPLATE.get(template_param, [])
+        context['tipopag'] = template_param  # <-- Pasamos tipopag para usarlo en el template
+        # Agregá el formset de ingredientes
         if self.request.method == 'POST':
             context['ingrediente_formset'] = IngredienteFormSet(self.request.POST)
         else:
             context['ingrediente_formset'] = IngredienteFormSet()
         return context
+
 
     def form_valid(self, form):
         context = self.get_context_data()
@@ -786,8 +827,12 @@ def filtrar_platos(
         # if tipo_parametro and tipo_parametro != "Dash":
         #     query &= Q(tipo=tipo_parametro)
 
+        # if tipo_parametro and tipo_parametro != "Dash":
+        #     query &= Q(tipos__nombre=tipo_parametro)
+
         if tipo_parametro and tipo_parametro != "Dash":
-            query &= Q(tipos__nombre=tipo_parametro)
+            query &= Q(tipos__icontains=tipo_parametro)  # ✅
+
 
         if medios and medios != '-':
             query &= Q(medios=medios)

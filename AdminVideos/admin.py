@@ -7,7 +7,7 @@ admin.site.register(Mensaje)
 admin.site.register(ElegidosXDia)
 admin.site.register(Sugeridos)
 admin.site.register(Lugar)
-admin.site.register(TipoPlato)
+# admin.site.register(TipoPlato)
 
 class IngredienteEnPlatoInline(admin.TabularInline):  # o StackedInline si preferís
     model = IngredienteEnPlato

@@ -20,8 +20,7 @@
                 <p class="card-text">Categoría: {{ plato.categoria }}</p>
                 <p class="card-text">Elaboración: {{ plato.elaboracion }}</p>
                 <p class="card-text">Cocción: {{ plato.coccion }}</p>
-                <p class="card-text">Tipo: {{ plato.tipo }}</p>
-                {% if plato.tipos.all %}
+                <!-- {% if plato.tipos.all %}
                   <p class="card-text">
                     <strong>Tipos asociados:</strong>
                     {% for tipo in plato.tipos.all %}
@@ -30,7 +29,20 @@
                       <span class="text-muted">Sin tipos asociados</span>
                     {% endfor %}
                   </p>
+                {% endif %} -->
+
+               {% if tipos_lista %}
+                  <p class="card-text">
+                    <strong>Tipos asociados:</strong>
+                    {% for tipo in tipos_lista %}
+                      <span class="badge bg-secondary">{{ tipo }}</span>
+                    {% endfor %}
+                  </p>
+                {% else %}
+                  <p class="text-muted">Sin tipos asociados</p>
                 {% endif %}
+
+
                 <p class="card-text">Estacionalidad: {{ plato.estacionalidad }}</p>
                 {% if plato.enlace %}
                 <p class="card-text">

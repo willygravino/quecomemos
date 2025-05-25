@@ -75,8 +75,25 @@ class Plato(models.Model):
     elaboracion = models.IntegerField(null=True, blank=True)
     coccion = models.IntegerField(null=True, blank=True)
 
-    tipos = models.ManyToManyField(TipoPlato, related_name="platos")
+    # tipos = models.ManyToManyField(TipoPlato, related_name="platos")
 
+    TIPOS_CHOICES = [
+        ('Entrada', 'Entrada'),
+        ('Guarnicion', 'Guarnición'),
+        ('Trago', 'Trago'),
+        ('Dip', 'Dip'),
+        ('Torta', 'Torta'),
+        ('Postre', 'Postre'),
+        ('Principal', 'Principal'),
+        ('Picada', 'Picada'),
+        ('Salsa', 'Salsa'),
+    ]
+
+    tipos = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Seleccioná los tipos (Ej: Entrada,Principal,Postre)"
+    )
 
     # INDISTINTO = '-'
     VERANO = 'Verano'

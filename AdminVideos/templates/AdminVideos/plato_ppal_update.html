@@ -19,7 +19,7 @@
 </div>
 
 <!-- ERRORES DEL FORMULARIO PRINCIPAL -->
-<!-- {% if form.errors %}
+ {% if form.errors %}
 <div class="alert alert-danger">
     <strong>Errores en el formulario:</strong>
     <ul>
@@ -33,7 +33,7 @@
         {% endfor %}
     </ul>
 </div>
-{% endif %} -->
+{% endif %}
 
 <center>
     
@@ -136,7 +136,6 @@
 
                 <!-- Otros campos -->
                
-
                 <div class="row mb-3 justify-content-center">
 
                     <div class="col-md-2 mb-2">
@@ -159,7 +158,12 @@
                     </div>
                 </div>
 
-            <div class="mb-3 border rounded p-3 bg-light{% if form.tipos.errors %} border-danger{% endif %}">
+                  <div class="col-md-2 mb-2">
+                        <label class="form-label">Categoría:</label> 
+                        {{ form.categoria|add_class:"form-control" }}
+                    </div>
+
+            <!-- <div class="mb-3 border rounded p-3 bg-light{% if form.tipos.errors %} border-danger{% endif %}">
                 <label class="form-label d-block">Tipo de plato:</label>
                 {% for checkbox in form.tipos %}
                     <div class="form-check form-check-inline">
@@ -175,7 +179,33 @@
                         {% endfor %}
                     </div>
                 {% endif %}
+            </div> -->
+
+            <div class="mb-3 border rounded p-3 bg-light{% if form.tipos.errors %} border-danger{% endif %}">
+    <label class="form-label d-block">Tipo de plato:</label>
+    {% if items %}
+        {% for tipo in items %}
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" 
+                       name="tipos" 
+                       id="id_tipos_{{ forloop.counter0 }}" 
+                       value="{{ tipo }}"
+                       {% if tipo == tipopag or tipo in form.tipos.value %}checked{% endif %}>
+                <label class="form-check-label" for="id_tipos_{{ forloop.counter0 }}"> &nbsp; {{ tipo }} </label>
             </div>
+        {% endfor %}
+    {% else %}
+        <p>No hay tipos disponibles.</p>
+    {% endif %}
+
+    {% if form.tipos.errors %}
+        <div class="invalid-feedback d-block">
+            {% for error in form.tipos.errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
 
 
 
