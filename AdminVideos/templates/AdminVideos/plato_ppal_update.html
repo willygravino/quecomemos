@@ -70,12 +70,14 @@
                 </div>
 
                 <!-- Ingredientes -->
-                <h4 class="mt-4">Ingredientes</h4>
+            <div class="border rounded p-1 bg-light">
+
+                <h4 class="mt-1">Ingredientes</h4>
                 {{ ingrediente_formset.management_form }}
 
                 <div id="ingredientes-container">
                     {% for form in ingrediente_formset %}
-                        <div class="ingrediente-form row align-items-end g-2 mb-3 {% if form.errors %}border border-danger rounded p-2{% endif %}">
+                        <div class="ingrediente-form row align-items-end g-2 mb-1 {% if form.errors %}border border-danger rounded p-2{% endif %}">
                             {% with ingrediente=form.nombre_ingrediente cantidad=form.cantidad unidad=form.unidad delete=form.DELETE %}
 
                             <div class="col-md-4">
@@ -126,6 +128,7 @@
                         </div>
                     {% endfor %}
                 </div>
+               </div> 
 
                 <button type="button" id="add-ingrediente" class="btn btn-outline-secondary mb-4">
                     Agregar otro ingrediente
