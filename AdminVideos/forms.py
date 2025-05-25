@@ -47,29 +47,51 @@ class PlatoForm(forms.ModelForm):
         tipos = self.cleaned_data.get("tipos")
         if not tipos or tipos.count() == 0:
             raise forms.ValidationError({'tipos': 'Debés seleccionar al menos un tipo de plato.'})
+        
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Quitar los labels
+        # for field in ['porciones', 'medios', 'elaboracion', 'coccion', 'enlace']:
+        #     self.fields[field].label = ''
+
+        # Agregar placeholders
+        self.fields['porciones'].widget.attrs.update({'placeholder': 'Porciones'})
+        # self.fields['medios'].empty_label = "Medios de cocción"
+        self.fields['elaboracion'].widget.attrs.update({'placeholder': 'Preparación (min)'})
+        self.fields['coccion'].widget.attrs.update({'placeholder': 'Cocción (min)'})
+        # self.fields['estacionalidad'].empty_label = "Estacionalidad"
+        self.fields['enlace'].widget.attrs.update({'placeholder': 'Enlace al video o receta'})
+        # self.fields['estacionalidad'].choices = [('', 'Estaciyyyonialidad')] + list(self.fields['estacionalidad'].choices)
+
 
 
 
 class IngredienteEnPlatoForm(forms.ModelForm):
+    # nombre_ingrediente = forms.CharField(
+    #     max_length=100,
+    #     label="",
+    #     help_text="Escribí el nombre del ingrediente",
+    # )
+
     nombre_ingrediente = forms.CharField(
         max_length=100,
-        label="Ingrediente",
+        label="",
+        required=False,   # <-- Esto hace que no sea obligatorio
         help_text="Escribí el nombre del ingrediente",
     )
 
-    # class Meta:
-    #     model = IngredienteEnPlato
-    #     fields = ['cantidad', 'unidad']  # No mostramos el campo FK directamente
 
     class Meta:
         model = IngredienteEnPlato
-        fields = ['cantidad', 'unidad']
+        fields = ['ingrediente','cantidad', 'unidad']
         labels = {
-            'cantidad': 'Cantidad',     # Podés modificar o quitar la etiqueta
+            'ingrediente': '',
+            'cantidad': '',     # Podés modificar o quitar la etiqueta
             'unidad': '',               # Esto quita la etiqueta de 'unidad'
         }
 
-    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -82,12 +104,21 @@ class IngredienteEnPlatoForm(forms.ModelForm):
 
         # Agregamos clases Bootstrap como placeholder opcional
         self.fields['nombre_ingrediente'].widget.attrs.update({'placeholder': 'Ingrediente'})
+        self.fields['cantidad'].widget.attrs.update({'placeholder': 'Cantidad'})
+        # self.fields['unidad'].empty_label = "Unidad de medida"
+        self.fields['unidad'].choices = [('', 'Unidad de medida')] + list(self.fields['unidad'].choices)
 
-    def clean_nombre_ingrediente(self):
-        nombre = self.cleaned_data['nombre_ingrediente'].strip()
-        if not nombre:
-            raise forms.ValidationError("El nombre del ingrediente no puede estar vacío.")
-        return nombre
+
+
+        # # ⚠️ Evitamos que Django valide este campo automáticamente
+        # self.fields['ingrediente'].required = False
+
+
+    # def clean_nombre_ingrediente(self):
+    #     nombre = self.cleaned_data['nombre_ingrediente'].strip()
+    #     if not nombre:
+    #         raise forms.ValidationError("El nombre del ingrediente no puede estar vacío.")
+    #     return nombre
 
     def save(self, commit=True):
         nombre = self.cleaned_data['nombre_ingrediente']

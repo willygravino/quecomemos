@@ -607,7 +607,7 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         "Dip": ["Dip", "Guarnicion"],
         "Torta": ["Torta", "Postre"],
         "Postre": ["Postre"],
-        "Principal": ["Principal", "Guarnicion", "Entrada"],
+        "Principal": ["Principal", "Guarnicion", "Entrada", "Picada"],
         "Picada": ["Picada","Guarnicion", "Entrada"],
         "Salsa": ["Salsa", "Dip", "Guarnicion", "Entrada"],
     }

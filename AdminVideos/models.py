@@ -43,7 +43,7 @@ class Plato(models.Model):
     porciones = models.PositiveIntegerField(null=True,blank=True, help_text="Cantidad de porciones que rinde este plato")
 
    
-    INDISTINTO = '-'
+    # INDISTINTO = '-'
     HORNO = 'Horno'
     COCINA = 'Cocina'
     PARRILA = 'Parrilla'
@@ -51,7 +51,7 @@ class Plato(models.Model):
     SIN_COCCION = 'Sin coccion'
     
     MEDIOS_CHOICES = [
-        (INDISTINTO, '-'),
+        # (INDISTINTO, '-'),
         (HORNO, 'Horno'),
         (COCINA, 'Cocina'),
         (PARRILA, 'Parrilla'),
@@ -78,13 +78,13 @@ class Plato(models.Model):
     tipos = models.ManyToManyField(TipoPlato, related_name="platos")
 
 
-    INDISTINTO = '-'
+    # INDISTINTO = '-'
     VERANO = 'Verano'
     INVIERNO = 'Invierno'
     TODO_EL_AÑO = 'Todo el año'
   
     ESTACIONALIDAD_CHOICES = [
-        (INDISTINTO, '-'),
+        # (INDISTINTO, '-'),
         (VERANO, 'Verano'),
         (INVIERNO, 'Invierno'),
         (TODO_EL_AÑO, 'Todo el año'),
@@ -118,7 +118,7 @@ class Ingrediente(models.Model):
 
 class IngredienteEnPlato(models.Model):
     UNIDADES_CHOICES = [
-        ('','-'),
+        # ('','-'),
         ('unidad', 'unidad'),
         ('gr', 'gr'),
         ('pizca', 'pizca'),
