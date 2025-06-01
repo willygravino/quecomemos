@@ -270,18 +270,13 @@ def lista_de_compras(request):
             # Recorrer cada plato en la comida
             for datos in lista_platos:
                 # Si el plato está marcado como elegido, añadimos sus ingredientes
-                if datos.get("elegido"):
+                if datos.get("elegido") and datos.get("ingredientes"):
                     lista_de_ingredientes.update(map(str.strip, datos["ingredientes"].split(",")))
                 
                 # Recorrer variedades si existen y están marcadas como elegidas
                 for variedad in datos.get("variedades", {}).values():
                     if variedad.get("elegido"):
                         lista_de_ingredientes.update(map(str.strip, variedad["ingredientes"].split(",")))
-
-
-
-
-
 
 
     if ingredientes_elegidos:
@@ -630,6 +625,7 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         "Torta": ["Torta", "Postre"],
         "Postre": ["Postre"],
         "Principal": ["Principal", "Guarnicion", "Entrada", "Picada"],
+        "Dash": ["Principal", "Guarnicion", "Entrada", "Picada"],
         "Picada": ["Picada","Guarnicion", "Entrada"],
         "Salsa": ["Salsa", "Dip", "Guarnicion", "Entrada"],
     }
@@ -638,8 +634,8 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         template_param = self.request.GET.get('tipopag')
-        if template_param == "Dash":
-            template_param = "Principal"
+        # if template_param == "Dash":
+        #     template_param = "Principal"
 
         opciones_disponibles = self.TIPOS_POR_TEMPLATE.get(template_param, [])
 
@@ -652,7 +648,7 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
                 tipo_por_defecto = TipoPlato.objects.get(nombre=template_param)
                 form.fields['tipos'].initial = [tipo_por_defecto.pk]
             except TipoPlato.DoesNotExist:
-                form.fields['tipos'].initial = []
+                form.fields['tipos'].initial = ["Principal"]
 
             # if len(opciones_disponibles) == 1:
             #     form.fields['tipos'].widget = forms.HiddenInput()
@@ -832,7 +828,6 @@ def filtrar_platos(
 
         if tipo_parametro and tipo_parametro != "Dash":
             query &= Q(tipos__icontains=tipo_parametro)  # ✅
-
 
         if medios and medios != '-':
             query &= Q(medios=medios)
@@ -1042,14 +1037,20 @@ def FiltroDePlatos (request):
         fec = registro['el_dia_en_que_comemos']  # Fecha del registro
         dias_programados.add(fec)  # <--- Aquí sumás la fecha
         pla = registro['platos_que_comemos'] or {}  # Asegurar que es un diccionario
+        # id_plato = registro['id_plato']
 
         for comida, lista_platos in pla.items():  # Iterar comidas (desayuno, almuerzo, etc.)
             for plato in lista_platos:  # Iterar cada plato dentro de la lista
                 plato_nombre = plato.get('plato', 'Desconocido')
+                id_plato = plato.get('id_plato')  # <-- ¡Lo obtenés de aquí!
 
                 # Añadir a la lista de la comida correspondiente
                 if comida in platos_dia_x_dia[fec]:  
-                    platos_dia_x_dia[fec][comida].append(plato_nombre)
+                    # platos_dia_x_dia[fec][comida].append(plato_nombre)
+                    platos_dia_x_dia[fec][comida].append({
+                            'id': id_plato,
+                            'nombre': plato_nombre
+                        })
 
     # Convertir defaultdict a dict antes de pasarlo a la plantilla
     platos_dia_x_dia = dict(platos_dia_x_dia)
@@ -1486,7 +1487,7 @@ class AsignarPlato(View):
                 data[comida].append({
                     "id_plato": objeto_id,
                     "plato": plato.nombre_plato,
-                    "tipo": plato.tipo,
+                    "tipo": plato.tipos,
                     "ingredientes": plato.ingredientes,
                     "variedades": {
                         vid: {

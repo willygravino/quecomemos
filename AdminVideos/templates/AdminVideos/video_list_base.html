@@ -5,7 +5,7 @@
 {% block lista_platos %}
 
 <!-- ESTE ES EL BOTÓN DE AGREGAR -->
-<section class="w-100 bg-danger text-white">
+<section class="w-100 text-white">
   <div class="container">
     <div class="d-flex justify-content-center flex-wrap gap-3">
       {% with tipopag=request.GET.tipopag %}
@@ -32,7 +32,7 @@
 </section>
 
 <!-- ESTAS SON LAS TARJETAS DE COMPARTIDOS -->
-<section class="w-100 py-3 bg-dark">
+<section class="w-100 py-2">
   <div class="container">
       {% if not platos and tipopag != "Delivery" and tipopag != "Comerafuera" %}
       <div class="alert alert-info text-center" role="alert">
@@ -80,7 +80,9 @@
 
 <!-- ESTAS SON LAS TARJETAS DE PLATOS, SI ES QUE ESTAMOS EN PLATOS -->
 
-<section class="w-100 bg-info text-white">
+<!-- <section class="w-100 text-white"> -->
+<section class="w-100 text-white bg-light p-2 rounded shadow-sm">
+
   <div class="d-flex flex-wrap gap-1 align-items-start justify-content-center">
     {% for plato in platos %}
       <div class="card position-relative {% if user.id == plato.propietario.id and not plato.proviene_de %}
