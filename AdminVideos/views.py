@@ -22,6 +22,11 @@ from datetime import date, datetime
 from django.contrib.auth.models import User  # Asegúrate de importar el modelo User
 from django.db.models import Q, Subquery, OuterRef
 
+from django.db.models.functions import ExtractWeekDay
+import random
+
+
+
 from django.shortcuts import redirect, reverse
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -854,6 +859,10 @@ def FiltroDePlatos (request):
             propietario=request.user
         )
 
+        # Calcular día de la semana en formato "LU", "MA", "MI", etc.
+        random_dia.dia_semana = fecha.strftime("%a")[:2].upper()
+        random_dia.save()  # Guardamos para que se aplique el nuevo campo
+
         # Agregar platos a cada comida
         for comida in ["desayuno", "almuerzo", "merienda", "cena"]:
             lista = datos.get(comida, [])
@@ -1624,6 +1633,145 @@ def eliminar_programado(request, nombre_plato, comida, fecha, plato_id):
 
 
 
+# def random_dia(request, dia_nombre):
+#     # Aquí tienes 'dia_nombre' (ej: "LU", "MA", "DO")
+
+
+# Mapeo nombre -> número de día (lunes=1 ... domingo=7)
+# dias = {
+#     "lunes": 1, "martes": 2, "miércoles": 3,
+#     "jueves": 4, "viernes": 5, "sábado": 6, "domingo": 7
+# }
+
+# def random_dia(request, dia_nombre):
+#     usuario = request.user
+#     # dia_num = dias.get(dia_nombre.lower())
+
+#     if not dia_nombre:
+#         return JsonResponse({"error": "Día inválido"}, status=400)
+
+#     qs = (HistoricoDia.objects
+#           .filter(propietario=usuario)
+#           .annotate(dia_semana=ExtractWeekDay("fecha"))
+#           .filter(dia_semana=dia_nombre))
+
+#     count = qs.count()
+#     if count == 0:
+#         return JsonResponse({"error": "No hay registros para ese día"}, status=404)
+
+#     random_index = random.randint(0, count - 1)
+#     registro = qs.all()[random_index]
+
+#     return JsonResponse({
+#         "id": registro.id,
+#         "fecha": registro.fecha.strftime("%Y-%m-%d"),
+#         "nombre_dia": registro.nombre_dia,
+#         "desayuno": [plato.nombre for plato in registro.desayuno.all()],
+#         "almuerzo": [plato.nombre for plato in registro.almuerzo.all()],
+#         "merienda": [plato.nombre for plato in registro.merienda.all()],
+#         "cena": [plato.nombre for plato in registro.cena.all()],
+#     })
+    
+
+
 def random_dia(request, dia_nombre):
-    # Aquí tienes 'dia_nombre' (ej: "LU", "MA", "DO")
-    return render(request, "AdminVideos/random.html", {"dia_nombre": dia_nombre})
+    usuario = request.user
+    mensaje_reinicio = None
+
+
+    if not dia_nombre:
+        return JsonResponse({"error": "Día inválido"}, status=400)
+
+    # Convertimos a mayúscula por seguridad (LU, MA, MI, etc.)
+    dia_nombre = dia_nombre.upper()
+
+    # # Filtramos por usuario y día de la semana
+    # qs = HistoricoDia.objects.filter(
+    #     propietario=usuario,
+    #     dia_semana=dia_nombre
+    # )
+
+    # Filtramos solo registros no sugeridos
+    qs = HistoricoDia.objects.filter(
+        propietario=usuario,
+        dia_semana=dia_nombre,
+        ya_sugerido=False
+    )
+
+
+    # Si no quedan registros, reiniciamos
+    if not qs.exists():
+        HistoricoDia.objects.filter(propietario=usuario, dia_semana=dia_nombre).update(ya_sugerido=False)
+        qs = HistoricoDia.objects.filter(
+            propietario=usuario,
+            dia_semana=dia_nombre,
+            ya_sugerido=False
+        )
+        mensaje_reinicio = "Se reinició la lista de registros sugeridos"
+
+
+    count = qs.count()
+    if count == 0:
+        return JsonResponse({"error": "No hay registros para ese día"}, status=404)
+
+    # Elegimos un registro al azar
+    random_index = random.randint(0, count - 1)
+    registro = qs.all()[random_index]
+
+    # Marcamos el registro como sugerido
+    registro.ya_sugerido = True
+    registro.save()
+
+     # Devolvemos JSON incluyendo el mensaje si hubo reinicio
+    respuesta = {
+        "id": registro.id,
+        "fecha": registro.fecha.strftime("%Y-%m-%d"),
+        "nombre_dia": registro.dia_semana,
+        "desayuno": [plato.id for plato in registro.desayuno.all()],
+        "almuerzo": [plato.id for plato in registro.almuerzo.all()],
+        "merienda": [plato.id for plato in registro.merienda.all()],
+        "cena": [plato.id for plato in registro.cena.all()],
+    }
+
+    if mensaje_reinicio:
+        respuesta["mensaje"] = mensaje_reinicio
+
+    return JsonResponse(respuesta)
+
+
+
+# def random_dia(request, dia_nombre):
+#     usuario = request.user
+
+#     if not dia_nombre:
+#         return JsonResponse({"error": "Día inválido"}, status=400)
+
+#     dia_nombre = dia_nombre.upper()
+
+#     # Filtramos solo registros no sugeridos
+#     qs = HistoricoDia.objects.filter(
+#         propietario=usuario,
+#         dia_semana=dia_nombre,
+#         ya_sugerido=False
+#     )
+
+#     count = qs.count()
+#     if count == 0:
+#         return JsonResponse({"error": "No hay registros disponibles para ese día"}, status=404)
+
+#     random_index = random.randint(0, count - 1)
+#     registro = qs.all()[random_index]
+
+#     # Marcamos el registro como sugerido
+#     registro.ya_sugerido = True
+#     registro.save()
+
+#     return JsonResponse({
+#         "id": registro.id,
+#         "fecha": registro.fecha.strftime("%Y-%m-%d"),
+#         "nombre_dia": registro.nombre_dia_completo,
+#         "desayuno": [plato.id for plato in registro.desayuno.all()],
+#         "almuerzo": [plato.id for plato in registro.almuerzo.all()],
+#         "merienda": [plato.id for plato in registro.merienda.all()],
+#         "cena": [plato.id for plato in registro.cena.all()],
+#     })

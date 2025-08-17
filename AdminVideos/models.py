@@ -176,10 +176,12 @@ class ElegidosXDia(models.Model):
 
 
 
-locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')  # para nombres de días en español
+# locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')  # para nombres de días en español
 
 class HistoricoDia(models.Model):
     fecha = models.DateField(unique=True)
+    dia_semana = models.CharField(max_length=2, blank=True)  # "LU", "MA", ...
+    ya_sugerido = models.BooleanField(default=False)
     
     desayuno = models.ManyToManyField('Plato', related_name='desayunos', blank=True)
     almuerzo = models.ManyToManyField('Plato', related_name='almuerzos', blank=True)

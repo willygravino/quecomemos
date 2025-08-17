@@ -414,10 +414,19 @@
                         <span class="d-none d-md-block">
 
                             <!-- <span class="material-symbols-outlined text-danger fs-6">wand_shine</span> -->
-                               <a href="{% url 'random_dia' dia|date:'D'|slice:':2'|upper %}" 
+                               <!-- <a href="{% url 'random_dia' dia|date:'D'|slice:':2'|upper %}" 
                                     class="btn btn-sm text-danger  "> 
                                     <span class="material-symbols-outlined">wand_shine</span>
                                </a>
+
+                              <button onclick="obtenerDiaAleatorio('{{ dia|date:"l j"|capfirst }}')">       
+                                <span class="material-symbols-outlined">wand_shine</span>
+                              </button> -->
+
+                            <a href="#" class="btn btn-sm text-danger"onclick="obtenerDiaAleatorio('{{ dia|date:'l'|slice:':2'|upper }}')">
+
+                                <span class="material-symbols-outlined">wand_shine</span>
+                            </a>
 
                             {{ dia|date:"l j"|capfirst }}
                             {% if dia in dias_programados %}
@@ -444,6 +453,38 @@
                 </li>
                 {% endfor %}
             </ul>
+
+
+  <div id="resultado">RESULTADO</div>
+
+
+  
+  
+  <script>
+    function obtenerDiaAleatorio(dia) {
+
+     // Tomamos las dos primeras letras y las ponemos en mayúscula
+    const diaCorto = dia.slice(0, 2).toUpperCase();
+
+      fetch(`/random-dia/${diaCorto}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById("resultado").innerHTML = `<p>${data.error}</p>`;
+            } else {
+                document.getElementById("resultado").innerHTML = `${data.mensaje ? `<p style="color:orange;"><b>${data.mensaje}</b></p>` : ""}              
+              <h3>Comidas del ${data.fecha} (${data.nombre_dia})</h3>
+              <p><b>Desayuno:</b> ${data.desayuno.join(", ")}</p>
+              <p><b>Almuerzo:</b> ${data.almuerzo.join(", ")}</p>
+              <p><b>Merienda:</b> ${data.merienda.join(", ")}</p>
+              <p><b>Cena:</b> ${data.cena.join(", ")}</p>
+            `;
+            }
+        });
+    }
+  </script>
+
+
 
 
             <!-- Tab Content -->
