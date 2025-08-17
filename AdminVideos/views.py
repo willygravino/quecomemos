@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.forms import inlineformset_factory
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
-from AdminVideos.models import IngredienteEnPlato, Lugar, Plato, Profile, Mensaje,  ElegidosXDia, Sugeridos, TipoPlato
+from AdminVideos.models import ComidaDelDia, HistoricoDia, IngredienteEnPlato, Lugar, Plato, Profile, Mensaje,  ElegidosXDia, TipoPlato
 from django.http import Http404, HttpResponseForbidden, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.forms import UserCreationForm
@@ -28,8 +28,6 @@ from django.urls import reverse
 import datetime
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-
-
 
 
 def set_dia_activo(request):
@@ -72,7 +70,6 @@ def index(request):
 
 def about(request):
     return render(request, "AdminVideos/about.html")
-
 
 
 
@@ -149,6 +146,8 @@ def procesar_item(platos_dia, item_nombre, menu_del_dia, dia_en_que_comemos_str,
     return resultado,  lista_de_ingredientes, no_incluir
 
 
+
+
 @login_required
 def lista_de_compras(request):
     # locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')  # Configura la localización a español
@@ -157,7 +156,7 @@ def lista_de_compras(request):
 
     # Obtener la fecha actual
     today = date.today()
-    
+
     lista_de_ingredientes = set()
     ingredientes_unicos = {}  # Diccionario para almacenar ingredientes a comprar, estado, comentario
     lista_de_compras = set()
@@ -167,6 +166,8 @@ def lista_de_compras(request):
     # Filtrar los objetos de ElegidosXDia para excluir aquellos cuya fecha sea anterior a la fecha actual
     menues_del_usuario = ElegidosXDia.objects.filter(user=request.user, el_dia_en_que_comemos__gte=today).order_by('el_dia_en_que_comemos')
 
+    # menues_del_usuario = ComidaDelDia.objects.filter(user=request.user, fecha__gte=today).order_by('fecha', 'momento')
+
     # Obtener el perfil del usuario actual
     perfil = get_object_or_404(Profile, user=request.user)
 
@@ -175,7 +176,7 @@ def lista_de_compras(request):
     variedades_seleccionadas = ""
 
     if request.method == 'POST':
-    
+
          # Diccionarios auxiliares
         variedades_seleccionadas = defaultdict(set)
 
@@ -187,7 +188,7 @@ def lista_de_compras(request):
             if key.startswith("variedad_seleccionada"):
                 plato_id, variedad = value.split("|")
                 variedades_seleccionadas[plato_id].add(variedad)  # No convertir a int
-        
+
         # Recorrer los menús del usuario y actualizar datos
         for menu in menues_del_usuario:
             platos = menu.platos_que_comemos or {}  # Obtener el diccionario de comidas
@@ -201,11 +202,11 @@ def lista_de_compras(request):
                     if clave_fecha in platos_seleccionados:
                         # Marcar como elegido
                         plato["elegido"] = True
-                    
+
                         for variedad_id, variedad_data in plato.get("variedades", {}).items():
                             if variedad_data["nombre"] in variedades_seleccionadas[plato_id]:
                                 variedad_data["elegido"] = True
-                            
+
                             else:
                                 variedad_data["elegido"] = False
                     else:
@@ -221,13 +222,13 @@ def lista_de_compras(request):
         # Suponiendo que perfil.comentarios contiene una lista de cadenas en el formato "ingrediente%comentario"
         comentarios_guardados_lista = perfil.comentarios
         comentarios_guardados = {}
- 
+
         if comentarios_guardados_lista:
             # Recorrer los comentarios guardados y convertirlos en un diccionario
             for item in comentarios_guardados_lista:
                 ingrediente, comentario = item.split("%", 1)  # Divide en ingrediente y comentario
                 comentarios_guardados[ingrediente] = comentario  # Guarda en el diccionario
-                       
+
         comentarios_posteados = {}
 
         for key, value in request.POST.items():
@@ -241,7 +242,7 @@ def lista_de_compras(request):
         # Recorremos el diccionario de comentarios guardados
         for ingrediente_posteado, comentario_posteado in comentarios_posteados.items():
             if ingrediente_posteado in comentarios_guardados:  # Verificamos si el ingrediente está en ambos diccionarios
-                # Obtenemos el comentario guardado 
+                # Obtenemos el comentario guardado
                 comentario_guardado = comentarios_guardados[ingrediente_posteado]
                 # prepara el registro nuevo por si lo usa
                 registro = f"{ingrediente_posteado}%{comentario_guardado}"
@@ -251,15 +252,15 @@ def lista_de_compras(request):
                 elif comentario_posteado != comentario_guardado:
                      # Actualizar el comentario del ingrediente
                     perfil.comentarios[perfil.comentarios.index(registro)] = f"{ingrediente_posteado}%{comentario_posteado}"
-                       
+
             elif comentario_posteado:
                 # Unir el ingrediente nuevo con el comentario, separado por '%'
                 ingrediente_con_comentario = f"{ingrediente_posteado}%{comentario_posteado}"
                 # Actualizar el campo ingredientes_que_tengo
                 perfil.comentarios.append(ingrediente_con_comentario)
             # Guardar los cambios en el perfil
-            perfil.save()    
-                
+            perfil.save()
+
 
     # Recorrer los menús del usuario
     for menu in menues_del_usuario:
@@ -272,7 +273,7 @@ def lista_de_compras(request):
                 # Si el plato está marcado como elegido, añadimos sus ingredientes
                 if datos.get("elegido") and datos.get("ingredientes"):
                     lista_de_ingredientes.update(map(str.strip, datos["ingredientes"].split(",")))
-                
+
                 # Recorrer variedades si existen y están marcadas como elegidas
                 for variedad in datos.get("variedades", {}).values():
                     if variedad.get("elegido"):
@@ -286,7 +287,7 @@ def lista_de_compras(request):
                 # Eliminar el ingrediente de la lista
                 perfil.ingredientes_que_tengo.remove(ingrediente_a_comprar)
                 # Guardar el perfil actualizado
-                perfil.save()     
+                perfil.save()
 
     if no_elegidos:
         for ingrediente in no_elegidos:
@@ -294,7 +295,7 @@ def lista_de_compras(request):
                 # Actualizar el campo ingredientes_que_tengo
                 perfil.ingredientes_que_tengo.append(ingrediente)
                 # Guardar el perfil actualizado
-                perfil.save()       
+                perfil.save()
 
     if lista_de_ingredientes:
         for ingrediente in lista_de_ingredientes:
@@ -334,7 +335,7 @@ def lista_de_compras(request):
 
     # Reemplazar los saltos de línea para que sean compatibles con la URL de WhatsApp
     mensaje_whatsapp = mensaje_whatsapp.replace("\n", "%0A")
-  
+
 
     context = {
         'menues_del_usuario': menues_del_usuario,
@@ -345,7 +346,7 @@ def lista_de_compras(request):
         "clave_fecha": clave_fecha,
         # "platos": platos,
         # "variedades_seleccionadas": variedades_seleccionadas,
-    
+
     }
 
     return render(request, 'AdminVideos/lista_de_compras.html', context)
@@ -409,7 +410,7 @@ class LugarDetail(DetailView):
         context["amigues"] = perfil.amigues  # Lista JSONField desde Profile
 
         return context
-    
+
 
 
 @login_required
@@ -558,7 +559,7 @@ class CrearLugar(LoginRequiredMixin, CreateView):
     form_class = LugarForm
     template_name = 'AdminVideos/crearlugar_form.html'
     success_url = reverse_lazy("crear-lugar")
-  
+
 
     def form_invalid(self, form):
         print("Errores en el formulario:", form.errors)
@@ -577,11 +578,11 @@ class CrearLugar(LoginRequiredMixin, CreateView):
             lugar.delivery = False
 
         lugar.save()
-       
+
         # Obtener el parámetro 'tipopag' y pasarlo en la redirección
         template_param = self.request.GET.get('tipopag')
         return redirect(reverse("crear-lugar") + f"?tipopag={template_param}")
-    
+
 
 
 
@@ -599,7 +600,7 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
 
     template_name = 'AdminVideos/platos_update.html'
     success_url = reverse_lazy("videos-create")
-    
+
 
     def get_template_names(self):
         template_param = self.request.GET.get('tipopag')
@@ -629,7 +630,7 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         "Picada": ["Picada","Guarnicion", "Entrada"],
         "Salsa": ["Salsa", "Dip", "Guarnicion", "Entrada"],
     }
-    
+
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
@@ -665,28 +666,6 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             form.fields['tipos'].initial = []
 
         return form
-
-
-    # 
-    
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     if self.request.method == 'POST':
-    #         context['ingrediente_formset'] = IngredienteFormSet(self.request.POST)
-    #     else:
-    #         context['ingrediente_formset'] = IngredienteFormSet()
-
-    #     template_param = self.request.GET.get('tipopag')
-    #     if template_param == "Dash":
-    #         template_param = "Principal"
-
-    #     # Pasar la lista de tipos permitidos según el parámetro
-    #     context['items'] = self.TIPOS_POR_TEMPLATE.get(template_param, [])
-
-    #     # También puedes pasar el mismo parametro para que el template lo use (opcional)
-    #     context['tipopag'] = template_param
-
-    #     return context
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -732,7 +711,7 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             return redirect(f"{reverse('videos-create')}?tipopag={template_param}&guardado=ok")
         else:
             return self.render_to_response(self.get_context_data(form=form))
-        
+
     def form_invalid(self, form):
         context = self.get_context_data(form=form)
         print("Errores del formulario principal:")
@@ -744,11 +723,11 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             for i, f in enumerate(ingrediente_formset.forms):
                 if f.errors:
                     print(f"Errores en el formulario #{i}: {f.errors}")
-        
+
         return self.render_to_response(context)
 
-        
-        
+
+
 
 class Login(LoginView):
     authentication_form = CustomAuthenticationForm
@@ -854,15 +833,48 @@ def FiltroDePlatos (request):
 
     locale.setlocale(locale.LC_TIME, 'C')
 
-    
     # Obtener la fecha y hora actuales
     fecha_actual = datetime.datetime.now().date()
+
+
+
+    # 🔄 Migrar registros anteriores a HistoricoDia
+    registros_antiguos = ElegidosXDia.objects.filter(el_dia_en_que_comemos__lt=fecha_actual, user=request.user)
+    
+    sumar_historico = 0
+
+    for registro in registros_antiguos:
+        sumar_historico += 1 
+        fecha = registro.el_dia_en_que_comemos
+        datos = registro.platos_que_comemos or {}
+
+        # Crear el objeto RandomDia vacío (si no existe aún)
+        random_dia, creado = HistoricoDia.objects.get_or_create(
+            fecha=fecha,
+            propietario=request.user
+        )
+
+        # Agregar platos a cada comida
+        for comida in ["desayuno", "almuerzo", "merienda", "cena"]:
+            lista = datos.get(comida, [])
+            for plato_data in lista:
+                id_plato = plato_data.get("id_plato")
+                if id_plato:
+                    plato_obj = Plato.objects.filter(id=id_plato).first()
+                    if plato_obj:
+                        getattr(random_dia, comida).add(plato_obj)
+
+        # Borrar el registro viejo
+        registro.delete()
+
+
+
 
     # # Calcular y agregar las fechas y nombres de los días para los próximos 6 días
     dias_desde_hoy = [(fecha_actual + timedelta(days=i)) for i in range(0, 7)]
 
     primer_dia = dias_desde_hoy[0].isoformat()
-    
+
     # Obtener el día activo de la sesión o asignar el primer día si no está definido
     dia_activo = request.session.get('dia_activo', primer_dia)
 
@@ -871,7 +883,7 @@ def FiltroDePlatos (request):
         request.session['dia_activo'] = primer_dia
 
     pla = ""
- 
+
     dias_programados = set()  # Usamos set para evitar fechas repetidas
 
     # Recuperar los parámetros desde la sesión y la URL
@@ -923,7 +935,7 @@ def FiltroDePlatos (request):
         platos = ""
 
 
-    elif tipo_parametro == "Comerafuera": 
+    elif tipo_parametro == "Comerafuera":
         lugares = Lugar.objects.filter(propietario=request.user, delivery=False)
         platos = ""
 
@@ -941,7 +953,7 @@ def FiltroDePlatos (request):
             dificultad=dificultad,
             palabra_clave=palabra_clave
         )
-   
+
     # Filtra las fechas únicas en `el_dia_en_que_comemos` para los objetos del usuario actual
     fechas_existentes = ElegidosXDia.objects.filter(user=usuario,el_dia_en_que_comemos__gte=fecha_actual).values_list('el_dia_en_que_comemos', flat=True).distinct()
 
@@ -984,7 +996,7 @@ def FiltroDePlatos (request):
         }
         for mensaje in mensajes_x_usuario
     }
-    
+
 # ------------------- LISTA DE PLATOS COMPARTIDOS
 
     # MENSAJES CON PLATOS COMPARTIDOS QUE AÚN NO FUERON IMPORTADOS
@@ -1007,7 +1019,7 @@ def FiltroDePlatos (request):
         {
             "id_plato": msg.id_elemento,
             "mensaje_id": msg.id, # Agregar el ID del mensaje del cual proviene
-            "mensaje": msg.mensaje,  
+            "mensaje": msg.mensaje,
             "nombre_plato": msg.nombre_elemento_compartido,
             "quien_comparte": msg.usuario_que_envia,
             "receta": los_platos_compartidos[msg.id_elemento].receta if msg.id_elemento in los_platos_compartidos else "",
@@ -1029,7 +1041,7 @@ def FiltroDePlatos (request):
 
     # Obtener los registros completos para cada fecha y extraer los platos
     registros = ElegidosXDia.objects.filter(
-        user=request.user, 
+        user=request.user,
         el_dia_en_que_comemos__in=fechas_existentes
     ).values('el_dia_en_que_comemos', 'platos_que_comemos')
 
@@ -1045,7 +1057,7 @@ def FiltroDePlatos (request):
                 id_plato = plato.get('id_plato')  # <-- ¡Lo obtenés de aquí!
 
                 # Añadir a la lista de la comida correspondiente
-                if comida in platos_dia_x_dia[fec]:  
+                if comida in platos_dia_x_dia[fec]:
                     # platos_dia_x_dia[fec][comida].append(plato_nombre)
                     platos_dia_x_dia[fec][comida].append({
                             'id': id_plato,
@@ -1071,7 +1083,8 @@ def FiltroDePlatos (request):
                 # "idesplatos": ids_platos_importados,
                 # "ides_descartable": ids_platos_compartidos,
                 "platos_compartidos": platos_compartidos,
-                "lugares": lugares
+                "lugares": lugares,
+                "sumados": sumar_historico
 
                }
 
@@ -1104,26 +1117,26 @@ class SolicitarAmistad(CreateView):
         # Asigna el valor predeterminado al campo 'amistad'
         form.instance.tipo_mensaje = "amistad"
         return super().form_valid(form)
-   
-   
+
+
    def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        
+
         # Obtener el perfil del usuario autenticado
         perfil_usuario = self.request.user.profile
-        
+
         # Obtener la lista de amigos (amigues) del usuario actual (en base al nombre de usuario)
         amigos = perfil_usuario.amigues
-        
+
         # Obtener los usuarios que no son amigos, excluyendo al usuario actual
         usuarios_no_amigos = User.objects.exclude(id=self.request.user.id)  # Excluir al usuario actual
-        
+
         # Filtrar usuarios que no estén en la lista de amigos (compara nombre de usuario)
         usuarios_no_amigos = usuarios_no_amigos.exclude(username__in=amigos)
-        
+
         form.fields['destinatario'].queryset = usuarios_no_amigos
         return form
-      
+
 class EnviarMensaje(LoginRequiredMixin, CreateView):
     model = Mensaje
     # success_url = reverse_lazy('enviar-mensaje')
@@ -1132,7 +1145,7 @@ class EnviarMensaje(LoginRequiredMixin, CreateView):
 
     def get_destinatario(self):
         return get_object_or_404(User, username=self.kwargs.get("usuario"))
-    
+
     def form_valid(self, form):
         form.instance.usuario_que_envia = self.request.user.username
         form.instance.tipo_mensaje = "texto"
@@ -1158,13 +1171,13 @@ class EnviarMensaje(LoginRequiredMixin, CreateView):
         ).order_by('creado_el')
 
         context["mensajes"] = mensajes
-                
+
         # Obtener el perfil del usuario actual
         perfil = get_object_or_404(Profile, user=self.request.user)
 
         # Pasar la lista de amigues al contexto
         context["amigues"] = perfil.amigues  # Lista JSONField desde Profile
-      
+
         return context
 
 # from .models import IngredienteEnPlato, Plato, Lugar, Mensaje, TipoPlato  # Asegúrate de importar los modelos necesarios
@@ -1211,10 +1224,10 @@ class compartir_elemento(CreateView):
         elif tipo_mensaje == "lugar":
             lugar = Lugar.objects.get(id=id_elemento)
             form.instance.nombre_elemento_compartido = lugar.nombre
-        
+
             if lugar.delivery:
                 form.instance.tipo_mensaje = "delivery"
-            else: 
+            else:
                 form.instance.tipo_mensaje = "comerafuera"
 
         destinatario = get_object_or_404(User, username=amigue_username)
@@ -1375,11 +1388,11 @@ def agregar_plato_compartido(request, pk, mensaje_id):
         dificultad=plato_original.dificultad,
         tipo=plato_original.tipo,
         calorias=plato_original.calorias,
-        propietario=request.user,  
+        propietario=request.user,
         image=plato_original.image,
         variedades=plato_original.variedades,
         proviene_de=plato_original.propietario,
-        id_original=plato_original.id 
+        id_original=plato_original.id
     )
 
     # Recuperar el mensaje por su ID
@@ -1424,7 +1437,7 @@ def agregar_a_mi_lista(request, plato_id):
 
     # Verificar si el plato original pertenece a otro usuario
     proviene_de = plato_original.propietario if plato_original.propietario != request.user else None
-    
+
 
     # Crear una copia del plato, asignando el nuevo propietario
     nuevo_plato = Plato.objects.create(
@@ -1441,7 +1454,7 @@ def agregar_a_mi_lista(request, plato_id):
         image=plato_original.image,  # Copiar la imagen si aplica
         variedades=plato_original.variedades,
         proviene_de= proviene_de,
-        id_original=plato_original.id         
+        id_original=plato_original.id
     )
 
   # Verificar si el plato_id ya está en la lista para evitar duplicados
@@ -1499,8 +1512,38 @@ class AsignarPlato(View):
                     "elegido": True
                 })
                 messages.success(request, f"Plato {plato.nombre_plato} asignado correctamente a {comida}.")
-            
+
             menu_dia.platos_que_comemos = data
+
+             # Verifica si ya hay una entrada de ComidaDelDia con ese plato para ese momento y fecha
+            ya_existe = ComidaDelDia.objects.filter(
+                user=request.user,
+                fecha=fecha_comida,
+                momento=comida,
+                plato=plato
+            ).exists()
+
+            if ya_existe:
+                messages.warning(request, f"El plato {plato.nombre_plato} ya está asignado a {comida}.")
+            else:
+                # Procesar variedades para guardarlas en JSONField
+                variedades_json = {
+                    vid: {
+                        "nombre": info["nombre"],
+                        "ingredientes": info["ingredientes"],
+                        "elegido": True
+                    } for vid, info in plato.variedades.items()
+                }
+
+                ComidaDelDia.objects.create(
+                    user=request.user,
+                    fecha=fecha_comida,
+                    momento=comida,
+                    plato=plato,
+                    variedades=variedades_json
+                )
+
+                messages.success(request, f"Plato {plato.nombre_plato} asignado correctamente a {comida}.")
 
         elif tipo == "lugar":
                     try:
@@ -1508,7 +1551,7 @@ class AsignarPlato(View):
                     except Lugar.DoesNotExist:
                         messages.error(request, "El lugar no existe.")
                         return redirect('filtro-de-platos')
-                    
+
                     data = menu_dia.platos_que_comemos
                     if not isinstance(data.get(comida), list):
                        data[comida] = []
@@ -1533,86 +1576,27 @@ class AsignarPlato(View):
 
         return redirect('filtro-de-platos')
 
-        # menu_dia.save()
-        # return redirect('filtro-de-platos')
-
-
-# class AsignarPlato(View):
-    
-#     def post(self, request):
-#         plato_id = request.POST.get('plato_id')
-#         dia = request.POST.get('dia')
-#         comida = request.POST.get('comida')
-
-#         # Buscar el plato
-#         try:
-#             plato = Plato.objects.get(id=plato_id)
-#         except Plato.DoesNotExist:
-#             messages.error(request, "El plato no existe.")
-#             return redirect('filtro-de-platos')
-
-#         # Convertir el string de fecha a objeto date
-#         fecha_comida = datetime.datetime.strptime(dia, "%Y-%m-%d").date()
-
-#         # Guardar la fecha en la sesión para recordar la pestaña activa
-#         request.session['dia_activo'] = dia  
-
-#         # Buscar o crear el registro del día
-#         menu_dia, created = ElegidosXDia.objects.get_or_create(
-#             user=request.user,
-#             el_dia_en_que_comemos=fecha_comida,
-#             defaults={"platos_que_comemos": {}}
-#         ) # menu_dia es un OBJETO DE LA BASE DE DATOS
-
-#         # Verificar si ya hay un plato con la misma comida en ese día
-#         platos_que_comemos = menu_dia.platos_que_comemos  # Diccionario almacenado en la BD - PLATOS QUE COMEMOS ES UN DICCIONARIO CON LOS DATOS DE ESE OBJETO DE LA BD
-
-#         # Asegurar que `comida` sea una lista en `platos_que_comemos`
-#         if not isinstance(platos_que_comemos.get(comida), list):
-#             platos_que_comemos[comida] = []
-       
-#        # Verificar si el plato ya está en la lista
-#         if any(plato["id_plato"] == plato_id for plato in platos_que_comemos[comida]):
-#             messages.warning(request, f"El plato {plato.nombre_plato} ya está asignado a {comida}.")
-#         else:
-#             # Agregar el nuevo plato a la lista
-#             platos_que_comemos[comida].append({
-#                 "id_plato": plato_id,
-#                 "plato": plato.nombre_plato,
-#                 "tipo": plato.tipo,
-#                 "ingredientes": plato.ingredientes,
-#                 "variedades": {variedad_id: {"nombre": datos["nombre"], "ingredientes": datos["ingredientes"], "elegido": True}
-#                    for variedad_id, datos in plato.variedades.items()},  # Agrega elegido: True a cada variedad
-#                 "elegido": True
-#             })
-            
-#         # Guardar los cambios en la base de datos
-#         menu_dia.platos_que_comemos = platos_que_comemos
-#         menu_dia.save()
-#         messages.success(request, f"Plato {plato.nombre_plato} asignado correctamente a {comida}.")
-            
-#         return redirect('filtro-de-platos')
+     
 
 
 
-
-def eliminar_programado(request, nombre_plato, comida, fecha):
+def eliminar_programado(request, nombre_plato, comida, fecha, plato_id):
     usuario = request.user
-    
+
     # Obtener el menú del usuario para la fecha especificada
     menu = get_object_or_404(ElegidosXDia, user=usuario, el_dia_en_que_comemos=fecha)
-    
+
     # Obtener los platos del menú
     platos = menu.platos_que_comemos or {}
-    
+
     if comida in platos:
         # Filtrar los platos que no coincidan con el nombre a eliminar
         platos[comida] = [plato for plato in platos[comida] if plato["plato"] != nombre_plato]
-        
+
         # Si la categoría de comida queda vacía, eliminarla del diccionario
         if not platos[comida]:
             del platos[comida]
-        
+
         # Si todas las categorías están vacías, eliminar el registro de la base de datos
         if not any(platos.values()):
             menu.delete()
@@ -1620,6 +1604,26 @@ def eliminar_programado(request, nombre_plato, comida, fecha):
             # Guardar los cambios en la base de datos
             menu.platos_que_comemos = platos
             menu.save()
-    
+
+    # LO NUEVO DE ComidaDelDia
+
+    comida_asignada = ComidaDelDia.objects.filter(
+        user=usuario,
+        fecha=fecha,
+        momento=comida,
+        plato=plato_id
+    ).first()
+
+    if comida_asignada:
+        comida_asignada.delete()
+        messages.success(request, f"El plato '{nombre_plato}' fue eliminado de {comida}.")
+    else:
+        messages.warning(request, f"No se encontró el plato '{nombre_plato}' en {comida} para esa fecha.")
+
     return redirect('filtro-de-platos')
 
+
+
+def random_dia(request, dia_nombre):
+    # Aquí tienes 'dia_nombre' (ej: "LU", "MA", "DO")
+    return render(request, "AdminVideos/random.html", {"dia_nombre": dia_nombre})

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+import locale
 
 class Lugar(models.Model):
     nombre = models.CharField(max_length=100)
@@ -171,7 +172,58 @@ class ElegidosXDia(models.Model):
     platos_que_comemos = models.JSONField(null=True, blank=True)
 
     def __str__(self):
-         return f'Menu Elegido {self.el_dia_en_que_comemos}' 
+         return f'Menu Elegido {self.el_dia_en_que_comemos}'
+
+
+
+locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')  # para nombres de días en español
+
+class HistoricoDia(models.Model):
+    fecha = models.DateField(unique=True)
+    
+    desayuno = models.ManyToManyField('Plato', related_name='desayunos', blank=True)
+    almuerzo = models.ManyToManyField('Plato', related_name='almuerzos', blank=True)
+    merienda = models.ManyToManyField('Plato', related_name='meriendas', blank=True)
+    cena = models.ManyToManyField('Plato', related_name='cenas', blank=True)
+
+    propietario = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    @property
+    def nombre_dia(self):
+        return self.fecha.strftime("%A").capitalize()
+
+    def __str__(self):
+        return f"Comidas del {self.fecha} ({self.nombre_dia})"
+
+    
+
+
+class ComidaDelDia(models.Model):
+    DESAYUNO = 'desayuno'
+    ALMUERZO = 'almuerzo'
+    MERIENDA = 'merienda'
+    CENA = 'cena'
+    # SNACK = 'Snack'
+
+    MOMENTO_CHOICES = [
+        (DESAYUNO, 'Desayuno'),
+        (ALMUERZO, 'Almuerzo'),
+        (MERIENDA, 'Merienda'),
+        (CENA, 'Cena'),
+        # (SNACK, 'Snack'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comidas_del_dia')
+    fecha = models.DateField()
+    momento = models.CharField(max_length=20, choices=MOMENTO_CHOICES)
+    plato = models.ForeignKey(Plato, on_delete=models.CASCADE)
+    variedades = models.JSONField(null=True, blank=True)
+    observaciones = models.TextField(blank=True, null=True)
+    elegido = models.BooleanField(default=True)  # Se marca como no leído por defecto
+
+    def __str__(self):
+        return f"{self.user} - {self.fecha} - {self.momento} - {self.plato.nombre_plato}"
+ 
 
 class Profile(models.Model):
      user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
@@ -194,20 +246,6 @@ class Profile(models.Model):
         return f"Perfil de {self.user}"
      
      
-# class Mensaje(models.Model):
-#     usuario_que_envia = models.CharField(max_length=15, null=True, blank=True)
-#     mensaje = models.TextField(max_length=1000)
-#     amistad = models.CharField(max_length=9, null=True, blank=True)
-#     nombre_plato_compartido =  models.CharField(max_length=30, null=True, blank=True)
-#     creado_el = models.DateTimeField(auto_now_add=True) 
-#     destinatario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="mensajes")
-#     # Nuevo campo para el estado de leído
-#     leido = models.BooleanField(default=False)  # Se marca como no leído por defecto
-#     importado = models.BooleanField(default=False)  # Se marca como no leído por defecto
-#     borrado_antes = models.BooleanField(default=False)  # Se marca como no leído por defecto
-       
-#     def __str__(self):
-#         return f"{self.id} - Mensaje de {self.usuario_que_envia} a {self.destinatario.username}"
 
 class Mensaje(models.Model):
     usuario_que_envia = models.CharField(max_length=15, null=True, blank=True)

@@ -43,7 +43,7 @@ class PlatoForm(forms.ModelForm):
         fields = [
             "nombre_plato", "receta", "descripcion_plato", "ingredientes", 
             "porciones", "medios", "elaboracion", "coccion", "categoria", 
-            "tipos", "enlace", "image"
+            "tipos", "estacionalidad", "enlace", "image"
         ]
 
     def __init__(self, *args, **kwargs):

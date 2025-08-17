@@ -13,10 +13,11 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django import views
 from django.contrib import admin
 from django.urls import path
 
-from AdminVideos.views import CrearLugar, EnviarMensaje, LugarDetail, LugarUpdate,  agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, compartir_elemento, descartar_sugerido, eliminar_lugar, eliminar_plato, eliminar_programado, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, SugerenciasRandom, FiltroDePlatos, reiniciar_sugeridos, set_dia_activo, sumar_amigue, user_logout, SolicitarAmistad, MensajeDelete, AsignarPlato 
+from AdminVideos.views import CrearLugar, EnviarMensaje, LugarDetail, LugarUpdate,  agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, compartir_elemento, descartar_sugerido, eliminar_lugar, eliminar_plato, eliminar_programado, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, SugerenciasRandom, FiltroDePlatos, random_dia, reiniciar_sugeridos, set_dia_activo, sumar_amigue, user_logout, SolicitarAmistad, MensajeDelete, AsignarPlato 
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -43,11 +44,13 @@ urlpatterns = [
     path('videos/<pk>/update', PlatoUpdate.as_view(), name="videos-update"),
     path('lugar/<pk>/update', LugarUpdate.as_view(), name="lugar-update"),
 
+    path('random-dia/<str:dia_nombre>/', random_dia, name='random_dia'),
+
     path('eliminar-plato/<int:plato_id>/', eliminar_plato, name='eliminar-plato'),
     path('eliminar-lugar/<int:lugar_id>/', eliminar_lugar, name='eliminar-lugar'),
     # path('duplicar-plato/<int:plato_id>/', duplicar_plato, name='duplicar-plato'),
 
-    path('eliminar/<str:nombre_plato>/<str:comida>/<str:fecha>/', eliminar_programado, name='eliminar-programado'),
+    path('eliminar/<str:nombre_plato>/<str:comida>/<str:fecha>/<int:plato_id>/', eliminar_programado, name='eliminar-programado'),
 
     path('plato/<pk>/detail', PlatoDetail.as_view(), name="platos-detail"),
     path('lugar/<pk>/detail', LugarDetail.as_view(), name="lugar-detail"),
