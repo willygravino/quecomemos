@@ -423,10 +423,10 @@
                                 <span class="material-symbols-outlined">wand_shine</span>
                               </button> -->
 
-                            <a href="#" class="btn btn-sm text-danger"onclick="obtenerDiaAleatorio('{{ dia|date:'l'|slice:':2'|upper }}')">
+                            <!-- <a href="#" class="btn btn-sm text-danger"onclick="obtenerDiaAleatorio('{{ dia|date:'l'|slice:':2'|upper }}')">
 
                                 <span class="material-symbols-outlined">wand_shine</span>
-                            </a>
+                            </a> -->
 
                             {{ dia|date:"l j"|capfirst }}
                             {% if dia in dias_programados %}
@@ -455,12 +455,10 @@
             </ul>
 
 
-  <div id="resultado">RESULTADO</div>
-
+  <!-- <div id="resultado">RESULTADO</div> -->
 
   
-  
-  <script>
+  <!-- <script>
     function obtenerDiaAleatorio(dia) {
 
      // Tomamos las dos primeras letras y las ponemos en mayúscula
@@ -482,9 +480,24 @@
             }
         });
     }
-  </script>
+  </script> -->
+<!-- 
+<script>
+  function normalizarDia(dia) {
+    // Quitar tildes, quedarse con dos letras y poner en mayúscula
+    return dia.normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, "")
+              .slice(0, 2)
+              .toUpperCase();
+  }
 
+  function obtenerDiaAleatorio(dia) {
+    const diaCorto = normalizarDia(dia);
 
+    // Redirigimos directamente al backend
+    window.location.href = `/random-dia/${diaCorto}/`;
+  }
+</script> -->
 
 
             <!-- Tab Content -->
@@ -664,11 +677,35 @@
                                     </div>
                                 </div>
                             </div>
+
                             <span
                                 class="fs-7 position-absolute top-0 start-50 translate-middle bg-light text-primary px-1"
                                 style="transform: translate(-50%, -50%);">
-                                Menú programado
+                                 <a href="/random-dia/{{ dia|date:'l'|slice:':2'|upper }}/" 
+                                class="btn btn-sm text-danger">
+                                    <span class="material-symbols-outlined">wand_shine</span>
+                                </a>
+                                Menú programado  
                             </span>
+
+
+
+                            {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-info">{{ message }}</div>
+                            {% endfor %}
+                            {% endif %}
+
+
+                            
+                            <!-- <span
+                                class="fs-7 position-absolute top-0 start-50 translate-middle bg-light text-primary px-1"
+                                style="transform: translate(-50%, -50%);">
+                                Menú programado  <a href="#" class="btn btn-sm text-danger"onclick="obtenerDiaAleatorio('{{ dia|date:'l'|slice:':2'|upper }}')">
+
+                                <span class="material-symbols-outlined">wand_shine</span>
+                            </a>
+                            </span> -->
                         </div>
                     </div>
                 </div>

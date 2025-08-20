@@ -1,6 +1,7 @@
 from collections import defaultdict
 from itertools import groupby
 import locale
+import unicodedata
 from django import forms
 from django.contrib import messages  # Para mostrar mensajes al usuario
 from django.contrib.auth import logout
@@ -830,38 +831,69 @@ def filtrar_platos(
 
 
 
+# @login_required(login_url=reverse_lazy('login'), redirect_field_name=None)
+# def FiltroDePlatos (request):
+#     # Configuración regional y fechas
+#     # Establecer la configuración regional a español
+#     # locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+
+#     locale.setlocale(locale.LC_TIME, 'C')
+
+#     # Obtener la fecha y hora actuales
+#     fecha_actual = datetime.datetime.now().date()
+
+
+
+#     # 🔄 Migrar registros anteriores a HistoricoDia
+#     registros_antiguos = ElegidosXDia.objects.filter(el_dia_en_que_comemos__lt=fecha_actual, user=request.user)
+    
+#     sumar_historico = 0
+
+#     for registro in registros_antiguos:
+#         sumar_historico += 1 
+#         fecha = registro.el_dia_en_que_comemos
+#         datos = registro.platos_que_comemos or {}
+
+#         # Crear el objeto RandomDia vacío (si no existe aún)
+#         random_dia, creado = HistoricoDia.objects.get_or_create(
+#             fecha=fecha,
+#             propietario=request.user
+#         )
+
+#         # Calcular día de la semana en formato "LU", "MA", "MI", etc.
+#         random_dia.dia_semana = fecha.strftime("%a")[:2].upper()
+#         random_dia.save()  # Guardamos para que se aplique el nuevo campo
+
 @login_required(login_url=reverse_lazy('login'), redirect_field_name=None)
-def FiltroDePlatos (request):
-    # Configuración regional y fechas
-    # Establecer la configuración regional a español
-    # locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+def FiltroDePlatos(request):
 
-    locale.setlocale(locale.LC_TIME, 'C')
-
-    # Obtener la fecha y hora actuales
+    # Obtener la fecha actual
     fecha_actual = datetime.datetime.now().date()
 
+    # Diccionario de días en español (abreviados)
+    DIAS_ES = ["LU", "MA", "MI", "JU", "VI", "SA", "DO"]
 
+    # 🔄 Migrar registros antiguos a HistoricoDia
+    registros_antiguos = ElegidosXDia.objects.filter(
+        el_dia_en_que_comemos__lt=fecha_actual, user=request.user
+    )
 
-    # 🔄 Migrar registros anteriores a HistoricoDia
-    registros_antiguos = ElegidosXDia.objects.filter(el_dia_en_que_comemos__lt=fecha_actual, user=request.user)
-    
     sumar_historico = 0
 
     for registro in registros_antiguos:
-        sumar_historico += 1 
+        sumar_historico += 1
         fecha = registro.el_dia_en_que_comemos
         datos = registro.platos_que_comemos or {}
 
-        # Crear el objeto RandomDia vacío (si no existe aún)
+        # Crear el objeto HistoricoDia si no existe
         random_dia, creado = HistoricoDia.objects.get_or_create(
             fecha=fecha,
             propietario=request.user
         )
 
-        # Calcular día de la semana en formato "LU", "MA", "MI", etc.
-        random_dia.dia_semana = fecha.strftime("%a")[:2].upper()
-        random_dia.save()  # Guardamos para que se aplique el nuevo campo
+        # Guardar día de la semana en español, abreviado
+        random_dia.dia_semana = DIAS_ES[fecha.weekday()]
+        random_dia.save()
 
         # Agregar platos a cada comida
         for comida in ["desayuno", "almuerzo", "merienda", "cena"]:
@@ -1631,65 +1663,100 @@ def eliminar_programado(request, nombre_plato, comida, fecha, plato_id):
 
     return redirect('filtro-de-platos')
 
-
-
-# def random_dia(request, dia_nombre):
-#     # Aquí tienes 'dia_nombre' (ej: "LU", "MA", "DO")
-
-
-# Mapeo nombre -> número de día (lunes=1 ... domingo=7)
-# dias = {
-#     "lunes": 1, "martes": 2, "miércoles": 3,
-#     "jueves": 4, "viernes": 5, "sábado": 6, "domingo": 7
-# }
-
-# def random_dia(request, dia_nombre):
-#     usuario = request.user
-#     # dia_num = dias.get(dia_nombre.lower())
-
-#     if not dia_nombre:
-#         return JsonResponse({"error": "Día inválido"}, status=400)
-
-#     qs = (HistoricoDia.objects
-#           .filter(propietario=usuario)
-#           .annotate(dia_semana=ExtractWeekDay("fecha"))
-#           .filter(dia_semana=dia_nombre))
-
-#     count = qs.count()
-#     if count == 0:
-#         return JsonResponse({"error": "No hay registros para ese día"}, status=404)
-
-#     random_index = random.randint(0, count - 1)
-#     registro = qs.all()[random_index]
-
-#     return JsonResponse({
-#         "id": registro.id,
-#         "fecha": registro.fecha.strftime("%Y-%m-%d"),
-#         "nombre_dia": registro.nombre_dia,
-#         "desayuno": [plato.nombre for plato in registro.desayuno.all()],
-#         "almuerzo": [plato.nombre for plato in registro.almuerzo.all()],
-#         "merienda": [plato.nombre for plato in registro.merienda.all()],
-#         "cena": [plato.nombre for plato in registro.cena.all()],
-#     })
     
+
+
+def generar_elegido_desde_historico(historico: HistoricoDia, fecha_activa):
+    """Crea un ElegidosXDia para la fecha activa a partir de un HistoricoDia como plantilla."""
+
+    # # Crear o recuperar el ElegidosXDia
+    # menu_dia, _ = ElegidosXDia.objects.get_or_create(
+    #     user=historico.propietario,
+    #     el_dia_en_que_comemos=fecha_activa,
+    #     defaults={"platos_que_comemos": {}}
+    # )
+
+    # Borrar cualquier registro previo de ElegidosXDia en esa fecha y usuario
+    ElegidosXDia.objects.filter(user=historico.propietario, el_dia_en_que_comemos=fecha_activa).delete()
+
+    # Crear un nuevo registro vacío
+    menu_dia = ElegidosXDia.objects.create(user=historico.propietario, el_dia_en_que_comemos=fecha_activa,platos_que_comemos={}
+)
+    data = menu_dia.platos_que_comemos or {}
+    comidas = ["desayuno", "almuerzo", "merienda", "cena"]
+
+    for comida in comidas:
+        platos = getattr(historico, comida).all()
+
+        if not isinstance(data.get(comida), list):
+            data[comida] = []
+
+        for plato in platos:
+            # Evitar duplicados en el JSON
+            if any(p["id_plato"] == str(plato.id) for p in data[comida]):
+                continue  
+
+            # Armar estructura JSON como en tu otra función
+            plato_json = {
+                "id_plato": str(plato.id),
+                "plato": plato.nombre_plato,
+                "tipo": plato.tipos,
+                "ingredientes": plato.ingredientes,
+                "variedades": {
+                    vid: {
+                        "nombre": info["nombre"],
+                        "ingredientes": info["ingredientes"],
+                        "elegido": True
+                    } for vid, info in (plato.variedades or {}).items()
+                },
+                "elegido": True
+            }
+
+            data[comida].append(plato_json)
+
+            # # Crear también el registro en ComidaDelDia si no existe
+            # ya_existe = ComidaDelDia.objects.filter(
+            #     user=historico.propietario,
+            #     fecha=historico.fecha,
+            #     momento=comida,
+            #     plato=plato
+            # ).exists()
+
+            # if not ya_existe:
+            #     ComidaDelDia.objects.create(
+            #         user=historico.propietario,
+            #         fecha=historico.fecha,
+            #         momento=comida,
+            #         plato=plato,
+            #         variedades=plato_json["variedades"]
+            #     )
+
+    # Actualizar JSON en ElegidosXDia
+    menu_dia.platos_que_comemos = data
+    menu_dia.save()
+
+    return menu_dia
+
+
+
+
+
+def normalizar_dia(dia):
+    # Quitar tildes y pasar a mayúsculas
+    return ''.join(
+        c for c in unicodedata.normalize('NFD', dia.upper())
+        if unicodedata.category(c) != 'Mn'
+    )
 
 
 def random_dia(request, dia_nombre):
     usuario = request.user
     mensaje_reinicio = None
 
-
     if not dia_nombre:
         return JsonResponse({"error": "Día inválido"}, status=400)
-
-    # Convertimos a mayúscula por seguridad (LU, MA, MI, etc.)
-    dia_nombre = dia_nombre.upper()
-
-    # # Filtramos por usuario y día de la semana
-    # qs = HistoricoDia.objects.filter(
-    #     propietario=usuario,
-    #     dia_semana=dia_nombre
-    # )
+    
+    dia_nombre = normalizar_dia(dia_nombre)[:2]  # -> "SA", "LU", "MA"...
 
     # Filtramos solo registros no sugeridos
     qs = HistoricoDia.objects.filter(
@@ -1709,6 +1776,8 @@ def random_dia(request, dia_nombre):
         )
         mensaje_reinicio = "Se reinició la lista de registros sugeridos"
 
+    if mensaje_reinicio:
+        messages.info(request, mensaje_reinicio)
 
     count = qs.count()
     if count == 0:
@@ -1721,6 +1790,10 @@ def random_dia(request, dia_nombre):
     # Marcamos el registro como sugerido
     registro.ya_sugerido = True
     registro.save()
+
+    # Generamos el ElegidosXDia
+    dia_activo = request.session.get('dia_activo', None)  # 🟢 Recuperamos la fecha activa
+    elegido = generar_elegido_desde_historico(registro, dia_activo)
 
      # Devolvemos JSON incluyendo el mensaje si hubo reinicio
     respuesta = {
@@ -1736,42 +1809,11 @@ def random_dia(request, dia_nombre):
     if mensaje_reinicio:
         respuesta["mensaje"] = mensaje_reinicio
 
-    return JsonResponse(respuesta)
+
+    messages.success(request, f"Se generó un menú para el día {dia_activo}")
 
 
+    # return JsonResponse(respuesta)
+    return redirect("filtro-de-platos")
 
-# def random_dia(request, dia_nombre):
-#     usuario = request.user
 
-#     if not dia_nombre:
-#         return JsonResponse({"error": "Día inválido"}, status=400)
-
-#     dia_nombre = dia_nombre.upper()
-
-#     # Filtramos solo registros no sugeridos
-#     qs = HistoricoDia.objects.filter(
-#         propietario=usuario,
-#         dia_semana=dia_nombre,
-#         ya_sugerido=False
-#     )
-
-#     count = qs.count()
-#     if count == 0:
-#         return JsonResponse({"error": "No hay registros disponibles para ese día"}, status=404)
-
-#     random_index = random.randint(0, count - 1)
-#     registro = qs.all()[random_index]
-
-#     # Marcamos el registro como sugerido
-#     registro.ya_sugerido = True
-#     registro.save()
-
-#     return JsonResponse({
-#         "id": registro.id,
-#         "fecha": registro.fecha.strftime("%Y-%m-%d"),
-#         "nombre_dia": registro.nombre_dia_completo,
-#         "desayuno": [plato.id for plato in registro.desayuno.all()],
-#         "almuerzo": [plato.id for plato in registro.almuerzo.all()],
-#         "merienda": [plato.id for plato in registro.merienda.all()],
-#         "cena": [plato.id for plato in registro.cena.all()],
-#     })
