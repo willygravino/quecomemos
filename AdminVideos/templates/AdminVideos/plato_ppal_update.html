@@ -35,6 +35,27 @@
 </div>
 {% endif %}
 
+
+<!-- ERRORES DEL FORMSET DE INGREDIENTES -->
+{% if ingrediente_formset.errors %}
+<div class="alert alert-danger">
+    <strong>Errores en los ingredientes:</strong>
+    <ul>
+        {% for form in ingrediente_formset.forms %}
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+
 <center>
     
 
@@ -69,73 +90,77 @@
                     {{ form.receta|add_class:"form-control" }}
                 </div>
 
-                <p>Ingredientes (separados por comas): {{ form.ingredientes }}</p>
+                <!-- <p>Ingredientes (separados por comas):  form.ingredientes }}</p> -->
+
+<!-- Botón para abrir modal -->
+<button type="button" class="btn btn-outline-secondary mb-4" data-bs-toggle="modal" data-bs-target="#ingredienteModal">
+  Agregar Ingrediente
+</button>
+
+{% if ingrediente_formset.forms %}
+  <!-- Lista de ingredientes ya cargados -->
+  <ul id="ingredientes-list" class="list-group mb-3">
+    {% for form in ingrediente_formset %}
+      {% if form.nombre_ingrediente.value %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          {{ form.nombre_ingrediente.value }} - {{ form.cantidad.value }} {{ form.unidad.value }}
+        </li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+{% endif %}
 
 
-                <!-- Ingredientes -->
-            <div class="border rounded p-1 bg-light">
+ <!-- Lista donde se mostrarán los ingredientes añadidos -->
+<div id="ingredientes-hidden" style="display:none;">
+  {{ ingrediente_formset.management_form }}
+  {% for form in ingrediente_formset %}
+    {{ form.as_p }}
+  {% endfor %}
+</div>
 
-                <h4 class="mt-1">Ingredientes</h4>
-                {{ ingrediente_formset.management_form }}
 
-                <div id="ingredientes-container">
-                    {% for form in ingrediente_formset %}
-                        <div class="ingrediente-form row align-items-end g-2 mb-1 {% if form.errors %}border border-danger rounded p-2{% endif %}">
-                            {% with ingrediente=form.nombre_ingrediente cantidad=form.cantidad unidad=form.unidad delete=form.DELETE %}
+<!-- Modal Bootstrap -->
+<div class="modal fade" id="ingredienteModal" tabindex="-1" aria-labelledby="ingredienteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="ingredienteModalLabel">Agregar Ingrediente</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <!-- 🚫 Cambiar <form> por <div> -->
+        <div id="ingredienteFormModal">
+          <div class="mb-3">
+            <label class="form-label">Ingrediente</label>
+            <input type="text" class="form-control" id="modal-nombre" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Cantidad</label>
+            <input type="text" class="form-control" id="modal-cantidad" required>
+          </div>
+       
+        <div class="mb-3">
+            <label class="form-label">Unidad</label>
+            {{ ingrediente_formset.empty_form.unidad|add_class:"form-select"|attr:"id:modal-unidad" }}
+        </div>
 
-                            <div class="col-md-4">
-                                {{ ingrediente.label_tag }}
-                                {% if ingrediente.errors %}
-                                    {{ ingrediente|add_class:"form-control is-invalid" }}
-                                    {% for error in ingrediente.errors %}
-                                        <div class="invalid-feedback">{{ error }}</div>
-                                    {% endfor %}
-                                {% else %}
-                                    {{ ingrediente|add_class:"form-control" }}
-                                {% endif %}
-                            </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="guardarIngrediente">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-                            <div class="col-md-3">
-                                {{ cantidad.label_tag }}
-                                {% if cantidad.errors %}
-                                    {{ cantidad|add_class:"form-control is-invalid" }}
-                                    {% for error in cantidad.errors %}
-                                        <div class="invalid-feedback">{{ error }}</div>
-                                    {% endfor %}
-                                {% else %}
-                                    {{ cantidad|add_class:"form-control" }}
-                                {% endif %}
-                            </div>
 
-                            <div class="col-md-3">
-                                {{ unidad.label_tag }}
-                                {% if unidad.errors %}
-                                    {{ unidad|add_class:"form-control is-invalid" }}
-                                    {% for error in unidad.errors %}
-                                        <div class="invalid-feedback">{{ error }}</div>
-                                    {% endfor %}
-                                {% else %}
-                                    {{ unidad|add_class:"form-control" }}
-                                {% endif %}
-                            </div>
 
-                            <div class="col-md-2 text-center">
-                                {{ delete.label_tag }}
-                                {{ delete }}
-                            </div>
 
-                            {% endwith %}
-                            {% for error in form.non_field_errors %}
-                                <div class="alert alert-danger mt-2">{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                    {% endfor %}
-                </div>
-               </div> 
 
-                <button type="button" id="add-ingrediente" class="btn btn-outline-secondary mb-4">
-                    Agregar otro ingrediente
-                </button>
+
+
 
                 <!-- Otros campos -->
                
@@ -365,7 +390,7 @@
 
 
 
-
+<!-- 
 
         <script>
             document.addEventListener("DOMContentLoaded", function () {
@@ -424,7 +449,7 @@
                 });
             });
         </script>
-</center>
+</center> -->
 
 {% if request.GET.guardado == "ok" %}
 <div class="modal show d-block" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.5);">
@@ -486,7 +511,58 @@
     </div>
 </div>
 
+</center>
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const list = document.getElementById("ingredientes-list");
+    const hiddenContainer = document.getElementById("ingredientes-hidden");
+    const totalFormsInput = document.getElementById("id_ingredientes_en_plato-TOTAL_FORMS");
+
+    // Verificamos que exista el formset antes de usarlo
+    if (!list || !hiddenContainer || !totalFormsInput) {
+        return; // si no existe en esta página, salimos y no da error
+    }
+
+    let totalForms = parseInt(totalFormsInput.value);
+
+    const btnGuardar = document.getElementById("guardarIngrediente");
+    if (btnGuardar) {
+        btnGuardar.addEventListener("click", function () {
+            let nombre = document.getElementById("modal-nombre").value.trim();
+            let cantidad = document.getElementById("modal-cantidad").value.trim();
+            let unidad = document.getElementById("modal-unidad").value.trim();
+
+            // Agregar a la lista visible
+            let li = document.createElement("li");
+            li.className = "list-group-item d-flex justify-content-between align-items-center";
+            li.innerHTML = `${nombre} - ${cantidad} ${unidad}`;
+            list.appendChild(li);
+
+            // Crear inputs ocultos para Django formset
+            let formHtml = `
+                <input type="hidden" name="ingredientes_en_plato-${totalForms}-nombre_ingrediente" value="${nombre}">
+                <input type="hidden" name="ingredientes_en_plato-${totalForms}-cantidad" value="${cantidad}">
+                <input type="hidden" name="ingredientes_en_plato-${totalForms}-unidad" value="${unidad}">
+            `;
+            hiddenContainer.insertAdjacentHTML("beforeend", formHtml);
+
+            // Actualizar contador
+            totalForms++;
+            totalFormsInput.value = totalForms;
+
+            // Resetear manualmente los campos (evita error de .reset en <div>)
+            document.getElementById("modal-nombre").value = "";
+            document.getElementById("modal-cantidad").value = "";
+            document.getElementById("modal-unidad").value = "";
+
+            // Cerrar modal
+            let modal = bootstrap.Modal.getInstance(document.getElementById("ingredienteModal"));
+            modal.hide();
+        });
+    }
+});
+</script>
 
             
 

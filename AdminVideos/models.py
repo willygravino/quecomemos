@@ -61,12 +61,12 @@ class Plato(models.Model):
     ]
     medios = models.CharField(max_length=20, choices=MEDIOS_CHOICES, default=COCINA, null=True)
    
-    INDISTINTO = '-'
+    INDISTINTO = 'Ambos'
     COTIDIANO = 'Cotidiano'
-    ESPECIAL = 'Especial'
+    ESPECIAL = 'Especial'  
        
     CATEGORIA_CHOICES = [
-        (INDISTINTO, '-'),
+        (INDISTINTO, 'Ambos'),
         (COTIDIANO, 'Cotidiano'),
         (ESPECIAL, 'Especial'),
         

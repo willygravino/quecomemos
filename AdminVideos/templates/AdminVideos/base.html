@@ -401,7 +401,12 @@
 
             <ul class="nav nav-tabs flex-nowrap overflow-auto border-0 w-100 justify-content-start" id="diasTab"
                 role="tablist" style="white-space: nowrap;">
+
+                <span class="btn btn-outline-danger material-symbols-outlined ">wand_shine</span>
+
+
                 {% for dia in dias_desde_hoy %}
+                
 
                 <li class="nav-item flex-fill" role="presentation" style="flex: 1 0 auto;">
                     <button
@@ -413,37 +418,12 @@
 
                         <span class="d-none d-md-block">
 
-                            <!-- <span class="material-symbols-outlined text-danger fs-6">wand_shine</span> -->
-                               <!-- <a href="{% url 'random_dia' dia|date:'D'|slice:':2'|upper %}" 
-                                    class="btn btn-sm text-danger  "> 
-                                    <span class="material-symbols-outlined">wand_shine</span>
-                               </a>
-
-                              <button onclick="obtenerDiaAleatorio('{{ dia|date:"l j"|capfirst }}')">       
-                                <span class="material-symbols-outlined">wand_shine</span>
-                              </button> -->
-
-                            <!-- <a href="#" class="btn btn-sm text-danger"onclick="obtenerDiaAleatorio('{{ dia|date:'l'|slice:':2'|upper }}')">
-
-                                <span class="material-symbols-outlined">wand_shine</span>
-                            </a> -->
-
                             {{ dia|date:"l j"|capfirst }}
                             {% if dia in dias_programados %}
-                            <i class="bi bi-pin-angle-fill ms-2"></i> <!-- Icono pin al lado del nombre -->
+                            &nbsp;<i class="fa-solid fa-check text-success"></i> <!-- Icono pin al lado del nombre -->
                             {% endif %}
                         </span>
                         <span class="d-block d-md-none">
-
-                            <!-- <span class="material-symbols-outlined text-danger fs-6">wand_shine</span> -->
-<!-- 
-                         <a href="{% url 'random_dia' dia|date:'D'|slice:':2'|upper %}" 
-                            class="btn btn-outline-danger btn-sm">
-                            <span class="material-symbols-outlined">wand_shine</span>
-                         </a>
- -->
-
-
                             {{ dia|date:"D"|slice:":2"|upper }}<br>{{ dia|date:"j" }}
                             {% if dia in dias_programados %}
                             <i class="bi bi-pin-angle-fill"></i>
@@ -455,62 +435,18 @@
             </ul>
 
 
-  <!-- <div id="resultado">RESULTADO</div> -->
-
-  
-  <!-- <script>
-    function obtenerDiaAleatorio(dia) {
-
-     // Tomamos las dos primeras letras y las ponemos en mayúscula
-    const diaCorto = dia.slice(0, 2).toUpperCase();
-
-      fetch(`/random-dia/${diaCorto}/`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                document.getElementById("resultado").innerHTML = `<p>${data.error}</p>`;
-            } else {
-                document.getElementById("resultado").innerHTML = `${data.mensaje ? `<p style="color:orange;"><b>${data.mensaje}</b></p>` : ""}              
-              <h3>Comidas del ${data.fecha} (${data.nombre_dia})</h3>
-              <p><b>Desayuno:</b> ${data.desayuno.join(", ")}</p>
-              <p><b>Almuerzo:</b> ${data.almuerzo.join(", ")}</p>
-              <p><b>Merienda:</b> ${data.merienda.join(", ")}</p>
-              <p><b>Cena:</b> ${data.cena.join(", ")}</p>
-            `;
-            }
-        });
-    }
-  </script> -->
-<!-- 
-<script>
-  function normalizarDia(dia) {
-    // Quitar tildes, quedarse con dos letras y poner en mayúscula
-    return dia.normalize("NFD")
-              .replace(/[\u0300-\u036f]/g, "")
-              .slice(0, 2)
-              .toUpperCase();
-  }
-
-  function obtenerDiaAleatorio(dia) {
-    const diaCorto = normalizarDia(dia);
-
-    // Redirigimos directamente al backend
-    window.location.href = `/random-dia/${diaCorto}/`;
-  }
-</script> -->
-
 
             <!-- Tab Content -->
+
             <div class="tab-content bg-white" id="diasTabContent">
+
                 {% for dia in dias_desde_hoy %}
                 <div class="tab-pane {% if dia_activo == dia|date:'Y-m-d' %}active{% elif forloop.first and not dia_activo %}active{% endif %}"
                     id="tab-content-{{ dia|date:'Y-m-d' }}" role="tabpanel"
                     aria-labelledby="tab-{{ dia|date:'Y-m-d' }}">
 
                     <div class="text-dark p-2 small">
-                        <!-- <p class="mb-1">Programado día {{ dia|date:"l j" }}</p>  -->
-                        <!-- <div class="row d-flex align-items-start">
-                                        <div class="col p-2" style="max-height: 100px; overflow-y: auto; overflow-x: hidden; display: block;"> -->
+                     
                         <div class="position-relative">
 
                             <div class="border border-2 border-primary rounded p-4 mt-2 bg-light shadow-sm">
@@ -545,6 +481,9 @@
                                                         class="text-decoration-none me-2">
                                                         &nbsp; {{ plato.nombre }}
                                                     </a>
+
+                                                    <i class="bi bi-pin-angle-fill ms-2 fa-lg"></i>&nbsp;
+
                                                     <a href="{% url 'eliminar-programado' nombre_plato=plato.nombre comida='desayuno' fecha=dia plato_id=plato.id %}"
                                                         class="btn btn-sm p-0" title="Eliminar">
                                                         <i class="fa-solid fa-trash-can"></i>
@@ -559,9 +498,7 @@
 
                                             <!-- Almuerzo -->
                                             <div class="col-md-3">
-                                                <!-- <h6 class="fw-bold">Almuerzo</h6> -->
-                                                  <h6
-                                                    class="fw-bold ml-1 bg-primary text-white p-1 rounded">
+                                                  <h6 class="fw-bold ml-1 bg-primary text-white p-1 rounded">
                                                     <span
                                                         class="material-symbols-outlined text-danger fs-6 me-2">wand_shine</span>
                                                     Almuerzo
@@ -578,6 +515,9 @@
                                                         class="text-decoration-none me-2">
                                                         &nbsp; {{ plato.nombre }}
                                                     </a>
+                                
+                                                    <i class="bi bi-pin-angle-fill ms-2 fa-lg"></i>&nbsp;
+
                                                     <!-- aquí mando nombre de plato que no se usará cuando la transición termine  -->
                                                     <a href="{% url 'eliminar-programado' nombre_plato=plato.nombre comida='almuerzo' fecha=dia plato_id=plato.id %}"
                                                         class="btn btn-sm p-0" title="Eliminar">
@@ -595,7 +535,6 @@
 
                                             <!-- Merienda -->
                                             <div class="col-md-3">
-                                                <!-- <h6 class="fw-bold">Merienda</h6> -->
                                                 <h6
                                                     class="fw-bold ml-1 bg-primary text-white p-1 rounded">
                                                     <span
@@ -608,14 +547,17 @@
 
                                                 <div class="mb-1 ml-1 d-flex align-items-center text-primary">
 
-                                                    <span
-                                                        class="material-symbols-outlined text-danger fs-6">wand_shine</span>
+                                                    <span class="material-symbols-outlined text-danger fs-6">wand_shine</span>
 
 
                                                     <a href="{% url 'platos-detail' plato.id %}"
                                                         class="text-decoration-none me-2">
                                                         &nbsp; {{ plato.nombre }}
                                                     </a>
+
+                                                                                                                                                                                                                                                      <i class="bi bi-pin-angle-fill ms-2 fa-lg"></i>&nbsp;
+
+
                                                     <a href="{% url 'eliminar-programado' nombre_plato=plato.nombre comida='merienda' fecha=dia plato_id=plato.id %}"
                                                         class="btn btn-sm p-0" title="Eliminar">
                                                         <i class="fa-solid fa-trash-can"></i>
@@ -651,6 +593,9 @@
                                                         class="text-decoration-none me-2">
                                                         &nbsp; {{ plato.nombre }}
                                                     </a>
+
+                                                    <i class="bi bi-pin-angle-fill ms-2 fa-lg"></i>&nbsp;
+
                                                     <a href="{% url 'eliminar-programado' nombre_plato=plato.nombre comida='cena' fecha=dia plato_id=plato.id %}"
                                                         class="btn btn-sm p-0" title="Eliminar">
                                                         <i class="fa-solid fa-trash-can"></i>
@@ -683,9 +628,12 @@
                                 style="transform: translate(-50%, -50%);">
                                  <a href="/random-dia/{{ dia|date:'l'|slice:':2'|upper }}/" 
                                 class="btn btn-sm text-danger">
-                                    <span class="material-symbols-outlined">wand_shine</span>
+                                    <span class="material-symbols-outlined" style="font-size: 20px;">wand_shine</span>
                                 </a>
-                                Menú programado  
+                                Menú programado&nbsp; 
+                                
+                                <i class="fa-solid fa-trash-can fa-lg"></i>&nbsp;
+
                             </span>
 
 
@@ -695,17 +643,6 @@
                                 <div class="alert alert-info">{{ message }}</div>
                             {% endfor %}
                             {% endif %}
-
-
-                            
-                            <!-- <span
-                                class="fs-7 position-absolute top-0 start-50 translate-middle bg-light text-primary px-1"
-                                style="transform: translate(-50%, -50%);">
-                                Menú programado  <a href="#" class="btn btn-sm text-danger"onclick="obtenerDiaAleatorio('{{ dia|date:'l'|slice:':2'|upper }}')">
-
-                                <span class="material-symbols-outlined">wand_shine</span>
-                            </a>
-                            </span> -->
                         </div>
                     </div>
                 </div>
@@ -721,7 +658,7 @@
 
                     <!-- Contenido de los bloques -->
                     <div class="shadow rounded p-2 m-2 mb-0">
-                        <h1>Históricos generados: {{sumados}}</h1>
+                        <!-- <h1>Históricos generados: {{sumados}}</h1> -->
                         {% block filtro %}
                         {% endblock %}
                     </div>
@@ -737,12 +674,6 @@
 
 
             </div>
-
-
-            <!-- </div> -->
-
-
-            <!-- </div> -->
 
             <!-- End of Main Content -->
 

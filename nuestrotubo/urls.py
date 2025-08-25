@@ -17,7 +17,7 @@ from django import views
 from django.contrib import admin
 from django.urls import path
 
-from AdminVideos.views import CrearLugar, EnviarMensaje, LugarDetail, LugarUpdate,  agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, compartir_elemento, descartar_sugerido, eliminar_lugar, eliminar_plato, eliminar_programado, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, SugerenciasRandom, FiltroDePlatos, random_dia, reiniciar_sugeridos, set_dia_activo, sumar_amigue, user_logout, SolicitarAmistad, MensajeDelete, AsignarPlato 
+from AdminVideos.views import CrearLugar, EnviarMensaje, LugarDetail, LugarUpdate,  agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, compartir_elemento, descartar_sugerido, eliminar_lugar, eliminar_plato, eliminar_programado, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, SugerenciasRandom, FiltroDePlatos, random_dia, set_dia_activo, sumar_amigue, user_logout, SolicitarAmistad, MensajeDelete, AsignarPlato 
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -40,7 +40,7 @@ urlpatterns = [
     path('agregar-compartido/<int:pk>/<int:mensaje_id>/', agregar_plato_compartido, name='agregar-plato-compartido'),
     path('videos/list/filtro', FiltroDePlatos, name="filtro-de-platos"),
     # path('lugares', Lugares, name="lugares"),
-    path('videos/reiniciar/sugeridos', reiniciar_sugeridos, name="reiniciar-sugeridos"),
+    # path('videos/reiniciar/sugeridos', reiniciar_sugeridos, name="reiniciar-sugeridos"),
     path('videos/<pk>/update', PlatoUpdate.as_view(), name="videos-update"),
     path('lugar/<pk>/update', LugarUpdate.as_view(), name="lugar-update"),
 
