@@ -91,7 +91,6 @@
                     {{ form.receta|add_class:"form-control" }}
                 </div>
 
-                <!-- <p>Ingredientes (separados por comas):  form.ingredientes }}</p> -->
 
 <!-- Botón para abrir modal -->
 <button type="button" class="btn btn-outline-secondary mb-4" data-bs-toggle="modal" data-bs-target="#ingredienteModal">
@@ -121,70 +120,6 @@
     {{ form.as_p }}
   {% endfor %}
 </div>
-
-
-<!-- Modal Bootstrap -->
-<div class="modal fade" id="ingredienteModal" tabindex="-1" aria-labelledby="ingredienteModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="ingredienteModalLabel">Agregar Ingrediente</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        <!-- 🚫 Cambiar <form> por <div> -->
-        <div id="ingredienteFormModal">
-          
-          
-          <!-- <div class="mb-3">
-            <label class="form-label">Ingrediente</label>
-            <input type="text" class="form-control" id="modal-nombre" required>
-          </div> -->
-
-          <!-- <div class="mb-3">
-            <label class="form-label">Ingrediente</label>
-            <select class="form-control" id="modal-nombre" name="ingrediente"></select>
-          </div> -->
-
-
-
-        
-        <!-- Select con los ingredientes 
-        <label for="modal-nombre">Ingrediente</label>
-        <select id="modal-nombre" class="form-select" style="width: 100%">
-          {% for ing in ingredientes %}
-            <option value="{{ ing.id }}">{{ ing.nombre }}</option>
-          {% endfor %}
-        </select> -->
-
-
-        <!-- Select con los ingredientes -->
-<label for="modal-nombre">Ingrediente</label>
-<select id="modal-nombre" class="form-select" style="width: 100%">
-</select>
-
-
-
-          <div class="mb-3">
-            <label class="form-label">Cantidad</label>
-            <input type="text" class="form-control" id="modal-cantidad" required>
-          </div>
-       
-        <div class="mb-3">
-            <label class="form-label">Unidad</label>
-            {{ ingrediente_formset.empty_form.unidad|add_class:"form-select"|attr:"id:modal-unidad" }}
-        </div>
-
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="guardarIngrediente">Guardar</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 
 
 
@@ -221,24 +156,7 @@
                         {{ form.categoria|add_class:"form-control" }}
                     </div>
 
-            <!-- <div class="mb-3 border rounded p-3 bg-light{% if form.tipos.errors %} border-danger{% endif %}">
-                <label class="form-label d-block">Tipo de plato:</label>
-                {% for checkbox in form.tipos %}
-                    <div class="form-check form-check-inline">
-                        {{ checkbox.tag }}
-                        <label class="form-check-label" for="{{ checkbox.id_for_label }}"> &nbsp; {{ checkbox.choice_label }} </label>
-                    </div>
-                {% endfor %}
-
-                {% if form.tipos.errors %}
-                    <div class="invalid-feedback d-block">
-                        {% for error in form.tipos.errors %}
-                            {{ error }}
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div> -->
-
+         
             <div class="mb-3 border rounded p-3 bg-light{% if form.tipos.errors %} border-danger{% endif %}">
                 <label class="form-label d-block">Tipo de plato:</label>
                 {% if items %}
@@ -420,66 +338,6 @@
 
 
 
-<!-- 
-
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const addButton = document.getElementById('add-ingrediente');
-                const container = document.getElementById('ingredientes-container');
-
-                const totalFormsInput = document.getElementById('id_ingredientes_en_plato-TOTAL_FORMS');
-
-                addButton.addEventListener('click', function () {
-                    let totalForms = parseInt(totalFormsInput.value);
-                    const firstForm = container.querySelector('.ingrediente-form');
-
-                    // Clonar el primer formulario para mantener estructura
-                    const newForm = firstForm.cloneNode(true);
-
-                    // Limpiar y actualizar los valores de inputs
-                    newForm.querySelectorAll('input').forEach(input => {
-                        if (input.type === 'checkbox' || input.type === 'radio') {
-                            input.checked = false;
-                        } else {
-                            input.value = '';
-                        }
-
-                        if (input.name) {
-                            input.name = input.name.replace(/-\d+-/, `-${totalForms}-`);
-                        }
-                        if (input.id) {
-                            input.id = input.id.replace(/-\d+-/, `-${totalForms}-`);
-                        }
-                    });
-
-                    // Limpiar y actualizar los valores de selects (como unidad)
-                    newForm.querySelectorAll('select').forEach(select => {
-                        select.selectedIndex = 0;
-
-                        if (select.name) {
-                            select.name = select.name.replace(/-\d+-/, `-${totalForms}-`);
-                        }
-                        if (select.id) {
-                            select.id = select.id.replace(/-\d+-/, `-${totalForms}-`);
-                        }
-                    });
-
-                    // Actualizar etiquetas <label> si tienen atributo for
-                    newForm.querySelectorAll('label').forEach(label => {
-                        if (label.htmlFor) {
-                            label.htmlFor = label.htmlFor.replace(/-\d+-/, `-${totalForms}-`);
-                        }
-                    });
-
-                    // Insertar el nuevo formulario en el contenedor
-                    container.appendChild(newForm);
-
-                    // Incrementar el contador total de formularios
-                    totalFormsInput.value = totalForms + 1;
-                });
-            });
-        </script>
-</center> -->
 
 {% if request.GET.guardado == "ok" %}
 <div class="modal show d-block" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.5);">
@@ -543,116 +401,93 @@
 
 </center>
 
+
+
+<!-- Modal ingredientes -->
+<div class="modal fade" id="ingredienteModal" tabindex="-1" aria-labelledby="ingredienteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Agregar Ingrediente</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="mb-3">
+            <label for="modal-nombre" class="form-label">Ingrediente</label>
+            <select id="modal-nombre" class="form-select" style="width:100%"></select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Cantidad</label>
+            <input type="text" id="modal-cantidad" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Unidad</label>
+            {{ ingrediente_formset.empty_form.unidad|add_class:"form-select"|attr:"id:modal-unidad" }}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="guardarIngrediente">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function() {
     const list = document.getElementById("ingredientes-list");
-    const hiddenContainer = document.getElementById("ingredientes-hidden");
+    const hidden = document.getElementById("ingredientes-hidden");
     const totalFormsInput = document.getElementById("id_ingredientes_en_plato-TOTAL_FORMS");
-
-    // Verificamos que exista el formset antes de usarlo
-    if (!list || !hiddenContainer || !totalFormsInput) {
-        return; // si no existe en esta página, salimos y no da error
-    }
-
     let totalForms = parseInt(totalFormsInput.value);
 
-    const btnGuardar = document.getElementById("guardarIngrediente");
-    if (btnGuardar) {
-        btnGuardar.addEventListener("click", function () {
-            let nombre = document.getElementById("modal-nombre").value.trim();
-            let cantidad = document.getElementById("modal-cantidad").value.trim();
-            let unidad = document.getElementById("modal-unidad").value.trim();
-
-            // Agregar a la lista visible
-            let li = document.createElement("li");
-            li.className = "list-group-item d-flex justify-content-between align-items-center";
-            li.innerHTML = `${nombre} - ${cantidad} ${unidad}`;
-            list.appendChild(li);
-
-            // Crear inputs ocultos para Django formset
-            let formHtml = `
-                <input type="hidden" name="ingredientes_en_plato-${totalForms}-nombre_ingrediente" value="${nombre}">
-                <input type="hidden" name="ingredientes_en_plato-${totalForms}-cantidad" value="${cantidad}">
-                <input type="hidden" name="ingredientes_en_plato-${totalForms}-unidad" value="${unidad}">
-            `;
-            hiddenContainer.insertAdjacentHTML("beforeend", formHtml);
-
-            // Actualizar contador
-            totalForms++;
-            totalFormsInput.value = totalForms;
-
-            // Resetear manualmente los campos (evita error de .reset en <div>)
-            document.getElementById("modal-nombre").value = "";
-            document.getElementById("modal-cantidad").value = "";
-            document.getElementById("modal-unidad").value = "";
-
-            // Cerrar modal
-            let modal = bootstrap.Modal.getInstance(document.getElementById("ingredienteModal"));
-            modal.hide();
-        });
-    }
-});
-</script>
-
-<!-- JavaScript con AJAX -->
-<script>
-    
-//    $('#ingredienteModal').on('shown.bs.modal', function () {
-//     $('#modal-nombre').select2({
-//         placeholder: 'Busca un ingrediente...',
-//         ajax: {
-//             url: '/api/ingredientes/',
-//             dataType: 'json',
-//             delay: 250,
-//             data: function (params) {
-//                 return { q: params.term };
-//             },
-//             processResults: function (data) {
-//                 return {
-//                     results: data.map(function(item) {
-//                         return { id: item.id, text: item.nombre };
-//                     })
-//                 };
-//             },
-//             cache: true
-//         },
-//         minimumInputLength: 1,
-//         dropdownParent: $('#ingredienteModal') // muy importante para modales
-//     });
-// });
-
-
-$('#ingredienteModal').on('shown.bs.modal', function () {
-    $('#modal-nombre').select2({
-        placeholder: 'Selecciona un ingrediente',
-        ajax: {
-            url: '/api/ingredientes/',       // tu endpoint Django
-            dataType: 'json',
-            delay: 250,
-            data: function (params) {
-                return { q: params.term || '' }; // si no escribe nada, q=""
+    // Select2 AJAX
+    $('#ingredienteModal').on('shown.bs.modal', function() {
+        $('#modal-nombre').select2({
+            placeholder: 'Selecciona un ingrediente',
+            ajax: {
+                url: '/api/ingredientes/',
+                dataType: 'json',
+                delay: 250,
+                data: params => ({ q: params.term || '' }),
+                processResults: data => ({ results: data.map(item => ({ id:item.id, text:item.nombre })) }),
+                cache: true
             },
-            processResults: function (data) {
-                return {
-                    results: data.map(function(item) {
-                        return { id: item.id, text: item.nombre };
-                    })
-                };
-            },
-            cache: true
-        },
-        minimumInputLength: 0,              // permite mostrar resultados sin escribir nada
-        dropdownParent: $('#ingredienteModal'),
-        allowClear: true
+            minimumInputLength: 0,
+            dropdownParent: $('#ingredienteModal'),
+            allowClear: true
+        }).select2('open');
     });
 
-    // Opcional: abrir dropdown automáticamente al abrir modal
-    $('#modal-nombre').select2('open');
+    document.getElementById("guardarIngrediente").addEventListener("click", function() {
+        const nombre = $('#modal-nombre').select2('data')[0].text;
+        const cantidad = document.getElementById("modal-cantidad").value;
+        const unidad = document.getElementById("modal-unidad").value;
+
+        list.insertAdjacentHTML("beforeend",
+            `<li class="list-group-item d-flex justify-content-between align-items-center">
+                ${nombre} - ${cantidad} ${unidad}
+            </li>`
+        );
+
+        hidden.insertAdjacentHTML("beforeend", `
+            <input type="hidden" name="ingredientes_en_plato-${totalForms}-nombre_ingrediente" value="${nombre}">
+            <input type="hidden" name="ingredientes_en_plato-${totalForms}-cantidad" value="${cantidad}">
+            <input type="hidden" name="ingredientes_en_plato-${totalForms}-unidad" value="${unidad}">
+        `);
+
+        totalForms++;
+        totalFormsInput.value = totalForms;
+
+        // Reset modal
+        $('#modal-nombre').val(null).trigger('change');
+        document.getElementById("modal-cantidad").value = "";
+        document.getElementById("modal-unidad").value = "";
+
+        bootstrap.Modal.getInstance(document.getElementById("ingredienteModal")).hide();
+    });
 });
-
-
-
 </script>
-
 
 {% endblock %}
