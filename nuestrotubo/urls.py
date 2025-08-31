@@ -17,7 +17,7 @@ from django import views
 from django.contrib import admin
 from django.urls import path
 
-from AdminVideos.views import CrearLugar, EnviarMensaje, LugarDetail, LugarUpdate,  agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, compartir_elemento, descartar_sugerido, eliminar_lugar, eliminar_plato, eliminar_programado, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, SugerenciasRandom, FiltroDePlatos, random_dia, set_dia_activo, sumar_amigue, user_logout, SolicitarAmistad, MensajeDelete, AsignarPlato 
+from AdminVideos.views import CrearLugar, EnviarMensaje, LugarDetail, LugarUpdate,  agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, api_ingredientes, compartir_elemento, descartar_sugerido, eliminar_lugar, eliminar_plato, eliminar_programado, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, SugerenciasRandom, FiltroDePlatos, random_dia, set_dia_activo, sumar_amigue, user_logout, SolicitarAmistad, MensajeDelete, AsignarPlato 
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -26,6 +26,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', index, name="index"),
     path('login', Login.as_view(), name="login"),
+
+    path('api/ingredientes/', api_ingredientes, name='api_ingredientes'),
+
 
     path('menu/elegido',lista_de_compras, name="menu-elegido"),
     path('menu/amigues',amigues, name="amigues"),

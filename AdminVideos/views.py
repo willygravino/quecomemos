@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.forms import inlineformset_factory
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
-from AdminVideos.models import ComidaDelDia, HistoricoDia, IngredienteEnPlato, Lugar, Plato, Profile, Mensaje,  ElegidosXDia, TipoPlato
+from AdminVideos.models import ComidaDelDia, HistoricoDia, Ingrediente, IngredienteEnPlato, Lugar, Plato, Profile, Mensaje,  ElegidosXDia, TipoPlato
 from django.http import Http404, HttpResponseForbidden, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.forms import UserCreationForm
@@ -30,6 +30,13 @@ from django.urls import reverse
 import datetime
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+
+
+def api_ingredientes(request):
+    q = request.GET.get('q', '')
+    ingredientes = Ingrediente.objects.filter(nombre__icontains=q).order_by('nombre')[:20]  # límite de resultados
+    data = [{"id": ing.id, "nombre": ing.nombre} for ing in ingredientes]
+    return JsonResponse(data, safe=False)
 
 
 def set_dia_activo(request):
@@ -605,7 +612,6 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
     template_name = 'AdminVideos/platos_update.html'
     success_url = reverse_lazy("videos-create")
 
-
     def get_template_names(self):
         template_param = self.request.GET.get('tipopag')
         templates = {
@@ -681,6 +687,10 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             context['ingrediente_formset'] = IngredienteFormSet(self.request.POST)
         else:
             context['ingrediente_formset'] = IngredienteFormSet()
+
+    # 👇 Agregar ingredientes al contexto
+        context['ingredientes'] = Ingrediente.objects.all()
+            
         return context
 
 

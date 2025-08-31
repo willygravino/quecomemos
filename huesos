@@ -1,3 +1,19 @@
+
+{% if ingrediente_formset.forms %}
+  <!-- Lista de ingredientes ya cargados -->
+  <ul id="ingredientes-list" class="list-group mb-3">
+    {% for form in ingrediente_formset %}
+      {% if form.nombre_ingrediente.value %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          {{ form.nombre_ingrediente.value }} - {{ form.cantidad.value }} {{ form.unidad.value }}
+        </li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+{% endif %}
+
+
+
 <!-- Inputs ocultos para el formset -->
 
 <div id="ingredientes-hidden">

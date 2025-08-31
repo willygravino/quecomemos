@@ -28,6 +28,11 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=wand_shine" />
 
+    <!-- CSS de Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+   
+
     <title>¿Qué cómemos? · V1.0</title>
 
 
@@ -794,13 +799,36 @@
         });
     </script>
 
-    <script src="{% static 'AdminVideos/vendor/jquery/jquery.min.js' %}"></script>
-    <script src="{% static 'AdminVideos/vendor/jquery-easing/jquery.easing.min.js' %}"></script>
-    <script src="{% static 'AdminVideos/js/sb-admin-2.min.js' %}"></script>
-    <script src="{% static 'AdminVideos/vendor/chart.js/Chart.min.js' %}"></script>
-    <script src="{% static 'AdminVideos/js/demo/chart-area-demo.js' %}"></script>
-    <script src="{% static 'AdminVideos/js/demo/chart-pie-demo.js' %}"></script>
-    <script src="{% static 'AdminVideos/js/bootstrap.bundle.min.js' %}"></script>
+
+
+
+<!-- jQuery (tu versión local, no uses la de CDN para evitar duplicados) -->
+<script src="{% static 'AdminVideos/vendor/jquery/jquery.min.js' %}"></script>
+
+<!-- Bootstrap (incluye Popper en bundle) -->
+<script src="{% static 'AdminVideos/js/bootstrap.bundle.min.js' %}"></script>
+
+<!-- Plugins que dependen de jQuery -->
+<script src="{% static 'AdminVideos/vendor/jquery-easing/jquery.easing.min.js' %}"></script>
+<script src="{% static 'AdminVideos/js/sb-admin-2.min.js' %}"></script>
+
+<!-- Charts -->
+<script src="{% static 'AdminVideos/vendor/chart.js/Chart.min.js' %}"></script>
+<script src="{% static 'AdminVideos/js/demo/chart-area-demo.js' %}"></script>
+<script src="{% static 'AdminVideos/js/demo/chart-pie-demo.js' %}"></script>
+
+<!-- Select2 (después de jQuery y Bootstrap) -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
+
+
+
+
+
+
+
+
 
     <!-- Inicialización de Tooltips y Popovers -->
     <script>

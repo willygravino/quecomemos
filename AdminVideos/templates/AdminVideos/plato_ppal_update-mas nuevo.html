@@ -5,34 +5,14 @@
 <div class="container my-5">
     <h4 class="text-center">Plato Principal - Refactorización</h4>
 
-    {% if form.errors %}
+    <!-- Mostrar errores de forma combinada -->
+    {% if form.errors or ingrediente_formset.errors %}
     <div class="alert alert-danger">
-        <strong>Errores en el formulario:</strong>
+        <strong>Errores:</strong>
         <ul>
-            {% for field in form %}
-                {% for error in field.errors %}
-                    <li><strong>{{ field.label }}:</strong> {{ error }}</li>
-                {% endfor %}
-            {% endfor %}
-            {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
-        </ul>
-    </div>
-    {% endif %}
-
-    {% if ingrediente_formset.errors %}
-    <div class="alert alert-danger">
-        <strong>Errores en los ingredientes:</strong>
-        <ul>
-            {% for form in ingrediente_formset %}
-                {% for field in form %}
-                    {% for error in field.errors %}
-                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
-                    {% endfor %}
-                {% endfor %}
-                {% for error in form.non_field_errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            {% endfor %}
+        {% for f in form %}{% for e in f.errors %}<li><strong>{{ f.label }}:</strong> {{ e }}</li>{% endfor %}{% endfor %}
+        {% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}
+        {% for fs in ingrediente_formset %}{% for f in fs %}{% for e in f.errors %}<li><strong>{{ f.label }}:</strong> {{ e }}</li>{% endfor %}{% endfor %}{% for e in fs.non_field_errors %}<li>{{ e }}</li>{% endfor %}{% endfor %}
         </ul>
     </div>
     {% endif %}
@@ -40,9 +20,9 @@
     <form method="post" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
 
-        {{ form.nombre_plato|add_class:"form-control mb-3" }}
-        {{ form.descripcion_plato|add_class:"form-control mb-3" }}
-        {{ form.receta|add_class:"form-control mb-3" }}
+        {% for field in form %}
+            {{ field|add_class:"form-control mb-3" }}
+        {% endfor %}
 
         <!-- Botón modal ingredientes -->
         <button type="button" class="btn btn-outline-secondary mb-3" data-bs-toggle="modal" data-bs-target="#ingredienteModal">
@@ -51,44 +31,34 @@
 
         <!-- Lista visible de ingredientes -->
         <ul id="ingredientes-list" class="list-group mb-3">
-            {% for form in ingrediente_formset %}
-                {% if form.nombre_ingrediente.value %}
+            {% for f in ingrediente_formset %}
+                {% if f.nombre_ingrediente.value %}
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    {{ form.nombre_ingrediente.value }} - {{ form.cantidad.value }} {{ form.unidad.value }}
+                    {{ f.nombre_ingrediente.value }} - {{ f.cantidad.value }} {{ f.unidad.value }}
                 </li>
                 {% endif %}
             {% endfor %}
         </ul>
 
-        <!-- Contenedor oculto con formset -->
+        <!-- Contenedor oculto para Django -->
         <div id="ingredientes-hidden" style="display:none;">
             {{ ingrediente_formset.management_form }}
-            {% for form in ingrediente_formset %}
-                {{ form.as_p }}
-            {% endfor %}
+            {% for f in ingrediente_formset %}{{ f.as_p }}{% endfor %}
         </div>
 
-        <!-- Otros campos compactos -->
-        {{ form.porciones|add_class:"form-control mb-2" }}
-        {{ form.medios|add_class:"form-control mb-2" }}
-        {{ form.elaboracion|add_class:"form-control mb-2" }}
-        {{ form.coccion|add_class:"form-control mb-2" }}
-        {{ form.categoria|add_class:"form-control mb-2" }}
-        {{ form.estacionalidad|add_class:"form-select mb-2" }}
-        {{ form.enlace|add_class:"form-control mb-2" }}
-        {{ form.image|add_class:"form-control mb-2" }}
-
         <!-- Tipos de plato -->
+        {% if items %}
         <div class="mb-3 border rounded p-3 bg-light{% if form.tipos.errors %} border-danger{% endif %}">
             <label class="form-label d-block">Tipo de plato:</label>
             {% for tipo in items %}
             <div class="form-check form-check-inline">
                 <input class="form-check-input" type="checkbox" name="tipos" id="id_tipos_{{ forloop.counter0 }}"
-                    value="{{ tipo }}" {% if tipo == tipopag or tipo in form.tipos.value %}checked{% endif %}>
-                <label class="form-check-label" for="id_tipos_{{ forloop.counter0 }}"> {{ tipo }} </label>
+                       value="{{ tipo }}" {% if tipo == tipopag or tipo in form.tipos.value %}checked{% endif %}>
+                <label class="form-check-label" for="id_tipos_{{ forloop.counter0 }}">{{ tipo }}</label>
             </div>
             {% endfor %}
         </div>
+        {% endif %}
 
         <button type="submit" class="btn btn-success mt-3">Guardar</button>
     </form>
@@ -105,7 +75,7 @@
       <div class="modal-body">
         <div class="mb-3">
             <label for="modal-nombre" class="form-label">Ingrediente</label>
-            <select id="modal-nombre" class="form-select" style="width: 100%"></select>
+            <select id="modal-nombre" class="form-select" style="width:100%"></select>
         </div>
         <div class="mb-3">
             <label class="form-label">Cantidad</label>
@@ -131,7 +101,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const totalFormsInput = document.getElementById("id_ingredientes_en_plato-TOTAL_FORMS");
     let totalForms = parseInt(totalFormsInput.value);
 
-    // Inicializar Select2 con AJAX
+    // Select2 AJAX
     $('#ingredienteModal').on('shown.bs.modal', function() {
         $('#modal-nombre').select2({
             placeholder: 'Selecciona un ingrediente',
@@ -140,31 +110,26 @@ document.addEventListener("DOMContentLoaded", function() {
                 dataType: 'json',
                 delay: 250,
                 data: params => ({ q: params.term || '' }),
-                processResults: data => ({
-                    results: data.map(item => ({ id: item.id, text: item.nombre }))
-                }),
+                processResults: data => ({ results: data.map(item => ({ id:item.id, text:item.nombre })) }),
                 cache: true
             },
             minimumInputLength: 0,
             dropdownParent: $('#ingredienteModal'),
             allowClear: true
-        });
-        $('#modal-nombre').select2('open');
+        }).select2('open');
     });
 
-    // Guardar ingrediente
     document.getElementById("guardarIngrediente").addEventListener("click", function() {
         const nombre = $('#modal-nombre').select2('data')[0].text;
         const cantidad = document.getElementById("modal-cantidad").value;
         const unidad = document.getElementById("modal-unidad").value;
 
-        // Agregar a la lista visible
-        const li = document.createElement("li");
-        li.className = "list-group-item d-flex justify-content-between align-items-center";
-        li.textContent = `${nombre} - ${cantidad} ${unidad}`;
-        list.appendChild(li);
+        list.insertAdjacentHTML("beforeend",
+            `<li class="list-group-item d-flex justify-content-between align-items-center">
+                ${nombre} - ${cantidad} ${unidad}
+            </li>`
+        );
 
-        // Crear inputs ocultos para Django
         hidden.insertAdjacentHTML("beforeend", `
             <input type="hidden" name="ingredientes_en_plato-${totalForms}-nombre_ingrediente" value="${nombre}">
             <input type="hidden" name="ingredientes_en_plato-${totalForms}-cantidad" value="${cantidad}">
@@ -183,6 +148,4 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 </script>
-
-
 {% endblock %}
