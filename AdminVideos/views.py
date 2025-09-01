@@ -689,7 +689,7 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             context['ingrediente_formset'] = IngredienteFormSet()
 
     # 👇 Agregar ingredientes al contexto
-        context['ingredientes'] = Ingrediente.objects.all()
+        # context['ingredientes'] = Ingrediente.objects.all()
             
         return context
 
