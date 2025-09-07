@@ -64,6 +64,13 @@
 
                     
                     <a href="{% url 'videos-update' plato.id %}" type="button"  class="btn btn-sm btn-outline-secondary">Editar</a> 
+<!-- PASANDO PARÁNMETRO DE TIPO DE PÁGINA
+                    <a href="{% url 'videos-update' plato.id %}?tipopag={{ tipopag|default:'Dash' }}" 
+                      type="button"  
+                      class="btn btn-sm btn-outline-secondary">
+                        Editar
+                    </a> -->
+
 
                     <a href="{% url 'agregar-a-mi-lista' plato.id %}?duplicar=true"
                     type="button" 

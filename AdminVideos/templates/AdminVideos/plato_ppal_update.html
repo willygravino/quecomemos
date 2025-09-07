@@ -96,7 +96,7 @@
   Agregar Ingrediente
 </button>
 
-
+<!-- 
 <div id="ingredientes-list">
   {{ ingrediente_formset.management_form }}
   {% for form in ingrediente_formset.forms %}
@@ -104,7 +104,40 @@
       <input type="hidden"  name="ingredientes_en_plato-{{ forloop.counter0 }}-cantidad" value="{{ form.cantidad.value|default:'' }}">
       <input type="hidden"  name="ingredientes_en_plato-{{ forloop.counter0 }}-unidad" value="{{ form.unidad.value|default:'' }}">
   {% endfor %}
+</div> -->
+
+
+<div id="ingredientes-list">
+    {{ ingrediente_formset.management_form }}
+    <ul class="list-group mb-3">
+        {% for form in ingrediente_formset.forms %}
+        <li class="list-group-item d-flex gap-2 align-items-center">
+            {% if form.instance.pk %}
+                <!-- Id del ingrediente existente -->
+                <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-id" value="{{ form.instance.pk }}">
+            {% endif %}
+            <input type="text" name="ingredientes_en_plato-{{ forloop.counter0 }}-nombre_ingrediente"
+                   value="{{ form.nombre_ingrediente.value|default:'' }}" class="form-control form-control-sm">
+                   
+            <!-- <input type="text" name="ingredientes_en_plato-{{ forloop.counter0 }}-cantidad"
+                   value="{{ form.cantidad.value|default:'' }}" class="form-control form-control-sm"> -->
+
+             <input type="text" name="ingredientes_en_plato-{{ forloop.counter0 }}-cantidad"
+       value="{% if form.cantidad.value %}{{ form.cantidad.value|stringformat:"g" }}{% else %}{% endif %}"
+       class="form-control form-control-sm">
+
+
+
+            <input type="text" name="ingredientes_en_plato-{{ forloop.counter0 }}-unidad"
+                   value="{{ form.unidad.value|default:'' }}" class="form-control form-control-sm">
+            <button type="button" class="btn btn-sm btn-danger eliminar-ingrediente">X</button>
+        </li>
+        {% endfor %}
+    </ul>
 </div>
+
+
+
 
 
                 <!-- Otros campos -->
@@ -323,7 +356,9 @@ function agregarIngrediente(list, totalFormsInput) {
 
     // Obtener datos del modal
     const nombre = $('#modal-nombre').select2('data')[0]?.text || '';
-    const cantidad = document.getElementById("modal-cantidad").value;
+    // const cantidad = document.getElementById("modal-cantidad").value;
+    const cantidad = document.getElementById("modal-cantidad").value.replace(',', '.');
+
     const unidad = document.getElementById("modal-unidad").value;
 
     // Crear li con inputs numerados correctamente

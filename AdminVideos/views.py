@@ -361,24 +361,6 @@ def lista_de_compras(request):
     return render(request, 'AdminVideos/lista_de_compras.html', context)
 
 
-
-# class PlatoDetail(DetailView):
-#     model = Plato
-#     template_name = 'AdminVideos/plato_detail.html'
-#     context_object_name = "plato"
-
-#     def get_context_data(self, **kwargs):
-#         # Llamar al método original para obtener el contexto base
-#         context = super().get_context_data(**kwargs)
-
-#         # Obtener el perfil del usuario actual
-#         perfil = get_object_or_404(Profile, user=self.request.user)
-
-#         # Pasar la lista de amigues al contexto
-#         context["amigues"] = perfil.amigues  # Lista JSONField desde Profile
-
-#         return context
-
 class PlatoDetail(DetailView):
     model = Plato
     template_name = 'AdminVideos/plato_detail.html'
@@ -508,57 +490,6 @@ class LugarUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return lugar.propietario == self.request.user
 
 
-class PlatoUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-    model = Plato
-    form_class = PlatoForm
-    template_name = 'AdminVideos/plato_ppal_update.html'
-    success_url = reverse_lazy("filtro-de-platos")
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        variedades_en_base = self.object.variedades or {}
-
-        variedades = {}
-        ingredientes_por_variedad = {}
-
-        for key, value in variedades_en_base.items():
-            variedad = value.get('nombre', '')
-            ingredientes = value.get('ingredientes', '')
-            variedades[key] = variedad
-            ingredientes_por_variedad[key] = ingredientes
-
-        context['variedades_en_base'] = variedades
-        context['ingredientes_variedad'] = ingredientes_por_variedad
-        return context
-
-    def test_func(self):
-        user_id = self.request.user.id
-        plato_id = self.kwargs.get("pk")
-        return Plato.objects.filter(propietario=user_id, id=plato_id).exists()
-
-    def form_valid(self, form):
-        plato = form.save(commit=False)
-        plato.propietario = self.request.user
-
-        # Procesar las variedades del formulario
-        variedades = {}
-        for i in range(1, 7):
-            variedad = form.cleaned_data.get(f'variedad{i}')
-            ingredientes = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
-            if variedad:
-                variedades[f'variedad{i}'] = {
-                    'nombre': variedad,
-                    'ingredientes': ingredientes
-                }
-
-        plato.variedades = variedades
-        plato.save()
-
-        # Guardar relaciones ManyToMany (como 'tipos')
-        form.save_m2m()
-
-        # return redirect(self.success_url)
-        return redirect(f"{reverse('videos-update', kwargs={'pk': plato.pk})}?modificado=ok")
 
 
 
@@ -591,7 +522,6 @@ class CrearLugar(LoginRequiredMixin, CreateView):
         # Obtener el parámetro 'tipopag' y pasarlo en la redirección
         template_param = self.request.GET.get('tipopag')
         return redirect(reverse("crear-lugar") + f"?tipopag={template_param}")
-
 
 
 
@@ -761,12 +691,24 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
 
 
 
-# class PlatoCreate(LoginRequiredMixin, CreateView):
+
+
+
+
+IngredienteFormSet = inlineformset_factory(
+    Plato,
+    IngredienteEnPlato,
+    form=IngredienteEnPlatoForm,
+    extra=1,            # en edición no forzamos uno vacío
+    can_delete=True
+)
+
+
+# class PlatoUpdate(LoginRequiredMixin, UpdateView):
 #     model = Plato
 #     form_class = PlatoForm
+#     template_name = "AdminVideos/plato_ppal_update.html"  # O dinámico como en PlatoCreate
 
-#     template_name = 'AdminVideos/platos_update.html'
-#     success_url = reverse_lazy("videos-create")
 
 
 #     def get_template_names(self):
@@ -785,99 +727,35 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
 #         }
 #         return [templates.get(template_param, self.template_name)]
 
-#     TIPOS_POR_TEMPLATE = {
-#         "Entrada": ["Guarnicion","Picada","Principal", "Entrada"],
-#         "Guarnicion": ["Guarnicion", "Principal", "Entrada", "Picada"],
-#         "Trago": ["Trago"],
-#         "Dip": ["Dip", "Guarnicion"],
-#         "Torta": ["Torta", "Postre"],
-#         "Postre": ["Postre"],
-#         "Principal": ["Principal", "Guarnicion", "Entrada", "Picada"],
-#         "Dash": ["Principal", "Guarnicion", "Entrada", "Picada"],
-#         "Picada": ["Picada","Guarnicion", "Entrada"],
-#         "Salsa": ["Salsa", "Dip", "Guarnicion", "Entrada"],
-#     }
-
-
-#     def get_form(self, form_class=None):
-#         form = super().get_form(form_class)
-#         template_param = self.request.GET.get('tipopag')
-#         # if template_param == "Dash":
-#         #     template_param = "Principal"
-
-#         opciones_disponibles = self.TIPOS_POR_TEMPLATE.get(template_param, [])
-
-#         if opciones_disponibles:
-#             # Mostrar solo las opciones válidas
-#             form.fields['tipos'].queryset = TipoPlato.objects.filter(nombre__in=opciones_disponibles)
-
-#             # Marcar solo la opción que coincide con el tipopag como seleccionada por defecto
-#             try:
-#                 tipo_por_defecto = TipoPlato.objects.get(nombre=template_param)
-#                 form.fields['tipos'].initial = [tipo_por_defecto.pk]
-#             except TipoPlato.DoesNotExist:
-#                 form.fields['tipos'].initial = ["Principal"]
-
-#             # if len(opciones_disponibles) == 1:
-#             #     form.fields['tipos'].widget = forms.HiddenInput()
-
-#             # Si hay una sola opción posible, ocultar el campo pero lo sigue mandando como lista para que lo pueda validar
-#             if len(opciones_disponibles) == 1:
-#                 tipo_unico = form.fields['tipos'].queryset.first()  # o puedes usar el nombre si prefieres
-#                 form.fields['tipos'].initial = [tipo_unico.pk]
-#                 form.fields['tipos'].widget = forms.MultipleHiddenInput()
-
-#         else:
-#             # No mostrar ninguna opción si el tipopag no tiene mapeo
-#             form.fields['tipos'].queryset = TipoPlato.objects.none()
-#             form.fields['tipos'].initial = []
-
-#         return form
+   
 
 #     def get_context_data(self, **kwargs):
 #         context = super().get_context_data(**kwargs)
-#         template_param = self.request.GET.get('tipopag')
-#         context['items'] = self.TIPOS_POR_TEMPLATE.get(template_param, [])
-#         context['tipopag'] = template_param  # <-- Pasamos tipopag para usarlo en el template
-#         # Agregá el formset de ingredientes
-#         if self.request.method == 'POST':
-#             context['ingrediente_formset'] = IngredienteFormSet(self.request.POST)
+
+#         # Formset de ingredientes
+#         if self.request.method == "POST":
+#             context["ingrediente_formset"] = IngredienteFormSet(
+#                 self.request.POST, instance=self.object
+#             )
 #         else:
-#             context['ingrediente_formset'] = IngredienteFormSet()
+#             context["ingrediente_formset"] = IngredienteFormSet(instance=self.object)
+
+#         # En Update, mostrar todos los tipos disponibles
+#         context['items'] = [tipo[0] for tipo in Plato.TIPOS_CHOICES]
+
+#         # Mantener tipopag en la URL si existe (opcional)
+#         context['tipopag'] = self.request.GET.get('tipopag', 'Dash')
+
 #         return context
-    
+
 
 #     def form_valid(self, form):
 #         context = self.get_context_data()
-#         ingrediente_formset = context['ingrediente_formset']
-
-#         if not self.request.user.is_authenticated:
-#             return redirect("login")
-
-#         # 1. Crear Plato pero sin guardarlo aún
-#         plato = form.save(commit=False)
-#         plato.propietario = self.request.user
-
-#         # 2. Guardarlo YA para que exista con propietario
-#         plato.save()
-#         form.save_m2m()
-
-#         # 3. Asignar instancia al formset ANTES de validarlo
-#         ingrediente_formset.instance = plato
+#         ingrediente_formset = context["ingrediente_formset"]
 
 #         if ingrediente_formset.is_valid():
-#             # --- Preparar variedades ---
-#             variedades = {}
-#             for i in range(1, 7):
-#                 variedad = form.cleaned_data.get(f'variedad{i}')
-#                 ingredientes_variedad_str = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
-#                 if variedad:
-#                     variedades[f"variedad{i}"] = {
-#                         "nombre": variedad,
-#                         "ingredientes": ingredientes_variedad_str,
-#                         "elegido": True
-#                     }
-#             plato.variedades = variedades
+#             plato = form.save(commit=False)
+#             plato.propietario = self.request.user
 
 #             # --- Concatenar ingredientes ---
 #             lista_ingredientes = []
@@ -896,16 +774,140 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
 
 #             plato.ingredientes = ", ".join(lista_ingredientes)
 
-#             # Guardar plato actualizado
+#             # Preparar variedades
+#             variedades = {}
+#             for i in range(1, 7):
+#                 variedad = form.cleaned_data.get(f'variedad{i}')
+#                 ingredientes_variedad_str = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
+#                 if variedad:
+#                     variedades[f"variedad{i}"] = {
+#                         "nombre": variedad,
+#                         "ingredientes": ingredientes_variedad_str,
+#                         "elegido": True
+#                     }
+
+#             plato.variedades = variedades
 #             plato.save()
+#             form.save_m2m()
+
+#             ingrediente_formset.instance = plato
 #             ingrediente_formset.save()
 
-#             template_param = self.request.GET.get('tipopag')
-#             return redirect(f"{reverse('videos-create')}?tipopag={template_param}&guardado=ok")
- 
+#             template_param = self.request.GET.get("tipopag")
+#             return redirect(f"{reverse('videos-create')}?tipopag={template_param}&modificado=ok")
 #         else:
-#             # Si el formset no es válido, no pasa nada: el Plato ya existe con propietario
 #             return self.render_to_response(self.get_context_data(form=form))
+
+#     def form_invalid(self, form):
+#         context = self.get_context_data(form=form)
+#         print("Errores al editar plato:", form.errors)
+
+#         ingrediente_formset = context.get("ingrediente_formset")
+#         if ingrediente_formset:
+#             for i, f in enumerate(ingrediente_formset.forms):
+#                 if f.errors:
+#                     print(f"Errores en ingrediente #{i}: {f.errors}")
+
+#         return self.render_to_response(context)
+
+
+class PlatoUpdate(LoginRequiredMixin, UpdateView):
+    model = Plato
+    form_class = PlatoForm
+    template_name = "AdminVideos/plato_ppal_update.html"
+
+    def get_template_names(self):
+        template_param = self.request.GET.get('tipopag')
+        templates = {
+            'Entrada': 'AdminVideos/entrada_update.html',
+            'Dip': 'AdminVideos/dip_update.html',
+            'Principal': 'AdminVideos/plato_ppal_update.html',
+            'Dash': 'AdminVideos/plato_ppal_update.html',
+            'Trago': 'AdminVideos/trago_update.html',
+            'Salsa': 'AdminVideos/salsa_update.html',
+            'Guarnicion': 'AdminVideos/guarnicion_update.html',
+            'Postre': 'AdminVideos/postre_update.html',
+            'Delivery': 'AdminVideos/delivery.html',
+            'Comerafuera': 'AdminVideos/comerafuera.html',
+        }
+        return [templates.get(template_param, self.template_name)]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        if self.request.method == "POST":
+            context["ingrediente_formset"] = IngredienteFormSet(self.request.POST, instance=self.object)
+        else:
+            context["ingrediente_formset"] = IngredienteFormSet(instance=self.object)
+
+        context['items'] = [tipo[0] for tipo in Plato.TIPOS_CHOICES]
+        context['tipopag'] = self.request.GET.get('tipopag', 'Dash')
+        return context
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        ingrediente_formset = context["ingrediente_formset"]
+
+        if ingrediente_formset.is_valid():
+            # Guardar el plato principal primero
+            plato = form.save(commit=False)
+            plato.propietario = self.request.user
+            plato.save()
+            form.save_m2m()
+
+            # Asignar correctamente la instancia del plato al formset
+            ingrediente_formset.instance = plato
+            ingrediente_formset.save()
+
+            # Concatenar ingredientes para el campo de texto
+            lista_ingredientes = []
+            for ing_form in ingrediente_formset:
+                if ing_form.cleaned_data and not ing_form.cleaned_data.get("DELETE", False):
+                    nombre = ing_form.cleaned_data.get("nombre_ingrediente")
+                    cantidad = ing_form.cleaned_data.get("cantidad")
+                    unidad = ing_form.cleaned_data.get("unidad")
+
+                    texto = nombre or ""
+                    if cantidad:
+                        texto += f" {cantidad}"
+                    if unidad:
+                        texto += f" {unidad}"
+                    lista_ingredientes.append(texto.strip())
+
+            plato.ingredientes = ", ".join(lista_ingredientes)
+            plato.save()
+
+            # Preparar variedades
+            variedades = {}
+            for i in range(1, 7):
+                variedad = form.cleaned_data.get(f'variedad{i}')
+                ingredientes_variedad_str = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
+                if variedad:
+                    variedades[f"variedad{i}"] = {
+                        "nombre": variedad,
+                        "ingredientes": ingredientes_variedad_str,
+                        "elegido": True
+                    }
+            plato.variedades = variedades
+            plato.save()
+
+            template_param = self.request.GET.get("tipopag")
+            return redirect(f"{reverse('videos-create')}?tipopag={template_param}&modificado=ok")
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+    def form_invalid(self, form):
+        context = self.get_context_data(form=form)
+        print("Errores al editar plato:", form.errors)
+
+        ingrediente_formset = context.get("ingrediente_formset")
+        if ingrediente_formset:
+            for i, f in enumerate(ingrediente_formset.forms):
+                if f.errors:
+                    print(f"Errores en ingrediente #{i}: {f.errors}")
+
+        return self.render_to_response(context)
+
 
 
 
