@@ -704,112 +704,6 @@ IngredienteFormSet = inlineformset_factory(
 )
 
 
-# class PlatoUpdate(LoginRequiredMixin, UpdateView):
-#     model = Plato
-#     form_class = PlatoForm
-#     template_name = "AdminVideos/plato_ppal_update.html"  # O dinámico como en PlatoCreate
-
-
-
-#     def get_template_names(self):
-#         template_param = self.request.GET.get('tipopag')
-#         templates = {
-#             'Entrada': 'AdminVideos/entrada_update.html',
-#             'Dip': 'AdminVideos/dip_update.html',
-#             'Principal': 'AdminVideos/plato_ppal_update.html',
-#             'Dash': 'AdminVideos/plato_ppal_update.html',
-#             'Trago': 'AdminVideos/trago_update.html',
-#             'Salsa': 'AdminVideos/salsa_update.html',
-#             'Guarnicion': 'AdminVideos/guarnicion_update.html',
-#             'Postre': 'AdminVideos/postre_update.html',
-#             'Delivery': 'AdminVideos/delivery.html',
-#             'Comerafuera': 'AdminVideos/comerafuera.html',
-#         }
-#         return [templates.get(template_param, self.template_name)]
-
-   
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-
-#         # Formset de ingredientes
-#         if self.request.method == "POST":
-#             context["ingrediente_formset"] = IngredienteFormSet(
-#                 self.request.POST, instance=self.object
-#             )
-#         else:
-#             context["ingrediente_formset"] = IngredienteFormSet(instance=self.object)
-
-#         # En Update, mostrar todos los tipos disponibles
-#         context['items'] = [tipo[0] for tipo in Plato.TIPOS_CHOICES]
-
-#         # Mantener tipopag en la URL si existe (opcional)
-#         context['tipopag'] = self.request.GET.get('tipopag', 'Dash')
-
-#         return context
-
-
-#     def form_valid(self, form):
-#         context = self.get_context_data()
-#         ingrediente_formset = context["ingrediente_formset"]
-
-#         if ingrediente_formset.is_valid():
-#             plato = form.save(commit=False)
-#             plato.propietario = self.request.user
-
-#             # --- Concatenar ingredientes ---
-#             lista_ingredientes = []
-#             for ing_form in ingrediente_formset:
-#                 if ing_form.cleaned_data and not ing_form.cleaned_data.get("DELETE", False):
-#                     nombre = ing_form.cleaned_data.get("nombre_ingrediente")
-#                     cantidad = ing_form.cleaned_data.get("cantidad")
-#                     unidad = ing_form.cleaned_data.get("unidad")
-
-#                     texto = nombre
-#                     if cantidad:
-#                         texto += f" {cantidad}"
-#                     if unidad:
-#                         texto += f" {unidad}"
-#                     lista_ingredientes.append(texto.strip())
-
-#             plato.ingredientes = ", ".join(lista_ingredientes)
-
-#             # Preparar variedades
-#             variedades = {}
-#             for i in range(1, 7):
-#                 variedad = form.cleaned_data.get(f'variedad{i}')
-#                 ingredientes_variedad_str = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
-#                 if variedad:
-#                     variedades[f"variedad{i}"] = {
-#                         "nombre": variedad,
-#                         "ingredientes": ingredientes_variedad_str,
-#                         "elegido": True
-#                     }
-
-#             plato.variedades = variedades
-#             plato.save()
-#             form.save_m2m()
-
-#             ingrediente_formset.instance = plato
-#             ingrediente_formset.save()
-
-#             template_param = self.request.GET.get("tipopag")
-#             return redirect(f"{reverse('videos-create')}?tipopag={template_param}&modificado=ok")
-#         else:
-#             return self.render_to_response(self.get_context_data(form=form))
-
-#     def form_invalid(self, form):
-#         context = self.get_context_data(form=form)
-#         print("Errores al editar plato:", form.errors)
-
-#         ingrediente_formset = context.get("ingrediente_formset")
-#         if ingrediente_formset:
-#             for i, f in enumerate(ingrediente_formset.forms):
-#                 if f.errors:
-#                     print(f"Errores en ingrediente #{i}: {f.errors}")
-
-#         return self.render_to_response(context)
-
 
 class PlatoUpdate(LoginRequiredMixin, UpdateView):
     model = Plato
@@ -844,57 +738,70 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
         context['tipopag'] = self.request.GET.get('tipopag', 'Dash')
         return context
 
+
     def form_valid(self, form):
-        context = self.get_context_data()
-        ingrediente_formset = context["ingrediente_formset"]
+        plato = form.save(commit=False)
+        plato.propietario = self.request.user
+        plato.save()
+        form.save_m2m()
 
-        if ingrediente_formset.is_valid():
-            # Guardar el plato principal primero
-            plato = form.save(commit=False)
-            plato.propietario = self.request.user
-            plato.save()
-            form.save_m2m()
+        # 🚨 Borrar ingredientes viejos
+        plato.ingredientes_en_plato.all().delete()
 
-            # Asignar correctamente la instancia del plato al formset
-            ingrediente_formset.instance = plato
-            ingrediente_formset.save()
+        # 🚀 Crear nuevos desde POST
+        total = int(self.request.POST.get("ingredientes_en_plato-TOTAL_FORMS", 0))
+        lista_ingredientes = []
 
-            # Concatenar ingredientes para el campo de texto
-            lista_ingredientes = []
-            for ing_form in ingrediente_formset:
-                if ing_form.cleaned_data and not ing_form.cleaned_data.get("DELETE", False):
-                    nombre = ing_form.cleaned_data.get("nombre_ingrediente")
-                    cantidad = ing_form.cleaned_data.get("cantidad")
-                    unidad = ing_form.cleaned_data.get("unidad")
+        for i in range(total):
+            ingrediente_id = self.request.POST.get(f"ingredientes_en_plato-{i}-ingrediente")
+            nombre = self.request.POST.get(f"ingredientes_en_plato-{i}-nombre_ingrediente")
+            cantidad = self.request.POST.get(f"ingredientes_en_plato-{i}-cantidad")
+            unidad = self.request.POST.get(f"ingredientes_en_plato-{i}-unidad")
 
-                    texto = nombre or ""
-                    if cantidad:
-                        texto += f" {cantidad}"
-                    if unidad:
-                        texto += f" {unidad}"
-                    lista_ingredientes.append(texto.strip())
+            # 👇 Aquí ponés el print para ver qué llega
+            print(i, ingrediente_id, nombre, cantidad, unidad)
 
-            plato.ingredientes = ", ".join(lista_ingredientes)
-            plato.save()
+            if ingrediente_id:  # ✅ aseguramos que hay un ingrediente elegido
+                try:
+                    ingrediente = Ingrediente.objects.get(pk=int(ingrediente_id))
+                except Ingrediente.DoesNotExist:
+                    continue
 
-            # Preparar variedades
-            variedades = {}
-            for i in range(1, 7):
-                variedad = form.cleaned_data.get(f'variedad{i}')
-                ingredientes_variedad_str = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
-                if variedad:
-                    variedades[f"variedad{i}"] = {
-                        "nombre": variedad,
-                        "ingredientes": ingredientes_variedad_str,
-                        "elegido": True
-                    }
-            plato.variedades = variedades
-            plato.save()
+                IngredienteEnPlato.objects.create(
+                    plato=plato,
+                    ingrediente=ingrediente,
+                    cantidad=float(cantidad) if cantidad else None,
+                    unidad=unidad or None,
+                )
 
-            template_param = self.request.GET.get("tipopag")
-            return redirect(f"{reverse('videos-create')}?tipopag={template_param}&modificado=ok")
-        else:
-            return self.render_to_response(self.get_context_data(form=form))
+                # Para campo de texto "ingredientes"
+                texto = ingrediente.nombre
+                if cantidad:
+                    texto += f" {cantidad}"
+                if unidad:
+                    texto += f" {unidad}"
+                lista_ingredientes.append(texto.strip())
+
+        plato.ingredientes = ", ".join(lista_ingredientes)
+        plato.save()
+
+        # Variedades (igual que antes)
+        variedades = {}
+        for i in range(1, 7):
+            variedad = form.cleaned_data.get(f'variedad{i}')
+            ingredientes_variedad_str = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
+            if variedad:
+                variedades[f"variedad{i}"] = {
+                    "nombre": variedad,
+                    "ingredientes": ingredientes_variedad_str,
+                    "elegido": True
+                }
+        plato.variedades = variedades
+        plato.save()
+
+        template_param = self.request.GET.get("tipopag")
+        return redirect(f"{reverse('videos-create')}?tipopag={template_param}&modificado=ok")
+
 
     def form_invalid(self, form):
         context = self.get_context_data(form=form)

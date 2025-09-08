@@ -109,31 +109,36 @@
 
 <div id="ingredientes-list">
     {{ ingrediente_formset.management_form }}
-    <ul class="list-group mb-3">
-        {% for form in ingrediente_formset.forms %}
-        <li class="list-group-item d-flex gap-2 align-items-center">
-            {% if form.instance.pk %}
-                <!-- Id del ingrediente existente -->
-                <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-id" value="{{ form.instance.pk }}">
-            {% endif %}
-            <input type="text" name="ingredientes_en_plato-{{ forloop.counter0 }}-nombre_ingrediente"
-                   value="{{ form.nombre_ingrediente.value|default:'' }}" class="form-control form-control-sm">
-                   
-            <!-- <input type="text" name="ingredientes_en_plato-{{ forloop.counter0 }}-cantidad"
-                   value="{{ form.cantidad.value|default:'' }}" class="form-control form-control-sm"> -->
+   <ul class="list-group mb-3">
+    {% for form in ingrediente_formset.forms %}
+    <li class="list-group-item d-flex gap-2 align-items-center">
+        {% if form.instance.pk %}
+            <!-- Id de la relación IngredienteEnPlato -->
+            <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-id" value="{{ form.instance.pk }}">
+        {% endif %}
 
-             <input type="text" name="ingredientes_en_plato-{{ forloop.counter0 }}-cantidad"
-       value="{% if form.cantidad.value %}{{ form.cantidad.value|stringformat:"g" }}{% else %}{% endif %}"
-       class="form-control form-control-sm">
+        {% if form.instance.ingrediente_id %}
+            <!-- Id del Ingrediente real -->
+            <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-ingrediente"
+                   value="{{ form.instance.ingrediente_id }}">
+        {% endif %}
 
+        <!-- Nombre solo como texto editable/visual -->
+        <input type="text" name="ingredientes_en_plato-{{ forloop.counter0 }}-nombre_ingrediente"
+               value="{{ form.instance.ingrediente.nombre|default_if_none:'' }}"
+               class="form-control form-control-sm">
 
+        <input type="text" name="ingredientes_en_plato-{{ forloop.counter0 }}-cantidad"
+               value="{% if form.cantidad.value %}{{ form.cantidad.value|stringformat:"g" }}{% endif %}"
+               class="form-control form-control-sm">
 
-            <input type="text" name="ingredientes_en_plato-{{ forloop.counter0 }}-unidad"
-                   value="{{ form.unidad.value|default:'' }}" class="form-control form-control-sm">
-            <button type="button" class="btn btn-sm btn-danger eliminar-ingrediente">X</button>
-        </li>
-        {% endfor %}
-    </ul>
+        <input type="text" name="ingredientes_en_plato-{{ forloop.counter0 }}-unidad"
+               value="{{ form.unidad.value|default:'' }}" class="form-control form-control-sm">
+
+        <button type="button" class="btn btn-sm btn-danger eliminar-ingrediente">X</button>
+    </li>
+    {% endfor %}
+</ul>
 </div>
 
 
@@ -355,6 +360,8 @@ function agregarIngrediente(list, totalFormsInput) {
     let totalForms = parseInt(totalFormsInput.value);
 
     // Obtener datos del modal
+    const idIngrediente = $('#modal-nombre').select2('data')[0]?.id || '';
+    
     const nombre = $('#modal-nombre').select2('data')[0]?.text || '';
     // const cantidad = document.getElementById("modal-cantidad").value;
     const cantidad = document.getElementById("modal-cantidad").value.replace(',', '.');
@@ -365,6 +372,8 @@ function agregarIngrediente(list, totalFormsInput) {
     const li = document.createElement("li");
     li.className = "list-group-item d-flex gap-2 align-items-center";
     li.innerHTML = `
+        <input type="hidden" name="ingredientes_en_plato-${totalForms}-ingrediente"
+           value="${idIngrediente}">
         <input type="text" name="ingredientes_en_plato-${totalForms}-nombre_ingrediente"
                value="${nombre}" class="form-control form-control-sm" placeholder="Ingrediente">
         <input type="text" name="ingredientes_en_plato-${totalForms}-cantidad"
