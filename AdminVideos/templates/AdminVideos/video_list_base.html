@@ -92,9 +92,13 @@
                         {% else %}
                           border-danger border-3
                         {% endif %}" style="width: 6rem;">
-        <a href="{% url 'platos-detail' plato.id %}">
+        <a href="{% url 'videos-update' plato.id %}">
           <img src="{{ plato.image_url }}" class="img-thumbnail" alt="Imagen del Plato">
         </a>
+
+        <!-- <a href="{% url 'videos-update' plato.id %}" type="button"  class="btn btn-sm btn-outline-secondary">Editar</a>  -->
+
+
         <div class="position-absolute top-0 mt-1 start-50 translate-middle-x text-center text-white bg-dark rounded">
           <h6 class="mb-0 small"> {{ plato.nombre_plato }}</h6>
         </div>

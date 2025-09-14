@@ -134,7 +134,12 @@
 
         <input type="checkbox" name="ingredientes_en_plato-{{ forloop.counter0 }}-DELETE" class="delete-flag d-none">
 
-        <button type="button" class="btn btn-sm btn-danger eliminar-ingrediente">X</button>
+        <!-- <button type="button" class="btn btn-sm btn-danger eliminar-ingrediente">X</button> -->
+        <button type="button"
+            class="btn btn-sm btn-danger eliminar-ingrediente"
+            onclick="eliminarIngrediente(event)">X</button>
+
+
     </li>
     {% endfor %}
   </ul>
@@ -365,12 +370,16 @@ function agregarIngrediente(list, totalFormsInput) {
 }
 
 function eliminarIngrediente(e) {
-  const btn = e.target.closest('.eliminar-ingrediente');
+  // si vino de onclick, e.target es el botón; si vino delegado, usamos closest
+  const btn = e.target.closest ? e.target.closest('.eliminar-ingrediente') : e.target;
   if (!btn) return;
+
+  console.log('[eliminarIngrediente] click en X'); // <-- debería verse en consola
 
   const li = btn.closest('li');
   if (!li) return;
 
+  // marcar DELETE (crear si faltara)
   let del = li.querySelector('input[name$="-DELETE"]');
   if (!del) {
     const anyField = li.querySelector('input[name^="ingredientes_en_plato-"]');
@@ -385,9 +394,17 @@ function eliminarIngrediente(e) {
   }
   if (del) del.checked = true;
 
-  // ocultar inmediatamente
-  li.classList.add('d-none');
+  // ocultar de forma contundente (inline gana siempre)
+  li.style.setProperty('display', 'none', 'important');
+  li.setAttribute('aria-hidden', 'true');
+
+  // evitar que algún handler externo haga algo raro
+  if (e.stopPropagation) e.stopPropagation();
+  if (e.preventDefault) e.preventDefault();
+  return false;
 }
+
+
 </script>
 
 <!-- ========================= -->
@@ -428,7 +445,7 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   // Eliminar (delegado en la UL)
-  ul.addEventListener("click", eliminarIngrediente);
+//   ul.addEventListener("click", eliminarIngrediente);
 });
 </script>
 

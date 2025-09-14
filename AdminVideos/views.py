@@ -572,37 +572,65 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
     }
 
 
+    # def get_form(self, form_class=None):
+    #     form = super().get_form(form_class)
+    #     template_param = self.request.GET.get('tipopag')
+    #     # if template_param == "Dash":
+    #     #     template_param = "Principal"
+
+    #     opciones_disponibles = self.TIPOS_POR_TEMPLATE.get(template_param, [])
+
+    #     if opciones_disponibles:
+    #         # Mostrar solo las opciones válidas
+    #         form.fields['tipos'].queryset = TipoPlato.objects.filter(nombre__in=opciones_disponibles)
+
+    #         # Marcar solo la opción que coincide con el tipopag como seleccionada por defecto
+    #         try:
+    #             tipo_por_defecto = TipoPlato.objects.get(nombre=template_param)
+    #             form.fields['tipos'].initial = [tipo_por_defecto.pk]
+    #         except TipoPlato.DoesNotExist:
+    #             form.fields['tipos'].initial = ["Principal"]
+
+    #         # if len(opciones_disponibles) == 1:
+    #         #     form.fields['tipos'].widget = forms.HiddenInput()
+
+    #         # Si hay una sola opción posible, ocultar el campo pero lo sigue mandando como lista para que lo pueda validar
+    #         if len(opciones_disponibles) == 1:
+    #             tipo_unico = form.fields['tipos'].queryset.first()  # o puedes usar el nombre si prefieres
+    #             form.fields['tipos'].initial = [tipo_unico.pk]
+    #             form.fields['tipos'].widget = forms.MultipleHiddenInput()
+
+    #     else:
+    #         # No mostrar ninguna opción si el tipopag no tiene mapeo
+    #         form.fields['tipos'].queryset = TipoPlato.objects.none()
+    #         form.fields['tipos'].initial = []
+
+    #     return form
+
+# 1) Alinear “tipos” con tu modelo actual (CharField CSV)
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         template_param = self.request.GET.get('tipopag')
-        # if template_param == "Dash":
-        #     template_param = "Principal"
+        if template_param == "Dash":
+           template_param = "Principal"
 
-        opciones_disponibles = self.TIPOS_POR_TEMPLATE.get(template_param, [])
+        opciones = self.TIPOS_POR_TEMPLATE.get(template_param, [])
+        if opciones:
+            # Filtrar CHOICES del MultipleChoiceField actual
+            form.fields['tipos'].choices = [
+                (k, v) for (k, v) in Plato.TIPOS_CHOICES if k in opciones
+            ]
+            # Inicial por defecto
+            if template_param in opciones:
+                form.fields['tipos'].initial = [template_param]
+            elif form.fields['tipos'].choices:
+                form.fields['tipos'].initial = [form.fields['tipos'].choices[0][0]]
 
-        if opciones_disponibles:
-            # Mostrar solo las opciones válidas
-            form.fields['tipos'].queryset = TipoPlato.objects.filter(nombre__in=opciones_disponibles)
-
-            # Marcar solo la opción que coincide con el tipopag como seleccionada por defecto
-            try:
-                tipo_por_defecto = TipoPlato.objects.get(nombre=template_param)
-                form.fields['tipos'].initial = [tipo_por_defecto.pk]
-            except TipoPlato.DoesNotExist:
-                form.fields['tipos'].initial = ["Principal"]
-
-            # if len(opciones_disponibles) == 1:
-            #     form.fields['tipos'].widget = forms.HiddenInput()
-
-            # Si hay una sola opción posible, ocultar el campo pero lo sigue mandando como lista para que lo pueda validar
-            if len(opciones_disponibles) == 1:
-                tipo_unico = form.fields['tipos'].queryset.first()  # o puedes usar el nombre si prefieres
-                form.fields['tipos'].initial = [tipo_unico.pk]
+            # Si hay solo una opción, oculto el widget (pero envío el valor)
+            if len(form.fields['tipos'].choices) == 1:
                 form.fields['tipos'].widget = forms.MultipleHiddenInput()
-
         else:
-            # No mostrar ninguna opción si el tipopag no tiene mapeo
-            form.fields['tipos'].queryset = TipoPlato.objects.none()
+            form.fields['tipos'].choices = []  # sin opciones
             form.fields['tipos'].initial = []
 
         return form

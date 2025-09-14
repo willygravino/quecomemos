@@ -69,69 +69,6 @@ class PlatoForm(forms.ModelForm):
 
 
 
-
-
-# class IngredienteEnPlatoForm(forms.ModelForm):
-  
-#     nombre_ingrediente = forms.CharField(
-#         max_length=100,
-#         label="",
-#         required=False,   # <-- Esto hace que no sea obligatorio
-#         help_text="Escribí el nombre del ingrediente",
-#     )
-
-
-#     class Meta:
-#         model = IngredienteEnPlato
-#         fields = ['ingrediente','cantidad', 'unidad']
-#         labels = {
-#             'ingrediente': '',
-#             'cantidad': '',     # Podés modificar o quitar la etiqueta
-#             'unidad': '',               # Esto quita la etiqueta de 'unidad'
-#         }
-        
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-
-#         # Ordenamos los campos incluyendo el manual
-#         self.order_fields(['nombre_ingrediente', 'cantidad', 'unidad'])
-
-#         # Si se está editando una instancia existente, precargamos el nombre del ingrediente
-#         if self.instance and self.instance.pk and self.instance.ingrediente:
-#             self.fields['nombre_ingrediente'].initial = self.instance.ingrediente.nombre
-
-#         # Manejar cantidad para que muestre "9" en vez de "9.0", pero manteniendo decimales
-#         if self.instance and self.instance.pk and self.instance.cantidad is not None:
-#             cantidad = self.instance.cantidad
-#             if cantidad == int(cantidad):
-#                 cantidad = str(int(cantidad))
-#             else:
-#                 cantidad = str(cantidad)
-#             self.fields['cantidad'].initial = cantidad
-
-#         # Agregamos clases Bootstrap como placeholder opcional
-#         self.fields['nombre_ingrediente'].widget.attrs.update({'placeholder': 'Ingrediente'})
-#         self.fields['cantidad'].widget.attrs.update({'placeholder': 'Cantidad'})
-#         # self.fields['unidad'].empty_label = "Unidad de medida"
-#         self.fields['unidad'].choices = [('', 'Unidad de medida')] + list(self.fields['unidad'].choices)
-
-
-#     def save(self, commit=True):
-#         nombre = self.cleaned_data['nombre_ingrediente']
-#         ingrediente_obj, created = Ingrediente.objects.get_or_create(nombre__iexact=nombre, defaults={'nombre': nombre})
-#         self.instance.ingrediente = ingrediente_obj
-#         return super().save(commit=commit)
-    
-#     def clean_cantidad(self):
-#         cantidad = self.cleaned_data.get('cantidad')
-#         if cantidad is None:
-#             return None
-#         # Reemplazar coma por punto
-#         cantidad_str = str(cantidad).replace(',', '.')
-#         try:
-#             return float(cantidad_str)
-#         except ValueError:
-#             raise forms.ValidationError("Cantidad inválida")
         
 class IngredienteEnPlatoForm(forms.ModelForm):
   
@@ -196,7 +133,7 @@ IngredienteEnPlatoFormSet = forms.inlineformset_factory(
     Plato,
     IngredienteEnPlato,
     form=IngredienteEnPlatoForm,
-    extra=1,         # siempre un form vacío al final
+    extra=0,         # antes estaba en 1, siempre un form vacío al final
     can_delete=True, # checkbox para borrar
 )
   
