@@ -7,12 +7,15 @@
 {% load widget_tweaks %}
 
 
+
+
 <div class="album py-1 bg-dark">
     <section class="py-1 text-center text-white container">
         <div class="row py-lg-1">
             <div class="col-lg-8 col-md-8 mx-auto">
-                <h4 class="fw-light">PLATO PRINCIPAL.</h4>
-                <h5 class="fw-bold">FORMULARIO PARA REFACTORIZACIÓN.</h5>
+                {% block tipo-de-formulario %}{% endblock %}
+                <!-- <h4 class="fw-light">PLATO PRINCIPAL.</h4> -->
+                <!-- <h5 class="fw-bold">FORMULARIO PARA REFACTORIZACIÓN.</h5> -->
             </div>
         </div>
     </section>
