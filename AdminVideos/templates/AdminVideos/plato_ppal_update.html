@@ -106,24 +106,21 @@
   {% endfor %}
 </div> -->
 
-
 <div id="ingredientes-list">
-    {{ ingrediente_formset.management_form }}
-   <ul class="list-group mb-3">
+  {{ ingrediente_formset.management_form }}
+
+  <ul id="ingredientes-ul" class="list-group mb-3">
     {% for form in ingrediente_formset.forms %}
     <li class="list-group-item d-flex gap-2 align-items-center">
         {% if form.instance.pk %}
-            <!-- Id de la relación IngredienteEnPlato -->
             <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-id" value="{{ form.instance.pk }}">
         {% endif %}
 
         {% if form.instance.ingrediente_id %}
-            <!-- Id del Ingrediente real -->
             <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-ingrediente"
                    value="{{ form.instance.ingrediente_id }}">
         {% endif %}
 
-        <!-- Nombre solo como texto editable/visual -->
         <input type="text" name="ingredientes_en_plato-{{ forloop.counter0 }}-nombre_ingrediente"
                value="{{ form.instance.ingrediente.nombre|default_if_none:'' }}"
                class="form-control form-control-sm">
@@ -135,10 +132,16 @@
         <input type="text" name="ingredientes_en_plato-{{ forloop.counter0 }}-unidad"
                value="{{ form.unidad.value|default:'' }}" class="form-control form-control-sm">
 
+        <input type="checkbox" name="ingredientes_en_plato-{{ forloop.counter0 }}-DELETE" class="delete-flag d-none">
+
         <button type="button" class="btn btn-sm btn-danger eliminar-ingrediente">X</button>
     </li>
     {% endfor %}
-</ul>
+  </ul>
+
+
+
+
 </div>
 
 
@@ -321,123 +324,111 @@
   </div>
 </div>
 
-
-<!-- ========================= -->
-<!-- 1. Configuración del modal y Select2 -->
-<!-- ========================= -->
-<script>
-function inicializarSelect2() {
-    $('#modal-nombre').select2({
-        placeholder: 'Selecciona un ingrediente',
-        ajax: {
-            url: '/api/ingredientes/',
-            dataType: 'json',
-            delay: 250,
-            data: params => ({ q: params.term || '' }),
-            processResults: data => ({
-                results: data.map(item => ({ id:item.id, text:item.nombre }))
-            }),
-            cache: true
-        },
-        minimumInputLength: 0,
-        dropdownParent: $('#ingredienteModal'),
-        allowClear: true
-    }).select2('open');
-}
-
-function configurarModal() {
-    $('#ingredienteModal').on('shown.bs.modal', inicializarSelect2);
-}
-</script>
-
-
 <!-- ========================= -->
 <!-- 2. Funciones de ingredientes -->
 <!-- ========================= -->
 <script>
 function agregarIngrediente(list, totalFormsInput) {
-    // Obtener índice del nuevo formulario
-    let totalForms = parseInt(totalFormsInput.value);
+  const totalForms = parseInt(totalFormsInput.value, 10);
+  const prefix = 'ingredientes_en_plato';
 
-    // Obtener datos del modal
-    const idIngrediente = $('#modal-nombre').select2('data')[0]?.id || '';
-    
-    const nombre = $('#modal-nombre').select2('data')[0]?.text || '';
-    // const cantidad = document.getElementById("modal-cantidad").value;
-    const cantidad = document.getElementById("modal-cantidad").value.replace(',', '.');
+  const sel = $('#modal-nombre').select2('data')[0] || {};
+  const idIngrediente = sel.id || '';
+  const nombre = sel.text || '';
+  const cantidad = document.getElementById("modal-cantidad").value.replace(',', '.');
+  const unidad = document.getElementById("modal-unidad").value;
 
-    const unidad = document.getElementById("modal-unidad").value;
+  const ul = document.getElementById("ingredientes-ul");
+  if (!ul) { console.error('No se encontró #ingredientes-ul'); return; }
 
-    // Crear li con inputs numerados correctamente
-    const li = document.createElement("li");
-    li.className = "list-group-item d-flex gap-2 align-items-center";
-    li.innerHTML = `
-        <input type="hidden" name="ingredientes_en_plato-${totalForms}-ingrediente"
-           value="${idIngrediente}">
-        <input type="text" name="ingredientes_en_plato-${totalForms}-nombre_ingrediente"
-               value="${nombre}" class="form-control form-control-sm" placeholder="Ingrediente">
-        <input type="text" name="ingredientes_en_plato-${totalForms}-cantidad"
-               value="${cantidad}" class="form-control form-control-sm" placeholder="Cantidad">
-        <input type="text" name="ingredientes_en_plato-${totalForms}-unidad"
-               value="${unidad}" class="form-control form-control-sm" placeholder="Unidad">
-        <button type="button" class="btn btn-sm btn-danger ms-2 eliminar-ingrediente">X</button>
-    `;
-    list.appendChild(li);
+  const li = document.createElement("li");
+  li.className = "list-group-item d-flex gap-2 align-items-center";
+  li.innerHTML = `
+    <input type="hidden" name="${prefix}-${totalForms}-ingrediente" value="${idIngrediente}">
+    <input type="text"   name="${prefix}-${totalForms}-nombre_ingrediente" value="${nombre}"  class="form-control form-control-sm" placeholder="Ingrediente">
+    <input type="text"   name="${prefix}-${totalForms}-cantidad"            value="${cantidad}" class="form-control form-control-sm" placeholder="Cantidad">
+    <input type="text"   name="${prefix}-${totalForms}-unidad"              value="${unidad}"   class="form-control form-control-sm" placeholder="Unidad">
+    <input type="checkbox" name="${prefix}-${totalForms}-DELETE" class="delete-flag d-none">
+    <button type="button" class="btn btn-sm btn-danger ms-2 eliminar-ingrediente">X</button>
+  `;
+  ul.appendChild(li);
 
-    // Actualizar TOTAL_FORMS
-    totalFormsInput.value = totalForms + 1;
+  totalFormsInput.value = totalForms + 1;
 
-    // Resetear modal
-    $('#modal-nombre').val(null).trigger('change');
-    document.getElementById("modal-cantidad").value = "";
-    document.getElementById("modal-unidad").value = "";
+  $('#modal-nombre').val(null).trigger('change');
+  document.getElementById("modal-cantidad").value = "";
+  document.getElementById("modal-unidad").value = "";
 
-    bootstrap.Modal.getInstance(document.getElementById("ingredienteModal")).hide();
+  const modalEl = document.getElementById("ingredienteModal");
+  const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+  modal.hide();
 }
 
-function eliminarIngrediente(e, list, totalFormsInput) {
-    if(e.target.classList.contains("eliminar-ingrediente")){
-        e.target.parentElement.remove();
+function eliminarIngrediente(e) {
+  const btn = e.target.closest('.eliminar-ingrediente');
+  if (!btn) return;
 
-        // Reenumerar los inputs para que los índices sean consecutivos
-        const items = list.querySelectorAll('li');
-        items.forEach((li, index) => {
-            const inputs = li.querySelectorAll('input');
-            inputs[0].name = `ingredientes_en_plato-${index}-nombre_ingrediente`;
-            inputs[1].name = `ingredientes_en_plato-${index}-cantidad`;
-            inputs[2].name = `ingredientes_en_plato-${index}-unidad`;
-        });
+  const li = btn.closest('li');
+  if (!li) return;
 
-        // Actualizar TOTAL_FORMS
-        totalFormsInput.value = items.length;
+  let del = li.querySelector('input[name$="-DELETE"]');
+  if (!del) {
+    const anyField = li.querySelector('input[name^="ingredientes_en_plato-"]');
+    if (anyField) {
+      const base = anyField.name.replace(/-(nombre_ingrediente|cantidad|unidad|ingrediente|id)$/, '');
+      del = document.createElement('input');
+      del.type = 'checkbox';
+      del.name = `${base}-DELETE`;
+      del.className = 'delete-flag d-none';
+      li.appendChild(del);
     }
+  }
+  if (del) del.checked = true;
+
+  // ocultar inmediatamente
+  li.classList.add('d-none');
 }
 </script>
 
-
-
-
-
 <!-- ========================= -->
-<!-- 3. Script principal -->
+<!-- Init único (DOMContentLoaded) -->
 <!-- ========================= -->
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const list = document.getElementById("ingredientes-list");
-    const totalFormsInput = document.getElementById("id_ingredientes_en_plato-TOTAL_FORMS");
+  const list = document.getElementById("ingredientes-list");
+  const ul = document.getElementById("ingredientes-ul");
+  const totalFormsInput = document.getElementById("id_ingredientes_en_plato-TOTAL_FORMS");
 
-    // Inicializar modal
-    configurarModal();
+  if (!list || !ul || !totalFormsInput) {
+    console.error('Faltan nodos del formset (#ingredientes-list / #ingredientes-ul / TOTAL_FORMS)');
+  }
 
-    // Guardar ingrediente
-    document.getElementById("guardarIngrediente").addEventListener("click", function() {
-        agregarIngrediente(list, totalFormsInput);
-    });
+  // Select2: inicializar al abrir el modal
+  function inicializarSelect2() {
+    $('#modal-nombre').select2({
+      placeholder: 'Selecciona un ingrediente',
+      ajax: {
+        url: '/api/ingredientes/',
+        dataType: 'json',
+        delay: 250,
+        data: params => ({ q: params.term || '' }),
+        processResults: data => ({ results: data.map(item => ({ id:item.id, text:item.nombre })) }),
+        cache: true
+      },
+      minimumInputLength: 0,
+      dropdownParent: $('#ingredienteModal'),
+      allowClear: true
+    }).select2('open');
+  }
+  $('#ingredienteModal').on('shown.bs.modal', inicializarSelect2);
 
-    // Eliminar ingrediente
-    list.addEventListener("click", function(e){
-        eliminarIngrediente(e, list, totalFormsInput);
-    });
+  // Guardar (agregar ítem) desde el modal
+  document.getElementById("guardarIngrediente").addEventListener("click", function() {
+    agregarIngrediente(list, totalFormsInput);
+  });
+
+  // Eliminar (delegado en la UL)
+  ul.addEventListener("click", eliminarIngrediente);
 });
 </script>
 

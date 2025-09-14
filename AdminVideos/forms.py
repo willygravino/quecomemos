@@ -191,7 +191,16 @@ class IngredienteEnPlatoForm(forms.ModelForm):
         except ValueError:
             raise forms.ValidationError("Cantidad inválida")
 
+
+IngredienteEnPlatoFormSet = forms.inlineformset_factory(
+    Plato,
+    IngredienteEnPlato,
+    form=IngredienteEnPlatoForm,
+    extra=1,         # siempre un form vacío al final
+    can_delete=True, # checkbox para borrar
+)
   
+
 class LugarForm(forms.ModelForm):
     class Meta:
         model = Lugar

@@ -135,7 +135,7 @@ class Ingrediente(models.Model):
 
 class IngredienteEnPlato(models.Model):
     UNIDADES_CHOICES = [
-        # ('','-'),
+        ('','-'),
         ('unidad', 'unidad'),
         ('gr', 'gr'),
         ('pizca', 'pizca'),
