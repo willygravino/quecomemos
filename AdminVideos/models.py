@@ -117,9 +117,16 @@ class Plato(models.Model):
 
     variedades = models.JSONField(null=True, blank=True)
 
+    # @property
+    # def image_url(self):
+    #     return self.image.url if self.image else '/media/avatares/logo.png'
+    
     @property
     def image_url(self):
-        return self.image.url if self.image else '/media/avatares/logo.png'
+        try:
+            return self.image.url
+        except (ValueError, FileNotFoundError):
+            return '/media/avatares/logo.png'
 
     def __str__(self):
         return f"{self.id} - {self.nombre_plato} de {self.propietario}"
@@ -135,7 +142,7 @@ class Ingrediente(models.Model):
 
 class IngredienteEnPlato(models.Model):
     UNIDADES_CHOICES = [
-        ('','-'),
+        ('-','-'),
         ('unidad', 'unidad'),
         ('gr', 'gr'),
         ('pizca', 'pizca'),
@@ -151,7 +158,7 @@ class IngredienteEnPlato(models.Model):
     plato = models.ForeignKey(Plato, on_delete=models.CASCADE, related_name='ingredientes_en_plato')
     ingrediente = models.ForeignKey(Ingrediente, on_delete=models.CASCADE,null=True, blank=True)
     cantidad = models.FloatField(null=True, blank=True)
-    unidad = models.CharField(max_length=20, choices=UNIDADES_CHOICES, default='-',null=True, blank=True)
+    unidad = models.CharField(max_length=20, choices=UNIDADES_CHOICES, default='-', blank=True)
 
     def __str__(self):
         return f"{self.cantidad or ''} {self.unidad} de {self.ingrediente} en {self.plato}"

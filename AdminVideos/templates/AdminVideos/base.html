@@ -481,9 +481,14 @@
                                                 <div class="mb-1 ml-1 d-flex align-items-center text-primary">
                                                     <span
                                                         class="material-symbols-outlined text-danger fs-6">wand_shine</span>
+                                                     
 
-                                                    <a href="{% url 'platos-detail' plato.id %}"
+                                                    <!-- <a href="{% url 'platos-detail' plato.id %}"
                                                         class="text-decoration-none me-2">
+                                                        &nbsp; {{ plato.nombre }}
+                                                    </a> -->
+
+                                                      <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
                                                         &nbsp; {{ plato.nombre }}
                                                     </a>
 
@@ -516,7 +521,7 @@
 
                                                     <span                                              class="material-symbols-outlined text-danger fs-6">wand_shine</span>
 
-                                                    <a href="{% url 'platos-detail' plato.id %}"
+                                                    <a href="{% url 'videos-update' plato.id %}"
                                                         class="text-decoration-none me-2">
                                                         &nbsp; {{ plato.nombre }}
                                                     </a>
@@ -555,7 +560,7 @@
                                                     <span class="material-symbols-outlined text-danger fs-6">wand_shine</span>
 
 
-                                                    <a href="{% url 'platos-detail' plato.id %}"
+                                                    <a href="{% url 'videos-update' plato.id %}"
                                                         class="text-decoration-none me-2">
                                                         &nbsp; {{ plato.nombre }}
                                                     </a>
@@ -594,7 +599,7 @@
                                                     <span
                                                         class="material-symbols-outlined text-danger fs-6">wand_shine</span>
 
-                                                    <a href="{% url 'platos-detail' plato.id %}"
+                                                    <a href="{% url 'videos-update' plato.id %}"
                                                         class="text-decoration-none me-2">
                                                         &nbsp; {{ plato.nombre }}
                                                     </a>
