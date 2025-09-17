@@ -2222,57 +2222,123 @@ def generar_elegido_desde_historico(historico, fecha_activa):
     return menu_dia
 
 
+# def random_dia(request, dia_nombre):
+#     usuario = request.user
+#     mensaje_reinicio = None
+
+#     if not dia_nombre:
+#         return JsonResponse({"error": "Día inválido"}, status=400)
+
+#     dia_nombre = normalizar_dia(dia_nombre)[:2]  # "LU", "MA", ...
+
+#     qs = HistoricoDia.objects.filter(
+#         propietario=usuario,
+#         dia_semana=dia_nombre,
+#         ya_sugerido=False
+#     )
+
+#     if not qs.exists():
+#         HistoricoDia.objects.filter(propietario=usuario, dia_semana=dia_nombre)\
+#             .update(ya_sugerido=False)
+#         qs = HistoricoDia.objects.filter(
+#             propietario=usuario, dia_semana=dia_nombre, ya_sugerido=False
+#         )
+#         mensaje_reinicio = "Se reinició la lista de registros sugeridos"
+
+#     if not qs.exists():
+#         return JsonResponse({"error": "No hay registros para ese día"}, status=404)
+
+#     # Elegimos un registro al azar
+#     random_index = random.randint(0, qs.count() - 1)
+#     registro = qs.all()[random_index]
+
+#     # Marcamos como sugerido
+#     registro.ya_sugerido = True
+#     registro.save()
+
+#     # Generamos el ElegidosXDia usando la nueva helper
+#     dia_activo = request.session.get('dia_activo', None)
+#     elegido = generar_elegido_desde_historico(registro, dia_activo)
+
+#     # Respuesta (si la necesitaras en JSON; vos redirigís)
+#     items = list(registro.items.all())
+#     respuesta = {
+#         "id": registro.id,
+#         "fecha": registro.fecha.strftime("%Y-%m-%d"),
+#         "nombre_dia": registro.dia_semana,
+#         "desayuno": [it.plato_id_ref for it in items if it.momento == "desayuno"],
+#         "almuerzo": [it.plato_id_ref for it in items if it.momento == "almuerzo"],
+#         "merienda": [it.plato_id_ref for it in items if it.momento == "merienda"],
+#         "cena": [it.plato_id_ref for it in items if it.momento == "cena"],
+#     }
+#     if mensaje_reinicio:
+#         respuesta["mensaje"] = mensaje_reinicio
+
+#     messages.success(request, f"Se generó un menú para el día {dia_activo}")
+#     return redirect("filtro-de-platos")
+
+
+def _validar_y_purgar(historico: HistoricoDia) -> bool:
+    """True si TODOS los platos existen. Si falta alguno, borra items + histórico y devuelve False."""
+    ids = list(historico.items.values_list("plato_id_ref", flat=True))
+    if not ids:
+        with transaction.atomic():
+            historico.items.all().delete()
+            historico.delete()
+        return False
+
+    existentes = set(Plato.objects.filter(id__in=ids).values_list("id", flat=True))
+    if len(existentes) != len(ids):
+        with transaction.atomic():
+            historico.items.all().delete()
+            historico.delete()
+        return False
+    return True
+
+
 def random_dia(request, dia_nombre):
     usuario = request.user
-    mensaje_reinicio = None
-
     if not dia_nombre:
         return JsonResponse({"error": "Día inválido"}, status=400)
 
     dia_nombre = normalizar_dia(dia_nombre)[:2]  # "LU", "MA", ...
 
-    qs = HistoricoDia.objects.filter(
-        propietario=usuario,
-        dia_semana=dia_nombre,
-        ya_sugerido=False
-    )
+    # solo no sugeridos
+    qs = HistoricoDia.objects.filter(propietario=usuario, dia_semana=dia_nombre, ya_sugerido=False)
 
+    # si no hay, reiniciar flags
     if not qs.exists():
-        HistoricoDia.objects.filter(propietario=usuario, dia_semana=dia_nombre)\
-            .update(ya_sugerido=False)
-        qs = HistoricoDia.objects.filter(
-            propietario=usuario, dia_semana=dia_nombre, ya_sugerido=False
-        )
-        mensaje_reinicio = "Se reinició la lista de registros sugeridos"
+        HistoricoDia.objects.filter(propietario=usuario, dia_semana=dia_nombre).update(ya_sugerido=False)
+        qs = HistoricoDia.objects.filter(propietario=usuario, dia_semana=dia_nombre, ya_sugerido=False)
+        if not qs.exists():
+            return JsonResponse({"error": "No hay registros para ese día"}, status=404)
+        messages.info(request, "Se reinició la lista de registros sugeridos")
 
-    if not qs.exists():
-        return JsonResponse({"error": "No hay registros para ese día"}, status=404)
+    # intentar hasta encontrar uno válido o agotar
+    MAX_INTENTOS = 100
+    intentos = 0
+    registro_valido = None
 
-    # Elegimos un registro al azar
-    random_index = random.randint(0, qs.count() - 1)
-    registro = qs.all()[random_index]
+    while qs.exists() and intentos < MAX_INTENTOS:
+        intentos += 1
+        registro = qs.all()[random.randint(0, qs.count() - 1)]
 
-    # Marcamos como sugerido
-    registro.ya_sugerido = True
-    registro.save()
+        if _validar_y_purgar(registro):
+            registro_valido = registro
+            break
+        # si se purgó dentro de _validar_y_purgar, refrescamos el queryset
+        qs = HistoricoDia.objects.filter(propietario=usuario, dia_semana=dia_nombre, ya_sugerido=False)
 
-    # Generamos el ElegidosXDia usando la nueva helper
+    if not registro_valido:
+        return JsonResponse({"error": "No hay registros válidos para ese día"}, status=404)
+
+    # marcar como sugerido
+    registro_valido.ya_sugerido = True
+    registro_valido.save()
+
+    # crear ElegidosXDia con tu función existente
     dia_activo = request.session.get('dia_activo', None)
-    elegido = generar_elegido_desde_historico(registro, dia_activo)
-
-    # Respuesta (si la necesitaras en JSON; vos redirigís)
-    items = list(registro.items.all())
-    respuesta = {
-        "id": registro.id,
-        "fecha": registro.fecha.strftime("%Y-%m-%d"),
-        "nombre_dia": registro.dia_semana,
-        "desayuno": [it.plato_id_ref for it in items if it.momento == "desayuno"],
-        "almuerzo": [it.plato_id_ref for it in items if it.momento == "almuerzo"],
-        "merienda": [it.plato_id_ref for it in items if it.momento == "merienda"],
-        "cena": [it.plato_id_ref for it in items if it.momento == "cena"],
-    }
-    if mensaje_reinicio:
-        respuesta["mensaje"] = mensaje_reinicio
+    generar_elegido_desde_historico(registro_valido, dia_activo)
 
     messages.success(request, f"Se generó un menú para el día {dia_activo}")
     return redirect("filtro-de-platos")
