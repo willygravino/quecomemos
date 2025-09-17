@@ -1,28 +1,24 @@
 from collections import defaultdict
-from itertools import groupby
 import locale
 import unicodedata
 from django import forms
 from django.contrib import messages  # Para mostrar mensajes al usuario
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-from django.forms import inlineformset_factory
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
-from AdminVideos.models import ComidaDelDia, HistoricoDia, HistoricoItem, Ingrediente, IngredienteEnPlato, Lugar, Plato, Profile, Mensaje,  ElegidosXDia, TipoPlato
-from django.http import Http404, HttpResponseForbidden, JsonResponse
+from AdminVideos.models import HistoricoDia, HistoricoItem, Ingrediente, Lugar, Plato, Profile, Mensaje,  ElegidosXDia 
+from django.http import Http404, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.forms import UserCreationForm
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
-from django.contrib.auth.views import LoginView, LogoutView
+from django.views.generic import CreateView, UpdateView, DeleteView, DetailView
+from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from datetime import datetime, timedelta
-from .forms import IngredienteEnPlatoForm, IngredienteEnPlatoFormSet, LugarForm, PlatoFilterForm, PlatoForm, CustomAuthenticationForm
-from django.views.generic import TemplateView
+from .forms import IngredienteEnPlatoFormSet, LugarForm, PlatoFilterForm, PlatoForm, CustomAuthenticationForm
 from datetime import date, datetime
 from django.contrib.auth.models import User  # Asegúrate de importar el modelo User
 from django.db.models import Q, Subquery, OuterRef
-from django.db.models.functions import ExtractWeekDay
 import random
 from django.shortcuts import redirect, reverse
 from django.shortcuts import redirect
@@ -73,8 +69,8 @@ def obtener_parametros_sesion(request):
     # Devolver las variables por separado
     return tipo_parametro, quecomemos, misplatos, medios, categoria, dificultad, palabra_clave
 
-class SugerenciasRandom(TemplateView):
-    template_name = 'AdminVideos/random.html'
+# class SugerenciasRandom(TemplateView):
+#     template_name = 'AdminVideos/random.html'
 
 def index(request):
     return redirect(reverse_lazy("filtro-de-platos"))
@@ -1914,34 +1910,34 @@ class AsignarPlato(View):
             menu_dia.platos_que_comemos = data
 
              # Verifica si ya hay una entrada de ComidaDelDia con ese plato para ese momento y fecha
-            ya_existe = ComidaDelDia.objects.filter(
-                user=request.user,
-                fecha=fecha_comida,
-                momento=comida,
-                plato=plato
-            ).exists()
+            # ya_existe = ComidaDelDia.objects.filter(
+            #     user=request.user,
+            #     fecha=fecha_comida,
+            #     momento=comida,
+            #     plato=plato
+            # ).exists()
 
-            if ya_existe:
-                messages.warning(request, f"El plato {plato.nombre_plato} ya está asignado a {comida}.")
-            else:
-                # Procesar variedades para guardarlas en JSONField
-                variedades_json = {
-                    vid: {
-                        "nombre": info["nombre"],
-                        "ingredientes": info["ingredientes"],
-                        "elegido": True
-                    } for vid, info in plato.variedades.items()
-                }
+            # if ya_existe:
+            #     messages.warning(request, f"El plato {plato.nombre_plato} ya está asignado a {comida}.")
+            # else:
+            #     # Procesar variedades para guardarlas en JSONField
+            #     variedades_json = {
+            #         vid: {
+            #             "nombre": info["nombre"],
+            #             "ingredientes": info["ingredientes"],
+            #             "elegido": True
+            #         } for vid, info in plato.variedades.items()
+            #     }
 
-                ComidaDelDia.objects.create(
-                    user=request.user,
-                    fecha=fecha_comida,
-                    momento=comida,
-                    plato=plato,
-                    variedades=variedades_json
-                )
+                # ComidaDelDia.objects.create(
+                #     user=request.user,
+                #     fecha=fecha_comida,
+                #     momento=comida,
+                #     plato=plato,
+                #     variedades=variedades_json
+                # )
 
-                messages.success(request, f"Plato {plato.nombre_plato} asignado correctamente a {comida}.")
+                # messages.success(request, f"Plato {plato.nombre_plato} asignado correctamente a {comida}.")
 
         elif tipo == "lugar":
                     try:
@@ -1978,7 +1974,7 @@ class AsignarPlato(View):
 
 
 
-def eliminar_programado(request, nombre_plato, comida, fecha, plato_id):
+def eliminar_plato_programado(request, nombre_plato, comida, fecha):
     usuario = request.user
 
     # Obtener el menú del usuario para la fecha especificada
@@ -2005,78 +2001,22 @@ def eliminar_programado(request, nombre_plato, comida, fecha, plato_id):
 
     # LO NUEVO DE ComidaDelDia
 
-    comida_asignada = ComidaDelDia.objects.filter(
-        user=usuario,
-        fecha=fecha,
-        momento=comida,
-        plato=plato_id
-    ).first()
+    # comida_asignada = ComidaDelDia.objects.filter(
+    #     user=usuario,
+    #     fecha=fecha,
+    #     momento=comida,
+    #     plato=plato_id
+    # ).first()
 
-    if comida_asignada:
-        comida_asignada.delete()
-        messages.success(request, f"El plato '{nombre_plato}' fue eliminado de {comida}.")
-    else:
-        messages.warning(request, f"No se encontró el plato '{nombre_plato}' en {comida} para esa fecha.")
+    # if comida_asignada:
+    #     comida_asignada.delete()
+    #     messages.success(request, f"El plato '{nombre_plato}' fue eliminado de {comida}.")
+    # else:
+    #     messages.warning(request, f"No se encontró el plato '{nombre_plato}' en {comida} para esa fecha.")
 
     return redirect('filtro-de-platos')
 
     
-
-
-# def generar_elegido_desde_historico(historico: HistoricoDia, fecha_activa):
-#     """Crea un ElegidosXDia para la fecha activa a partir de un HistoricoDia como plantilla."""
-
-#     # # Crear o recuperar el ElegidosXDia
-#     # menu_dia, _ = ElegidosXDia.objects.get_or_create(
-#     #     user=historico.propietario,
-#     #     el_dia_en_que_comemos=fecha_activa,
-#     #     defaults={"platos_que_comemos": {}}
-#     # )
-
-#     # Borrar cualquier registro previo de ElegidosXDia en esa fecha y usuario
-#     ElegidosXDia.objects.filter(user=historico.propietario, el_dia_en_que_comemos=fecha_activa).delete()
-
-#     # Crear un nuevo registro vacío
-#     menu_dia = ElegidosXDia.objects.create(user=historico.propietario, el_dia_en_que_comemos=fecha_activa,platos_que_comemos={}
-# )
-#     data = menu_dia.platos_que_comemos or {}
-#     comidas = ["desayuno", "almuerzo", "merienda", "cena"]
-
-#     for comida in comidas:
-#         platos = getattr(historico, comida).all()
-
-#         if not isinstance(data.get(comida), list):
-#             data[comida] = []
-
-#         for plato in platos:
-#             # Evitar duplicados en el JSON
-#             if any(p["id_plato"] == str(plato.id) for p in data[comida]):
-#                 continue  
-
-#             # Armar estructura JSON como en tu otra función
-#             plato_json = {
-#                 "id_plato": str(plato.id),
-#                 "plato": plato.nombre_plato,
-#                 "tipo": plato.tipos,
-#                 "ingredientes": plato.ingredientes,
-#                 "variedades": {
-#                     vid: {
-#                         "nombre": info["nombre"],
-#                         "ingredientes": info["ingredientes"],
-#                         "elegido": True
-#                     } for vid, info in (plato.variedades or {}).items()
-#                 },
-#                 "elegido": True
-#             }
-
-#             data[comida].append(plato_json)
-
-#     # Actualizar JSON en ElegidosXDia
-#     menu_dia.platos_que_comemos = data
-#     menu_dia.save()
-
-#     return menu_dia
-
 
 
 
@@ -2087,70 +2027,6 @@ def normalizar_dia(dia):
         c for c in unicodedata.normalize('NFD', dia.upper())
         if unicodedata.category(c) != 'Mn'
     )
-
-
-# def random_dia(request, dia_nombre):
-#     usuario = request.user
-#     mensaje_reinicio = None
-
-#     if not dia_nombre:
-#         return JsonResponse({"error": "Día inválido"}, status=400)
-    
-#     dia_nombre = normalizar_dia(dia_nombre)[:2]  # -> "SA", "LU", "MA"...
-
-#     # Filtramos solo registros no sugeridos
-#     qs = HistoricoDia.objects.filter(
-#         propietario=usuario,
-#         dia_semana=dia_nombre,
-#         ya_sugerido=False
-#     )
-#     # Si no quedan registros, reiniciamos
-#     if not qs.exists():
-#         HistoricoDia.objects.filter(propietario=usuario, dia_semana=dia_nombre).update(ya_sugerido=False)
-#         qs = HistoricoDia.objects.filter(
-#             propietario=usuario,
-#             dia_semana=dia_nombre,
-#             ya_sugerido=False
-#         )
-#         mensaje_reinicio = "Se reinició la lista de registros sugeridos"
-
-#     if mensaje_reinicio:
-#         messages.info(request, mensaje_reinicio)
-
-#     count = qs.count()
-#     if count == 0:
-#         return JsonResponse({"error": "No hay registros para ese día"}, status=404)
-
-#     # Elegimos un registro al azar
-#     random_index = random.randint(0, count - 1)
-#     registro = qs.all()[random_index]
-
-#     # Marcamos el registro como sugerido
-#     registro.ya_sugerido = True
-#     registro.save()
-
-#     # Generamos el ElegidosXDia
-#     dia_activo = request.session.get('dia_activo', None)  # 🟢 Recuperamos la fecha activa
-#     elegido = generar_elegido_desde_historico(registro, dia_activo)
-
-#      # Devolvemos JSON incluyendo el mensaje si hubo reinicio
-#     respuesta = {
-#         "id": registro.id,
-#         "fecha": registro.fecha.strftime("%Y-%m-%d"),
-#         "nombre_dia": registro.dia_semana,
-#         "desayuno": [plato.id for plato in registro.desayuno.all()],
-#         "almuerzo": [plato.id for plato in registro.almuerzo.all()],
-#         "merienda": [plato.id for plato in registro.merienda.all()],
-#         "cena": [plato.id for plato in registro.cena.all()],
-#     }
-
-#     if mensaje_reinicio:
-#         respuesta["mensaje"] = mensaje_reinicio
-
-#     messages.success(request, f"Se generó un menú para el día {dia_activo}")
-
-#     # return JsonResponse(respuesta)
-#     return redirect("filtro-de-platos")
 
 
 
@@ -2222,61 +2098,6 @@ def generar_elegido_desde_historico(historico, fecha_activa):
     return menu_dia
 
 
-# def random_dia(request, dia_nombre):
-#     usuario = request.user
-#     mensaje_reinicio = None
-
-#     if not dia_nombre:
-#         return JsonResponse({"error": "Día inválido"}, status=400)
-
-#     dia_nombre = normalizar_dia(dia_nombre)[:2]  # "LU", "MA", ...
-
-#     qs = HistoricoDia.objects.filter(
-#         propietario=usuario,
-#         dia_semana=dia_nombre,
-#         ya_sugerido=False
-#     )
-
-#     if not qs.exists():
-#         HistoricoDia.objects.filter(propietario=usuario, dia_semana=dia_nombre)\
-#             .update(ya_sugerido=False)
-#         qs = HistoricoDia.objects.filter(
-#             propietario=usuario, dia_semana=dia_nombre, ya_sugerido=False
-#         )
-#         mensaje_reinicio = "Se reinició la lista de registros sugeridos"
-
-#     if not qs.exists():
-#         return JsonResponse({"error": "No hay registros para ese día"}, status=404)
-
-#     # Elegimos un registro al azar
-#     random_index = random.randint(0, qs.count() - 1)
-#     registro = qs.all()[random_index]
-
-#     # Marcamos como sugerido
-#     registro.ya_sugerido = True
-#     registro.save()
-
-#     # Generamos el ElegidosXDia usando la nueva helper
-#     dia_activo = request.session.get('dia_activo', None)
-#     elegido = generar_elegido_desde_historico(registro, dia_activo)
-
-#     # Respuesta (si la necesitaras en JSON; vos redirigís)
-#     items = list(registro.items.all())
-#     respuesta = {
-#         "id": registro.id,
-#         "fecha": registro.fecha.strftime("%Y-%m-%d"),
-#         "nombre_dia": registro.dia_semana,
-#         "desayuno": [it.plato_id_ref for it in items if it.momento == "desayuno"],
-#         "almuerzo": [it.plato_id_ref for it in items if it.momento == "almuerzo"],
-#         "merienda": [it.plato_id_ref for it in items if it.momento == "merienda"],
-#         "cena": [it.plato_id_ref for it in items if it.momento == "cena"],
-#     }
-#     if mensaje_reinicio:
-#         respuesta["mensaje"] = mensaje_reinicio
-
-#     messages.success(request, f"Se generó un menú para el día {dia_activo}")
-#     return redirect("filtro-de-platos")
-
 
 def _validar_y_purgar(historico: HistoricoDia) -> bool:
     """True si TODOS los platos existen. Si falta alguno, borra items + histórico y devuelve False."""
@@ -2341,4 +2162,27 @@ def random_dia(request, dia_nombre):
     generar_elegido_desde_historico(registro_valido, dia_activo)
 
     messages.success(request, f"Se generó un menú para el día {dia_activo}")
+    return redirect("filtro-de-platos")
+
+
+def eliminar_menu_programado(request):
+    # Recuperar la fecha activa desde la sesión
+    dia_activo = request.session.get("dia_activo", None)
+
+    if not dia_activo:
+        messages.error(request, "No hay un día activo en la sesión.")
+        return redirect("filtro-de-platos")
+
+    # Buscar y eliminar el registro
+    elegido = ElegidosXDia.objects.filter(
+        user=request.user,
+        el_dia_en_que_comemos=dia_activo
+    ).first()
+
+    if elegido:
+        elegido.delete()
+        messages.success(request, f"Se eliminó el menú del {dia_activo}")
+    else:
+        messages.warning(request, f"No había un menú guardado para {dia_activo}")
+
     return redirect("filtro-de-platos")

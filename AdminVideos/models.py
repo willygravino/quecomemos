@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-import locale
+from django.forms import ValidationError
 
 class Lugar(models.Model):
     nombre = models.CharField(max_length=100)
@@ -132,12 +132,192 @@ class Plato(models.Model):
         return f"{self.id} - {self.nombre_plato} de {self.propietario}"
     
 
+# class Ingrediente(models.Model):
+#     nombre = models.CharField(max_length=100, unique=True)
+
+#     def __str__(self):
+#         return f"{self.id} - {self.nombre}"
 class Ingrediente(models.Model):
-    nombre = models.CharField(max_length=100, unique=True)
+     # ===== Nivel 1: categoría (lugar de compra) =====
+    VERDULERIA = "verduleria"
+    CARNICERIA = "carniceria"
+    PESCADERIA = "pescaderia"
+    PANADERIA = "panaderia"
+    ALMACEN = "almacen"
+    LACTEOS = "lacteos"
+    CONDIMENTOS = "condimentos"
+    BEBIDAS = "bebidas"
+    OTRO = "otro"
+
+    TIPO_CHOICES = [
+        (VERDULERIA, "Verdulería"),
+        (CARNICERIA, "Carnicería"),
+        (PESCADERIA, "Pescadería"),
+        (PANADERIA, "Panadería"),
+        (ALMACEN, "Almacén"),
+        (LACTEOS, "Lácteos"),
+        (CONDIMENTOS, "Condimentos"),
+        (BEBIDAS, "Bebidas"),
+        (OTRO, "Otro"),
+    ]
+
+    # ===== Nivel 2: detalle (subcategoría) =====
+    # Valores (los usamos en choices y para validar)
+    VERDURA = "verdura"
+    FRUTA = "fruta"
+    TUBERCULO = "tuberculo"
+    HIERBA_FRESCA = "hierba_fresca"
+
+    CARNE_ROJA = "carne_roja"
+    AVE = "ave"
+    CERDO = "cerdo"
+    CORDERO = "cordero"
+    ACHURAS = "achuras"
+
+    PESCADO_BLANCO = "pescado_blanco"
+    PESCADO_AZUL = "pescado_azul"
+    MARISCO = "marisco"
+
+    PAN = "pan"
+    FACTURAS = "facturas"
+    MASA = "masa"
+    GALLETAS = "galletas"
+
+    LEGUMBRE = "legumbre"
+    CEREAL = "cereal"
+    HARINA = "harina"
+    ACEITE = "aceite"
+    CONSERVA = "conserva"
+    AZUCAR = "azucar"
+    FIDEOS = "fideos"
+
+    LECHE = "leche"
+    QUESO = "queso"
+    YOGUR = "yogur"
+    CREMA = "crema"
+    MANTECA = "manteca"
+
+    ESPECIA = "especia"
+    HIERBA_SECA = "hierba_seca"
+    ADEREZO = "aderezo"
+    SALSA = "salsa"
+
+    ALCOHOLICA = "alcoholica"
+    SIN_ALCOHOL = "sin_alcohol"
+    INFUSION = "infusion"
+
+    # Choices agrupados (Django los muestra con optgroups en admin)
+    DETALLE_CHOICES_GROUPED = [
+        ("Verdulería", (
+            (VERDURA, "Verdura"),
+            (FRUTA, "Fruta"),
+            (TUBERCULO, "Tubérculo"),
+            (HIERBA_FRESCA, "Hierba fresca"),
+        )),
+        ("Carnicería", (
+            (CARNE_ROJA, "Carne roja"),
+            (AVE, "Ave"),
+            (CERDO, "Cerdo"),
+            (CORDERO, "Cordero"),
+            (ACHURAS, "Achuras"),
+        )),
+        ("Pescadería", (
+            (PESCADO_BLANCO, "Pescado blanco"),
+            (PESCADO_AZUL, "Pescado azul"),
+            (MARISCO, "Marisco"),
+        )),
+        ("Panadería", (
+            (PAN, "Pan"),
+            (FACTURAS, "Facturas"),
+            (MASA, "Masa"),
+            (GALLETAS, "Galletas"),
+        )),
+        ("Almacén", (
+            (LEGUMBRE, "Legumbre"),
+            (CEREAL, "Cereal"),
+            (HARINA, "Harina"),
+            (ACEITE, "Aceite"),
+            (CONSERVA, "Conserva"),
+            (AZUCAR, "Azúcar"),
+            (FIDEOS, "Fideos"),
+        )),
+        ("Lácteos", (
+            (LECHE, "Leche"),
+            (QUESO, "Queso"),
+            (YOGUR, "Yogur"),
+            (CREMA, "Crema"),
+            (MANTECA, "Manteca"),
+        )),
+        ("Condimentos", (
+            (ESPECIA, "Especia"),
+            (HIERBA_SECA, "Hierba seca"),
+            (ADEREZO, "Aderezo"),
+            (SALSA, "Salsa"),
+        )),
+        ("Bebidas", (
+            (ALCOHOLICA, "Alcohólica"),
+            (SIN_ALCOHOL, "Sin alcohol"),
+            (INFUSION, "Infusión"),
+        )),
+        ("Otro", (
+            (OTRO, "Otro"),
+        )),
+    ]
+
+    # Mapa para validar que detalle ↔ tipo tengan sentido
+    DETALLE_POR_TIPO = {
+        VERDULERIA: {VERDURA, FRUTA, TUBERCULO, HIERBA_FRESCA},
+        CARNICERIA: {CARNE_ROJA, AVE, CERDO, CORDERO, ACHURAS},
+        PESCADERIA: {PESCADO_BLANCO, PESCADO_AZUL, MARISCO},
+        PANADERIA: {PAN, FACTURAS, MASA, GALLETAS},
+        ALMACEN: {LEGUMBRE, CEREAL, HARINA, ACEITE, CONSERVA, AZUCAR, FIDEOS},
+        LACTEOS: {LECHE, QUESO, YOGUR, CREMA, MANTECA},
+        CONDIMENTOS: {ESPECIA, HIERBA_SECA, ADEREZO, SALSA},
+        BEBIDAS: {ALCOHOLICA, SIN_ALCOHOL, INFUSION},
+        OTRO: {OTRO},
+    }
+
+    # ===== Campos =====
+    nombre = models.CharField(
+        max_length=100,
+        unique=True,
+        help_text="Nombre del ingrediente (p. ej., Zanahoria, Lentejas)."
+    )
+    tipo = models.CharField(
+        max_length=20,
+        choices=TIPO_CHOICES,
+        default=OTRO,
+        help_text="Lugar de compra / categoría general."
+    )
+    detalle = models.CharField(
+        max_length=30,
+        choices=DETALLE_CHOICES_GROUPED,
+        blank=True,
+        help_text="Subcategoría (p. ej., Verdura, Fruta, Legumbre…)."
+    )
+
+    class Meta:
+        ordering = ["nombre"]
+        indexes = [
+            models.Index(fields=["nombre"]),
+        ]
+
+    def clean(self):
+        """
+        Asegura que 'detalle' pertenezca al grupo correcto según 'tipo'.
+        Permite dejar 'detalle' vacío si no lo querés usar.
+        """
+        super().clean()
+        if self.detalle:
+            permitidos = self.DETALLE_POR_TIPO.get(self.tipo, set())
+            if self.detalle not in permitidos:
+                raise ValidationError({
+                    "detalle": f"El detalle “{self.get_detalle_display()}” no corresponde al tipo “{self.get_tipo_display()}”."
+                })
 
     def __str__(self):
-        return f"{self.id} - {self.nombre}"
-
+        det = f" – {self.get_detalle_display()}" if self.detalle else ""
+        return f"{self.id} - {self.nombre} ({self.get_tipo_display()}{det})"
     
 
 class IngredienteEnPlato(models.Model):
@@ -164,10 +344,10 @@ class IngredienteEnPlato(models.Model):
         return f"{self.cantidad or ''} {self.unidad} de {self.ingrediente} en {self.plato}"
 
 
-class Sugeridos(models.Model):    
-     usuario_de_sugeridos = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="usuario_sugeridos", null=True, blank=True)
-    #  usuario_de_sugeridos = models.OneToOneField(User, on_delete=models.CASCADE, related_name="usuario_sugeridos")
-     nombre_plato_sugerido = models.CharField(max_length=30) 
+# class Sugeridos(models.Model):    
+#      usuario_de_sugeridos = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="usuario_sugeridos", null=True, blank=True)
+#     #  usuario_de_sugeridos = models.OneToOneField(User, on_delete=models.CASCADE, related_name="usuario_sugeridos")
+#      nombre_plato_sugerido = models.CharField(max_length=30) 
      
 # #     Uso de ForeignKey: En tus modelos PlatosSeleccionados y Elegidos, estás usando ForeignKey a User. Si estos modelos están relacionados con el usuario autenticado, considera usar OneToOneField en lugar de ForeignKey para garantizar que solo haya una instancia por usuario.
 # En este ejemplo, el campo usuario en el modelo PerfilUsuario es un OneToOneField que apunta al modelo de usuario predeterminado de Django (User). Esto significa que cada instancia de PerfilUsuario está asociada a exactamente una instancia de User, y viceversa. La opción on_delete=models.CASCADE especifica que si se elimina el usuario, también se eliminará automáticamente su perfil de usuario asociado.
@@ -182,26 +362,6 @@ class ElegidosXDia(models.Model):
 
 
 
-# locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')  # para nombres de días en español
-
-# class HistoricoDia(models.Model):
-#     fecha = models.DateField(unique=True)
-#     dia_semana = models.CharField(max_length=2, blank=True)  # "LU", "MA", ...
-#     ya_sugerido = models.BooleanField(default=False)
-    
-#     desayuno = models.ManyToManyField('Plato', related_name='desayunos', blank=True)
-#     almuerzo = models.ManyToManyField('Plato', related_name='almuerzos', blank=True)
-#     merienda = models.ManyToManyField('Plato', related_name='meriendas', blank=True)
-#     cena = models.ManyToManyField('Plato', related_name='cenas', blank=True)
-
-#     propietario = models.ForeignKey(User, on_delete=models.CASCADE)
-
-#     @property
-#     def nombre_dia(self):
-#         return self.fecha.strftime("%A").capitalize()
-
-#     def __str__(self):
-#         return f"Comidas del {self.fecha} ({self.nombre_dia})"
 
 class HistoricoDia(models.Model):
     fecha = models.DateField(unique=True)
@@ -247,32 +407,6 @@ class HistoricoItem(models.Model):
         # ({self.plato_nombre_snapshot})"
 
 
-class ComidaDelDia(models.Model):
-    DESAYUNO = 'desayuno'
-    ALMUERZO = 'almuerzo'
-    MERIENDA = 'merienda'
-    CENA = 'cena'
-    # SNACK = 'Snack'
-
-    MOMENTO_CHOICES = [
-        (DESAYUNO, 'Desayuno'),
-        (ALMUERZO, 'Almuerzo'),
-        (MERIENDA, 'Merienda'),
-        (CENA, 'Cena'),
-        # (SNACK, 'Snack'),
-    ]
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comidas_del_dia')
-    fecha = models.DateField()
-    momento = models.CharField(max_length=20, choices=MOMENTO_CHOICES)
-    plato = models.ForeignKey(Plato, on_delete=models.CASCADE)
-    variedades = models.JSONField(null=True, blank=True)
-    observaciones = models.TextField(blank=True, null=True)
-    elegido = models.BooleanField(default=True)  # Se marca como no leído por defecto
-
-    def __str__(self):
-        return f"{self.user} - {self.fecha} - {self.momento} - {self.plato.nombre_plato}"
- 
 
 class Profile(models.Model):
      user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")

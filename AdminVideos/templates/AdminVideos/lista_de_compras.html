@@ -19,9 +19,9 @@
                 {% csrf_token %}
             
                 {% for menu in menues_del_usuario %}
-                <div class="card">
+                <div class="card mb-2">   {# 👈 agregamos mb-4 (margin-bottom bootstrap) #}
                     <div class="card-body">
-                    <h5 class="bg-primary text-white p-2 rounded">{{ menu.el_dia_en_que_comemos|date:"l j F Y" }}</h5> <!-- Fondo azul con texto blanco -->
+                    <h5 class="bg-info text-white p-2 rounded">{{ menu.el_dia_en_que_comemos|date:"l j F Y" }}</h5> <!-- Fondo azul con texto blanco -->
                 
                             {% for comida, platos in menu.platos_que_comemos.items %}
                                 {% if platos %}

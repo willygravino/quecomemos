@@ -1,13 +1,13 @@
 from django.contrib import admin
-from AdminVideos.models import HistoricoDia, HistoricoItem, Ingrediente, IngredienteEnPlato, Plato, Profile, Mensaje, ElegidosXDia, Sugeridos, Lugar, ComidaDelDia
+from AdminVideos.models import HistoricoDia, HistoricoItem, Ingrediente, IngredienteEnPlato, Plato, Profile, Mensaje, ElegidosXDia, Lugar
 
 # admin.site.register(Plato)
 admin.site.register(Profile)
 admin.site.register(Mensaje)
 admin.site.register(ElegidosXDia)
-admin.site.register(Sugeridos)
+# admin.site.register(Sugeridos)
 admin.site.register(Lugar)
-admin.site.register(ComidaDelDia)
+# admin.site.register(ComidaDelDia)
 admin.site.register(HistoricoDia)
 admin.site.register(HistoricoItem)
 
