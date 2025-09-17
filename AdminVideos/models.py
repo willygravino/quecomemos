@@ -184,16 +184,29 @@ class ElegidosXDia(models.Model):
 
 # locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')  # para nombres de días en español
 
+# class HistoricoDia(models.Model):
+#     fecha = models.DateField(unique=True)
+#     dia_semana = models.CharField(max_length=2, blank=True)  # "LU", "MA", ...
+#     ya_sugerido = models.BooleanField(default=False)
+    
+#     desayuno = models.ManyToManyField('Plato', related_name='desayunos', blank=True)
+#     almuerzo = models.ManyToManyField('Plato', related_name='almuerzos', blank=True)
+#     merienda = models.ManyToManyField('Plato', related_name='meriendas', blank=True)
+#     cena = models.ManyToManyField('Plato', related_name='cenas', blank=True)
+
+#     propietario = models.ForeignKey(User, on_delete=models.CASCADE)
+
+#     @property
+#     def nombre_dia(self):
+#         return self.fecha.strftime("%A").capitalize()
+
+#     def __str__(self):
+#         return f"Comidas del {self.fecha} ({self.nombre_dia})"
+
 class HistoricoDia(models.Model):
     fecha = models.DateField(unique=True)
     dia_semana = models.CharField(max_length=2, blank=True)  # "LU", "MA", ...
     ya_sugerido = models.BooleanField(default=False)
-    
-    desayuno = models.ManyToManyField('Plato', related_name='desayunos', blank=True)
-    almuerzo = models.ManyToManyField('Plato', related_name='almuerzos', blank=True)
-    merienda = models.ManyToManyField('Plato', related_name='meriendas', blank=True)
-    cena = models.ManyToManyField('Plato', related_name='cenas', blank=True)
-
     propietario = models.ForeignKey(User, on_delete=models.CASCADE)
 
     @property
@@ -203,7 +216,35 @@ class HistoricoDia(models.Model):
     def __str__(self):
         return f"Comidas del {self.fecha} ({self.nombre_dia})"
 
-    
+
+class HistoricoItem(models.Model):
+    DESAYUNO = 'desayuno'
+    ALMUERZO = 'almuerzo'
+    MERIENDA = 'merienda'
+    CENA = 'cena'
+
+    MOMENTO_CHOICES = [
+        (DESAYUNO, 'Desayuno'),
+        (ALMUERZO, 'Almuerzo'),
+        (MERIENDA, 'Merienda'),
+        (CENA, 'Cena'),
+    ]
+
+    historico = models.ForeignKey(HistoricoDia, on_delete=models.CASCADE, related_name='items')
+
+    # 👉 snapshot mínimo
+    plato_id_ref = models.IntegerField()  # ID del Plato en el momento del guardado
+    # plato_nombre_snapshot = models.CharField(max_length=100)  # nombre del Plato en ese momento (o lo que quieras “congelar”)
+
+    momento = models.CharField(max_length=20, choices=MOMENTO_CHOICES)
+
+    class Meta:
+        unique_together = ('historico', 'plato_id_ref', 'momento')
+
+    def __str__(self):
+        return f"{self.historico.fecha} - {self.momento} - {self.plato_id_ref}"
+        
+        # ({self.plato_nombre_snapshot})"
 
 
 class ComidaDelDia(models.Model):
