@@ -106,7 +106,7 @@
   <ul id="ingredientes-ul" class="list-group mb-3">
     {% for form in ingrediente_formset.forms %}
 
-
+<!-- 
 
     <li class="list-group-item d-flex gap-2 align-items-center">
         {% if form.instance.pk %}
@@ -137,8 +137,40 @@
             onclick="eliminarIngrediente(event)">X</button>
 
 
-    </li>
+    </li> -->
 
+    <li class="list-group-item d-flex gap-2 align-items-center">
+    {% if form.instance.pk %}
+        <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-id" value="{{ form.instance.pk }}">
+    {% endif %}
+
+    {% if form.instance.ingrediente_id %}
+        <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-ingrediente"
+            value="{{ form.instance.ingrediente_id }}">
+    {% else %}
+        <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-ingrediente" value="">
+    {% endif %}
+
+    <!-- Guardamos el nombre real en un hidden (lo que espera tu backend hoy) -->
+    <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-nombre_ingrediente"
+            value="{{ form.instance.ingrediente.nombre|default_if_none:'' }}">
+
+    <!-- Select2 visible (sin name para no interferir con el formset) -->
+    <select class="form-select form-select-sm ingrediente-select"
+            data-initial-id="{{ form.instance.ingrediente_id|default:'' }}"
+            data-initial-text="{{ form.instance.ingrediente.nombre|default_if_none:'' }}"></select>
+
+    <input type="text" name="ingredientes_en_plato-{{ forloop.counter0 }}-cantidad"
+            value="{% if form.cantidad.value %}{{ form.cantidad.value|stringformat:'g' }}{% endif %}"
+            class="form-control form-control-sm" placeholder="Cantidad">
+
+    <input type="text" name="ingredientes_en_plato-{{ forloop.counter0 }}-unidad"
+            value="{{ form.unidad.value|default:'' }}" class="form-control form-control-sm" placeholder="Unidad">
+
+    <input type="checkbox" name="ingredientes_en_plato-{{ forloop.counter0 }}-DELETE" class="delete-flag d-none">
+
+    <button type="button" class="btn btn-sm btn-danger eliminar-ingrediente" onclick="eliminarIngrediente(event)">X</button>
+    </li>
 
 
     
@@ -474,7 +506,64 @@
 <!-- ========================= -->
 <!-- 2. Funciones de ingredientes -->
 <!-- ========================= -->
-<script>
+ <script>
+function agregarIngrediente(list, totalFormsInput) {
+  const totalForms = parseInt(totalFormsInput.value, 10);
+  const prefix = 'ingredientes_en_plato';
+
+  // Tomar selección del modal
+  const sel = $('#modal-nombre').select2('data')[0] || {};
+  const idIngrediente = sel.id || '';
+  const nombre = sel.text || '';
+
+  const cantidad = document.getElementById("modal-cantidad").value.replace(',', '.');
+  const unidad = document.getElementById("modal-unidad").value;
+
+  const ul = document.getElementById("ingredientes-ul");
+  if (!ul) { console.error('No se encontró #ingredientes-ul'); return; }
+
+  const li = document.createElement("li");
+  li.className = "list-group-item d-flex gap-2 align-items-center";
+
+  li.innerHTML = `
+    <input type="hidden" name="${prefix}-${totalForms}-ingrediente" value="${idIngrediente}">
+    <input type="hidden" name="${prefix}-${totalForms}-nombre_ingrediente" value="${nombre}">
+
+    <select class="form-select form-select-sm ingrediente-select"
+            data-initial-id="${idIngrediente}"
+            data-initial-text="${nombre}"></select>
+
+    <input type="text"   name="${prefix}-${totalForms}-cantidad"
+           value="${cantidad}" class="form-control form-control-sm" placeholder="Cantidad">
+
+    <input type="text"   name="${prefix}-${totalForms}-unidad"
+           value="${unidad}" class="form-control form-control-sm" placeholder="Unidad">
+
+    <input type="checkbox" name="${prefix}-${totalForms}-DELETE" class="delete-flag d-none">
+    <button type="button" class="btn btn-sm btn-danger ms-2 eliminar-ingrediente">X</button>
+  `;
+
+  ul.appendChild(li);
+
+  // Aumentar el TOTAL_FORMS
+  totalFormsInput.value = totalForms + 1;
+
+  // Inicializar Select2 sobre el <select> recién creado
+  const newSelect = li.querySelector('.ingrediente-select');
+  initIngredienteSelect(newSelect);
+
+  // Limpiar modal
+  $('#modal-nombre').val(null).trigger('change');
+  document.getElementById("modal-cantidad").value = "";
+  document.getElementById("modal-unidad").value = "";
+
+  // Cerrar modal
+  const modalEl = document.getElementById("ingredienteModal");
+  const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+  modal.hide();
+}
+</script>
+<!-- <script>
 function agregarIngrediente(list, totalFormsInput) {
   const totalForms = parseInt(totalFormsInput.value, 10);
   const prefix = 'ingredientes_en_plato';
@@ -544,7 +633,7 @@ function eliminarIngrediente(e) {
   if (e.stopPropagation) e.stopPropagation();
   if (e.preventDefault) e.preventDefault();
   return false;
-}
+} -->
 
 
 </script>
@@ -553,6 +642,39 @@ function eliminarIngrediente(e) {
 <!-- Init único (DOMContentLoaded) -->
 <!-- ========================= -->
 <script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Referencias que ya usabas
+  const list = document.getElementById("ingredientes-list");
+  const ul = document.getElementById("ingredientes-ul");
+  const totalFormsInput = document.getElementById("id_ingredientes_en_plato-TOTAL_FORMS");
+
+  if (!list || !ul || !totalFormsInput) {
+    console.error('Faltan nodos del formset (#ingredientes-list / #ingredientes-ul / TOTAL_FORMS)');
+  }
+
+  // === (3) Inicializar Select2 en todos los ítems ya renderizados ===
+  // Busca todos los <select class="ingrediente-select"> que pusiste en el template del formset
+  document.querySelectorAll('#ingredientes-ul .ingrediente-select').forEach(initIngredienteSelect);
+
+  // === Modal: inicializar Select2 al abrirlo, reutilizando la misma config ===
+  function inicializarSelect2Modal() {
+    $('#modal-nombre')
+      .select2(buildSelect2Config($('#ingredienteModal')))
+      .select2('open');
+  }
+  $('#ingredienteModal').on('shown.bs.modal', inicializarSelect2Modal);
+
+  // Guardar (agregar ítem) desde el modal -> crea el <li> y llama a initIngredienteSelect en el nuevo select
+  document.getElementById("guardarIngrediente").addEventListener("click", function() {
+    agregarIngrediente(list, totalFormsInput);
+  });
+
+  // Si querés delegar la eliminación por click en la lista, podés usar esto:
+  // ul.addEventListener("click", eliminarIngrediente);
+});
+</script>
+
+<!-- <script>
 document.addEventListener("DOMContentLoaded", function() {
   const list = document.getElementById("ingredientes-list");
   const ul = document.getElementById("ingredientes-ul");
@@ -589,8 +711,65 @@ document.addEventListener("DOMContentLoaded", function() {
   // Eliminar (delegado en la UL)
 //   ul.addEventListener("click", eliminarIngrediente);
 });
-</script>
+</script> -->
 
+<script>
+function buildSelect2Config(dropdownParent=null) {
+  const cfg = {
+    placeholder: 'Selecciona un ingrediente',
+    ajax: {
+      url: '/api/ingredientes/',
+      dataType: 'json',
+      delay: 250,
+      data: params => ({ q: params.term || '' }),
+      processResults: data => ({
+        results: data.map(item => ({ id: item.id, text: item.nombre }))
+      }),
+      cache: true
+    },
+    minimumInputLength: 0,
+    allowClear: true
+  };
+  if (dropdownParent) cfg.dropdownParent = dropdownParent;
+  return cfg;
+}
+
+/**
+ * Inicializa un <select class="ingrediente-select"> dentro de un <li>.
+ * Sincroniza su value con los inputs hidden:
+ *   - ...-ingrediente
+ *   - ...-nombre_ingrediente
+ */
+function initIngredienteSelect(selectEl) {
+  const $select = $(selectEl);
+
+  // 1) Pre-cargar valor inicial si viene de la base
+  const initId = $select.data('initial-id');
+  const initText = $select.data('initial-text');
+
+  if (initId && initText) {
+    const option = new Option(initText, initId, true, true);
+    $select.append(option).trigger('change');
+  }
+
+  // 2) Inicializar Select2 (fuera del modal => sin dropdownParent)
+  $select.select2(buildSelect2Config());
+
+  // 3) Vincular cambios al par de hidden
+  $select.on('select2:select select2:clear change', function() {
+    const li = selectEl.closest('li');
+    if (!li) return;
+
+    const hiddenId = li.querySelector('input[name$="-ingrediente"]');
+    const hiddenNombre = li.querySelector('input[name$="-nombre_ingrediente"]');
+
+    const data = $select.select2('data')[0] || null;
+
+    if (hiddenId) hiddenId.value = data ? (data.id ?? '') : '';
+    if (hiddenNombre) hiddenNombre.value = data ? (data.text ?? '') : '';
+  });
+}
+</script>
 
 
 
