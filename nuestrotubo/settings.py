@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'AdminVideos',
-    # 'widget_tweaks',  # agrega si realmente lo usás en templates
+    'widget_tweaks'
 ]
 
 MIDDLEWARE = [
