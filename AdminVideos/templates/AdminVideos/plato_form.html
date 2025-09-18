@@ -164,8 +164,11 @@
             value="{% if form.cantidad.value %}{{ form.cantidad.value|stringformat:'g' }}{% endif %}"
             class="form-control form-control-sm" placeholder="Cantidad">
 
-    <input type="text" name="ingredientes_en_plato-{{ forloop.counter0 }}-unidad"
-            value="{{ form.unidad.value|default:'' }}" class="form-control form-control-sm" placeholder="Unidad">
+    <!-- <input type="text" name="ingredientes_en_plato-{{ forloop.counter0 }}-unidad"
+            value="{{ form.unidad.value|default:'' }}" class="form-control form-control-sm" placeholder="Unidad"> -->
+
+            <!-- Después (usa el widget del form) -->
+    {{ form.unidad|add_class:"form-select form-select-sm" }}
 
     <input type="checkbox" name="ingredientes_en_plato-{{ forloop.counter0 }}-DELETE" class="delete-flag d-none">
 
@@ -470,172 +473,143 @@
 </center>
 
 
-
 <!-- Modal ingredientes -->
 <div class="modal fade" id="ingredienteModal" tabindex="-1" aria-labelledby="ingredienteModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
+      
       <div class="modal-header">
-        <h5 class="modal-title">Agregar Ingrediente</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <h5 class="modal-title" id="ingredienteModalLabel">Agregar Ingrediente</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
+      
       <div class="modal-body">
+        
+        <!-- Ingrediente -->
+        <div class="mb-3">
+          <label for="modal-nombre" class="form-label">Ingrediente</label>
+          <select id="modal-nombre" class="form-select" style="width:100%"></select>
+        </div>
+        
+        <!-- Cantidad -->
+        <div class="mb-3">
+          <label for="modal-cantidad" class="form-label">Cantidad</label>
+          <input type="text" id="modal-cantidad" class="form-control">
+        </div>
+        
+    <!-- Unidad visible para el usuario -->
+    <div class="mb-3">
+        <label for="modal-unidad" class="form-label">Unidad</label>
+        <select id="modal-unidad" name="modal-unidad" class="form-select">
+            {% for value, label in ingrediente_formset.empty_form.unidad.field.choices %}
+            <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
 
-        <div class="mb-3">
-            <label for="modal-nombre" class="form-label">Ingrediente</label>
-            <select id="modal-nombre" class="form-select" style="width:100%"></select>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Cantidad</label>
-            <input type="text" id="modal-cantidad" class="form-control">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Unidad</label>
-            {{ ingrediente_formset.empty_form.unidad|add_class:"form-select"|attr:"id:modal-unidad" }}
-        </div>
+    <!-- Prototype oculto para clonar el select de unidad en nuevos ítems -->
+    <div id="unidad-prototype" class="d-none">
+    <select name="ingredientes_en_plato-__prefix__-unidad"
+        class="form-select form-select-sm flex-grow-0"
+        style="width:10rem"
+        disabled>
+        {% for value, label in ingrediente_formset.empty_form.unidad.field.choices %}
+        <option value="{{ value }}">{{ label }}</option>
+        {% endfor %}
+    </select>
+    </div>
+        
       </div>
+      
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
         <button type="button" class="btn btn-primary" id="guardarIngrediente">Guardar</button>
       </div>
+      
     </div>
   </div>
 </div>
 
+
+
+
+
+
 <!-- ========================= -->
 <!-- 2. Funciones de ingredientes -->
 <!-- ========================= -->
- <script>
+<script>
 function agregarIngrediente(list, totalFormsInput) {
   const totalForms = parseInt(totalFormsInput.value, 10);
   const prefix = 'ingredientes_en_plato';
 
-  // Tomar selección del modal
+  // Datos del modal
   const sel = $('#modal-nombre').select2('data')[0] || {};
-  const idIngrediente = sel.id || '';
-  const nombre = sel.text || '';
-
+  const idIngrediente = sel?.id || '';
+  const nombre = sel?.text || '';
   const cantidad = document.getElementById("modal-cantidad").value.replace(',', '.');
-  const unidad = document.getElementById("modal-unidad").value;
-
+  const unidadElegida = document.getElementById("modal-unidad").value;
+  
   const ul = document.getElementById("ingredientes-ul");
   if (!ul) { console.error('No se encontró #ingredientes-ul'); return; }
 
+  // 1) Clonar prototype del <select> unidad y reemplazar __prefix__
+  const proto = document.getElementById('unidad-prototype');
+  if (!proto) { console.error('Falta #unidad-prototype'); return; }
+  let unidadHtml = proto.innerHTML.replace(/__prefix__/g, totalForms);
+
+  // 2) Construir el <li>
   const li = document.createElement("li");
   li.className = "list-group-item d-flex gap-2 align-items-center";
-
   li.innerHTML = `
     <input type="hidden" name="${prefix}-${totalForms}-ingrediente" value="${idIngrediente}">
     <input type="hidden" name="${prefix}-${totalForms}-nombre_ingrediente" value="${nombre}">
 
-    <select class="form-select form-select-sm ingrediente-select"
+    <select class="form-select form-select-sm flex-grow-1 ingrediente-select"
             data-initial-id="${idIngrediente}"
             data-initial-text="${nombre}"></select>
+           
+    <input type="text" name="${prefix}-${totalForms}-cantidad"
+       value="${cantidad}" class="form-control form-control-sm flex-grow-0"
+       style="width:8rem" placeholder="Cantidad">
 
-    <input type="text"   name="${prefix}-${totalForms}-cantidad"
-           value="${cantidad}" class="form-control form-control-sm" placeholder="Cantidad">
-
-    <input type="text"   name="${prefix}-${totalForms}-unidad"
-           value="${unidad}" class="form-control form-control-sm" placeholder="Unidad">
+    <!-- Aquí va el SELECT de unidad clonado -->
+    <span class="unidad-wrapper">${unidadHtml}</span>
 
     <input type="checkbox" name="${prefix}-${totalForms}-DELETE" class="delete-flag d-none">
     <button type="button" class="btn btn-sm btn-danger ms-2 eliminar-ingrediente">X</button>
   `;
 
+  // 3) Agregar el <li> a la lista
   ul.appendChild(li);
 
-  // Aumentar el TOTAL_FORMS
+  // 4) Actualizar TOTAL_FORMS
   totalFormsInput.value = totalForms + 1;
 
-  // Inicializar Select2 sobre el <select> recién creado
-  const newSelect = li.querySelector('.ingrediente-select');
-  initIngredienteSelect(newSelect);
+  // 5) Inicializar el select de INGREDIENTE
+  const newSelectIngrediente = li.querySelector('.ingrediente-select');
+  initIngredienteSelect(newSelectIngrediente);
 
-  // Limpiar modal
-  $('#modal-nombre').val(null).trigger('change');
-  document.getElementById("modal-cantidad").value = "";
-  document.getElementById("modal-unidad").value = "";
-
-  // Cerrar modal
-  const modalEl = document.getElementById("ingredienteModal");
-  const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-  modal.hide();
-}
-</script>
-<!-- <script>
-function agregarIngrediente(list, totalFormsInput) {
-  const totalForms = parseInt(totalFormsInput.value, 10);
-  const prefix = 'ingredientes_en_plato';
-
-  const sel = $('#modal-nombre').select2('data')[0] || {};
-  const idIngrediente = sel.id || '';
-  const nombre = sel.text || '';
-  const cantidad = document.getElementById("modal-cantidad").value.replace(',', '.');
-  const unidad = document.getElementById("modal-unidad").value;
-
-  const ul = document.getElementById("ingredientes-ul");
-  if (!ul) { console.error('No se encontró #ingredientes-ul'); return; }
-
-  const li = document.createElement("li");
-  li.className = "list-group-item d-flex gap-2 align-items-center";
-  li.innerHTML = `
-    <input type="hidden" name="${prefix}-${totalForms}-ingrediente" value="${idIngrediente}">
-    <input type="text"   name="${prefix}-${totalForms}-nombre_ingrediente" value="${nombre}"  class="form-control form-control-sm" placeholder="Ingrediente">
-    <input type="text"   name="${prefix}-${totalForms}-cantidad"            value="${cantidad}" class="form-control form-control-sm" placeholder="Cantidad">
-    <input type="text"   name="${prefix}-${totalForms}-unidad"              value="${unidad}"   class="form-control form-control-sm" placeholder="Unidad">
-    <input type="checkbox" name="${prefix}-${totalForms}-DELETE" class="delete-flag d-none">
-    <button type="button" class="btn btn-sm btn-danger ms-2 eliminar-ingrediente">X</button>
-  `;
-  ul.appendChild(li);
-
-  totalFormsInput.value = totalForms + 1;
-
-  $('#modal-nombre').val(null).trigger('change');
-  document.getElementById("modal-cantidad").value = "";
-  document.getElementById("modal-unidad").value = "";
-
-  const modalEl = document.getElementById("ingredienteModal");
-  const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-  modal.hide();
-}
-
-function eliminarIngrediente(e) {
-  // si vino de onclick, e.target es el botón; si vino delegado, usamos closest
-  const btn = e.target.closest ? e.target.closest('.eliminar-ingrediente') : e.target;
-  if (!btn) return;
-
-  console.log('[eliminarIngrediente] click en X'); // <-- debería verse en consola
-
-  const li = btn.closest('li');
-  if (!li) return;
-
-  // marcar DELETE (crear si faltara)
-  let del = li.querySelector('input[name$="-DELETE"]');
-  if (!del) {
-    const anyField = li.querySelector('input[name^="ingredientes_en_plato-"]');
-    if (anyField) {
-      const base = anyField.name.replace(/-(nombre_ingrediente|cantidad|unidad|ingrediente|id)$/, '');
-      del = document.createElement('input');
-      del.type = 'checkbox';
-      del.name = `${base}-DELETE`;
-      del.className = 'delete-flag d-none';
-      li.appendChild(del);
-    }
+  // 6) Activar el SELECT de UNIDAD clonado y setear valor desde el modal
+  const unidadSelect = li.querySelector(`select[name="${prefix}-${totalForms}-unidad"]`);
+  if (unidadSelect) {
+    unidadSelect.removeAttribute('disabled');   // venía disabled en el prototype
+    unidadSelect.value = unidadElegida || '';
+    // Si querés Select2 también para unidad, descomentá:
+    // $(unidadSelect).select2({ width: 'style' });
+  } else {
+    console.warn('No se encontró el select de unidad clonado');
   }
-  if (del) del.checked = true;
 
-  // ocultar de forma contundente (inline gana siempre)
-  li.style.setProperty('display', 'none', 'important');
-  li.setAttribute('aria-hidden', 'true');
+  // 7) Limpiar y cerrar modal
+  $('#modal-nombre').val(null).trigger('change');
+  document.getElementById("modal-cantidad").value = "";
+  document.getElementById("modal-unidad").selectedIndex = 0; // resetea unidad visible del modal
 
-  // evitar que algún handler externo haga algo raro
-  if (e.stopPropagation) e.stopPropagation();
-  if (e.preventDefault) e.preventDefault();
-  return false;
-} -->
-
-
+  const modalEl = document.getElementById("ingredienteModal");
+  const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+  modal.hide();
+}
 </script>
 
 <!-- ========================= -->
@@ -643,7 +617,6 @@ function eliminarIngrediente(e) {
 <!-- ========================= -->
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-  // Referencias que ya usabas
   const list = document.getElementById("ingredientes-list");
   const ul = document.getElementById("ingredientes-ul");
   const totalFormsInput = document.getElementById("id_ingredientes_en_plato-TOTAL_FORMS");
@@ -652,66 +625,26 @@ document.addEventListener("DOMContentLoaded", function() {
     console.error('Faltan nodos del formset (#ingredientes-list / #ingredientes-ul / TOTAL_FORMS)');
   }
 
-  // === (3) Inicializar Select2 en todos los ítems ya renderizados ===
-  // Busca todos los <select class="ingrediente-select"> que pusiste en el template del formset
+  // Inicializar Select2 en todos los <select class="ingrediente-select"> existentes
   document.querySelectorAll('#ingredientes-ul .ingrediente-select').forEach(initIngredienteSelect);
 
-  // === Modal: inicializar Select2 al abrirlo, reutilizando la misma config ===
+  // Al abrir el modal, inicializar Select2 del campo de ingrediente (del modal)
   function inicializarSelect2Modal() {
     $('#modal-nombre')
       .select2(buildSelect2Config($('#ingredienteModal')))
       .select2('open');
+
+    // Si querés Select2 también para unidad en el modal, descomentá:
+    // $('#modal-unidad').select2({ dropdownParent: $('#ingredienteModal'), width: 'style' });
   }
   $('#ingredienteModal').on('shown.bs.modal', inicializarSelect2Modal);
-
-  // Guardar (agregar ítem) desde el modal -> crea el <li> y llama a initIngredienteSelect en el nuevo select
-  document.getElementById("guardarIngrediente").addEventListener("click", function() {
-    agregarIngrediente(list, totalFormsInput);
-  });
-
-  // Si querés delegar la eliminación por click en la lista, podés usar esto:
-  // ul.addEventListener("click", eliminarIngrediente);
-});
-</script>
-
-<!-- <script>
-document.addEventListener("DOMContentLoaded", function() {
-  const list = document.getElementById("ingredientes-list");
-  const ul = document.getElementById("ingredientes-ul");
-  const totalFormsInput = document.getElementById("id_ingredientes_en_plato-TOTAL_FORMS");
-
-  if (!list || !ul || !totalFormsInput) {
-    console.error('Faltan nodos del formset (#ingredientes-list / #ingredientes-ul / TOTAL_FORMS)');
-  }
-
-  // Select2: inicializar al abrir el modal
-  function inicializarSelect2() {
-    $('#modal-nombre').select2({
-      placeholder: 'Selecciona un ingrediente',
-      ajax: {
-        url: '/api/ingredientes/',
-        dataType: 'json',
-        delay: 250,
-        data: params => ({ q: params.term || '' }),
-        processResults: data => ({ results: data.map(item => ({ id:item.id, text:item.nombre })) }),
-        cache: true
-      },
-      minimumInputLength: 0,
-      dropdownParent: $('#ingredienteModal'),
-      allowClear: true
-    }).select2('open');
-  }
-  $('#ingredienteModal').on('shown.bs.modal', inicializarSelect2);
 
   // Guardar (agregar ítem) desde el modal
   document.getElementById("guardarIngrediente").addEventListener("click", function() {
     agregarIngrediente(list, totalFormsInput);
   });
-
-  // Eliminar (delegado en la UL)
-//   ul.addEventListener("click", eliminarIngrediente);
 });
-</script> -->
+</script>
 
 <script>
 function buildSelect2Config(dropdownParent=null) {
@@ -734,43 +667,88 @@ function buildSelect2Config(dropdownParent=null) {
   return cfg;
 }
 
-/**
- * Inicializa un <select class="ingrediente-select"> dentro de un <li>.
- * Sincroniza su value con los inputs hidden:
- *   - ...-ingrediente
- *   - ...-nombre_ingrediente
- */
+// Inicializa un <select class="ingrediente-select"> dentro de un <li>
+// y sincroniza su value con los inputs hidden (...-ingrediente y ...-nombre_ingrediente)
 function initIngredienteSelect(selectEl) {
   const $select = $(selectEl);
 
-  // 1) Pre-cargar valor inicial si viene de la base
+  // Pre-cargar valor inicial si viene de la base
   const initId = $select.data('initial-id');
   const initText = $select.data('initial-text');
-
   if (initId && initText) {
     const option = new Option(initText, initId, true, true);
     $select.append(option).trigger('change');
   }
 
-  // 2) Inicializar Select2 (fuera del modal => sin dropdownParent)
+  // Inicializar Select2 (fuera del modal => sin dropdownParent)
   $select.select2(buildSelect2Config());
 
-  // 3) Vincular cambios al par de hidden
+  // Vincular cambios al par de hidden
   $select.on('select2:select select2:clear change', function() {
     const li = selectEl.closest('li');
     if (!li) return;
-
     const hiddenId = li.querySelector('input[name$="-ingrediente"]');
     const hiddenNombre = li.querySelector('input[name$="-nombre_ingrediente"]');
-
     const data = $select.select2('data')[0] || null;
-
     if (hiddenId) hiddenId.value = data ? (data.id ?? '') : '';
     if (hiddenNombre) hiddenNombre.value = data ? (data.text ?? '') : '';
   });
 }
 </script>
 
+<script>
+/**
+ * Marca el DELETE del formset y oculta el <li>.
+ * No toca TOTAL_FORMS (en formsets hay que dejarlo igual).
+ */
+function eliminarIngrediente(e) {
+  // Soporta inline onclick y event delegation
+  const btn = e && e.target ? (e.target.closest('.eliminar-ingrediente') || e.target) : null;
+  if (!btn) return false;
+
+  const li = btn.closest('li');
+  if (!li) return false;
+
+  // Buscar o crear el input ...-DELETE
+  let del = li.querySelector('input[name$="-DELETE"]');
+  if (!del) {
+    // Derivar el prefix a partir de cualquier input del formset en el li
+    const anyField = li.querySelector('input[name^="ingredientes_en_plato-"], select[name^="ingredientes_en_plato-"]');
+    if (anyField && anyField.name) {
+      const base = anyField.name.replace(/-(nombre_ingrediente|cantidad|unidad|ingrediente|id)$/, '');
+      del = document.createElement('input');
+      del.type = 'checkbox';
+      del.name = `${base}-DELETE`;
+      del.className = 'delete-flag d-none';
+      li.appendChild(del);
+    }
+  }
+  if (del) del.checked = true;
+
+  // Evitar validaciones/estilos en campos ocultos
+  li.querySelectorAll('[required]').forEach(el => el.removeAttribute('required'));
+
+  // Ocultar el item visualmente
+  li.style.setProperty('display', 'none', 'important');
+  li.setAttribute('aria-hidden', 'true');
+
+  // Parar burbujeo/default si vino por click
+  if (e && e.stopPropagation) e.stopPropagation();
+  if (e && e.preventDefault) e.preventDefault();
+  return false;
+}
+
+// (Opcional pero recomendable) Delegación por si algún botón no tiene el onclick inline
+document.addEventListener('DOMContentLoaded', function () {
+  const ul = document.getElementById('ingredientes-ul');
+  if (!ul) return;
+  ul.addEventListener('click', function (ev) {
+    if (ev.target.closest && ev.target.closest('.eliminar-ingrediente')) {
+      eliminarIngrediente(ev);
+    }
+  });
+});
+</script>
 
 
 {% endblock %}
