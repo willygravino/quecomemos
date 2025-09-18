@@ -9,7 +9,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # --- Seguridad / modo ---
 SECRET_KEY = os.environ.get('SECRET_KEY', '!!!-dev-only-!!!')
-DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+# DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+
+DEBUG=True
 
 # Dominio público que Railway suele exponer
 RAILWAY_PUBLIC_DOMAIN = os.environ.get("RAILWAY_PUBLIC_DOMAIN", "").strip()
