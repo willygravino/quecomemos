@@ -105,6 +105,9 @@
 
   <ul id="ingredientes-ul" class="list-group mb-3">
     {% for form in ingrediente_formset.forms %}
+
+
+
     <li class="list-group-item d-flex gap-2 align-items-center">
         {% if form.instance.pk %}
             <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-id" value="{{ form.instance.pk }}">
@@ -128,13 +131,17 @@
 
         <input type="checkbox" name="ingredientes_en_plato-{{ forloop.counter0 }}-DELETE" class="delete-flag d-none">
 
-        <!-- <button type="button" class="btn btn-sm btn-danger eliminar-ingrediente">X</button> -->
+      
         <button type="button"
             class="btn btn-sm btn-danger eliminar-ingrediente"
             onclick="eliminarIngrediente(event)">X</button>
 
 
     </li>
+
+
+
+    
     {% endfor %}
   </ul>
 
@@ -211,10 +218,11 @@
                     {{ form.enlace|add_class:"form-control" }}
                 </div>
 
+                <!-- PARA SUBIR IMAGEN PARA EL FUTURO
                 <div class="mb-3">
                     <label class="form-label">Imagen:</label>
                     {{ form.image|add_class:"form-control" }}
-                </div>
+                </div> -->
 
 <!-- Variedades -->
 
