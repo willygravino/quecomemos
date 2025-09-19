@@ -179,52 +179,49 @@ def lista_de_compras(request):
     perfil = get_object_or_404(Profile, user=request.user)
 
     # VARIABLES PARA PRUEBAS
-    clave_fecha = ""
-    variedades_seleccionadas = ""
+    # clave_fecha = ""
+    # variedades_seleccionadas = ""
 
     if request.method == 'POST':
+        var_sel = defaultdict(set)  # ← dict con sets
 
-         # Diccionarios auxiliares
-        variedades_seleccionadas = defaultdict(set)
+        # 1) Parsear variedades: value = "PLATOID_YYYYMMDD|NOMBRE"
+        for raw in request.POST.getlist("variedad_seleccionada"):
+            try:
+                left, variedad = raw.split("|", 1)         # "155_20250920" | "jamón y queso"
+                plato_id_str, ymd = left.split("_", 1)     # "155", "20250920"
+                var_sel[(plato_id_str.strip(), ymd.strip())].add(variedad.strip())
+            except ValueError:
+                continue
 
-        platos_seleccionados = set(request.POST.getlist("plato_seleccionado"))  # Captura todos los valores correctamente
+        # 2) Platos seleccionados (siguen igual)
+        platos_seleccionados = set(request.POST.getlist("plato_seleccionado"))
         ingredientes_elegidos = set(request.POST.getlist("ingrediente_a_comprar"))
 
-        # Procesar el formulario - variedades
-        for key, value in request.POST.items():
-            if key.startswith("variedad_seleccionada"):
-                plato_id, variedad = value.split("|")
-                variedades_seleccionadas[plato_id].add(variedad)  # No convertir a int
-
-        # Recorrer los menús del usuario y actualizar datos
+        # 3) Aplicar seleccionado por día
         for menu in menues_del_usuario:
-            platos = menu.platos_que_comemos or {}  # Obtener el diccionario de comidas
+            platos = menu.platos_que_comemos or {}
+            ymd = menu.el_dia_en_que_comemos.strftime('%Y%m%d')
 
             for comida, lista_platos in platos.items():
-
-               for plato in lista_platos:  # Recorrer cada plato dentro de la comida
-                    plato_id = plato["id_plato"]  # Ahora puedes acceder al ID correctamente
-                    clave_fecha = f"{plato_id}_{menu.el_dia_en_que_comemos.strftime('%Y%m%d')}"
+                for plato in lista_platos:
+                    plato_id_str = str(plato.get("id_plato"))
+                    clave_fecha = f"{plato_id_str}_{ymd}"
 
                     if clave_fecha in platos_seleccionados:
-                        # Marcar como elegido
                         plato["elegido"] = True
-
-                        for variedad_id, variedad_data in plato.get("variedades", {}).items():
-                            if variedad_data["nombre"] in variedades_seleccionadas[plato_id]:
-                                variedad_data["elegido"] = True
-
-                            else:
-                                variedad_data["elegido"] = False
+                        seleccionadas = var_sel.get((plato_id_str, ymd), set())
+                        for vdata in (plato.get("variedades") or {}).values():
+                            nombre = (vdata.get("nombre") or "").strip()
+                            vdata["elegido"] = (nombre in seleccionadas)
                     else:
-                        # Si no fue seleccionado, marcar como no elegido
                         plato["elegido"] = False
-                        for variedad in plato.get("variedades", {}).values():
-                            variedad["elegido"] = False
+                        for vdata in (plato.get("variedades") or {}).values():
+                            vdata["elegido"] = False
 
-            # Guardar cambios en el modelo
             menu.platos_que_comemos = platos
             menu.save()
+
 
         # Suponiendo que perfil.comentarios contiene una lista de cadenas en el formato "ingrediente%comentario"
         comentarios_guardados_lista = perfil.comentarios
@@ -350,7 +347,7 @@ def lista_de_compras(request):
         "lista_de_compras": lista_de_compras, # LISTA DE COMPRAS PARA VERLO EN ENVAR A WHATS APP
         "mensaje_whatsapp": mensaje_whatsapp, # MENSAJE FORMATEADO PARA WHATSAPP
         "parametro" : "lista-compras",
-        "clave_fecha": clave_fecha,
+        # "clave_fecha": clave_fecha,
         # "platos": platos,
         # "variedades_seleccionadas": variedades_seleccionadas,
 

@@ -1,3 +1,168 @@
 
-web: gunicorn nuestrotubo.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --threads 2 --timeout 120 --access-logfile - --error-logfile - --capture-output --log-level info
+{% extends "AdminVideos/base.html" %}
+{% load static %}
+{% block principal %}
 
+<form action="{% url 'menu-elegido' %}" method="post">  {# ⬅️ FORM INICIO #}
+  {% csrf_token %}
+
+  <div class="row g-4">
+
+    <!-- Columna: Menúes programados -->
+    <div class="col-12 col-lg-4">
+      <section>
+        <h4 class="mb-3">Menúes programados</h4>
+
+        {% for menu in menues_del_usuario %}
+          <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span class="fw-semibold">
+                {{ menu.el_dia_en_que_comemos|date:"l"|capfirst }} {{ menu.el_dia_en_que_comemos|date:"j" }}
+              </span>
+            </div>
+
+            <div class="list-group list-group-flush">
+              {% for comida, platos in menu.platos_que_comemos.items %}
+                {% if platos %}
+                  <div class="list-group-item">
+                    <h6 class="mb-2 text-primary">{{ comida|title }}</h6>
+
+                    {% for plato in platos %}
+                      {% if plato.tipo != "lugar" %}
+                        <div class="form-check mb-2">
+                          <input
+                            type="checkbox"
+                            id="plato{{ plato.id_plato }}_{{ menu.el_dia_en_que_comemos|date:'Ymd' }}"
+                            name="plato_seleccionado"
+                            value="{{ plato.id_plato }}_{{ menu.el_dia_en_que_comemos|date:'Ymd' }}"
+                            class="form-check-input"
+                            {% if plato.elegido %}checked{% endif %}>
+                          <label class="form-check-label" for="plato{{ plato.id_plato }}_{{ menu.el_dia_en_que_comemos|date:'Ymd' }}">
+                            {{ plato.plato }}
+                          </label>
+                        </div>
+
+                        {% if plato.variedades %}
+                          <div class="ps-4 mt-2 border-start">
+                            {% for variedad_id, variedad in plato.variedades.items %}
+                              <div class="form-check mb-1">
+                                <input
+                                  type="checkbox"
+                                  id="variedad{{ variedad_id }}_{{ plato.id_plato }}_{{ menu.el_dia_en_que_comemos|date:'Ymd' }}"
+                                  name="variedad_seleccionada"   {# ⬅️ MISMO name para poder usar getlist #}
+                                  value="{{ plato.id_plato }}|{{ variedad.nombre }}"
+                                  class="form-check-input"
+                                  {% if variedad.elegido %}checked{% endif %}>
+                                <label class="form-check-label" for="variedad{{ variedad_id }}_{{ plato.id_plato }}_{{ menu.el_dia_en_que_comemos|date:'Ymd' }}">
+                                  → {{ variedad.nombre }}
+                                </label>
+                              </div>
+                            {% endfor %}
+                          </div>
+                        {% endif %}
+
+                      {% else %}
+                        <div class="text-muted fst-italic">››› {{ plato.plato }}</div>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+        {% empty %}
+          <div class="alert alert-info">No hay platos asignados.</div>
+        {% endfor %}
+
+      </section>
+    </div>
+
+    <!-- Columna: Edita lista de compras -->
+    <div class="col-12 col-lg-4">
+      <section>
+        <h4 class="mb-2">Marcá lo que necesites comprar:</h4>
+
+        {% if ingredientes_con_tengo_y_comentario %}
+          <div class="card">
+            <ul class="list-group list-group-flush">
+              {% for ingrediente, valor in ingredientes_con_tengo_y_comentario.items %}
+                <li class="list-group-item py-1 px-2">
+                  <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-2">
+
+                    <div class="form-check m-0 flex-grow-1">
+                      <input 
+                        class="form-check-input me-1" 
+                        type="checkbox" 
+                        id="ing-{{ forloop.counter }}"      {# ⬅️ IDs sin espacios #}
+                        name="ingrediente_a_comprar"
+                        value="{{ ingrediente }}"
+                        {% if valor.estado == "no-tengo" %}checked{% endif %}>
+                      <label class="form-check-label small" for="ing-{{ forloop.counter }}">
+                        {{ ingrediente }}
+                      </label>
+                    </div>
+
+                    <div class="input-group input-group-sm">
+                      <input 
+                        type="text"
+                        id="ing-{{ forloop.counter }}_comentario"
+                        name="{{ ingrediente }}_comentario"
+                        value="{{ valor.comentario }}"
+                        class="form-control"
+                        placeholder="Comentario">
+                      <button 
+                        class="btn btn-outline-secondary" 
+                        type="button" 
+                        onclick="this.previousElementSibling.value=''">
+                        &times;
+                      </button>
+                    </div>
+
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% else %}
+          <div class="alert alert-info py-1 px-2 small">No hay ingredientes para editar</div>
+        {% endif %}
+      </section>
+    </div>
+
+    <!-- Columna: Lista de compras -->
+    <div class="col-12 col-lg-4">
+      <section>
+        <h4 class="mb-3">Lista de compras</h4>
+
+        {% if lista_de_compras %}
+          <div class="card mb-3">
+            <ul class="list-group list-group-flush">
+              {% for item in lista_de_compras %}
+                <li class="list-group-item d-flex align-items-center">
+                  <span class="me-2">•</span>{{ item }}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <a class="btn btn-success w-100"
+             href="https://wa.me/5491145342640?text={{ mensaje_whatsapp }}"
+             target="_blank" rel="noopener">
+            Enviar lista por WhatsApp
+          </a>
+        {% else %}
+          <span class="alert alert-info py-1 px-2 small">No hay ingredientes para comprar</span>
+        {% endif %}
+      </section>
+    </div>
+
+  </div>
+
+  <!-- Submit global (DENTRO del form) -->
+  <div class="text-center mt-4">
+    <button type="submit" class="btn btn-primary px-4">Actualizar</button>
+  </div>
+
+</form>  {# ⬅️ FORM FIN #}
+
+{% endblock %}
