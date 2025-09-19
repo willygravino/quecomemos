@@ -138,33 +138,40 @@
     </div>
 
     <!-- Columna: Lista de compras -->
-    <div class="col-12 col-lg-4">
-      <section>
-        <h4 class="mb-3">Lista de compras</h4>
+    <!-- Columna: Lista de compras (compacta) -->
+<div class="col-12 col-lg-4">
+  <section>
+    <h6 class="mb-2">Lista de compras</h6> <!-- título más chico -->
 
-        {% if lista_de_compras %}
-          <div class="card mb-3">
-            <ul class="list-group list-group-flush">
-              {% for item in lista_de_compras %}
-                <li class="list-group-item d-flex align-items-center">
-                  <span class="me-2">•</span>{{ item }}
-                </li>
-              {% endfor %}
-            </ul>
-          </div>
+    {% if lista_de_compras %}
+      <div class="card mb-2">
+        <ul class="list-group list-group-flush">
+          {% for item in lista_de_compras %}
+            <li class="list-group-item py-1 px-2 d-flex align-items-center small">
+              <span class="me-1">•</span>{{ item }}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
 
-          <a class="btn btn-success w-100"
-             href="https://wa.me/5491145342640?text={{ mensaje_whatsapp }}"
-             target="_blank" rel="noopener">
-            Enviar lista por WhatsApp
-          </a>
-        {% else %}
-          <span class="alert alert-info py-1 px-2 small">No hay ingredientes para comprar</span>
-        {% endif %}
-      </section>
-    </div>
+      <a class="btn btn-success w-100 mb-2"
+        href="https://wa.me/5491145342640?text={{ mensaje_whatsapp }}"
+        target="_blank" rel="noopener">
+        Enviar lista por WhatsApp
+      </a>
 
-  </div>
+      <a class="btn btn-outline-secondary w-100"
+        href="{{ share_url }}"
+        target="_blank" rel="noopener">
+        Compartir lista de compras
+      </a>
+
+    {% else %}
+      <span class="alert alert-info py-1 px-2 small">No hay ingredientes para comprar</span>
+    {% endif %}
+  </section>
+</div>
+
 
   <!-- Submit global (DENTRO del form) -->
   <!-- <div class="text-center mt-4">

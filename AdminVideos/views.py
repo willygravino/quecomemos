@@ -1,6 +1,8 @@
 from collections import defaultdict
 import locale
 import unicodedata
+from django.core.signing import dumps as signed_dumps
+from django.core.signing import loads as signed_loads, BadSignature
 from django import forms
 from django.contrib import messages  # Para mostrar mensajes al usuario
 from django.contrib.auth import logout
@@ -341,12 +343,29 @@ def lista_de_compras(request):
     mensaje_whatsapp = mensaje_whatsapp.replace("\n", "%0A")
 
 
+    # Construir payload para compartir: solo los que están en "no-tengo"
+    items_para_compartir = []
+    for ing, det in ingredientes_unicos.items():
+        if det.get("estado") == "no-tengo":
+            items_para_compartir.append({
+                "nombre": ing,
+                "comentario": det.get("comentario", "")
+            })
+
+    token = signed_dumps({"items": items_para_compartir})
+    share_url = request.build_absolute_uri(
+        reverse("compartir-lista") + f"?t={token}"
+    )
+
+
     context = {
         'menues_del_usuario': menues_del_usuario,
         'ingredientes_con_tengo_y_comentario': ingredientes_unicos, # DICT TODOS LOS INGREDIENTES, CON TENGO Y COMENTARIO
         "lista_de_compras": lista_de_compras, # LISTA DE COMPRAS PARA VERLO EN ENVAR A WHATS APP
         "mensaje_whatsapp": mensaje_whatsapp, # MENSAJE FORMATEADO PARA WHATSAPP
         "parametro" : "lista-compras",
+        'share_url': share_url,             # 👈 NUEVO
+
         # "clave_fecha": clave_fecha,
         # "platos": platos,
         # "variedades_seleccionadas": variedades_seleccionadas,
@@ -355,6 +374,22 @@ def lista_de_compras(request):
 
     return render(request, 'AdminVideos/lista_de_compras.html', context)
 
+
+def compartir_lista(request):
+    t = request.GET.get("t")
+    if not t:
+        raise Http404("Token faltante")
+
+    try:
+        data = signed_loads(t)           # {'items': [{'nombre':..., 'comentario':...}, ...]}
+        items = data.get("items", [])
+    except BadSignature:
+        raise Http404("Token inválido")
+
+    return render(request, "AdminVideos/compartir_lista.html", {
+        "items": items,
+        "token": t,                      # lo usamos como clave de localStorage
+    })
 
 class PlatoDetail(DetailView):
     model = Plato

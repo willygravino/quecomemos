@@ -17,7 +17,7 @@ from django import views
 from django.contrib import admin
 from django.urls import path
 
-from AdminVideos.views import CrearLugar, EnviarMensaje, LugarDetail, LugarUpdate,  agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, api_ingredientes, compartir_elemento, descartar_sugerido, eliminar_lugar, eliminar_menu_programado, eliminar_plato, eliminar_plato_programado, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, FiltroDePlatos, random_dia, set_dia_activo, sumar_amigue, user_logout, SolicitarAmistad, MensajeDelete, AsignarPlato 
+from AdminVideos.views import CrearLugar, EnviarMensaje, LugarDetail, LugarUpdate,  agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, api_ingredientes, compartir_elemento, descartar_sugerido, eliminar_lugar, eliminar_menu_programado, eliminar_plato, eliminar_plato_programado, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, FiltroDePlatos, random_dia, set_dia_activo, sumar_amigue, user_logout, SolicitarAmistad, MensajeDelete, AsignarPlato, compartir_lista
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -46,6 +46,7 @@ urlpatterns = [
     # path('videos/reiniciar/sugeridos', reiniciar_sugeridos, name="reiniciar-sugeridos"),
     path('videos/<pk>/update', PlatoUpdate.as_view(), name="videos-update"),
     path('lugar/<pk>/update', LugarUpdate.as_view(), name="lugar-update"),
+    path("lista/compartir/", compartir_lista, name="compartir-lista"),
 
     path('random-dia/<str:dia_nombre>/', random_dia, name='random_dia'),
 
