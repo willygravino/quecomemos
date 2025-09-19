@@ -425,13 +425,16 @@
 
                             {{ dia|date:"l j"|capfirst }}
                             {% if dia in dias_programados %}
-                            &nbsp;<i class="fa-solid fa-check text-success"></i> <!-- Icono pin al lado del nombre -->
+                            &nbsp;
+                            <i class="fa-solid fa-check text-success"></i>
+                            <!-- Icono pin al lado del nombre -->
                             {% endif %}
                         </span>
                         <span class="d-block d-md-none">
                             {{ dia|date:"D"|slice:":2"|upper }}<br>{{ dia|date:"j" }}
                             {% if dia in dias_programados %}
-                            <i class="bi bi-pin-angle-fill"></i>
+                            <i class="fa-solid fa-check text-success"></i>
+                            <!-- <i class="bi bi-pin-angle-fill"></i> -->
                             {% endif %}
                         </span>
                     </button>

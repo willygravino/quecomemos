@@ -132,37 +132,31 @@ class Plato(models.Model):
         return f"{self.id} - {self.nombre_plato} de {self.propietario}"
     
 
-# class Ingrediente(models.Model):
-#     nombre = models.CharField(max_length=100, unique=True)
-
-#     def __str__(self):
-#         return f"{self.id} - {self.nombre}"
 class Ingrediente(models.Model):
      # ===== Nivel 1: categoría (lugar de compra) =====
     VERDULERIA = "verduleria"
+    FIAMBRERIA = "fiambreria"
     CARNICERIA = "carniceria"
     PESCADERIA = "pescaderia"
     PANADERIA = "panaderia"
     ALMACEN = "almacen"
     LACTEOS = "lacteos"
-    CONDIMENTOS = "condimentos"
     BEBIDAS = "bebidas"
     OTRO = "otro"
 
     TIPO_CHOICES = [
         (VERDULERIA, "Verdulería"),
+        (FIAMBRERIA, "Fiambriería"),
         (CARNICERIA, "Carnicería"),
         (PESCADERIA, "Pescadería"),
         (PANADERIA, "Panadería"),
         (ALMACEN, "Almacén"),
         (LACTEOS, "Lácteos"),
-        (CONDIMENTOS, "Condimentos"),
         (BEBIDAS, "Bebidas"),
         (OTRO, "Otro"),
     ]
 
     # ===== Nivel 2: detalle (subcategoría) =====
-    # Valores (los usamos en choices y para validar)
     VERDURA = "verdura"
     FRUTA = "fruta"
     TUBERCULO = "tuberculo"
@@ -174,109 +168,73 @@ class Ingrediente(models.Model):
     CORDERO = "cordero"
     ACHURAS = "achuras"
 
-    PESCADO_BLANCO = "pescado_blanco"
-    PESCADO_AZUL = "pescado_azul"
+    FIAMBRE = "fiambre"
+    QUESO = "queso"
+    EMBUTIDO = "embutido" 
+
+    PESCADO = "pescado"
     MARISCO = "marisco"
 
     PAN = "pan"
-    FACTURAS = "facturas"
-    MASA = "masa"
-    GALLETAS = "galletas"
 
     LEGUMBRE = "legumbre"
     CEREAL = "cereal"
-    HARINA = "harina"
+    HARINA_BLANCA = "harina_blanca"
     ACEITE = "aceite"
     CONSERVA = "conserva"
     AZUCAR = "azucar"
-    FIDEOS = "fideos"
-
-    LECHE = "leche"
-    QUESO = "queso"
-    YOGUR = "yogur"
-    CREMA = "crema"
-    MANTECA = "manteca"
 
     ESPECIA = "especia"
-    HIERBA_SECA = "hierba_seca"
-    ADEREZO = "aderezo"
-    SALSA = "salsa"
 
-    ALCOHOLICA = "alcoholica"
-    SIN_ALCOHOL = "sin_alcohol"
-    INFUSION = "infusion"
-
-    # Choices agrupados (Django los muestra con optgroups en admin)
     DETALLE_CHOICES_GROUPED = [
-        ("Verdulería", (
+        ("Verdulería", [
             (VERDURA, "Verdura"),
             (FRUTA, "Fruta"),
             (TUBERCULO, "Tubérculo"),
             (HIERBA_FRESCA, "Hierba fresca"),
-        )),
-        ("Carnicería", (
+        ]),
+        ("Carnicería", [
             (CARNE_ROJA, "Carne roja"),
             (AVE, "Ave"),
             (CERDO, "Cerdo"),
             (CORDERO, "Cordero"),
             (ACHURAS, "Achuras"),
-        )),
-        ("Pescadería", (
-            (PESCADO_BLANCO, "Pescado blanco"),
-            (PESCADO_AZUL, "Pescado azul"),
+        ]),
+        ("Pescadería", [
+            (PESCADO, "Pescado"),
             (MARISCO, "Marisco"),
-        )),
-        ("Panadería", (
+        ]),
+        ("Panadería", [
             (PAN, "Pan"),
-            (FACTURAS, "Facturas"),
-            (MASA, "Masa"),
-            (GALLETAS, "Galletas"),
-        )),
-        ("Almacén", (
+        ]),
+        ("Almacén", [
             (LEGUMBRE, "Legumbre"),
             (CEREAL, "Cereal"),
-            (HARINA, "Harina"),
+            (HARINA_BLANCA, "Harina Blanca"),
             (ACEITE, "Aceite"),
             (CONSERVA, "Conserva"),
             (AZUCAR, "Azúcar"),
-            (FIDEOS, "Fideos"),
-        )),
-        ("Lácteos", (
-            (LECHE, "Leche"),
-            (QUESO, "Queso"),
-            (YOGUR, "Yogur"),
-            (CREMA, "Crema"),
-            (MANTECA, "Manteca"),
-        )),
-        ("Condimentos", (
             (ESPECIA, "Especia"),
-            (HIERBA_SECA, "Hierba seca"),
-            (ADEREZO, "Aderezo"),
-            (SALSA, "Salsa"),
-        )),
-        ("Bebidas", (
-            (ALCOHOLICA, "Alcohólica"),
-            (SIN_ALCOHOL, "Sin alcohol"),
-            (INFUSION, "Infusión"),
-        )),
-        ("Otro", (
+        ]),
+     
+        ("Condimentos", [
+            (ESPECIA, "Especia"),
+        ]),
+      
+        ("Otro", [
             (OTRO, "Otro"),
-        )),
+        ]),
     ]
 
-    # Mapa para validar que detalle ↔ tipo tengan sentido
     DETALLE_POR_TIPO = {
         VERDULERIA: {VERDURA, FRUTA, TUBERCULO, HIERBA_FRESCA},
         CARNICERIA: {CARNE_ROJA, AVE, CERDO, CORDERO, ACHURAS},
-        PESCADERIA: {PESCADO_BLANCO, PESCADO_AZUL, MARISCO},
-        PANADERIA: {PAN, FACTURAS, MASA, GALLETAS},
-        ALMACEN: {LEGUMBRE, CEREAL, HARINA, ACEITE, CONSERVA, AZUCAR, FIDEOS},
-        LACTEOS: {LECHE, QUESO, YOGUR, CREMA, MANTECA},
-        CONDIMENTOS: {ESPECIA, HIERBA_SECA, ADEREZO, SALSA},
-        BEBIDAS: {ALCOHOLICA, SIN_ALCOHOL, INFUSION},
+        PESCADERIA: {PESCADO, MARISCO},
+        PANADERIA: {PAN},
+        ALMACEN: {LEGUMBRE, CEREAL, HARINA_BLANCA, ACEITE, CONSERVA, AZUCAR, ESPECIA},
+        FIAMBRERIA: {FIAMBRE, QUESO, EMBUTIDO},
         OTRO: {OTRO},
     }
-
     # ===== Campos =====
     nombre = models.CharField(
         max_length=100,
@@ -322,18 +280,17 @@ class Ingrediente(models.Model):
 
 class IngredienteEnPlato(models.Model):
     UNIDADES_CHOICES = [
-        ('-','-'),
+        ('-', '-'),  # Por si no aplica o se cuenta de otra forma
         ('unidad', 'unidad'),
-        ('gr', 'gr'),
-        ('pizca', 'pizca'),
-        ('mg', 'mg'),
-        ('kg', 'kg'),
-        ('ml', 'ml'),
-        ('cucharada', 'cucharada'),
-        ('cdita', 'cdita'),
-        
-        # Podés agregar más según necesites
-    ]
+        ('gr', 'gramo'),
+        ('kg', 'kilogramo'),
+        ('mg', 'miligramo'),
+        ('ml', 'mililitro'),
+        ('l', 'litro'),
+        ('cdita', 'cucharadita'),         # cucharadita de té
+        ('cda', 'cucharada'),             # cucharada sopera
+        ('taza', 'taza'),
+        ('pizca', 'pizca'),]
 
     plato = models.ForeignKey(Plato, on_delete=models.CASCADE, related_name='ingredientes_en_plato')
     ingrediente = models.ForeignKey(Ingrediente, on_delete=models.CASCADE,null=True, blank=True)
