@@ -157,16 +157,29 @@
       
 
      <!-- Botón WhatsApp existente -->
-<a class="btn btn-success w-100 mb-2"
+<!-- <a class="btn btn-success w-100 mb-2"
    href="https://wa.me/5491145342640?text={{ mensaje_whatsapp }}"
    target="_blank" rel="noopener">
   Enviar lista por WhatsApp
-</a>
+</a> -->
 
-<!-- NUEVO: botón que abre el modal de opciones -->
-<button type="button" class="btn btn-outline-secondary w-100" id="btnShare">
-  Compartir lista de compras
-</button>
+<!-- Botones: ir a la lista + compartir por WhatsApp -->
+<div class="d-flex gap-2">
+  <!-- Ir a lista de compras -->
+  <a href="{{ share_url }}" target="_blank" rel="noopener"
+     class="btn btn-outline-secondary flex-grow-1">
+    Ir a lista de compras
+  </a>
+
+  <!-- Compartir link por WhatsApp -->
+  <a href="https://wa.me/?text={{ share_url|urlencode }}"
+     target="_blank" rel="noopener"
+     class="btn btn-success d-inline-flex align-items-center justify-content-center"
+     aria-label="Compartir por WhatsApp" title="Compartir por WhatsApp">
+    <i class="bi bi-whatsapp"></i>
+  </a>
+</div>
+
 
   <!-- (Opcional) input para copiar el link directamente -->
   <div class="input-group input-group-sm mt-2">
@@ -195,62 +208,6 @@
 
 </form>  {# ⬅️ FORM FIN #}
 
-<div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-
-      <div class="modal-header">
-        <h5 class="modal-title" id="shareModalLabel">Compartir lista de compras</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-
-      <div class="modal-body">
-        ¿Qué querés hacer?
-        <ul class="small mt-2 mb-0">
-          <li>Enviar el link por WhatsApp</li>
-          <li>Ir a la página de la lista (tildable)</li>
-        </ul>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="goList">Ir a la lista</button>
-        <button type="button" class="btn btn-success" id="goWhatsApp">Mandar por WhatsApp</button>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<script>
-  (function () {
-    const shareBtn   = document.getElementById('btnShare');
-    const shareModal = document.getElementById('shareModal');
-    const goWA       = document.getElementById('goWhatsApp');
-    const goList     = document.getElementById('goList');
-
-    // Abrir modal al click
-    shareBtn?.addEventListener('click', function (e) {
-      e.preventDefault();
-      const modal = new bootstrap.Modal(shareModal);
-      modal.show();
-    });
-
-    // Ir a la página de la lista (nueva pestaña)
-    goList?.addEventListener('click', function () {
-      const url = "{{ share_url }}";
-      window.open(url, '_blank', 'noopener');
-    });
-
-    // Enviar link por WhatsApp (sin número específico)
-    goWA?.addEventListener('click', function () {
-      const link = "{{ share_url }}";
-      const msg  = `Te comparto mi lista de compras:\n${link}`;
-      const wa   = "https://wa.me/?text=" + encodeURIComponent(msg);
-      window.open(wa, '_blank', 'noopener');
-    });
-  })();
-</script>
 
 <script>
   (function() {

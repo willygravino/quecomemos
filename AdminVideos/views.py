@@ -345,7 +345,7 @@ def lista_de_compras(request):
                 lista_de_compras.append(f"{ingrediente}")
 
     # Reemplazar los saltos de línea para que sean compatibles con la URL de WhatsApp
-    mensaje_whatsapp = mensaje_whatsapp.replace("\n", "%0A")
+    # mensaje_whatsapp = mensaje_whatsapp.replace("\n", "%0A")
 
 
     # # Construir payload para compartir: solo los que están en "no-tengo"
@@ -376,7 +376,7 @@ def lista_de_compras(request):
         'menues_del_usuario': menues_del_usuario,
         'ingredientes_con_tengo_y_comentario': ingredientes_unicos, # DICT TODOS LOS INGREDIENTES, CON TENGO Y COMENTARIO
         "lista_de_compras": lista_de_compras, # LISTA DE COMPRAS PARA VERLO EN ENVAR A WHATS APP
-        "mensaje_whatsapp": mensaje_whatsapp, # MENSAJE FORMATEADO PARA WHATSAPP
+        # "mensaje_whatsapp": mensaje_whatsapp, # MENSAJE FORMATEADO PARA WHATSAPP
         "parametro" : "lista-compras",
         'share_url': share_url,             # 👈 NUEVO
 
