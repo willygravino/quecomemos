@@ -252,5 +252,58 @@
   })();
 </script>
 
+<script>
+  (function() {
+    // El token público está en la URL. Lo tomamos del path:
+    const tokenFromPath = window.location.pathname.split("/").filter(Boolean).pop(); 
+    // ej: /lista/compartir/2f3d...-...-.../  → "2f3d...-...-..."
+    const API_URL = `/api/lista/compartir/${tokenFromPath}/toggle/`;
+
+    function toggleBackend(nombre, checked) {
+      fetch(API_URL, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ nombre, checked })
+      }).catch(()=>{ /* silencioso */});
+    }
+
+    const token = "{{ token|escapejs }}";
+    const KEY = "lista_compartida::" + token;
+    const btnClear = document.getElementById("btn-clear");
+    const state = JSON.parse(localStorage.getItem(KEY) || "{}");
+
+    // aplicar estado y bind
+    document.querySelectorAll(".item-check").forEach(chk => {
+      const li = chk.closest(".item-line");
+      const nombre = li.querySelector(".item-nombre")?.textContent?.trim() || "";
+
+      if (state[chk.id]) {
+        chk.checked = true;
+        li.classList.add("striked");
+      }
+
+      chk.addEventListener("change", () => {
+        state[chk.id] = chk.checked;
+        li.classList.toggle("striked", chk.checked);
+        localStorage.setItem(KEY, JSON.stringify(state));
+        // Persistir en servidor
+        toggleBackend(nombre, chk.checked);
+      });
+    });
+
+    btnClear?.addEventListener("click", () => {
+      document.querySelectorAll(".item-check").forEach(chk => {
+        const li = chk.closest(".item-line");
+        const nombre = li.querySelector(".item-nombre")?.textContent?.trim() || "";
+        chk.checked = false;
+        li.classList.remove("striked");
+        state[chk.id] = false;
+        toggleBackend(nombre, false);
+      });
+      localStorage.setItem(KEY, JSON.stringify(state));
+    });
+  })();
+</script>
+ 
 
 {% endblock %}

@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.forms import ValidationError
+import uuid
+from django.conf import settings
 
 class Lugar(models.Model):
     nombre = models.CharField(max_length=100)
@@ -38,7 +40,9 @@ class Plato(models.Model):
     ingredientes = models.CharField('Ingresá los ingredientes, separados por coma', max_length=400, blank=True)
 
     # ingredientes_detallados = models.JSONField(null=True, blank=True,help_text="Estructura: [{'ingrediente': 'harina', 'cantidad': 200, 'unidad': 'g'}]")
-    proviene_de = models.CharField(max_length=20, null=True)
+
+    # Para campos de texto (CharField, TextField), se suele usar blank=True y no null=True, porque Django guarda vacío como "" en vez de NULL. Si no querés NULL en DB, podés hacer solo:
+    proviene_de = models.CharField(max_length=20, blank=True, default="")
     id_original = models.IntegerField(null=True, blank=True)
     enlace = models.URLField(max_length=200, blank=True, null=True)
     porciones = models.PositiveIntegerField(null=True,blank=True, help_text="Cantidad de porciones que rinde este plato")
@@ -365,25 +369,77 @@ class HistoricoItem(models.Model):
 
 
 
-class Profile(models.Model):
-     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
-     nombre = models.CharField(max_length=50, null=True, blank=True)
-     apellido = models.CharField(max_length=50, null=True, blank=True)
-     telefono = models.CharField(max_length=15, null=True, blank=True)
-     avatar = models.ImageField(upload_to="avatares", null=True, blank=True)
-     ingredientes_que_tengo = models.JSONField(default=list, blank=True)
-    #  por qué default list?
-     comentarios = models.JSONField(default=list, blank=True)
-     amigues = models.JSONField(default=list, blank=True)
-     sugeridos_descartados = models.JSONField(default=list, blank=True)
-     sugeridos_importados = models.JSONField(default=list, blank=True)
 
-     @property
-     def avatar_url(self):
-        return self.avatar.url if self.avatar else '/media/avatares/user.png'
-     
-     def __str__(self):
+class Profile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="profile",
+    )
+    nombre = models.CharField(max_length=50, null=True, blank=True)
+    apellido = models.CharField(max_length=50, null=True, blank=True)
+    telefono = models.CharField(max_length=15, null=True, blank=True)
+    avatar = models.ImageField(upload_to="avatares", null=True, blank=True)
+
+    # Usamos default=list (callable) para evitar el problema de mutables como default
+    ingredientes_que_tengo = models.JSONField(default=list, blank=True)
+    comentarios = models.JSONField(default=list, blank=True)
+    amigues = models.JSONField(default=list, blank=True)
+    sugeridos_descartados = models.JSONField(default=list, blank=True)
+    sugeridos_importados = models.JSONField(default=list, blank=True)
+
+    # Para compartir la lista
+    share_token = models.CharField(max_length=36, unique=True, blank=True, null=True)
+
+    def ensure_share_token(self):
+        """Genera un token si no existe y lo devuelve."""
+        if not self.share_token:
+            self.share_token = str(uuid.uuid4())
+            # Si el modelo es nuevo y aún no fue guardado, no uses update_fields
+            if self.pk:
+                self.save(update_fields=["share_token"])
+            else:
+                self.save()
+        return self.share_token
+
+    @property
+    def avatar_url(self):
+        return self.avatar.url if self.avatar else "/media/avatares/user.png"
+
+    def __str__(self):
         return f"Perfil de {self.user}"
+
+
+# class Profile(models.Model):
+#      user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+#      nombre = models.CharField(max_length=50, null=True, blank=True)
+#      apellido = models.CharField(max_length=50, null=True, blank=True)
+#      telefono = models.CharField(max_length=15, null=True, blank=True)
+#      avatar = models.ImageField(upload_to="avatares", null=True, blank=True)
+#      ingredientes_que_tengo = models.JSONField(default=list, blank=True)
+#     #  por qué default list?
+#      comentarios = models.JSONField(default=list, blank=True)
+#      amigues = models.JSONField(default=list, blank=True)
+#      sugeridos_descartados = models.JSONField(default=list, blank=True)
+#      sugeridos_importados = models.JSONField(default=list, blank=True)
+
+#      share_token = models.CharField(max_length=36, unique=True, blank=True, null=True)
+#     # ingredientes_que_tengo: asumo que ya existe (lista en JSON/ArrayField/lo que uses)
+
+#     def ensure_share_token(self):
+#         if not self.share_token:
+#             self.share_token = str(uuid.uuid4())
+#             self.save(update_fields=["share_token"])
+#         return self.share_token
+
+#      @property
+#      def avatar_url(self):
+#         return self.avatar.url if self.avatar else '/media/avatares/user.png'
+     
+#      def __str__(self):
+#         return f"Perfil de {self.user}"
+     
+    
      
      
 
