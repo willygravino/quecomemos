@@ -1,0 +1,298 @@
+
+{% extends "AdminVideos/base.html" %}
+{% load static %}
+         
+
+<!-- MENUES, BUSQUEDA Y PLATOS -->
+{% block tags-busqueda-platos %}
+
+            <ul class="nav nav-tabs flex-nowrap overflow-auto border-0 w-100 justify-content-start" id="diasTab"
+                role="tablist" style="white-space: nowrap;">
+
+                <!-- <span class="btn btn-outline-danger material-symbols-outlined ">wand_shine</span> -->
+
+
+                {% for dia in dias_desde_hoy %}
+                
+
+                <li class="nav-item flex-fill" role="presentation" style="flex: 1 0 auto;">
+                    <button
+                        class="nav-link {% if dia_activo == dia|date:'Y-m-d' %}active{% elif forloop.first and not dia_activo %}active{% endif %} text-center px-2"
+                        id="tab-{{ dia|date:'Y-m-d' }}" data-bs-toggle="tab"
+                        data-bs-target="#tab-content-{{ dia|date:'Y-m-d' }}" type="button" role="tab"
+                        aria-controls="tab-content-{{ dia|date:'Y-m-d' }}"
+                        aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+
+                        <span class="d-none d-md-block">
+
+                            {{ dia|date:"l j"|capfirst }}
+                            {% if dia in dias_programados %}
+                            &nbsp;
+                            <i class="fa-solid fa-check text-success"></i>
+                            <!-- Icono pin al lado del nombre -->
+                            {% endif %}
+                        </span>
+                        <span class="d-block d-md-none">
+                            {{ dia|date:"D"|slice:":2"|upper }}<br>{{ dia|date:"j" }}
+                            {% if dia in dias_programados %}
+                            <i class="fa-solid fa-check text-success"></i>
+                            <!-- <i class="bi bi-pin-angle-fill"></i> -->
+                            {% endif %}
+                        </span>
+                    </button>
+                </li>
+                {% endfor %}
+            </ul>
+
+
+
+            <!-- Tab Content -->
+            <div class="tab-content bg-white" id="diasTabContent">
+
+                {% for dia in dias_desde_hoy %}
+                <div class="tab-pane {% if dia_activo == dia|date:'Y-m-d' %}active{% elif forloop.first and not dia_activo %}active{% endif %}"
+                    id="tab-content-{{ dia|date:'Y-m-d' }}" role="tabpanel" aria-labelledby="tab-{{ dia|date:'Y-m-d' }}">
+
+                    <div class="text-dark p-2 small">
+
+                        <div class="position-relative">
+
+                            <div class="border border-2 border-primary rounded p-4 mt-2 bg-light shadow-sm">
+                                <div class="row d-flex align-items-start">
+                                    <div class="col p-2"
+                                        style="max-height: 100px; overflow-y: auto; overflow-x: hidden; display: block;">
+
+                                        {% if dia in platos_dia_x_dia %}
+                                        <!-- Si hay platos programados para este día, los mostramos -->
+                                        {% for dia_plato in platos_dia_x_dia.items %}
+                                        {% if dia_plato.0 == dia %}
+
+                                        <div class="row">
+
+                                            <!-- Desayuno -->
+                                            <div class="col-md-3">
+
+                                                <h6 class="fw-bold ml-1 bg-primary text-white p-1 rounded">
+                                                    <span class="material-symbols-outlined text-danger fs-6 me-2">wand_shine</span>
+                                                    Desayuno
+                                                </h6>
+
+
+                                                {% if dia_plato.1.desayuno %}
+                                                {% for plato in dia_plato.1.desayuno %}
+                                                <div class="mb-1 ml-1 d-flex align-items-center text-primary">
+                                                    <span class="material-symbols-outlined text-danger fs-6">wand_shine</span>
+
+
+                                                    <!-- <a href="{% url 'platos-detail' plato.id %}"
+                                                                    class="text-decoration-none me-2">
+                                                                    &nbsp; {{ plato.nombre }}
+                                                                </a> -->
+
+                                                    <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
+                                                        &nbsp; {{ plato.nombre }}
+                                                    </a>
+
+                                                    <i class="bi bi-pin-angle-fill ms-2 fa-lg"></i>&nbsp;
+
+                                                    <a href="{% url 'eliminar-programado' nombre_plato=plato.nombre comida='desayuno' fecha=dia %}"
+                                                        class="btn btn-sm p-0" title="Eliminar">
+                                                        <i class="fa-solid fa-trash-can"></i>
+                                                    </a>&nbsp;&nbsp;
+
+
+                                                    <i class="fa-solid fa-arrow-right-arrow-left"></i>
+
+
+                                                </div>
+                                                {% endfor %}
+                                                {% else %}
+                                                <p class="mb-1 ml-1 d-flex align-items-center">No hay platos
+                                                    programados.</p>
+                                                {% endif %}
+                                            </div>
+
+                                            <!-- Almuerzo -->
+                                            <div class="col-md-3">
+                                                <h6 class="fw-bold ml-1 bg-primary text-white p-1 rounded">
+                                                    <span class="material-symbols-outlined text-danger fs-6 me-2">wand_shine</span>
+                                                    Almuerzo
+                                                </h6>
+
+                                                {% if dia_plato.1.almuerzo %}
+                                                {% for plato in dia_plato.1.almuerzo %}
+
+                                                <div class="mb-1 ml-1 d-flex align-items-center text-primary">
+
+                                                    <span class="material-symbols-outlined text-danger fs-6">wand_shine</span>
+
+                                                    <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
+                                                        &nbsp; {{ plato.nombre }}
+                                                    </a>
+
+                                                    <i class="bi bi-pin-angle-fill ms-2 fa-lg"></i>&nbsp;
+
+                                                    <!-- aquí mando nombre de plato que no se usará cuando la transición termine  -->
+                                                    <a href="{% url 'eliminar-programado' nombre_plato=plato.nombre comida='almuerzo' fecha=dia %}"
+                                                        class="btn btn-sm p-0" title="Eliminar">
+                                                        <i class="fa-solid fa-trash-can"></i>
+                                                    </a>
+
+                                                    &nbsp;&nbsp;<i class="fa-solid fa-arrow-right-arrow-left"></i>
+
+                                                </div>
+
+
+                                                {% endfor %}
+                                                {% else %}
+                                                <p class="mb-1 ml-1 d-flex align-items-center">No hay platos
+                                                    programados.</p>
+                                                {% endif %}
+                                            </div>
+
+                                            <!-- Merienda -->
+                                            <div class="col-md-3">
+                                                <h6 class="fw-bold ml-1 bg-primary text-white p-1 rounded">
+                                                    <span class="material-symbols-outlined text-danger fs-6 me-2">wand_shine</span>
+                                                    Merienda
+                                                </h6>
+
+                                                {% if dia_plato.1.merienda %}
+                                                {% for plato in dia_plato.1.merienda %}
+
+                                                <div class="mb-1 ml-1 d-flex align-items-center text-primary">
+
+                                                    <span class="material-symbols-outlined text-danger fs-6">wand_shine</span>
+
+
+                                                    <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
+                                                        &nbsp; {{ plato.nombre }}
+                                                    </a>
+
+                                                    <i class="bi bi-pin-angle-fill ms-2 fa-lg"></i>&nbsp;
+
+
+                                                    <a href="{% url 'eliminar-programado' nombre_plato=plato.nombre comida='merienda' fecha=dia %}"
+                                                        class="btn btn-sm p-0" title="Eliminar">
+                                                        <i class="fa-solid fa-trash-can"></i>
+                                                    </a>
+
+                                                    &nbsp;&nbsp;<i class="fa-solid fa-arrow-right-arrow-left"></i>
+
+                                                </div>
+
+                                                {% endfor %}
+                                                {% else %}
+                                                <p class="mb-1 ml-1 d-flex align-items-center">No hay platos
+                                                    programados.</p>
+                                                {% endif %}
+                                            </div>
+
+                                            <!-- Cena -->
+                                            <div class="col-md-3">
+                                                <!-- <h6 class="fw-bold">Cena</h6> -->
+                                                <h6 class="fw-bold ml-1 bg-primary text-white p-1 rounded">
+                                                    <span class="material-symbols-outlined text-danger fs-6 me-2">wand_shine</span>
+                                                    Cena
+                                                </h6>
+
+                                                {% if dia_plato.1.cena %}
+                                                {% for plato in dia_plato.1.cena %}
+
+                                                <div class="mb-1 ml-1 d-flex align-items-center text-primary">
+
+                                                    <span class="material-symbols-outlined text-danger fs-6">wand_shine</span>
+
+                                                    <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
+                                                        &nbsp; {{ plato.nombre }}
+                                                    </a>
+
+                                                    <i class="bi bi-pin-angle-fill ms-2 fa-lg"></i>&nbsp;
+
+                                                    <a href="{% url 'eliminar-programado' nombre_plato=plato.nombre comida='cena' fecha=dia %}"
+                                                        class="btn btn-sm p-0" title="Eliminar">
+                                                        <i class="fa-solid fa-trash-can"></i>
+                                                    </a>
+
+                                                    &nbsp;&nbsp;<i class="fa-solid fa-arrow-right-arrow-left"></i>
+
+                                                </div>
+
+
+                                                {% endfor %}
+                                                {% else %}
+                                                <p class="mb-1 ml-1 d-flex align-items-center">No hay platos
+                                                    programados.</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                        {% endif %}
+                                        {% endfor %}
+                                        {% else %}
+                                        <h3 class="text-muted text-center mt-1" style="font-size: 1rem;">
+                                            Aún no programaste ningún plato para este día.
+                                        </h3>
+
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <span class="fs-7 position-absolute top-0 start-50 translate-middle bg-light text-primary px-1"
+                                style="transform: translate(-50%, -50%);">
+                                <a href="/random-dia/{{ dia|date:'l'|slice:':2'|upper }}/" class="btn btn-sm text-danger">
+                                    <span class="material-symbols-outlined" style="font-size: 20px;">wand_shine</span>
+                                </a>
+                                Menú programado&nbsp;
+
+                                {% if dia in platos_dia_x_dia %}
+                                    <a href="{% url 'eliminar-menu' %}" class="btn btn-link p-0" title="Eliminar menú del día">
+                                    <i class="fa-solid fa-trash-can fa-lg" style="font-size: 18px;"></i>
+                                    </a>
+                                {% endif %}
+
+                                &nbsp;
+
+                            </span>
+
+
+
+                            {% if messages %}
+                            {% for message in messages %}
+                            <div class="alert alert-info">{{ message }}</div>
+                            {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <div class="border border-primary rounded p-2 position-relative m-2">
+
+                    <!-- Título encima del borde -->
+                    <small class="position-absolute top-0 start-50 translate-middle bg-white px-3 text-primary"
+                        style="transform: translate(-50%, -50%);">
+                        Platos
+                    </small>
+
+                    <!-- Contenido de los bloques -->
+                    <div class="shadow rounded p-2 m-2 mb-0">
+                        <!-- <h1>Históricos generados: {{sumados}}</h1> -->
+                        {% block filtro %}
+                        {% endblock %}
+                    </div>
+
+                    <div class="my-3">
+                        {% block principal %}
+                        {% endblock %}
+                    </div>
+
+                </div>
+
+
+
+
+            </div>
+            
+{% endblock %}
