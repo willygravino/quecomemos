@@ -195,7 +195,7 @@ def lista_de_compras(request):
         variedades_seleccionadas = defaultdict(set)
 
         platos_seleccionados = set(request.POST.getlist("plato_seleccionado"))  # Captura todos los valores correctamente
-        ingredientes_elegidos = set(request.POST.getlist("ingrediente_a_comprar"))
+        # ingredientes_elegidos = set(request.POST.getlist("ingrediente_a_comprar"))
 
         # Procesar el formulario - variedades
         for key, value in request.POST.items():
@@ -275,7 +275,10 @@ def lista_de_compras(request):
 
             # Guardar los cambios en el perfil
             perfil.save()
-
+    
+    # ultimos_elegidos > para que cuando no mande nada porque se destildó todo, sepa cuales se destildaron y los agrege a "tengo"
+    ultimos_elegidos = request.POST.get("ultimos_elegidos", "")
+    ingredientes_elegidos = set(request.POST.getlist("ingrediente_a_comprar"))
 
     # Recorrer los menús del usuario
     for menu in menues_del_usuario:
@@ -293,17 +296,21 @@ def lista_de_compras(request):
                 for variedad in datos.get("variedades", {}).values():
                     if variedad.get("elegido"):
                         lista_de_ingredientes.update(map(str.strip, variedad["ingredientes"].split(",")))
+    
+        
+    ingredientes_elegidos = set(request.POST.getlist("ingrediente_a_comprar"))
 
-
-    # if ingredientes_elegidos:
-    no_elegidos = lista_de_ingredientes - ingredientes_elegidos
-    for ingrediente_a_comprar in lista_de_ingredientes:
-        if ingrediente_a_comprar in perfil.ingredientes_que_tengo:
-            # Eliminar el ingrediente de la lista
-            perfil.ingredientes_que_tengo.remove(ingrediente_a_comprar)
-            # Guardar el perfil actualizado
-            perfil.save()
-
+    if ingredientes_elegidos:
+        no_elegidos = lista_de_ingredientes - ingredientes_elegidos
+        for ingrediente_a_comprar in lista_de_ingredientes:
+            if ingrediente_a_comprar in perfil.ingredientes_que_tengo:
+                # Eliminar el ingrediente de la lista
+                perfil.ingredientes_que_tengo.remove(ingrediente_a_comprar)
+                # Guardar el perfil actualizado
+                perfil.save()
+    elif request.method != "GET":
+        no_elegidos = lista_de_ingredientes    
+                
     if no_elegidos:
         for ingrediente in no_elegidos:
             if ingrediente not in perfil.ingredientes_que_tengo:
@@ -311,7 +318,7 @@ def lista_de_compras(request):
                 perfil.ingredientes_que_tengo.append(ingrediente)
                 # Guardar el perfil actualizado
                 perfil.save()
-
+   
     if lista_de_ingredientes:
         for ingrediente in lista_de_ingredientes:
             el_comentario = ""
@@ -331,9 +338,7 @@ def lista_de_compras(request):
                     "comentario": el_comentario,
                     "estado": "no-tengo" }
 
-    # Generar el mensaje de WhatsApp
-    # mensaje_whatsapp = "Lista de compras:\n"
-
+   
     lista_de_compras =[]
     # Recorrer el diccionario para formatear los ingredientes que no tienes
     for ingrediente, detalles in ingredientes_unicos.items():
@@ -348,47 +353,20 @@ def lista_de_compras(request):
                 # mensaje_whatsapp += f"• {ingrediente}\n"
                 lista_de_compras.append(f"{ingrediente}")
 
-    # Reemplazar los saltos de línea para que sean compatibles con la URL de WhatsApp
-    # mensaje_whatsapp = mensaje_whatsapp.replace("\n", "%0A")
-
-
-    # # Construir payload para compartir: solo los que están en "no-tengo"
-    # items_para_compartir = []
-    # for ing, det in ingredientes_unicos.items():
-    #     if det.get("estado") == "no-tengo":
-    #         items_para_compartir.append({
-    #             "nombre": ing,
-    #             "comentario": det.get("comentario", "")
-    #         })
-
-    # token = signed_dumps({"items": items_para_compartir})
-    # share_url = request.build_absolute_uri(
-    #     # reverse("compartir-lista") + f"?t={token}"
-    #     reverse("compartir-lista", args=[request.user.id])
-
-    # )
-    # share_url = request.build_absolute_uri(reverse("compartir-lista", args=[request.user.id]))
-
+    
     token = perfil.ensure_share_token()  # genera uno si no existe
 
     share_url = request.build_absolute_uri(
         reverse("compartir-lista", args=[token]))
 
-
-
     context = {
         'menues_del_usuario': menues_del_usuario,
         'ingredientes_con_tengo_y_comentario': ingredientes_unicos, # DICT TODOS LOS INGREDIENTES, CON TENGO Y COMENTARIO
         "lista_de_compras": lista_de_compras, # LISTA DE COMPRAS PARA VERLO EN ENVAR A WHATS APP
-        # "mensaje_whatsapp": mensaje_whatsapp, # MENSAJE FORMATEADO PARA WHATSAPP
         "parametro" : "lista-compras",
-        'share_url': share_url,             # 👈 NUEVO
-
-        # "clave_fecha": clave_fecha,
-        # "platos": platos,
-        # "variedades_seleccionadas": variedades_seleccionadas,
-
-    }
+        'share_url': share_url             # 👈 NUEVO
+        
+     }
 
     return render(request, 'AdminVideos/lista_de_compras.html', context)
 
@@ -945,6 +923,8 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
 
             ingrediente_formset.instance = plato
             ingrediente_formset.save()
+
+        # AQUÍ VER SI ESTA PLATO ESTÁ EN ELEGIDOS POR DÍA, SI ES ASÍ, ELIMINARLO Y VOLVER A CARGARLO /            
 
         template_param = self.request.GET.get("tipopag")
         tail = f"?tipopag={template_param}&modificado=ok" if template_param else "?modificado=ok"

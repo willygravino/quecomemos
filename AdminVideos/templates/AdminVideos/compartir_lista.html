@@ -13,6 +13,14 @@
 </head>
 <body class="bg-light">
   <div class="container py-4">
+    {% if request.user.is_authenticated %}
+      <div class="mb-3">
+        <a href="{% url 'menu-elegido' %}" class="btn btn-secondary btn-sm">
+          ← Volver
+        </a>
+      </div>
+    {% endif %}
+
     <div class="d-flex align-items-center mb-3">
       <h5 class="m-0">Lista de compras</h5>
       <button class="btn btn-sm btn-outline-secondary ms-auto" id="btn-clear">Borrar tildados</button>
