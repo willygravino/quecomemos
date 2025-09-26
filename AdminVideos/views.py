@@ -186,50 +186,73 @@ def lista_de_compras(request):
     perfil = get_object_or_404(Profile, user=request.user)
 
     # VARIABLES PARA PRUEBAS
+    # ingrediente_limpio = set()
+    # ingredientes_elegidos_calculados = set()
+    # no_elegidos_calculados = set()
     # clave_fecha = ""
     # variedades_seleccionadas = ""
 
+    def norm(s: str) -> str:
+        return (s or "").strip().lower()
+    
+    ingredientes_elegidos = set(request.POST.getlist("ingrediente_a_comprar"))
+
     if request.method == 'POST':
+        # 1) Estructuras auxiliares
+        # platos seleccionados: set de claves "platoId_fecha"
+        platos_seleccionados = set(request.POST.getlist("plato_seleccionado"))  # p.ej. {"155_20250926", ...}
 
-        # Diccionarios auxiliares
-        variedades_seleccionadas = defaultdict(set)
+        # variedades seleccionadas por clave_fecha
+        # Ej: variedades_sel["155_20250926"] = {"con huevo", "sin huevo"}
+        variedades_sel = defaultdict(set)
+        for value in request.POST.getlist("variedad_seleccionada"):
+            try:
+                clave_plato_fecha, nombre_var = value.split("|", 1)  # "155_20250926" | "con huevo"
+            except ValueError:
+                continue
+            variedades_sel[clave_plato_fecha].add(norm(nombre_var))
 
-        platos_seleccionados = set(request.POST.getlist("plato_seleccionado"))  # Captura todos los valores correctamente
-        # ingredientes_elegidos = set(request.POST.getlist("ingrediente_a_comprar"))
-
-        # Procesar el formulario - variedades
-        for key, value in request.POST.items():
-            if key.startswith("variedad_seleccionada"):
-                plato_id, variedad = value.split("|")
-                variedades_seleccionadas[plato_id].add(variedad)  # No convertir a int
-
-        # Recorrer los menús del usuario y actualizar datos
+        # 2) Recorrer menús y actualizar true / false según lo que llegó del form
         for menu in menues_del_usuario:
-            platos = menu.platos_que_comemos or {}  # Obtener el diccionario de comidas
+            platos = menu.platos_que_comemos or {}
+            fecha_menu = menu.el_dia_en_que_comemos.strftime("%Y%m%d")
 
             for comida, lista_platos in platos.items():
-
-                for plato in lista_platos:  # Recorrer cada plato dentro de la comida
-                    plato_id = plato["id_plato"]  # Ahora puedes acceder al ID correctamente
-                    clave_fecha = f"{plato_id}_{menu.el_dia_en_que_comemos.strftime('%Y%m%d')}"
+                for plato in lista_platos:
+                    plato_id = str(plato.get("id_plato", ""))
+                    clave_fecha = f"{plato_id}_{fecha_menu}"
 
                     if clave_fecha in platos_seleccionados:
-                        # Marcar como elegido
                         plato["elegido"] = True
 
-                        for variedad_id, variedad_data in plato.get("variedades", {}).items():
-                            if variedad_data["nombre"] in variedades_seleccionadas[plato_id]:
-                                variedad_data["elegido"] = True
+                        # Variedades: comparamos por NOMBRE normalizado (lo que llega del form)
+                        seleccionadas = variedades_sel.get(clave_fecha, set())
+                        
+                        for _, var_data in (plato.get("variedades") or {}).items():
+                            nombre_var = var_data.get("nombre")
+                            estaba_elegido = var_data.get("elegido", False)
 
-                            else:
-                                variedad_data["elegido"] = False
+                            # Si antes era False y ahora (según el form) es True
+                            if (nombre_var in seleccionadas) and not estaba_elegido:
+                                ingred_variedad_agregada = {
+                                    ing.strip() for ing in (var_data.get("ingredientes") or "").split(",") if ing.strip()
+                                }
+                                if ingred_variedad_agregada:
+                                    ingredientes_tengo = set(perfil.ingredientes_que_tengo)
+                                    # no_elegidos_calculados = ingred_variedad_agregada & ingredientes_tengo
+                                    # ingredientes_elegidos_calculados |= ingred_variedad_agregada - ingredientes_tengo
+                                    no_elegidos = ingred_variedad_agregada & ingredientes_tengo
+                                    ingredientes_elegidos |= ingred_variedad_agregada - ingredientes_tengo
+
+                            # Actualiza el estado (sin usar variable intermedia)
+                            var_data["elegido"] = (nombre_var in seleccionadas)
+                        
                     else:
-                        # Si no fue seleccionado, marcar como no elegido
                         plato["elegido"] = False
-                        for variedad in plato.get("variedades", {}).values():
-                            variedad["elegido"] = False
+                        for var_data in (plato.get("variedades") or {}).values():
+                            var_data["elegido"] = False
 
-            # Guardar cambios en el modelo
+            # 3) Persistir
             menu.platos_que_comemos = platos
             menu.save()
 
@@ -276,10 +299,6 @@ def lista_de_compras(request):
             # Guardar los cambios en el perfil
             perfil.save()
     
-    # ultimos_elegidos > para que cuando no mande nada porque se destildó todo, sepa cuales se destildaron y los agrege a "tengo"
-    ultimos_elegidos = request.POST.get("ultimos_elegidos", "")
-    ingredientes_elegidos = set(request.POST.getlist("ingrediente_a_comprar"))
-
     # Recorrer los menús del usuario
     for menu in menues_del_usuario:
         platos = menu.platos_que_comemos or []  # Asegurar que no sea None, sino una lista vacía
@@ -296,10 +315,7 @@ def lista_de_compras(request):
                 for variedad in datos.get("variedades", {}).values():
                     if variedad.get("elegido"):
                         lista_de_ingredientes.update(map(str.strip, variedad["ingredientes"].split(",")))
-    
-        
-    ingredientes_elegidos = set(request.POST.getlist("ingrediente_a_comprar"))
-
+                     
     if ingredientes_elegidos:
         no_elegidos = lista_de_ingredientes - ingredientes_elegidos
         for ingrediente_a_comprar in lista_de_ingredientes:
@@ -337,7 +353,6 @@ def lista_de_compras(request):
                 ingredientes_unicos [ingrediente] = {
                     "comentario": el_comentario,
                     "estado": "no-tengo" }
-
    
     lista_de_compras =[]
     # Recorrer el diccionario para formatear los ingredientes que no tienes
@@ -352,7 +367,6 @@ def lista_de_compras(request):
             else:
                 # mensaje_whatsapp += f"• {ingrediente}\n"
                 lista_de_compras.append(f"{ingrediente}")
-
     
     token = perfil.ensure_share_token()  # genera uno si no existe
 
@@ -364,7 +378,12 @@ def lista_de_compras(request):
         'ingredientes_con_tengo_y_comentario': ingredientes_unicos, # DICT TODOS LOS INGREDIENTES, CON TENGO Y COMENTARIO
         "lista_de_compras": lista_de_compras, # LISTA DE COMPRAS PARA VERLO EN ENVAR A WHATS APP
         "parametro" : "lista-compras",
-        'share_url': share_url             # 👈 NUEVO
+        'share_url': share_url,             # 👈 NUEVO
+        # "lista_de_ingredientes": lista_de_ingredientes,
+        # "no_elegidos": no_elegidos,
+        # "ingredientes_elegidos": ingredientes_elegidos,
+        # "ingredientes_elegidos_calculados": ingredientes_elegidos_calculados,
+        # "no_elegidos_calculados" : no_elegidos_calculados,
         
      }
 
@@ -923,11 +942,45 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
 
             ingrediente_formset.instance = plato
             ingrediente_formset.save()
-
-        # AQUÍ VER SI ESTA PLATO ESTÁ EN ELEGIDOS POR DÍA, SI ES ASÍ, ELIMINARLO Y VOLVER A CARGARLO /            
+            
 
         template_param = self.request.GET.get("tipopag")
         tail = f"?tipopag={template_param}&modificado=ok" if template_param else "?modificado=ok"
+
+
+        # 🔁 Si el plato editado está en algún menú del día (ElegidosXDia), actualizamos su info
+        registros = ElegidosXDia.objects.filter(
+            Q(platos_que_comemos__icontains=f'"id_plato": "{plato.id}"')
+        )
+
+        for registro in registros:
+            actualizado = False
+            data = registro.platos_que_comemos or {}
+
+            if not isinstance(data, dict):
+                continue  # Seguridad ante datos corruptos
+
+            for comida, platos in data.items():
+                for i, p in enumerate(platos):
+                    if str(p.get("id_plato")) == str(plato.id):
+                        # Actualizar datos del plato
+                        p["plato"] = plato.nombre_plato
+                        p["tipo"] = plato.tipos
+                        p["ingredientes"] = plato.ingredientes
+                        p["variedades"] = {
+                            vid: {
+                                "nombre": info.get("nombre", ""),
+                                "ingredientes": info.get("ingredientes", ""),
+                                "elegido": True
+                            }
+                            for vid, info in (plato.variedades or {}).items()
+                        }
+                        actualizado = True
+
+            if actualizado:
+                registro.platos_que_comemos = data
+                registro.save()
+
         return redirect(f"{reverse('videos-create')}{tail}")
 
     def form_invalid(self, form):
@@ -1764,36 +1817,7 @@ class AsignarPlato(View):
 
             menu_dia.platos_que_comemos = data
 
-             # Verifica si ya hay una entrada de ComidaDelDia con ese plato para ese momento y fecha
-            # ya_existe = ComidaDelDia.objects.filter(
-            #     user=request.user,
-            #     fecha=fecha_comida,
-            #     momento=comida,
-            #     plato=plato
-            # ).exists()
-
-            # if ya_existe:
-            #     messages.warning(request, f"El plato {plato.nombre_plato} ya está asignado a {comida}.")
-            # else:
-            #     # Procesar variedades para guardarlas en JSONField
-            #     variedades_json = {
-            #         vid: {
-            #             "nombre": info["nombre"],
-            #             "ingredientes": info["ingredientes"],
-            #             "elegido": True
-            #         } for vid, info in plato.variedades.items()
-            #     }
-
-                # ComidaDelDia.objects.create(
-                #     user=request.user,
-                #     fecha=fecha_comida,
-                #     momento=comida,
-                #     plato=plato,
-                #     variedades=variedades_json
-                # )
-
-                # messages.success(request, f"Plato {plato.nombre_plato} asignado correctamente a {comida}.")
-
+       
         elif tipo == "lugar":
                     try:
                         lugar = Lugar.objects.get(id=objeto_id)
