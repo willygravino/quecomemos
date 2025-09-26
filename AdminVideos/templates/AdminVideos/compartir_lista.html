@@ -86,12 +86,7 @@
     const line   = chk.closest(".item-line");
     const nombre = chk.dataset.nombre || line?.dataset.nombre || "";
 
-    // estado inicial desde localStorage
-    if (state[chk.id]) {
-      chk.checked = true;
-      line.classList.add("striked");
-    }
-
+    
     chk.addEventListener("change", () => {
       const checked = chk.checked;
       state[chk.id] = checked;
