@@ -15,10 +15,17 @@
   <div class="container py-4">
    
 
-    <div class="d-flex align-items-center mb-3">
+    <!-- <div class="d-flex align-items-center mb-3">
       <h5 class="m-0">Lista de compras</h5>
       <button class="btn btn-sm btn-outline-secondary ms-auto" id="btn-clear">Borrar tildados</button>
-    </div>
+    </div> -->
+<h5 class="fw-bold text-primary mb-1">
+  <i class="bi bi-cart-check me-2"></i> Lista de compras
+</h5>
+<h6 class="text-muted fst-italic">
+  <i class="bi bi-hand-index-thumb me-1"></i> Tildá lo que vayas adquiriendo
+</h6>
+
 
     {% if items %}
       <div class="card">
@@ -39,14 +46,14 @@
           {% endfor %}
         </ul>
       </div>
-      <p class="text-muted small mt-2">Tip: el tilde se guarda en este navegador automáticamente.</p>
+      <!-- <p class="text-muted small mt-2">Tip: el tilde se guarda en este navegador automáticamente.</p> -->
     {% else %}
       <div class="alert alert-info">No hay ingredientes.</div>
     {% endif %}
 
      {% if request.user.is_authenticated %}
       <!-- <div class="mb-3"> -->
-      <div class="mb-3 d-flex justify-content-end">
+      <div class="mt-3 d-flex justify-content-end">
 
         <a href="{% url 'menu-elegido' %}" class="btn btn-secondary btn-sm">
           ← Volver
@@ -58,12 +65,43 @@
 
 <script>
 (function() {
+  const API = "{% url 'api-toggle-item' token=api_token %}";  
+
+  async function postToggle(nombre, checked) {
+    try {
+      await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre, checked })
+      });
+    } catch(e) {
+      console.error("No se pudo persistir el cambio", e);
+    }
+  }
+
+  document.querySelectorAll(".item-check").forEach((chk) => {
+    const line   = chk.closest(".item-line");
+    const nombre = chk.dataset.nombre || line?.dataset.nombre || "";
+
+    chk.addEventListener("change", () => {
+      const checked = chk.checked;
+      line.classList.toggle("striked", checked);
+      postToggle(nombre, checked);
+    });
+  });
+})();
+</script>
+
+
+
+<!-- 
+<script>
+(function() {
   const token = "{{ token|escapejs }}";           // localStorage
   const KEY   = "lista_compartida::" + token;
   const API   = "{% url 'api-toggle-item' token=api_token %}";  
   
   const listaEl = document.getElementById("lista");
-  const btnClear= document.getElementById("btn-clear");
 
   function loadState() {
     try { return JSON.parse(localStorage.getItem(KEY) || "{}"); }
@@ -100,19 +138,8 @@
       postToggle(nombre, checked);
     });
   });
+})(); -->
 
-  btnClear?.addEventListener("click", () => {
-    document.querySelectorAll(".item-check").forEach(chk => {
-      const line   = chk.closest(".item-line");
-      const nombre = chk.dataset.nombre || line?.dataset.nombre || "";
-      chk.checked = false;
-      line?.classList.remove("striked");
-      state[chk.id] = false;
-      postToggle(nombre, false);
-    });
-    saveState(state);
-  });
-})();
 </script>
 </body>
 </html>
