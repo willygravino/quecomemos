@@ -322,13 +322,14 @@ class ElegidosXDia(models.Model):
          return f'Menu Elegido {self.el_dia_en_que_comemos}'
 
 
-
-
 class HistoricoDia(models.Model):
-    fecha = models.DateField(unique=True)
-    dia_semana = models.CharField(max_length=2, blank=True)  # "LU", "MA", ...
+    fecha = models.DateField()
+    dia_semana = models.CharField(max_length=2, blank=True)
     ya_sugerido = models.BooleanField(default=False)
     propietario = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('fecha', 'propietario')  # 👈 Esto es lo importante
 
     @property
     def nombre_dia(self):
@@ -336,6 +337,22 @@ class HistoricoDia(models.Model):
 
     def __str__(self):
         return f"Comidas del {self.fecha} ({self.nombre_dia})"
+
+
+# class HistoricoDia(models.Model):
+#     fecha = models.DateField(unique=True)
+#     dia_semana = models.CharField(max_length=2, blank=True)  # "LU", "MA", ...
+#     ya_sugerido = models.BooleanField(default=False)
+#     propietario = models.ForeignKey(User, on_delete=models.CASCADE)
+
+#     @property
+#     def nombre_dia(self):
+#         return self.fecha.strftime("%A").capitalize()
+
+#     def __str__(self):
+#         return f"Comidas del {self.fecha} ({self.nombre_dia})"
+
+
 
 
 class HistoricoItem(models.Model):
@@ -366,6 +383,7 @@ class HistoricoItem(models.Model):
         return f"{self.historico.fecha} - {self.momento} - {self.plato_id_ref}"
         
         # ({self.plato_nombre_snapshot})"
+
 
 
 
