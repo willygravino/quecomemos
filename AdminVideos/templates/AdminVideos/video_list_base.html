@@ -132,7 +132,7 @@
             data-bs-target="#compartirModal"
             onclick="setPlatoInfo('{{ plato.id }}', 'plato')"
             class="position-absolute text-primary"
-            style="top: 62%; right: 10%;">
+            style="top: 63%; right: 10%;">
             <i class="fa-solid fa-share-nodes"></i>
           </a>
           {% endif %}
@@ -150,15 +150,18 @@
           
           <!-- <a href="{% url 'eliminar-plato' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Eliminar</a> -->
 
-          <button
-            type="button"
-            class="btn btn-sm btn-outline-secondary"
-            data-bs-toggle="modal"
-            data-bs-target="#confirmDeleteModal"
-            data-url="{% url 'eliminar-plato' plato.id %}"
-            data-nombre="{{ plato.nombre_plato }}">
-            Eliminar
-          </button>
+         <!-- Botón eliminar posicionado -->
+        <button
+          type="button"
+          class="btn btn-sm position-absolute text-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#confirmDeleteModal"
+          data-url="{% url 'eliminar-plato' plato.id %}"
+          data-nombre="{{ plato.nombre_plato }}"
+          style="top: 45%; right: 0%;">
+          <i class="fa-solid fa-trash-can"></i>
+        </button>
+
           
         </div>
 

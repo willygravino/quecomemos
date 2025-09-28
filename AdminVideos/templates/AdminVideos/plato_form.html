@@ -65,7 +65,34 @@
                 {% csrf_token %}
 
                 <!-- Nombre del Plato -->
-                <div class="mb-3">
+
+                <div class="mb-3 row">
+                  <div class="col">
+                    <label for="{{ form.nombre_plato.id_for_label }}" class="form-label">
+                      Nombre del Plato:
+                    </label>
+                    {% if form.nombre_plato.errors %}
+                      {{ form.nombre_plato|add_class:"form-control is-invalid" }}
+                      {% for error in form.nombre_plato.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                      {% endfor %}
+                    {% else %}
+                      {{ form.nombre_plato|add_class:"form-control" }}
+                    {% endif %}
+                  </div>
+
+                  <div class="col-auto d-flex align-items-end">
+                    <a href="{% url 'agregar-a-mi-lista' plato.id %}?duplicar=true"
+                      type="button" 
+                      class="btn btn-sm btn-outline-secondary"
+                      title="Si querés modificar la receta de este plato, podés hacer un duplicado para conservar la receta original">
+                      Duplicar Plato
+                    </a>
+                  </div>
+                </div>
+
+
+                <!-- <div class="mb-3">
                     <label for="{{ form.nombre_plato.id_for_label }}" class="form-label">Nombre del Plato:</label>
                     {% if form.nombre_plato.errors %}
                         {{ form.nombre_plato|add_class:"form-control is-invalid" }}
@@ -75,7 +102,15 @@
                     {% else %}
                         {{ form.nombre_plato|add_class:"form-control" }}
                     {% endif %}
-                </div>
+
+                    <a href="{% url 'agregar-a-mi-lista' plato.id %}?duplicar=true"
+                    type="button" 
+                    class="btn btn-sm btn-outline-secondary" 
+                    title="Si querés modificar la receta de este plato, podés hacer un duplicado para conservar la receta original">
+                    Duplicar
+                  </a>
+                  
+                </div> -->
 
                 <!-- Descripción -->
                 <div class="mb-3">
