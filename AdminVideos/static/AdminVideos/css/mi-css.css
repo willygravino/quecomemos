@@ -3,6 +3,39 @@
     display: none;
 } */
 
+/* .efecto-sombra {
+  filter: drop-shadow(0 0 10px lime) 
+          drop-shadow(0 0 20px green);
+} */
+
+.sombra-verde {
+  -webkit-filter: 
+    drop-shadow(-1px 0 0 green)
+    drop-shadow(0 1px 0 green);
+  filter: 
+    drop-shadow(-1px 0 0 green)
+    drop-shadow(0 1px 0 green);
+}
+
+.sombra-violeta {
+  -webkit-filter: 
+    drop-shadow(-1px 0 0 rgb(70, 0, 128))
+    drop-shadow(0 1px 0 rgb(70, 0, 128));
+  filter: 
+    drop-shadow(-1px 0 0 rgb(70, 0, 128))
+    drop-shadow(0 1px 0 rgb(70, 0, 128));
+}
+
+.sombra-naranja {
+  -webkit-filter: 
+    drop-shadow(-1px 0 0 rgb(255, 128, 0))
+    drop-shadow(0 1px 0 rgb(255, 128, 0));
+  filter: 
+    drop-shadow(-1px 0 0 rgb(255, 128, 0))
+    drop-shadow(0 1px 0 rgb(255, 128, 0));
+}
+
+
 
 /* Estilo para el contenedor del checkbox personalizado */
 .custom-checkbox {

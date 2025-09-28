@@ -130,7 +130,9 @@ class Plato(models.Model):
         try:
             return self.image.url
         except (ValueError, FileNotFoundError):
-            return '/media/avatares/logo.png'
+            # return '/media/avatares/logo.png'
+            return '/media/avatares/hoja_thumbnail.png'
+        
 
     def __str__(self):
         return f"{self.id} - {self.nombre_plato} de {self.propietario}"
