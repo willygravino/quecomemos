@@ -35,14 +35,63 @@ import datetime
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.db import transaction
+from django.views.decorators.http import require_http_methods
+from django.core.exceptions import ValidationError
 
 
 
+# def api_ingredientes(request):
+#     q = request.GET.get('q', '')
+#     ingredientes = Ingrediente.objects.filter(nombre__icontains=q).order_by('nombre')[:20]  # límite de resultados
+#     data = [{"id": ing.id, "nombre": ing.nombre} for ing in ingredientes]
+#     return JsonResponse(data, safe=False)
+
+
+
+@require_http_methods(["GET", "POST"])
 def api_ingredientes(request):
-    q = request.GET.get('q', '')
-    ingredientes = Ingrediente.objects.filter(nombre__icontains=q).order_by('nombre')[:20]  # límite de resultados
-    data = [{"id": ing.id, "nombre": ing.nombre} for ing in ingredientes]
-    return JsonResponse(data, safe=False)
+    if request.method == "GET":
+        q = (request.GET.get('q') or '').strip()
+        qs = Ingrediente.objects.all()
+        if q:
+            qs = qs.filter(nombre__icontains=q)
+        ingredientes = qs.order_by('nombre')[:50]
+        data = [{"id": ing.id, "nombre": ing.nombre} for ing in ingredientes]
+        return JsonResponse(data, safe=False)
+
+    # POST: crear si no existe; si existe, devolvés el existente (UX más amable)
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except Exception:
+        return JsonResponse({"error": "JSON inválido"}, status=400)
+
+    nombre = (payload.get("nombre") or "").strip()
+    tipo = (payload.get("tipo") or "").strip()
+    detalle = (payload.get("detalle") or "").strip() or ""
+
+    # Validaciones mínimas
+    if not nombre:
+        return JsonResponse({"errors": {"nombre": ["Requerido"]}}, status=400)
+    if not tipo:
+        return JsonResponse({"errors": {"tipo": ["Requerido"]}}, status=400)
+
+    # Si ya existe por nombre (case-insensitive), devolvés ese ID
+    existente = Ingrediente.objects.filter(nombre__iexact=nombre).first()
+    if existente:
+        return JsonResponse({"id": existente.id, "nombre": existente.nombre, "existed": True}, status=200)
+
+    # Crear nuevo respetando la clean() del modelo (detalle vs tipo)
+    try:
+        obj = Ingrediente(nombre=nombre, tipo=tipo, detalle=detalle)
+        obj.full_clean()     # ejecuta clean() + field validators
+        obj.save()
+    except ValidationError as e:
+        return JsonResponse({"errors": e.message_dict}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
+    return JsonResponse({"id": obj.id, "nombre": obj.nombre}, status=201)
+
 
 
 def set_dia_activo(request):

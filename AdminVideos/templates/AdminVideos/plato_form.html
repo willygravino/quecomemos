@@ -82,35 +82,21 @@
                   </div>
 
                   <div class="col-auto d-flex align-items-end">
-                    <a href="{% url 'agregar-a-mi-lista' plato.id %}?duplicar=true"
-                      type="button" 
-                      class="btn btn-sm btn-outline-secondary"
-                      title="Si querés modificar la receta de este plato, podés hacer un duplicado para conservar la receta original">
-                      Duplicar Plato
-                    </a>
+                    
+
+                    {% if form.instance.pk %}
+                      <a href="{% url 'agregar-a-mi-lista' form.instance.pk %}?duplicar=true"
+                        class="btn btn-sm btn-outline-secondary">
+                        Duplicar Plato
+                      </a>
+                    {% endif %}
+
+                    
                   </div>
                 </div>
 
 
-                <!-- <div class="mb-3">
-                    <label for="{{ form.nombre_plato.id_for_label }}" class="form-label">Nombre del Plato:</label>
-                    {% if form.nombre_plato.errors %}
-                        {{ form.nombre_plato|add_class:"form-control is-invalid" }}
-                        {% for error in form.nombre_plato.errors %}
-                            <div class="invalid-feedback d-block">{{ error }}</div>
-                        {% endfor %}
-                    {% else %}
-                        {{ form.nombre_plato|add_class:"form-control" }}
-                    {% endif %}
-
-                    <a href="{% url 'agregar-a-mi-lista' plato.id %}?duplicar=true"
-                    type="button" 
-                    class="btn btn-sm btn-outline-secondary" 
-                    title="Si querés modificar la receta de este plato, podés hacer un duplicado para conservar la receta original">
-                    Duplicar
-                  </a>
-                  
-                </div> -->
+                
 
                 <!-- Descripción -->
                 <div class="mb-3">
@@ -498,70 +484,105 @@
 
 
 <!-- Modal ingredientes -->
+<!-- Modal ingredientes -->
 <div class="modal fade" id="ingredienteModal" tabindex="-1" aria-labelledby="ingredienteModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      
+
       <div class="modal-header">
         <h5 class="modal-title" id="ingredienteModalLabel">Agregar Ingrediente</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
-      
+
       <div class="modal-body">
-        
-        <!-- Ingrediente -->
-        <div class="mb-3">
-          <label for="modal-nombre" class="form-label">Ingrediente</label>
-          <select id="modal-nombre" class="form-select" style="width:100%"></select>
+
+        <!-- ====== Ingrediente existente + alternativa "nuevo" en la misma fila ====== -->
+        <div class="mb-3" id="bloque-existente">
+          <div class="row g-2 align-items-end">
+            <!-- Select de ingrediente existente -->
+            <div class="col">
+              <label for="modal-nombre" class="form-label">Ingrediente</label>
+              <select id="modal-nombre" class="form-select" style="width:100%"></select>
+            </div>
+
+            <!-- Switch a la derecha -->
+            <div class="col-auto">
+              <div class="form-check form-switch d-flex align-items-center mt-4 mt-sm-0">
+                <input class="form-check-input me-2" type="checkbox" id="toggle-nuevo-ingrediente">
+                <label class="form-check-label mb-0" for="toggle-nuevo-ingrediente">
+                  Cargar ingrediente nuevo
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
-        
+
+        <!-- ========== NUEVO (campos del modelo) ========== -->
+        <div id="bloque-nuevo" class="border rounded p-3 bg-light d-none">
+          <div class="mb-3">
+            <label for="nuevo-nombre" class="form-label">Nombre</label>
+            <input type="text" id="nuevo-nombre" class="form-control" placeholder="Ej.: Zanahoria">
+          </div>
+
+          <div class="mb-3">
+            <label for="nuevo-tipo" class="form-label">Tipo (lugar/categoría)</label>
+            <select id="nuevo-tipo" class="form-select">
+              <option value="verduleria">Verdulería</option>
+              <option value="fiambreria">Fiambriería</option>
+              <option value="carniceria">Carnicería</option>
+              <option value="pescaderia">Pescadería</option>
+              <option value="panaderia">Panadería</option>
+              <option value="almacen">Almacén</option>
+              <option value="lacteos">Lácteos</option>
+              <option value="bebidas">Bebidas</option>
+              <option value="otro" selected>Otro</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="nuevo-detalle" class="form-label">Detalle (subcategoría)</label>
+            <select id="nuevo-detalle" class="form-select">
+              <option value="">— (opcional)</option>
+            </select>
+          </div>
+
+          <div class="alert alert-warning d-none" id="nuevo-ingrediente-errores"></div>
+        </div>
+
         <!-- Cantidad -->
         <div class="mb-3">
           <label for="modal-cantidad" class="form-label">Cantidad</label>
           <input type="text" id="modal-cantidad" class="form-control">
         </div>
-        
-    <!-- Unidad visible para el usuario -->
-    <div class="mb-3">
-        <label for="modal-unidad" class="form-label">Unidad</label>
-        <select id="modal-unidad" name="modal-unidad" class="form-select">
+
+        <!-- Unidad visible -->
+        <div class="mb-3">
+          <label for="modal-unidad" class="form-label">Unidad</label>
+          <select id="modal-unidad" name="modal-unidad" class="form-select">
             {% for value, label in ingrediente_formset.empty_form.unidad.field.choices %}
-            <option value="{{ value }}">{{ label }}</option>
+              <option value="{{ value }}">{{ label }}</option>
             {% endfor %}
-        </select>
-    </div>
+          </select>
+        </div>
 
-    <!-- Prototype oculto para clonar el select de unidad en nuevos ítems -->
-    <!-- <div id="unidad-prototype" class="d-none">
-    <select name="ingredientes_en_plato-__prefix__-unidad"
-        class="form-select form-select-sm flex-grow-0"
-        style="width:10rem"
-        disabled>
-        {% for value, label in ingrediente_formset.empty_form.unidad.field.choices %}
-        <option value="{{ value }}">{{ label }}</option>
-        {% endfor %}
-    </select>
-    </div> -->
+        <!-- Prototype oculto para clonar al formset -->
+        <div id="unidad-prototype" class="d-none">
+          <select name="ingredientes_en_plato-__prefix__-unidad"
+                  class="form-select form-select-sm w-100 w-sm-auto"
+                  disabled>
+            {% for value, label in ingrediente_formset.empty_form.unidad.field.choices %}
+              <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
 
-    <!-- Prototype oculto para clonar el select de unidad en nuevos ítems -->
-<div id="unidad-prototype" class="d-none">
-  <select name="ingredientes_en_plato-__prefix__-unidad"
-          class="form-select form-select-sm w-100 w-sm-auto"
-          disabled>
-    {% for value, label in ingrediente_formset.empty_form.unidad.field.choices %}
-      <option value="{{ value }}">{{ label }}</option>
-    {% endfor %}
-  </select>
-</div>
-
-        
       </div>
-      
+
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
         <button type="button" class="btn btn-primary" id="guardarIngrediente">Guardar</button>
       </div>
-      
+
     </div>
   </div>
 </div>
@@ -674,10 +695,7 @@ document.addEventListener("DOMContentLoaded", function() {
   }
   $('#ingredienteModal').on('shown.bs.modal', inicializarSelect2Modal);
 
-  // Guardar (agregar ítem) desde el modal
-  document.getElementById("guardarIngrediente").addEventListener("click", function() {
-    agregarIngrediente(list, totalFormsInput);
-  });
+ 
 });
 </script>
 
@@ -780,6 +798,183 @@ document.addEventListener('DOMContentLoaded', function () {
   ul.addEventListener('click', function (ev) {
     if (ev.target.closest && ev.target.closest('.eliminar-ingrediente')) {
       eliminarIngrediente(ev);
+    }
+  });
+});
+</script>
+
+<script>
+// ==== util CSRF ====
+function getCookie(name) {
+  const v = document.cookie.split('; ').find(row => row.startsWith(name + '='));
+  return v ? decodeURIComponent(v.split('=')[1]) : null;
+}
+const CSRF_TOKEN = getCookie('csrftoken');
+
+// ==== mapping de opciones de detalle por tipo (debería reflejar el modelo) ====
+// Si preferís no duplicar lógica, más abajo te dejo un endpoint alternativo para servir esto desde Django.
+const DETALLE_OPCIONES = {
+  "verduleria": [
+    ["verdura","Verdura"],
+    ["fruta","Fruta"],
+    ["tuberculo","Tubérculo"],
+    ["hierba_fresca","Hierba fresca"],
+  ],
+  "carniceria": [
+    ["carne_roja","Carne roja"],
+    ["ave","Ave"],
+    ["cerdo","Cerdo"],
+    ["cordero","Cordero"],
+    ["achuras","Achuras"],
+  ],
+  "pescaderia": [
+    ["pescado","Pescado"],
+    ["marisco","Marisco"],
+  ],
+  "panaderia": [
+    ["pan","Pan"],
+  ],
+  "almacen": [
+    ["legumbre","Legumbre"],
+    ["cereal","Cereal"],
+    ["harina_blanca","Harina Blanca"],
+    ["aceite","Aceite"],
+    ["conserva","Conserva"],
+    ["azucar","Azúcar"],
+    ["especia","Especia"],
+  ],
+  "fiambreria": [
+    ["fiambre","Fiambre"],
+    ["queso","Queso"],
+    ["embutido","Embutido"],
+  ],
+  "otro": [
+    ["otro","Otro"],
+  ],
+  "lacteos": [],   // por si decidís permitir sin detalle
+  "bebidas": [],
+};
+
+// ==== UI: toggle entre existente y nuevo ====
+document.addEventListener('DOMContentLoaded', function() {
+  const sw = document.getElementById('toggle-nuevo-ingrediente');
+  const bloqueExist = document.getElementById('bloque-existente');
+  const bloqueNuevo = document.getElementById('bloque-nuevo');
+  const tipoSel = document.getElementById('nuevo-tipo');
+  const detalleSel = document.getElementById('nuevo-detalle');
+
+  function cargarDetallePorTipo(tipo) {
+    detalleSel.innerHTML = '<option value="">— (opcional)</option>';
+    (DETALLE_OPCIONES[tipo] || []).forEach(([val, label]) => {
+      const opt = document.createElement('option');
+      opt.value = val;
+      opt.textContent = label;
+      detalleSel.appendChild(opt);
+    });
+  }
+
+  // arranque
+  cargarDetallePorTipo(tipoSel.value);
+
+  sw.addEventListener('change', () => {
+    if (sw.checked) {
+      bloqueExist.classList.add('d-none');
+      bloqueNuevo.classList.remove('d-none');
+    } else {
+      bloqueNuevo.classList.add('d-none');
+      bloqueExist.classList.remove('d-none');
+    }
+  });
+
+  tipoSel.addEventListener('change', () => cargarDetallePorTipo(tipoSel.value));
+});
+
+// ==== Alta condicional del ingrediente y devolución de {id, text} ====
+async function crearIngredienteSiHaceFalta() {
+  const usarNuevo = document.getElementById('toggle-nuevo-ingrediente').checked;
+  const erroresBox = document.getElementById('nuevo-ingrediente-errores');
+  erroresBox.classList.add('d-none');
+  erroresBox.innerHTML = '';
+
+  if (!usarNuevo) {
+    // EXISTENTE: devolver selección de Select2
+    const sel = $('#modal-nombre').select2('data')[0] || {};
+    if (!sel.id) {
+      throw new Error('Elegí un ingrediente existente o activá "Cargar un ingrediente nuevo".');
+    }
+    return { id: sel.id, text: sel.text };
+  }
+
+  // NUEVO: validar inputs
+  const nombre = (document.getElementById('nuevo-nombre').value || '').trim();
+  const tipo = document.getElementById('nuevo-tipo').value;
+  const detalle = document.getElementById('nuevo-detalle').value; // puede ser ""
+
+  if (!nombre) {
+    throw new Error('Completá el nombre del nuevo ingrediente.');
+  }
+  if (!tipo) {
+    throw new Error('Elegí el tipo del nuevo ingrediente.');
+  }
+
+  // POST a /api/ingredientes/  (usa tu auth/permiso habitual)
+  const resp = await fetch('/api/ingredientes/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': CSRF_TOKEN
+    },
+    body: JSON.stringify({ nombre, tipo, detalle })
+  });
+
+  if (!resp.ok) {
+    let msg = 'No se pudo crear el ingrediente.';
+    try {
+      const data = await resp.json();
+      if (data && data.error) msg = data.error;
+      if (data && data.errors) {
+        // Django form-like errors: {field: [..]}
+        msg = Object.entries(data.errors).map(([k,v]) => `<div><strong>${k}:</strong> ${v.join(', ')}</div>`).join('');
+      }
+    } catch(_) {}
+    erroresBox.innerHTML = msg;
+    erroresBox.classList.remove('d-none');
+    throw new Error('Error al crear ingrediente');
+  }
+
+  const creado = await resp.json(); // {id, nombre}
+  // limpiar campos del “nuevo”
+  document.getElementById('nuevo-nombre').value = '';
+  document.getElementById('nuevo-tipo').value = 'otro';
+  document.getElementById('nuevo-detalle').innerHTML = '<option value="">— (opcional)</option>';
+
+  return { id: creado.id, text: creado.nombre };
+}
+
+// ==== Hookeamos tu botón Guardar del modal: primero aseguramos id, luego agregamos al formset ====
+document.addEventListener("DOMContentLoaded", function() {
+  const totalFormsInput = document.getElementById("id_ingredientes_en_plato-TOTAL_FORMS");
+  const list = document.getElementById("ingredientes-list");
+
+  document.getElementById("guardarIngrediente").addEventListener("click", async function() {
+    try {
+      // 1) aseguramos tener un {id, text} (existente o creado ahora)
+      const elegido = await crearIngredienteSiHaceFalta();
+
+      // 2) seteamos el Select2 del modal para que agregarIngrediente use esos valores
+      const $modalSel = $('#modal-nombre');
+      $modalSel.empty();
+      const opt = new Option(elegido.text, elegido.id, true, true);
+      $modalSel.append(opt).trigger('change');
+
+      // 3) llamamos tu función existente
+      agregarIngrediente(list, totalFormsInput);
+    } catch (err) {
+      // errores ya informados arriba si es de creación;
+      // si es falta de selección, mostramos toast simple:
+      if (err && err.message) {
+        console.warn(err.message);
+      }
     }
   });
 });
