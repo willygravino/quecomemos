@@ -147,7 +147,18 @@
               Programar
             </a>
           </div>
+          
+          <!-- <a href="{% url 'eliminar-plato' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Eliminar</a> -->
 
+          <button
+            type="button"
+            class="btn btn-sm btn-outline-secondary"
+            data-bs-toggle="modal"
+            data-bs-target="#confirmDeleteModal"
+            data-url="{% url 'eliminar-plato' plato.id %}"
+            data-nombre="{{ plato.nombre_plato }}">
+            Eliminar
+          </button>
           
         </div>
 
@@ -161,6 +172,31 @@
     {% endfor %}
   </div>
 </section>
+
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmDeleteLabel">Confirmar eliminación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <form method="post" id="deleteForm">
+        {% csrf_token %}
+        <div class="modal-body">
+          <p>¿Estás seguro de que querés borrar <strong id="platoNombre"></strong>?</p>
+          <p class="text-muted small mb-0">Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-danger">Sí, borrar</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
 
 <!-- ESTAS SON LAS TARJETAS DE LUGARES, SI ES QUE ESTAMOS EN LUGARES -->
 <section class="w-100 bg-info text-white">
@@ -307,6 +343,25 @@
     document.getElementById("tipoObjetoAsignar").value = tipo;
   }
 </script>
+
+<!-- ELIMINAR PLATO -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const modalEl = document.getElementById('confirmDeleteModal');
+  modalEl.addEventListener('show.bs.modal', function (event) {
+    const trigger = event.relatedTarget;
+    const url = trigger.getAttribute('data-url');
+    const nombre = trigger.getAttribute('data-nombre');
+
+    const form = modalEl.querySelector('#deleteForm');
+    const nombreEl = modalEl.querySelector('#platoNombre');
+
+    form.setAttribute('action', url);
+    nombreEl.textContent = nombre || '';
+  });
+});
+</script>
+
 
 
 {% endblock %}

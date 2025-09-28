@@ -586,39 +586,59 @@ def eliminar_lugar(request, lugar_id):
     # Redirigir a la página que quieras (modificá este nombre si tenés otra vista)
     return redirect('filtro-de-platos')
 
+# @login_required
+# def eliminar_plato(request, plato_id):
+#     # Verificar que el usuario es el propietario del plato
+#     plato = get_object_or_404(Plato, id=plato_id)
+
+#     # Comprobar si el usuario actual es el propietario del plato
+#     if plato.propietario != request.user:
+#         raise Http404("No tienes permiso para eliminar este plato.")
+
+#     # Actualizar la lista sugeridos_descartados del perfil del usuario
+#     # profile = request.user.profile
+
+#     # Obtener el perfil del usuario actual
+#     perfil = get_object_or_404(Profile, user=request.user)
+
+#     # Eliminar el plato de la lista de sugeridos_descartados si está allí
+#     if plato.id_original in perfil.sugeridos_descartados:
+#         perfil.sugeridos_descartados.remove(plato.id_original)
+#         perfil.save()
+
+#   # Eliminar el plato de la lista de sugeridos_importados si está allí
+#     if plato.id_original in perfil.sugeridos_importados:
+#         perfil.sugeridos_importados.remove(plato.id_original)
+#         perfil.save()
+
+#     # Eliminar el plato de la base de datos
+#     plato.delete()
+
+#     # # Eliminar el plato de la base de datos
+#     # plato.delete()
+
+#     return redirect('filtro-de-platos')  # Redirigir a la página de filtro de platos
+
 @login_required
 def eliminar_plato(request, plato_id):
-    # Verificar que el usuario es el propietario del plato
-    plato = get_object_or_404(Plato, id=plato_id)
+    plato = get_object_or_404(Plato, id=plato_id, propietario=request.user)
 
-    # Comprobar si el usuario actual es el propietario del plato
-    if plato.propietario != request.user:
-        raise Http404("No tienes permiso para eliminar este plato.")
+    if request.method == 'POST':
+        perfil = get_object_or_404(Profile, user=request.user)
 
-    # Actualizar la lista sugeridos_descartados del perfil del usuario
-    # profile = request.user.profile
+        if plato.id_original in perfil.sugeridos_descartados:
+            perfil.sugeridos_descartados.remove(plato.id_original)
 
-    # Obtener el perfil del usuario actual
-    perfil = get_object_or_404(Profile, user=request.user)
+        if plato.id_original in perfil.sugeridos_importados:
+            perfil.sugeridos_importados.remove(plato.id_original)
 
-    # Eliminar el plato de la lista de sugeridos_descartados si está allí
-    if plato.id_original in perfil.sugeridos_descartados:
-        perfil.sugeridos_descartados.remove(plato.id_original)
         perfil.save()
+        plato.delete()
+        return redirect('filtro-de-platos')
 
-  # Eliminar el plato de la lista de sugeridos_importados si está allí
-    if plato.id_original in perfil.sugeridos_importados:
-        perfil.sugeridos_importados.remove(plato.id_original)
-        perfil.save()
-
-    # Eliminar el plato de la base de datos
-    plato.delete()
-
-    # # Eliminar el plato de la base de datos
-    # plato.delete()
-
-    return redirect('filtro-de-platos')  # Redirigir a la página de filtro de platos
-
+    # Si viene por GET, no borrar:
+    from django.http import HttpResponseNotAllowed
+    return HttpResponseNotAllowed(['POST'])
 
 
 
