@@ -407,6 +407,8 @@ class Profile(models.Model):
     amigues = models.JSONField(default=list, blank=True)
     sugeridos_descartados = models.JSONField(default=list, blank=True)
     sugeridos_importados = models.JSONField(default=list, blank=True)
+    ingredientes_a_comprar = models.JSONField(default=list, blank=True)  # 👈 NUEVO CAMPO
+
 
     # Para compartir la lista
     share_token = models.CharField(max_length=36, unique=True, blank=True, null=True)

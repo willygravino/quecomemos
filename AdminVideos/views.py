@@ -273,6 +273,20 @@ def lista_de_compras(request):
                     clave_fecha = f"{plato_id}_{fecha_menu}"
 
                     if clave_fecha in platos_seleccionados:
+                        plato_estaba_elegido = plato.get("elegido", False)
+                        # Si antes era False y ahora (según el form) es True
+                        if (clave_fecha in platos_seleccionados) and not plato_estaba_elegido:
+                                ingred_plato_agregado = {
+                                    ing.strip() for ing in (plato.get("ingredientes") or "").split(",") if ing.strip()
+                                }
+                                if ingred_plato_agregado:
+                                    ingredientes_tengo = set(perfil.ingredientes_que_tengo)
+                                    # no_elegidos_calculados = ingred_variedad_agregada & ingredientes_tengo
+                                    # ingredientes_elegidos_calculados |= ingred_variedad_agregada - ingredientes_tengo
+                                    no_elegidos = ingred_plato_agregado & ingredientes_tengo
+                                    ingredientes_elegidos |= ingred_plato_agregado - ingredientes_tengo
+
+                        # Actualiza el estado (sin usar variable intermedia)
                         plato["elegido"] = True
 
                         # Variedades: comparamos por NOMBRE normalizado (lo que llega del form)
@@ -280,10 +294,10 @@ def lista_de_compras(request):
                         
                         for _, var_data in (plato.get("variedades") or {}).items():
                             nombre_var = var_data.get("nombre")
-                            estaba_elegido = var_data.get("elegido", False)
+                            var_estaba_elegida = var_data.get("elegido", False)
 
                             # Si antes era False y ahora (según el form) es True
-                            if (nombre_var in seleccionadas) and not estaba_elegido:
+                            if (nombre_var in seleccionadas) and not var_estaba_elegida:
                                 ingred_variedad_agregada = {
                                     ing.strip() for ing in (var_data.get("ingredientes") or "").split(",") if ing.strip()
                                 }
@@ -429,9 +443,9 @@ def lista_de_compras(request):
         "lista_de_compras": lista_de_compras, # LISTA DE COMPRAS PARA VERLO EN ENVAR A WHATS APP
         "parametro" : "lista-compras",
         'share_url': share_url,             # 👈 NUEVO
-        # "lista_de_ingredientes": lista_de_ingredientes,
-        # "no_elegidos": no_elegidos,
-        # "ingredientes_elegidos": ingredientes_elegidos,
+        "lista_de_ingredientes": lista_de_ingredientes,
+        "no_elegidos": no_elegidos,
+        "ingredientes_elegidos": ingredientes_elegidos,
         # "ingredientes_elegidos_calculados": ingredientes_elegidos_calculados,
         # "no_elegidos_calculados" : no_elegidos_calculados,
         
