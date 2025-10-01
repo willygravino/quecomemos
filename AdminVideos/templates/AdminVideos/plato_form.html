@@ -68,9 +68,12 @@
 
                 <div class="mb-3 row">
                   <div class="col">
-                    <label for="{{ form.nombre_plato.id_for_label }}" class="form-label">
+                    <!-- <label for="{{ form.nombre_plato.id_for_label }}" class="form-label">
                       Nombre del Plato:
-                    </label>
+                    </label> -->
+
+                    <label class="form-label">Nombre del Plato: <span class="text-danger">*</span></label>
+
                     {% if form.nombre_plato.errors %}
                       {{ form.nombre_plato|add_class:"form-control is-invalid" }}
                       {% for error in form.nombre_plato.errors %}
@@ -805,11 +808,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <script>
 // ==== util CSRF ====
+
 function getCookie(name) {
-  const v = document.cookie.split('; ').find(row => row.startsWith(name + '='));
-  return v ? decodeURIComponent(v.split('=')[1]) : null;
+  const cookies = document.cookie.split(';');
+  for (let i = 0; i < cookies.length; i++) {
+    const c = cookies[i].trim();
+    if (c.startsWith(name + '=')) {
+      return decodeURIComponent(c.substring(name.length + 1));
+    }
+  }
+  return null;
 }
+
 const CSRF_TOKEN = getCookie('csrftoken');
+
 
 // ==== mapping de opciones de detalle por tipo (debería reflejar el modelo) ====
 // Si preferís no duplicar lógica, más abajo te dejo un endpoint alternativo para servir esto desde Django.
@@ -919,13 +931,14 @@ async function crearIngredienteSiHaceFalta() {
 
   // POST a /api/ingredientes/  (usa tu auth/permiso habitual)
   const resp = await fetch('/api/ingredientes/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': CSRF_TOKEN
-    },
-    body: JSON.stringify({ nombre, tipo, detalle })
-  });
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-CSRFToken': CSRF_TOKEN
+  },
+  body: JSON.stringify({ nombre, tipo, detalle }),
+  credentials: 'same-origin'  // ✅ Muy recomendable
+});
 
   if (!resp.ok) {
     let msg = 'No se pudo crear el ingrediente.';

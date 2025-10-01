@@ -201,7 +201,7 @@
           <!-- <a href="{% url 'eliminar-plato' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Eliminar</a> -->
 
          <!-- Botón eliminar posicionado -->
-        <button
+        <!-- <button
           type="button"
           class="btn btn-sm position-absolute text-primary"
           data-bs-toggle="modal"
@@ -210,7 +210,18 @@
           data-nombre="{{ plato.nombre_plato }}"
           style="top: 59%; right: 4%; font-size: 1rem;">
           <i class="fa-solid fa-trash-can"></i>
-        </button>
+        </button> -->
+
+      <a href="#"
+        data-bs-toggle="modal"
+        data-bs-target="#confirmDeleteModal"
+        data-url="{% url 'eliminar-plato' plato.id %}"
+        data-nombre="{{ plato.nombre_plato }}"
+        class="position-absolute text-secondary"
+        style="top: 62%; right: 12%; font-size: 1.1rem;"
+        title="Eliminar">
+        <i class="fa-solid fa-trash-can"></i>
+      </a>
 
           
         </div>
