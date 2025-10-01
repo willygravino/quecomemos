@@ -31,6 +31,8 @@
   </div>
 </section>
 
+<!-- <H5>{{platos_compartidos}}  </H5> -->
+
 <!-- ESTAS SON LAS TARJETAS DE COMPARTIDOS -->
 <section class="w-100 py-2">
   <div class="container">
@@ -85,17 +87,11 @@
 
   <div class="d-flex flex-wrap gap-1 align-items-start justify-content-center">
     {% for plato in platos %}
-      <!-- <div class="card position-relative {% if user.id == plato.propietario.id and not plato.proviene_de %}
-                          border-success border-4
-                        {% elif user.id == Plato.propietario.id and plato.proviene_de %}
-                          border-warning border-4
-                        {% else %}
-                          border-danger border-3
-                        {% endif %}" style="width: 6rem;"> -->
+      
 
       <div class="card position-relative border-0 bg-transparent" style="width: 6rem;">                        
         
-       <a href="{% url 'videos-update' plato.id %}">
+       <!-- <a href="{% url 'videos-update' plato.id %}">
         <img src="{{ plato.image_url }}"
             class="img-fluid {% if user.id == plato.propietario.id and not plato.proviene_de %}
                         sombra-verde
@@ -105,15 +101,60 @@
                         sombra-violeta
                         {% endif %}"  
             alt="Imagen del Plato"> 
+      </a> -->
+
+      <!-- <a href="#"
+        data-bs-toggle="modal"
+        data-bs-target="#asignarPlatoModal"
+        onclick="setPlatoInfo('{{ plato.id }}', 'plato')">
+        <img src="{{ plato.image_url }}"
+            class="img-fluid {% if user.id == plato.propietario.id and not plato.proviene_de %}
+                        sombra-verde
+                        {% elif user.id == plato.propietario.id and plato.proviene_de %}
+                        sombra-naranja
+                        {% else %}
+                        sombra-violeta
+                        {% endif %}"  
+            alt="Imagen del Plato"> 
+      </a> -->
+
+      <a href="#"
+        data-bs-toggle="modal"
+        data-bs-target="#asignarPlatoModal"
+        onclick="setPlatoInfo('{{ plato.id }}', 'plato')"
+        class="position-relative d-inline-block text-decoration-none">
+        
+        <img src="{{ plato.image_url }}"
+            class="img-fluid {% if user.id == plato.propietario.id and not plato.proviene_de %}
+                        sombra-verde
+                        {% elif user.id == plato.propietario.id and plato.proviene_de %}
+                        sombra-naranja
+                        {% else %}
+                        sombra-violeta
+                        {% endif %}"  
+            alt="Imagen del Plato"> 
+
+        <!-- Ícono + verde centrado -->
+        <div class="position-absolute top-50 start-50 translate-middle text-success fs-3">
+          <i class="fa-solid fa-plus-circle"></i>
+        </div>
       </a>
+
 
         <!-- <div class="position-absolute top-0 mt-1 start-50 translate-middle-x text-center text-white bg-dark rounded">
           <h6 class="mb-0 small"> {{ plato.nombre_plato }}</h6>
         </div> -->
-
+<!-- 
         <div class="position-absolute start-50 translate-middle-x text-center text-white bg-dark bg-opacity-30 rounded px-1" style="top: 18%;">
           <h6 class="mb-0 small">{{ plato.nombre_plato }}</h6>
+        </div> -->
+
+
+        <div class="position-absolute start-50 translate-middle-x text-center text-white rounded px-2 py-1"
+            style="top: 10%; background-color: rgba(0, 0, 0, 0.5);">
+          <h6 class="mb-0 small">{{ plato.nombre_plato }}</h6>
         </div>
+
 <!-- 
         esto no está funcionando, por qué? -->
         {% for key, value in plato.variedades.items %}
@@ -132,7 +173,7 @@
             data-bs-target="#compartirModal"
             onclick="setPlatoInfo('{{ plato.id }}', 'plato')"
             class="position-absolute text-primary"
-            style="top: 63%; right: 10%;">
+            style="top: 63%; left: 50%;">
             <i class="fa-solid fa-share-nodes"></i>
           </a>
           {% endif %}
@@ -140,13 +181,22 @@
             class="btn btn-sm btn-primary p-0" onclick="setPlatoInfo('{{ plato.id }}', 'plato')">
             Programar
           </a> -->
-          <div class="position-absolute  translate-middle-x text-center" style="top: 62%; left: 43%;">
+          <!-- <div class="position-absolute  translate-middle-x text-center" style="top: 62%; left: 43%;">
             <a href="#" data-bs-toggle="modal" data-bs-target="#asignarPlatoModal"
-              class="btn btn-sm btn-primary p-0" style="font-size: 0.7rem;"
+               
               onclick="setPlatoInfo('{{ plato.id }}', 'plato')">
-              Programar
+              
+            <i class="fa-regular fa-pen-to-square"></i>
+
+            </a>
+          </div> -->
+
+          <div class="position-absolute translate-middle-x text-center" style="top: 62%; left: 35%;">
+            <a href="{% url 'videos-update' plato.id %}">
+              <i class="fa-regular fa-pen-to-square"></i>
             </a>
           </div>
+
           
           <!-- <a href="{% url 'eliminar-plato' plato.id %}" type="button" class="btn btn-sm btn-outline-secondary">Eliminar</a> -->
 
@@ -158,7 +208,7 @@
           data-bs-target="#confirmDeleteModal"
           data-url="{% url 'eliminar-plato' plato.id %}"
           data-nombre="{{ plato.nombre_plato }}"
-          style="top: 45%; right: 0%;">
+          style="top: 59%; right: 4%; font-size: 1rem;">
           <i class="fa-solid fa-trash-can"></i>
         </button>
 

@@ -190,6 +190,7 @@ class Ingrediente(models.Model):
     CONSERVA = "conserva"
     AZUCAR = "azucar"
 
+    CONDIMENTO = "Condimento"
     ESPECIA = "especia"
 
     DETALLE_CHOICES_GROUPED = [
@@ -225,6 +226,7 @@ class Ingrediente(models.Model):
      
         ("Condimentos", [
             (ESPECIA, "Especia"),
+            (CONDIMENTO, "Condimento"),
         ]),
       
         ("Otro", [
