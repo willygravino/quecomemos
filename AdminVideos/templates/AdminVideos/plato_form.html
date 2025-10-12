@@ -102,10 +102,10 @@
                 
 
                 <!-- Descripción -->
-                <div class="mb-3">
+                <!-- <div class="mb-3">
                     <label class="form-label">Descripción del Plato:</label>
-                    {{ form.descripcion_plato|add_class:"form-control" }}
-                </div>
+                     form.descripcion_plato|add_class:"form-control" }}
+                </div> -->
 
                 <!-- Receta -->
                 <div class="mb-3">
@@ -248,6 +248,45 @@
                 </div> -->
 
 <!-- Variedades -->
+
+<!-- NUEVO: botón para agregar variedad -->
+<div class="text-center my-4">
+  <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#variedadModal">
+    ➕ Agregar variedad
+  </button>
+</div>
+
+<!-- Modal para agregar variedad -->
+<div class="modal fade" id="variedadModal" tabindex="-1" aria-labelledby="variedadModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="variedadModalLabel">Agregar Variedad</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Nombre de la variedad</label>
+          <input type="text" id="nuevo-nombre-variedad" class="form-control" placeholder="Ej: Jamón y Queso">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Ingredientes adicionales</label>
+          <textarea id="nuevo-ingredientes-variedad" class="form-control" rows="2" placeholder="Ej: jamón, queso, orégano"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="guardarVariedad">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
 <!-- Acordeón de variedades -->
 <div class="px-2 px-sm-3 w-100 w-md-75 w-lg-50 mx-auto">

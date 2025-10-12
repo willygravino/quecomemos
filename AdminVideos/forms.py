@@ -1,6 +1,6 @@
 
 from django import forms
-from .models import Ingrediente, IngredienteEnPlato, Lugar, Plato, TipoPlato
+from .models import Ingrediente, IngredienteEnPlato, Lugar, Plato, TipoPlato, VariedadPlato
 from django.contrib.auth.forms import AuthenticationForm
 
 
@@ -41,7 +41,7 @@ class PlatoForm(forms.ModelForm):
     class Meta:
         model = Plato
         fields = [
-            "nombre_plato", "receta", "descripcion_plato", "ingredientes", 
+            "nombre_plato", "receta", "ingredientes", 
             "porciones", "medios", "elaboracion", "coccion", "categoria", 
             "tipos", "estacionalidad", "enlace", "image"
         ]
@@ -67,6 +67,23 @@ class PlatoForm(forms.ModelForm):
         if not tipos or len(tipos) == 0:
             self.add_error('tipos', 'Debés seleccionar al menos un tipo de plato.')
 
+
+class VariedadPlatoForm(forms.ModelForm):
+    class Meta:
+        model = VariedadPlato
+        fields = ['nombre', 'ingredientes', 'activo']
+        widgets = {
+            'nombre': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nombre de la variedad'
+            }),
+            'ingredientes': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'Ingredientes adicionales'
+            }),
+            'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
 
 
         

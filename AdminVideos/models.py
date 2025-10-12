@@ -35,7 +35,7 @@ class TipoPlato(models.Model):
 class Plato(models.Model):
     nombre_plato = models.CharField(max_length=30)
     receta = models.CharField(max_length=80, blank=True)
-    descripcion_plato = models.CharField(max_length=300, blank=True)
+    # descripcion_plato = models.CharField(max_length=300, blank=True)
     
     ingredientes = models.CharField('Ingresá los ingredientes, separados por coma', max_length=400, blank=True)
 
@@ -137,6 +137,23 @@ class Plato(models.Model):
     def __str__(self):
         return f"{self.id} - {self.nombre_plato} de {self.propietario}"
     
+class VariedadPlato(models.Model):
+    plato_base = models.ForeignKey(
+        'Plato',
+        on_delete=models.CASCADE,
+        related_name='variedades_nuevas'
+    )
+    nombre = models.CharField(max_length=100)
+    # descripcion = models.CharField(max_length=300, blank=True)
+    ingredientes = models.CharField(max_length=400, blank=True)
+    elaboracion = models.IntegerField(null=True, blank=True)
+    coccion = models.IntegerField(null=True, blank=True)
+    image = models.ImageField(upload_to="variedades/", null=True, blank=True)
+    activo = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.plato_base.nombre_plato} – {self.nombre}"
+
 
 class Ingrediente(models.Model):
      # ===== Nivel 1: categoría (lugar de compra) =====
