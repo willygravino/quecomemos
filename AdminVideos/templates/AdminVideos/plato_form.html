@@ -954,4 +954,56 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 
 
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const botonGuardar = document.getElementById("guardarVariedad");
+  const listaVariedades = document.querySelector("#accordionExample"); // mismo acordeón que ya tenés
+
+  botonGuardar.addEventListener("click", function() {
+    const nombre = document.getElementById("nuevo-nombre-variedad").value.trim();
+    const ingredientes = document.getElementById("nuevo-ingredientes-variedad").value.trim();
+
+    if (!nombre) {
+      alert("Completá el nombre de la variedad.");
+      return;
+    }
+
+    const total = document.querySelectorAll("#accordionExample .accordion-item").length + 1;
+    const id = `collapseVar${total}`;
+
+    const item = document.createElement("div");
+    item.className = "accordion-item";
+    item.innerHTML = `
+      <h2 class="accordion-header" id="headingVar${total}">
+        <button class="accordion-button collapsed" type="button"
+                data-bs-toggle="collapse" data-bs-target="#${id}"
+                aria-expanded="false" aria-controls="${id}">
+          <input type="text" name="variedad${total}"
+                 value="${nombre}"
+                 class="form-control form-control-sm bg-light rounded w-100"
+                 placeholder="Variedad ${total}"
+                 onclick="event.stopPropagation()" />
+        </button>
+      </h2>
+      <div id="${id}" class="accordion-collapse collapse" aria-labelledby="headingVar${total}">
+        <div class="accordion-body">
+          <label class="form-label small">Ingredientes de la variedad ${total}</label>
+          <input type="text" name="ingredientes_de_variedad${total}"
+                 value="${ingredientes}"
+                 class="form-control form-control-sm">
+        </div>
+      </div>
+    `;
+
+    listaVariedades.appendChild(item);
+
+    // limpiar y cerrar modal
+    document.getElementById("nuevo-nombre-variedad").value = "";
+    document.getElementById("nuevo-ingredientes-variedad").value = "";
+    bootstrap.Modal.getInstance(document.getElementById("variedadModal")).hide();
+  });
+});
+</script>
+
+
 {% endblock %}
