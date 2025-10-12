@@ -289,7 +289,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
 
-      <div class="modal-body">
+      <!-- <div class="modal-body">
         <div class="mb-3">
           <label class="form-label">Nombre de la variedad</label>
           <input type="text" id="nuevo-nombre-variedad" class="form-control" placeholder="Ej: Jamón y Queso">
@@ -299,7 +299,29 @@
           <label class="form-label">Ingredientes adicionales</label>
           <textarea id="nuevo-ingredientes-variedad" class="form-control" rows="2" placeholder="Ej: jamón, queso, orégano"></textarea>
         </div>
+      </div> -->
+
+      <div class="modal-body">
+        <!-- Nombre -->
+        <div class="mb-3">
+          <label class="form-label">Nombre de la variedad</label>
+          <input type="text" id="nuevo-nombre-variedad" class="form-control" placeholder="Ej: Jamón y Queso">
+        </div>
+
+        <!-- Lista de ingredientes (dentro de la variedad) -->
+        <div class="mb-3 border p-2 rounded bg-light">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="form-label mb-0">Ingredientes de esta variedad</label>
+            <button type="button" id="agregarIngredienteVariedad" class="btn btn-sm btn-outline-secondary">Agregar</button>
+          </div>
+
+          <ul id="ingredientes-variedad-list" class="list-group small"></ul>
+        </div>
+
+        <!-- Campos ocultos para almacenar los ingredientes -->
+        <input type="hidden" id="nuevo-ingredientes-variedad" value="">
       </div>
+
 
    
 
@@ -1070,6 +1092,62 @@ document.addEventListener("DOMContentLoaded", function() {
         totalFormsInput.value = Math.max(0, parseInt(totalFormsInput.value, 10) - 1);
       }
     }
+  });
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const listaIngredientes = document.getElementById("ingredientes-variedad-list");
+  const btnAgregarIng = document.getElementById("agregarIngredienteVariedad");
+  const hiddenInput = document.getElementById("nuevo-ingredientes-variedad");
+
+  if (!listaIngredientes || !btnAgregarIng || !hiddenInput) {
+    console.warn("⚠️ No se encontró la estructura del modal de ingredientes de variedad.");
+    return;
+  }
+
+  // Mantener lista temporal en memoria
+  let ingredientesVariedad = [];
+
+  // Función para refrescar la lista visual
+  function renderLista() {
+    listaIngredientes.innerHTML = "";
+    ingredientesVariedad.forEach((ing, idx) => {
+      const li = document.createElement("li");
+      li.className = "list-group-item d-flex justify-content-between align-items-center";
+      li.innerHTML = `
+        <span>${ing}</span>
+        <button type="button" class="btn btn-sm btn-outline-danger eliminar-ing-variedad" data-index="${idx}">X</button>
+      `;
+      listaIngredientes.appendChild(li);
+    });
+    // sincroniza con el campo oculto para enviar al servidor
+    hiddenInput.value = ingredientesVariedad.join(", ");
+  }
+
+  // Agregar un nuevo ingrediente
+  btnAgregarIng.addEventListener("click", function() {
+    const nuevo = prompt("Ingrese el ingrediente:");
+    if (nuevo && nuevo.trim() !== "") {
+      ingredientesVariedad.push(nuevo.trim());
+      renderLista();
+    }
+  });
+
+  // Delegación para eliminar
+  listaIngredientes.addEventListener("click", function(e) {
+    if (e.target.classList.contains("eliminar-ing-variedad")) {
+      const idx = parseInt(e.target.dataset.index, 10);
+      ingredientesVariedad.splice(idx, 1);
+      renderLista();
+    }
+  });
+
+  // Reiniciar lista al abrir el modal
+  document.getElementById("variedadModal").addEventListener("show.bs.modal", function() {
+    ingredientesVariedad = [];
+    renderLista();
   });
 });
 </script>
