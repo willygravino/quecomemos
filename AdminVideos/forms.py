@@ -86,6 +86,14 @@ class VariedadPlatoForm(forms.ModelForm):
         }
 
 
+VariedadPlatoFormSet = forms.inlineformset_factory(
+    Plato,                   # modelo padre
+    VariedadPlato,           # modelo hijo
+    form=VariedadPlatoForm,  # formulario base
+    extra=1,                 # cuántos formularios vacíos muestra inicialmente
+    can_delete=True          # permite marcar para eliminar
+)
+
         
 class IngredienteEnPlatoForm(forms.ModelForm):
   

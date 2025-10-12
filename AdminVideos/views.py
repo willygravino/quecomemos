@@ -13,7 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
 from AdminVideos import models
-from AdminVideos.models import HistoricoDia, HistoricoItem, Ingrediente, Lugar, Plato, Profile, Mensaje,  ElegidosXDia
+from AdminVideos.models import HistoricoDia, HistoricoItem, Ingrediente, Lugar, Plato, Profile, Mensaje,  ElegidosXDia, VariedadPlato
 from django.views.decorators.csrf import csrf_exempt
 
 from django.http import Http404, JsonResponse
@@ -829,23 +829,38 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
 
         return form
 
+    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         template_param = self.request.GET.get('tipopag')
         context['items'] = self.TIPOS_POR_TEMPLATE.get(template_param, [])
         context['tipopag'] = template_param
 
+        # === Ingredientes ===
         if self.request.method == 'POST':
             context['ingrediente_formset'] = IngredienteEnPlatoFormSet(self.request.POST)
         else:
             context['ingrediente_formset'] = IngredienteEnPlatoFormSet()
+
+        # === Variedades dinámicas (nuevas) ===
+        from .forms import VariedadPlatoFormSet  # importar local para evitar referencias circulares
+        if self.request.method == 'POST':
+            context['variedad_formset'] = VariedadPlatoFormSet(self.request.POST)
+        else:
+            context['variedad_formset'] = VariedadPlatoFormSet()
+
         return context
+
 
     def form_valid(self, form):
         context = self.get_context_data()
         ingrediente_formset = context['ingrediente_formset']
+        variedad_formset = context.get('variedad_formset')  # 🆕
 
         if not ingrediente_formset.is_valid():
+            return self.render_to_response(self.get_context_data(form=form))
+        if variedad_formset and not variedad_formset.is_valid():  # 🆕
             return self.render_to_response(self.get_context_data(form=form))
 
         # 🔒 Imagen: normalizar (evita TypeError join(None))
@@ -865,20 +880,13 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             for ing_form in ingrediente_formset:
                 if ing_form.cleaned_data and not ing_form.cleaned_data.get("DELETE", False):
                     nombre = ing_form.cleaned_data.get("nombre_ingrediente")
-                    # cantidad = ing_form.cleaned_data.get("cantidad")
-                    # unidad = ing_form.cleaned_data.get("unidad")
-
                     texto = (nombre or '').strip()
-                    # if cantidad not in [None, '']:
-                    #     texto += f" {cantidad}".rstrip()
-                    # if unidad:
-                    #     texto += f" {unidad}".rstrip()
                     if texto:
                         lista_ingredientes.append(texto)
 
             plato.ingredientes = ", ".join(lista_ingredientes)
 
-            # variedades
+            # --- variedades fijas (1 a 6) ---
             variedades = {}
             for i in range(1, 7):
                 variedad = form.cleaned_data.get(f'variedad{i}')
@@ -894,12 +902,20 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             plato.save()
             form.save_m2m()
 
+            # Guardar ingredientes
             ingrediente_formset.instance = plato
             ingrediente_formset.save()
 
+            # === 🆕 Guardar variedades dinámicas (sin límite) ===
+            if variedad_formset:
+                variedad_formset.instance = plato
+                variedad_formset.save()
+
+        # Redirección final
         template_param = self.request.GET.get('tipopag')
         tail = f"?tipopag={template_param}&guardado=ok" if template_param else "?guardado=ok"
         return redirect(f"{reverse('videos-create')}{tail}")
+
 
     def form_invalid(self, form):
         context = self.get_context_data(form=form)
