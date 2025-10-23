@@ -249,6 +249,13 @@
 
 <!-- Variedades -->
 
+<div class="text-center mt-3">
+  <a href="{% url 'videos-create' %}?tipopag={{ tipopag }}&return_to={{ request.get_full_path|urlencode }}"
+     class="btn btn-outline-primary px-4">
+     Agregar variedad
+  </a>
+</div>
+
 <!-- Acordeón de variedades -->
 <div class="px-2 px-sm-3 w-100 w-md-75 w-lg-50 mx-auto">
 

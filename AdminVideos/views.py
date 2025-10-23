@@ -841,6 +841,66 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             context['ingrediente_formset'] = IngredienteEnPlatoFormSet()
         return context
 
+    # def form_valid(self, form):
+    #     context = self.get_context_data()
+    #     ingrediente_formset = context['ingrediente_formset']
+
+    #     if not ingrediente_formset.is_valid():
+    #         return self.render_to_response(self.get_context_data(form=form))
+
+    #     # 🔒 Imagen: normalizar (evita TypeError join(None))
+    #     uploaded = self.request.FILES.get('image')
+    #     if not uploaded:
+    #         form.instance.image = None
+    #     else:
+    #         if not getattr(uploaded, 'name', None):
+    #             uploaded.name = 'upload.jpg'
+
+    #     with transaction.atomic():
+    #         plato = form.save(commit=False)
+    #         plato.propietario = self.request.user
+
+    #         # --- concatenar ingredientes ---
+    #         lista_ingredientes = []
+    #         for ing_form in ingrediente_formset:
+    #             if ing_form.cleaned_data and not ing_form.cleaned_data.get("DELETE", False):
+    #                 nombre = ing_form.cleaned_data.get("nombre_ingrediente")
+    #                 # cantidad = ing_form.cleaned_data.get("cantidad")
+    #                 # unidad = ing_form.cleaned_data.get("unidad")
+
+    #                 texto = (nombre or '').strip()
+    #                 # if cantidad not in [None, '']:
+    #                 #     texto += f" {cantidad}".rstrip()
+    #                 # if unidad:
+    #                 #     texto += f" {unidad}".rstrip()
+    #                 if texto:
+    #                     lista_ingredientes.append(texto)
+
+    #         plato.ingredientes = ", ".join(lista_ingredientes)
+
+    #         # variedades
+    #         variedades = {}
+    #         for i in range(1, 7):
+    #             variedad = form.cleaned_data.get(f'variedad{i}')
+    #             ingredientes_variedad_str = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
+    #             if variedad:
+    #                 variedades[f"variedad{i}"] = {
+    #                     "nombre": variedad,
+    #                     "ingredientes": ingredientes_variedad_str,
+    #                     "elegido": True
+    #                 }
+
+    #         plato.variedades = variedades
+    #         plato.save()
+    #         form.save_m2m()
+
+    #         ingrediente_formset.instance = plato
+    #         ingrediente_formset.save()
+
+    #     template_param = self.request.GET.get('tipopag')
+    #     tail = f"?tipopag={template_param}&guardado=ok" if template_param else "?guardado=ok"
+    #     return redirect(f"{reverse('videos-create')}{tail}")
+
     def form_valid(self, form):
         context = self.get_context_data()
         ingrediente_formset = context['ingrediente_formset']
@@ -848,7 +908,6 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         if not ingrediente_formset.is_valid():
             return self.render_to_response(self.get_context_data(form=form))
 
-        # 🔒 Imagen: normalizar (evita TypeError join(None))
         uploaded = self.request.FILES.get('image')
         if not uploaded:
             form.instance.image = None
@@ -865,20 +924,13 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             for ing_form in ingrediente_formset:
                 if ing_form.cleaned_data and not ing_form.cleaned_data.get("DELETE", False):
                     nombre = ing_form.cleaned_data.get("nombre_ingrediente")
-                    # cantidad = ing_form.cleaned_data.get("cantidad")
-                    # unidad = ing_form.cleaned_data.get("unidad")
-
                     texto = (nombre or '').strip()
-                    # if cantidad not in [None, '']:
-                    #     texto += f" {cantidad}".rstrip()
-                    # if unidad:
-                    #     texto += f" {unidad}".rstrip()
                     if texto:
                         lista_ingredientes.append(texto)
 
             plato.ingredientes = ", ".join(lista_ingredientes)
 
-            # variedades
+            # variedades (ya existentes)
             variedades = {}
             for i in range(1, 7):
                 variedad = form.cleaned_data.get(f'variedad{i}')
@@ -897,9 +949,16 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             ingrediente_formset.instance = plato
             ingrediente_formset.save()
 
+        # 👇 Nuevo bloque: manejo del return_to
+        return_to = self.request.GET.get("return_to")
+        if return_to:
+            return redirect(return_to)
+
+        # Si no hay return_to, comportamiento normal
         template_param = self.request.GET.get('tipopag')
         tail = f"?tipopag={template_param}&guardado=ok" if template_param else "?guardado=ok"
         return redirect(f"{reverse('videos-create')}{tail}")
+
 
     def form_invalid(self, form):
         context = self.get_context_data(form=form)
