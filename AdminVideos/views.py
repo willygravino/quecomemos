@@ -1379,7 +1379,7 @@ def FiltroDePlatos(request):
             "nombre_plato": msg.nombre_elemento_compartido,
             "quien_comparte": msg.usuario_que_envia,
             "receta": los_platos_compartidos[msg.id_elemento].receta if msg.id_elemento in los_platos_compartidos else "",
-            "descripcion": los_platos_compartidos[msg.id_elemento].descripcion_plato if msg.id_elemento in los_platos_compartidos else "",
+            # "descripcion": los_platos_compartidos[msg.id_elemento].descripcion_plato if msg.id_elemento in los_platos_compartidos else "",
             "ingredientes": los_platos_compartidos[msg.id_elemento].ingredientes if msg.id_elemento in los_platos_compartidos else "",
             # "tipo": los_platos_compartidos[msg.id_elemento].tipo if msg.id_elemento in los_platos_compartidos else "",
             "image_url": los_platos_compartidos[msg.id_elemento].image_url if msg.id_elemento in los_platos_compartidos else ""
@@ -1724,7 +1724,7 @@ def agregar_plato_compartido(request, pk, mensaje_id):
     nuevo_plato = Plato.objects.create(
         nombre_plato=plato_original.nombre_plato,
         receta=plato_original.receta,
-        descripcion_plato=plato_original.descripcion_plato,
+        # descripcion_plato=plato_original.descripcion_plato,
         ingredientes=plato_original.ingredientes,
         medios=plato_original.medios,
         categoria=plato_original.categoria,
@@ -1798,7 +1798,7 @@ def agregar_a_mi_lista(request, plato_id):
     nuevo_plato = Plato.objects.create(
         nombre_plato=nombre_copia,
         receta=plato_original.receta,
-        descripcion_plato=plato_original.descripcion_plato,
+        # descripcion_plato=plato_original.descripcion_plato,
         ingredientes=plato_original.ingredientes,
         medios=plato_original.medios,
         categoria=plato_original.categoria,

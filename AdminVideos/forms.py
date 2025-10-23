@@ -41,7 +41,7 @@ class PlatoForm(forms.ModelForm):
     class Meta:
         model = Plato
         fields = [
-            "nombre_plato", "receta", "descripcion_plato", "ingredientes", 
+            "nombre_plato", "receta", "ingredientes", 
             "porciones", "medios", "elaboracion", "coccion", "categoria", 
             "tipos", "estacionalidad", "enlace", "image"
         ]

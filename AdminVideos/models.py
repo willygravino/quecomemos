@@ -35,7 +35,7 @@ class TipoPlato(models.Model):
 class Plato(models.Model):
     nombre_plato = models.CharField(max_length=30)
     receta = models.CharField(max_length=80, blank=True)
-    descripcion_plato = models.CharField(max_length=300, blank=True)
+    # descripcion_plato = models.CharField(max_length=300, blank=True)
     
     ingredientes = models.CharField('Ingresá los ingredientes, separados por coma', max_length=400, blank=True)
 
