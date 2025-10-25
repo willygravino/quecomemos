@@ -1,0 +1,603 @@
+
+{% load static %}
+
+{% load widget_tweaks %}
+
+<div class="album py-1 bg-dark">
+    <section class="py-1 text-center text-white container">
+        <div class="row py-lg-1">
+            <div class="col-lg-8 col-md-8 mx-auto">
+                {% block tipo-de-formulario %}{% endblock %}
+                <!-- <h4 class="fw-light">PLATO PRINCIPAL.</h4> -->
+                <!-- <h5 class="fw-bold">FORMULARIO PARA REFACTORIZACIÓN.</h5> -->
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- ERRORES DEL FORMULARIO PRINCIPAL -->
+ {% if form.errors %}
+<div class="alert alert-danger">
+    <strong>Errores en el formulario:</strong>
+    <ul>
+        {% for field in form %}
+        {% for error in field.errors %}
+        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+        {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+
+<!-- ERRORES DEL FORMSET DE INGREDIENTES -->
+{% if ingrediente_formset.errors %}
+<div class="alert alert-danger">
+    <strong>Errores en los ingredientes:</strong>
+    <ul>
+        {% for form in ingrediente_formset.forms %}
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+
+
+
+<div class="container my-5">
+    <div class="card shadow-lg">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+
+                <!-- Nombre del Plato -->
+
+                <div class="mb-3 row">
+                  <div class="col">
+                    <!-- <label for="{{ form.nombre_plato.id_for_label }}" class="form-label">
+                      Nombre del Plato:
+                    </label> -->
+
+                    <label class="form-label">Nombre del Plato: <span class="text-danger">*</span></label>
+
+                    {% if form.nombre_plato.errors %}
+                      {{ form.nombre_plato|add_class:"form-control is-invalid" }}
+                      {% for error in form.nombre_plato.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                      {% endfor %}
+                    {% else %}
+                      {{ form.nombre_plato|add_class:"form-control" }}
+                    {% endif %}
+                  </div>
+
+                  <div class="col-auto d-flex align-items-end">
+                    
+
+                    {% if form.instance.pk %}
+                      <a href="{% url 'agregar-a-mi-lista' form.instance.pk %}?duplicar=true"
+                        class="btn btn-sm btn-outline-secondary">
+                        Duplicar Plato
+                      </a>
+                    {% endif %}
+
+                    
+                  </div>
+                </div>
+
+
+                
+
+                <!-- Descripción -->
+                <!-- <div class="mb-3">
+                    <label class="form-label">Descripción del Plato:</label>
+                    {{ form.descripcion_plato|add_class:"form-control" }}
+                </div> -->
+
+                <!-- Receta -->
+                <div class="mb-3">
+                    <label class="form-label">Receta:</label>
+                    {{ form.receta|add_class:"form-control" }}
+                </div>
+
+
+<!-- Botón para abrir modal -->
+<button type="button" class="btn btn-outline-secondary mb-4" data-bs-toggle="modal" data-bs-target="#ingredienteModal">
+  Agregar Ingrediente
+</button>
+
+
+<div id="ingredientes-list">
+  {{ ingrediente_formset.management_form }}
+
+  <ul id="ingredientes-ul" class="list-group mb-3">
+    {% for form in ingrediente_formset.forms %}
+
+<li class="list-group-item d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2">
+
+  <!-- id / fk ocultos como ya los tenés -->
+  {% if form.instance.pk %}
+    <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-id" value="{{ form.instance.pk }}">
+  {% endif %}
+  <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-ingrediente"
+         value="{{ form.instance.ingrediente_id|default:'' }}">
+  <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-nombre_ingrediente"
+         value="{{ form.instance.ingrediente.nombre|default_if_none:'' }}">
+
+  <!-- Select visible (o tu Select2 si lo usás) -->
+  <select class="form-select form-select-sm ingrediente-select w-100 w-sm-auto flex-fill"
+          data-initial-id="{{ form.instance.ingrediente_id|default:'' }}"
+          data-initial-text="{{ form.instance.ingrediente.nombre|default_if_none:'' }}">
+  </select>
+
+  <!-- Cantidad -->
+  <input type="text" name="ingredientes_en_plato-{{ forloop.counter0 }}-cantidad"
+         value="{% if form.cantidad.value %}{{ form.cantidad.value|stringformat:'g' }}{% endif %}"
+         class="form-control form-control-sm w-100 w-sm-auto" placeholder="Cantidad">
+
+  <!-- Unidad (usa el widget del form) -->
+  <div class="w-100 w-sm-auto">
+    {{ form.unidad|add_class:"form-select form-select-sm" }}
+  </div>
+
+  <input type="checkbox" name="ingredientes_en_plato-{{ forloop.counter0 }}-DELETE" class="d-none delete-flag">
+
+  <!-- Botón borrar pegado a la derecha en desktop, ocupa fila en móvil -->
+  <button type="button"
+          class="btn btn-sm btn-danger ms-sm-auto"
+          onclick="eliminarIngrediente(event)">
+    X
+  </button>
+</li>
+
+
+
+    
+    {% endfor %}
+  </ul>
+
+
+
+
+</div>
+
+
+
+
+
+                <!-- Otros campos -->
+
+                <div class="row mb-3 justify-content-center">
+
+                    <div class="col-md-2 mb-2">
+                        <!-- <label class="form-label">Porciones:</label> -->
+                        {{ form.porciones|add_class:"form-control" }}
+                    </div>
+
+                    <div class="col-md-3 mb-2">
+                        <!-- <label class="form-label">Medios de cocción:</label> -->
+                        {{ form.medios|add_class:"form-control" }}
+                    </div>
+
+                    <div class="col-md-2 mb-2">
+                        <!-- <label class="form-label">Preparación:</label> -->
+                        {{ form.elaboracion|add_class:"form-control" }}
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <!-- <label class="form-label">Cocción:</label> -->
+                        {{ form.coccion|add_class:"form-control" }}
+                    </div>
+                </div>
+
+                  <div class="col-md-2 mb-2">
+                        <label class="form-label">Categoría:</label>
+                        {{ form.categoria|add_class:"form-control" }}
+                    </div>
+
+
+            <div class="mb-3 border rounded p-3 bg-light{% if form.tipos.errors %} border-danger{% endif %}">
+                <label class="form-label d-block">Tipo de plato:</label>
+                {% if items %}
+                {% for tipo in items %}
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="tipos" id="id_tipos_{{ forloop.counter0 }}"
+                        value="{{ tipo }}" {% if tipo == tipopag or tipo in form.tipos.value %}checked{% endif %}>
+                    <label class="form-check-label" for="id_tipos_{{ forloop.counter0 }}"> &nbsp; {{ tipo }} </label>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p>No hay tipos disponibles.</p>
+                {% endif %}
+
+                {% if form.tipos.errors %}
+                <div class="invalid-feedback d-block">
+                    {% for error in form.tipos.errors %}
+                    {{ error }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+
+                <div class="mb-3">
+                    <label class="form-label">Estacionalidad:</label>
+                    {{ form.estacionalidad|add_class:"form-select" }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.enlace|add_class:"form-control" }}
+                </div>
+
+                <!-- PARA SUBIR IMAGEN PARA EL FUTURO
+                <div class="mb-3">
+                    <label class="form-label">Imagen:</label>
+                    {{ form.image|add_class:"form-control" }}
+                </div> -->
+
+<!-- Variedades -->
+
+<div class="text-center mt-3">
+  <a href="{% url 'videos-create' %}?tipopag={{ tipopag }}&return_to={{ request.get_full_path|urlencode }}"
+     class="btn btn-outline-primary px-4">
+     Agregar variedad
+  </a>
+</div>
+
+<!-- Acordeón de variedades -->
+<div class="px-2 px-sm-3 w-100 w-md-75 w-lg-50 mx-auto">
+
+  <div class="accordion" id="accordionExample">
+
+    <!-- Variedad 1 -->
+   <div class="accordion-item">
+    <h2 class="accordion-header" id="headingOne">
+        <button class="accordion-button collapsed" type="button"
+                data-bs-toggle="collapse" data-bs-target="#collapseOne"
+                aria-expanded="false" aria-controls="collapseOne">
+
+        <input type="text" name="variedad1"
+                value="{{ variedades_en_base.variedad1|default:'' }}"
+                class="form-control form-control-sm bg-light rounded w-100"
+                placeholder="Variedad 1"
+                onclick="event.stopPropagation()" />
+
+        </button>
+    </h2>
+    <div id="collapseOne" class="accordion-collapse collapse"
+        aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+        <label class="form-label small">Ingredientes adicionales</label>
+        <input type="text" name="ingredientes_de_variedad1"
+                value="{{ ingredientes_variedad.variedad1|default:'' }}"
+                class="form-control form-control-sm">
+        </div>
+    </div>
+    </div>
+
+    <!-- Variedad 2 -->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingTwo">
+        <button class="accordion-button collapsed" type="button"
+                data-bs-toggle="collapse" data-bs-target="#collapseTwo"
+                aria-expanded="false" aria-controls="collapseTwo">
+
+          <input type="text" name="variedad2"
+                 value="{{ variedades_en_base.variedad2|default:'' }}"
+                 class="form-control form-control-sm bg-light rounded w-100"
+                 placeholder="Variedad 2"
+                 onclick="event.stopPropagation()" />
+
+        </button>
+      </h2>
+      <div id="collapseTwo" class="accordion-collapse collapse"
+           aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+          <label class="form-label small">Ingredientes de variedad 2</label>
+          <input type="text" name="ingredientes_de_variedad2"
+                 value="{{ ingredientes_variedad.variedad2|default:'' }}"
+                 class="form-control form-control-sm">
+        </div>
+      </div>
+    </div>
+
+    <!-- Variedad 3 -->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingThree">
+        <button class="accordion-button collapsed" type="button"
+                data-bs-toggle="collapse" data-bs-target="#collapseThree"
+                aria-expanded="false" aria-controls="collapseThree">
+
+          <input type="text" name="variedad3"
+                 value="{{ variedades_en_base.variedad3|default:'' }}"
+                 class="form-control form-control-sm bg-light rounded w-100"
+                 placeholder="Variedad 3"
+                 onclick="event.stopPropagation()" />
+
+        </button>
+      </h2>
+      <div id="collapseThree" class="accordion-collapse collapse"
+           aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+          <label class="form-label small">Ingredientes de variedad 3</label>
+          <input type="text" name="ingredientes_de_variedad3"
+                 value="{{ ingredientes_variedad.variedad3|default:'' }}"
+                 class="form-control form-control-sm">
+        </div>
+      </div>
+    </div>
+
+    <!-- Variedad 4 -->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingFour">
+        <button class="accordion-button collapsed" type="button"
+                data-bs-toggle="collapse" data-bs-target="#collapseFour"
+                aria-expanded="false" aria-controls="collapseFour">
+
+          <input type="text" name="variedad4"
+                 value="{{ variedades_en_base.variedad4|default:'' }}"
+                 class="form-control form-control-sm bg-light rounded w-100"
+                 placeholder="Variedad 4"
+                 onclick="event.stopPropagation()" />
+
+        </button>
+      </h2>
+      <div id="collapseFour" class="accordion-collapse collapse"
+           aria-labelledby="headingFour" data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+          <label class="form-label small">Ingredientes de variedad 4</label>
+          <input type="text" name="ingredientes_de_variedad4"
+                 value="{{ ingredientes_variedad.variedad4|default:'' }}"
+                 class="form-control form-control-sm">
+        </div>
+      </div>
+    </div>
+
+    <!-- Variedad 5 -->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingFive">
+        <button class="accordion-button collapsed" type="button"
+                data-bs-toggle="collapse" data-bs-target="#collapseFive"
+                aria-expanded="false" aria-controls="collapseFive">
+
+          <input type="text" name="variedad5"
+                 value="{{ variedades_en_base.variedad5|default:'' }}"
+                 class="form-control form-control-sm bg-light rounded w-100"
+                 placeholder="Variedad 5"
+                 onclick="event.stopPropagation()" />
+
+        </button>
+      </h2>
+      <div id="collapseFive" class="accordion-collapse collapse"
+           aria-labelledby="headingFive" data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+          <label class="form-label small">Ingredientes de variedad 5</label>
+          <input type="text" name="ingredientes_de_variedad5"
+                 value="{{ ingredientes_variedad.variedad5|default:'' }}"
+                 class="form-control form-control-sm">
+        </div>
+      </div>
+    </div>
+
+    <!-- Variedad 6 -->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingSix">
+        <button class="accordion-button collapsed" type="button"
+                data-bs-toggle="collapse" data-bs-target="#collapseSix"
+                aria-expanded="false" aria-controls="collapseSix">
+
+          <input type="text" name="variedad6"
+                 value="{{ variedades_en_base.variedad6|default:'' }}"
+                 class="form-control form-control-sm bg-light rounded w-100"
+                 placeholder="Variedad 6"
+                 onclick="event.stopPropagation()" />
+
+        </button>
+      </h2>
+      <div id="collapseSix" class="accordion-collapse collapse"
+           aria-labelledby="headingSix" data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+          <label class="form-label small">Ingredientes de variedad 6</label>
+          <input type="text" name="ingredientes_de_variedad6"
+                 value="{{ ingredientes_variedad.variedad6|default:'' }}"
+                 class="form-control form-control-sm">
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+
+<!-- --------- variedades -->
+
+  <div class="text-center mt-2 mb-2">
+                    <button type="submit" class="btn btn-success px-5">Guardar</button>
+                </div>
+
+            </form>
+
+
+{% if request.GET.guardado == "ok" %}
+<div class="modal show d-block" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.5);">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">¡Guardado exitosamente!</h5>
+            </div>
+            <div class="modal-body">
+                <p>¿Qué querés hacer ahora?</p>
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-primary" href="{{ request.path }}?tipopag={{ request.GET.tipopag }}">Crear otro
+                    plato</a>
+                <a class="btn btn-secondary" href="/">Ir a Home</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if request.GET.modificado == "ok" %}
+<div class="modal show d-block" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.5);">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">¡Modificado exitosamente!</h5>
+            </div>
+            <div class="modal-body">
+                <p>¿Qué querés hacer ahora?</p>
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-primary" href="/">Ir a Home</a>
+                <a class="btn btn-secondary" href="{% url 'filtro-de-platos' %}">Ver todos mis platos</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+
+
+<!-- Modal Bootstrap -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="successModalLabel">¡Guardado exitosamente!</h5>
+            </div>
+            <div class="modal-body">
+                ¿Qué querés hacer ahora?
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-primary" href="{{ request.path }}?tipopag={{ request.GET.tipopag }}">Crear otro
+                    plato</a>
+                <a class="btn btn-secondary" href="/">Ir a Home</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Modal ingredientes -->
+<div class="modal fade" id="ingredienteModal" tabindex="-1" aria-labelledby="ingredienteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="ingredienteModalLabel">Agregar Ingrediente</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- ====== Ingrediente existente + alternativa "nuevo" en la misma fila ====== -->
+        <div class="mb-3" id="bloque-existente">
+          <div class="row g-2 align-items-end">
+            <!-- Select de ingrediente existente -->
+            <div class="col">
+              <label for="modal-nombre" class="form-label">Ingrediente</label>
+              <select id="modal-nombre" class="form-select" style="width:100%"></select>
+            </div>
+
+            <!-- Switch a la derecha -->
+            <!-- <div class="col-auto">
+              <div class="form-check form-switch d-flex align-items-center mt-4 mt-sm-0">
+                <input class="form-check-input me-2" type="checkbox" id="toggle-nuevo-ingrediente">
+                <label class="form-check-label mb-0" for="toggle-nuevo-ingrediente">
+                  Cargar ingrediente nuevo
+                </label>
+              </div>
+            </div> -->
+          </div>
+        </div>
+
+        <hr class="my-3">
+        <small class="text-muted">O bien, cargá un nuevo ingrediente:</small>
+
+
+        <!-- ========== NUEVO (campos del modelo) ========== -->
+        <!-- <div id="bloque-nuevo" class="border rounded p-3 bg-light d-none"> -->
+        <div id="bloque-nuevo" class="border rounded p-3 bg-light mt-3">
+
+          <div class="mb-3">
+            <label for="nuevo-nombre" class="form-label">Nombre</label>
+            <input type="text" id="nuevo-nombre" class="form-control" placeholder="Ej.: Zanahoria">
+          </div>
+
+          <div class="mb-3">
+            <label for="nuevo-tipo" class="form-label">Tipo (lugar/categoría)</label>
+            <select id="nuevo-tipo" class="form-select">
+              <option value="verduleria">Verdulería</option>
+              <option value="fiambreria">Fiambriería</option>
+              <option value="carniceria">Carnicería</option>
+              <option value="pescaderia">Pescadería</option>
+              <option value="panaderia">Panadería</option>
+              <option value="almacen">Almacén</option>
+              <option value="lacteos">Lácteos</option>
+              <option value="bebidas">Bebidas</option>
+              <option value="otro" selected>Otro</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="nuevo-detalle" class="form-label">Detalle (subcategoría)</label>
+            <select id="nuevo-detalle" class="form-select">
+              <option value="">— (opcional)</option>
+            </select>
+          </div>
+
+          <div class="alert alert-warning d-none" id="nuevo-ingrediente-errores"></div>
+        </div>
+
+        <!-- Cantidad -->
+        <div class="mb-3">
+          <label for="modal-cantidad" class="form-label">Cantidad</label>
+          <input type="text" id="modal-cantidad" class="form-control">
+        </div>
+
+        <!-- Unidad visible -->
+        <div class="mb-3">
+          <label for="modal-unidad" class="form-label">Unidad</label>
+          <select id="modal-unidad" name="modal-unidad" class="form-select">
+            {% for value, label in ingrediente_formset.empty_form.unidad.field.choices %}
+              <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Prototype oculto para clonar al formset -->
+        <div id="unidad-prototype" class="d-none">
+          <select name="ingredientes_en_plato-__prefix__-unidad"
+                  class="form-select form-select-sm w-100 w-sm-auto"
+                  disabled>
+            {% for value, label in ingrediente_formset.empty_form.unidad.field.choices %}
+              <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="guardarIngrediente">Guardar</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+

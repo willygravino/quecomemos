@@ -15,6 +15,8 @@ from django.views import View
 from AdminVideos import models
 from AdminVideos.models import HistoricoDia, HistoricoItem, Ingrediente, Lugar, Plato, Profile, Mensaje,  ElegidosXDia
 from django.views.decorators.csrf import csrf_exempt
+from django.template.loader import render_to_string   # ✅ ← ESTA ES LA CLAVE
+
 
 from django.http import Http404, JsonResponse
 from django.urls import reverse, reverse_lazy
@@ -771,6 +773,18 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
     # Fallback de template por si tipopag no matchea
     DEFAULT_TEMPLATE = 'AdminVideos/ppal_form.html'
 
+    def get(self, request, *args, **kwargs):
+        self.object = None  # ← necesario para evitar AttributeError
+        context = self.get_context_data()
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            html = render_to_string('AdminVideos/plato_form_inner.html', context, request=request)
+            return JsonResponse({'html': html})
+
+        return super().get(request, *args, **kwargs)
+
+
+
     def get_template_names(self):
         template_param = self.request.GET.get('tipopag')
         templates = {
@@ -841,73 +855,20 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             context['ingrediente_formset'] = IngredienteEnPlatoFormSet()
         return context
 
-    # def form_valid(self, form):
-    #     context = self.get_context_data()
-    #     ingrediente_formset = context['ingrediente_formset']
-
-    #     if not ingrediente_formset.is_valid():
-    #         return self.render_to_response(self.get_context_data(form=form))
-
-    #     # 🔒 Imagen: normalizar (evita TypeError join(None))
-    #     uploaded = self.request.FILES.get('image')
-    #     if not uploaded:
-    #         form.instance.image = None
-    #     else:
-    #         if not getattr(uploaded, 'name', None):
-    #             uploaded.name = 'upload.jpg'
-
-    #     with transaction.atomic():
-    #         plato = form.save(commit=False)
-    #         plato.propietario = self.request.user
-
-    #         # --- concatenar ingredientes ---
-    #         lista_ingredientes = []
-    #         for ing_form in ingrediente_formset:
-    #             if ing_form.cleaned_data and not ing_form.cleaned_data.get("DELETE", False):
-    #                 nombre = ing_form.cleaned_data.get("nombre_ingrediente")
-    #                 # cantidad = ing_form.cleaned_data.get("cantidad")
-    #                 # unidad = ing_form.cleaned_data.get("unidad")
-
-    #                 texto = (nombre or '').strip()
-    #                 # if cantidad not in [None, '']:
-    #                 #     texto += f" {cantidad}".rstrip()
-    #                 # if unidad:
-    #                 #     texto += f" {unidad}".rstrip()
-    #                 if texto:
-    #                     lista_ingredientes.append(texto)
-
-    #         plato.ingredientes = ", ".join(lista_ingredientes)
-
-    #         # variedades
-    #         variedades = {}
-    #         for i in range(1, 7):
-    #             variedad = form.cleaned_data.get(f'variedad{i}')
-    #             ingredientes_variedad_str = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
-    #             if variedad:
-    #                 variedades[f"variedad{i}"] = {
-    #                     "nombre": variedad,
-    #                     "ingredientes": ingredientes_variedad_str,
-    #                     "elegido": True
-    #                 }
-
-    #         plato.variedades = variedades
-    #         plato.save()
-    #         form.save_m2m()
-
-    #         ingrediente_formset.instance = plato
-    #         ingrediente_formset.save()
-
-    #     template_param = self.request.GET.get('tipopag')
-    #     tail = f"?tipopag={template_param}&guardado=ok" if template_param else "?guardado=ok"
-    #     return redirect(f"{reverse('videos-create')}{tail}")
-
     def form_valid(self, form):
         context = self.get_context_data()
         ingrediente_formset = context['ingrediente_formset']
 
+        # --- Validación del formset ---
         if not ingrediente_formset.is_valid():
+            # Si vino por AJAX (modal)
+            if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                html = render_to_string(self.get_template_names(), context, request=self.request)
+                return JsonResponse({'success': False, 'html': html})
+            # Si es página normal
             return self.render_to_response(self.get_context_data(form=form))
 
+        # --- Manejo de imagen ---
         uploaded = self.request.FILES.get('image')
         if not uploaded:
             form.instance.image = None
@@ -915,11 +876,12 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             if not getattr(uploaded, 'name', None):
                 uploaded.name = 'upload.jpg'
 
+        # --- Guardado atómico ---
         with transaction.atomic():
             plato = form.save(commit=False)
             plato.propietario = self.request.user
 
-            # --- concatenar ingredientes ---
+            # --- Concatenar ingredientes del formset ---
             lista_ingredientes = []
             for ing_form in ingrediente_formset:
                 if ing_form.cleaned_data and not ing_form.cleaned_data.get("DELETE", False):
@@ -930,7 +892,7 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
 
             plato.ingredientes = ", ".join(lista_ingredientes)
 
-            # variedades (ya existentes)
+            # --- Guardar variedades ---
             variedades = {}
             for i in range(1, 7):
                 variedad = form.cleaned_data.get(f'variedad{i}')
@@ -949,12 +911,16 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             ingrediente_formset.instance = plato
             ingrediente_formset.save()
 
-        # 👇 Nuevo bloque: manejo del return_to
+        # --- Si es un request AJAX (modal) ---
+        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'nombre': plato.nombre_plato})
+
+        # --- Si hay return_to (volver a formulario anterior) ---
         return_to = self.request.GET.get("return_to")
         if return_to:
             return redirect(return_to)
 
-        # Si no hay return_to, comportamiento normal
+        # --- Comportamiento normal (página completa) ---
         template_param = self.request.GET.get('tipopag')
         tail = f"?tipopag={template_param}&guardado=ok" if template_param else "?guardado=ok"
         return redirect(f"{reverse('videos-create')}{tail}")

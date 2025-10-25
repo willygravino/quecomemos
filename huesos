@@ -1,107 +1,315 @@
 
-<div class="modal fade" id="ingredienteModal" tabindex="-1" aria-labelledby="ingredienteModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      
-      <div class="modal-header">
-        <h5 class="modal-title" id="ingredienteModalLabel">Agregar Ingrediente</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      
-      <div class="modal-body">
-        
+!!!!!!! sacado de plato_form_inner.html !!!!!!!!!!
 
+<!-- ========================= -->
+<!-- 2. Funciones de ingredientes -->
+<!-- ========================= -->
+<script>
+function agregarIngrediente(list, totalFormsInput) {
+  const totalForms = parseInt(totalFormsInput.value, 10);
+  const prefix = 'ingredientes_en_plato';
 
-        <!-- ====== Elegir existente o crear nuevo ====== -->
-        <div class="mb-3">
-        <div class="form-check form-switch d-flex align-items-center">
-          <input class="form-check-input me-2" type="checkbox" id="toggle-nuevo-ingrediente">
-          <label class="form-check-label mb-0" for="toggle-nuevo-ingrediente">
-            Cargar un ingrediente nuevo
-          </label>
-        </div>
-      </div>
+  // Datos del modal
+  const sel = $('#modal-nombre').select2('data')[0] || {};
+  const idIngrediente = sel?.id || '';
+  const nombre = sel?.text || '';
+  const cantidad = document.getElementById("modal-cantidad").value.replace(',', '.');
+  const unidadElegida = document.getElementById("modal-unidad").value;
 
+  const ul = document.getElementById("ingredientes-ul");
+  if (!ul) { console.error('No se encontró #ingredientes-ul'); return; }
 
+  // Clonar prototype de unidad con el índice correcto
+  const proto = document.getElementById('unidad-prototype');
+  if (!proto) { console.error('Falta #unidad-prototype'); return; }
+  let unidadHtml = proto.innerHTML.replace(/__prefix__/g, totalForms);
 
-        <!-- ========== EXISTENTE (Select2) ========== -->
-        <!-- Tu select actual queda envuelto en este bloque -->
-        <div id="bloque-existente">
-          <div class="mb-3">
-            <label for="modal-nombre" class="form-label">Ingrediente (existente)</label>
-            <select id="modal-nombre" class="form-select" style="width:100%"></select>
-          </div>
-        </div>
+  // Construir <li> con el MISMO patrón responsive que el servidor
+  const li = document.createElement("li");
+  li.className = "list-group-item d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2";
+  li.innerHTML = `
+    <input type="hidden" name="${prefix}-${totalForms}-ingrediente" value="${idIngrediente}">
+    <input type="hidden" name="${prefix}-${totalForms}-nombre_ingrediente" value="${nombre}">
 
-        <!-- ========== NUEVO (campos del modelo) ========== -->
-        <div id="bloque-nuevo" class="border rounded p-3 bg-light d-none">
-          <div class="mb-3">
-            <label for="nuevo-nombre" class="form-label">Nombre</label>
-            <input type="text" id="nuevo-nombre" class="form-control" placeholder="Ej.: Zanahoria">
-          </div>
+    <select class="form-select form-select-sm ingrediente-select w-100 w-sm-auto flex-fill"
+            data-initial-id="${idIngrediente}"
+            data-initial-text="${nombre}"></select>
 
-          <div class="mb-3">
-            <label for="nuevo-tipo" class="form-label">Tipo (lugar/categoría)</label>
-            <select id="nuevo-tipo" class="form-select">
-              <option value="verduleria">Verdulería</option>
-              <option value="fiambreria">Fiambriería</option>
-              <option value="carniceria">Carnicería</option>
-              <option value="pescaderia">Pescadería</option>
-              <option value="panaderia">Panadería</option>
-              <option value="almacen">Almacén</option>
-              <option value="lacteos">Lácteos</option>
-              <option value="bebidas">Bebidas</option>
-              <option value="otro" selected>Otro</option>
-            </select>
-          </div>
+    <input type="text" name="${prefix}-${totalForms}-cantidad"
+           value="${cantidad}"
+           class="form-control form-control-sm w-100 w-sm-auto"
+           placeholder="Cantidad">
 
-          <div class="mb-3">
-            <label for="nuevo-detalle" class="form-label">Detalle (subcategoría)</label>
-            <select id="nuevo-detalle" class="form-select">
-              <option value="">— (opcional)</option>
-            </select>
-          </div>
-
-          <div class="alert alert-warning d-none" id="nuevo-ingrediente-errores"></div>
-        </div>
-
-        <!-- (Dejás tal cual) Cantidad -->
-        <div class="mb-3">
-          <label for="modal-cantidad" class="form-label">Cantidad</label>
-          <input type="text" id="modal-cantidad" class="form-control">
-        </div>
-
-        <!-- (Dejás tal cual) Unidad visible -->
-        <div class="mb-3">
-          <label for="modal-unidad" class="form-label">Unidad</label>
-          <select id="modal-unidad" name="modal-unidad" class="form-select">
-            {% for value, label in ingrediente_formset.empty_form.unidad.field.choices %}
-              <option value="{{ value }}">{{ label }}</option>
-            {% endfor %}
-          </select>
-        </div>
-
-        <!-- (Dejás tal cual) Prototype oculto -->
-        <div id="unidad-prototype" class="d-none">
-          <select name="ingredientes_en_plato-__prefix__-unidad"
-                  class="form-select form-select-sm w-100 w-sm-auto"
-                  disabled>
-            {% for value, label in ingrediente_formset.empty_form.unidad.field.choices %}
-              <option value="{{ value }}">{{ label }}</option>
-            {% endfor %}
-          </select>
-        </div>
-
-      </div>
-
-        
-      <!-- </div> -->
-      
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="guardarIngrediente">Guardar</button>
-      </div>
-      
+    <div class="w-100 w-sm-auto">
+      ${unidadHtml}
     </div>
-  </div>
-</div>
+
+    <input type="checkbox" name="${prefix}-${totalForms}-DELETE" class="d-none delete-flag">
+
+    <button type="button" class="btn btn-sm btn-danger ms-sm-auto eliminar-ingrediente">X</button>
+  `;
+
+  ul.appendChild(li);
+
+  // Actualizar TOTAL_FORMS
+  totalFormsInput.value = totalForms + 1;
+
+  // Inicializar select de INGREDIENTE (Select2)
+  const newSelectIngrediente = li.querySelector('.ingrediente-select');
+  initIngredienteSelect(newSelectIngrediente);
+
+  // Activar el SELECT de UNIDAD clonado y setear valor elegido en el modal
+  const unidadSelect = li.querySelector(`select[name="${prefix}-${totalForms}-unidad"]`);
+  if (unidadSelect) {
+    unidadSelect.disabled = false;
+    unidadSelect.value = unidadElegida || '';
+  }
+
+  // Limpiar y cerrar modal
+  $('#modal-nombre').val(null).trigger('change');
+  document.getElementById("modal-cantidad").value = "";
+  document.getElementById("modal-unidad").selectedIndex = 0;
+
+  const modalEl = document.getElementById("ingredienteModal");
+  const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+  modal.hide();
+}
+</script>
+
+
+<!-- ========================= -->
+<!-- Init único (DOMContentLoaded) -->
+<!-- ========================= -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const list = document.getElementById("ingredientes-list");
+  const ul = document.getElementById("ingredientes-ul");
+  const totalFormsInput = document.getElementById("id_ingredientes_en_plato-TOTAL_FORMS");
+
+  if (!list || !ul || !totalFormsInput) {
+    console.error('Faltan nodos del formset (#ingredientes-list / #ingredientes-ul / TOTAL_FORMS)');
+  }
+
+  // Inicializar Select2 en todos los <select class="ingrediente-select"> existentes
+  document.querySelectorAll('#ingredientes-ul .ingrediente-select').forEach(initIngredienteSelect);
+
+  // Al abrir el modal, inicializar Select2 del campo de ingrediente (del modal)
+  function inicializarSelect2Modal() {
+    $('#modal-nombre')
+      .select2(buildSelect2Config($('#ingredienteModal')))
+      .select2('open');
+
+    // Si querés Select2 también para unidad en el modal, descomentá:
+    // $('#modal-unidad').select2({ dropdownParent: $('#ingredienteModal'), width: 'style' });
+  }
+  $('#ingredienteModal').on('shown.bs.modal', inicializarSelect2Modal);
+
+ 
+});
+</script>
+
+<script>
+function buildSelect2Config(dropdownParent=null) {
+  const cfg = {
+    placeholder: 'Selecciona un ingrediente',
+    ajax: {
+      url: '/api/ingredientes/',
+      dataType: 'json',
+      delay: 250,
+      data: params => ({ q: params.term || '' }),
+      processResults: data => ({
+        results: data.map(item => ({ id: item.id, text: item.nombre }))
+      }),
+      cache: true
+    },
+    minimumInputLength: 0,
+    allowClear: true
+  };
+  if (dropdownParent) cfg.dropdownParent = dropdownParent;
+  return cfg;
+}
+
+// Inicializa un <select class="ingrediente-select"> dentro de un <li>
+// y sincroniza su value con los inputs hidden (...-ingrediente y ...-nombre_ingrediente)
+function initIngredienteSelect(selectEl) {
+  const $select = $(selectEl);
+
+  // Pre-cargar valor inicial si viene de la base
+  const initId = $select.data('initial-id');
+  const initText = $select.data('initial-text');
+  if (initId && initText) {
+    const option = new Option(initText, initId, true, true);
+    $select.append(option).trigger('change');
+  }
+
+  // Inicializar Select2 (fuera del modal => sin dropdownParent)
+  $select.select2(buildSelect2Config());
+
+  // Vincular cambios al par de hidden
+  $select.on('select2:select select2:clear change', function() {
+    const li = selectEl.closest('li');
+    if (!li) return;
+    const hiddenId = li.querySelector('input[name$="-ingrediente"]');
+    const hiddenNombre = li.querySelector('input[name$="-nombre_ingrediente"]');
+    const data = $select.select2('data')[0] || null;
+    if (hiddenId) hiddenId.value = data ? (data.id ?? '') : '';
+    if (hiddenNombre) hiddenNombre.value = data ? (data.text ?? '') : '';
+  });
+}
+</script>
+
+<script>
+/**
+ * Marca el DELETE del formset y oculta el <li>.
+ * No toca TOTAL_FORMS (en formsets hay que dejarlo igual).
+ */
+function eliminarIngrediente(e) {
+  const btn = e?.target?.closest('.eliminar-ingrediente') || e?.target;
+  if (!btn) return false;
+
+  const li = btn.closest('li');
+  if (!li) return false;
+
+  let del = li.querySelector('input[name$="-DELETE"]');
+  if (!del) {
+    const anyField = li.querySelector('input[name^="ingredientes_en_plato-"], select[name^="ingredientes_en_plato-"]');
+    if (anyField?.name) {
+      const base = anyField.name.replace(/-(nombre_ingrediente|cantidad|unidad|ingrediente|id)$/, '');
+      del = document.createElement('input');
+      del.type = 'checkbox';
+      del.name = `${base}-DELETE`;
+      del.className = 'delete-flag d-none';
+      li.appendChild(del);
+    }
+  }
+  if (del) del.checked = true;
+
+  li.querySelectorAll('[required]').forEach(el => el.removeAttribute('required'));
+  li.style.setProperty('display', 'none', 'important');
+  li.setAttribute('aria-hidden', 'true');
+
+  e?.stopPropagation?.();
+  e?.preventDefault?.();
+  return false;
+}
+
+// ==== util CSRF ====
+function getCookie(name) {
+  const cookies = document.cookie.split(';');
+  for (let i = 0; i < cookies.length; i++) {
+    const c = cookies[i].trim();
+    if (c.startsWith(name + '=')) {
+      return decodeURIComponent(c.substring(name.length + 1));
+    }
+  }
+  return null;
+}
+const CSRF_TOKEN = getCookie('csrftoken');
+
+// ==== Mapping de subcategorías según tipo de ingrediente ====
+const DETALLE_OPCIONES = {
+  verduleria: [["verdura", "Verdura"], ["fruta", "Fruta"], ["tuberculo", "Tubérculo"], ["hierba_fresca", "Hierba fresca"]],
+  carniceria: [["carne_roja", "Carne roja"], ["ave", "Ave"], ["cerdo", "Cerdo"], ["cordero", "Cordero"], ["achuras", "Achuras"]],
+  pescaderia: [["pescado", "Pescado"], ["marisco", "Marisco"]],
+  panaderia: [["pan", "Pan"]],
+  almacen: [["legumbre", "Legumbre"], ["cereal", "Cereal"], ["harina_blanca", "Harina Blanca"], ["aceite", "Aceite"], ["conserva", "Conserva"], ["azucar", "Azúcar"], ["especia", "Especia"]],
+  fiambreria: [["fiambre", "Fiambre"], ["queso", "Queso"], ["embutido", "Embutido"]],
+  otro: [["otro", "Otro"]],
+  lacteos: [],
+  bebidas: [],
+};
+
+// ==== Alta condicional del ingrediente y devolución de {id, text} ====
+async function crearIngredienteSiHaceFalta() {
+  const nombreNuevo = (document.getElementById('nuevo-nombre').value || '').trim();
+
+  if (nombreNuevo !== '') {
+    const tipo = document.getElementById('nuevo-tipo').value;
+    const detalle = document.getElementById('nuevo-detalle').value;
+    if (!tipo) throw new Error('Elegí el tipo del nuevo ingrediente.');
+
+    const resp = await fetch('/api/ingredientes/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': CSRF_TOKEN
+      },
+      body: JSON.stringify({ nombre: nombreNuevo, tipo, detalle }),
+      credentials: 'same-origin'
+    });
+
+    if (!resp.ok) {
+      const erroresBox = document.getElementById('nuevo-ingrediente-errores');
+      erroresBox.innerHTML = 'No se pudo crear el ingrediente.';
+      erroresBox.classList.remove('d-none');
+      throw new Error('Error al crear ingrediente');
+    }
+
+    const creado = await resp.json();
+    // limpiar campos del nuevo
+    document.getElementById('nuevo-nombre').value = '';
+    document.getElementById('nuevo-tipo').value = 'otro';
+    document.getElementById('nuevo-detalle').innerHTML = '<option value="">— (opcional)</option>';
+    return { id: creado.id, text: creado.nombre };
+  }
+
+  // Si no hay nombre nuevo, usar ingrediente existente
+  const sel = $('#modal-nombre').select2('data')[0] || {};
+  if (!sel.id) {
+    throw new Error('Seleccioná un ingrediente existente o completá el nombre de uno nuevo.');
+  }
+  return { id: sel.id, text: sel.text };
+}
+
+// ==== Eventos globales (DOMContentLoaded) ====
+document.addEventListener('DOMContentLoaded', function () {
+  // Delegación para eliminar ingredientes
+  const ul = document.getElementById('ingredientes-ul');
+  if (ul) {
+    ul.addEventListener('click', function (ev) {
+      if (ev.target.closest('.eliminar-ingrediente')) {
+        eliminarIngrediente(ev);
+      }
+    });
+  }
+
+  // Cargar dinámicamente las subcategorías
+  const tipoSel = document.getElementById('nuevo-tipo');
+  const detalleSel = document.getElementById('nuevo-detalle');
+  if (tipoSel && detalleSel) {
+    function cargarDetallePorTipo(tipo) {
+      detalleSel.innerHTML = '<option value="">— (opcional)</option>';
+      (DETALLE_OPCIONES[tipo] || []).forEach(([val, label]) => {
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = label;
+        detalleSel.appendChild(opt);
+      });
+    }
+
+    cargarDetallePorTipo(tipoSel.value);
+    tipoSel.addEventListener('change', () => {
+      cargarDetallePorTipo(tipoSel.value);
+    });
+  }
+
+  // Guardar ingrediente
+  const totalFormsInput = document.getElementById("id_ingredientes_en_plato-TOTAL_FORMS");
+  const list = document.getElementById("ingredientes-list");
+
+  document.getElementById("guardarIngrediente").addEventListener("click", async function () {
+    try {
+      const elegido = await crearIngredienteSiHaceFalta();
+      const $modalSel = $('#modal-nombre');
+      $modalSel.empty();
+      const opt = new Option(elegido.text, elegido.id, true, true);
+      $modalSel.append(opt).trigger('change');
+      agregarIngrediente(list, totalFormsInput);
+    } catch (err) {
+      if (err?.message) {
+        console.warn(err.message);
+      }
+    }
+  });
+});
+</script>

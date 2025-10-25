@@ -8,6 +8,12 @@
 <section class="w-100 text-white">
   <div class="container">
     <div class="d-flex justify-content-center flex-wrap gap-3">
+
+      <!-- Botón -->
+      <button class="btn btn-primary" id="btnNuevoPrincipal">
+        Nuevo Plato Principal
+      </button>
+
       {% with tipopag=request.GET.tipopag %}
       {% if tipopag == "Delivery" or tipopag == "Comerafuera" %}
         <a class="btn btn-primary w-75 w-sm-100 text-white border border-dark rounded text-center" href="{% url 'crear-lugar' %}?tipopag={{ tipopag|default:'Dash' }}">
@@ -425,6 +431,50 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 </script>
+
+<!-- Modal para cargar el formulario dinámicamente -->
+<div class="modal fade" id="modalPlato" tabindex="-1" aria-labelledby="modalPlatoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalPlatoLabel">Nuevo Plato</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body" id="modalPlatoBody">
+        <!-- Aquí se cargará el formulario dinámicamente -->
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const modalEl = document.getElementById("modalPlato");
+  const modalBody = document.getElementById("modalPlatoBody");
+  const modal = new bootstrap.Modal(modalEl);
+
+  const btnNuevo = document.getElementById("btnNuevoPrincipal");
+  if (!btnNuevo) return;
+
+  btnNuevo.addEventListener("click", function() {
+    fetch("{% url 'videos-create' %}?tipopag=Principal", {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(r => r.json())
+    .then(data => {
+      modalBody.innerHTML = data.html;
+      // 👇 Nueva línea clave: inicializa todas las funciones JS del form
+      initPlatoForm(modalBody);
+      modal.show();
+    })
+    .catch(err => console.error("Error cargando formulario:", err));
+  });
+});
+</script>
+
 
 
 
