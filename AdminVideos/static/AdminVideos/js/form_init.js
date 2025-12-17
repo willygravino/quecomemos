@@ -262,7 +262,8 @@
         ${unidadHtml}
       </div>
 
-      <input type="checkbox" name="${prefix}-${totalForms}-DELETE" class="d-none delete-flag">
+      <input type="checkbox" name="${prefix}-${totalForms}-DELETE" class="d-none delete-flag" value="">
+
 
       <button type="button" class="btn btn-sm btn-danger ms-sm-auto eliminar-ingrediente">X</button>
     `;
@@ -357,6 +358,7 @@
     }
 
     // ===== Botón "Guardar" del modal ingredientes
+     // ===== Botón "Guardar" del modal ingredientes
     const guardarBtn = context.querySelector("#guardarIngrediente");
     if (guardarBtn && !guardarBtn.__bound) {
       guardarBtn.addEventListener("click", async function () {
@@ -374,8 +376,75 @@
       guardarBtn.__bound = true;
     }
 
+       // ===== Asegurar que el form tenga action correcto =====
+    const formEl = context.querySelector("#platoForm") || context.querySelector("form[method='post']");
+    if (formEl && !formEl.action) {
+      // Detecta tipo de plato desde los inputs o contexto
+      let tipopag = "Principal";
+      const tipoInput = context.querySelector("input[name='tipos']:checked");
+      if (tipoInput) {
+        tipopag = tipoInput.value;
+      }
+
+      formEl.action = `/videos/create/?tipopag=${encodeURIComponent(tipopag)}`;
+      log(`🧩 action asignado dinámicamente: ${formEl.action}`);
+    }
+
+        // ===== Guardado AJAX dentro del modal principal =====
+    function setupAjaxSave(modalBody) {
+      const form = modalBody.querySelector("form");
+      if (!form) return;
+
+      form.addEventListener("submit", function (e) {
+        // Solo interceptar si el form está dentro del modal
+        if (!modalBody.closest("#modalPlato")) return;
+
+        e.preventDefault();
+
+        // 🔹 Crear FormData con todos los inputs visibles y ocultos del modal
+        const formData = new FormData(form);
+
+        // 🔹 Asegurar que el formset de ingredientes se incluya aunque esté fuera del <form>
+        document.querySelectorAll("[name^='ingredientes_en_plato-']").forEach(el => {
+          if (!formData.has(el.name)) {
+            formData.append(el.name, el.value);
+          }
+        });
+    
+
+
+        fetch(form.action, {
+          method: "POST",
+          body: formData,
+          headers: { 
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRFToken": CSRF_TOKEN || ""
+          },
+        })
+
+
+          .then(r => r.json())
+          .then(data => {
+            if (data.success) {
+              const modal = bootstrap.Modal.getInstance(modalBody.closest("#modalPlato"));
+              modal.hide();
+              location.reload(); // refresca lista de platos
+            } else if (data.html) {
+              // Si hay errores, reinyecta el formulario con los mensajes
+              modalBody.innerHTML = data.html;
+              initPlatoForm(modalBody);
+            } else {
+              console.error("Respuesta inesperada:", data);
+            }
+          })
+          .catch(err => console.error("Error guardando:", err));
+      });
+    }
+
+    // Llamar a setupAjaxSave cuando se inicializa el form
+    setupAjaxSave(context);
     log("✅ initPlatoForm completado para el contexto:", context);
-  }
+  } // ← cierre de la función initPlatoForm
 
   // Exponer globalmente
   window.initPlatoForm = initPlatoForm;
@@ -387,4 +456,4 @@
       initPlatoForm(document);
     }
   });
-})();
+})(); // ← cierre final del IIFE principal

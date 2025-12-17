@@ -859,14 +859,32 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         context = self.get_context_data()
         ingrediente_formset = context['ingrediente_formset']
 
+        print("🔹 Headers:", dict(self.request.headers))
+        print("🔹 User:", self.request.user)
+
+        print("== POST RECEIVED ==")
+        for key in self.request.POST:
+            print(key, "=>", self.request.POST.get(key))
+
+
+        # --- Validación del formset ---
+        # if not ingrediente_formset.is_valid():
+        #     # Si vino por AJAX (modal)
+        #     if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        #         html = render_to_string(self.get_template_names(), context, request=self.request)
+        #         return JsonResponse({'success': False, 'html': html})
+        #     # Si es página normal
+        #     return self.render_to_response(self.get_context_data(form=form))
+        
         # --- Validación del formset ---
         if not ingrediente_formset.is_valid():
             # Si vino por AJAX (modal)
             if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                html = render_to_string(self.get_template_names(), context, request=self.request)
+                html = render_to_string('AdminVideos/plato_form_inner.html', context, request=self.request)
                 return JsonResponse({'success': False, 'html': html})
             # Si es página normal
             return self.render_to_response(self.get_context_data(form=form))
+
 
         # --- Manejo de imagen ---
         uploaded = self.request.FILES.get('image')
@@ -911,6 +929,20 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             ingrediente_formset.instance = plato
             ingrediente_formset.save()
 
+        # # --- Si es un request AJAX (modal) ---
+        # if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        #     return JsonResponse({'success': True, 'nombre': plato.nombre_plato})
+
+        # # --- Si hay return_to (volver a formulario anterior) ---
+        # return_to = self.request.GET.get("return_to")
+        # if return_to:
+        #     return redirect(return_to)
+
+        # # --- Comportamiento normal (página completa) ---
+        # template_param = self.request.GET.get('tipopag')
+        # tail = f"?tipopag={template_param}&guardado=ok" if template_param else "?guardado=ok"
+        # return redirect(f"{reverse('videos-create')}{tail}")
+        
         # --- Si es un request AJAX (modal) ---
         if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({'success': True, 'nombre': plato.nombre_plato})
@@ -928,17 +960,24 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
 
     def form_invalid(self, form):
         context = self.get_context_data(form=form)
-        print("Errores del formulario principal:")
+        print("❌ Errores del formulario principal:")
         print(form.errors)
 
         ingrediente_formset = context.get('ingrediente_formset')
         if ingrediente_formset:
-            print("Errores del formset de ingredientes:")
+            print("❌ Errores del formset de ingredientes:")
             for i, f in enumerate(ingrediente_formset.forms):
                 if f.errors:
                     print(f"Errores en el formulario #{i}: {f.errors}")
 
+        # 🔹 Si la petición viene del modal (AJAX)
+        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            html = render_to_string('AdminVideos/plato_form_inner.html', context, request=self.request)
+            return JsonResponse({'success': False, 'html': html})
+
+        # 🔹 Si es una página completa
         return self.render_to_response(context)
+
 
 
 

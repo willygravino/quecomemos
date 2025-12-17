@@ -58,7 +58,20 @@
 <div class="container my-5">
     <div class="card shadow-lg">
         <div class="card-body">
-            <form method="post" enctype="multipart/form-data" novalidate>
+
+
+            <!-- <form method="post" enctype="multipart/form-data" novalidate> -->
+
+             <!-- <form id="platoForm" method="post" enctype="multipart/form-data" novalidate> -->
+
+            <form id="platoForm"
+                  method="post"
+                  enctype="multipart/form-data"
+                  novalidate
+                  action="{% url 'videos-create' %}?tipopag={{ tipopag }}">
+
+
+
                 {% csrf_token %}
 
                 <!-- Nombre del Plato -->
