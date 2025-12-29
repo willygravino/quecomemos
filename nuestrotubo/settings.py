@@ -11,7 +11,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', '!!!-dev-only-!!!')
 # DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-DEBUG=True
+# DEBUG=True
+
+DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
+
 
 # Dominio público que Railway suele exponer
 RAILWAY_PUBLIC_DOMAIN = os.environ.get("RAILWAY_PUBLIC_DOMAIN", "").strip()
@@ -29,8 +32,12 @@ ALLOWED_HOSTS = os.environ.get(
 
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
+
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 
 # CSRF trusted origins (solo si tenemos el dominio exacto)
 CSRF_TRUSTED_ORIGINS = []
@@ -89,13 +96,40 @@ WSGI_APPLICATION = 'nuestrotubo.wsgi.application'
 # --- Base de datos ---
 # Producción: Railway pasa DATABASE_URL (suele incluir sslmode=require)
 # Local: podés usar ?sslmode=disable en tu DATABASE_URL local
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL', 'postgres://guillermo:@localhost:5432/quecomemos_local'),
-        conn_max_age=600
-        # sin ssl_require=True aquí, dejamos que lo decida la URL (Railway suele ponerlo)
-    )
+
+# DATABASES PARA PRODUCCIÓN MAC
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         default=os.environ.get('DATABASE_URL', 'postgres://guillermo:@localhost:5432/quecomemos_local'),
+#         conn_max_age=600
+#         # sin ssl_require=True aquí, dejamos que lo decida la URL (Railway suele ponerlo)
+#     )
+# }
+
+# --------- TODO ESTO PARA WINDOWS ASUS VIVOBOX
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if DATABASE_URL:  # Railway / producción
+    DATABASES = {
+        "default": dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
+    }
+else:  # Local
+    DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("LOCAL_DB_NAME", "quecomemos_local"),
+        "USER": os.getenv("LOCAL_DB_USER", "guillermo"),
+        "PASSWORD": os.getenv("LOCAL_DB_PASSWORD", ""),
+        "HOST": "127.0.0.1",
+        "PORT": os.getenv("LOCAL_DB_PORT", "5432"),
+    }
 }
+
+
+# -------------------
+
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
