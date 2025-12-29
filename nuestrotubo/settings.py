@@ -11,9 +11,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', '!!!-dev-only-!!!')
 # DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-# DEBUG=True
+DEBUG=True
 
-DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
+# DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
 
 
 # Dominio público que Railway suele exponer
@@ -33,16 +33,16 @@ ALLOWED_HOSTS = os.environ.get(
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
+# SESSION_COOKIE_SECURE = not DEBUG
+# CSRF_COOKIE_SECURE = not DEBUG
 
 # CSRF trusted origins (solo si tenemos el dominio exacto)
 CSRF_TRUSTED_ORIGINS = []
-if RAILWAY_PUBLIC_DOMAIN:
-    CSRF_TRUSTED_ORIGINS.append(f"https://{RAILWAY_PUBLIC_DOMAIN}")
+# if RAILWAY_PUBLIC_DOMAIN:
+#     CSRF_TRUSTED_ORIGINS.append(f"https://{RAILWAY_PUBLIC_DOMAIN}")
 
 # No fijar cookie domains a menos que sea necesario para multi-subdominios
 # CSRF_COOKIE_DOMAIN = '.railway.app'
