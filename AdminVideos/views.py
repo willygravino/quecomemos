@@ -856,6 +856,7 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         return context
 
     def form_valid(self, form):
+        
         context = self.get_context_data()
         ingrediente_formset = context['ingrediente_formset']
 
@@ -865,17 +866,7 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         print("== POST RECEIVED ==")
         for key in self.request.POST:
             print(key, "=>", self.request.POST.get(key))
-
-
-        # --- Validación del formset ---
-        # if not ingrediente_formset.is_valid():
-        #     # Si vino por AJAX (modal)
-        #     if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        #         html = render_to_string(self.get_template_names(), context, request=self.request)
-        #         return JsonResponse({'success': False, 'html': html})
-        #     # Si es página normal
-        #     return self.render_to_response(self.get_context_data(form=form))
-        
+    
         # --- Validación del formset ---
         if not ingrediente_formset.is_valid():
             # Si vino por AJAX (modal)
@@ -929,26 +920,13 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             ingrediente_formset.instance = plato
             ingrediente_formset.save()
 
-        # # --- Si es un request AJAX (modal) ---
-        # if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        #     return JsonResponse({'success': True, 'nombre': plato.nombre_plato})
-
-        # # --- Si hay return_to (volver a formulario anterior) ---
-        # return_to = self.request.GET.get("return_to")
-        # if return_to:
-        #     return redirect(return_to)
-
-        # # --- Comportamiento normal (página completa) ---
-        # template_param = self.request.GET.get('tipopag')
-        # tail = f"?tipopag={template_param}&guardado=ok" if template_param else "?guardado=ok"
-        # return redirect(f"{reverse('videos-create')}{tail}")
         
         # --- Si es un request AJAX (modal) ---
         if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({'success': True, 'nombre': plato.nombre_plato})
 
         # --- Si hay return_to (volver a formulario anterior) ---
-        return_to = self.request.GET.get("return_to")
+        return_to = self.request.POST.get("return_to") or self.request.GET.get("return_to")
         if return_to:
             return redirect(return_to)
 
@@ -1036,6 +1014,7 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
         return context
 
     def form_valid(self, form):
+
         context = self.get_context_data()
         ingrediente_formset = context["ingrediente_formset"]
 
@@ -1044,11 +1023,20 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
 
         # 🔒 Imagen: normalizar
         uploaded = self.request.FILES.get('image')
-        if not uploaded:
-            form.instance.image = None  # si no se manda nueva, mantener actual; si querés mantenerla, comenta esta línea
-        else:
+        # Eso te borra la imagen en cada edición si no subís otra.
+
+        # if not uploaded:
+        #     form.instance.image = None  # si no se manda nueva, mantener actual; si querés mantenerla, comenta esta línea
+        # else:
+        #     if not getattr(uploaded, 'name', None):
+        #         uploaded.name = 'upload.jpg'
+
+        # Cambialo por:
+       
+        if uploaded:
             if not getattr(uploaded, 'name', None):
                 uploaded.name = 'upload.jpg'
+        # si no viene uploaded, no toques image (queda la actual)
 
         with transaction.atomic():
             plato = form.save(commit=False)
@@ -1129,7 +1117,16 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
                 registro.platos_que_comemos = data
                 registro.save()
 
+        # 1️⃣ Primero: volver a donde fue llamado (si existe)
+        return_to = self.request.POST.get("return_to") or self.request.GET.get("return_to")
+        if return_to:
+            return redirect(return_to)
+
+        # 2️⃣ Fallback: comportamiento normal si NO hay return_to
+        template_param = self.request.GET.get("tipopag")
+        tail = f"?tipopag={template_param}&modificado=ok" if template_param else "?modificado=ok"
         return redirect(f"{reverse('videos-create')}{tail}")
+
 
     def form_invalid(self, form):
         context = self.get_context_data(form=form)

@@ -60,17 +60,7 @@
         <div class="card-body">
 
 
-            <!-- <form method="post" enctype="multipart/form-data" novalidate> -->
-
-             <!-- <form id="platoForm" method="post" enctype="multipart/form-data" novalidate> -->
-
-            <form id="platoForm"
-                  method="post"
-                  enctype="multipart/form-data"
-                  novalidate
-                  action="{% url 'videos-create' %}?tipopag={{ tipopag }}">
-
-
+           <form id="platoForm" method="post" enctype="multipart/form-data" novalidate>
 
                 {% csrf_token %}
 
@@ -167,10 +157,10 @@
 
   <!-- Botón borrar pegado a la derecha en desktop, ocupa fila en móvil -->
   <button type="button"
-          class="btn btn-sm btn-danger ms-sm-auto"
-          onclick="eliminarIngrediente(event)">
+          class="btn btn-sm btn-danger ms-sm-auto eliminar-ingrediente">
     X
   </button>
+
 </li>
 
 
@@ -437,6 +427,9 @@
   <div class="text-center mt-2 mb-2">
                     <button type="submit" class="btn btn-success px-5">Guardar</button>
                 </div>
+
+  <input type="hidden" name="return_to" value="{{ request.GET.return_to|default:'' }}">
+
 
             </form>
 
