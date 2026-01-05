@@ -1167,6 +1167,132 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
 
 
 
+
+class PlatoVariedadCreate(PlatoCreate):
+    """
+    Crea un Plato hijo asociado a un Plato padre.
+    Reusa template, form, formset y AJAX de PlatoCreate.
+    """
+
+    def dispatch(self, request, *args, **kwargs):
+        self.padre = get_object_or_404(Plato, pk=kwargs["padre_id"])
+
+        # regla: NO variedades de variedades
+        if self.padre.plato_padre_id is not None:
+            raise PermissionDenied("No se pueden crear variedades de una variedad.")
+
+        # seguridad: mismo propietario
+        if self.padre.propietario_id != request.user.id:
+            raise PermissionDenied()
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_template_names(self):
+        """
+        Mantener el mismo look & feel que el padre.
+        Si viene tipopag por GET lo respeta; si no, intenta inferir desde el padre.
+        """
+        tipopag = self.request.GET.get("tipopag")
+
+        if not tipopag:
+            # tu campo 'tipos' es CSV; tomamos el primero como "tipopag" razonable
+            raw = (self.padre.tipos or "").split(",")[0].strip()
+            tipopag = raw or "Dash"
+
+        # hack simple: reutiliza tu mapping interno de PlatoCreate.get_template_names
+        self.request.GET._mutable = True
+        self.request.GET["tipopag"] = tipopag
+        self.request.GET._mutable = False
+
+        return super().get_template_names()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # útil si querés mostrar aviso "creando variedad de X" luego
+        context["plato_padre_obj"] = self.padre
+        return context
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        ingrediente_formset = context["ingrediente_formset"]
+
+        # --- Validación del formset ---
+        if not ingrediente_formset.is_valid():
+            if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                html = render_to_string("AdminVideos/plato_form_inner.html", context, request=self.request)
+                return JsonResponse({"success": False, "html": html})
+            return self.render_to_response(self.get_context_data(form=form))
+
+        # --- Manejo de imagen (idéntico a tu create) ---
+        uploaded = self.request.FILES.get("image")
+        if not uploaded:
+            form.instance.image = None
+        else:
+            if not getattr(uploaded, "name", None):
+                uploaded.name = "upload.jpg"
+
+        with transaction.atomic():
+            plato = form.save(commit=False)
+            plato.propietario = self.request.user
+
+            # ✅ CLAVE: asociar variedad al padre
+            plato.plato_padre = self.padre
+
+            # --- Concatenar ingredientes del formset (igual) ---
+            lista_ingredientes = []
+            for ing_form in ingrediente_formset:
+                if ing_form.cleaned_data and not ing_form.cleaned_data.get("DELETE", False):
+                    nombre = ing_form.cleaned_data.get("nombre_ingrediente")
+                    texto = (nombre or "").strip()
+                    if texto:
+                        lista_ingredientes.append(texto)
+
+            plato.ingredientes = ", ".join(lista_ingredientes)
+
+            # legacy variedades (si ya lo estás vaciando en template, quedará {})
+            variedades = {}
+            for i in range(1, 7):
+                variedad = form.cleaned_data.get(f"variedad{i}")
+                ingredientes_variedad_str = form.cleaned_data.get(f"ingredientes_de_variedad{i}")
+                if variedad:
+                    variedades[f"variedad{i}"] = {
+                        "nombre": variedad,
+                        "ingredientes": ingredientes_variedad_str,
+                        "elegido": True,
+                    }
+            plato.variedades = variedades
+
+            plato.save()
+            form.save_m2m()
+
+            ingrediente_formset.instance = plato
+            ingrediente_formset.save()
+
+        # AJAX (modal) — lo dejamos compatible para el paso 4
+        if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({"success": True, "nombre": plato.nombre_plato, "id": plato.id})
+
+        # ✅ Redirect seguro: volver al padre (edit) con flag opcional
+        # 🔹 SI ES PANTALLA COMPLETA → VOLVER AL PADRE
+        return redirect(
+            reverse("videos-update", kwargs={"pk": self.padre.id})
+        )
+
+class PlatoVariedadUpdate(PlatoUpdate):
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        if self.object.plato_padre_id is None:
+            raise PermissionDenied("Este plato no es una variedad.")
+
+        if self.object.propietario_id != request.user.id:
+            raise PermissionDenied()
+
+        return super().dispatch(request, *args, **kwargs)
+
+
+
+
 class Login(LoginView):
     authentication_form = CustomAuthenticationForm
     next_page = reverse_lazy("filtro-de-platos")

@@ -121,6 +121,18 @@ class Plato(models.Model):
 
     variedades = models.JSONField(null=True, blank=True)
 
+    plato_padre = models.ForeignKey(
+    "self",
+    null=True,
+    blank=True,
+    related_name="variedades_hijas",  # 👈 cambia esto
+    on_delete=models.SET_NULL,
+)
+
+
+    def es_variedad(self):
+        return self.plato_padre_id is not None
+
     # @property
     # def image_url(self):
     #     return self.image.url if self.image else '/media/avatares/logo.png'

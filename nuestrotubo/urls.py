@@ -17,7 +17,7 @@ from django import views
 from django.contrib import admin
 from django.urls import path
 
-from AdminVideos.views import CrearLugar, EnviarMensaje, LugarDetail, LugarUpdate,  agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, api_ingredientes, api_toggle_item, compartir_elemento, descartar_sugerido, eliminar_lugar, eliminar_menu_programado, eliminar_plato, eliminar_plato_programado, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, FiltroDePlatos, random_dia, set_dia_activo, sumar_amigue, user_logout, SolicitarAmistad, MensajeDelete, AsignarPlato, compartir_lista
+from AdminVideos.views import CrearLugar, EnviarMensaje, LugarDetail, LugarUpdate, PlatoVariedadCreate, PlatoVariedadUpdate,  agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, api_ingredientes, api_toggle_item, compartir_elemento, descartar_sugerido, eliminar_lugar, eliminar_menu_programado, eliminar_plato, eliminar_plato_programado, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, FiltroDePlatos, random_dia, set_dia_activo, sumar_amigue, user_logout, SolicitarAmistad, MensajeDelete, AsignarPlato, compartir_lista
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -80,7 +80,8 @@ urlpatterns = [
     path('menu/amigue/<pk>/borrar', amigue_borrar, name="amigue-borrar"),
     path('asignar/plato', AsignarPlato.as_view(), name="asignar-plato"), # type: ignore
     path("set-dia-activo/", set_dia_activo, name="set-dia-activo"),
-
+    path("platos/<int:padre_id>/variedades/create/", PlatoVariedadCreate.as_view(), name="plato_variedad_create"),
+    path("variedades/<int:pk>/edit/", PlatoVariedadUpdate.as_view(), name="plato_variedad_update"),
      
 ]
 
