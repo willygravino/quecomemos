@@ -66,7 +66,7 @@
               method="post"
               enctype="multipart/form-data"
               novalidate
-              action="{{ request.path }}"
+              action="{{ request.get_full_path }}"
               data-mode="{% if form.instance.pk %}update{% else %}create{% endif %}">
 
 
