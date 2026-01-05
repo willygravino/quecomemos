@@ -376,10 +376,16 @@
       guardarBtn.__bound = true;
     }
 
-       // ===== Asegurar que el form tenga action correcto =====
-    const formEl = context.querySelector("#platoForm") || context.querySelector("form[method='post']");
-    if (formEl && !formEl.action) {
-      // Detecta tipo de plato desde los inputs o contexto
+  // ===== Asegurar que el form tenga action correcto =====
+  const formEl = context.querySelector("#platoForm") || context.querySelector("form[method='post']");
+  if (formEl) {
+    const action = formEl.getAttribute("action") || "";
+
+    // 👉 Si es edición, NO tocar el action
+    if (action.includes("/videos/update/")) {
+      log("✏️ Modo edición detectado, action preservado:", action);
+    } else {
+      // 👉 Si es creación (modal)
       let tipopag = "Principal";
       const tipoInput = context.querySelector("input[name='tipos']:checked");
       if (tipoInput) {
@@ -387,8 +393,11 @@
       }
 
       formEl.action = `/videos/create/?tipopag=${encodeURIComponent(tipopag)}`;
-      log(`🧩 action asignado dinámicamente: ${formEl.action}`);
+      log("🆕 Modo creación, action forzado:", formEl.action);
     }
+  }
+ 
+
 
         // ===== Guardado AJAX dentro del modal principal =====
     function setupAjaxSave(modalBody) {
@@ -413,31 +422,46 @@
     
 
 
-        fetch(form.action, {
-          method: "POST",
-          body: formData,
-          headers: { 
-            "X-Requested-With": "XMLHttpRequest",
-            "X-CSRFToken": CSRF_TOKEN || ""
-          },
-        })
+    fetch(form.action, {
+        method: "POST",
+        body: formData,
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+          "X-CSRFToken": CSRF_TOKEN || ""
+        },
+      })
+      .then(async response => {
+        const contentType = response.headers.get("content-type") || "";
+
+        if (contentType.includes("application/json")) {
+          const data = await response.json();
+
+          if (data.success) {
+            const modal = bootstrap.Modal.getInstance(modalBody.closest("#modalPlato"));
+            modal.hide();
+            location.reload(); // refresca lista de platos
+          } else if (data.html) {
+            modalBody.innerHTML = data.html;
+            initPlatoForm(modalBody);
+          } else {
+            console.error("⚠️ Respuesta JSON inesperada:", data);
+          }
+
+        } else {
+          const text = await response.text();
+          console.error("❌ La respuesta no es JSON. Posible error en el backend:");
+          console.error(text); // Mostramos el HTML que causó el fallo
+          alert("Error inesperado del servidor. Revisa la consola para más información.");
+        }
+      })
+      .catch(err => {
+        console.error("❌ Error en el fetch:", err);
+        alert("Ocurrió un error al intentar guardar. Revisá la consola para más detalles.");
+      });
+          
 
 
-          .then(r => r.json())
-          .then(data => {
-            if (data.success) {
-              const modal = bootstrap.Modal.getInstance(modalBody.closest("#modalPlato"));
-              modal.hide();
-              location.reload(); // refresca lista de platos
-            } else if (data.html) {
-              // Si hay errores, reinyecta el formulario con los mensajes
-              modalBody.innerHTML = data.html;
-              initPlatoForm(modalBody);
-            } else {
-              console.error("Respuesta inesperada:", data);
-            }
-          })
-          .catch(err => console.error("Error guardando:", err));
+
       });
     }
 

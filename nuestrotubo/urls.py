@@ -67,7 +67,7 @@ urlpatterns = [
     path('plato/<pk>/detail', PlatoDetail.as_view(), name="platos-detail"),
     path('lugar/<pk>/detail', LugarDetail.as_view(), name="lugar-detail"),
 
-    path('videos/create', PlatoCreate.as_view(), name="videos-create"),
+    path('videos/create/', PlatoCreate.as_view(), name="videos-create"),
     path('lugar/crear', CrearLugar.as_view(), name="crear-lugar"),
     path('registration/logout/', user_logout, name='logout'),
     path('signup', SignUp.as_view(), name="signup"),
