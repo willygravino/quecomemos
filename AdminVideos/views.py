@@ -13,7 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
 from AdminVideos import models
-from AdminVideos.models import HistoricoDia, HistoricoItem, Ingrediente, Lugar, Plato, Profile, Mensaje,  ElegidosXDia
+from AdminVideos.models import HistoricoDia, HistoricoItem, Ingrediente, IngredienteEnPlato, Lugar, Plato, Profile, Mensaje,  ElegidosXDia
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string   # ✅ ← ESTA ES LA CLAVE
 
@@ -1827,60 +1827,60 @@ def descartar_sugerido(request, plato_id):
 
 
 
-@login_required
-def agregar_a_mi_lista(request, plato_id):
-    # 1) Plato original
-    plato_original = get_object_or_404(Plato, id=plato_id)
+# @login_required
+# def agregar_a_mi_lista(request, plato_id):
+#     # 1) Plato original
+#     plato_original = get_object_or_404(Plato, id=plato_id)
 
-    # 2) Perfil del usuario (asegura que exista)
-    profile = get_object_or_404(Profile, user=request.user)
+#     # 2) Perfil del usuario (asegura que exista)
+#     profile = get_object_or_404(Profile, user=request.user)
 
-    # 3) Leer flag GET
-    duplicar = request.GET.get('duplicar') == 'true'
+#     # 3) Leer flag GET
+#     duplicar = request.GET.get('duplicar') == 'true'
 
-    # 4) Nombre copia
-    nombre_copia = (
-        f"Copia de {plato_original.nombre_plato}"
-        if duplicar else
-        plato_original.nombre_plato
-    )
+#     # 4) Nombre copia
+#     nombre_copia = (
+#         f"Copia de {plato_original.nombre_plato}"
+#         if duplicar else
+#         plato_original.nombre_plato
+#     )
 
-    # 5) proviene_de ES CharField en tu modelo → guardar texto (p. ej. username)
-    proviene_de_str = (
-        plato_original.propietario.username
-        if plato_original.propietario != request.user else
-        ""
-    )
+#     # 5) proviene_de ES CharField en tu modelo → guardar texto (p. ej. username)
+#     proviene_de_str = (
+#         plato_original.propietario.username
+#         if plato_original.propietario != request.user else
+#         ""
+#     )
 
-    # 6) Copiar variedades sin compartir referencia (por si luego lo mutás)
-    variedades_copia = deepcopy(plato_original.variedades)
+#     # 6) Copiar variedades sin compartir referencia (por si luego lo mutás)
+#     variedades_copia = deepcopy(plato_original.variedades)
 
-    # 7) Crear el nuevo plato AJUSTADO al modelo
-    nuevo_plato = Plato.objects.create(
-        nombre_plato=nombre_copia,
-        receta=plato_original.receta,
-        # descripcion_plato=plato_original.descripcion_plato,
-        ingredientes=plato_original.ingredientes,
-        medios=plato_original.medios,
-        categoria=plato_original.categoria,
-        elaboracion=plato_original.elaboracion,
-        coccion=plato_original.coccion,
-        tipos=plato_original.tipos,                  # 👈 existe en el modelo (no 'tipo')
-        estacionalidad=plato_original.estacionalidad,
-        propietario=request.user,
-        image=plato_original.image,                  # referencia al mismo archivo (ok)
-        variedades=variedades_copia,
-        proviene_de=proviene_de_str,                 # 👈 string, no User
-        id_original=plato_original.id
-    )
+#     # 7) Crear el nuevo plato AJUSTADO al modelo
+#     nuevo_plato = Plato.objects.create(
+#         nombre_plato=nombre_copia,
+#         receta=plato_original.receta,
+#         # descripcion_plato=plato_original.descripcion_plato,
+#         ingredientes=plato_original.ingredientes,
+#         medios=plato_original.medios,
+#         categoria=plato_original.categoria,
+#         elaboracion=plato_original.elaboracion,
+#         coccion=plato_original.coccion,
+#         tipos=plato_original.tipos,                  # 👈 existe en el modelo (no 'tipo')
+#         estacionalidad=plato_original.estacionalidad,
+#         propietario=request.user,
+#         image=plato_original.image,                  # referencia al mismo archivo (ok)
+#         variedades=variedades_copia,
+#         proviene_de=proviene_de_str,                 # 👈 string, no User
+#         id_original=plato_original.id
+#     )
 
-    # 8) Evitar duplicados en sugeridos_importados → por ID, no por nombre
-    if plato_original.id not in profile.sugeridos_importados:
-        profile.sugeridos_importados.append(plato_original.id)
-        profile.save(update_fields=["sugeridos_importados"])
+#     # 8) Evitar duplicados en sugeridos_importados → por ID, no por nombre
+#     if plato_original.id not in profile.sugeridos_importados:
+#         profile.sugeridos_importados.append(plato_original.id)
+#         profile.save(update_fields=["sugeridos_importados"])
 
-    # 9) Redirigir (tu lógica actual)
-    return redirect('descartar-sugerido', plato_id=plato_id)
+#     # 9) Redirigir (tu lógica actual)
+#     return redirect('descartar-sugerido', plato_id=plato_id)
 
 
 # def agregar_a_mi_lista(request, plato_id):
@@ -1927,6 +1927,78 @@ def agregar_a_mi_lista(request, plato_id):
 #     # Redirigir a la vista para descartar el plato después de agregarlo
 #     return redirect('descartar-sugerido', plato_id=plato_id)
 
+
+@login_required
+def agregar_a_mi_lista(request, plato_id):
+    # 1) Plato original
+    plato_original = get_object_or_404(Plato, id=plato_id)
+
+    # 2) Perfil del usuario
+    profile = get_object_or_404(Profile, user=request.user)
+
+    # 3) Flag GET
+    duplicar = request.GET.get('duplicar') == 'true'
+
+    # 4) Nombre
+    nombre_copia = (
+        f"Copia de {plato_original.nombre_plato}"
+        if duplicar else
+        plato_original.nombre_plato
+    )
+
+    # 5) proviene_de (string)
+    proviene_de_str = (
+        plato_original.propietario.username
+        if plato_original.propietario != request.user else
+        ""
+    )
+
+    # 6) Copiar variedades
+    variedades_copia = deepcopy(plato_original.variedades)
+
+    # 7) Crear nuevo plato (SIN ingredientes todavía)
+    nuevo_plato = Plato.objects.create(
+        nombre_plato=nombre_copia,
+        receta=plato_original.receta,
+        ingredientes="",  # 👈 se reconstruye luego
+        medios=plato_original.medios,
+        categoria=plato_original.categoria,
+        elaboracion=plato_original.elaboracion,
+        coccion=plato_original.coccion,
+        tipos=plato_original.tipos,
+        estacionalidad=plato_original.estacionalidad,
+        propietario=request.user,
+        image=plato_original.image,
+        variedades=variedades_copia,
+        proviene_de=proviene_de_str,
+        id_original=plato_original.id
+    )
+
+    # 8) Copiar ingredientes estructurados + reconstruir texto
+    ingredientes_texto = []
+
+    for ing in plato_original.ingredientes_en_plato.all():
+        IngredienteEnPlato.objects.create(
+            plato=nuevo_plato,
+            ingrediente=ing.ingrediente,
+            cantidad=ing.cantidad,
+            unidad=ing.unidad,
+        )
+
+        if ing.ingrediente:
+            ingredientes_texto.append(ing.ingrediente.nombre)
+
+    # Guardar el campo CharField como en CreateView
+    nuevo_plato.ingredientes = ", ".join(ingredientes_texto)
+    nuevo_plato.save(update_fields=["ingredientes"])
+
+    # 9) Evitar duplicados en sugeridos_importados
+    if plato_original.id not in profile.sugeridos_importados:
+        profile.sugeridos_importados.append(plato_original.id)
+        profile.save(update_fields=["sugeridos_importados"])
+
+    # 10) Redirigir
+    return redirect('descartar-sugerido', plato_id=plato_id)
 
 class AsignarPlato(View):
 
