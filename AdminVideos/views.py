@@ -1169,10 +1169,25 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
 
 
 class PlatoVariedadCreate(PlatoCreate):
-    """
-    Crea un Plato hijo asociado a un Plato padre.
-    Reusa template, form, formset y AJAX de PlatoCreate.
-    """
+    
+#     Crea un Plato hijo asociado a un Plato padre.
+#     Reusa template, form, formset y AJAX de PlatoCreate.
+#   else:
+#     form.fields['tipos'].choices = []
+#     form.fields['tipos'].initial = [] 
+# 
+
+    def get_form(self, form_class=None):
+            form = super().get_form(form_class)
+            # ✅ Para variedades, no queremos invalidar los checkboxes por falta de tipopag
+            form.fields["tipos"].choices = Plato.TIPOS_CHOICES
+            return form 
+
+    def get_initial(self):
+        initial = super().get_initial()
+        if self.padre.tipos:
+            initial["tipos"] = [t.strip() for t in self.padre.tipos.split(",") if t.strip()]
+        return initial
 
     def dispatch(self, request, *args, **kwargs):
         self.padre = get_object_or_404(Plato, pk=kwargs["padre_id"])
@@ -1208,9 +1223,20 @@ class PlatoVariedadCreate(PlatoCreate):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # útil si querés mostrar aviso "creando variedad de X" luego
+
+        # útil para mostrar "creando variedad de X"
         context["plato_padre_obj"] = self.padre
+
+        # ✅ CLAVE: tu template usa `items` para pintar los checkboxes
+        context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
+
+        # ✅ `tipopag` lo usa tu template para marcar alguno por defecto
+        # tomamos el primero del padre o fallback
+        raw = (self.padre.tipos or "").split(",")[0].strip()
+        context["tipopag"] = raw or self.request.GET.get("tipopag") or "Principal"
+
         return context
+
 
     def form_valid(self, form):
         context = self.get_context_data()

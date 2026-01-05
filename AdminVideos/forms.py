@@ -17,7 +17,12 @@ class PlatoFilterForm(forms.Form):
     calorias = forms.ChoiceField(choices=Plato.ESTACIONALIDAD_CHOICES, required=False)
     
     
+    from django import forms
+from .models import Plato
+
+
 class PlatoForm(forms.ModelForm):
+    # Legacy (lo vas a borrar después, pero no rompe nada ahora)
     variedad1 = forms.CharField(max_length=100, required=False)
     ingredientes_de_variedad1 = forms.CharField(max_length=120, required=False)
     variedad2 = forms.CharField(max_length=100, required=False)
@@ -31,41 +36,72 @@ class PlatoForm(forms.ModelForm):
     variedad6 = forms.CharField(max_length=100, required=False)
     ingredientes_de_variedad6 = forms.CharField(max_length=120, required=False)
 
+    # ✅ Tipos: lista durante validación, CSV al guardar
     tipos = forms.MultipleChoiceField(
         choices=Plato.TIPOS_CHOICES,
         widget=forms.CheckboxSelectMultiple,
         required=False,
-        label="Tipos"
+        label="Tipos",
     )
 
     class Meta:
         model = Plato
         fields = [
-            "nombre_plato", "receta", "ingredientes", 
-            "porciones", "medios", "elaboracion", "coccion", "categoria", 
-            "tipos", "estacionalidad", "enlace", "image"
+            "nombre_plato",
+            "receta",
+            "ingredientes",
+            "porciones",
+            "medios",
+            "elaboracion",
+            "coccion",
+            "categoria",
+            "tipos",
+            "estacionalidad",
+            "enlace",
+            "image",
         ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        # ✅ Si en DB guardás "Principal,Guarnicion", convertimos a lista sin espacios
         if self.instance and self.instance.tipos:
-            self.initial['tipos'] = self.instance.tipos.split(',')
+            self.initial["tipos"] = [
+                t.strip() for t in self.instance.tipos.split(",") if t.strip()
+            ]
 
         # Placeholders
-        self.fields['porciones'].widget.attrs.update({'placeholder': 'Porciones'})
-        self.fields['elaboracion'].widget.attrs.update({'placeholder': 'Preparación (min)'})
-        self.fields['coccion'].widget.attrs.update({'placeholder': 'Cocción (min)'})
-        self.fields['enlace'].widget.attrs.update({'placeholder': 'Enlace al video o receta'})
-
-    def clean_tipos(self):
-        return ','.join(self.cleaned_data['tipos'])
+        if "porciones" in self.fields:
+            self.fields["porciones"].widget.attrs.update({"placeholder": "Porciones"})
+        if "elaboracion" in self.fields:
+            self.fields["elaboracion"].widget.attrs.update({"placeholder": "Preparación (min)"})
+        if "coccion" in self.fields:
+            self.fields["coccion"].widget.attrs.update({"placeholder": "Cocción (min)"})
+        if "enlace" in self.fields:
+            self.fields["enlace"].widget.attrs.update({"placeholder": "Enlace al video o receta"})
 
     def clean(self):
         cleaned_data = super().clean()
-        tipos = cleaned_data.get("tipos")
-        if not tipos or len(tipos) == 0:
-            self.add_error('tipos', 'Debés seleccionar al menos un tipo de plato.')
+
+        # ✅ Acá `tipos` es lista (MultipleChoiceField), no string
+        tipos = cleaned_data.get("tipos") or []
+        if len(tipos) == 0:
+            self.add_error("tipos", "Debés seleccionar al menos un tipo de plato.")
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+
+        # ✅ Convertimos lista → CSV recién al guardar
+        tipos_lista = self.cleaned_data.get("tipos") or []
+        obj.tipos = ",".join([t.strip() for t in tipos_lista if t.strip()])
+
+        if commit:
+            obj.save()
+            self.save_m2m()
+
+        return obj
 
 
 

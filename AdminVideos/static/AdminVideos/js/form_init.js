@@ -525,6 +525,141 @@
   // Exponer globalmente
   window.initPlatoForm = initPlatoForm;
 
+
+    // ===========================
+  // VARIEDADES: modal siempre (create/update)
+  // ===========================
+  if (!document.__variedadModalBound) {
+
+    function ensureVariedadModalExists() {
+      let modalEl = document.getElementById("variedadModal");
+      if (modalEl) return modalEl;
+
+      // Crear modal si no existe (por si el template no lo incluye)
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = `
+        <div class="modal fade" id="variedadModal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Agregar variedad</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+              </div>
+              <div class="modal-body" id="variedadModalBody">
+                <div class="text-muted">Cargando…</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(wrapper.firstElementChild);
+      return document.getElementById("variedadModal");
+    }
+
+    async function openVariedadModal(url) {
+      const modalEl = ensureVariedadModalExists();
+      const modalBody = modalEl.querySelector("#variedadModalBody");
+      modalBody.innerHTML = '<div class="text-muted">Cargando…</div>';
+
+      const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+      modal.show();
+
+      const res = await fetch(url, {
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+        credentials: "same-origin",
+      });
+      const data = await res.json();
+
+      modalBody.innerHTML = data.html;
+
+      // Re-init de todo lo del form (select2 + formset + etc.) en el HTML nuevo
+      // OJO: tu initPlatoForm detecta modal por #modalPlato, así que acá va a
+      // comportarse como "page". Está bien porque el HTML se reemplaza.
+      if (window.initPlatoForm) window.initPlatoForm(modalBody);
+
+      // Además, interceptamos submit dentro de este modal (variedadModal),
+      // porque tu setupAjaxSave actual solo engancha #modalPlato.
+      const innerForm = modalBody.querySelector("form");
+      if (innerForm && !innerForm.__ajaxBound) {
+        innerForm.addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const formData = new FormData(innerForm);
+
+          // Asegurar formset ingredientes dentro del modal de variedad
+          modalBody
+            .querySelectorAll(
+              "[name^='ingredientes_en_plato-'], #id_ingredientes_en_plato-TOTAL_FORMS, #id_ingredientes_en_plato-INITIAL_FORMS, #id_ingredientes_en_plato-MIN_NUM_FORMS, #id_ingredientes_en_plato-MAX_NUM_FORMS"
+            )
+            .forEach((el) => {
+              if (el.type === "checkbox") {
+                if (el.checked) formData.set(el.name, el.value || "on");
+                else formData.delete(el.name);
+              } else {
+                formData.set(el.name, el.value);
+              }
+            });
+
+          const resp = await fetch(innerForm.action, {
+            method: "POST",
+            body: formData,
+            headers: {
+              "X-Requested-With": "XMLHttpRequest",
+              "X-CSRFToken": CSRF_TOKEN || "",
+            },
+            credentials: "same-origin",
+          });
+
+          const ct = resp.headers.get("content-type") || "";
+          if (!ct.includes("application/json")) {
+            const text = await resp.text();
+            console.error("❌ Respuesta no JSON en variedad:", text);
+            alert("Error inesperado del servidor (variedad). Revisá la consola.");
+            return;
+          }
+
+          const payload = await resp.json();
+
+          if (payload.success) {
+            modal.hide();
+
+            // ✅ Simple y seguro por ahora:
+            // recargar para que aparezca anidada en la lista
+            location.reload();
+            return;
+          }
+
+          if (payload.html) {
+            modalBody.innerHTML = payload.html;
+            if (window.initPlatoForm) window.initPlatoForm(modalBody);
+          }
+        });
+
+        innerForm.__ajaxBound = true;
+      }
+    }
+
+    // Delegación: cualquier botón/link con .js-open-variedad-modal
+    document.addEventListener("click", function (e) {
+      const btn = e.target.closest(".js-open-variedad-modal");
+      if (!btn) return;
+
+      e.preventDefault();
+
+      const url = btn.getAttribute("data-url") || btn.getAttribute("href");
+      if (!url) return;
+
+      openVariedadModal(url).catch((err) => {
+        console.error("❌ Error abriendo modal variedad:", err);
+        alert("No se pudo cargar el formulario de variedad. Revisá la consola.");
+      });
+    });
+
+    document.__variedadModalBound = true;
+  }
+
+
+
   // Auto-init en páginas normales (cuando hay formulario ya presente en el DOM)
   document.addEventListener("DOMContentLoaded", function () {
     const formInPage = document.querySelector("#platoForm") || document.querySelector("form[method='post']");
@@ -533,3 +668,4 @@
     }
   });
 })(); // ← cierre final del IIFE principal
+
