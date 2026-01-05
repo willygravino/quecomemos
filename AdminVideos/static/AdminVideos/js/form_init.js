@@ -59,16 +59,33 @@
     // Idempotencia: si ya tiene Select2, no reiniciar
     if ($select.data("select2")) return;
 
-    // Pre-cargar valor inicial si viene de la base
-    const initId = $select.data("initial-id");
-    const initText = $select.data("initial-text");
+   // ✅ Pre-cargar valor inicial (data-attributes o fallback desde hidden)
+    let initId = $select.data("initial-id");
+    let initText = $select.data("initial-text");
+
+    // Si no vienen data-initial-* (a veces en HTML cargado por AJAX),
+    // tomar valor desde los hidden del mismo <li>
+    if ((!initId || !initText)) {
+      const li = selectEl.closest("li");
+      if (li) {
+        const hidId = li.querySelector('input[name$="-ingrediente"]');
+        const hidText = li.querySelector('input[name$="-nombre_ingrediente"]');
+        if (!initId && hidId) initId = (hidId.value || "").trim();
+        if (!initText && hidText) initText = (hidText.value || "").trim();
+      }
+    }
+
     if (initId && initText) {
       const option = new Option(initText, initId, true, true);
       $select.append(option).trigger("change");
     }
 
+
     // Inicializar Select2 (lista del form, fuera del modal => sin dropdownParent)
-    $select.select2(buildSelect2Config(null));
+    const modalRoot = $select.closest(".modal");
+    const dropdownParent = modalRoot.length ? modalRoot : null;
+
+    $select.select2(buildSelect2Config(dropdownParent));
 
     // Vincular cambios al par de hidden
     $select.on("select2:select select2:clear change", function () {
@@ -304,12 +321,19 @@
   function initPlatoForm(context) {
     if (!context) context = document;
 
-    // Evita doble init sobre el mismo root
+    
+  // Evita doble init SOLO en página completa.
+  // En modal se reemplaza HTML (AJAX), así que necesitamos re-init siempre.
+  const isModalContext = !!(context.closest && context.closest("#modalPlato"));
+  if (!isModalContext) {
     if (context.__platoFormInitialized) {
       log("ℹ️ initPlatoForm: ya estaba inicializado para este context");
       return;
     }
     context.__platoFormInitialized = true;
+  }
+
+
 
     const form = context.querySelector("#platoForm") || context.querySelector("form[method='post']");
     if (!form) {
