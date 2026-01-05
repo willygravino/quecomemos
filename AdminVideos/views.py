@@ -16,8 +16,6 @@ from AdminVideos import models
 from AdminVideos.models import HistoricoDia, HistoricoItem, Ingrediente, IngredienteEnPlato, Lugar, Plato, Profile, Mensaje,  ElegidosXDia
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string   # ✅ ← ESTA ES LA CLAVE
-
-
 from django.http import Http404, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.forms import UserCreationForm
@@ -925,10 +923,19 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({'success': True, 'nombre': plato.nombre_plato})
 
-        # --- Si hay return_to (volver a formulario anterior) ---
-        return_to = self.request.POST.get("return_to") or self.request.GET.get("return_to")
-        if return_to:
-            return redirect(return_to)
+        # # --- Si hay return_to (volver a formulario anterior) ---
+        # return_to = self.request.POST.get("return_to") or self.request.GET.get("return_to")
+        # if return_to:
+        #     return redirect(return_to)
+
+        # 🔹 Si viene desde modal (AJAX), responder JSON
+        if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({
+                "success": True,
+                "nombre": plato.nombre_plato,
+                "id": plato.id,
+            })
+
 
         # --- Comportamiento normal (página completa) ---
         template_param = self.request.GET.get('tipopag')
@@ -963,6 +970,17 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
     model = Plato
     form_class = PlatoForm
     template_name = "AdminVideos/plato_update.html"
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        context = self.get_context_data()
+        
+        # ✅ Si es AJAX: devolver fragmento HTML como JSON
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            html = render_to_string("AdminVideos/plato_form_inner.html", context, request=request)
+            return JsonResponse({'html': html})
+        
+        return self.render_to_response(context)
 
     # 👉 TIPOS: ofrecer TODOS y marcar los que tenga el plato
     def get_form(self, form_class=None):
@@ -1117,15 +1135,24 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
                 registro.platos_que_comemos = data
                 registro.save()
 
-        # 1️⃣ Primero: volver a donde fue llamado (si existe)
+        # 1️⃣ Si fue llamado desde un modal (AJAX), responder con JSON
+        if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({
+                "success": True,
+                "nombre": plato.nombre_plato,
+                "id": plato.id,
+            })
+
+        # 2️⃣ Si hay return_to (volver a donde fue llamado)
         return_to = self.request.POST.get("return_to") or self.request.GET.get("return_to")
         if return_to:
             return redirect(return_to)
 
-        # 2️⃣ Fallback: comportamiento normal si NO hay return_to
+        # 3️⃣ Fallback: redirigir normalmente
         template_param = self.request.GET.get("tipopag")
         tail = f"?tipopag={template_param}&modificado=ok" if template_param else "?modificado=ok"
         return redirect(f"{reverse('videos-create')}{tail}")
+
 
 
     def form_invalid(self, form):

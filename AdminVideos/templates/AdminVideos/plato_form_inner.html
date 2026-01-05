@@ -60,7 +60,15 @@
         <div class="card-body">
 
 
-           <form id="platoForm" method="post" enctype="multipart/form-data" novalidate>
+           <!-- <form id="platoForm" method="post" enctype="multipart/form-data" novalidate> -->
+            <form
+              id="platoForm"
+              method="post"
+              enctype="multipart/form-data"
+              novalidate
+              action="{{ request.path }}"
+              data-mode="{% if form.instance.pk %}update{% else %}create{% endif %}">
+
 
                 {% csrf_token %}
 

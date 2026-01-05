@@ -198,9 +198,27 @@
           </div> -->
 
           <div class="position-absolute translate-middle-x text-center" style="top: 62%; left: 35%;">
+
+            <!-- PARA ABRIR UPDATE EN PANTALLA COMPLETA -->
             <a href="{% url 'videos-update' plato.id %}">
+              editar pancomple
+              <!-- <i class="fa-regular fa-pen-to-square"></i> -->
+            </a> 
+
+            <!-- PARA ABRIR UPDATE EN MODAL -->
+            <a href="{% url 'videos-update' plato.id %}?tipopag={{ tipopag|default:'Dash' }}"
+              class="btn-editar-plato"
+              data-id="{{ plato.id }}"
+              data-nombre="{{ plato.nombre_plato }}"
+              data-url="{% url 'videos-update' plato.id %}?tipopag={{ tipopag|default:'Dash' }}"
+              data-bs-toggle="modal"
+              data-bs-target="#modalPlato"
+              title="Editar plato">
               <i class="fa-regular fa-pen-to-square"></i>
             </a>
+
+
+
           </div>
 
           
@@ -479,6 +497,39 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 });
 </script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const modal = new bootstrap.Modal(document.getElementById("modalPlato"));
+  const modalBody = document.getElementById("modalPlatoBody");
+  const modalTitle = document.getElementById("modalPlatoLabel");
+
+  // 👉 Botón "Editar"
+  document.querySelectorAll(".btn-editar-plato").forEach(btn => {
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      const url = this.getAttribute("data-url");
+      const nombre = this.getAttribute("data-nombre");
+
+      fetch(url, {
+        headers: { "X-Requested-With": "XMLHttpRequest" }
+      })
+        .then(response => response.json())
+        .then(data => {
+          modalBody.innerHTML = data.html;
+          modalTitle.textContent = "Editar: " + nombre;
+          initPlatoForm(modalBody);
+          modal.show();
+        })
+        .catch(err => {
+          console.error("Error cargando formulario de edición:", err);
+        });
+    });
+  });
+});
+</script>
+
 
 
 

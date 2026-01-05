@@ -376,26 +376,32 @@
       guardarBtn.__bound = true;
     }
 
-  // ===== Asegurar que el form tenga action correcto =====
-  const formEl = context.querySelector("#platoForm") || context.querySelector("form[method='post']");
-  if (formEl) {
-    const action = formEl.getAttribute("action") || "";
+  // // ===== Asegurar que el form tenga action correcto =====
+  // const formEl = context.querySelector("#platoForm") || context.querySelector("form[method='post']");
+  // if (formEl) {
+    
+    
+  //   const isUpdateMode = formEl.dataset.mode === "update";
 
-    // 👉 Si es edición, NO tocar el action
-    if (action.includes("/videos/update/")) {
-      log("✏️ Modo edición detectado, action preservado:", action);
-    } else {
-      // 👉 Si es creación (modal)
-      let tipopag = "Principal";
-      const tipoInput = context.querySelector("input[name='tipos']:checked");
-      if (tipoInput) {
-        tipopag = tipoInput.value;
-      }
+  //   // 👉 Si es edición, NO tocar el action
+  //   if (isUpdateMode) {
+  //     log("✏️ Modo edición detectado, action preservado:", formEl.action);
+  //   } else {
+  //     // 👉 Si es creación (modal)
 
-      formEl.action = `/videos/create/?tipopag=${encodeURIComponent(tipopag)}`;
-      log("🆕 Modo creación, action forzado:", formEl.action);
-    }
-  }
+
+
+
+  //     let tipopag = "Principal";
+  //     const tipoInput = context.querySelector("input[name='tipos']:checked");
+  //     if (tipoInput) {
+  //       tipopag = tipoInput.value;
+  //     }
+
+  //     formEl.action = `/videos/create/?tipopag=${encodeURIComponent(tipopag)}`;
+  //     log("🆕 Modo creación, action forzado:", formEl.action);
+  //   }
+  // }
  
 
 
@@ -406,20 +412,29 @@
 
       form.addEventListener("submit", function (e) {
         // Solo interceptar si el form está dentro del modal
-        if (!modalBody.closest("#modalPlato")) return;
+      if (!form.closest("#modalPlato")) return;
 
         e.preventDefault();
 
         // 🔹 Crear FormData con todos los inputs visibles y ocultos del modal
         const formData = new FormData(form);
 
-        // 🔹 Asegurar que el formset de ingredientes se incluya aunque esté fuera del <form>
-        document.querySelectorAll("[name^='ingredientes_en_plato-']").forEach(el => {
-          if (!formData.has(el.name)) {
-            formData.append(el.name, el.value);
+        // // 🔹 Asegurar que el formset de ingredientes se incluya aunque esté fuera del <form>
+        // document.querySelectorAll("[name^='ingredientes_en_plato-']").forEach(el => {
+        //   if (!formData.has(el.name)) {
+        //     formData.append(el.name, el.value);
+        //   }
+        // });
+          modalBody.querySelectorAll("[name^='ingredientes_en_plato-'], #id_ingredientes_en_plato-TOTAL_FORMS, #id_ingredientes_en_plato-INITIAL_FORMS, #id_ingredientes_en_plato-MIN_NUM_FORMS, #id_ingredientes_en_plato-MAX_NUM_FORMS")
+        .forEach(el => {
+          if (el.type === "checkbox") {
+            if (el.checked) formData.set(el.name, el.value || "on");
+            else formData.delete(el.name);
+          } else {
+            formData.set(el.name, el.value);
           }
         });
-    
+
 
 
     fetch(form.action, {
@@ -437,7 +452,9 @@
           const data = await response.json();
 
           if (data.success) {
-            const modal = bootstrap.Modal.getInstance(modalBody.closest("#modalPlato"));
+
+            const modal = bootstrap.Modal.getInstance(form.closest("#modalPlato"));
+
             modal.hide();
             location.reload(); // refresca lista de platos
           } else if (data.html) {
