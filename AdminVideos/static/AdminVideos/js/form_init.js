@@ -343,19 +343,30 @@
       });
     }
 
-    // ===== Modal ingredientes → Select2 del modal-nombre
-    const ingredienteModal = context.querySelector("#ingredienteModal");
-    if (ingredienteModal && !ingredienteModal.__shownHandlerBound) {
-      ingredienteModal.addEventListener("shown.bs.modal", function () {
-        const $modal = $(ingredienteModal);
-        $("#modal-nombre")
-          .select2(buildSelect2Config($modal))
-          .select2("open");
-        // Si querés Select2 para #modal-unidad, podés habilitarlo:
-        // $("#modal-unidad").select2({ dropdownParent: $modal, width: "style" });
+
+    // ===== Modal ingredientes → Select2 del modal-nombre (delegado) =====
+    if (!document.__ingredienteModalSelect2Bound) {
+      document.addEventListener("shown.bs.modal", function (e) {
+        if (!e.target || e.target.id !== "ingredienteModal") return;
+
+        const $modal = $(e.target);
+        const $sel = $modal.find("#modal-nombre");
+        if (!$sel.length) return;
+
+        if (!$sel.data("select2")) {
+          $sel.select2(buildSelect2Config($modal));
+        }
+        $sel.select2("open");
       });
-      ingredienteModal.__shownHandlerBound = true;
+
+      document.__ingredienteModalSelect2Bound = true;
     }
+
+
+
+
+
+
 
     // ===== Botón "Guardar" del modal ingredientes
      // ===== Botón "Guardar" del modal ingredientes
