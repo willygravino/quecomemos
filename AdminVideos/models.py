@@ -321,13 +321,72 @@ class IngredienteEnPlato(models.Model):
         return f"{self.cantidad or ''} {self.unidad} de {self.ingrediente} en {self.plato}"
 
 
-# class Sugeridos(models.Model):    
-#      usuario_de_sugeridos = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="usuario_sugeridos", null=True, blank=True)
-#     #  usuario_de_sugeridos = models.OneToOneField(User, on_delete=models.CASCADE, related_name="usuario_sugeridos")
-#      nombre_plato_sugerido = models.CharField(max_length=30) 
-     
-# #     Uso de ForeignKey: En tus modelos PlatosSeleccionados y Elegidos, estás usando ForeignKey a User. Si estos modelos están relacionados con el usuario autenticado, considera usar OneToOneField en lugar de ForeignKey para garantizar que solo haya una instancia por usuario.
-# En este ejemplo, el campo usuario en el modelo PerfilUsuario es un OneToOneField que apunta al modelo de usuario predeterminado de Django (User). Esto significa que cada instancia de PerfilUsuario está asociada a exactamente una instancia de User, y viceversa. La opción on_delete=models.CASCADE especifica que si se elimina el usuario, también se eliminará automáticamente su perfil de usuario asociado.
+class MenuDia(models.Model):
+    propietario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="menus_dia")
+    fecha = models.DateField()
+
+    # (opcional, si después querés marcar sugerencias)
+    ya_sugerido = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ("propietario", "fecha")
+        indexes = [models.Index(fields=["propietario", "fecha"])]
+
+    def __str__(self):
+        return f"Menú {self.fecha} de {self.propietario}"
+
+
+class MenuItem(models.Model):
+    DESAYUNO = 'desayuno'
+    ALMUERZO = 'almuerzo'
+    MERIENDA = 'merienda'
+    CENA = 'cena'
+
+    MOMENTO_CHOICES = [
+        (DESAYUNO, 'Desayuno'),
+        (ALMUERZO, 'Almuerzo'),
+        (MERIENDA, 'Merienda'),
+        (CENA, 'Cena'),
+    ]
+
+    menu = models.ForeignKey(MenuDia, on_delete=models.CASCADE, related_name="items")
+    momento = models.CharField(max_length=20, choices=MOMENTO_CHOICES)
+
+    # Uno u otro (plato o lugar)
+    plato = models.ForeignKey("Plato", null=True, blank=True, on_delete=models.CASCADE, related_name="en_menus")
+    lugar = models.ForeignKey("Lugar", null=True, blank=True, on_delete=models.CASCADE, related_name="en_menus")
+
+    creado_el = models.DateTimeField(auto_now_add=True)
+    elegido = models.BooleanField(default=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["menu", "momento"]),
+            models.Index(fields=["plato"]),
+            models.Index(fields=["lugar"]),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["menu", "momento", "plato"],
+                name="uq_menu_momento_plato",
+                condition=models.Q(plato__isnull=False),
+            ),
+            models.UniqueConstraint(
+                fields=["menu", "momento", "lugar"],
+                name="uq_menu_momento_lugar",
+                condition=models.Q(lugar__isnull=False),
+            ),
+        ]
+
+    def clean(self):
+        super().clean()
+        # XOR: exactamente uno debe estar seteado
+        if bool(self.plato) == bool(self.lugar):
+            raise ValidationError("MenuItem debe tener plato XOR lugar (exactamente uno).")
+
+    def __str__(self):
+        obj = self.plato or self.lugar
+        return f"{self.menu.fecha} - {self.momento} - {obj}"
 
 class ElegidosXDia(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="usuario_que_come", null=True)
@@ -354,19 +413,6 @@ class HistoricoDia(models.Model):
     def __str__(self):
         return f"Comidas del {self.fecha} ({self.nombre_dia})"
 
-
-# class HistoricoDia(models.Model):
-#     fecha = models.DateField(unique=True)
-#     dia_semana = models.CharField(max_length=2, blank=True)  # "LU", "MA", ...
-#     ya_sugerido = models.BooleanField(default=False)
-#     propietario = models.ForeignKey(User, on_delete=models.CASCADE)
-
-#     @property
-#     def nombre_dia(self):
-#         return self.fecha.strftime("%A").capitalize()
-
-#     def __str__(self):
-#         return f"Comidas del {self.fecha} ({self.nombre_dia})"
 
 
 
@@ -398,7 +444,6 @@ class HistoricoItem(models.Model):
     def __str__(self):
         return f"{self.historico.fecha} - {self.momento} - {self.plato_id_ref}"
         
-        # ({self.plato_nombre_snapshot})"
 
 
 
@@ -445,35 +490,6 @@ class Profile(models.Model):
         return f"Perfil de {self.user}"
 
 
-# class Profile(models.Model):
-#      user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
-#      nombre = models.CharField(max_length=50, null=True, blank=True)
-#      apellido = models.CharField(max_length=50, null=True, blank=True)
-#      telefono = models.CharField(max_length=15, null=True, blank=True)
-#      avatar = models.ImageField(upload_to="avatares", null=True, blank=True)
-#      ingredientes_que_tengo = models.JSONField(default=list, blank=True)
-#     #  por qué default list?
-#      comentarios = models.JSONField(default=list, blank=True)
-#      amigues = models.JSONField(default=list, blank=True)
-#      sugeridos_descartados = models.JSONField(default=list, blank=True)
-#      sugeridos_importados = models.JSONField(default=list, blank=True)
-
-#      share_token = models.CharField(max_length=36, unique=True, blank=True, null=True)
-#     # ingredientes_que_tengo: asumo que ya existe (lista en JSON/ArrayField/lo que uses)
-
-#     def ensure_share_token(self):
-#         if not self.share_token:
-#             self.share_token = str(uuid.uuid4())
-#             self.save(update_fields=["share_token"])
-#         return self.share_token
-
-#      @property
-#      def avatar_url(self):
-#         return self.avatar.url if self.avatar else '/media/avatares/user.png'
-     
-#      def __str__(self):
-#         return f"Perfil de {self.user}"
-     
     
      
      

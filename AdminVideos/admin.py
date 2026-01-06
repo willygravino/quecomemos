@@ -1,5 +1,5 @@
 from django.contrib import admin
-from AdminVideos.models import HistoricoDia, HistoricoItem, Ingrediente, IngredienteEnPlato, Plato, Profile, Mensaje, ElegidosXDia, Lugar
+from AdminVideos.models import HistoricoDia, HistoricoItem, Ingrediente, IngredienteEnPlato, MenuDia, MenuItem, Plato, Profile, Mensaje, ElegidosXDia, Lugar
 
 # admin.site.register(Plato)
 admin.site.register(Profile)
@@ -10,7 +10,8 @@ admin.site.register(Lugar)
 # admin.site.register(ComidaDelDia)
 admin.site.register(HistoricoDia)
 admin.site.register(HistoricoItem)
-
+admin.site.register(MenuDia)
+admin.site.register(MenuItem)
  
 # admin.site.register(TipoPlato)
 
