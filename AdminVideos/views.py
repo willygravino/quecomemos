@@ -37,6 +37,8 @@ from django.views.decorators.http import require_POST
 from django.db import transaction
 from django.views.decorators.http import require_http_methods
 from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied
+
 
 
 
@@ -1005,31 +1007,37 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        # --- Formset ingredientes (POST/GET) ---
         if self.request.method == "POST":
-            context["ingrediente_formset"] = IngredienteEnPlatoFormSet(
-                self.request.POST, instance=self.object
-            )
+            formset = IngredienteEnPlatoFormSet(self.request.POST, instance=self.object)
         else:
-            context["ingrediente_formset"] = IngredienteEnPlatoFormSet(
-                instance=self.object
-            )
+            formset = IngredienteEnPlatoFormSet(instance=self.object)
+
+        # ✅ PARCHE: asegurar nombre_ingrediente en initial (evita VariableDoesNotExist)
+        for f in formset.forms:
+            if "nombre_ingrediente" not in f.initial:
+                ing = getattr(f.instance, "ingrediente", None)
+                f.initial["nombre_ingrediente"] = getattr(ing, "nombre", "") if ing else ""
+
+        context["ingrediente_formset"] = formset
 
         # 👉 TIPOS: enviar TODOS al template
-        context['items'] = [k for (k, _) in Plato.TIPOS_CHOICES]
-        context['tipopag'] = self.request.GET.get('tipopag', 'Dash')
+        context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
+        context["tipopag"] = self.request.GET.get("tipopag", "Dash")
 
-        # 👉 Variedades: exponer maps como espera el template
+        # 👉 Variedades (legacy): exponer maps como espera el template
         data = self.object.variedades or {}
-        context['variedades_en_base'] = {
+        context["variedades_en_base"] = {
             f"variedad{i}": (data.get(f"variedad{i}", {}) or {}).get("nombre", "")
             for i in range(1, 7)
         }
-        context['ingredientes_variedad'] = {
+        context["ingredientes_variedad"] = {
             f"variedad{i}": (data.get(f"variedad{i}", {}) or {}).get("ingredientes", "")
             for i in range(1, 7)
         }
 
         return context
+
 
     def form_valid(self, form):
 
@@ -1178,15 +1186,32 @@ class PlatoVariedadCreate(PlatoCreate):
 # 
 
     def get_form(self, form_class=None):
-            form = super().get_form(form_class)
-            # ✅ Para variedades, no queremos invalidar los checkboxes por falta de tipopag
-            form.fields["tipos"].choices = Plato.TIPOS_CHOICES
-            return form 
+        form = super().get_form(form_class)
+        # ✅ Para variedades, no queremos invalidar los checkboxes por falta de tipopag
+        form.fields["tipos"].choices = Plato.TIPOS_CHOICES
+        return form 
 
     def get_initial(self):
         initial = super().get_initial()
-        if self.padre.tipos:
-            initial["tipos"] = [t.strip() for t in self.padre.tipos.split(",") if t.strip()]
+
+        p = self.padre
+
+        # Sugerencia de nombre
+        initial["nombre_plato"] = f"{p.nombre_plato} (variedad)"
+
+        # Copiar campos “normales”
+        initial["receta"] = p.receta
+        initial["porciones"] = p.porciones
+        initial["medios"] = p.medios
+        initial["elaboracion"] = p.elaboracion
+        initial["coccion"] = p.coccion
+        initial["categoria"] = p.categoria
+        initial["estacionalidad"] = p.estacionalidad
+        initial["enlace"] = p.enlace
+
+        # Tipos: tu form usa MultipleChoiceField; el padre guarda CSV
+        initial["tipos"] = [t.strip() for t in (p.tipos or "").split(",") if t.strip()]
+
         return initial
 
     def dispatch(self, request, *args, **kwargs):
@@ -1221,21 +1246,61 @@ class PlatoVariedadCreate(PlatoCreate):
 
         return super().get_template_names()
 
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+
+    #     if self.request.method == "POST":
+    #         # POST: que valide lo que vino del modal
+    #         context["ingrediente_formset"] = IngredienteEnPlatoFormSet(self.request.POST)
+    #         return context
+
+    #     # GET: clonar ingredientes del padre como initial
+    #     inicial = []
+    #     # 👇 ajustá el related_name si el tuyo es distinto
+    #     for rel in self.padre.ingredienteenplato_set.all():
+    #         inicial.append({
+    #             "ingrediente": rel.ingrediente_id,
+    #             "nombre_ingrediente": rel.ingrediente.nombre if rel.ingrediente else "",
+    #             "cantidad": rel.cantidad,
+    #             "unidad": rel.unidad,
+    #         })
+
+    #     context["ingrediente_formset"] = IngredienteEnPlatoFormSet(initial=inicial)
+    #     return context
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # útil para mostrar "creando variedad de X"
-        context["plato_padre_obj"] = self.padre
-
-        # ✅ CLAVE: tu template usa `items` para pintar los checkboxes
+        # ✅ SIEMPRE: en variedades queremos mostrar tipos disponibles
         context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
 
-        # ✅ `tipopag` lo usa tu template para marcar alguno por defecto
-        # tomamos el primero del padre o fallback
-        raw = (self.padre.tipos or "").split(",")[0].strip()
-        context["tipopag"] = raw or self.request.GET.get("tipopag") or "Principal"
+        # ✅ tipopag: si no vino en la URL del modal, inferir desde el padre
+        tipopag = self.request.GET.get("tipopag")
+        if not tipopag:
+            raw = (self.padre.tipos or "").split(",")[0].strip()
+            tipopag = raw or "Dash"
+        context["tipopag"] = tipopag
 
+        context["plato_padre_obj"] = self.padre
+
+        # POST: que valide lo que vino del modal
+        if self.request.method == "POST":
+            context["ingrediente_formset"] = IngredienteEnPlatoFormSet(self.request.POST)
+            return context
+
+        # GET: clonar ingredientes del padre como initial
+        inicial = []
+        for rel in self.padre.ingredientes_en_plato.select_related("ingrediente").all():
+            inicial.append({
+                "ingrediente": rel.ingrediente_id,
+                "nombre_ingrediente": rel.ingrediente.nombre if rel.ingrediente else "",
+                "cantidad": rel.cantidad,
+                "unidad": rel.unidad,
+            })
+
+        context["ingrediente_formset"] = IngredienteEnPlatoFormSet(initial=inicial)
         return context
+
+
 
 
     def form_valid(self, form):
@@ -1355,7 +1420,6 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
     def test_func(self):
         return Profile.objects.filter(user=self.request.user).exists()
 
-
 def filtrar_platos(
     usuario,
     tipo_parametro,
@@ -1369,49 +1433,42 @@ def filtrar_platos(
 
     # Si no se selecciona 'quecomemos' ni 'misplatos', no mostrar platos
     if quecomemos != "quecomemos" and misplatos != "misplatos":
-        return Plato.objects.none()  # Retorna un queryset vacío
-    else:
-        # Construir la consulta con Q
-        query = Q()
+        return Plato.objects.none()
 
-        if quecomemos == "quecomemos":
-            usuario_quecomemos = User.objects.filter(username="quecomemos").first()
-            if usuario_quecomemos:
-                query |= Q(propietario=usuario_quecomemos)
+    # 🔒 BASE: SOLO PLATOS PADRE (excluye variedades)
+    query = Q(plato_padre__isnull=True)
 
-            # Excluir platos descartados
-            platos_descartados = usuario.profile.sugeridos_descartados
-            if platos_descartados:
-                # query &= ~Q(nombre_plato__in=platos_descartados)
-                query &= ~Q(id__in=platos_descartados)  # Usamos el id del plato para excluirlo
+    if quecomemos == "quecomemos":
+        usuario_quecomemos = User.objects.filter(username="quecomemos").first()
+        if usuario_quecomemos:
+            query |= Q(propietario=usuario_quecomemos, plato_padre__isnull=True)
 
+        platos_descartados = usuario.profile.sugeridos_descartados
+        if platos_descartados:
+            query &= ~Q(id__in=platos_descartados)
 
-        if misplatos == "misplatos":
-            query |= Q(propietario=usuario)
+    if misplatos == "misplatos":
+        query |= Q(propietario=usuario, plato_padre__isnull=True)
 
-        # if tipo_parametro and tipo_parametro != "Dash":
-        #     query &= Q(tipo=tipo_parametro)
+    if tipo_parametro and tipo_parametro != "Dash":
+        query &= Q(tipos__icontains=tipo_parametro)
 
-        # if tipo_parametro and tipo_parametro != "Dash":
-        #     query &= Q(tipos__nombre=tipo_parametro)
+    if medios and medios != '-':
+        query &= Q(medios=medios)
 
-        if tipo_parametro and tipo_parametro != "Dash":
-            query &= Q(tipos__icontains=tipo_parametro)  # ✅
+    if categoria and categoria != '-':
+        query &= Q(categoria=categoria)
 
-        if medios and medios != '-':
-            query &= Q(medios=medios)
+    if dificultad and dificultad != '-':
+        query &= Q(dificultad=dificultad)
 
-        if categoria and categoria != '-':
-            query &= Q(categoria=categoria)
+    if palabra_clave:
+        query &= (
+            Q(ingredientes__icontains=palabra_clave) |
+            Q(nombre_plato__icontains=palabra_clave)
+        )
 
-        if dificultad and dificultad != '-':
-            query &= Q(dificultad=dificultad)
-
-        if palabra_clave:
-            query &= Q(ingredientes__icontains=palabra_clave) | Q(nombre_plato__icontains=palabra_clave)
-
-        # Aplicar la consulta
-        return Plato.objects.filter(query)
+    return Plato.objects.filter(query)
 
 
 

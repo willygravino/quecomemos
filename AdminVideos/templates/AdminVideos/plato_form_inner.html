@@ -143,15 +143,16 @@
     <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-id" value="{{ ing_form.instance.pk }}">
   {% endif %}
   <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-ingrediente"
-         value="{{ ing_form.instance.ingrediente_id|default:'' }}">
-  <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-nombre_ingrediente"
-         value="{{ ing_form.instance.ingrediente.nombre|default_if_none:'' }}">
+       value="{{ ing_form.instance.ingrediente_id|default:ing_form.initial.ingrediente|default:'' }}">
 
-  <!-- Select visible (o tu Select2 si lo usás) -->
-  <select class="form-select form-select-sm ingrediente-select w-100 w-sm-auto flex-fill"
-          data-initial-id="{{ ing_form.instance.ingrediente_id|default:'' }}"
-          data-initial-text="{{ ing_form.instance.ingrediente.nombre|default_if_none:'' }}">
+  <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-nombre_ingrediente"
+        value="{{ ing_form.instance.ingrediente.nombre|default:ing_form.initial.nombre_ingrediente|default:'' }}">
+
+  <select class="form-select form-select-sm ingrediente-select ..."
+          data-initial-id="{{ ing_form.instance.ingrediente_id|default:ing_form.initial.ingrediente|default:'' }}"
+          data-initial-text="{{ ing_form.instance.ingrediente.nombre|default:ing_form.initial.nombre_ingrediente|default:'' }}">
   </select>
+
 
   <!-- Cantidad -->
   <input type="text" name="ingredientes_en_plato-{{ forloop.counter0 }}-cantidad"
