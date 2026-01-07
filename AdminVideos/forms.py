@@ -21,6 +21,29 @@ class PlatoFilterForm(forms.Form):
 from .models import Plato
 
 
+class ElegirPlatoForm(forms.Form):
+    plato = forms.ChoiceField(choices=())
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        padres = Plato.objects.filter(propietario=user, plato_padre__isnull=True)
+        hijos = Plato.objects.filter(propietario=user, plato_padre__isnull=False).select_related("plato_padre")
+
+        # armamos un mapa padre -> hijos
+        hijos_por_padre = {}
+        for h in hijos:
+            hijos_por_padre.setdefault(h.plato_padre_id, []).append(h)
+
+        choices = []
+        for p in padres:
+            choices.append((str(p.id), p.nombre_plato))
+            for h in hijos_por_padre.get(p.id, []):
+                choices.append((str(h.id), f"   ↳ {h.nombre_plato}"))
+
+        self.fields["plato"].choices = choices
+        
+
 class PlatoForm(forms.ModelForm):
     # Legacy (lo vas a borrar después, pero no rompe nada ahora)
     variedad1 = forms.CharField(max_length=100, required=False)

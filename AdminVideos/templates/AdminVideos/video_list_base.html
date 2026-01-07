@@ -146,20 +146,23 @@
         </div>
       </a>
 
-
-        <!-- <div class="position-absolute top-0 mt-1 start-50 translate-middle-x text-center text-white bg-dark rounded">
-          <h6 class="mb-0 small"> {{ plato.nombre_plato }}</h6>
-        </div> -->
-<!-- 
-        <div class="position-absolute start-50 translate-middle-x text-center text-white bg-dark bg-opacity-30 rounded px-1" style="top: 18%;">
-          <h6 class="mb-0 small">{{ plato.nombre_plato }}</h6>
-        </div> -->
-
-
-        <div class="position-absolute start-50 translate-middle-x text-center text-white rounded px-2 py-1"
+      <div class="position-absolute start-50 translate-middle-x text-center text-white rounded px-2 py-1"
             style="top: 10%; background-color: rgba(0, 0, 0, 0.5);">
-          <h6 class="mb-0 small">{{ plato.nombre_plato }}</h6>
-        </div>
+
+          <h6 class="mb-0 small">
+            <!--  plato.nombre_plato }} -->
+            <!--  plato.nombre_para_front }} -->
+
+            {% if plato.variedades_count > 0 %}
+               {{ plato.nombre_para_front }} 📁 {{ plato.variedades_count|add:"1" }}
+            {% else %}
+              {{ plato.nombre_plato }}
+            {% endif %}
+
+          </h6>
+
+      </div>
+
 
 <!-- 
         esto no está funcionando, por qué? -->

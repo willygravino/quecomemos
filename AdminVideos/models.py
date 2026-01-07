@@ -34,6 +34,13 @@ class TipoPlato(models.Model):
     
 class Plato(models.Model):
     nombre_plato = models.CharField(max_length=30)
+
+    nombre_grupo = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Nombre del grupo de variedades (ej: Empanadas)"
+    )
+
     receta = models.CharField(max_length=80, blank=True)
     # descripcion_plato = models.CharField(max_length=300, blank=True)
     
@@ -128,6 +135,12 @@ class Plato(models.Model):
     related_name="variedades_hijas",  # 👈 cambia esto
     on_delete=models.SET_NULL,
 )
+
+    @property
+    def nombre_para_front(self):
+        if self.variedades_hijas.exists():
+            return self.nombre_grupo or f"{self.nombre_plato} (grupo)"
+        return self.nombre_plato
 
 
     def es_variedad(self):
