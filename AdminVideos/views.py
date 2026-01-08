@@ -867,6 +867,10 @@ class CrearLugar(LoginRequiredMixin, CreateView):
         lugar = form.save(commit=False)
         lugar.propietario = self.request.user
 
+        print("GET tipopag:", self.request.GET.get("tipopag"))
+        print("POST tipopag:", self.request.POST.get("tipopag"))
+        print("PATH:", self.request.get_full_path())
+
         # Obtener el valor del parámetro 'template' desde la URL
         template_param = self.request.GET.get('tipopag')
 

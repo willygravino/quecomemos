@@ -165,16 +165,11 @@
 
 
 <!-- 
-        esto no está funcionando, por qué? -->
-        {% for key, value in plato.variedades.items %}
-          {% if value.variedad %}
-            <small class="text-success"> {{ value.variedad }} /</small>
-          {% endif %}
-        {% endfor %}
+       
 
         <div class="d-inline-flex gap-2 align-items-center justify-content-center">
           {% if amigues %}
-          <!-- <a href="#" data-bs-toggle="modal" data-bs-target="#compartirModal" onclick="setPlatoInfo('{{ plato.id }}', 'plato')">
+           <a href="#" data-bs-toggle="modal" data-bs-target="#compartirModal" onclick="setPlatoInfo('{{ plato.id }}', 'plato')">
             <i class="fa-solid fa-share-nodes"></i>
           </a> -->
           <a href="#"
@@ -290,48 +285,49 @@
 
 <!-- ESTAS SON LAS TARJETAS DE LUGARES, SI ES QUE ESTAMOS EN LUGARES -->
 <section class="w-100 bg-info text-white">
-  {% if not lugares and tipopag == "Delivery" or tipopag == "Comerafuera" %}
-<div class="alert alert-info text-center" role="alert">
-  <i class="bi bi-geo-alt-fill"></i> No hay lugares ingresados para mostrar.
-</div>
-{% else %}
-<div class="container p-0">
-  <div class="row">
-    {% for lugar in lugares %}
-    <div class="col-6 col-sm-4 col-md-3">
+  {% if tipopag == "Delivery" or tipopag == "Comerafuera" %}
+    {% if not lugares %}
+      <div class="alert alert-info text-center" role="alert">
+        <i class="bi bi-geo-alt-fill"></i> No hay lugares ingresados para mostrar.
+      </div>
+    {% else %}
+      <div class="container p-0">
+        <div class="row">
+          {% for lugar in lugares %}
+            <div class="col-6 col-sm-4 col-md-3">
+                <div class="card h-100 shadow-sm rounded-4" style="font-size: 0.9rem; position: relative;">
+                  <a href="{% url 'lugar-detail' lugar.id %}" style="position: relative; display: block;">
+                    <img src="{{ lugar.image_url }}" class="card-img-top object-fit-cover rounded-top-4" alt="Imagen del Lugar"
+                      style="height: 150px; object-fit: cover;">
+                    <div
+                      style="position: absolute; top: 0; left: 0; right: 0; height: 150px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.4); color: white; font-weight: bold; border-top-left-radius: 1rem; border-top-right-radius: 1rem;">
+                      {{ lugar.nombre }}
+                    </div>
+                  </a>
 
-      <div class="card h-100 shadow-sm rounded-4" style="font-size: 0.9rem; position: relative;">
-        <a href="{% url 'lugar-detail' lugar.id %}" style="position: relative; display: block;">
-          <img src="{{ lugar.image_url }}" class="card-img-top object-fit-cover rounded-top-4" alt="Imagen del Lugar"
-            style="height: 150px; object-fit: cover;">
-          <div
-            style="position: absolute; top: 0; left: 0; right: 0; height: 150px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.4); color: white; font-weight: bold; border-top-left-radius: 1rem; border-top-right-radius: 1rem;">
-            {{ lugar.nombre }}
-          </div>
-        </a>
+                  <div class="card-body text-center p-1">
+                    <p class="text-muted mb-0" style="font-size: 0.8rem;">{{ lugar.direccion|default:"Sin dirección" }}</p>
 
-        <div class="card-body text-center p-1">
-          <p class="text-muted mb-0" style="font-size: 0.8rem;">{{ lugar.direccion|default:"Sin dirección" }}</p>
+                    {% if amigues %}
+                      <div class="mt-2">
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#compartirModal"
+                          onclick="setPlatoInfo('{{ lugar.id }}', 'lugar')" class="text-primary me-2">
+                          <i class="fa-solid fa-share-nodes"></i>
+                        </a>
+                      </div>
+                    {% endif %}
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#asignarPlatoModal" class="btn btn-sm btn-primary p-0"
+                      onclick="setPlatoInfo('{{ lugar.id }}', 'lugar')" class="btn btn-sm btn-outline-primary">
+                      Programar
+                    </a>
 
-          {% if amigues %}
-          <div class="mt-2">
-            <a href="#" data-bs-toggle="modal" data-bs-target="#compartirModal"
-              onclick="setPlatoInfo('{{ lugar.id }}', 'lugar')" class="text-primary me-2">
-              <i class="fa-solid fa-share-nodes"></i>
-            </a>
-            {% endif %}
-
-            <a href="#" data-bs-toggle="modal" data-bs-target="#asignarPlatoModal" class="btn btn-sm btn-primary p-0"
-              onclick="setPlatoInfo('{{ lugar.id }}', 'lugar')" class="btn btn-sm btn-outline-primary">
-              Programar
-            </a>
-
-          </div>
+                  </div>
+                </div>
+            </div>
+          {% endfor %}
         </div>
       </div>
-      {% endfor %}
-    </div>
-  </div>
+    {% endif %}
   {% endif %}
 </section>
 
