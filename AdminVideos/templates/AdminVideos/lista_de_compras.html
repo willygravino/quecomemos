@@ -63,33 +63,6 @@
                           </label>
                         </div>
 
-                        {% if plato.variedades %}
-                          <div class="ps-4 mt-1 border-start">
-                            {% for variedad_id, variedad in plato.variedades.items %}
-                              <div class="form-check mb-1">
-                                <!-- <input
-                                  type="checkbox"
-                                  id="variedad{{ variedad_id }}_{{ plato.id_plato }}_{{ menu.el_dia_en_que_comemos|date:'Ymd' }}"
-                                  name="variedad_seleccionada"   {# ⬅️ MISMO name para poder usar getlist #}
-                                  value="{{ plato.id_plato }}|{{ variedad.nombre }}"
-                                  class="form-check-input"
-                                  {% if variedad.elegido %}checked{% endif %}> -->
-
-                                  <input
-                                    type="checkbox"
-                                    id="variedad{{ variedad_id }}_{{ plato.id_plato }}_{{ menu.el_dia_en_que_comemos|date:'Ymd' }}"
-                                    name="variedad_seleccionada"
-                                    value="{{ plato.id_plato }}_{{ menu.el_dia_en_que_comemos|date:'Ymd' }}|{{ variedad.nombre }}"
-                                    class="form-check-input"
-                                    {% if variedad.elegido %}checked{% endif %}>
-                                <label class="form-check-label" for="variedad{{ variedad_id }}_{{ plato.id_plato }}_{{ menu.el_dia_en_que_comemos|date:'Ymd' }}">
-                                  → {{ variedad.nombre }}
-                                </label>
-                              </div>
-                            {% endfor %}
-                          </div>
-                        {% endif %}
-
                       {% else %}
                         <div class="text-muted fst-italic">››› {{ plato.plato }}</div>
                       {% endif %}

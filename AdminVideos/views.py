@@ -468,7 +468,8 @@ def lista_de_compras(request):
         menu.el_dia_en_que_comemos = menu.fecha
 
         estructura = {"desayuno": [], "almuerzo": [], "merienda": [], "cena": []}
-        items = menu.items.select_related("plato", "lugar")
+        items = menu.items.select_related("plato", "lugar").order_by("id")
+        
 
         for item in items:
             if item.plato:
