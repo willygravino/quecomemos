@@ -160,95 +160,314 @@ def agregar_plato(diccionario, clave, plato, ingredientes):
             "elegido": True
         }
 
-def procesar_item(platos_dia, item_nombre, menu_del_dia, dia_en_que_comemos_str, request, lista_de_ingredientes, no_incluir):
+# def procesar_item(platos_dia, item_nombre, menu_del_dia, dia_en_que_comemos_str, request, lista_de_ingredientes, no_incluir):
 
-    resultado = {}
-    # Extraer el plato y los ingredientes del item
-    # ej guarnicion1
-    # item = platos_dia.get(item_nombre, {})
-    # ej Tortilla
-    item_plato = platos_dia.get(item_nombre, {}).get("plato", [])
-    item_ingredientes  = platos_dia.get(item_nombre, {}).get("ingredientes", [])
+#     resultado = {}
+#     # Extraer el plato y los ingredientes del item
+#     # ej guarnicion1
+#     # item = platos_dia.get(item_nombre, {})
+#     # ej Tortilla
+#     item_plato = platos_dia.get(item_nombre, {}).get("plato", [])
+#     item_ingredientes  = platos_dia.get(item_nombre, {}).get("ingredientes", [])
 
-    # item_plato = platos_dia..get("plato", [])
-    # ej papa, huevo
-    # item_ingredientes = item.get("ingredientes", [])
+#     # item_plato = platos_dia..get("plato", [])
+#     # ej papa, huevo
+#     # item_ingredientes = item.get("ingredientes", [])
 
-    # Crear la cadena `buscar_item` con el día concatenado si `plato` tiene valor
-    if item_plato:
-        buscar_item = item_plato + dia_en_que_comemos_str
-       # Variable para indicar si el item fue elegido
-        # item_elegido = False
+#     # Crear la cadena `buscar_item` con el día concatenado si `plato` tiene valor
+#     if item_plato:
+#         buscar_item = item_plato + dia_en_que_comemos_str
+#        # Variable para indicar si el item fue elegido
+#         # item_elegido = False
 
-        # Si `buscar_item` está en los datos POST de la petición
-        if buscar_item in request.POST:
-            item_elegido = True
-            lista_de_ingredientes.update({ingrediente.strip() for ingrediente in item_ingredientes.split(',')})
+#         # Si `buscar_item` está en los datos POST de la petición
+#         if buscar_item in request.POST:
+#             item_elegido = True
+#             lista_de_ingredientes.update({ingrediente.strip() for ingrediente in item_ingredientes.split(',')})
 
-            # Marcar el item como elegido si aún no está marcado
-            if not menu_del_dia.platos_que_comemos[item_nombre]["elegido"]:
-                menu_del_dia.platos_que_comemos[item_nombre]["elegido"] = True
-                # Guardar cambios en la base de datos
-                menu_del_dia.save()
-                no_incluir.update({ingrediente.strip() for ingrediente in item_ingredientes.split(',')})
+#             # Marcar el item como elegido si aún no está marcado
+#             if not menu_del_dia.platos_que_comemos[item_nombre]["elegido"]:
+#                 menu_del_dia.platos_que_comemos[item_nombre]["elegido"] = True
+#                 # Guardar cambios en la base de datos
+#                 menu_del_dia.save()
+#                 no_incluir.update({ingrediente.strip() for ingrediente in item_ingredientes.split(',')})
 
-        else:
-            item_elegido = False
-            # Si el item no se seleccionó, marcarlo como no elegido
-            menu_del_dia.platos_que_comemos[item_nombre]["elegido"] = False
-            # Guardar cambios en la base de datos
-            menu_del_dia.save()
+#         else:
+#             item_elegido = False
+#             # Si el item no se seleccionó, marcarlo como no elegido
+#             menu_del_dia.platos_que_comemos[item_nombre]["elegido"] = False
+#             # Guardar cambios en la base de datos
+#             menu_del_dia.save()
 
-        # Agregar el item al diccionario `items` con la estructura deseada
-        resultado [item_nombre] = {"plato": item_plato,
-            "ingredientes": item_ingredientes,
-            "elegido": item_elegido
-        }
-    # else:
-    #     resultado = {}
+#         # Agregar el item al diccionario `items` con la estructura deseada
+#         resultado [item_nombre] = {"plato": item_plato,
+#             "ingredientes": item_ingredientes,
+#             "elegido": item_elegido
+#         }
+#     # else:
+#     #     resultado = {}
 
 
 
-    # Retornar los valores que necesitarás fuera de la función
-    return resultado,  lista_de_ingredientes, no_incluir
+#     # Retornar los valores que necesitarás fuera de la función
+#     return resultado,  lista_de_ingredientes, no_incluir
+
+
+
+
+# @login_required
+# def lista_de_compras(request):
+#     # locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')  # Configura la localización a español
+
+#     locale.setlocale(locale.LC_TIME, 'C')
+
+#     # Obtener la fecha actual
+#     today = date.today()
+
+#     lista_de_ingredientes = set()
+#     ingredientes_unicos = {}  # Diccionario para almacenar ingredientes a comprar, estado, comentario
+#     lista_de_compras = set()
+#     no_elegidos = set()
+#     ingredientes_elegidos = set()
+
+# # REFACTORIZACIÓN
+#     menues_del_usuario = (
+#         MenuDia.objects
+#         .filter(propietario=request.user, fecha__gte=today)
+#         .order_by('fecha')
+#     )
+
+# # 🔧 ADAPTADOR TEMPORAL PARA EL TEMPLATE (lista de compras)
+#     for menu in menues_del_usuario:
+#         # simulamos la estructura vieja
+#         menu.el_dia_en_que_comemos = menu.fecha
+
+#         estructura = {
+#             "desayuno": [],
+#             "almuerzo": [],
+#             "merienda": [],
+#             "cena": []
+#         }
+
+#         items = menu.items.select_related("plato", "lugar")
+
+#         for item in items:
+#             if item.plato:
+#                 estructura[item.momento].append({
+#                     "id_plato": item.plato.id,
+#                     "plato": item.plato.nombre_plato,
+#                     "ingredientes": item.plato.ingredientes,
+#                     "elegido": item.elegido,
+#                     "tipo": "plato",
+#                     "variedades": {}  # 🔴 vacío, luego lo limpiaremos
+#                 })
+#             elif item.lugar:
+#                 estructura[item.momento].append({
+#                     "id_plato": item.lugar.id,
+#                     "plato": item.lugar.nombre,
+#                     "tipo": "lugar"
+#                 })
+
+#         # esto es lo que el template espera
+#         menu.platos_que_comemos = estructura
+
+#     # Obtener el perfil del usuario actual
+#     perfil = get_object_or_404(Profile, user=request.user)
+
+
+#     # def norm(s: str) -> str:
+#     #     return (s or "").strip().lower()
+    
+#     ingredientes_elegidos = set(request.POST.getlist("ingrediente_a_comprar"))
+
+#     if request.method == 'POST':
+#         # 1) Estructuras auxiliares
+#         platos_seleccionados = set(request.POST.getlist("plato_seleccionado"))  # p.ej. {"155_20250926", ...}
+        
+#         # 1) Primero apagamos todos los platos futuros
+#         MenuItem.objects.filter(
+#             menu__propietario=request.user,
+#             menu__fecha__gte=today,
+#             plato__isnull=False
+#         ).update(elegido=False)
+
+#         # 2) Luego encendemos solo los seleccionados
+#         for clave in platos_seleccionados:
+#             try:
+#                 plato_id, ymd = clave.split("_", 1)
+#             except ValueError:
+#                 continue
+
+#             MenuItem.objects.filter(
+#                 menu__propietario=request.user,
+#                 plato_id=int(plato_id),
+#                 menu__fecha=datetime.datetime.strptime(ymd, "%Y%m%d").date(),
+#             ).update(elegido=True)
+
+#         # Suponiendo que perfil.comentarios contiene una lista de cadenas en el formato "ingrediente%comentario"
+#         comentarios_guardados_lista = perfil.comentarios
+#         comentarios_guardados = {}
+
+#         if comentarios_guardados_lista:
+#             # Recorrer los comentarios guardados y convertirlos en un diccionario
+#             for item in comentarios_guardados_lista:
+#                 ingrediente, comentario = item.split("%", 1)  # Divide en ingrediente y comentario
+#                 comentarios_guardados[ingrediente] = comentario  # Guarda en el diccionario
+
+#         comentarios_posteados = {}
+
+#         for key, value in request.POST.items():
+#             if key.endswith("_comentario"):  # Filtra solo los comentarios
+#                 ingrediente = key.replace("_comentario", "")  # Extraer el ingrediente del nombre del campo
+#                 comentario_posteado = value.strip()  # Eliminar espacios en blanco al inicio y al final
+
+#                 # Guarda el comentario (puede ser vacío)
+#                 comentarios_posteados[ingrediente] = comentario_posteado
+
+#         # Recorremos el diccionario de comentarios guardados
+#         for ingrediente_posteado, comentario_posteado in comentarios_posteados.items():
+#             if ingrediente_posteado in comentarios_guardados:  # Verificamos si el ingrediente está en ambos diccionarios
+#                 # Obtenemos el comentario guardado
+#                 comentario_guardado = comentarios_guardados[ingrediente_posteado]
+#                 # prepara el registro nuevo por si lo usa
+#                 registro = f"{ingrediente_posteado}%{comentario_guardado}"
+#                 if not comentario_posteado:
+#                     # Eliminar el comentario del ingrediente
+#                     perfil.comentarios.remove(registro)
+#                 elif comentario_posteado != comentario_guardado:
+#                         # Actualizar el comentario del ingrediente
+#                     perfil.comentarios[perfil.comentarios.index(registro)] = f"{ingrediente_posteado}%{comentario_posteado}"
+
+#             elif comentario_posteado:
+#                 # Unir el ingrediente nuevo con el comentario, separado por '%'
+#                 ingrediente_con_comentario = f"{ingrediente_posteado}%{comentario_posteado}"
+#                 # Actualizar el campo ingredientes_que_tengo
+#                 perfil.comentarios.append(ingrediente_con_comentario)
+
+#         # Guardar los cambios en el perfil
+#         perfil.save()
+    
+#     # REFACTOR
+#     # ✅ Ingredientes a partir del modelo nuevo (MenuItem)
+#     items_elegidos = (
+#         MenuItem.objects
+#         .filter(
+#             menu__propietario=request.user,
+#             menu__fecha__gte=today,
+#             plato__isnull=False,
+#             elegido=True,
+#         )
+#         .select_related("plato")
+#     )
+
+#     # lista_de_ingredientes = set()
+
+#     for item in items_elegidos:
+#         ing_txt = (item.plato.ingredientes or "").strip()
+#         if not ing_txt:
+#             continue
+#         lista_de_ingredientes.update(
+#             ing.strip() for ing in ing_txt.split(",") if ing.strip()
+#         )
+                            
+#     if ingredientes_elegidos:
+#         no_elegidos = lista_de_ingredientes - ingredientes_elegidos
+#         for ingrediente_a_comprar in lista_de_ingredientes:
+#             if ingrediente_a_comprar in perfil.ingredientes_que_tengo:
+#                 # Eliminar el ingrediente de la lista
+#                 perfil.ingredientes_que_tengo.remove(ingrediente_a_comprar)
+#                 # Guardar el perfil actualizado
+#                 perfil.save()
+#     elif request.method != "GET":
+#         no_elegidos = lista_de_ingredientes    
+                
+#     if no_elegidos:
+#         for ingrediente in no_elegidos:
+#             if ingrediente not in perfil.ingredientes_que_tengo:
+#                 # Actualizar el campo ingredientes_que_tengo
+#                 perfil.ingredientes_que_tengo.append(ingrediente)
+#                 # Guardar el perfil actualizado
+#                 perfil.save()
+   
+#     if lista_de_ingredientes:
+#         for ingrediente in lista_de_ingredientes:
+#             el_comentario = ""
+#             # Recorrer la lista y buscar el comentario asociado
+#             for item in perfil.comentarios:
+#                 # if "%" in item:
+#                 ingrediente_archivado, comentario = item.split("%", 1)  # Dividir en ingrediente y comentario
+#                 if ingrediente_archivado == ingrediente:
+#                     el_comentario = comentario
+
+#             if ingrediente in perfil.ingredientes_que_tengo:
+#                 ingredientes_unicos [ingrediente] = {
+#                     "comentario": el_comentario,
+#                     "estado": "tengo" }
+#             else:
+#                 ingredientes_unicos [ingrediente] = {
+#                     "comentario": el_comentario,
+#                     "estado": "no-tengo" }
+   
+#     lista_de_compras =[]
+#     # Recorrer el diccionario para formatear los ingredientes que no tienes
+#     for ingrediente, detalles in ingredientes_unicos.items():
+#         if detalles["estado"] == "no-tengo":
+#             comentario = detalles["comentario"]
+#             # Formatear el ingrediente con el comentario si está presente
+#             if comentario:
+#                 # mensaje_whatsapp += f"• {ingrediente} ({comentario})\n"
+#                 lista_de_compras.append(f"{ingrediente} ({comentario})")
+
+#             else:
+#                 # mensaje_whatsapp += f"• {ingrediente}\n"
+#                 lista_de_compras.append(f"{ingrediente}")
+    
+#     token = perfil.ensure_share_token()  # genera uno si no existe
+
+#     share_url = request.build_absolute_uri(
+#         reverse("compartir-lista", args=[token]))
+
+#     context = {
+#         'menues_del_usuario': menues_del_usuario,
+#         'ingredientes_con_tengo_y_comentario': ingredientes_unicos, # DICT TODOS LOS INGREDIENTES, CON TENGO Y COMENTARIO
+#         "lista_de_compras": lista_de_compras, # LISTA DE COMPRAS PARA VERLO EN ENVAR A WHATS APP
+#         "parametro" : "lista-compras",
+#         'share_url': share_url,             # 👈 NUEVO
+#         "lista_de_ingredientes": lista_de_ingredientes,
+#         "no_elegidos": no_elegidos,
+#         "ingredientes_elegidos": ingredientes_elegidos,
+#         # "ingredientes_elegidos_calculados": ingredientes_elegidos_calculados,
+#         # "no_elegidos_calculados" : no_elegidos_calculados,
+        
+#      }
+
+#     return render(request, 'AdminVideos/lista_de_compras.html', context)
 
 
 
 
 @login_required
 def lista_de_compras(request):
-    # locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')  # Configura la localización a español
-
-    locale.setlocale(locale.LC_TIME, 'C')
-
-    # Obtener la fecha actual
+    locale.setlocale(locale.LC_TIME, "C")
     today = date.today()
 
     lista_de_ingredientes = set()
-    ingredientes_unicos = {}  # Diccionario para almacenar ingredientes a comprar, estado, comentario
-    lista_de_compras = set()
+    ingredientes_unicos = {}
+    lista_de_compras = []
     no_elegidos = set()
     ingredientes_elegidos = set()
 
-# REFACTORIZACIÓN
     menues_del_usuario = (
         MenuDia.objects
         .filter(propietario=request.user, fecha__gte=today)
-        .order_by('fecha')
+        .order_by("fecha")
     )
 
-# 🔧 ADAPTADOR TEMPORAL PARA EL TEMPLATE (lista de compras)
+    # 🔧 Adaptador temporal template viejo
     for menu in menues_del_usuario:
-        # simulamos la estructura vieja
         menu.el_dia_en_que_comemos = menu.fecha
 
-        estructura = {
-            "desayuno": [],
-            "almuerzo": [],
-            "merienda": [],
-            "cena": []
-        }
-
+        estructura = {"desayuno": [], "almuerzo": [], "merienda": [], "cena": []}
         items = menu.items.select_related("plato", "lugar")
 
         for item in items:
@@ -259,7 +478,7 @@ def lista_de_compras(request):
                     "ingredientes": item.plato.ingredientes,
                     "elegido": item.elegido,
                     "tipo": "plato",
-                    "variedades": {}  # 🔴 vacío, luego lo limpiaremos
+                    "variedades": {}
                 })
             elif item.lugar:
                 estructura[item.momento].append({
@@ -268,30 +487,25 @@ def lista_de_compras(request):
                     "tipo": "lugar"
                 })
 
-        # esto es lo que el template espera
         menu.platos_que_comemos = estructura
 
-    # Obtener el perfil del usuario actual
     perfil = get_object_or_404(Profile, user=request.user)
 
+    # =====================================================
+    # POST: decidir qué se persiste según post_origen
+    # =====================================================
+    post_origen = request.POST.get("post_origen", "") if request.method == "POST" else ""
 
-    def norm(s: str) -> str:
-        return (s or "").strip().lower()
-    
-    ingredientes_elegidos = set(request.POST.getlist("ingrediente_a_comprar"))
+    # ---- 1) Guardar menú (platos elegidos) SOLO si el origen es "menu"
+    if request.method == "POST" and post_origen == "menu":
+        platos_seleccionados = set(request.POST.getlist("plato_seleccionado"))
 
-    if request.method == 'POST':
-        # 1) Estructuras auxiliares
-        platos_seleccionados = set(request.POST.getlist("plato_seleccionado"))  # p.ej. {"155_20250926", ...}
-        
-        # 1) Primero apagamos todos los platos futuros
         MenuItem.objects.filter(
             menu__propietario=request.user,
             menu__fecha__gte=today,
             plato__isnull=False
         ).update(elegido=False)
 
-        # 2) Luego encendemos solo los seleccionados
         for clave in platos_seleccionados:
             try:
                 plato_id, ymd = clave.split("_", 1)
@@ -304,51 +518,9 @@ def lista_de_compras(request):
                 menu__fecha=datetime.datetime.strptime(ymd, "%Y%m%d").date(),
             ).update(elegido=True)
 
-        # Suponiendo que perfil.comentarios contiene una lista de cadenas en el formato "ingrediente%comentario"
-        comentarios_guardados_lista = perfil.comentarios
-        comentarios_guardados = {}
-
-        if comentarios_guardados_lista:
-            # Recorrer los comentarios guardados y convertirlos en un diccionario
-            for item in comentarios_guardados_lista:
-                ingrediente, comentario = item.split("%", 1)  # Divide en ingrediente y comentario
-                comentarios_guardados[ingrediente] = comentario  # Guarda en el diccionario
-
-        comentarios_posteados = {}
-
-        for key, value in request.POST.items():
-            if key.endswith("_comentario"):  # Filtra solo los comentarios
-                ingrediente = key.replace("_comentario", "")  # Extraer el ingrediente del nombre del campo
-                comentario_posteado = value.strip()  # Eliminar espacios en blanco al inicio y al final
-
-                # Guarda el comentario (puede ser vacío)
-                comentarios_posteados[ingrediente] = comentario_posteado
-
-        # Recorremos el diccionario de comentarios guardados
-        for ingrediente_posteado, comentario_posteado in comentarios_posteados.items():
-            if ingrediente_posteado in comentarios_guardados:  # Verificamos si el ingrediente está en ambos diccionarios
-                # Obtenemos el comentario guardado
-                comentario_guardado = comentarios_guardados[ingrediente_posteado]
-                # prepara el registro nuevo por si lo usa
-                registro = f"{ingrediente_posteado}%{comentario_guardado}"
-                if not comentario_posteado:
-                    # Eliminar el comentario del ingrediente
-                    perfil.comentarios.remove(registro)
-                elif comentario_posteado != comentario_guardado:
-                        # Actualizar el comentario del ingrediente
-                    perfil.comentarios[perfil.comentarios.index(registro)] = f"{ingrediente_posteado}%{comentario_posteado}"
-
-            elif comentario_posteado:
-                # Unir el ingrediente nuevo con el comentario, separado por '%'
-                ingrediente_con_comentario = f"{ingrediente_posteado}%{comentario_posteado}"
-                # Actualizar el campo ingredientes_que_tengo
-                perfil.comentarios.append(ingrediente_con_comentario)
-
-        # Guardar los cambios en el perfil
-        perfil.save()
-    
-    # REFACTOR
-    # ✅ Ingredientes a partir del modelo nuevo (MenuItem)
+    # =====================================================
+    # Ingredientes desde MenuItem elegido=True (SIEMPRE para mostrar)
+    # =====================================================
     items_elegidos = (
         MenuItem.objects
         .filter(
@@ -360,8 +532,6 @@ def lista_de_compras(request):
         .select_related("plato")
     )
 
-    lista_de_ingredientes = set()
-
     for item in items_elegidos:
         ing_txt = (item.plato.ingredientes or "").strip()
         if not ing_txt:
@@ -369,79 +539,101 @@ def lista_de_compras(request):
         lista_de_ingredientes.update(
             ing.strip() for ing in ing_txt.split(",") if ing.strip()
         )
-                            
-    if ingredientes_elegidos:
-        no_elegidos = lista_de_ingredientes - ingredientes_elegidos
-        for ingrediente_a_comprar in lista_de_ingredientes:
-            if ingrediente_a_comprar in perfil.ingredientes_que_tengo:
-                # Eliminar el ingrediente de la lista
-                perfil.ingredientes_que_tengo.remove(ingrediente_a_comprar)
-                # Guardar el perfil actualizado
-                perfil.save()
-    elif request.method != "GET":
-        no_elegidos = lista_de_ingredientes    
-                
-    if no_elegidos:
-        for ingrediente in no_elegidos:
-            if ingrediente not in perfil.ingredientes_que_tengo:
-                # Actualizar el campo ingredientes_que_tengo
-                perfil.ingredientes_que_tengo.append(ingrediente)
-                # Guardar el perfil actualizado
-                perfil.save()
-   
-    if lista_de_ingredientes:
-        for ingrediente in lista_de_ingredientes:
-            el_comentario = ""
-            # Recorrer la lista y buscar el comentario asociado
-            for item in perfil.comentarios:
-                # if "%" in item:
-                ingrediente_archivado, comentario = item.split("%", 1)  # Dividir en ingrediente y comentario
-                if ingrediente_archivado == ingrediente:
-                    el_comentario = comentario
 
-            if ingrediente in perfil.ingredientes_que_tengo:
-                ingredientes_unicos [ingrediente] = {
-                    "comentario": el_comentario,
-                    "estado": "tengo" }
+    # =====================================================
+    # 2) Persistir ingredientes/comentarios SOLO si origen == "ingredientes"
+    # =====================================================
+    if request.method == "POST" and post_origen == "ingredientes":
+        ingredientes_elegidos = set(request.POST.getlist("ingrediente_a_comprar"))
+
+        # a) comentarios
+        comentarios_guardados = {}
+        if perfil.comentarios:
+            for item in perfil.comentarios:
+                ingrediente, comentario = item.split("%", 1)
+                comentarios_guardados[ingrediente] = comentario
+
+        comentarios_posteados = {}
+        for key, value in request.POST.items():
+            if key.endswith("_comentario"):
+                ingrediente = key.replace("_comentario", "")
+                comentarios_posteados[ingrediente] = value.strip()
+
+        for ingrediente_posteado, comentario_posteado in comentarios_posteados.items():
+            if ingrediente_posteado in comentarios_guardados:
+                comentario_guardado = comentarios_guardados[ingrediente_posteado]
+                registro = f"{ingrediente_posteado}%{comentario_guardado}"
+
+                if not comentario_posteado:
+                    if registro in perfil.comentarios:
+                        perfil.comentarios.remove(registro)
+                elif comentario_posteado != comentario_guardado:
+                    if registro in perfil.comentarios:
+                        perfil.comentarios[perfil.comentarios.index(registro)] = f"{ingrediente_posteado}%{comentario_posteado}"
             else:
-                ingredientes_unicos [ingrediente] = {
-                    "comentario": el_comentario,
-                    "estado": "no-tengo" }
-   
-    lista_de_compras =[]
-    # Recorrer el diccionario para formatear los ingredientes que no tienes
+                if comentario_posteado:
+                    perfil.comentarios.append(f"{ingrediente_posteado}%{comentario_posteado}")
+
+        # b) persistencia de "tengo" vs "no-tengo"
+        # tu UI: checked => estado "no-tengo" (lo tengo que comprar)
+        # perfil.ingredientes_que_tengo guarda los que "tengo"
+        for ing in lista_de_ingredientes:
+            if ing in ingredientes_elegidos:
+                # lo marco para comprar => NO lo tengo
+                if ing in perfil.ingredientes_que_tengo:
+                    perfil.ingredientes_que_tengo.remove(ing)
+            else:
+                # no marcado => lo tengo
+                if ing not in perfil.ingredientes_que_tengo:
+                    perfil.ingredientes_que_tengo.append(ing)
+
+        perfil.save()
+
+    # =====================================================
+    # Estado para mostrar (si no guardamos por ingredientes)
+    # =====================================================
+    if not (request.method == "POST" and post_origen == "ingredientes"):
+        no_elegidos = {ing for ing in lista_de_ingredientes if ing not in perfil.ingredientes_que_tengo}
+        ingredientes_elegidos = lista_de_ingredientes - no_elegidos
+
+    # =====================================================
+    # Armar estructura para template
+    # =====================================================
+    for ingrediente in lista_de_ingredientes:
+        el_comentario = ""
+        for item in perfil.comentarios:
+            ingrediente_archivado, comentario = item.split("%", 1)
+            if ingrediente_archivado == ingrediente:
+                el_comentario = comentario
+
+        if ingrediente in perfil.ingredientes_que_tengo:
+            ingredientes_unicos[ingrediente] = {"comentario": el_comentario, "estado": "tengo"}
+        else:
+            ingredientes_unicos[ingrediente] = {"comentario": el_comentario, "estado": "no-tengo"}
+
     for ingrediente, detalles in ingredientes_unicos.items():
         if detalles["estado"] == "no-tengo":
             comentario = detalles["comentario"]
-            # Formatear el ingrediente con el comentario si está presente
-            if comentario:
-                # mensaje_whatsapp += f"• {ingrediente} ({comentario})\n"
-                lista_de_compras.append(f"{ingrediente} ({comentario})")
+            lista_de_compras.append(f"{ingrediente} ({comentario})" if comentario else f"{ingrediente}")
 
-            else:
-                # mensaje_whatsapp += f"• {ingrediente}\n"
-                lista_de_compras.append(f"{ingrediente}")
-    
-    token = perfil.ensure_share_token()  # genera uno si no existe
-
-    share_url = request.build_absolute_uri(
-        reverse("compartir-lista", args=[token]))
+    token = perfil.ensure_share_token()
+    share_url = request.build_absolute_uri(reverse("compartir-lista", args=[token]))
 
     context = {
-        'menues_del_usuario': menues_del_usuario,
-        'ingredientes_con_tengo_y_comentario': ingredientes_unicos, # DICT TODOS LOS INGREDIENTES, CON TENGO Y COMENTARIO
-        "lista_de_compras": lista_de_compras, # LISTA DE COMPRAS PARA VERLO EN ENVAR A WHATS APP
-        "parametro" : "lista-compras",
-        'share_url': share_url,             # 👈 NUEVO
+        "menues_del_usuario": menues_del_usuario,
+        "ingredientes_con_tengo_y_comentario": ingredientes_unicos,
+        "lista_de_compras": lista_de_compras,
+        "parametro": "lista-compras",
+        "share_url": share_url,
         "lista_de_ingredientes": lista_de_ingredientes,
         "no_elegidos": no_elegidos,
         "ingredientes_elegidos": ingredientes_elegidos,
-        # "ingredientes_elegidos_calculados": ingredientes_elegidos_calculados,
-        # "no_elegidos_calculados" : no_elegidos_calculados,
-        
-     }
+    }
+    return render(request, "AdminVideos/lista_de_compras.html", context)
 
-    return render(request, 'AdminVideos/lista_de_compras.html', context)
+
+
+
 
 
 def _get_user_by_token_or_404(token):

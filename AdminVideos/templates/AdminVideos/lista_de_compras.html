@@ -7,6 +7,9 @@
 <form id="frm-menu" action="{% url 'menu-elegido' %}" method="post">
 
   {% csrf_token %}
+
+  <input type="hidden" name="post_origen" id="post_origen" value="">
+
 <!-- 
 <h5 >lista de ingredientes {{redientes}}</h5>  
 <h5 >No elegidos {{ no_elegidos}}</h5>  
@@ -190,15 +193,17 @@
     </div>
 
 
-
-
-</form>  {# ⬅️ FORM FIN #}
 <script>
 (function () {
   const form = document.getElementById('frm-menu');
   if (!form) return;
 
   const csrf = form.querySelector('input[name=csrfmiddlewaretoken]')?.value || '';
+  const origenInput = document.getElementById('post_origen');
+
+  function setOrigen(v) {
+    if (origenInput) origenInput.value = v; // "menu" o "ingredientes"
+  }
 
   let t;
   const debounce = (fn, ms=350) => (...args) => {
@@ -216,7 +221,7 @@
     });
   }
 
-  // --- Cambios que afectan la lista de compras (requieren recarga) ---
+  // --- Cambios de menú (requieren recarga) ---
   const afectaIngredientesSelector = [
     'input[name="plato_seleccionado"]',
     'input[name="variedad_seleccionada"]'
@@ -225,38 +230,48 @@
   form.querySelectorAll(afectaIngredientesSelector).forEach(el => {
     el.addEventListener('change', async () => {
       try {
-        await autosave();       // guarda primero
-        location.reload();      // luego recarga para ver los ingredientes nuevos
+        setOrigen('menu');
+        await autosave();
+        location.reload();
       } catch (e) {
         console.error('No se pudo guardar y recargar', e);
       }
     });
   });
 
-  // --- Cambios que NO requieren recarga inmediata ---
-  // ingredientes a comprar: podés guardar sin recargar
+  // --- Cambios de ingredientes (NO recarga inmediata) ---
   form.querySelectorAll('input[name="ingrediente_a_comprar"]').forEach(el => {
     el.addEventListener('change', async () => {
-      try { await autosave(); } catch(e) {}
+      try {
+        setOrigen('ingredientes');
+        await autosave();
+      } catch(e) {}
     });
   });
 
   // comentarios: guardamos con debounce mientras escribís
   form.querySelectorAll('input[name$="_comentario"]').forEach(el => {
-    const saveDebounced = debounce(() => autosave(), 500);
+    const saveDebounced = debounce(async () => {
+      try {
+        setOrigen('ingredientes');
+        await autosave();
+      } catch(e) {}
+    }, 500);
+
     el.addEventListener('input', saveDebounced);
     el.addEventListener('change', async () => {
-      try { await autosave(); } catch(e) {}
+      try {
+        setOrigen('ingredientes');
+        await autosave();
+      } catch(e) {}
     });
   });
 
-  // Si alguien hace submit manual, prevenimos recarga completa
   form.addEventListener('submit', (e) => {
     e.preventDefault();
   });
 })();
 </script>
 
- 
 
 {% endblock %}
