@@ -774,32 +774,57 @@ class LugarDetail(DetailView):
 
 
 
+# @login_required
+# def eliminar_lugar(request, lugar_id):
+#     lugar = get_object_or_404(Lugar, id=lugar_id)
+
+#     # Verificar si el usuario es el propietario del lugar
+#     if lugar.propietario != request.user:
+#         raise Http404("No tenés permiso para eliminar este lugar.")
+
+#     # Obtener el perfil del usuario actual
+#     perfil = get_object_or_404(Profile, user=request.user)
+
+#     # Eliminar el lugar si aparece en listas personalizadas (si aplica)
+#     if lugar.id in perfil.sugeridos_descartados:
+#         perfil.sugeridos_descartados.remove(lugar.id)
+#         perfil.save()
+
+#     if lugar.id in perfil.sugeridos_importados:
+#         perfil.sugeridos_importados.remove(lugar.id)
+#         perfil.save()
+
+#     # Eliminar el lugar de la base de datos
+#     lugar.delete()
+
+#     # Redirigir a la página que quieras (modificá este nombre si tenés otra vista)
+#     return redirect('filtro-de-platos')
+
+
 @login_required
 def eliminar_lugar(request, lugar_id):
     lugar = get_object_or_404(Lugar, id=lugar_id)
 
-    # Verificar si el usuario es el propietario del lugar
+    # 🔒 Seguridad: solo el propietario puede borrar
     if lugar.propietario != request.user:
         raise Http404("No tenés permiso para eliminar este lugar.")
 
-    # Obtener el perfil del usuario actual
-    perfil = get_object_or_404(Profile, user=request.user)
+    # 🔧 Desasignar de menús (MUY IMPORTANTE)
+    MenuItem.objects.filter(
+        lugar=lugar,
+        menu__propietario=request.user
+    ).delete()
 
-    # Eliminar el lugar si aparece en listas personalizadas (si aplica)
-    if lugar.id in perfil.sugeridos_descartados:
-        perfil.sugeridos_descartados.remove(lugar.id)
-        perfil.save()
-
-    if lugar.id in perfil.sugeridos_importados:
-        perfil.sugeridos_importados.remove(lugar.id)
-        perfil.save()
-
-    # Eliminar el lugar de la base de datos
+    # 🗑️ Eliminar lugar
     lugar.delete()
 
-    # Redirigir a la página que quieras (modificá este nombre si tenés otra vista)
-    return redirect('filtro-de-platos')
+    # 🔁 Volver al filtro respetando tipopag
+    tipopag = request.GET.get("tipopag")
+    url = reverse("filtro-de-platos")
+    if tipopag:
+        url += f"?tipopag={tipopag}"
 
+    return redirect(url)
 
 @login_required
 def eliminar_plato(request, plato_id):
