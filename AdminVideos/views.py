@@ -600,7 +600,7 @@ def lista_de_compras(request):
     # =====================================================
     # Armar estructura para template
     # =====================================================
-    for ingrediente in lista_de_ingredientes:
+    for ingrediente in sorted(lista_de_ingredientes, key=str.casefold):
         el_comentario = ""
         for item in perfil.comentarios:
             ingrediente_archivado, comentario = item.split("%", 1)
