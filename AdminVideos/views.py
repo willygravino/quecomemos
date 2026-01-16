@@ -1113,211 +1113,6 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
 
 
 
-# class PlatoUpdate(LoginRequiredMixin, UpdateView):
-#     model = Plato
-#     form_class = PlatoForm
-#     template_name = "AdminVideos/plato_update.html"
-
-#     def get(self, request, *args, **kwargs):
-#         self.object = self.get_object()
-#         context = self.get_context_data()
-        
-#         # ✅ Si es AJAX: devolver fragmento HTML como JSON
-#         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-#             html = render_to_string("AdminVideos/plato_form_inner.html", context, request=request)
-#             return JsonResponse({'html': html})
-        
-#         return self.render_to_response(context)
-
-#     # 👉 TIPOS: ofrecer TODOS y marcar los que tenga el plato
-#     def get_form(self, form_class=None):
-#         form = super().get_form(form_class)
-
-#         # Mostrar todas las opciones
-#         form.fields['tipos'].choices = Plato.TIPOS_CHOICES
-
-#         # Sugerir tipopag si no hay initial
-#         if not form.initial.get('tipos'):
-#             tipopag = self.request.GET.get('tipopag')
-#             valid_keys = {k for k, _ in Plato.TIPOS_CHOICES}
-#             if tipopag in valid_keys:
-#                 form.fields['tipos'].initial = [tipopag]
-
-#         # Imagen no requerida
-#         if 'image' in form.fields:
-#             form.fields['image'].required = False
-
-#         return form
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-
-#         # --- Formset ingredientes (POST/GET) ---
-#         if self.request.method == "POST":
-#             formset = IngredienteEnPlatoFormSet(self.request.POST, instance=self.object)
-#         else:
-#             formset = IngredienteEnPlatoFormSet(instance=self.object)
-
-#         # ✅ PARCHE: asegurar nombre_ingrediente en initial (evita VariableDoesNotExist)
-#         for f in formset.forms:
-#             if "nombre_ingrediente" not in f.initial:
-#                 ing = getattr(f.instance, "ingrediente", None)
-#                 f.initial["nombre_ingrediente"] = getattr(ing, "nombre", "") if ing else ""
-
-#         context["ingrediente_formset"] = formset
-
-#         # 👉 TIPOS: enviar TODOS al template
-#         context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
-#         context["tipopag"] = self.request.GET.get("tipopag", "Dash")
-
-#         # 👉 Variedades (legacy): exponer maps como espera el template
-#         data = self.object.variedades or {}
-#         context["variedades_en_base"] = {
-#             f"variedad{i}": (data.get(f"variedad{i}", {}) or {}).get("nombre", "")
-#             for i in range(1, 7)
-#         }
-#         context["ingredientes_variedad"] = {
-#             f"variedad{i}": (data.get(f"variedad{i}", {}) or {}).get("ingredientes", "")
-#             for i in range(1, 7)
-#         }
-
-#         return context
-
-
-#     def form_valid(self, form):
-
-#         context = self.get_context_data()
-#         ingrediente_formset = context["ingrediente_formset"]
-
-#         if not ingrediente_formset.is_valid():
-#             return self.render_to_response(self.get_context_data(form=form))
-
-#         # 🔒 Imagen: normalizar
-#         uploaded = self.request.FILES.get('image')
-#         # Eso te borra la imagen en cada edición si no subís otra.
-
-#         # if not uploaded:
-#         #     form.instance.image = None  # si no se manda nueva, mantener actual; si querés mantenerla, comenta esta línea
-#         # else:
-#         #     if not getattr(uploaded, 'name', None):
-#         #         uploaded.name = 'upload.jpg'
-
-#         # Cambialo por:
-       
-#         if uploaded:
-#             if not getattr(uploaded, 'name', None):
-#                 uploaded.name = 'upload.jpg'
-#         # si no viene uploaded, no toques image (queda la actual)
-
-#         with transaction.atomic():
-#             plato = form.save(commit=False)
-#             plato.propietario = self.request.user
-
-#             # reconstruir string "ingredientes"
-#             lista_ingredientes = []
-#             for ing_form in ingrediente_formset:
-#                 if ing_form.cleaned_data and not ing_form.cleaned_data.get("DELETE", False):
-#                     nombre = ing_form.cleaned_data.get("nombre_ingrediente")
-#                     # cantidad = ing_form.cleaned_data.get("cantidad")
-#                     # unidad = ing_form.cleaned_data.get("unidad")
-
-#                     texto = (nombre or '').strip()
-#                     # if cantidad not in [None, '']:
-#                     #     texto += f" {cantidad}".rstrip()
-#                     # if unidad:
-#                     #     texto += f" {unidad}".rstrip()
-#                     if texto:
-#                         lista_ingredientes.append(texto)
-
-#             plato.ingredientes = ", ".join(lista_ingredientes)
-
-#             # variedades
-#             variedades = {}
-#             for i in range(1, 7):
-#                 variedad = form.cleaned_data.get(f'variedad{i}')
-#                 ingredientes_variedad_str = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
-#                 if variedad:
-#                     variedades[f"variedad{i}"] = {
-#                         "nombre": variedad,
-#                         "ingredientes": ingredientes_variedad_str,
-#                         "elegido": True
-#                     }
-#             plato.variedades = variedades
-
-#             plato.save()
-#             form.save_m2m()
-
-#             ingrediente_formset.instance = plato
-#             ingrediente_formset.save()
-            
-
-#         template_param = self.request.GET.get("tipopag")
-#         tail = f"?tipopag={template_param}&modificado=ok" if template_param else "?modificado=ok"
-
-
-#         # 🔁 Si el plato editado está en algún menú del día (ElegidosXDia), actualizamos su info
-#         registros = ElegidosXDia.objects.filter(
-#             Q(platos_que_comemos__icontains=f'"id_plato": "{plato.id}"')
-#         )
-
-#         for registro in registros:
-#             actualizado = False
-#             data = registro.platos_que_comemos or {}
-
-#             if not isinstance(data, dict):
-#                 continue  # Seguridad ante datos corruptos
-
-#             for comida, platos in data.items():
-#                 for i, p in enumerate(platos):
-#                     if str(p.get("id_plato")) == str(plato.id):
-#                         # Actualizar datos del plato
-#                         p["plato"] = plato.nombre_plato
-#                         p["tipo"] = plato.tipos
-#                         p["ingredientes"] = plato.ingredientes
-#                         p["variedades"] = {
-#                             vid: {
-#                                 "nombre": info.get("nombre", ""),
-#                                 "ingredientes": info.get("ingredientes", ""),
-#                                 "elegido": True
-#                             }
-#                             for vid, info in (plato.variedades or {}).items()
-#                         }
-#                         actualizado = True
-
-#             if actualizado:
-#                 registro.platos_que_comemos = data
-#                 registro.save()
-
-#         # 1️⃣ Si fue llamado desde un modal (AJAX), responder con JSON
-#         if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
-#             return JsonResponse({
-#                 "success": True,
-#                 "nombre": plato.nombre_plato,
-#                 "id": plato.id,
-#             })
-
-#         # 2️⃣ Si hay return_to (volver a donde fue llamado)
-#         return_to = self.request.POST.get("return_to") or self.request.GET.get("return_to")
-#         if return_to:
-#             return redirect(return_to)
-
-#         # 3️⃣ Fallback: redirigir normalmente
-#         template_param = self.request.GET.get("tipopag")
-#         tail = f"?tipopag={template_param}&modificado=ok" if template_param else "?modificado=ok"
-#         return redirect(f"{reverse('videos-create')}{tail}")
-
-
-
-#     def form_invalid(self, form):
-#         context = self.get_context_data(form=form)
-#         print("Errores al editar plato:", form.errors)
-#         ingrediente_formset = context.get("ingrediente_formset")
-#         if ingrediente_formset:
-#             for i, f in enumerate(ingrediente_formset.forms):
-#                 if f.errors:
-#                     print(f"Errores en ingrediente #{i}: {f.errors}")
-#         return self.render_to_response(context)
-
 
 class PlatoUpdate(LoginRequiredMixin, UpdateView):
     model = Plato
@@ -1538,13 +1333,44 @@ class PlatoVariedadCreate(PlatoCreate):
 
     #     context["ingrediente_formset"] = IngredienteEnPlatoFormSet(initial=inicial)
     #     return context
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+
+    #     # ✅ SIEMPRE: en variedades queremos mostrar tipos disponibles
+    #     context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
+
+    #     # ✅ tipopag: si no vino en la URL del modal, inferir desde el padre
+    #     tipopag = self.request.GET.get("tipopag")
+    #     if not tipopag:
+    #         raw = (self.padre.tipos or "").split(",")[0].strip()
+    #         tipopag = raw or "Dash"
+    #     context["tipopag"] = tipopag
+
+    #     context["plato_padre_obj"] = self.padre
+
+    #     # POST: que valide lo que vino del modal
+    #     if self.request.method == "POST":
+    #         context["ingrediente_formset"] = IngredienteEnPlatoFormSet(self.request.POST)
+    #         return context
+
+    #     # GET: clonar ingredientes del padre como initial
+    #     inicial = []
+    #     for rel in self.padre.ingredientes_en_plato.select_related("ingrediente").all():
+    #         inicial.append({
+    #             "ingrediente": rel.ingrediente_id,
+    #             "nombre_ingrediente": rel.ingrediente.nombre if rel.ingrediente else "",
+    #             "cantidad": rel.cantidad,
+    #             "unidad": rel.unidad,
+    #         })
+
+    #     context["ingrediente_formset"] = IngredienteEnPlatoFormSet(initial=inicial)
+    #     return context
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # ✅ SIEMPRE: en variedades queremos mostrar tipos disponibles
         context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
 
-        # ✅ tipopag: si no vino en la URL del modal, inferir desde el padre
         tipopag = self.request.GET.get("tipopag")
         if not tipopag:
             raw = (self.padre.tipos or "").split(",")[0].strip()
@@ -1553,12 +1379,11 @@ class PlatoVariedadCreate(PlatoCreate):
 
         context["plato_padre_obj"] = self.padre
 
-        # POST: que valide lo que vino del modal
         if self.request.method == "POST":
             context["ingrediente_formset"] = IngredienteEnPlatoFormSet(self.request.POST)
             return context
 
-        # GET: clonar ingredientes del padre como initial
+        # GET: clonar ingredientes del padre
         inicial = []
         for rel in self.padre.ingredientes_en_plato.select_related("ingrediente").all():
             inicial.append({
@@ -1568,7 +1393,13 @@ class PlatoVariedadCreate(PlatoCreate):
                 "unidad": rel.unidad,
             })
 
-        context["ingrediente_formset"] = IngredienteEnPlatoFormSet(initial=inicial)
+        # 👇 CLAVE: si tu formset es inlineformset, necesita extra >= len(inicial)
+        context["ingrediente_formset"] = IngredienteEnPlatoFormSet(
+            initial=inicial,
+            queryset=self.padre.ingredientes_en_plato.none(),  # opcional, evita traer del padre
+        )
+        context["ingrediente_formset"].extra = len(inicial)
+
         return context
 
 
@@ -1577,6 +1408,11 @@ class PlatoVariedadCreate(PlatoCreate):
     def form_valid(self, form):
         context = self.get_context_data()
         ingrediente_formset = context["ingrediente_formset"]
+
+        print("=== VARIEDAD CREATE POST CHECK ===")
+        print("keys TOTAL_FORMS:", [k for k in self.request.POST.keys() if "TOTAL_FORMS" in k])
+        print("keys INITIAL_FORMS:", [k for k in self.request.POST.keys() if "INITIAL_FORMS" in k])
+
 
         # --- Validación del formset ---
         if not ingrediente_formset.is_valid():
@@ -1612,22 +1448,63 @@ class PlatoVariedadCreate(PlatoCreate):
             plato.ingredientes = ", ".join(lista_ingredientes)
 
             # legacy variedades (si ya lo estás vaciando en template, quedará {})
-            variedades = {}
-            for i in range(1, 7):
-                variedad = form.cleaned_data.get(f"variedad{i}")
-                ingredientes_variedad_str = form.cleaned_data.get(f"ingredientes_de_variedad{i}")
-                if variedad:
-                    variedades[f"variedad{i}"] = {
-                        "nombre": variedad,
-                        "ingredientes": ingredientes_variedad_str,
-                        "elegido": True,
-                    }
-            plato.variedades = variedades
+            # variedades = {}
+            # for i in range(1, 7):
+            #     variedad = form.cleaned_data.get(f"variedad{i}")
+            #     ingredientes_variedad_str = form.cleaned_data.get(f"ingredientes_de_variedad{i}")
+            #     if variedad:
+            #         variedades[f"variedad{i}"] = {
+            #             "nombre": variedad,
+            #             "ingredientes": ingredientes_variedad_str,
+            #             "elegido": True,
+            #         }
+            # plato.variedades = variedades
 
             plato.save()
             form.save_m2m()
 
             ingrediente_formset.instance = plato
+
+            # Si no vinieron ingredientes en el POST, clonarlos del padre
+            hay_al_menos_uno = False
+            for f in ingrediente_formset.forms:
+                if f.cleaned_data and not f.cleaned_data.get("DELETE", False):
+                    nombre = (f.cleaned_data.get("nombre_ingrediente") or "").strip()
+                    if nombre:
+                        hay_al_menos_uno = True
+                        break
+
+            if not hay_al_menos_uno:
+                # 1) borrar cualquier cosa que haya quedado (por seguridad)
+                # (en create normalmente no hay, pero no molesta)
+                # plato.ingredientes_en_plato.all().delete()  # si ya existen
+
+                # 2) clonar relaciones desde el padre
+                from .models import IngredienteEnPlato  # ajustá si tu import es distinto
+
+                IngredienteEnPlato.objects.bulk_create([
+                    IngredienteEnPlato(
+                        plato=plato,
+                        ingrediente=rel.ingrediente,
+                        cantidad=rel.cantidad,
+                        unidad=rel.unidad,
+                    )
+                    for rel in self.padre.ingredientes_en_plato.select_related("ingrediente").all()
+                    if rel.ingrediente_id
+                ])
+
+                # 3) y reconstruir el string "ingredientes"
+                nombres = [
+                    rel.ingrediente.nombre
+                    for rel in self.padre.ingredientes_en_plato.select_related("ingrediente").all()
+                    if rel.ingrediente_id and rel.ingrediente and rel.ingrediente.nombre
+                ]
+                plato.ingredientes = ", ".join(nombres)
+                plato.save(update_fields=["ingredientes"])
+            else:
+                ingrediente_formset.instance = plato
+                ingrediente_formset.save()
+
             ingrediente_formset.save()
 
         # AJAX (modal) — lo dejamos compatible para el paso 4

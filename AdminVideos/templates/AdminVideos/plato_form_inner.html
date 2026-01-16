@@ -278,11 +278,23 @@
 
         {# Por ahora link directo para no depender de urls.py (paso 3 lo conectamos con modal) #}
    
-       <button type="button"
+       
+
+
+        <button type="button"
                 class="btn btn-sm btn-primary js-open-variedad-modal"
                 data-url="{% url 'plato_variedad_create' form.instance.pk %}">
-          + Agregar variedad
+          + Agregar variedad MODAL
         </button>
+
+        <a class="btn btn-sm btn-primary"
+          href="{% url 'plato_variedad_create' form.instance.pk %}?tipopag={{ tipopag }}">
+          + Agregar variedad pantalla completa
+        </a>
+
+
+        
+
 
 
 
