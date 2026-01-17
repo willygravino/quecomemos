@@ -4,6 +4,72 @@
 (function () {
   "use strict";
 
+    // ===========================
+  // PLATO: Ver / compartir ingredientes (modal)
+  // Se bindea UNA sola vez para toda la app
+  // ===========================
+  if (!document.__platoIngredientesBound) {
+
+    async function openPlatoIngredientesModal(url) {
+      // cerrar modal de edición si está abierto
+      const modalPlatoEl = document.getElementById("modalPlato");
+      if (modalPlatoEl && window.bootstrap?.Modal) {
+        const inst = bootstrap.Modal.getInstance(modalPlatoEl);
+        if (inst) inst.hide();
+      }
+
+      const res = await fetch(url, {
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+        credentials: "same-origin",
+      });
+
+      const html = await res.text();
+
+      const root = document.getElementById("modal-root");
+      if (!root) {
+        console.error("Falta #modal-root en el HTML base");
+        return;
+      }
+
+      root.innerHTML = html;
+
+      const modalEl = document.getElementById("platoIngredientesModal");
+      if (!modalEl) {
+        console.error("No llegó #platoIngredientesModal en el HTML del endpoint");
+        return;
+      }
+
+      // IMPORTANTÍSIMO: que viva en body para z-index correcto
+      if (modalEl.parentElement !== document.body) {
+        document.body.appendChild(modalEl);
+      }
+
+      const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+      modal.show();
+
+      modalEl.addEventListener("hidden.bs.modal", () => {
+        root.innerHTML = "";
+      }, { once: true });
+    }
+
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest(".js-plato-ingredientes");
+      if (!btn) return;
+
+      e.preventDefault();
+
+      const url = btn.dataset.url;
+      if (!url) {
+        console.error("Falta data-url en .js-plato-ingredientes");
+        return;
+      }
+
+      openPlatoIngredientesModal(url).catch(err => console.error("Error abriendo ingredientes:", err));
+    });
+
+    document.__platoIngredientesBound = true;
+  }
+
 
   // ===========================
 // FIX BOOTSTRAP MODALS STACKING

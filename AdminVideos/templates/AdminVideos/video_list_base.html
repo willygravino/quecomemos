@@ -538,37 +538,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-<div id="modal-root"></div>
-<script>
-  (function() {
-    async function openPlatoIngredientesModal(url) {
-      const res = await fetch(url, {
-        headers: { "X-Requested-With": "XMLHttpRequest" }
-      });
-      const html = await res.text();
-
-      const root = document.getElementById("modal-root");
-      root.innerHTML = html;
-
-      const modalEl = document.getElementById("platoIngredientesModal");
-      const modal = new bootstrap.Modal(modalEl);
-      modal.show();
-
-      // opcional: limpiar al cerrar para evitar duplicados
-      modalEl.addEventListener("hidden.bs.modal", () => {
-        root.innerHTML = "";
-      }, { once: true });
-    }
-
-    document.addEventListener("click", (e) => {
-      const btn = e.target.closest(".js-plato-ingredientes");
-      if (!btn) return;
-      e.preventDefault();
-      openPlatoIngredientesModal(btn.dataset.url);
-    });
-  })();
-</script>
-
 
 
 {% endblock %}

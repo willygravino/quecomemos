@@ -93,18 +93,25 @@
                     {% endif %}
                   </div>
 
-                  <div class="col-auto d-flex align-items-end">
-                    
+                  <div class="col-auto d-flex flex-column align-items-start gap-1">
 
                     {% if form.instance.pk %}
                       <a href="{% url 'agregar-a-mi-lista' form.instance.pk %}?duplicar=true"
                         class="btn btn-sm btn-outline-secondary">
                         Duplicar Plato
                       </a>
+
+                      <button type="button"
+                              class="btn btn-sm btn-outline-primary js-plato-ingredientes"
+                              data-url="{% url 'plato_ingredientes' form.instance.pk %}">
+                        Ver / compartir ingredientes
+                      </button>
                     {% endif %}
 
-                    
                   </div>
+
+
+                  
                 </div>
 
 
@@ -562,5 +569,6 @@
     </div>
   </div>
 </div>
+
 
 
