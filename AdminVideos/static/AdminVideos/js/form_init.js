@@ -4,7 +4,39 @@
 (function () {
   "use strict";
 
+
+  // ===========================
+// FIX BOOTSTRAP MODALS STACKING
+// ===========================
+// Cuando se abre un modal (ej: Variedad) y desde ahí se abre otro
+// (ej: Ingrediente), Bootstrap deja ambos con el mismo z-index (1050)
+// y el segundo queda visualmente "detrás".
+//
+// La causa es que algunos modales se renderizan dentro de otros
+// contenedores (por ejemplo, dentro del modal de variedad).
+//
+// Solución:
+// - Forzar que ciertos modales vivan directamente en <body>
+// - Bootstrap calcula correctamente z-index y backdrop desde ahí
+//
+// ⚠️ Esto se ejecuta UNA SOLA VEZ al cargar el script
+// ===========================
+
+  function ensureModalAtBody(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.parentElement !== document.body) {
+      document.body.appendChild(el);
+    }
+  }
+
+  // al iniciar el script (después de definir funciones básicas)
+  ensureModalAtBody("ingredienteModal");
+  ensureModalAtBody("confirmDeleteVariedadModal");
+  ensureModalAtBody("successModal");
+
   
+
 
   // Evita redefinir si el archivo se carga más de una vez
   if (window.__PLATO_FORM_INIT_LOADED__) return;
