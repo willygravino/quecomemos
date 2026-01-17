@@ -621,13 +621,21 @@
           const payload = await resp.json();
 
           if (payload.success) {
-            modal.hide();
+            const modalEl2 = modalEl; // el mismo modal del principio
+            const inst = bootstrap.Modal.getInstance(modalEl2);
 
-            // ✅ Simple y seguro por ahora:
-            // recargar para que aparezca anidada en la lista
-            location.reload();
+            // cerrar
+            if (inst) inst.hide();
+
+            // recargar cuando el modal terminó de cerrarse
+            modalEl2.addEventListener(
+              "hidden.bs.modal",
+              () => window.location.reload(),
+              { once: true }
+            );
             return;
           }
+
 
           if (payload.html) {
             modalBody.innerHTML = payload.html;
