@@ -1548,6 +1548,32 @@ class PlatoVariedadUpdate(PlatoUpdate):
 
 
 
+class PlatoVariedadDelete(LoginRequiredMixin, DeleteView):
+    model = Plato
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        if self.object.plato_padre_id is None:
+            raise PermissionDenied("Este plato no es una variedad.")
+        if self.object.propietario_id != request.user.id:
+            raise PermissionDenied()
+
+        self.padre = self.object.plato_padre
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.padre = self.object.plato_padre
+        self.object.delete()
+
+        # si lo llamás por AJAX
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({"success": True})
+
+        # pantalla completa: volver al padre
+        return redirect(reverse("videos-update", kwargs={"pk": self.padre.id}))
+
 
 class Login(LoginView):
     authentication_form = CustomAuthenticationForm

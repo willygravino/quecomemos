@@ -4,9 +4,82 @@
 (function () {
   "use strict";
 
+  
+
   // Evita redefinir si el archivo se carga más de una vez
   if (window.__PLATO_FORM_INIT_LOADED__) return;
+
+  function getCookie(name) {
+    const cookies = document.cookie ? document.cookie.split(";") : [];
+    for (let i = 0; i < cookies.length; i++) {
+      const c = cookies[i].trim();
+      if (c.startsWith(name + "=")) return decodeURIComponent(c.substring(name.length + 1));
+    }
+    return null;
+  }
+
+
+  const CSRF_TOKEN = getCookie("csrftoken");
   window.__PLATO_FORM_INIT_LOADED__ = true;
+
+    // ===========================
+  // DELETE VARIEDAD (confirm modal)
+  // ===========================
+    if (!document.__deleteVariedadBound) {
+      let deleteUrl = null;
+
+      document.addEventListener("click", function (e) {
+        const btn = e.target.closest(".js-delete-variedad");
+        if (!btn) return;
+
+        deleteUrl = btn.dataset.url;
+        const nombre = btn.dataset.nombre || "esta variedad";
+
+        const nameEl = document.getElementById("deleteVariedadNombre");
+        if (nameEl) nameEl.textContent = nombre;
+
+        const modalEl = document.getElementById("confirmDeleteVariedadModal");
+        if (!modalEl) return;
+
+        const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        modal.show();
+      });
+
+      const confirmBtn = document.getElementById("confirmDeleteVariedadBtn");
+      if (confirmBtn) {
+        confirmBtn.addEventListener("click", async function () {
+          if (!deleteUrl) return;
+
+          const resp = await fetch(deleteUrl, {
+            method: "POST",
+            headers: {
+              "X-Requested-With": "XMLHttpRequest",
+              "X-CSRFToken": CSRF_TOKEN || "",
+            },
+            credentials: "same-origin",
+          });
+
+          if (!resp.ok) {
+            alert("No se pudo eliminar. Revisá permisos/CSRF.");
+            return;
+          }
+
+          const modalEl = document.getElementById("confirmDeleteVariedadModal");
+          const inst = modalEl ? bootstrap.Modal.getInstance(modalEl) : null;
+          if (inst) inst.hide();
+
+          if (modalEl) {
+            modalEl.addEventListener("hidden.bs.modal", () => window.location.reload(), { once: true });
+          } else {
+            window.location.reload();
+          }
+        });
+      }
+
+      document.__deleteVariedadBound = true;
+    }
+
+
 
   // ===== Utils =====
   function log() {
@@ -15,18 +88,18 @@
     }
   }
 
-  function getCookie(name) {
-    const cookies = document.cookie ? document.cookie.split(";") : [];
-    for (let i = 0; i < cookies.length; i++) {
-      const c = cookies[i].trim();
-      if (c.startsWith(name + "=")) {
-        return decodeURIComponent(c.substring(name.length + 1));
-      }
-    }
-    return null;
-  }
+  // function getCookie(name) {
+  //   const cookies = document.cookie ? document.cookie.split(";") : [];
+  //   for (let i = 0; i < cookies.length; i++) {
+  //     const c = cookies[i].trim();
+  //     if (c.startsWith(name + "=")) {
+  //       return decodeURIComponent(c.substring(name.length + 1));
+  //     }
+  //   }
+  //   return null;
+  // }
 
-  const CSRF_TOKEN = getCookie("csrftoken");
+  // const CSRF_TOKEN = getCookie("csrftoken");
 
   // ===== Select2 helpers =====
   function buildSelect2Config(dropdownParent /* jQuery or null */) {
@@ -667,13 +740,14 @@
   }
 
 
-
   // Auto-init en páginas normales (cuando hay formulario ya presente en el DOM)
   document.addEventListener("DOMContentLoaded", function () {
-    const formInPage = document.querySelector("#platoForm") || document.querySelector("form[method='post']");
+    const formInPage =
+      document.querySelector("#platoForm") || document.querySelector("form[method='post']");
     if (formInPage) {
       initPlatoForm(document);
     }
   });
 })(); // ← cierre final del IIFE principal
+
 
