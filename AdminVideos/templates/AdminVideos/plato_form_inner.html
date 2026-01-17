@@ -315,6 +315,14 @@
                   href="{% url 'plato_variedad_update' v.id %}">
                   Editar
                 </a>
+
+                <button type="button"
+                        class="btn btn-sm btn-outline-secondary js-open-variedad-modal"
+                        data-url="{% url 'plato_variedad_update' v.id %}?tipopag={{ tipopag }}">
+                  Editar en Modal
+                </button>
+
+
                 
               </div>
             {% endfor %}
