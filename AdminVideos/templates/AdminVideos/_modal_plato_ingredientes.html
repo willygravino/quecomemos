@@ -1,0 +1,67 @@
+<div class="modal fade" id="platoIngredientesModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          Ingredientes: {{ plato.nombre_plato }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body">
+        {% if ingredientes %}
+          <ul class="list-group">
+            {% for iep in ingredientes %}
+              <li class="list-group-item d-flex justify-content-between align-items-start">
+                <div class="me-3">
+                  <div class="fw-semibold">{{ iep.ingrediente.nombre }}</div>
+                  <small class="text-muted">{{ iep.cantidad }} {{ iep.unidad }}</small>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="alert alert-secondary mb-0">
+            Este plato no tiene ingredientes cargados.
+          </div>
+        {% endif %}
+
+        <hr class="my-3">
+
+        <div class="d-grid gap-2">
+          <a class="btn btn-success" target="_blank"
+             href="https://wa.me/?text={{ share_url|urlencode }}">
+            Compartir por WhatsApp
+          </a>
+
+          <button type="button" class="btn btn-outline-secondary" id="btnCopyLink"
+                  data-link="{{ share_url }}">
+            Copiar link
+          </button>
+
+         
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const btn = document.getElementById("btnCopyLink");
+    if (!btn) return;
+
+    btn.addEventListener("click", async () => {
+      const link = btn.dataset.link;
+      try {
+        await navigator.clipboard.writeText(link);
+        btn.textContent = "Link copiado ✓";
+        setTimeout(() => (btn.textContent = "Copiar link"), 1200);
+      } catch (e) {
+        prompt("Copiá el link:", link);
+      }
+    });
+  })();
+</script>

@@ -17,7 +17,7 @@ from AdminVideos import models
 from AdminVideos.models import HistoricoDia, HistoricoItem, Ingrediente, IngredienteEnPlato, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje,  ElegidosXDia
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string   # ✅ ← ESTA ES LA CLAVE
-from django.http import Http404, JsonResponse
+from django.http import Http404, HttpRequest, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.forms import UserCreationForm
 from django.views.generic import CreateView, UpdateView, DeleteView, DetailView
@@ -48,6 +48,30 @@ from django.core.exceptions import PermissionDenied
 #     ingredientes = Ingrediente.objects.filter(nombre__icontains=q).order_by('nombre')[:20]  # límite de resultados
 #     data = [{"id": ing.id, "nombre": ing.nombre} for ing in ingredientes]
 #     return JsonResponse(data, safe=False)
+
+
+def plato_ingredientes(request: HttpRequest, pk: int):
+    plato = get_object_or_404(Plato, pk=pk)
+
+    # Ajustá esto al related_name real:
+    # Ej: plato.ingredientes_en_plato.all()
+    ingredientes_qs = plato.ingredientes_en_plato.select_related("ingrediente").all()
+
+    ctx = {
+        "plato": plato,
+        "ingredientes": ingredientes_qs,
+        "share_url": request.build_absolute_uri(),
+    }
+
+    # detectar fetch/AJAX (compatible con tu estilo actual)
+    is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
+
+    if is_ajax:
+        return render(request, "AdminVideos/_modal_plato_ingredientes.html", ctx)
+
+
+    # si alguien abre el link desde WhatsApp
+    return render(request, "AdminVideos/plato_ingredientes_page.html", ctx)
 
 
 
