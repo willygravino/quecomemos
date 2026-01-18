@@ -4,7 +4,7 @@
 (function () {
   "use strict";
 
-    // ===========================
+  // ===========================
   // PLATO: Ver / compartir ingredientes (modal)
   // Se bindea UNA sola vez para toda la app
   // ===========================
@@ -32,6 +32,40 @@
       }
 
       root.innerHTML = html;
+
+      // ✅ Bind autosave dentro del modal recién cargado
+      const frm = document.getElementById("frm-plato-ingredientes");
+      if (frm) {
+        const csrf = frm.querySelector('input[name=csrfmiddlewaretoken]')?.value || '';
+
+        let t;
+        const debounce = (fn, ms = 350) => (...args) => {
+          clearTimeout(t);
+          t = setTimeout(() => fn.apply(null, args), ms);
+        };
+
+        async function autosave() {
+          const fd = new FormData(frm);
+          await fetch(url, { // ✅ usa el parámetro url
+            method: "POST",
+            headers: { "X-CSRFToken": csrf, "X-Requested-With": "XMLHttpRequest" },
+            body: fd,
+            credentials: "same-origin",
+          });
+        }
+
+        frm.querySelectorAll('input[name="ingrediente_a_comprar_id"]').forEach(el => {
+          el.addEventListener("change", () => {
+            autosave().catch(() => {});
+          });
+        });
+
+        frm.querySelectorAll('input[name^="comentario_"]').forEach(el => {
+          const saveDebounced = debounce(() => autosave().catch(() => {}), 500);
+          el.addEventListener("input", saveDebounced);
+          el.addEventListener("change", () => autosave().catch(() => {}));
+        });
+      }
 
       const modalEl = document.getElementById("platoIngredientesModal");
       if (!modalEl) {

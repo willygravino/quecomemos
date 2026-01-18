@@ -50,29 +50,122 @@ from django.core.exceptions import PermissionDenied
 #     return JsonResponse(data, safe=False)
 
 
+# def plato_ingredientes(request: HttpRequest, pk: int):
+#     plato = get_object_or_404(Plato, pk=pk)
+
+#     # Ajustá esto al related_name real:
+#     # Ej: plato.ingredientes_en_plato.all()
+#     ingredientes_qs = plato.ingredientes_en_plato.select_related("ingrediente").all()
+
+#     ctx = {
+#         "plato": plato,
+#         "ingredientes": ingredientes_qs,
+#         "share_url": request.build_absolute_uri(),
+#     }
+
+#     # detectar fetch/AJAX (compatible con tu estilo actual)
+#     is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
+
+#     if is_ajax:
+#         return render(request, "AdminVideos/_modal_plato_ingredientes.html", ctx)
+
+
+#     # si alguien abre el link desde WhatsApp
+#     return render(request, "AdminVideos/plato_ingredientes_page.html", ctx)
+
+
+
+@login_required
 def plato_ingredientes(request: HttpRequest, pk: int):
     plato = get_object_or_404(Plato, pk=pk)
+    perfil = get_object_or_404(Profile, user=request.user)
 
-    # Ajustá esto al related_name real:
-    # Ej: plato.ingredientes_en_plato.all()
-    ingredientes_qs = plato.ingredientes_en_plato.select_related("ingrediente").all()
+    ingredientes_qs = (
+        plato.ingredientes_en_plato
+        .select_related("ingrediente")
+        .all()
+    )
+
+    ing_ids = list(ingredientes_qs.values_list("ingrediente_id", flat=True))
+
+    pantry_qs = (
+        ProfileIngrediente.objects
+        .filter(profile=perfil, ingrediente_id__in=ing_ids)
+        .only("ingrediente_id", "tengo", "comentario", "last_bought_at")
+    )
+    pantry_map = {pi.ingrediente_id: pi for pi in pantry_qs}
+
+    # =========================
+    # POST (AJAX): persistir estados del modal
+    # =========================
+    if request.method == "POST":
+        now = timezone.now()
+
+        # checked => "no-tengo" => aparece en POST como to_buy_id
+        to_buy_ids = set(
+            int(x) for x in request.POST.getlist("ingrediente_a_comprar_id") if x.isdigit()
+        )
+
+        # persistimos SOLO los ingredientes del plato
+        for iep in ingredientes_qs:
+            ing_id = iep.ingrediente_id
+            want_tengo = (ing_id not in to_buy_ids)  # no marcado => lo tengo
+
+            pi = pantry_map.get(ing_id)
+            if not pi:
+                pi = ProfileIngrediente(profile=perfil, ingrediente_id=ing_id)
+                pi.tengo = want_tengo
+            else:
+                # transición no-tengo -> tengo => recién comprado
+                if (pi.tengo is False) and (want_tengo is True):
+                    pi.last_bought_at = now
+                pi.tengo = want_tengo
+
+            # comentario (mismo naming que en lista de compras)
+            comentario_key = f"comentario_{ing_id}"
+            if comentario_key in request.POST:
+                pi.comentario = (request.POST.get(comentario_key) or "").strip()
+
+            pi.save()
+
+        return JsonResponse({"success": True})
+
+    # =========================
+    # GET: preparar items para render
+    # =========================
+    items = []
+    for iep in ingredientes_qs:
+        ing = iep.ingrediente
+        pi = pantry_map.get(iep.ingrediente_id)
+
+        # misma convención: checked = "no-tengo"
+        estado = "tengo"
+        comentario = ""
+        if pi:
+            comentario = pi.comentario or ""
+            if pi.tengo is False:
+                estado = "no-tengo"
+
+        items.append({
+            "ingrediente_id": iep.ingrediente_id,
+            "nombre": ing.nombre,
+            "cantidad": iep.cantidad,
+            "unidad": iep.unidad,
+            "estado": estado,
+            "comentario": comentario,
+        })
 
     ctx = {
         "plato": plato,
-        "ingredientes": ingredientes_qs,
+        "items": items,
         "share_url": request.build_absolute_uri(),
     }
 
-    # detectar fetch/AJAX (compatible con tu estilo actual)
     is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
-
     if is_ajax:
         return render(request, "AdminVideos/_modal_plato_ingredientes.html", ctx)
 
-
-    # si alguien abre el link desde WhatsApp
     return render(request, "AdminVideos/plato_ingredientes_page.html", ctx)
-
 
 
 @require_http_methods(["GET", "POST"])
