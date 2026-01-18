@@ -1353,13 +1353,16 @@ def _get_user_by_token_or_404(token):
     perfil = get_object_or_404(Profile, share_token=str(token))
     return perfil.user, perfil
 
+
+
 def compartir_lista(request, token):
     share_user, perfil = _get_user_by_token_or_404(token)
 
     today = date.today()
-    ingredientes = set()
 
-    # ✅ NUEVO: ingredientes desde MenuItem elegido=True
+    # =====================================================
+    # Platos elegidos (igual que tu lista nueva)
+    # =====================================================
     items_elegidos = (
         MenuItem.objects
         .filter(
@@ -1368,45 +1371,140 @@ def compartir_lista(request, token):
             plato__isnull=False,
             elegido=True,
         )
-        .select_related("plato")
+        .select_related("menu", "plato")
     )
 
-    for it in items_elegidos:
-        ing_txt = (it.plato.ingredientes or "").strip()
-        if not ing_txt:
-            continue
-        ingredientes.update(
-            ing.strip() for ing in ing_txt.split(",") if ing.strip()
+    plato_ids = list(items_elegidos.values_list("plato_id", flat=True).distinct())
+
+    # Si no hay platos elegidos, devolvemos vacío
+    if not plato_ids:
+        if not perfil.share_token:
+            perfil.ensure_share_token()
+        return render(request, "AdminVideos/compartir_lista.html", {
+            "items": [],
+            "token": f"user-{perfil.pk}",
+            "api_token": perfil.share_token,
+        })
+
+    # =====================================================
+    # Ingredientes relacionales usados por esos platos
+    # =====================================================
+    ingredientes_rows = (
+        IngredienteEnPlato.objects
+        .filter(plato_id__in=plato_ids)
+        .select_related("ingrediente")
+        .only(
+            "plato_id",
+            "ingrediente_id",
+            "cantidad",
+            "unidad",
+            "ingrediente__nombre",
+            "ingrediente__tipo",
+            "ingrediente__detalle",
         )
+    )
 
-    # comentarios (igual que antes)
-    comentarios = {}
-    for item in (perfil.comentarios or []):
-        try:
-            ingr, coment = item.split("%", 1)
-            comentarios[ingr] = coment
-        except ValueError:
-            pass
+    # fecha más cercana de uso por plato (para "needed_by")
+    plato_min_fecha = {
+        row["plato_id"]: row["min_fecha"]
+        for row in (
+            items_elegidos
+            .values("plato_id")
+            .annotate(min_fecha=Min("menu__fecha"))
+        )
+    }
 
-    tengo = set(perfil.ingredientes_que_tengo or [])
+    # =====================================================
+    # Agregamos por ingrediente (como en lista nueva)
+    # =====================================================
+    agregados = {}
+    for row in ingredientes_rows:
+        if not row.ingrediente:
+            continue
 
+        ing_id = row.ingrediente.id
+        needed_by = plato_min_fecha.get(row.plato_id)
+
+        if ing_id not in agregados:
+            agregados[ing_id] = {
+                "ingrediente_id": ing_id,
+                "nombre": row.ingrediente.nombre,
+                "tipo": row.ingrediente.tipo,
+                "detalle": row.ingrediente.detalle,
+                "needed_by": needed_by,
+                "cantidades": defaultdict(float),
+            }
+
+        # earliest needed_by
+        if needed_by and (
+            agregados[ing_id]["needed_by"] is None
+            or needed_by < agregados[ing_id]["needed_by"]
+        ):
+            agregados[ing_id]["needed_by"] = needed_by
+
+        if row.cantidad is not None:
+            agregados[ing_id]["cantidades"][row.unidad or "-"] += float(row.cantidad)
+
+    # =====================================================
+    # Estados guardados (tengo / comentario / last_bought_at)
+    # =====================================================
+    pantry_qs = (
+        ProfileIngrediente.objects
+        .filter(profile=perfil, ingrediente_id__in=agregados.keys())
+        .only("ingrediente_id", "tengo", "comentario", "last_bought_at")
+    )
+    pantry_map = {pi.ingrediente_id: pi for pi in pantry_qs}
+
+    def fresh_until(fecha_uso):
+        return fecha_uso or (today + timedelta(days=7))
+
+    def estado_final(pi, limite):
+        if not pi:
+            return "tengo"  # o "no-tengo" si querés default comprar; pero tu lista nueva usa "tengo"
+        if not pi.tengo:
+            return "no-tengo"
+        if (
+            pi.last_bought_at
+            and pi.last_bought_at >= timezone.now() - timedelta(days=7)
+            and today <= limite
+        ):
+            return "recien-comprado"
+        return "tengo"
+
+    # =====================================================
+    # Items para template compartido
+    # (Yo te recomiendo mostrar TODOS, y que el template tache "fresh".
+    #  Si querés, podés filtrar solo "no-tengo".)
+    # =====================================================
     items = []
-    for ing in sorted(ingredientes, key=str.casefold):
-        if ing not in tengo:
-            items.append({"nombre": ing, "comentario": comentarios.get(ing, "")})
+    for ing_id, data in agregados.items():
+        pi = pantry_map.get(ing_id)
+        limite = fresh_until(data["needed_by"])
+        estado = estado_final(pi, limite)
 
-    # tokens (igual que tu idea: UUID para API, pk para localStorage)
+        items.append({
+            "ingrediente_id": ing_id,
+            "nombre": data["nombre"],
+            "comentario": (pi.comentario if pi else ""),
+            "estado": estado,
+            "last_bought_at": (pi.last_bought_at if pi else None),
+            "needed_by": data["needed_by"],
+        })
+
+    # Orden como tu lista nueva
+    order = {"no-tengo": 0, "recien-comprado": 1, "tengo": 2}
+    items.sort(key=lambda i: (order[i["estado"]], i["nombre"].casefold()))
+
+    # Tokens
     if not perfil.share_token:
-        perfil.ensure_share_token()  # genera y guarda un UUID
-
-    api_token = perfil.share_token
-    local_token = f"user-{perfil.pk}"
+        perfil.ensure_share_token()
 
     return render(request, "AdminVideos/compartir_lista.html", {
         "items": items,
-        "token": local_token,   # localStorage
-        "api_token": api_token, # URL/API
+        "token": f"user-{perfil.pk}",
+        "api_token": perfil.share_token,
     })
+
 
 @csrf_exempt
 @require_POST
