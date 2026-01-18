@@ -144,7 +144,7 @@
                       <button
                         class="btn btn-outline-secondary"
                         type="button"
-                        onclick="this.previousElementSibling.value=''"
+                        onclick="const el=this.previousElementSibling; el.value=''; el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true}));"
                         title="Limpiar comentario"
                       >
                         &times;
