@@ -3189,14 +3189,13 @@ def agregar_a_mi_lista(request, plato_id):
     # 10) Redirigir
     return redirect('descartar-sugerido', plato_id=plato_id)
 
-
 class AsignarPlato(View):
 
     def post(self, request):
         tipo = request.POST.get("tipo_elemento")   # "plato" | "lugar"
         objeto_id = request.POST.get("plato_id")
-        dia = request.POST.get("dia") or request.session.get("dia_activo")  # ✅ fallback
-        momento = request.POST.get("comida")        # desayuno / almuerzo / etc.
+        dia = request.POST.get("dia") or request.session.get("dia_activo")
+        momento = request.POST.get("comida")
 
         if not dia:
             messages.error(request, "No hay día activo seleccionado.")
@@ -3210,19 +3209,30 @@ class AsignarPlato(View):
 
         request.session["dia_activo"] = dia
 
-        # 1) Obtener o crear el día
         menu_dia, _ = MenuDia.objects.get_or_create(
             propietario=request.user,
             fecha=fecha,
         )
 
-        # 2) Crear el item (simple, sin transacciones ni florituras)
         try:
             if tipo == "plato":
-                plato = Plato.objects.get(id=objeto_id, propietario=request.user)
+                # plato “en juego”
+                plato_base = Plato.objects.get(id=objeto_id, propietario=request.user)
 
-                # ✅ padre + hijos (variedades)
-                platos_a_asignar = [plato] + list(plato.variedades_hijas.all())
+                # ✅ NUEVO: si el form manda platos_ids, asignamos solo esos
+                ids_post = [x for x in request.POST.getlist("platos_ids") if x.isdigit()]
+
+                if ids_post:
+                    # solo permitimos asignar el plato base o sus hijas
+                    allowed_ids = set([plato_base.id] + list(plato_base.variedades_hijas.values_list("id", flat=True)))
+                    selected_ids = [int(x) for x in ids_post if int(x) in allowed_ids]
+
+                    platos_a_asignar = list(
+                        Plato.objects.filter(id__in=selected_ids, propietario=request.user)
+                    )
+                else:
+                    # comportamiento actual (por ahora)
+                    platos_a_asignar = [plato_base] + list(plato_base.variedades_hijas.all())
 
                 creados = 0
                 for p in platos_a_asignar:
@@ -3247,23 +3257,37 @@ class AsignarPlato(View):
                     momento=momento,
                     lugar=lugar,
                 )
-                messages.success(
-                    request,
-                    f"Lugar {lugar.nombre} asignado correctamente a {momento}."
-                )
+                messages.success(request, f"Lugar {lugar.nombre} asignado correctamente a {momento}.")
             else:
                 messages.error(request, "Tipo de elemento inválido.")
 
         except Exception:
-            messages.warning(
-                request,
-                "Ese elemento ya estaba asignado a esa comida en ese día."
-            )
+            messages.warning(request, "Ese elemento ya estaba asignado a esa comida en ese día.")
 
         return redirect("filtro-de-platos")
 
 
 
+@login_required
+def plato_opciones_asignar(request, pk):
+    # Plato base
+    plato = get_object_or_404(Plato, pk=pk, propietario=request.user)
+
+    # Padre + hijas
+    opciones = [{
+        "id": plato.id,
+        "nombre": plato.nombre_plato,
+    }]
+
+    for v in plato.variedades_hijas.all():
+        opciones.append({
+            "id": v.id,
+            "nombre": v.nombre_plato,
+        })
+
+    return JsonResponse({"opciones": opciones})
+
+    
 
 @login_required
 def eliminar_plato_programado(request, nombre_plato, comida, fecha):

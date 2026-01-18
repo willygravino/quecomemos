@@ -631,6 +631,11 @@ Root globl para modales cargados dinámicamente (AJAX)
 
           <h2>Asignar al día <span id="diaActivoTexto"></span></h2>
 
+          <div id="bloque-platos-para-asignar" class="mt-2 d-none">
+              <div class="small text-muted mb-1">¿Cuál querés asignar?</div>
+              <div id="lista-platos-para-asignar" class="d-flex flex-column gap-1"></div>
+          </div>
+
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 
           <div class="mb-1">
@@ -655,13 +660,74 @@ Root globl para modales cargados dinámicamente (AJAX)
 </div>
 
 <script>
-  function setPlatoInfo(platoId, tipo) {
-    // Asignar
+
+  async function setPlatoInfo(platoId, tipo) {
+    // Asignar: ids básicos
     const idAsignar = document.getElementById("platoIdInputAsignar");
     const tipoAsignar = document.getElementById("tipoObjetoAsignar");
     if (idAsignar) idAsignar.value = platoId;
     if (tipoAsignar) tipoAsignar.value = tipo;
+
+    // Solo para platos: cargar opciones padre/hijas
+    if (tipo !== "plato") return;
+
+    const bloque = document.getElementById("bloque-platos-para-asignar");
+    const lista = document.getElementById("lista-platos-para-asignar");
+    const form = document.getElementById("asignarPlatoForm");
+
+    if (!bloque || !lista || !form) return;
+
+    // limpiar estado anterior
+    lista.innerHTML = "";
+    bloque.classList.add("d-none");
+
+    try {
+      const res = await fetch(`/platos/${platoId}/opciones-asignar/`, {
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+        credentials: "same-origin",
+      });
+      if (!res.ok) return;
+
+      const data = await res.json();
+      const opciones = data.opciones || [];
+
+      // Si hay 0 o 1, no mostramos selector (asignación obvia)
+      if (opciones.length <= 1) return;
+
+      // Mostrar selector
+      bloque.classList.remove("d-none");
+
+      // Render checkboxes: name="platos_ids"
+      for (const op of opciones) {
+        const id = op.id;
+        const nombre = op.nombre;
+
+        const wrap = document.createElement("label");
+        wrap.className = "form-check d-flex align-items-center gap-2";
+
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.className = "form-check-input";
+        cb.name = "platos_ids";
+        cb.value = String(id);
+
+        // default: tildar el padre (el que abriste)
+        if (String(id) === String(platoId)) cb.checked = true;
+
+        const span = document.createElement("span");
+        span.className = "form-check-label";
+        span.textContent = nombre;
+
+        wrap.appendChild(cb);
+        wrap.appendChild(span);
+        lista.appendChild(wrap);
+      }
+    } catch (e) {
+      // silencioso
+    }
   }
+
+  
 </script>
 
 
