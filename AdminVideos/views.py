@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
 from AdminVideos import models
-from AdminVideos.models import HistoricoDia, HistoricoItem, Ingrediente, IngredienteEnPlato, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje,  ElegidosXDia
+from AdminVideos.models import HistoricoDia, HistoricoItem, Ingrediente, IngredienteEnPlato, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje,  ElegidosXDia, ProfileIngrediente
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string   # ✅ ← ESTA ES LA CLAVE
 from django.http import Http404, HttpRequest, JsonResponse
@@ -27,7 +27,7 @@ from datetime import datetime, timedelta
 from .forms import IngredienteEnPlatoFormSet, LugarForm, PlatoFilterForm, PlatoForm, CustomAuthenticationForm
 from datetime import date, datetime
 from django.contrib.auth.models import User  # Asegúrate de importar el modelo User
-from django.db.models import Q, Subquery, OuterRef
+from django.db.models import Q, Subquery, OuterRef, Prefetch, Min
 import random
 from django.shortcuts import redirect, reverse
 from django.shortcuts import redirect
@@ -470,201 +470,815 @@ def agregar_plato(diccionario, clave, plato, ingredientes):
 
 
 
-@login_required
-def lista_de_compras(request):
-    locale.setlocale(locale.LC_TIME, "C")
-    today = date.today()
+# @login_required
+# def lista_de_compras(request):
+#     locale.setlocale(locale.LC_TIME, "C")
+#     today = date.today()
 
-    lista_de_ingredientes = set()
-    ingredientes_unicos = {}
-    lista_de_compras = []
-    no_elegidos = set()
-    ingredientes_elegidos = set()
+#     lista_de_ingredientes = set()
+#     ingredientes_unicos = {}
+#     lista_de_compras = []
+#     no_elegidos = set()
+#     ingredientes_elegidos = set()
 
-    menues_del_usuario = (
-        MenuDia.objects
-        .filter(propietario=request.user, fecha__gte=today)
-        .order_by("fecha")
-    )
+#     menues_del_usuario = (
+#         MenuDia.objects
+#         .filter(propietario=request.user, fecha__gte=today)
+#         .order_by("fecha")
+#     )
 
-    # 🔧 Adaptador temporal template viejo
-    for menu in menues_del_usuario:
-        menu.el_dia_en_que_comemos = menu.fecha
+#     # 🔧 Adaptador temporal template viejo
+#     for menu in menues_del_usuario:
+#         menu.el_dia_en_que_comemos = menu.fecha
 
-        estructura = {"desayuno": [], "almuerzo": [], "merienda": [], "cena": []}
-        items = menu.items.select_related("plato", "lugar").order_by("id")
+#         estructura = {"desayuno": [], "almuerzo": [], "merienda": [], "cena": []}
+#         items = menu.items.select_related("plato", "lugar").order_by("id")
         
 
-        for item in items:
-            if item.plato:
-                estructura[item.momento].append({
-                    "id_plato": item.plato.id,
-                    "plato": item.plato.nombre_plato,
-                    "ingredientes": item.plato.ingredientes,
-                    "elegido": item.elegido,
-                    "tipo": "plato",
-                    "variedades": {}
-                })
-            elif item.lugar:
-                estructura[item.momento].append({
-                    "id_plato": item.lugar.id,
-                    "plato": item.lugar.nombre,
-                    "tipo": "lugar"
-                })
+#         for item in items:
+#             if item.plato:
+#                 estructura[item.momento].append({
+#                     "id_plato": item.plato.id,
+#                     "plato": item.plato.nombre_plato,
+#                     "ingredientes": item.plato.ingredientes,
+#                     "elegido": item.elegido,
+#                     "tipo": "plato",
+#                     "variedades": {}
+#                 })
+#             elif item.lugar:
+#                 estructura[item.momento].append({
+#                     "id_plato": item.lugar.id,
+#                     "plato": item.lugar.nombre,
+#                     "tipo": "lugar"
+#                 })
 
-        menu.platos_que_comemos = estructura
+#         menu.platos_que_comemos = estructura
 
+#     perfil = get_object_or_404(Profile, user=request.user)
+
+#     # =====================================================
+#     # POST: decidir qué se persiste según post_origen
+#     # =====================================================
+#     post_origen = request.POST.get("post_origen", "") if request.method == "POST" else ""
+
+#     # ---- 1) Guardar menú (platos elegidos) SOLO si el origen es "menu"
+#     if request.method == "POST" and post_origen == "menu":
+#         platos_seleccionados = set(request.POST.getlist("plato_seleccionado"))
+
+#         MenuItem.objects.filter(
+#             menu__propietario=request.user,
+#             menu__fecha__gte=today,
+#             plato__isnull=False
+#         ).update(elegido=False)
+
+#         for clave in platos_seleccionados:
+#             try:
+#                 plato_id, ymd = clave.split("_", 1)
+#             except ValueError:
+#                 continue
+
+#             MenuItem.objects.filter(
+#                 menu__propietario=request.user,
+#                 plato_id=int(plato_id),
+#                 menu__fecha=datetime.datetime.strptime(ymd, "%Y%m%d").date(),
+#             ).update(elegido=True)
+
+#     # =====================================================
+#     # Ingredientes desde MenuItem elegido=True (SIEMPRE para mostrar)
+#     # =====================================================
+#     items_elegidos = (
+#         MenuItem.objects
+#         .filter(
+#             menu__propietario=request.user,
+#             menu__fecha__gte=today,
+#             plato__isnull=False,
+#             elegido=True,
+#         )
+#         .select_related("plato")
+#     )
+
+#     for item in items_elegidos:
+#         ing_txt = (item.plato.ingredientes or "").strip()
+#         if not ing_txt:
+#             continue
+#         lista_de_ingredientes.update(
+#             ing.strip() for ing in ing_txt.split(",") if ing.strip()
+#         )
+
+#     # =====================================================
+#     # 2) Persistir ingredientes/comentarios SOLO si origen == "ingredientes"
+#     # =====================================================
+#     if request.method == "POST" and post_origen == "ingredientes":
+#         ingredientes_elegidos = set(request.POST.getlist("ingrediente_a_comprar"))
+
+#         # a) comentarios
+#         comentarios_guardados = {}
+#         if perfil.comentarios:
+#             for item in perfil.comentarios:
+#                 ingrediente, comentario = item.split("%", 1)
+#                 comentarios_guardados[ingrediente] = comentario
+
+#         comentarios_posteados = {}
+#         for key, value in request.POST.items():
+#             if key.endswith("_comentario"):
+#                 ingrediente = key.replace("_comentario", "")
+#                 comentarios_posteados[ingrediente] = value.strip()
+
+#         for ingrediente_posteado, comentario_posteado in comentarios_posteados.items():
+#             if ingrediente_posteado in comentarios_guardados:
+#                 comentario_guardado = comentarios_guardados[ingrediente_posteado]
+#                 registro = f"{ingrediente_posteado}%{comentario_guardado}"
+
+#                 if not comentario_posteado:
+#                     if registro in perfil.comentarios:
+#                         perfil.comentarios.remove(registro)
+#                 elif comentario_posteado != comentario_guardado:
+#                     if registro in perfil.comentarios:
+#                         perfil.comentarios[perfil.comentarios.index(registro)] = f"{ingrediente_posteado}%{comentario_posteado}"
+#             else:
+#                 if comentario_posteado:
+#                     perfil.comentarios.append(f"{ingrediente_posteado}%{comentario_posteado}")
+
+#         # b) persistencia de "tengo" vs "no-tengo"
+#         # tu UI: checked => estado "no-tengo" (lo tengo que comprar)
+#         # perfil.ingredientes_que_tengo guarda los que "tengo"
+#         for ing in lista_de_ingredientes:
+#             if ing in ingredientes_elegidos:
+#                 # lo marco para comprar => NO lo tengo
+#                 if ing in perfil.ingredientes_que_tengo:
+#                     perfil.ingredientes_que_tengo.remove(ing)
+#             else:
+#                 # no marcado => lo tengo
+#                 if ing not in perfil.ingredientes_que_tengo:
+#                     perfil.ingredientes_que_tengo.append(ing)
+
+#         perfil.save()
+
+
+
+
+#     # # =====================================================
+#     # # Estado para mostrar (si no guardamos por ingredientes)
+#     # # =====================================================
+#     # if not (request.method == "POST" and post_origen == "ingredientes"):
+#     #     no_elegidos = {ing for ing in lista_de_ingredientes if ing not in perfil.ingredientes_que_tengo}
+#     #     ingredientes_elegidos = lista_de_ingredientes - no_elegidos
+
+#     # # =====================================================
+#     # # Armar estructura para template
+#     # # =====================================================
+#     # for ingrediente in sorted(lista_de_ingredientes, key=str.casefold):
+#     #     el_comentario = ""
+#     #     for item in perfil.comentarios:
+#     #         ingrediente_archivado, comentario = item.split("%", 1)
+#     #         if ingrediente_archivado == ingrediente:
+#     #             el_comentario = comentario
+
+#     #     if ingrediente in perfil.ingredientes_que_tengo:
+#     #         ingredientes_unicos[ingrediente] = {"comentario": el_comentario, "estado": "tengo"}
+#     #     else:
+#     #         ingredientes_unicos[ingrediente] = {"comentario": el_comentario, "estado": "no-tengo"}
+
+#     # for ingrediente, detalles in ingredientes_unicos.items():
+#     #     if detalles["estado"] == "no-tengo":
+#     #         comentario = detalles["comentario"]
+#     #         lista_de_compras.append(f"{ingrediente} ({comentario})" if comentario else f"{ingrediente}")
+
+
+#     # =====================================================
+#     # Estado de ingredientes desde ProfileIngrediente
+#     # (solo lectura, no escribimos todavía)
+#     # =====================================================
+
+#     # Traemos los estados guardados SOLO para los ingredientes actuales
+#     pis = (
+#         ProfileIngrediente.objects
+#         .filter(
+#             profile=perfil,
+#             ingrediente__nombre__in=list(lista_de_ingredientes)
+#         )
+#         .select_related("ingrediente")
+#     )
+
+#     # Mapa: nombre -> ProfileIngrediente
+#     pi_map = {
+#         pi.ingrediente.nombre: pi
+#         for pi in pis
+#     }
+
+#     ingredientes_unicos = {}
+
+#     for ingrediente in sorted(lista_de_ingredientes, key=str.casefold):
+#         pi = pi_map.get(ingrediente)
+
+#         if pi:
+#             estado = "tengo" if pi.tengo else "no-tengo"
+#             comentario = pi.comentario or ""
+#         else:
+#             # default si todavía no existe registro
+#             estado = "tengo"
+#             comentario = ""
+
+#         ingredientes_unicos[ingrediente] = {
+#             "estado": estado,
+#             "comentario": comentario,
+#         }
+
+#     # Compatibilidad con template actual
+#     no_elegidos = {
+#         ing for ing, d in ingredientes_unicos.items()
+#         if d["estado"] == "tengo"
+#     }
+#     ingredientes_elegidos = set(lista_de_ingredientes) - no_elegidos
+
+#     # Lista de compras (solo los que NO tengo)
+#     lista_de_compras = []
+#     for ingrediente, detalles in ingredientes_unicos.items():
+#         if detalles["estado"] == "no-tengo":
+#             comentario = detalles["comentario"]
+#             lista_de_compras.append(
+#                 f"{ingrediente} ({comentario})" if comentario else ingrediente)
+
+
+
+
+
+
+#     token = perfil.ensure_share_token()
+#     share_url = request.build_absolute_uri(reverse("compartir-lista", args=[token]))
+
+#     context = {
+#         "menues_del_usuario": menues_del_usuario,
+#         "ingredientes_con_tengo_y_comentario": ingredientes_unicos,
+#         "lista_de_compras": lista_de_compras,
+#         "parametro": "lista-compras",
+#         "share_url": share_url,
+#         "lista_de_ingredientes": lista_de_ingredientes,
+#         "no_elegidos": no_elegidos,
+#         "ingredientes_elegidos": ingredientes_elegidos,
+#     }
+#     return render(request, "AdminVideos/lista_de_compras.html", context)
+
+def _fresh_until_for_ingrediente(min_fecha_menu: date) -> date:
+    """
+    Define hasta cuándo un ingrediente se considera 'recién comprado'.
+    Regla:
+    - si sabemos cuándo se usa → hasta ese día
+    - si no, dura 7 días desde hoy
+    """
+    if min_fecha_menu:
+        return min_fecha_menu
+    return date.today() + timedelta(days=7)
+
+
+# @login_required
+# def lista_de_compras(request):
+    
+#     today = date.today()
+
+#     # =====================================================
+#     # Perfil del usuario
+#     # =====================================================
+#     perfil = get_object_or_404(Profile, user=request.user)
+
+#     # =====================================================
+#     # Menús futuros del usuario
+#     # =====================================================
+#     menues = (
+#         MenuDia.objects
+#         .filter(propietario=request.user, fecha__gte=today)
+#         .order_by("fecha")
+#     )
+
+#     # =====================================================
+#     # Ítems de menú elegidos (solo platos, no lugares)
+#     # =====================================================
+#     items_elegidos = (
+#         MenuItem.objects
+#         .filter(
+#             menu__in=menues,
+#             plato__isnull=False,
+#             elegido=True
+#         )
+#         .select_related("menu", "plato")
+#     )
+
+#     plato_ids = list(items_elegidos.values_list("plato_id", flat=True))
+
+#     # =====================================================
+#     # Si no hay platos, devolvemos lista vacía
+#     # =====================================================
+#     if not plato_ids:
+#         token = perfil.ensure_share_token()
+#         share_url = request.build_absolute_uri(
+#             reverse("compartir-lista", args=[token])
+#         )
+#         return render(
+#             request,
+#             "AdminVideos/lista_de_compras.html",
+#             {
+#                 "share_url": share_url,
+#                 "shopping": {
+#                     "items": [],
+#                     "summary": {
+#                         "total": 0,
+#                         "to_buy": 0,
+#                         "fresh": 0,
+#                         "have": 0,
+#                     },
+#                 },
+#             },
+#         )
+
+
+
+#     # =====================================================
+#     # Ingredientes reales usados por los platos (relacional)
+#     # =====================================================
+#     ingredientes_rows = (
+#         IngredienteEnPlato.objects
+#         .filter(plato_id__in=plato_ids)
+#         .select_related("ingrediente", "plato")
+#         .only(
+#             "plato_id",
+#             "ingrediente_id",
+#             "cantidad",
+#             "unidad",
+#             "ingrediente__nombre",
+#             "ingrediente__tipo",
+#             "ingrediente__detalle",
+#         )
+#     )
+
+#     # =====================================================
+#     # Fecha más cercana en que se usa cada plato
+#     # =====================================================
+#     from django.db.models import Min
+
+#     plato_min_fecha = {
+#         row["plato_id"]: row["min_fecha"]
+#         for row in (
+#             items_elegidos
+#             .values("plato_id")
+#             .annotate(min_fecha=Min("menu__fecha"))
+#         )
+#     }
+
+#     # =====================================================
+#     # Agrupamos ingredientes por ID (cantidades + usos)
+#     # =====================================================
+#     agregados = {}
+
+#     for row in ingredientes_rows:
+#         if not row.ingrediente:
+#             continue
+
+#         ing_id = row.ingrediente.id
+#         needed_by = plato_min_fecha.get(row.plato_id)
+
+#         if ing_id not in agregados:
+#             agregados[ing_id] = {
+#                 "ingrediente_id": ing_id,
+#                 "nombre": row.ingrediente.nombre,
+#                 "tipo": row.ingrediente.tipo,
+#                 "detalle": row.ingrediente.detalle,
+#                 "needed_by": needed_by,
+#                 "cantidades": defaultdict(float),
+#                 "usos": [],
+#             }
+
+#         # fecha más cercana en que se necesita
+#         if needed_by and (
+#             agregados[ing_id]["needed_by"] is None
+#             or needed_by < agregados[ing_id]["needed_by"]
+#         ):
+#             agregados[ing_id]["needed_by"] = needed_by
+
+#         # acumulamos cantidades por unidad
+#         if row.cantidad is not None:
+#             agregados[ing_id]["cantidades"][row.unidad or "-"] += float(row.cantidad)
+
+#         # guardamos referencia de uso
+#         agregados[ing_id]["usos"].append({
+#             "plato_id": row.plato_id,
+#             "fecha": needed_by,
+#         })
+
+#     # =====================================================
+#     # Traemos los estados guardados SOLO para estos ingredientes
+#     # =====================================================
+#     pantry_qs = (
+#         ProfileIngrediente.objects
+#         .filter(
+#             profile=perfil,
+#             ingrediente_id__in=agregados.keys()
+#         )
+#         .only(
+#             "ingrediente_id",
+#             "tengo",
+#             "comentario",
+#             "last_bought_at",
+#         )
+#     )
+
+#     pantry_map = {
+#         pi.ingrediente_id: pi
+#         for pi in pantry_qs
+#     }
+
+       
+#     # =====================================================
+#     # POST: guardar estados SOLO si origen == "ingredientes"
+#     # =====================================================
+#     post_origen = request.POST.get("post_origen", "") if request.method == "POST" else ""
+
+#     if request.method == "POST" and post_origen == "ingredientes":
+#         now = timezone.now()
+
+#         # ids de ingredientes que el usuario marcó como "comprar" (no-tengo)
+#         to_buy_ids = set(
+#             int(x) for x in request.POST.getlist("ingrediente_a_comprar_id") if x.isdigit()
+#         )
+
+#         # para cada ingrediente actual de la lista, persistimos su estado
+#         for ing_id in agregados.keys():
+#             want_tengo = (ing_id not in to_buy_ids)  # si NO está en to_buy => lo tengo
+
+#             pi = pantry_map.get(ing_id)
+
+#             if not pi:
+#                 pi = ProfileIngrediente(profile=perfil, ingrediente_id=ing_id)
+#                 pi.tengo = want_tengo
+#             else:
+#                 # transición no-tengo -> tengo => recién comprado
+#                 if (pi.tengo is False) and (want_tengo is True):
+#                     pi.last_bought_at = now
+#                 pi.tengo = want_tengo
+
+#             # comentario (si viene)
+#             comentario_key = f"comentario_{ing_id}"
+#             if comentario_key in request.POST:
+#                 pi.comentario = (request.POST.get(comentario_key) or "").strip()
+
+#             pi.save()
+
+#         # =====================================================
+#         # REFRESH en memoria (equivalente a tu lógica vieja):
+#         # después de guardar, actualizamos pantry_map para que
+#         # el render de esta misma request ya muestre lo nuevo
+#         # =====================================================
+#         pantry_map = {
+#             pi.ingrediente_id: pi
+#             for pi in (
+#                 ProfileIngrediente.objects
+#                 .filter(profile=perfil, ingrediente_id__in=agregados.keys())
+#                 .only("ingrediente_id", "tengo", "comentario", "last_bought_at")
+#             )
+#         }
+ 
+
+#         # respuesta liviana para autosave
+#         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+#             return JsonResponse({"success": True})
+
+
+#     # =====================================================
+#     # Helpers de estado (reglas de negocio)
+#     # =====================================================
+#     def fresh_until(fecha_uso):
+#         # si sabemos cuándo se usa → hasta ese día
+#         # si no → una semana
+#         return fecha_uso or (today + timedelta(days=7))
+
+#     def estado_final(pi, limite):
+#         if not pi:
+#             return "tengo"
+#         if not pi.tengo:
+#             return "no-tengo"
+#         if (
+#             pi.last_bought_at
+#             and pi.last_bought_at >= timezone.now() - timedelta(days=7)
+#             and today <= limite
+#         ):
+#             return "recien-comprado"
+#         return "tengo"
+
+#     # =====================================================
+#     # Construimos estructura final para la UI
+#     # =====================================================
+#     items = []
+
+#     for ing_id, data in agregados.items():
+#         pi = pantry_map.get(ing_id)
+#         limite = fresh_until(data["needed_by"])
+
+#         items.append({
+#             "ingrediente_id": ing_id,
+#             "nombre": data["nombre"],
+#             "tipo": data["tipo"],
+#             "detalle": data["detalle"],
+#             "estado": estado_final(pi, limite),
+#             "comentario": pi.comentario if pi else "",
+#             "last_bought_at": pi.last_bought_at if pi else None,
+#             "needed_by": data["needed_by"],
+#             "fresh_until": limite,
+#             "cantidades": [
+#                 {"unidad": u, "total": t}
+#                 for u, t in data["cantidades"].items()
+#             ],
+#             "usos": data["usos"],
+#         })
+
+#     # =====================================================
+#     # Orden visual: comprar → recién comprado → tengo
+#     # =====================================================
+#     order = {"no-tengo": 0, "recien-comprado": 1, "tengo": 2}
+#     items.sort(key=lambda i: (order[i["estado"]], i["nombre"].casefold()))
+
+#     # =====================================================
+#     # Link para compartir lista
+#     # =====================================================
+#     token = perfil.ensure_share_token()
+#     share_url = request.build_absolute_uri(
+#         reverse("compartir-lista", args=[token])
+#     )
+
+#     # =====================================================
+#     # Resumen rápido (para badges / encabezados)
+#     # =====================================================
+#     summary = {
+#         "total": len(items),
+#         "to_buy": sum(i["estado"] == "no-tengo" for i in items),
+#         "fresh": sum(i["estado"] == "recien-comprado" for i in items),
+#         "have": sum(i["estado"] == "tengo" for i in items),
+#     }
+
+#     # =====================================================
+#     # Context final (contrato nuevo)
+#     # =====================================================
+#     return render(
+#         request,
+#         "AdminVideos/lista_de_compras.html",
+        
+#         {
+#             "share_url": share_url,
+#             "items_elegidos": items_elegidos,  # 👈 nuevo
+#             "shopping": {"items": items, "summary": summary},
+#         },
+#     )
+
+
+
+@login_required
+def lista_de_compras(request):
+    today = date.today()
     perfil = get_object_or_404(Profile, user=request.user)
 
     # =====================================================
-    # POST: decidir qué se persiste según post_origen
+    # Menús futuros + items prefetcheados (sin adapters)
+    # =====================================================
+    menues = (
+        MenuDia.objects
+        .filter(propietario=request.user, fecha__gte=today)
+        .order_by("fecha")
+        .prefetch_related(
+            Prefetch(
+                "items",
+                queryset=(
+                    MenuItem.objects
+                    .select_related("plato", "lugar")
+                    .order_by("id")
+                ),
+            )
+        )
+    )
+
+    # =====================================================
+    # POST: guardar menú SOLO si origen == "menu"
     # =====================================================
     post_origen = request.POST.get("post_origen", "") if request.method == "POST" else ""
 
-    # ---- 1) Guardar menú (platos elegidos) SOLO si el origen es "menu"
     if request.method == "POST" and post_origen == "menu":
         platos_seleccionados = set(request.POST.getlist("plato_seleccionado"))
 
+        # desmarcar todos
         MenuItem.objects.filter(
             menu__propietario=request.user,
             menu__fecha__gte=today,
-            plato__isnull=False
+            plato__isnull=False,
         ).update(elegido=False)
 
+        # marcar los seleccionados
         for clave in platos_seleccionados:
             try:
                 plato_id, ymd = clave.split("_", 1)
+                fecha = datetime.datetime.strptime(ymd, "%Y%m%d").date()
             except ValueError:
                 continue
 
             MenuItem.objects.filter(
                 menu__propietario=request.user,
+                menu__fecha=fecha,
                 plato_id=int(plato_id),
-                menu__fecha=datetime.datetime.strptime(ymd, "%Y%m%d").date(),
             ).update(elegido=True)
 
+        # respuesta liviana si es autosave
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({"success": True})
+
     # =====================================================
-    # Ingredientes desde MenuItem elegido=True (SIEMPRE para mostrar)
+    # Ítems elegidos (platos) para calcular ingredientes
     # =====================================================
     items_elegidos = (
         MenuItem.objects
-        .filter(
-            menu__propietario=request.user,
-            menu__fecha__gte=today,
-            plato__isnull=False,
-            elegido=True,
-        )
-        .select_related("plato")
+        .filter(menu__in=menues, plato__isnull=False, elegido=True)
+        .select_related("menu", "plato")
     )
 
-    for item in items_elegidos:
-        ing_txt = (item.plato.ingredientes or "").strip()
-        if not ing_txt:
-            continue
-        lista_de_ingredientes.update(
-            ing.strip() for ing in ing_txt.split(",") if ing.strip()
+    plato_ids = list(items_elegidos.values_list("plato_id", flat=True))
+
+    # si no hay platos elegidos
+    if not plato_ids:
+        token = perfil.ensure_share_token()
+        share_url = request.build_absolute_uri(reverse("compartir-lista", args=[token]))
+        return render(
+            request,
+            "AdminVideos/lista_de_compras.html",
+            {
+                "menues": menues,
+                "items_elegidos": items_elegidos,
+                "share_url": share_url,
+                "shopping": {"items": [], "summary": {"total": 0, "to_buy": 0, "fresh": 0, "have": 0}},
+            },
         )
 
     # =====================================================
-    # 2) Persistir ingredientes/comentarios SOLO si origen == "ingredientes"
+    # Ingredientes relacionales usados por los platos
+    # =====================================================
+    ingredientes_rows = (
+        IngredienteEnPlato.objects
+        .filter(plato_id__in=plato_ids)
+        .select_related("ingrediente", "plato")
+        .only(
+            "plato_id",
+            "ingrediente_id",
+            "cantidad",
+            "unidad",
+            "ingrediente__nombre",
+            "ingrediente__tipo",
+            "ingrediente__detalle",
+        )
+    )
+
+    # fecha más cercana de uso por plato
+    plato_min_fecha = {
+        row["plato_id"]: row["min_fecha"]
+        for row in (
+            items_elegidos
+            .values("plato_id")
+            .annotate(min_fecha=Min("menu__fecha"))
+        )
+    }
+
+    # agrupar por ingrediente
+    agregados = {}
+    for row in ingredientes_rows:
+        if not row.ingrediente:
+            continue
+
+        ing_id = row.ingrediente.id
+        needed_by = plato_min_fecha.get(row.plato_id)
+
+        if ing_id not in agregados:
+            agregados[ing_id] = {
+                "ingrediente_id": ing_id,
+                "nombre": row.ingrediente.nombre,
+                "tipo": row.ingrediente.tipo,
+                "detalle": row.ingrediente.detalle,
+                "needed_by": needed_by,
+                "cantidades": defaultdict(float),
+                "usos": [],
+            }
+
+        if needed_by and (
+            agregados[ing_id]["needed_by"] is None
+            or needed_by < agregados[ing_id]["needed_by"]
+        ):
+            agregados[ing_id]["needed_by"] = needed_by
+
+        if row.cantidad is not None:
+            agregados[ing_id]["cantidades"][row.unidad or "-"] += float(row.cantidad)
+
+        agregados[ing_id]["usos"].append({"plato_id": row.plato_id, "fecha": needed_by})
+
+    # estados guardados para estos ingredientes
+    pantry_qs = (
+        ProfileIngrediente.objects
+        .filter(profile=perfil, ingrediente_id__in=agregados.keys())
+        .only("ingrediente_id", "tengo", "comentario", "last_bought_at")
+    )
+    pantry_map = {pi.ingrediente_id: pi for pi in pantry_qs}
+
+    # =====================================================
+    # POST: guardar ingredientes SOLO si origen == "ingredientes"
     # =====================================================
     if request.method == "POST" and post_origen == "ingredientes":
-        ingredientes_elegidos = set(request.POST.getlist("ingrediente_a_comprar"))
+        now = timezone.now()
+        to_buy_ids = set(
+            int(x) for x in request.POST.getlist("ingrediente_a_comprar_id") if x.isdigit()
+        )
 
-        # a) comentarios
-        comentarios_guardados = {}
-        if perfil.comentarios:
-            for item in perfil.comentarios:
-                ingrediente, comentario = item.split("%", 1)
-                comentarios_guardados[ingrediente] = comentario
+        for ing_id in agregados.keys():
+            want_tengo = (ing_id not in to_buy_ids)  # no está marcado => lo tengo
+            pi = pantry_map.get(ing_id)
 
-        comentarios_posteados = {}
-        for key, value in request.POST.items():
-            if key.endswith("_comentario"):
-                ingrediente = key.replace("_comentario", "")
-                comentarios_posteados[ingrediente] = value.strip()
-
-        for ingrediente_posteado, comentario_posteado in comentarios_posteados.items():
-            if ingrediente_posteado in comentarios_guardados:
-                comentario_guardado = comentarios_guardados[ingrediente_posteado]
-                registro = f"{ingrediente_posteado}%{comentario_guardado}"
-
-                if not comentario_posteado:
-                    if registro in perfil.comentarios:
-                        perfil.comentarios.remove(registro)
-                elif comentario_posteado != comentario_guardado:
-                    if registro in perfil.comentarios:
-                        perfil.comentarios[perfil.comentarios.index(registro)] = f"{ingrediente_posteado}%{comentario_posteado}"
+            if not pi:
+                pi = ProfileIngrediente(profile=perfil, ingrediente_id=ing_id)
+                pi.tengo = want_tengo
             else:
-                if comentario_posteado:
-                    perfil.comentarios.append(f"{ingrediente_posteado}%{comentario_posteado}")
+                if (pi.tengo is False) and (want_tengo is True):
+                    pi.last_bought_at = now
+                pi.tengo = want_tengo
 
-        # b) persistencia de "tengo" vs "no-tengo"
-        # tu UI: checked => estado "no-tengo" (lo tengo que comprar)
-        # perfil.ingredientes_que_tengo guarda los que "tengo"
-        for ing in lista_de_ingredientes:
-            if ing in ingredientes_elegidos:
-                # lo marco para comprar => NO lo tengo
-                if ing in perfil.ingredientes_que_tengo:
-                    perfil.ingredientes_que_tengo.remove(ing)
-            else:
-                # no marcado => lo tengo
-                if ing not in perfil.ingredientes_que_tengo:
-                    perfil.ingredientes_que_tengo.append(ing)
+            comentario_key = f"comentario_{ing_id}"
+            if comentario_key in request.POST:
+                pi.comentario = (request.POST.get(comentario_key) or "").strip()
 
-        perfil.save()
+            pi.save()
 
+        pantry_map = {
+            pi.ingrediente_id: pi
+            for pi in (
+                ProfileIngrediente.objects
+                .filter(profile=perfil, ingrediente_id__in=agregados.keys())
+                .only("ingrediente_id", "tengo", "comentario", "last_bought_at")
+            )
+        }
 
-
-
-    # =====================================================
-    # Estado para mostrar (si no guardamos por ingredientes)
-    # =====================================================
-    if not (request.method == "POST" and post_origen == "ingredientes"):
-        no_elegidos = {ing for ing in lista_de_ingredientes if ing not in perfil.ingredientes_que_tengo}
-        ingredientes_elegidos = lista_de_ingredientes - no_elegidos
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({"success": True})
 
     # =====================================================
-    # Armar estructura para template
+    # reglas de estado (igual espíritu que antes + "recién comprado")
     # =====================================================
-    for ingrediente in sorted(lista_de_ingredientes, key=str.casefold):
-        el_comentario = ""
-        for item in perfil.comentarios:
-            ingrediente_archivado, comentario = item.split("%", 1)
-            if ingrediente_archivado == ingrediente:
-                el_comentario = comentario
+    def fresh_until(fecha_uso):
+        return fecha_uso or (today + timedelta(days=7))
 
-        if ingrediente in perfil.ingredientes_que_tengo:
-            ingredientes_unicos[ingrediente] = {"comentario": el_comentario, "estado": "tengo"}
-        else:
-            ingredientes_unicos[ingrediente] = {"comentario": el_comentario, "estado": "no-tengo"}
+    def estado_final(pi, limite):
+        if not pi:
+            return "tengo"
+        if not pi.tengo:
+            return "no-tengo"
+        if (
+            pi.last_bought_at
+            and pi.last_bought_at >= timezone.now() - timedelta(days=7)
+            and today <= limite
+        ):
+            return "recien-comprado"
+        return "tengo"
 
+    items = []
+    for ing_id, data in agregados.items():
+        pi = pantry_map.get(ing_id)
+        limite = fresh_until(data["needed_by"])
 
+        items.append({
+            "ingrediente_id": ing_id,
+            "nombre": data["nombre"],
+            "tipo": data["tipo"],
+            "detalle": data["detalle"],
+            "estado": estado_final(pi, limite),
+            "comentario": pi.comentario if pi else "",
+            "last_bought_at": pi.last_bought_at if pi else None,
+            "needed_by": data["needed_by"],
+            "fresh_until": limite,
+            "cantidades": [{"unidad": u, "total": t} for u, t in data["cantidades"].items()],
+            "usos": data["usos"],
+        })
 
-
-
-    for ingrediente, detalles in ingredientes_unicos.items():
-        if detalles["estado"] == "no-tengo":
-            comentario = detalles["comentario"]
-            lista_de_compras.append(f"{ingrediente} ({comentario})" if comentario else f"{ingrediente}")
+    order = {"no-tengo": 0, "recien-comprado": 1, "tengo": 2}
+    items.sort(key=lambda i: (order[i["estado"]], i["nombre"].casefold()))
 
     token = perfil.ensure_share_token()
     share_url = request.build_absolute_uri(reverse("compartir-lista", args=[token]))
 
-    context = {
-        "menues_del_usuario": menues_del_usuario,
-        "ingredientes_con_tengo_y_comentario": ingredientes_unicos,
-        "lista_de_compras": lista_de_compras,
-        "parametro": "lista-compras",
-        "share_url": share_url,
-        "lista_de_ingredientes": lista_de_ingredientes,
-        "no_elegidos": no_elegidos,
-        "ingredientes_elegidos": ingredientes_elegidos,
+    summary = {
+        "total": len(items),
+        "to_buy": sum(i["estado"] == "no-tengo" for i in items),
+        "fresh": sum(i["estado"] == "recien-comprado" for i in items),
+        "have": sum(i["estado"] == "tengo" for i in items),
     }
-    return render(request, "AdminVideos/lista_de_compras.html", context)
 
-
-
+    return render(
+        request,
+        "AdminVideos/lista_de_compras.html",
+        {
+            "menues": menues,                 # 👈 para render viejo sin adapters
+            "items_elegidos": items_elegidos, # si lo querés para debug o lista plana
+            "share_url": share_url,
+            "shopping": {"items": items, "summary": summary},
+        },
+    )
 
 
 

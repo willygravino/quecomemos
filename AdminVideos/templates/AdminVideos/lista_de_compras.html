@@ -17,53 +17,66 @@
    
     <div class="col-12 col-md-6">
 
+    <section>
+      
+<h6 class="mb-1">Menúes programados</h6>
 
-      <section>
-        <h6 class="mb-1">Menúes programados</h6>
+  {% for menu in menues %}
+    <div class="card mb-3 mr-3">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">
+          {{ menu.fecha|date:"l"|capfirst }} {{ menu.fecha|date:"j" }}
+        </span>
+      </div>
 
-        {% for menu in menues_del_usuario %}
-          <div class="card mb-3 mr-3">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <span class="fw-semibold">
-                {{ menu.el_dia_en_que_comemos|date:"l"|capfirst }} {{ menu.el_dia_en_que_comemos|date:"j" }}
-              </span>
-            </div>
+      <div class="list-group list-group-flush">
 
-            <div class="list-group list-group-flush">
-              {% for comida, platos in menu.platos_que_comemos.items %}
-                {% if platos %}
-                  <div class="list-group-item">
-                    <h6 class="mb-1 text-primary">{{ comida|title }}</h6>
+        {% regroup menu.items.all by momento as items_por_momento %}
 
-                    {% for plato in platos %}
-                      {% if plato.tipo != "lugar" %}
-                        <div class="form-check mb-2">
-                          <input
-                            type="checkbox"
-                            id="plato{{ plato.id_plato }}_{{ menu.el_dia_en_que_comemos|date:'Ymd' }}"
-                            name="plato_seleccionado"
-                            value="{{ plato.id_plato }}_{{ menu.el_dia_en_que_comemos|date:'Ymd' }}"
-                            class="form-check-input"
-                            {% if plato.elegido %}checked{% endif %}>
-                          <label class="form-check-label" for="plato{{ plato.id_plato }}_{{ menu.el_dia_en_que_comemos|date:'Ymd' }}">
-                            {{ plato.plato }}
-                          </label>
-                        </div>
+        {% for grupo in items_por_momento %}
+          <div class="list-group-item">
+            <h6 class="mb-1 text-primary">{{ grupo.grouper|title }}</h6>
 
-                      {% else %}
-                        <div class="text-muted fst-italic">››› {{ plato.plato }}</div>
-                      {% endif %}
-                    {% endfor %}
-                  </div>
-                {% endif %}
-              {% endfor %}
-            </div>
+            {% for item in grupo.list %}
+              {% if item.plato %}
+                <div class="form-check mb-2">
+                  <input
+                    type="checkbox"
+                    id="plato{{ item.plato_id }}_{{ menu.fecha|date:'Ymd' }}"
+                    name="plato_seleccionado"
+                    value="{{ item.plato_id }}_{{ menu.fecha|date:'Ymd' }}"
+                    class="form-check-input"
+                    {% if item.elegido %}checked{% endif %}
+                  >
+                  <label class="form-check-label" for="plato{{ item.plato_id }}_{{ menu.fecha|date:'Ymd' }}">
+                    {{ item.plato.nombre_plato }}
+                  </label>
+                </div>
+
+              {% elif item.lugar %}
+                <div class="text-muted fst-italic">››› {{ item.lugar.nombre }}</div>
+              {% endif %}
+            {% endfor %}
           </div>
-        {% empty %}
-          <div class="alert alert-info">No hay platos asignados.</div>
         {% endfor %}
 
-      </section>
+      </div>
+    </div>
+  {% empty %}
+    <div class="alert alert-info">No hay platos asignados.</div>
+  {% endfor %}
+
+
+
+
+
+    </section>
+
+      
+
+
+
+
     </div>
 
     <!-- Columna: Edita lista de compras -->
@@ -75,50 +88,83 @@
         
         <h6 class="mb-1">Marcá lo que necesites comprar:</h6>
 
-        {% if ingredientes_con_tengo_y_comentario %}
-          <div class="card mr-3">
+        {% if shopping.items %}
+          <div class="card me-3">
             <ul class="list-group list-group-flush">
-              {% for ingrediente, valor in ingredientes_con_tengo_y_comentario.items %}
+
+              {% for item in shopping.items %}
                 <li class="list-group-item py-1 px-2">
+
                   <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-2">
 
+                    <!-- ===== Checkbox + nombre ===== -->
                     <div class="form-check m-0 flex-grow-1">
-                      <input 
-                        class="form-check-input me-1" 
-                        type="checkbox" 
-                        id="ing-{{ forloop.counter }}"      {# ⬅️ IDs sin espacios #}
-                        name="ingrediente_a_comprar"
-                        value="{{ ingrediente }}"
-                        {% if valor.estado == "no-tengo" %}checked{% endif %}>
-                      <label class="form-check-label small" for="ing-{{ forloop.counter }}">
-                        {{ ingrediente }}
+
+                       
+                        <!-- Convención:
+                        - checked  => no-tengo (hay que comprar)
+                        - unchecked => tengo / recién comprado -->
+                      
+                      <input
+                        class="form-check-input me-1"
+                        type="checkbox"
+                        id="ing-{{ item.ingrediente_id }}"
+                        name="ingrediente_a_comprar_id"
+                        value="{{ item.ingrediente_id }}"
+                        {% if item.estado == "no-tengo" %}checked{% endif %}
+                      >
+
+                      <label
+                        class="form-check-label small
+                          {% if item.estado == 'recien-comprado' %}
+                            text-decoration-line-through text-muted
+                          {% endif %}"
+                        for="ing-{{ item.ingrediente_id }}"
+                      >
+                        {{ item.nombre }}
+
+                        {% if item.estado == "recien-comprado" %}
+                          <span class="badge bg-success ms-1">recién comprado</span>
+                        {% endif %}
                       </label>
+
                     </div>
 
+                    <!-- ===== Comentario ===== -->
                     <div class="input-group input-group-sm">
-                      <input 
+
+                      <input
                         type="text"
-                        id="ing-{{ forloop.counter }}_comentario"
-                        name="{{ ingrediente }}_comentario"
-                        value="{{ valor.comentario }}"
+                        name="comentario_{{ item.ingrediente_id }}"
+                        value="{{ item.comentario }}"
                         class="form-control"
-                        placeholder="Comentario">
-                      <button 
-                        class="btn btn-outline-secondary" 
-                        type="button" 
-                        onclick="this.previousElementSibling.value=''">
+                        placeholder="Comentario"
+                      >
+
+                      <button
+                        class="btn btn-outline-secondary"
+                        type="button"
+                        onclick="this.previousElementSibling.value=''"
+                        title="Limpiar comentario"
+                      >
                         &times;
                       </button>
+
                     </div>
 
                   </div>
+
                 </li>
               {% endfor %}
+
             </ul>
           </div>
         {% else %}
-          <div class="alert alert-info py-1 px-2 small">No hay ingredientes para editar</div>
+          <div class="alert alert-info py-1 px-2 small">
+            No hay ingredientes para mostrar
+          </div>
         {% endif %}
+
 
         <div class="mt-3 mr-3">
         <!-- Botones: ir a la lista + compartir por WhatsApp -->
@@ -199,7 +245,7 @@
   });
 
   // --- Cambios de ingredientes (NO recarga inmediata) ---
-  form.querySelectorAll('input[name="ingrediente_a_comprar"]').forEach(el => {
+  form.querySelectorAll('input[name="ingrediente_a_comprar_id"]').forEach(el => {
     el.addEventListener('change', async () => {
       try {
         setOrigen('ingredientes');
@@ -209,7 +255,7 @@
   });
 
   // comentarios: guardamos con debounce mientras escribís
-  form.querySelectorAll('input[name$="_comentario"]').forEach(el => {
+  form.querySelectorAll('input[name^="comentario_"]').forEach(el => {
     const saveDebounced = debounce(async () => {
       try {
         setOrigen('ingredientes');
@@ -229,6 +275,8 @@
   form.addEventListener('submit', (e) => {
     e.preventDefault();
   });
+
+
 })();
 </script>
 
