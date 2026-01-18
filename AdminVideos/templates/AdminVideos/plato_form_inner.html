@@ -97,9 +97,13 @@
 
                     {% if form.instance.pk %}
                       <a href="{% url 'agregar-a-mi-lista' form.instance.pk %}?duplicar=true"
-                        class="btn btn-sm btn-outline-secondary">
-                        Duplicar Plato
+                        class="btn btn-sm"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        title="Clonar plato">
+                        <i class="fa-solid fa-clone" style="font-size:2rem;"></i>
                       </a>
+
 
                       <button type="button"
                               class="btn btn-sm btn-outline-primary js-plato-ingredientes"

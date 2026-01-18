@@ -501,7 +501,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             // Detectamos el tab activo al hacer clic en los enlaces de navegación
-            document.querySelectorAll(".nav-link").forEach(link => {
+            document.querySelectorAll("a.nav-link").forEach(link => {
                 link.addEventListener("click", function (event) {
                     let activeTab = document.querySelector(".nav-tabs .nav-link.active");
                     if (activeTab) {
