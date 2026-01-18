@@ -1170,6 +1170,35 @@ def lista_de_compras(request):
 
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return JsonResponse({"success": True})
+        
+    if request.method == "POST" and post_origen == "ingredientes":
+        ing_id = request.POST.get("toggle_ing_id") or request.POST.get("comment_ing_id")
+        checked = request.POST.get("toggle_ing_checked")  # "1" o "0" o None
+
+        if ing_id and ing_id.isdigit():
+            ing_id = int(ing_id)
+
+            defaults = {}
+
+            # toggle checkbox: checked=1 => "no-tengo" => tengo=False
+            if checked in ("0", "1"):
+                defaults["tengo"] = (checked == "0")
+
+            # comentario (si vino)
+            comentario_key = f"comentario_{ing_id}"
+            if comentario_key in request.POST:
+                defaults["comentario"] = (request.POST.get(comentario_key) or "").strip()
+
+            if defaults:
+                ProfileIngrediente.objects.update_or_create(
+                    profile=perfil,
+                    ingrediente_id=ing_id,
+                    defaults=defaults
+                )
+
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({"success": True})
+
 
 
     # ⚠️ IMPORTANTE: menues estaba prefetcheado ANTES del update.

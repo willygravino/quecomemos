@@ -12,6 +12,12 @@
   <input type="hidden" name="toggle_plato_id" id="toggle_plato_id" value="">
   <input type="hidden" name="toggle_plato_checked" id="toggle_plato_checked" value="">
 
+  
+  <!-- ✅ AGREGÁ ESTOS 3 ACÁ -->
+  <input type="hidden" name="toggle_ing_id" id="toggle_ing_id" value="">
+  <input type="hidden" name="toggle_ing_checked" id="toggle_ing_checked" value="">
+  <input type="hidden" name="comment_ing_id" id="comment_ing_id" value="">
+
 
   <div class="row g-1 ml-1">
 
@@ -247,15 +253,26 @@
     });
   });
 
-  // --- Cambios de ingredientes (NO recarga inmediata) ---
+ // --- Cambios de ingredientes (persisten) ---
   form.querySelectorAll('input[name="ingrediente_a_comprar_id"]').forEach(el => {
     el.addEventListener('change', async () => {
       try {
         setOrigen('ingredientes');
+
+        // ✅ seteo de hidden inputs
+        document.getElementById('toggle_ing_id').value = el.value; // ingrediente_id
+        document.getElementById('toggle_ing_checked').value = el.checked ? "1" : "0";
+        document.getElementById('comment_ing_id').value = el.value; // opcional
+
         await autosave();
-      } catch(e) {}
+      } catch (e) {
+        console.error(e);
+      }
     });
   });
+
+
+
 
   // comentarios: guardamos con debounce mientras escribís
   let t;
@@ -264,22 +281,32 @@
     t = setTimeout(() => fn.apply(null, args), ms);
   };
 
+
+
   form.querySelectorAll('input[name^="comentario_"]').forEach(el => {
+    const ingId = el.name.replace("comentario_", ""); // saca el ID del nombre
+
     const saveDebounced = debounce(async () => {
       try {
         setOrigen('ingredientes');
+        document.getElementById('comment_ing_id').value = ingId; // ✅ clave
         await autosave();
       } catch(e) {}
     }, 500);
 
     el.addEventListener('input', saveDebounced);
+
     el.addEventListener('change', async () => {
       try {
         setOrigen('ingredientes');
+        document.getElementById('comment_ing_id').value = ingId; // ✅ clave
         await autosave();
       } catch(e) {}
     });
   });
+
+
+
 
   form.addEventListener('submit', (e) => e.preventDefault());
 })();
