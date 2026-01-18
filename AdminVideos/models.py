@@ -472,7 +472,7 @@ class ProfileIngrediente(models.Model):
     )
 
     # True = lo tengo / False = no lo tengo (entonces lo compro)
-    tengo = models.BooleanField(default=True)
+    tengo = models.BooleanField(default=False)
 
     # comentario opcional (ej: “marca X”, “comprar si hay oferta”)
     comentario = models.CharField(max_length=120, blank=True, default="")
