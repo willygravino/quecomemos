@@ -9,6 +9,9 @@
   {% csrf_token %}
 
   <input type="hidden" name="post_origen" id="post_origen" value="">
+  <input type="hidden" name="toggle_plato_id" id="toggle_plato_id" value="">
+  <input type="hidden" name="toggle_plato_checked" id="toggle_plato_checked" value="">
+
 
   <div class="row g-1 ml-1">
 
@@ -206,6 +209,92 @@
   const csrf = form.querySelector('input[name=csrfmiddlewaretoken]')?.value || '';
   const origenInput = document.getElementById('post_origen');
 
+  const toggleIdInput = document.getElementById('toggle_plato_id');
+  const toggleCheckedInput = document.getElementById('toggle_plato_checked');
+
+  function setOrigen(v) {
+    if (origenInput) origenInput.value = v;
+  }
+
+  async function autosave() {
+    const fd = new FormData(form);
+    await fetch(form.action, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': csrf, 'X-Requested-With': 'XMLHttpRequest' },
+      body: fd,
+      credentials: 'same-origin'
+    });
+  }
+
+  // --- Cambios de menú (requieren recarga) ---
+  form.querySelectorAll('input[name="plato_seleccionado"]').forEach(el => {
+    el.addEventListener('change', async () => {
+      try {
+        setOrigen('menu');
+
+        // value = "<plato_id>_<Ymd>"
+        const val = el.value || "";
+        const platoId = val.split("_", 1)[0];
+
+        if (toggleIdInput) toggleIdInput.value = platoId;
+        if (toggleCheckedInput) toggleCheckedInput.value = el.checked ? "1" : "0";
+
+        await autosave();
+        location.reload();
+      } catch (e) {
+        console.error('No se pudo guardar y recargar', e);
+      }
+    });
+  });
+
+  // --- Cambios de ingredientes (NO recarga inmediata) ---
+  form.querySelectorAll('input[name="ingrediente_a_comprar_id"]').forEach(el => {
+    el.addEventListener('change', async () => {
+      try {
+        setOrigen('ingredientes');
+        await autosave();
+      } catch(e) {}
+    });
+  });
+
+  // comentarios: guardamos con debounce mientras escribís
+  let t;
+  const debounce = (fn, ms=350) => (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn.apply(null, args), ms);
+  };
+
+  form.querySelectorAll('input[name^="comentario_"]').forEach(el => {
+    const saveDebounced = debounce(async () => {
+      try {
+        setOrigen('ingredientes');
+        await autosave();
+      } catch(e) {}
+    }, 500);
+
+    el.addEventListener('input', saveDebounced);
+    el.addEventListener('change', async () => {
+      try {
+        setOrigen('ingredientes');
+        await autosave();
+      } catch(e) {}
+    });
+  });
+
+  form.addEventListener('submit', (e) => e.preventDefault());
+})();
+</script>
+
+
+<!-- 
+<script>
+(function () {
+  const form = document.getElementById('frm-menu');
+  if (!form) return;
+
+  const csrf = form.querySelector('input[name=csrfmiddlewaretoken]')?.value || '';
+  const origenInput = document.getElementById('post_origen');
+
   function setOrigen(v) {
     if (origenInput) origenInput.value = v; // "menu" o "ingredientes"
   }
@@ -278,7 +367,7 @@
 
 
 })();
-</script>
+</script> -->
 
 
 {% endblock %}

@@ -1151,33 +1151,44 @@ def lista_de_compras(request):
     # =====================================================
     post_origen = request.POST.get("post_origen", "") if request.method == "POST" else ""
 
+    # =====================================================
+    # POST: guardar ingredientes SOLO si origen == "ingredientes"
+    # =====================================================
     if request.method == "POST" and post_origen == "menu":
-        platos_seleccionados = set(request.POST.getlist("plato_seleccionado"))
+        plato_id = request.POST.get("toggle_plato_id")
+        checked = request.POST.get("toggle_plato_checked") == "1"
 
-        # desmarcar todos
-        MenuItem.objects.filter(
-            menu__propietario=request.user,
-            menu__fecha__gte=today,
-            plato__isnull=False,
-        ).update(elegido=False)
+        if plato_id and plato_id.isdigit():
+            plato_id = int(plato_id)
 
-        # marcar los seleccionados
-        for clave in platos_seleccionados:
-            try:
-                plato_id, ymd = clave.split("_", 1)
-                fecha = datetime.datetime.strptime(ymd, "%Y%m%d").date()
-            except ValueError:
-                continue
-
+            # aplicar a TODOS los días futuros donde aparezca ese plato
             MenuItem.objects.filter(
                 menu__propietario=request.user,
-                menu__fecha=fecha,
-                plato_id=int(plato_id),
-            ).update(elegido=True)
+                menu__fecha__gte=today,
+                plato_id=plato_id,
+            ).update(elegido=checked)
 
-        # respuesta liviana si es autosave
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return JsonResponse({"success": True})
+
+
+    # ⚠️ IMPORTANTE: menues estaba prefetcheado ANTES del update.
+    # Rehacer el queryset para que el template vea los elegidos actualizados.
+    menues = (
+        MenuDia.objects
+        .filter(propietario=request.user, fecha__gte=today)
+        .order_by("fecha")
+        .prefetch_related(
+            Prefetch(
+                "items",
+                queryset=(
+                    MenuItem.objects
+                    .select_related("plato", "lugar")
+                    .order_by("id")
+                ),
+            )
+        )
+    )
 
     # =====================================================
     # Ítems elegidos (platos) para calcular ingredientes
@@ -1272,44 +1283,7 @@ def lista_de_compras(request):
     )
     pantry_map = {pi.ingrediente_id: pi for pi in pantry_qs}
 
-    # =====================================================
-    # POST: guardar ingredientes SOLO si origen == "ingredientes"
-    # =====================================================
-    if request.method == "POST" and post_origen == "ingredientes":
-        now = timezone.now()
-        to_buy_ids = set(
-            int(x) for x in request.POST.getlist("ingrediente_a_comprar_id") if x.isdigit()
-        )
-
-        for ing_id in agregados.keys():
-            want_tengo = (ing_id not in to_buy_ids)  # no está marcado => lo tengo
-            pi = pantry_map.get(ing_id)
-
-            if not pi:
-                pi = ProfileIngrediente(profile=perfil, ingrediente_id=ing_id)
-                pi.tengo = want_tengo
-            else:
-                if (pi.tengo is False) and (want_tengo is True):
-                    pi.last_bought_at = now
-                pi.tengo = want_tengo
-
-            comentario_key = f"comentario_{ing_id}"
-            if comentario_key in request.POST:
-                pi.comentario = (request.POST.get(comentario_key) or "").strip()
-
-            pi.save()
-
-        pantry_map = {
-            pi.ingrediente_id: pi
-            for pi in (
-                ProfileIngrediente.objects
-                .filter(profile=perfil, ingrediente_id__in=agregados.keys())
-                .only("ingrediente_id", "tengo", "comentario", "last_bought_at")
-            )
-        }
-
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return JsonResponse({"success": True})
+   
 
     # =====================================================
     # reglas de estado (igual espíritu que antes + "recién comprado")
@@ -3287,7 +3261,7 @@ def plato_opciones_asignar(request, pk):
 
     return JsonResponse({"opciones": opciones})
 
-    
+
 
 @login_required
 def eliminar_plato_programado(request, nombre_plato, comida, fecha):
