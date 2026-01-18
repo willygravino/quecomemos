@@ -459,8 +459,72 @@ class HistoricoItem(models.Model):
         
 
 
+class ProfileIngrediente(models.Model):
+    profile = models.ForeignKey(
+        "Profile",
+        on_delete=models.CASCADE,
+        related_name="ingredientes_pantry",
+    )
+    ingrediente = models.ForeignKey(
+        "AdminVideos.Ingrediente",   # <-- ajustá "AdminVideos" al app real donde está Ingrediente
+        on_delete=models.CASCADE,
+        related_name="en_pantry_de",
+    )
+
+    # True = lo tengo / False = no lo tengo (entonces lo compro)
+    tengo = models.BooleanField(default=True)
+
+    # comentario opcional (ej: “marca X”, “comprar si hay oferta”)
+    comentario = models.CharField(max_length=120, blank=True, default="")
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    last_bought_at = models.DateTimeField(null=True, blank=True)  # 👈 NUEVO
 
 
+    class Meta:
+        unique_together = ("profile", "ingrediente")
+
+    def __str__(self):
+        return f"{self.profile.user} - {self.ingrediente} ({'tengo' if self.tengo else 'no tengo'})"
+
+
+
+class IngredienteEstado(models.Model):
+    class Estado(models.TextChoices):
+        TENGO = "tengo", "Tengo"
+        NO_TENGO = "no-tengo", "No tengo"
+        RECIEN_COMPRADO = "recien-comprado", "Recién comprado"
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="ingredientes_estado",
+    )
+
+    # Guardamos el ingrediente como texto (por ahora), igual que hoy lo manejás
+    nombre = models.CharField(max_length=120, db_index=True)
+
+    estado = models.CharField(max_length=20, choices=Estado.choices, default=Estado.NO_TENGO)
+
+    comentario = models.TextField(blank=True, default="")
+
+    # Para que “recién comprado” venza
+    estado_hasta = models.DateField(null=True, blank=True)
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "nombre"], name="uniq_user_ingrediente_nombre"),
+        ]
+        indexes = [
+            models.Index(fields=["user", "estado"]),
+        ]
+
+    def __str__(self):
+        return f"{self.user_id} - {self.nombre} ({self.estado})"
+    
 
 class Profile(models.Model):
     user = models.OneToOneField(

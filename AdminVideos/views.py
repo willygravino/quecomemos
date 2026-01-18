@@ -614,6 +614,9 @@ def lista_de_compras(request):
 
         perfil.save()
 
+
+
+
     # =====================================================
     # Estado para mostrar (si no guardamos por ingredientes)
     # =====================================================
@@ -635,6 +638,10 @@ def lista_de_compras(request):
             ingredientes_unicos[ingrediente] = {"comentario": el_comentario, "estado": "tengo"}
         else:
             ingredientes_unicos[ingrediente] = {"comentario": el_comentario, "estado": "no-tengo"}
+
+
+
+
 
     for ingrediente, detalles in ingredientes_unicos.items():
         if detalles["estado"] == "no-tengo":
