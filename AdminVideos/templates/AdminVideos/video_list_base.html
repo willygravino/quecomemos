@@ -378,68 +378,6 @@
   </div>
 
 
-  <!-- Modal para asignar plato -->
-  <div class="modal fade" id="asignarPlatoModal" tabindex="-1" aria-labelledby="asignarPlatoLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-       <form
-        id="asignarPlatoForm"
-        action="{% url 'asignar-plato' %}"
-        method="post"
-        novalidate>
-
-          {% csrf_token %}
-          <div class="modal-body">
-
-
-            <!-- Campo oculto para almacenar el día activo -->
-            <input type="hidden" name="dia" id="diaSeleccionado">
-
-            <!-- Muestra el día activo en el modal -->
-            <h2>Asignar al día <span id="diaActivoTexto"></span></h2>
-
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-
-
-            <!-- Selector del tipo de comida -->
-            <div class="mb-1">
-              <label for="comidaSeleccionada" class="form-label">Seleccionar comida:</label>
-              <select name="comida" id="comidaSeleccionada" class="form-select">
-                <option value="desayuno">Desayuno</option>
-                <option value="almuerzo">Almuerzo</option>
-                <option value="merienda">Merienda</option>
-                <option value="cena">Cena</option>
-              </select>
-
-              <!-- Campo oculto para el ID del plato -->
-              <input type="hidden" name="plato_id" id="platoIdInputAsignar">
-
-              <!-- Campo oculto para el tipo de elemento -->
-              <input type="hidden" name="tipo_elemento" id="tipoObjetoAsignar">
-
-              <button type="submit" class="btn btn-primary">Asignar</button>
-
-
-        </form>
-
-      </div>
-    </div>
-
-  </div>
-</div>
-</div>
-
-<script>
-  function setPlatoInfo(platoId, tipo) {
-    // Compartir
-    document.getElementById("platoIdInputCompartir").value = platoId;
-    document.getElementById("tipoObjetoCompartir").value = tipo;
-
-    // Asignar
-    document.getElementById("platoIdInputAsignar").value = platoId;
-    document.getElementById("tipoObjetoAsignar").value = tipo;
-  }
-</script>
 
 <!-- ELIMINAR PLATO -->
 <script>

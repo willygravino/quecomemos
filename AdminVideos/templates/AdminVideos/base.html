@@ -619,6 +619,52 @@ Root globl para modales cargados dinámicamente (AJAX)
  Contenedor único para modales dinámicos (ingredientes, compartir, etc.) -->
 <div id="modal-root"></div>
 
+{# ===== Modal global: asignar plato ===== #}
+<div class="modal fade" id="asignarPlatoModal" tabindex="-1" aria-labelledby="asignarPlatoLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="asignarPlatoForm" action="{% url 'asignar-plato' %}" method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="modal-body">
+          <input type="hidden" name="dia" id="diaSeleccionado">
+
+          <h2>Asignar al día <span id="diaActivoTexto"></span></h2>
+
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+          <div class="mb-1">
+            <label for="comidaSeleccionada" class="form-label">Seleccionar comida:</label>
+            <select name="comida" id="comidaSeleccionada" class="form-select">
+              <option value="desayuno">Desayuno</option>
+              <option value="almuerzo">Almuerzo</option>
+              <option value="merienda">Merienda</option>
+              <option value="cena">Cena</option>
+            </select>
+
+            <input type="hidden" name="plato_id" id="platoIdInputAsignar">
+            <input type="hidden" name="tipo_elemento" id="tipoObjetoAsignar">
+
+            <button type="submit" class="btn btn-primary mt-2">Asignar</button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function setPlatoInfo(platoId, tipo) {
+    // Asignar
+    const idAsignar = document.getElementById("platoIdInputAsignar");
+    const tipoAsignar = document.getElementById("tipoObjetoAsignar");
+    if (idAsignar) idAsignar.value = platoId;
+    if (tipoAsignar) tipoAsignar.value = tipo;
+  }
+</script>
+
+
 
 </body>
 

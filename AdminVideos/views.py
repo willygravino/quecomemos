@@ -3190,15 +3190,17 @@ def agregar_a_mi_lista(request, plato_id):
     return redirect('descartar-sugerido', plato_id=plato_id)
 
 
-
-
 class AsignarPlato(View):
 
     def post(self, request):
         tipo = request.POST.get("tipo_elemento")   # "plato" | "lugar"
         objeto_id = request.POST.get("plato_id")
-        dia = request.POST.get("dia")               # YYYY-MM-DD
+        dia = request.POST.get("dia") or request.session.get("dia_activo")  # ✅ fallback
         momento = request.POST.get("comida")        # desayuno / almuerzo / etc.
+
+        if not dia:
+            messages.error(request, "No hay día activo seleccionado.")
+            return redirect("filtro-de-platos")
 
         try:
             fecha = datetime.datetime.strptime(dia, "%Y-%m-%d").date()
@@ -3228,7 +3230,7 @@ class AsignarPlato(View):
                         menu=menu_dia,
                         momento=momento,
                         plato=p,
-                        defaults={"elegido": True},  # si querés que por defecto compute en lista de compras
+                        defaults={"elegido": True},
                     )
                     if created:
                         creados += 1
@@ -3237,7 +3239,6 @@ class AsignarPlato(View):
                     request,
                     f"Asignados {creados}/{len(platos_a_asignar)} platos a {momento}."
                 )
-
 
             elif tipo == "lugar":
                 lugar = Lugar.objects.get(id=objeto_id)
@@ -3254,14 +3255,12 @@ class AsignarPlato(View):
                 messages.error(request, "Tipo de elemento inválido.")
 
         except Exception:
-            # Cubre duplicados, plato inexistente, etc.
             messages.warning(
                 request,
                 "Ese elemento ya estaba asignado a esa comida en ese día."
             )
 
         return redirect("filtro-de-platos")
-
 
 
 

@@ -104,7 +104,15 @@
                       <button type="button"
                               class="btn btn-sm btn-outline-primary js-plato-ingredientes"
                               data-url="{% url 'plato_ingredientes' form.instance.pk %}">
-                        Ver / compartir ingredientes
+                        Compartir lista de compras
+                      </button>
+
+                      <button type="button"
+                              class="btn btn-sm btn-outline-primary"
+                              data-bs-toggle="modal"
+                              data-bs-target="#asignarPlatoModal"
+                              onclick="setPlatoInfo('{{ form.instance.pk }}', 'plato')">
+                        Programar este plato
                       </button>
                     {% endif %}
 
