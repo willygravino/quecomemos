@@ -4,20 +4,34 @@
 (function () {
   "use strict";
 
+
   // ===========================
   // PLATO: Ver / compartir ingredientes (modal)
-  // Se bindea UNA sola vez para toda la app
+  // Apila modales (no oculta modalPlato)
   // ===========================
   if (!document.__platoIngredientesBound) {
 
-    async function openPlatoIngredientesModal(url) {
-      // cerrar modal de edición si está abierto
-      const modalPlatoEl = document.getElementById("modalPlato");
-      if (modalPlatoEl && window.bootstrap?.Modal) {
-        const inst = bootstrap.Modal.getInstance(modalPlatoEl);
-        if (inst) inst.hide();
-      }
+    // ---- Helper: stack de modales (Bootstrap 5)
+    // Hace que cada modal nuevo quede arriba del anterior, con backdrop correcto.
+    function stackModal(modalEl) {
+      const openModals = document.querySelectorAll(".modal.show").length; // cuántos ya están abiertos
+      const baseZ = 1055;                 // Bootstrap modal z-index base
+      const step = 20;                    // separación segura
+      const z = baseZ + (openModals * step);
 
+      modalEl.style.zIndex = z;
+
+      // Cuando Bootstrap cree el backdrop, lo ajustamos también
+      setTimeout(() => {
+        const backdrops = document.querySelectorAll(".modal-backdrop");
+        const backdrop = backdrops[backdrops.length - 1];
+        if (backdrop) {
+          backdrop.style.zIndex = z - 1;
+        }
+      }, 0);
+    }
+
+    async function openPlatoIngredientesModal(url) {
       const res = await fetch(url, {
         headers: { "X-Requested-With": "XMLHttpRequest" },
         credentials: "same-origin",
@@ -33,57 +47,34 @@
 
       root.innerHTML = html;
 
-      // ✅ Bind autosave dentro del modal recién cargado
-      const frm = document.getElementById("frm-plato-ingredientes");
-      if (frm) {
-        const csrf = frm.querySelector('input[name=csrfmiddlewaretoken]')?.value || '';
-
-        let t;
-        const debounce = (fn, ms = 350) => (...args) => {
-          clearTimeout(t);
-          t = setTimeout(() => fn.apply(null, args), ms);
-        };
-
-        async function autosave() {
-          const fd = new FormData(frm);
-          await fetch(url, { // ✅ usa el parámetro url
-            method: "POST",
-            headers: { "X-CSRFToken": csrf, "X-Requested-With": "XMLHttpRequest" },
-            body: fd,
-            credentials: "same-origin",
-          });
-        }
-
-        frm.querySelectorAll('input[name="ingrediente_a_comprar_id"]').forEach(el => {
-          el.addEventListener("change", () => {
-            autosave().catch(() => {});
-          });
-        });
-
-        frm.querySelectorAll('input[name^="comentario_"]').forEach(el => {
-          const saveDebounced = debounce(() => autosave().catch(() => {}), 500);
-          el.addEventListener("input", saveDebounced);
-          el.addEventListener("change", () => autosave().catch(() => {}));
-        });
-      }
-
       const modalEl = document.getElementById("platoIngredientesModal");
       if (!modalEl) {
         console.error("No llegó #platoIngredientesModal en el HTML del endpoint");
         return;
       }
 
-      // IMPORTANTÍSIMO: que viva en body para z-index correcto
+      // que viva en body para z-index correcto
       if (modalEl.parentElement !== document.body) {
         document.body.appendChild(modalEl);
       }
 
-      const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+      // IMPORTANTE: al apilar, conviene desactivar el "focus trap" del modal superior
+      // para que no rompa interacción con el de abajo (Bootstrap 5 soporta focus:false)
+      const modal =
+        bootstrap.Modal.getInstance(modalEl) ||
+        new bootstrap.Modal(modalEl, { focus: false });
+
+      // antes de mostrar, ajustamos stack
+      stackModal(modalEl);
       modal.show();
 
-      modalEl.addEventListener("hidden.bs.modal", () => {
-        root.innerHTML = "";
-      }, { once: true });
+      modalEl.addEventListener(
+        "hidden.bs.modal",
+        () => {
+          root.innerHTML = "";
+        },
+        { once: true }
+      );
     }
 
     document.addEventListener("click", (e) => {
@@ -98,13 +89,16 @@
         return;
       }
 
-      openPlatoIngredientesModal(url).catch(err => console.error("Error abriendo ingredientes:", err));
+      openPlatoIngredientesModal(url).catch((err) =>
+        console.error("Error abriendo ingredientes:", err)
+      );
     });
 
     document.__platoIngredientesBound = true;
   }
 
 
+  
   // ===========================
 // FIX BOOTSTRAP MODALS STACKING
 // ===========================
