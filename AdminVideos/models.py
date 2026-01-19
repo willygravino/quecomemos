@@ -401,13 +401,13 @@ class MenuItem(models.Model):
         obj = self.plato or self.lugar
         return f"{self.menu.fecha} - {self.momento} - {obj}"
 
-class ElegidosXDia(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="usuario_que_come", null=True)
-    el_dia_en_que_comemos = models.DateField(null=True)  # Campo de fecha
-    platos_que_comemos = models.JSONField(null=True, blank=True)
+# class ElegidosXDia(models.Model):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="usuario_que_come", null=True)
+#     el_dia_en_que_comemos = models.DateField(null=True)  # Campo de fecha
+#     platos_que_comemos = models.JSONField(null=True, blank=True)
 
-    def __str__(self):
-         return f'Menu Elegido {self.el_dia_en_que_comemos}'
+#     def __str__(self):
+#          return f'Menu Elegido {self.el_dia_en_que_comemos}'
 
 
 class HistoricoDia(models.Model):

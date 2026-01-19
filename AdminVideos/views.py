@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
 from AdminVideos import models
-from AdminVideos.models import HistoricoDia, HistoricoItem, Ingrediente, IngredienteEnPlato, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje,  ElegidosXDia, ProfileIngrediente
+from AdminVideos.models import HistoricoDia, HistoricoItem, Ingrediente, IngredienteEnPlato, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string   # ✅ ← ESTA ES LA CLAVE
 from django.http import Http404, HttpRequest, JsonResponse
@@ -2520,44 +2520,44 @@ def FiltroDePlatos(request):
 
     DIAS_ES = ['LU','MA','MI','JU','VI','SA','DO']  # tu mapeo
 
-    if False:  # 🔴 BLOQUE DESACTIVADO (refactor nuevo menú)
+    # if False:  # 🔴 BLOQUE DESACTIVADO (refactor nuevo menú)
 
-        registros_antiguos = ElegidosXDia.objects.filter(
-            el_dia_en_que_comemos__lt=fecha_actual, user=request.user
-        )
+    #     registros_antiguos = ElegidosXDia.objects.filter(
+    #         el_dia_en_que_comemos__lt=fecha_actual, user=request.user
+    #     )
 
-        with transaction.atomic():
-            for registro in registros_antiguos:
-                fecha = registro.el_dia_en_que_comemos
-                datos = registro.platos_que_comemos or {}
+    #     with transaction.atomic():
+    #         for registro in registros_antiguos:
+    #             fecha = registro.el_dia_en_que_comemos
+    #             datos = registro.platos_que_comemos or {}
 
-                historico, _ = HistoricoDia.objects.get_or_create(
-                    fecha=fecha,
-                    propietario=request.user,
-                    defaults={'dia_semana': DIAS_ES[fecha.weekday()]}
-                )
-                if not historico.dia_semana:
-                    historico.dia_semana = DIAS_ES[fecha.weekday()]
-                    historico.save(update_fields=['dia_semana'])
+    #             historico, _ = HistoricoDia.objects.get_or_create(
+    #                 fecha=fecha,
+    #                 propietario=request.user,
+    #                 defaults={'dia_semana': DIAS_ES[fecha.weekday()]}
+    #             )
+    #             if not historico.dia_semana:
+    #                 historico.dia_semana = DIAS_ES[fecha.weekday()]
+    #                 historico.save(update_fields=['dia_semana'])
 
-                for momento in ["desayuno", "almuerzo", "merienda", "cena"]:
-                    for plato_data in datos.get(momento, []):
-                        pid = plato_data.get("id_plato")
-                        if not pid:
-                            continue
+    #             for momento in ["desayuno", "almuerzo", "merienda", "cena"]:
+    #                 for plato_data in datos.get(momento, []):
+    #                     pid = plato_data.get("id_plato")
+    #                     if not pid:
+    #                         continue
 
-                        # Intentamos resolver el Plato SOLO para capturar snapshot de nombre (si aún existe)
-                        plato_obj = Plato.objects.filter(id=pid, propietario=request.user).only('id','nombre_plato').first()
-                        nombre_snap = plato_obj.nombre_plato if plato_obj else (plato_data.get("nombre_plato") or "Plato eliminado")
+    #                     # Intentamos resolver el Plato SOLO para capturar snapshot de nombre (si aún existe)
+    #                     plato_obj = Plato.objects.filter(id=pid, propietario=request.user).only('id','nombre_plato').first()
+    #                     nombre_snap = plato_obj.nombre_plato if plato_obj else (plato_data.get("nombre_plato") or "Plato eliminado")
 
-                        HistoricoItem.objects.get_or_create(
-                            historico=historico,
-                            plato_id_ref=pid,
-                            momento=momento
-                            # defaults={'plato_nombre_snapshot': nombre_snap}
-                        )
+    #                     HistoricoItem.objects.get_or_create(
+    #                         historico=historico,
+    #                         plato_id_ref=pid,
+    #                         momento=momento
+    #                         # defaults={'plato_nombre_snapshot': nombre_snap}
+    #                     )
 
-                registro.delete()
+    #             registro.delete()
 
 
 
@@ -3430,67 +3430,67 @@ def normalizar_dia(dia):
     )
 
 
-def generar_elegido_desde_historico(historico, fecha_activa):
-    """Crea un ElegidosXDia para la fecha activa a partir de un HistoricoDia con HistoricoItem."""
+# def generar_elegido_desde_historico(historico, fecha_activa):
+#     """Crea un ElegidosXDia para la fecha activa a partir de un HistoricoDia con HistoricoItem."""
 
-    # 1) limpiar el ElegidosXDia existente
-    ElegidosXDia.objects.filter(
-        user=historico.propietario,
-        el_dia_en_que_comemos=fecha_activa
-    ).delete()
+#     # 1) limpiar el ElegidosXDia existente
+#     ElegidosXDia.objects.filter(
+#         user=historico.propietario,
+#         el_dia_en_que_comemos=fecha_activa
+#     ).delete()
 
-    # 2) crear nuevo contenedor vacío
-    menu_dia = ElegidosXDia.objects.create(
-        user=historico.propietario,
-        el_dia_en_que_comemos=fecha_activa,
-        platos_que_comemos={}
-    )
-    data = {m: [] for m in MOMENTOS}
+#     # 2) crear nuevo contenedor vacío
+#     menu_dia = ElegidosXDia.objects.create(
+#         user=historico.propietario,
+#         el_dia_en_que_comemos=fecha_activa,
+#         platos_que_comemos={}
+#     )
+#     data = {m: [] for m in MOMENTOS}
 
-    # 3) agrupar ids por momento
-    ids_por_momento = {m: [] for m in MOMENTOS}
-    for it in historico.items.all():
-        if it.momento in ids_por_momento:
-            ids_por_momento[it.momento].append(it.plato_id_ref)
+#     # 3) agrupar ids por momento
+#     ids_por_momento = {m: [] for m in MOMENTOS}
+#     for it in historico.items.all():
+#         if it.momento in ids_por_momento:
+#             ids_por_momento[it.momento].append(it.plato_id_ref)
 
-    # 4) búsqueda y serialización
-    for momento in MOMENTOS:
-        ids = ids_por_momento[momento]
-        if not ids:
-            continue
+#     # 4) búsqueda y serialización
+#     for momento in MOMENTOS:
+#         ids = ids_por_momento[momento]
+#         if not ids:
+#             continue
 
-        platos_qs = Plato.objects.filter(id__in=ids)
-        mapa = {p.id: p for p in platos_qs}
+#         platos_qs = Plato.objects.filter(id__in=ids)
+#         mapa = {p.id: p for p in platos_qs}
 
-        for pid in ids:
-            p = mapa.get(pid)
-            if not p:
-                continue  # plato eliminado
+#         for pid in ids:
+#             p = mapa.get(pid)
+#             if not p:
+#                 continue  # plato eliminado
 
-            # evitar duplicados
-            if any(item.get("id_plato") == str(p.id) for item in data[momento]):
-                continue
+#             # evitar duplicados
+#             if any(item.get("id_plato") == str(p.id) for item in data[momento]):
+#                 continue
 
-            plato_json = {
-                "id_plato": str(p.id),
-                "plato": p.nombre_plato,
-                "tipo": p.tipos,
-                "ingredientes": p.ingredientes,
-                "variedades": {
-                    vid: {
-                        "nombre": info.get("nombre"),
-                        "ingredientes": info.get("ingredientes"),
-                        "elegido": True,
-                    } for vid, info in (p.variedades or {}).items()
-                },
-                "elegido": True,
-            }
-            data[momento].append(plato_json)
+#             plato_json = {
+#                 "id_plato": str(p.id),
+#                 "plato": p.nombre_plato,
+#                 "tipo": p.tipos,
+#                 "ingredientes": p.ingredientes,
+#                 "variedades": {
+#                     vid: {
+#                         "nombre": info.get("nombre"),
+#                         "ingredientes": info.get("ingredientes"),
+#                         "elegido": True,
+#                     } for vid, info in (p.variedades or {}).items()
+#                 },
+#                 "elegido": True,
+#             }
+#             data[momento].append(plato_json)
 
-    # 5) guardar y devolver
-    menu_dia.platos_que_comemos = data
-    menu_dia.save()
-    return menu_dia
+#     # 5) guardar y devolver
+#     menu_dia.platos_que_comemos = data
+#     menu_dia.save()
+#     return menu_dia
 
 
 def _validar_y_purgar(historico: HistoricoDia) -> bool:
@@ -3575,24 +3575,24 @@ def random_dia(request, dia_nombre):
 
     return redirect("filtro-de-platos")
 
-def eliminar_menu_programado(request):
-    # Recuperar la fecha activa desde la sesión
-    dia_activo = request.session.get("dia_activo", None)
+# def eliminar_menu_programado(request):
+#     # Recuperar la fecha activa desde la sesión
+#     dia_activo = request.session.get("dia_activo", None)
 
-    if not dia_activo:
-        messages.error(request, "No hay un día activo en la sesión.")
-        return redirect("filtro-de-platos")
+#     if not dia_activo:
+#         messages.error(request, "No hay un día activo en la sesión.")
+#         return redirect("filtro-de-platos")
 
-    # Buscar y eliminar el registro
-    elegido = ElegidosXDia.objects.filter(
-        user=request.user,
-        el_dia_en_que_comemos=dia_activo
-    ).first()
+#     # Buscar y eliminar el registro
+#     elegido = ElegidosXDia.objects.filter(
+#         user=request.user,
+#         el_dia_en_que_comemos=dia_activo
+#     ).first()
 
-    if elegido:
-        elegido.delete()
-        messages.success(request, f"Se eliminó el menú del {dia_activo}")
-    else:
-        messages.warning(request, f"No había un menú guardado para {dia_activo}")
+#     if elegido:
+#         elegido.delete()
+#         messages.success(request, f"Se eliminó el menú del {dia_activo}")
+#     else:
+#         messages.warning(request, f"No había un menú guardado para {dia_activo}")
 
-    return redirect("filtro-de-platos")
+#     return redirect("filtro-de-platos")
