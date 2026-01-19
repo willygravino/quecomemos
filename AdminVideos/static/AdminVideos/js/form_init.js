@@ -133,6 +133,13 @@
 
       const html = await res.text();
 
+      if (!res.ok) {
+        console.error("❌ Error HTTP", res.status, "al cargar modal ingredientes");
+        console.error(html);
+        return;
+      }
+
+
       const root = document.getElementById("modal-root");
       if (!root) {
         console.error("Falta #modal-root en el HTML base");

@@ -87,126 +87,137 @@ def plato_ingredientes(request: HttpRequest, pk: int):
         .all()
     )
 
-    ing_ids = list(ingredientes_qs.values_list("ingrediente_id", flat=True))
-
-    pantry_qs = (
-        ProfileIngrediente.objects
-        .filter(profile=perfil, ingrediente_id__in=ing_ids)
-        .only("ingrediente_id", "tengo", "comentario", "last_bought_at")
-    )
-    pantry_map = {pi.ingrediente_id: pi for pi in pantry_qs}
-
     # =========================
     # Helpers
     # =========================
     def _norm(s: str) -> str:
         return " ".join((s or "").strip().lower().split())
 
+    # Mapa id -> nombre normalizado (para update/create consistente)
+    ingid_to_nombre_norm = {
+        iep.ingrediente_id: _norm(iep.ingrediente.nombre)
+        for iep in ingredientes_qs
+        if iep.ingrediente
+    }
+
     # =========================
     # POST: 2 modos
-    # 1) Form POST (tu modal viejo): guarda checks + comentarios en ProfileIngrediente (igual que antes)
-    # 2) JSON POST (tu fetch nuevo): guarda comentario en IngredienteEstado
+    # 1) JSON POST (fetch): guarda comentario y/o toggle en IngredienteEstado
+    # 2) Form POST (modal HTML): guarda checks + comentarios en IngredienteEstado
     # =========================
     if request.method == "POST":
         content_type = (request.headers.get("Content-Type") or "").lower()
 
-        # ---------- (2) JSON POST (fetch): comentario ----------
+        # ---------- (1) JSON POST (fetch) ----------
         if "application/json" in content_type:
             try:
                 payload = json.loads(request.body.decode("utf-8"))
             except Exception:
                 return JsonResponse({"ok": False, "error": "JSON inválido"}, status=400)
 
-            nombre = (payload.get("nombre") or "").strip()
+            nombre = _norm(payload.get("nombre"))
             comentario = payload.get("comentario", None)
+            checked = payload.get("checked", None)  # opcional: si lo mandás, lo usa
 
             if not nombre:
                 return JsonResponse({"ok": False, "error": "nombre requerido"}, status=400)
 
-            # si viene comentario, lo persistimos
+            defaults = {}
+
+            # Si viene checked, interpretamos:
+            # - en tu modal “checked = hay que comprar” => estado NO_TENGO
+            # Pero este JSON podría venir desde otros lados.
+            # Si vos querés que JSON siga la misma convención, dejalo así:
+            if checked is not None:
+                checked_bool = bool(checked)
+                defaults["estado"] = (
+                    IngredienteEstado.Estado.NO_TENGO if checked_bool
+                    else IngredienteEstado.Estado.TENGO
+                )
+
             if comentario is not None:
+                defaults["comentario"] = (comentario or "").strip()
+
+            if defaults:
                 obj, _ = IngredienteEstado.objects.update_or_create(
                     user=request.user,
-                    nombre=_norm(nombre),
-                    defaults={"comentario": (comentario or "").strip()},
+                    nombre=nombre,
+                    defaults=defaults,
                 )
-                return JsonResponse({"ok": True, "nombre": obj.nombre, "comentario": obj.comentario})
+                return JsonResponse({
+                    "ok": True,
+                    "nombre": obj.nombre,
+                    "estado": obj.estado,
+                    "comentario": obj.comentario,
+                })
 
-            # si no vino comentario, no hacemos nada acá (para no romper)
             return JsonResponse({"ok": True})
 
-        # ---------- (1) Form POST (HTML): tu lógica original ----------
-        now = timezone.now()
-
-        # checked => "no-tengo" => aparece en POST como to_buy_id
+        # ---------- (2) Form POST (HTML modal): checks + comentarios ----------
+        # checked => "no-tengo" => aparece en POST como ingrediente_a_comprar_id
         to_buy_ids = set(
             int(x) for x in request.POST.getlist("ingrediente_a_comprar_id") if x.isdigit()
         )
 
-        # persistimos SOLO los ingredientes del plato
         for iep in ingredientes_qs:
             ing_id = iep.ingrediente_id
-            want_tengo = (ing_id not in to_buy_ids)  # no marcado => lo tengo
+            nombre_norm = ingid_to_nombre_norm.get(ing_id)
+            if not nombre_norm:
+                continue
 
-            pi = pantry_map.get(ing_id)
-            if not pi:
-                pi = ProfileIngrediente(profile=perfil, ingrediente_id=ing_id)
-                pi.tengo = want_tengo
-            else:
-                # transición no-tengo -> tengo => recién comprado
-                if (pi.tengo is False) and (want_tengo is True):
-                    pi.last_bought_at = now
-                pi.tengo = want_tengo
+            # Convención del modal:
+            # - marcado (checked) => hay que comprar => NO_TENGO
+            # - no marcado => TENGO
+            estado = (
+                IngredienteEstado.Estado.NO_TENGO
+                if ing_id in to_buy_ids
+                else IngredienteEstado.Estado.TENGO
+            )
 
-            # comentario (mismo naming que en lista de compras)
+            defaults = {"estado": estado}
+
             comentario_key = f"comentario_{ing_id}"
             if comentario_key in request.POST:
-                pi.comentario = (request.POST.get(comentario_key) or "").strip()
+                defaults["comentario"] = (request.POST.get(comentario_key) or "").strip()
 
-            pi.save()
+            IngredienteEstado.objects.update_or_create(
+                user=request.user,
+                nombre=nombre_norm,
+                defaults=defaults,
+            )
 
         return JsonResponse({"success": True})
 
     # =========================
     # GET: preparar items para render
     # =========================
-    # Traemos comentarios “nuevos” desde IngredienteEstado (si existen) para mostrarlos.
-    nombres_norm = []
-    ingid_to_nombre_norm = {}
+    nombres_norm = list(ingid_to_nombre_norm.values())
 
-    for iep in ingredientes_qs:
-        n = _norm(iep.ingrediente.nombre)
-        nombres_norm.append(n)
-        ingid_to_nombre_norm[iep.ingrediente_id] = n
-
-    ie_qs = IngredienteEstado.objects.filter(user=request.user, nombre__in=nombres_norm).only("nombre", "comentario", "estado")
-    ie_map = {ie.nombre: ie for ie in ie_qs}
+    estado_qs = (
+        IngredienteEstado.objects
+        .filter(user=request.user, nombre__in=nombres_norm)
+        .only("nombre", "estado", "comentario", "estado_hasta", "updated_at")
+    )
+    estado_map = {e.nombre: e for e in estado_qs}
 
     items = []
     for iep in ingredientes_qs:
         ing = iep.ingrediente
-        pi = pantry_map.get(iep.ingrediente_id)
+        if not ing:
+            continue
 
-        # misma convención: checked = "no-tengo" (esto queda igual)
-        estado = "tengo"
-        comentario = ""
-        if pi:
-            comentario = pi.comentario or ""
-            if pi.tengo is False:
-                estado = "no-tengo"
-
-        # ✅ si hay comentario en IngredienteEstado, lo priorizamos para que “se vea” lo que guardaste por fetch
         key = ingid_to_nombre_norm.get(iep.ingrediente_id)
-        ie = ie_map.get(key) if key else None
-        if ie and (ie.comentario is not None) and (ie.comentario.strip() != ""):
-            comentario = ie.comentario
+        e = estado_map.get(key) if key else None
+
+        estado = e.estado if e else "tengo"
+        comentario = (e.comentario or "") if e else ""
 
         items.append({
             "ingrediente_id": iep.ingrediente_id,
             "nombre": ing.nombre,
             "cantidad": iep.cantidad,
             "unidad": iep.unidad,
-            "estado": estado,
+            "estado": estado,        # "no-tengo" => checkbox checked
             "comentario": comentario,
         })
 
@@ -394,27 +405,33 @@ def lista_de_compras(request):
         if ing_id and ing_id.isdigit():
             ing_id = int(ing_id)
 
+            # nombre del ingrediente (lo buscamos una vez)
+            ing = Ingrediente.objects.filter(pk=ing_id).only("nombre").first()
+            if not ing:
+                return JsonResponse({"success": False, "error": "Ingrediente no existe"}, status=404)
+
             defaults = {}
 
-            # toggle checkbox: checked=1 => "no-tengo" => tengo=False
+            # checkbox: checked=1 => "no-tengo" (hay que comprar)
             if checked in ("0", "1"):
-                defaults["tengo"] = (checked == "0")
+                defaults["estado"] = (
+                    IngredienteEstado.Estado.NO_TENGO if checked == "1"
+                    else IngredienteEstado.Estado.TENGO
+                )
 
-            # comentario (si vino)
             comentario_key = f"comentario_{ing_id}"
             if comentario_key in request.POST:
                 defaults["comentario"] = (request.POST.get(comentario_key) or "").strip()
 
             if defaults:
-                ProfileIngrediente.objects.update_or_create(
-                    profile=perfil,
-                    ingrediente_id=ing_id,
-                    defaults=defaults
+                IngredienteEstado.objects.update_or_create(
+                    user=request.user,
+                    nombre=ing.nombre.casefold(),  # clave consistente
+                    defaults=defaults,
                 )
 
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return JsonResponse({"success": True})
-
 
 
     # ⚠️ IMPORTANTE: menues estaba prefetcheado ANTES del update.
@@ -519,54 +536,51 @@ def lista_de_compras(request):
             agregados[ing_id]["cantidades"][row.unidad or "-"] += float(row.cantidad)
 
         agregados[ing_id]["usos"].append({"plato_id": row.plato_id, "fecha": needed_by})
+    
+    nombres = [d["nombre"].casefold() for d in agregados.values()]
+
+    estado_qs = (
+        IngredienteEstado.objects
+        .filter(user=request.user, nombre__in=nombres)
+        .only("nombre", "estado", "comentario", "estado_hasta", "updated_at")
+    )
+
+    estado_map = {e.nombre: e for e in estado_qs}
+
 
     # estados guardados para estos ingredientes
-    pantry_qs = (
-        ProfileIngrediente.objects
-        .filter(profile=perfil, ingrediente_id__in=agregados.keys())
-        .only("ingrediente_id", "tengo", "comentario", "last_bought_at")
-    )
-    pantry_map = {pi.ingrediente_id: pi for pi in pantry_qs}
+    # pantry_qs = (
+    #     ProfileIngrediente.objects
+    #     .filter(profile=perfil, ingrediente_id__in=agregados.keys())
+    #     .only("ingrediente_id", "tengo", "comentario", "last_bought_at")
+    # )
+    # pantry_map = {pi.ingrediente_id: pi for pi in pantry_qs}
 
    
 
-    # =====================================================
-    # reglas de estado (igual espíritu que antes + "recién comprado")
-    # =====================================================
-    def fresh_until(fecha_uso):
-        return fecha_uso or (today + timedelta(days=7))
 
-    def estado_final(pi, limite):
-        if not pi:
-            return "tengo"
-        if not pi.tengo:
-            return "no-tengo"
-        if (
-            pi.last_bought_at
-            and pi.last_bought_at >= timezone.now() - timedelta(days=7)
-            and today <= limite
-        ):
-            return "recien-comprado"
-        return "tengo"
+    
 
     items = []
     for ing_id, data in agregados.items():
-        pi = pantry_map.get(ing_id)
-        limite = fresh_until(data["needed_by"])
+        key = data["nombre"].casefold()
+        e = estado_map.get(key)
+
+        estado = e.estado if e else "tengo"
+        comentario = e.comentario if (e and e.comentario) else ""
 
         items.append({
             "ingrediente_id": ing_id,
             "nombre": data["nombre"],
             "tipo": data["tipo"],
             "detalle": data["detalle"],
-            "estado": estado_final(pi, limite),
-            "comentario": pi.comentario if pi else "",
-            "last_bought_at": pi.last_bought_at if pi else None,
+            "estado": estado,
+            "comentario": comentario,   # 👈 IMPORTANTÍSIMO para el template
             "needed_by": data["needed_by"],
-            "fresh_until": limite,
             "cantidades": [{"unidad": u, "total": t} for u, t in data["cantidades"].items()],
             "usos": data["usos"],
         })
+
 
     order = {"no-tengo": 0, "recien-comprado": 1, "tengo": 2}
     items.sort(key=lambda i: (order[i["estado"]], i["nombre"].casefold()))
@@ -693,12 +707,24 @@ def compartir_lista(request, token):
     # =====================================================
     # Estados guardados (tengo / comentario / last_bought_at)
     # =====================================================
-    pantry_qs = (
-        ProfileIngrediente.objects
-        .filter(profile=perfil, ingrediente_id__in=agregados.keys())
-        .only("ingrediente_id", "tengo", "comentario", "last_bought_at")
+    # pantry_qs = (
+    #     ProfileIngrediente.objects
+    #     .filter(profile=perfil, ingrediente_id__in=agregados.keys())
+    #     .only("ingrediente_id", "tengo", "comentario", "last_bought_at")
+    # )
+    # pantry_map = {pi.ingrediente_id: pi for pi in pantry_qs}
+
+    # comentarios/estado por nombre (vienen del modal por plato)
+    # usamos nombre__iexact para que "Banana" y "banana" maten el problema de mayúsculas
+    estado_qs = (
+        IngredienteEstado.objects
+        .filter(
+            user=request.user,
+            nombre__in=[data["nombre"] for data in agregados.values()]
+        )
     )
-    pantry_map = {pi.ingrediente_id: pi for pi in pantry_qs}
+
+    estado_map = {e.nombre.casefold(): e for e in estado_qs}
 
     def fresh_until(fecha_uso):
         return fecha_uso or (today + timedelta(days=7))
@@ -723,22 +749,29 @@ def compartir_lista(request, token):
     # =====================================================
     items = []
     for ing_id, data in agregados.items():
-        pi = pantry_map.get(ing_id)
+        e = estado_map.get(data["nombre"].casefold())
         limite = fresh_until(data["needed_by"])
-        estado = estado_final(pi, limite)
+
+        if not e:
+            estado = "tengo"
+            comentario = ""
+        else:
+            estado = e.estado
+            comentario = e.comentario or ""
 
         items.append({
             "ingrediente_id": ing_id,
             "nombre": data["nombre"],
-            "comentario": (pi.comentario if pi else ""),
+            "comentario": comentario,
             "estado": estado,
-            "last_bought_at": (pi.last_bought_at if pi else None),
             "needed_by": data["needed_by"],
         })
 
+
     # Orden como tu lista nueva
-    order = {"no-tengo": 0, "recien-comprado": 1, "tengo": 2}
-    items.sort(key=lambda i: (order[i["estado"]], i["nombre"].casefold()))
+    # order = {"no-tengo": 0, "recien-comprado": 1, "tengo": 2}
+    items.sort(key=lambda i: i["nombre"].casefold())
+
 
     # Tokens
     if not perfil.share_token:
