@@ -4,6 +4,100 @@
 (function () {
   "use strict";
 
+  // ===========================
+  // PLATO INGREDIENTES (modal): guardar comentarios (debounce)
+  // ===========================
+  if (!document.__platoIngredientesComentarioBound) {
+    let t = null;
+
+    document.addEventListener("input", (ev) => {
+      const inp = ev.target.closest("input[type='text'][data-ing-nombre]");
+      if (!inp) return;
+
+      const modal = inp.closest("#platoIngredientesModal");
+      if (!modal) return;
+
+      const api = modal.getAttribute("data-api-toggle");
+      if (!api) return;
+
+      const nombre = (inp.dataset.ingNombre || "").trim();
+      const comentario = (inp.value || "").trim();
+
+      // debounce simple para no postear cada tecla
+      clearTimeout(t);
+      t = setTimeout(async () => {
+        try {
+          const res = await fetch(api, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nombre, comentario })
+          });
+
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || data.ok === false) {
+            console.error("API error (comentario):", res.status, data);
+          }
+        } catch (e) {
+          console.error("No se pudo persistir el comentario", e);
+        }
+      }, 400);
+    });
+
+    document.__platoIngredientesComentarioBound = true;
+  }
+
+
+    // ===========================
+  // PLATO INGREDIENTES (modal): guardar checks
+  // checked en este modal = "hay que comprar" => no-tengo
+  // Endpoint api-toggle-item usa checked = "tengo"
+  // Por eso invertimos.
+  // ===========================
+  if (!document.__platoIngredientesToggleBound) {
+    console.log("✅ platoIngredientesToggleBound cargado");
+
+    document.addEventListener("change", async (ev) => {
+      const chk = ev.target.closest("input[type='checkbox'][name='ingrediente_a_comprar_id']");
+      if (!chk) return;
+
+      const modal = chk.closest("#platoIngredientesModal");
+      if (!modal) return;
+
+      const api = modal.getAttribute("data-api-toggle");
+      if (!api) {
+        console.error("Falta data-api-toggle en #platoIngredientesModal");
+        return;
+      }
+
+      const li = chk.closest("li");
+      const nombre = (li?.querySelector("label")?.textContent || "").trim();
+      if (!nombre) {
+        console.error("No pude leer el nombre del ingrediente");
+        return;
+      }
+
+      const checkedComprar = chk.checked;   // checked => comprar => no-tengo
+      const checkedTengo = !checkedComprar; // invertimos para el endpoint
+
+      try {
+        const res = await fetch(api, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nombre, checked: checkedTengo })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.ok === false) {
+          console.error("API error:", res.status, data);
+        }
+      } catch (e) {
+        console.error("No se pudo persistir el cambio", e);
+      }
+    });
+
+    document.__platoIngredientesToggleBound = true;
+  }
+
 
   // ===========================
   // PLATO: Ver / compartir ingredientes (modal)

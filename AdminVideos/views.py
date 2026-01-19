@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
 from AdminVideos import models
-from AdminVideos.models import HistoricoDia, HistoricoItem, Ingrediente, IngredienteEnPlato, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente
+from AdminVideos.models import HistoricoDia, HistoricoItem, Ingrediente, IngredienteEnPlato, IngredienteEstado, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string   # ✅ ← ESTA ES LA CLAVE
 from django.http import Http404, HttpRequest, JsonResponse
@@ -75,6 +75,7 @@ from django.core.exceptions import PermissionDenied
 
 
 
+
 @login_required
 def plato_ingredientes(request: HttpRequest, pk: int):
     plato = get_object_or_404(Plato, pk=pk)
@@ -96,9 +97,45 @@ def plato_ingredientes(request: HttpRequest, pk: int):
     pantry_map = {pi.ingrediente_id: pi for pi in pantry_qs}
 
     # =========================
-    # POST (AJAX): persistir estados del modal
+    # Helpers
+    # =========================
+    def _norm(s: str) -> str:
+        return " ".join((s or "").strip().lower().split())
+
+    # =========================
+    # POST: 2 modos
+    # 1) Form POST (tu modal viejo): guarda checks + comentarios en ProfileIngrediente (igual que antes)
+    # 2) JSON POST (tu fetch nuevo): guarda comentario en IngredienteEstado
     # =========================
     if request.method == "POST":
+        content_type = (request.headers.get("Content-Type") or "").lower()
+
+        # ---------- (2) JSON POST (fetch): comentario ----------
+        if "application/json" in content_type:
+            try:
+                payload = json.loads(request.body.decode("utf-8"))
+            except Exception:
+                return JsonResponse({"ok": False, "error": "JSON inválido"}, status=400)
+
+            nombre = (payload.get("nombre") or "").strip()
+            comentario = payload.get("comentario", None)
+
+            if not nombre:
+                return JsonResponse({"ok": False, "error": "nombre requerido"}, status=400)
+
+            # si viene comentario, lo persistimos
+            if comentario is not None:
+                obj, _ = IngredienteEstado.objects.update_or_create(
+                    user=request.user,
+                    nombre=_norm(nombre),
+                    defaults={"comentario": (comentario or "").strip()},
+                )
+                return JsonResponse({"ok": True, "nombre": obj.nombre, "comentario": obj.comentario})
+
+            # si no vino comentario, no hacemos nada acá (para no romper)
+            return JsonResponse({"ok": True})
+
+        # ---------- (1) Form POST (HTML): tu lógica original ----------
         now = timezone.now()
 
         # checked => "no-tengo" => aparece en POST como to_buy_id
@@ -133,18 +170,36 @@ def plato_ingredientes(request: HttpRequest, pk: int):
     # =========================
     # GET: preparar items para render
     # =========================
+    # Traemos comentarios “nuevos” desde IngredienteEstado (si existen) para mostrarlos.
+    nombres_norm = []
+    ingid_to_nombre_norm = {}
+
+    for iep in ingredientes_qs:
+        n = _norm(iep.ingrediente.nombre)
+        nombres_norm.append(n)
+        ingid_to_nombre_norm[iep.ingrediente_id] = n
+
+    ie_qs = IngredienteEstado.objects.filter(user=request.user, nombre__in=nombres_norm).only("nombre", "comentario", "estado")
+    ie_map = {ie.nombre: ie for ie in ie_qs}
+
     items = []
     for iep in ingredientes_qs:
         ing = iep.ingrediente
         pi = pantry_map.get(iep.ingrediente_id)
 
-        # misma convención: checked = "no-tengo"
+        # misma convención: checked = "no-tengo" (esto queda igual)
         estado = "tengo"
         comentario = ""
         if pi:
             comentario = pi.comentario or ""
             if pi.tengo is False:
                 estado = "no-tengo"
+
+        # ✅ si hay comentario en IngredienteEstado, lo priorizamos para que “se vea” lo que guardaste por fetch
+        key = ingid_to_nombre_norm.get(iep.ingrediente_id)
+        ie = ie_map.get(key) if key else None
+        if ie and (ie.comentario is not None) and (ie.comentario.strip() != ""):
+            comentario = ie.comentario
 
         items.append({
             "ingrediente_id": iep.ingrediente_id,
@@ -155,9 +210,13 @@ def plato_ingredientes(request: HttpRequest, pk: int):
             "comentario": comentario,
         })
 
+    if not perfil.share_token:
+        perfil.ensure_share_token()
+
     ctx = {
         "plato": plato,
         "items": items,
+        "api_token": perfil.share_token,
         "share_url": request.build_absolute_uri(),
     }
 
@@ -693,6 +752,54 @@ def compartir_lista(request, token):
 
 
 
+# @csrf_exempt
+# @require_POST
+# def api_toggle_item(request, token):
+#     user, perfil = _get_user_by_token_or_404(token)
+
+#     try:
+#         payload = json.loads(request.body.decode("utf-8"))
+#     except Exception:
+#         return JsonResponse({"ok": False, "error": "JSON inválido"}, status=400)
+
+#     checked = bool(payload.get("checked"))
+#     nombre = (payload.get("nombre") or "").strip()
+
+#     if not nombre:
+#         return JsonResponse({"ok": False, "error": "nombre requerido"}, status=400)
+
+#     # Buscamos el ingrediente por nombre (case-insensitive)
+#     ingrediente = Ingrediente.objects.filter(nombre__iexact=nombre).first()
+#     if not ingrediente:
+#         return JsonResponse({"ok": False, "error": f"No existe Ingrediente con nombre='{nombre}'"}, status=404)
+
+#     pi, _ = ProfileIngrediente.objects.get_or_create(
+#         profile=perfil,
+#         ingrediente=ingrediente,
+#         defaults={"tengo": False},
+#     )
+
+#     # Convención pedida:
+#     # checked => tengo (y marco last_bought_at)
+#     # unchecked => no-tengo (y limpio last_bought_at)
+#     if checked:
+#         pi.tengo = True
+#         pi.last_bought_at = timezone.now()
+#     else:
+#         pi.tengo = False
+#         pi.last_bought_at = None
+
+#     pi.save(update_fields=["tengo", "last_bought_at"])
+
+#     return JsonResponse({
+#         "ok": True,
+#         "ingrediente_id": ingrediente.id,
+#         "nombre": ingrediente.nombre,
+#         "tengo": pi.tengo,
+#         "last_bought_at": pi.last_bought_at.isoformat() if pi.last_bought_at else None,
+#         "checked": checked,
+#     })
+
 @csrf_exempt
 @require_POST
 def api_toggle_item(request, token):
@@ -703,43 +810,42 @@ def api_toggle_item(request, token):
     except Exception:
         return JsonResponse({"ok": False, "error": "JSON inválido"}, status=400)
 
-    checked = bool(payload.get("checked"))
-    nombre = (payload.get("nombre") or "").strip()
+    def _norm(s):
+        return " ".join((s or "").strip().lower().split())
 
+    nombre = _norm(payload.get("nombre"))
     if not nombre:
         return JsonResponse({"ok": False, "error": "nombre requerido"}, status=400)
 
-    # Buscamos el ingrediente por nombre (case-insensitive)
-    ingrediente = Ingrediente.objects.filter(nombre__iexact=nombre).first()
-    if not ingrediente:
-        return JsonResponse({"ok": False, "error": f"No existe Ingrediente con nombre='{nombre}'"}, status=404)
+    comentario = (payload.get("comentario") or "").strip()
 
-    pi, _ = ProfileIngrediente.objects.get_or_create(
-        profile=perfil,
-        ingrediente=ingrediente,
-        defaults={"tengo": False},
+    defaults = {"comentario": comentario}
+
+    # Si viene checked, actualizamos estado. Si no viene, solo comentario.
+    if "checked" in payload:
+        checked = bool(payload.get("checked"))
+
+        if checked:
+            defaults["estado"] = IngredienteEstado.Estado.RECIEN_COMPRADO
+            defaults["estado_hasta"] = (timezone.localdate() + timedelta(days=3))
+        else:
+            defaults["estado"] = IngredienteEstado.Estado.NO_TENGO
+            defaults["estado_hasta"] = None
+
+    obj, _created = IngredienteEstado.objects.update_or_create(
+        user=user,
+        nombre=nombre,
+        defaults=defaults,
     )
-
-    # Convención pedida:
-    # checked => tengo (y marco last_bought_at)
-    # unchecked => no-tengo (y limpio last_bought_at)
-    if checked:
-        pi.tengo = True
-        pi.last_bought_at = timezone.now()
-    else:
-        pi.tengo = False
-        pi.last_bought_at = None
-
-    pi.save(update_fields=["tengo", "last_bought_at"])
 
     return JsonResponse({
         "ok": True,
-        "ingrediente_id": ingrediente.id,
-        "nombre": ingrediente.nombre,
-        "tengo": pi.tengo,
-        "last_bought_at": pi.last_bought_at.isoformat() if pi.last_bought_at else None,
-        "checked": checked,
+        "nombre": obj.nombre,
+        "estado": obj.estado,
+        "comentario": obj.comentario,
+        "estado_hasta": obj.estado_hasta.isoformat() if obj.estado_hasta else None,
     })
+
 
 class LugarDetail(DetailView):
     model = Lugar
