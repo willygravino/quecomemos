@@ -41,11 +41,7 @@
                                                 <div class="mb-1 ml-1 d-flex align-items-center text-primary">
                                                     <!-- <span class="material-symbols-outlined text-danger fs-6">wand_shine</span> -->
 
-
-                                                    <!-- <a href="{% url 'platos-detail' plato.id %}"
-                                                                    class="text-decoration-none me-2">
-                                                                    &nbsp; {{ plato.nombre }}
-                                                                </a> -->
+                                                    
 
                                                     <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
                                                         &nbsp; {{ plato.nombre }}
@@ -205,7 +201,7 @@
                                 Menú programado&nbsp;
 
                                 {% if dia in platos_dia_x_dia %}
-                                    <!-- <a href="{% url 'eliminar-menu' %}" class="btn btn-link p-0" title="Eliminar menú del día"> -->
+                                    <!-- <a href="% url 'eliminar-menu' %}" class="btn btn-link p-0" title="Eliminar menú del día"> -->
                                     <i class="fa-solid fa-trash-can fa-lg" style="font-size: 18px;"></i>
                                     </a>
                                 {% endif %}

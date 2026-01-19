@@ -722,33 +722,6 @@ def api_toggle_item(request, token):
 
 
 
-
-
-
-# class PlatoDetail(DetailView):
-#     model = Plato
-#     template_name = 'AdminVideos/plato_detail.html'
-#     context_object_name = "plato"
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-
-#         # Perfil y amigues (como ya tenés)
-#         perfil = get_object_or_404(Profile, user=self.request.user)
-#         context["amigues"] = perfil.amigues
-
-#         # Obtener el plato actual
-#         plato = self.get_object()
-
-#         # Convertir el campo 'tipos' (string separado por comas) a lista
-#         if plato.tipos:
-#             context['tipos_lista'] = [t.strip() for t in plato.tipos.split(',')]
-#         else:
-#             context['tipos_lista'] = []
-
-#         return context
-
-
 class LugarDetail(DetailView):
     model = Lugar
     template_name = 'AdminVideos/lugar_detail.html'
