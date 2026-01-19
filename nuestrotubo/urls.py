@@ -17,7 +17,7 @@ from django import views
 from django.contrib import admin
 from django.urls import path
 
-from AdminVideos.views import CrearLugar, EnviarMensaje, LugarDetail, LugarUpdate, PlatoVariedadCreate, PlatoVariedadDelete, PlatoVariedadUpdate,  agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, api_ingredientes, api_toggle_item, compartir_elemento, descartar_sugerido, eliminar_lugar, eliminar_plato, eliminar_plato_programado, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, PlatoDetail, lista_de_compras, FiltroDePlatos, plato_ingredientes, plato_opciones_asignar, random_dia, set_dia_activo, sumar_amigue, user_logout, SolicitarAmistad, MensajeDelete, AsignarPlato, compartir_lista
+from AdminVideos.views import CrearLugar, EnviarMensaje, LugarDetail, LugarUpdate, PlatoVariedadCreate, PlatoVariedadDelete, PlatoVariedadUpdate,  agregar_a_mi_lista, agregar_plato_compartido, amigue_borrar, amigues, api_ingredientes, api_toggle_item, compartir_elemento, descartar_sugerido, eliminar_lugar, eliminar_plato, eliminar_plato_programado, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, lista_de_compras, FiltroDePlatos, plato_ingredientes, plato_opciones_asignar, random_dia, set_dia_activo, sumar_amigue, user_logout, SolicitarAmistad, MensajeDelete, AsignarPlato, compartir_lista
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -64,7 +64,7 @@ urlpatterns = [
     # path('eliminar-menu', eliminar_menu_programado, name='eliminar-menu'),
 
 
-    path('plato/<pk>/detail', PlatoDetail.as_view(), name="platos-detail"),
+    # path('plato/<pk>/detail', PlatoDetail.as_view(), name="platos-detail"),
     path('lugar/<pk>/detail', LugarDetail.as_view(), name="lugar-detail"),
 
     path('videos/create/', PlatoCreate.as_view(), name="videos-create"),
