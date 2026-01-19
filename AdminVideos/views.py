@@ -695,31 +695,46 @@ def compartir_lista(request, token):
 @csrf_exempt
 @require_POST
 def api_toggle_item(request, token):
-    _, perfil = _get_user_by_token_or_404(token)
+    user, perfil = _get_user_by_token_or_404(token)
+
     try:
         payload = json.loads(request.body.decode("utf-8"))
     except Exception:
         return JsonResponse({"ok": False, "error": "JSON inválido"}, status=400)
 
-    nombre = (payload.get("nombre") or "").strip()
     checked = bool(payload.get("checked"))
+
+    # Preferimos nombre (porque tu IngredienteEstado guarda nombre texto)
+    nombre = (payload.get("nombre") or "").strip()
 
     if not nombre:
         return JsonResponse({"ok": False, "error": "nombre requerido"}, status=400)
 
-    # Normalizamos la lista
-    lista = list(perfil.ingredientes_que_tengo or [])
+    # checked => recién comprado (y por ende lo tengo)
+    # unchecked => no tengo
+    if checked:
+        estado = IngredienteEstado.Estado.RECIEN_COMPRADO
+        estado_hasta = (timezone.localdate() + timedelta(days=3))  # ajustá días
+    else:
+        estado = IngredienteEstado.Estado.NO_TENGO
+        estado_hasta = None
 
-    if checked and nombre not in lista:
-        lista.append(nombre)
-    if not checked and nombre in lista:
-        lista.remove(nombre)
+    obj, _created = IngredienteEstado.objects.update_or_create(
+        user=user,
+        nombre=nombre,
+        defaults={
+            "estado": estado,
+            "estado_hasta": estado_hasta,
+        }
+    )
 
-    perfil.ingredientes_que_tengo = lista
-    perfil.save(update_fields=["ingredientes_que_tengo"])
-
-    return JsonResponse({"ok": True, "nombre": nombre, "checked": checked})
-
+    return JsonResponse({
+        "ok": True,
+        "nombre": obj.nombre,
+        "estado": obj.estado,
+        "estado_hasta": obj.estado_hasta.isoformat() if obj.estado_hasta else None,
+        "checked": checked,
+    })
 
 
 class LugarDetail(DetailView):
