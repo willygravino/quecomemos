@@ -538,7 +538,7 @@ class Profile(models.Model):
     avatar = models.ImageField(upload_to="avatares", null=True, blank=True)
 
     # Usamos default=list (callable) para evitar el problema de mutables como default
-    ingredientes_que_tengo = models.JSONField(default=list, blank=True)
+    # ingredientes_que_tengo = models.JSONField(default=list, blank=True)
     comentarios = models.JSONField(default=list, blank=True)
     amigues = models.JSONField(default=list, blank=True)
     sugeridos_descartados = models.JSONField(default=list, blank=True)

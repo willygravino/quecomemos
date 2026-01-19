@@ -70,45 +70,52 @@
 
   </div>
 
+
 <script>
-(function() {
+(function () {
   const API = "{% url 'api-toggle-item' token=api_token %}";
 
-  async function postToggle(ingrediente_id, checked) {
+  async function postToggle(nombre, checked) {
     try {
       await fetch(API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ingrediente_id, nombre: line.dataset.nombre, checked })
+        body: JSON.stringify({ nombre, checked })
       });
-    } catch(e) {
+    } catch (e) {
       console.error("No se pudo persistir el cambio", e);
     }
   }
 
   document.querySelectorAll(".item-check").forEach((chk) => {
     const line = chk.closest(".item-line");
-    const estado = line?.dataset.estado;
+    if (!line) return;
+
+    const estado = line.dataset.estado || "";
+    const nombre = (line.dataset.nombre || "").trim();
 
     // UI inicial:
-    // - si está recien-comprado o tengo => tachado
-    // - si no-tengo => normal
+    // tachado si "tengo" o "recien-comprado"
     const inicialTachado = (estado === "recien-comprado" || estado === "tengo");
     line.classList.toggle("striked", inicialTachado);
 
     chk.addEventListener("change", () => {
       const checked = chk.checked;
 
-      // Convención nueva:
-      // checked => "tengo" (o recien-comprado si backend decide)
+      // Convención:
+      // checked => "tengo"
       // unchecked => "no-tengo"
       line.classList.toggle("striked", checked);
 
-      postToggle(chk.dataset.ingId, checked);
+      // Guardar en DB (Profile.ingredientes_que_tengo)
+      postToggle(nombre, checked);
     });
   });
 })();
 </script>
+
+
+
 
 </body>
 </html>
