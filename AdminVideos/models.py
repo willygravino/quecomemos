@@ -539,7 +539,7 @@ class Profile(models.Model):
 
     # Usamos default=list (callable) para evitar el problema de mutables como default
     # ingredientes_que_tengo = models.JSONField(default=list, blank=True)
-    comentarios = models.JSONField(default=list, blank=True)
+    # comentarios = models.JSONField(default=list, blank=True)
     amigues = models.JSONField(default=list, blank=True)
     sugeridos_descartados = models.JSONField(default=list, blank=True)
     sugeridos_importados = models.JSONField(default=list, blank=True)
