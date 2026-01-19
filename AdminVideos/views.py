@@ -692,6 +692,7 @@ def compartir_lista(request, token):
     })
 
 
+
 @csrf_exempt
 @require_POST
 def api_toggle_item(request, token):
@@ -703,39 +704,42 @@ def api_toggle_item(request, token):
         return JsonResponse({"ok": False, "error": "JSON inválido"}, status=400)
 
     checked = bool(payload.get("checked"))
-
-    # Preferimos nombre (porque tu IngredienteEstado guarda nombre texto)
     nombre = (payload.get("nombre") or "").strip()
 
     if not nombre:
         return JsonResponse({"ok": False, "error": "nombre requerido"}, status=400)
 
-    # checked => recién comprado (y por ende lo tengo)
-    # unchecked => no tengo
-    if checked:
-        estado = IngredienteEstado.Estado.RECIEN_COMPRADO
-        estado_hasta = (timezone.localdate() + timedelta(days=3))  # ajustá días
-    else:
-        estado = IngredienteEstado.Estado.NO_TENGO
-        estado_hasta = None
+    # Buscamos el ingrediente por nombre (case-insensitive)
+    ingrediente = Ingrediente.objects.filter(nombre__iexact=nombre).first()
+    if not ingrediente:
+        return JsonResponse({"ok": False, "error": f"No existe Ingrediente con nombre='{nombre}'"}, status=404)
 
-    obj, _created = IngredienteEstado.objects.update_or_create(
-        user=user,
-        nombre=nombre,
-        defaults={
-            "estado": estado,
-            "estado_hasta": estado_hasta,
-        }
+    pi, _ = ProfileIngrediente.objects.get_or_create(
+        profile=perfil,
+        ingrediente=ingrediente,
+        defaults={"tengo": False},
     )
+
+    # Convención pedida:
+    # checked => tengo (y marco last_bought_at)
+    # unchecked => no-tengo (y limpio last_bought_at)
+    if checked:
+        pi.tengo = True
+        pi.last_bought_at = timezone.now()
+    else:
+        pi.tengo = False
+        pi.last_bought_at = None
+
+    pi.save(update_fields=["tengo", "last_bought_at"])
 
     return JsonResponse({
         "ok": True,
-        "nombre": obj.nombre,
-        "estado": obj.estado,
-        "estado_hasta": obj.estado_hasta.isoformat() if obj.estado_hasta else None,
+        "ingrediente_id": ingrediente.id,
+        "nombre": ingrediente.nombre,
+        "tengo": pi.tengo,
+        "last_bought_at": pi.last_bought_at.isoformat() if pi.last_bought_at else None,
         "checked": checked,
     })
-
 
 class LugarDetail(DetailView):
     model = Lugar

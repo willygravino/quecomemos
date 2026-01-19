@@ -30,7 +30,8 @@
           <li class="list-group-item py-2 item-line d-flex align-items-start gap-2"
               data-ing-id="{{ it.ingrediente_id }}"
               data-estado="{{ it.estado }}"
-              data-nombre="{{ it.nombre|escapejs }}">
+              data-nombre="{{ it.nombre|escape }}">
+
 
             <!-- checked => tengo (o recien-comprado) -->
             <input class="form-check-input mt-1 flex-shrink-0 item-check"
