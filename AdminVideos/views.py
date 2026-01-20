@@ -716,15 +716,22 @@ def compartir_lista(request, token):
 
     # comentarios/estado por nombre (vienen del modal por plato)
     # usamos nombre__iexact para que "Banana" y "banana" maten el problema de mayúsculas
+    def _norm(s: str) -> str:
+        return " ".join((s or "").strip().lower().split())
+
+    nombres_norm = [_norm(data["nombre"]) for data in agregados.values()]
+
     estado_qs = (
         IngredienteEstado.objects
         .filter(
-            user=share_user,  # <- clave: el dueño de la lista compartida
-            nombre__in=[data["nombre"] for data in agregados.values()]
+            user=share_user,
+            nombre__in=nombres_norm
         )
     )
 
-    estado_map = {e.nombre.casefold(): e for e in estado_qs}
+    estado_map = { _norm(e.nombre): e for e in estado_qs }
+
+
 
     def fresh_until(fecha_uso):
         return fecha_uso or (today + timedelta(days=7))
@@ -752,12 +759,13 @@ def compartir_lista(request, token):
         e = estado_map.get(data["nombre"].casefold())
         limite = fresh_until(data["needed_by"])
 
+        # Si no hay estado guardado para este ingrediente, NO lo mostramos en la lista compartida
         if not e:
-            estado = "no-tengo"
-            comentario = ""
-        else:
-            estado = e.estado
-            comentario = e.comentario or ""
+            continue
+
+        estado = e.estado
+        comentario = e.comentario or ""
+
 
         # Solo mostrar lo que falta comprar
         if estado == "no-tengo":
