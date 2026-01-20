@@ -581,9 +581,7 @@ def lista_de_compras(request):
             "usos": data["usos"],
         })
 
-
-    order = {"no-tengo": 0, "recien-comprado": 1, "tengo": 2}
-    items.sort(key=lambda i: (order[i["estado"]], i["nombre"].casefold()))
+    items.sort(key=lambda i: i["nombre"].casefold())
 
     token = perfil.ensure_share_token()
     share_url = request.build_absolute_uri(reverse("compartir-lista", args=[token]))
