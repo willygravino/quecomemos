@@ -719,7 +719,7 @@ def compartir_lista(request, token):
     estado_qs = (
         IngredienteEstado.objects
         .filter(
-            user=request.user,
+            user=share_user,  # <- clave: el dueño de la lista compartida
             nombre__in=[data["nombre"] for data in agregados.values()]
         )
     )
@@ -753,19 +753,22 @@ def compartir_lista(request, token):
         limite = fresh_until(data["needed_by"])
 
         if not e:
-            estado = "tengo"
+            estado = "no-tengo"
             comentario = ""
         else:
             estado = e.estado
             comentario = e.comentario or ""
 
-        items.append({
-            "ingrediente_id": ing_id,
-            "nombre": data["nombre"],
-            "comentario": comentario,
-            "estado": estado,
-            "needed_by": data["needed_by"],
-        })
+        # Solo mostrar lo que falta comprar
+        if estado == "no-tengo":
+            items.append({
+                "ingrediente_id": ing_id,
+                "nombre": data["nombre"],
+                "comentario": comentario,
+                "estado": estado,
+                "needed_by": data["needed_by"],
+            })
+
 
 
     # Orden como tu lista nueva
@@ -778,10 +781,12 @@ def compartir_lista(request, token):
         perfil.ensure_share_token()
 
     return render(request, "AdminVideos/compartir_lista.html", {
-        "items": items,
-        "token": f"user-{perfil.pk}",
-        "api_token": perfil.share_token,
+    "items": items,
+    "token": f"user-{perfil.pk}",
+    "api_token": perfil.share_token,
+    "DEBUG_VISTA": f"compartir_lista items={len(items)}",
     })
+
 
 
 

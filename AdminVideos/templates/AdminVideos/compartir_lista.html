@@ -41,7 +41,7 @@
                    {% if it.estado == "tengo" or it.estado == "recien-comprado" %}checked{% endif %}>
 
             <label class="form-check-label flex-grow-1" for="chk-{{ it.ingrediente_id }}">
-              <div class="fw-semibold item-nombre {% if it.estado == 'tengo' or it.estado == 'recien-comprado' %}striked{% endif %}">
+              <div class="fw-semibold item-nombre">
                 {{ it.nombre }}
 
                 {% if it.estado == "recien-comprado" %}
@@ -71,7 +71,6 @@
 
   </div>
 
-
 <script>
 (function () {
   const API = "{% url 'api-toggle-item' token=api_token %}";
@@ -88,32 +87,32 @@
     }
   }
 
+  // Recorremos cada checkbox de item
   document.querySelectorAll(".item-check").forEach((chk) => {
     const line = chk.closest(".item-line");
     if (!line) return;
 
-    const estado = line.dataset.estado || "";
     const nombre = (line.dataset.nombre || "").trim();
+    const nombreEl = line.querySelector(".item-nombre"); // <-- SOLO el texto
 
-    // UI inicial:
-    // tachado si "tengo" o "recien-comprado"
-    const inicialTachado = (estado === "recien-comprado" || estado === "tengo");
-    line.classList.toggle("striked", inicialTachado);
+    // --- UI inicial ---
+    // En lista compartida: tachado = checkbox checked (comprado)
+    if (nombreEl) nombreEl.classList.toggle("striked", chk.checked);
 
+    // --- Cambios ---
     chk.addEventListener("change", () => {
       const checked = chk.checked;
 
-      // Convención:
-      // checked => "tengo"
-      // unchecked => "no-tengo"
-      line.classList.toggle("striked", checked);
+      // Tachado SOLO del nombre (no de toda la fila)
+      if (nombreEl) nombreEl.classList.toggle("striked", checked);
 
-      // Guardar en DB (Profile.ingredientes_que_tengo)
+      // Persistir (sin tocar backend: usa tu API existente)
       postToggle(nombre, checked);
     });
   });
 })();
 </script>
+
 
 
 
