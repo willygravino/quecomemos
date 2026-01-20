@@ -768,7 +768,7 @@ def compartir_lista(request, token):
 
 
         # Solo mostrar lo que falta comprar
-        if estado == "no-tengo":
+        if estado in ("no-tengo", "recien-comprado"):
             items.append({
                 "ingrediente_id": ing_id,
                 "nombre": data["nombre"],
@@ -873,7 +873,7 @@ def api_toggle_item(request, token):
 
         if checked:
             defaults["estado"] = IngredienteEstado.Estado.RECIEN_COMPRADO
-            defaults["estado_hasta"] = (timezone.localdate() + timedelta(days=3))
+            defaults["estado_hasta"] = (timezone.localdate() + timedelta(hours=3))
         else:
             defaults["estado"] = IngredienteEstado.Estado.NO_TENGO
             defaults["estado_hasta"] = None
