@@ -16,9 +16,16 @@
   .plato-menu { display: block !important; }
 }
 
-/* En desktop: hover normal; ocultamos ⋯ */
+/* En desktop */
 @media (hover: hover) and (pointer: fine) {
-  .plato-menu { display: none; }
+  .plato-menu { display: block; } /* o simplemente borrá este bloque */
+}
+
+/* para que el título no se rompa raro */
+.plato-title span{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 
