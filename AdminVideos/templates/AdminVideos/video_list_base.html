@@ -121,7 +121,6 @@
                           {% endif %}"
               alt="Imagen del Plato">
         </a> -->
-
         <!-- Thumb (imagen + overlays) -->
         <div class="plato-thumb">
 
@@ -153,6 +152,50 @@
               📁 {{ plato.variedades_count|add:"1" }}
             </span>
           {% endif %}
+
+          <!-- Menú acciones MOBILE (⋯) -->
+          <div class="dropdown position-absolute top-0 end-0 m-1 plato-menu" style="display:none; z-index:5;">
+            <button class="btn btn-sm btn-light py-0 px-1"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    title="Opciones">
+              <i class="fa-solid fa-ellipsis-vertical"></i>
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li>
+                <a class="dropdown-item" href="{% url 'videos-update' plato.id %}">
+                  <i class="fa-regular fa-pen-to-square me-2"></i> Editar
+                </a>
+              </li>
+
+              {% if amigues %}
+              <li>
+                <a class="dropdown-item"
+                   href="#"
+                   data-bs-toggle="modal"
+                   data-bs-target="#compartirModal"
+                   onclick="setPlatoInfo('{{ plato.id }}', 'plato')">
+                  <i class="fa-solid fa-share-nodes me-2"></i> Compartir
+                </a>
+              </li>
+              {% endif %}
+
+              <li><hr class="dropdown-divider"></li>
+
+              <li>
+                <a class="dropdown-item text-danger"
+                   href="#"
+                   data-bs-toggle="modal"
+                   data-bs-target="#confirmDeleteModal"
+                   data-url="{% url 'eliminar-plato' plato.id %}"
+                   data-nombre="{{ plato.nombre_plato }}">
+                  <i class="fa-solid fa-trash-can me-2"></i> Eliminar
+                </a>
+              </li>
+            </ul>
+          </div>
 
           <!-- Acciones secundarias (hover) -->
           <div class="plato-actions">
@@ -440,6 +483,40 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
+<script>
+/*
+========================================================
+FIX MOBILE UX – MENÚ ⋯ VS ACCIÓN PRINCIPAL (+)
+--------------------------------------------------------
+Problema:
+En dispositivos táctiles, al tocar el menú ⋯ dentro
+de la tarjeta del plato, el evento se propagaba al <a>
+contenedor y abría el modal de "Asignar Plato".
+
+Solución:
+- Detener la propagación de eventos (click / touch / pointer)
+- Permitir que el menú ⋯ funcione de forma independiente
+- Evitar el doble tap en mobile
+- Mantener el hover normal en desktop
+
+Este script es SOLO frontend.
+No toca lógica, rutas ni backend.
+========================================================
+*/
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll(".plato-menu, .plato-menu *").forEach(el => {
+    el.addEventListener("click", function (e) {
+      e.stopPropagation();
+    });
+    el.addEventListener("touchstart", function (e) {
+      e.stopPropagation();
+    }, { passive: true });
+    el.addEventListener("pointerdown", function (e) {
+      e.stopPropagation();
+    });
+  });
+});
+</script>
 
 
 

@@ -8,6 +8,20 @@
           drop-shadow(0 0 20px green);
 } */
 
+/* En mobile: NO hover; escondemos acciones flotantes y mostramos ⋯ */
+/* ====== MOBILE FIRST: acciones siempre accesibles ====== */
+
+@media (hover: none) and (pointer: coarse) {
+  .plato-actions { display: none !important; }
+  .plato-menu { display: block !important; }
+}
+
+/* En desktop: hover normal; ocultamos ⋯ */
+@media (hover: hover) and (pointer: fine) {
+  .plato-menu { display: none; }
+}
+
+
 /* ====== SOLO VISUAL: Plato cards ====== */
 
   /* Card chica */
@@ -169,3 +183,20 @@ input[type="checkbox"]:checked + .custom-checkbox:before {
     --bs-popover-body-padding-x: 1rem;
     --bs-popover-body-padding-y: .5rem;
   }
+
+  /* Asegura que el menú ⋯ siempre quede arriba del <a> */
+.plato-menu {
+  z-index: 10;
+}
+
+/* El botón ⋯ un poquito más grande para dedo */
+.plato-menu .btn {
+  padding: 2px 7px;
+  line-height: 1.1;
+}
+
+/* IMPORTANTE: el dropdown de Bootstrap se renderiza DENTRO del thumb.
+   Si overflow:hidden tapa el menú desplegado, lo abrimos SOLO en desktop. */
+@media (hover: hover) and (pointer: fine) {
+  .plato-thumb { overflow: visible; }
+}
