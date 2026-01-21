@@ -207,3 +207,32 @@ input[type="checkbox"]:checked + .custom-checkbox:before {
 @media (hover: hover) and (pointer: fine) {
   .plato-thumb { overflow: visible; }
 }
+
+/* ===============================
+   FIX DROPDOWN ⋯ EN TITULO PLATO
+   =============================== */
+
+/* El contenedor del título NO debe recortar el menú */
+.plato-title{
+  overflow: visible !important;
+}
+
+/* Aseguramos layout flex correcto */
+.plato-title.d-flex{
+  display: flex !important;
+  align-items: center;
+}
+
+/* El texto no debe tapar el botón */
+.plato-title.d-flex > span{
+  min-width: 0;              /* CLAVE */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* El menú debe estar por encima */
+.plato-title .plato-menu{
+  position: relative;
+  z-index: 50;
+}
