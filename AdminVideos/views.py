@@ -43,38 +43,6 @@ from django.core.exceptions import PermissionDenied
 
 
 
-# def api_ingredientes(request):
-#     q = request.GET.get('q', '')
-#     ingredientes = Ingrediente.objects.filter(nombre__icontains=q).order_by('nombre')[:20]  # límite de resultados
-#     data = [{"id": ing.id, "nombre": ing.nombre} for ing in ingredientes]
-#     return JsonResponse(data, safe=False)
-
-
-# def plato_ingredientes(request: HttpRequest, pk: int):
-#     plato = get_object_or_404(Plato, pk=pk)
-
-#     # Ajustá esto al related_name real:
-#     # Ej: plato.ingredientes_en_plato.all()
-#     ingredientes_qs = plato.ingredientes_en_plato.select_related("ingrediente").all()
-
-#     ctx = {
-#         "plato": plato,
-#         "ingredientes": ingredientes_qs,
-#         "share_url": request.build_absolute_uri(),
-#     }
-
-#     # detectar fetch/AJAX (compatible con tu estilo actual)
-#     is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
-
-#     if is_ajax:
-#         return render(request, "AdminVideos/_modal_plato_ingredientes.html", ctx)
-
-
-#     # si alguien abre el link desde WhatsApp
-#     return render(request, "AdminVideos/plato_ingredientes_page.html", ctx)
-
-
-
 
 @login_required
 def plato_ingredientes(request: HttpRequest, pk: int):
@@ -224,18 +192,85 @@ def plato_ingredientes(request: HttpRequest, pk: int):
     if not perfil.share_token:
         perfil.ensure_share_token()
 
+    
     ctx = {
         "plato": plato,
         "items": items,
         "api_token": perfil.share_token,
-        "share_url": request.build_absolute_uri(),
+        "share_url": request.build_absolute_uri(
+            reverse("compartir-plato", args=[perfil.share_token, plato.pk])
+        ),
+        "shopping_url": request.build_absolute_uri(
+            reverse("compartir-lista", args=[perfil.share_token])  # <-- tu vista compartir_lista
+        ),
     }
+
 
     is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
     if is_ajax:
         return render(request, "AdminVideos/_modal_plato_ingredientes.html", ctx)
 
     return render(request, "AdminVideos/plato_ingredientes_page.html", ctx)
+
+def compartir_ing_plato(request, token, pk: int):
+    share_user, perfil = _get_user_by_token_or_404(token)
+    plato = get_object_or_404(Plato, pk=pk)
+
+    ingredientes_qs = (
+        plato.ingredientes_en_plato
+        .select_related("ingrediente")
+        .all()
+    )
+
+    def _norm(s: str) -> str:
+        return " ".join((s or "").strip().lower().split())
+
+    # nombres normalizados del plato
+    nombres_norm = [
+        _norm(iep.ingrediente.nombre)
+        for iep in ingredientes_qs
+        if iep.ingrediente
+    ]
+
+    # estados del dueño del token (NO request.user)
+    estado_qs = (
+        IngredienteEstado.objects
+        .filter(user=share_user, nombre__in=nombres_norm)
+        .only("nombre", "estado", "comentario", "estado_hasta", "updated_at")
+    )
+    estado_map = { _norm(e.nombre): e for e in estado_qs }
+
+    items = []
+    for iep in ingredientes_qs:
+        ing = iep.ingrediente
+        if not ing:
+            continue
+
+        key = _norm(ing.nombre)
+        e = estado_map.get(key)
+
+        estado = e.estado if e else "tengo"
+        comentario = (e.comentario or "") if e else ""
+
+        # formato EXACTO que espera compartir_lista.html
+        items.append({
+            "ingrediente_id": iep.ingrediente_id,
+            "nombre": ing.nombre,
+            "comentario": comentario,
+            "estado": estado,
+        })
+
+    items.sort(key=lambda i: i["nombre"].casefold())
+
+    if not perfil.share_token:
+        perfil.ensure_share_token()
+
+    return render(request, "AdminVideos/compartir_lista.html", {
+        "items": items,
+        "api_token": perfil.share_token,
+        "token": f"user-{perfil.pk}",
+    })
+
 
 
 @require_http_methods(["GET", "POST"])
