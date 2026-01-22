@@ -1,238 +1,226 @@
-/* Ocultar el checkbox predeterminado */
-/* input[type="checkbox"] {
-    display: none;
-} */
+/* ===========================================================
+   MOBILE vs DESKTOP BEHAVIOR
+   =========================================================== */
 
-/* .efecto-sombra {
-  filter: drop-shadow(0 0 10px lime) 
-          drop-shadow(0 0 20px green);
-} */
-
-/* En mobile: NO hover; escondemos acciones flotantes y mostramos ⋯ */
-/* ====== MOBILE FIRST: acciones siempre accesibles ====== */
-
+/* 📱 MOBILE (touch, sin hover) */
 @media (hover: none) and (pointer: coarse) {
-  .plato-actions { display: none !important; }
-  .plato-menu { display: block !important; }
-}
-
-/* En desktop */
-@media (hover: hover) and (pointer: fine) {
-  .plato-menu { display: block; } /* o simplemente borrá este bloque */
-}
-
-/* para que el título no se rompa raro */
-.plato-title span{
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-
-/* ====== SOLO VISUAL: Plato cards ====== */
-
-  /* Card chica */
-  .plato-card { width: 6rem; }
-
-  /* Contenedor de la imagen */
-  .plato-thumb {
-    position: relative;
-    border-radius: .6rem;
-    overflow: hidden;
-  }
-
-  /* El + central: solo decorativo (el click lo captura el <a>) */
-  .plato-plus {
-    pointer-events: none;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 1.8rem;
-    z-index: 2;
-  }
-
-  /* Badge de grupo (arriba-izquierda) */
-  .plato-badge {
-    position: absolute;
-    top: .25rem;
-    left: .25rem;
-    z-index: 3;
-    padding: .12rem .35rem;
-    border-radius: .45rem;
-    font-size: .62rem;
-    line-height: 1.1;
-    background: rgba(0,0,0,.55);
-    color: #fff;
-    backdrop-filter: blur(2px);
-  }
-
-  /* Acciones secundarias (aparecen al hover) */
   .plato-actions {
-    position: absolute;
-    left: .25rem;
-    right: .25rem;
-    bottom: .25rem;
-    z-index: 3;
+    display: none;
+  }
+
+  .plato-menu {
+    display: block;
+  }
+}
+
+/* 🖥 DESKTOP (mouse, con hover real) */
+@media (hover: hover) and (pointer: fine) {
+  .plato-actions {
     display: flex;
-    justify-content: center;
-    gap: .35rem;
-    opacity: 0;
-    transform: translateY(6px);
-    transition: opacity .15s ease, transform .15s ease;
-    pointer-events: none;
   }
 
-  .plato-thumb:hover .plato-actions,
-  .plato-thumb:focus-within .plato-actions {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
+  .plato-menu {
+    display: none;
   }
+}
 
-  /* Botón circular “pill” para íconos */
-  .plato-action-btn {
-    width: 1.55rem;
-    height: 1.55rem;
-    border-radius: 999px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255,255,255,.92);
-    box-shadow: 0 2px 10px rgba(0,0,0,.15);
-    text-decoration: none;
-  }
 
-  /* Título abajo: 2 líneas máx */
-  .plato-title {
-    margin-top: .25rem;
-    padding: .25rem .35rem;
-    border-radius: .5rem;
-    background: rgba(255,255,255,.92);
-    color: #111;
-    text-align: center;
-    font-size: .72rem;
-    line-height: 1.1;
+/* ===========================================================
+   PLATO CARDS
+   =========================================================== */
+.plato-card {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  margin-bottom: 0.75rem; /* asegura separación entre filas si algún gap falla */
 
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    min-height: 2.2em; /* altura consistente */
-  }
-  
+  background: transparent;
+  line-height: 0; /* elimina espacio residual de inline-block */
+}
+
+section > .d-flex {
+  flex-wrap: wrap;        /* ya lo tenés */
+  gap: 0.75rem;           /* horizontal y vertical entre tarjetas */
+  justify-content: center; /* mantiene centradas las filas */
+  align-items: flex-start; /* alinea tops de las cards */
+}
+
+
+/* ===========================================================
+   THUMB DE PLATO (SIN ESPACIOS)
+   =========================================================== */
+.plato-thumb {
+  padding: 0;
+  margin: 0;
+  font-size: 0;
+  line-height: 0;
+  /* background: rgb(182, 50, 89);  */
+  position: relative; /* clave para badge y + */
+}
+
+/* El <a> ocupa todo el thumb y centra el + */
+.plato-thumb > a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Imagen dentro del thumb */
+.plato-thumb img {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* + central decorativo */
+.plato-plus {
+  pointer-events: none;
+  position: absolute;
+  inset: 0; /* top:0; right:0; bottom:0; left:0 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  z-index: 5; /* encima de la imagen, debajo del badge si se desea */
+}
+
+/* Badge en esquina inferior derecha */
+.plato-badge {
+  position: absolute;
+  bottom: 0.25rem;
+  right: 0.25rem;
+  z-index: 6; /* encima de la imagen */
+  padding: 0.18rem 0.4rem;
+  border-radius: 0.45rem;
+  font-size: 0.6rem;
+  line-height: 1;
+  background: rgba(0,0,0,0.65);
+  color: #fff;
+  backdrop-filter: blur(2px);
+  pointer-events: none; /* no interfiere con clicks */
+}
+
+
+/* ===========================================================
+   ACCIONES Y BOTONES
+   =========================================================== */
+.plato-actions {
+  position: absolute;
+  left: 0.25rem;
+  right: 0.25rem;
+  bottom: 0.25rem;
+  z-index: 3;
+  display: flex;
+  justify-content: center;
+  gap: 0.35rem;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity .15s ease, transform .15s ease;
+  pointer-events: none;
+}
+
+.plato-action-btn {
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.92);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  text-decoration: none;
+}
+
+
+/* ===========================================================
+   SOMBRAS DE COLORES
+   =========================================================== */
 .sombra-verde {
-  -webkit-filter: 
-    drop-shadow(-1px 0 0 green)
-    drop-shadow(0 1px 0 green);
-  filter: 
-    drop-shadow(-1px 0 0 green)
-    drop-shadow(0 1px 0 green);
+  filter: drop-shadow(-1px 0 0 green) drop-shadow(0 1px 0 green);
 }
 
 .sombra-violeta {
-  -webkit-filter: 
-    drop-shadow(-1px 0 0 rgb(70, 0, 128))
-    drop-shadow(0 1px 0 rgb(70, 0, 128));
-  filter: 
-    drop-shadow(-1px 0 0 rgb(70, 0, 128))
-    drop-shadow(0 1px 0 rgb(70, 0, 128));
+  filter: drop-shadow(-1px 0 0 rgb(70,0,128)) drop-shadow(0 1px 0 rgb(70,0,128));
 }
 
 .sombra-naranja {
-  -webkit-filter: 
-    drop-shadow(-1px 0 0 rgb(255, 128, 0))
-    drop-shadow(0 1px 0 rgb(255, 128, 0));
-  filter: 
-    drop-shadow(-1px 0 0 rgb(255, 128, 0))
-    drop-shadow(0 1px 0 rgb(255, 128, 0));
+  filter: drop-shadow(-1px 0 0 rgb(255,128,0)) drop-shadow(0 1px 0 rgb(255,128,0));
 }
 
 
-
-/* Estilo para el contenedor del checkbox personalizado */
-.custom-checkbox {
-   
-    /* display: none; */
-    display: inline-block;
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-    background-color: transparent;
-    border: 2px solid #ccc;
-    border-radius: 50%;
-    position: relative;
-    transition: all 0.3s ease;
-}
-
-/* Forma de corazón cuando está marcado */
-.custom-checkbox:before {
-    content: '';
-    position: absolute;
-    width: 24px;
-    height: 24px;
-    background-color: transparent;
-    clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 50% 80%, 18% 100%, 0% 38%);
-    transition: all 0.3s ease;
-}
-
-/* Cambiar el corazón a rojo si está marcado */
-input[type="checkbox"]:checked + .custom-checkbox:before {
-    background-color: red;
-}
-
-/* NO FUNCIONA! */
-.custom-popover {
-    --bs-popover-max-width: 200px;
-    --bs-popover-border-color: var(--bd-violet-bg);
-    --bs-popover-header-bg: var(--bd-violet-bg);
-    --bs-popover-header-color: var(--bs-white);
-    --bs-popover-body-padding-x: 1rem;
-    --bs-popover-body-padding-y: .5rem;
-  }
-
-  /* Asegura que el menú ⋯ siempre quede arriba del <a> */
+/* ===========================================================
+   MENÚ ⋯
+   =========================================================== */
 .plato-menu {
   z-index: 10;
 }
 
-/* El botón ⋯ un poquito más grande para dedo */
 .plato-menu .btn {
   padding: 2px 7px;
   line-height: 1.1;
 }
 
-/* IMPORTANTE: el dropdown de Bootstrap se renderiza DENTRO del thumb.
-   Si overflow:hidden tapa el menú desplegado, lo abrimos SOLO en desktop. */
-@media (hover: hover) and (pointer: fine) {
-  .plato-thumb { overflow: visible; }
+
+/* ===========================================================
+   TÍTULO DEL PLATO
+   =========================================================== */
+.plato-title {
+  margin-top: 0.25rem;
+  margin-bottom: 0;
+  padding: 0;
+  font-size: 0.72rem;
+  line-height: 1.1;
+  text-align: center;
+  color: #111;
+  overflow: visible;
 }
 
-/* ===============================
-   FIX DROPDOWN ⋯ EN TITULO PLATO
-   =============================== */
-
-/* El contenedor del título NO debe recortar el menú */
-.plato-title{
-  overflow: visible !important;
+/* Solo el texto: recorte a 2 líneas */
+.plato-title span {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-/* Aseguramos layout flex correcto */
-.plato-title.d-flex{
-  display: flex !important;
-  align-items: center;
-}
-
-/* El texto no debe tapar el botón */
-.plato-title.d-flex > span{
-  min-width: 0;              /* CLAVE */
+/* Evita que el texto tape botones dentro de un contenedor flex */
+.plato-title.d-flex > span {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* El menú debe estar por encima */
-.plato-title .plato-menu{
+/* Menú interno siempre sobre el título */
+.plato-title .plato-menu {
   position: relative;
   z-index: 50;
+}
+
+/* Hover solo en desktop */
+@media (hover: hover) and (pointer: fine) {
+  .plato-title:hover .plato-actions {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+}
+
+
+/* ===========================================================
+   FIX DROPDOWN ⋯ EN TITULO PLATO
+   =========================================================== */
+.plato-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.menu-plato {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
 }

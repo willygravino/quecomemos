@@ -87,126 +87,102 @@
 
 <!-- ESTAS SON LAS TARJETAS DE PLATOS, SI ES QUE ESTAMOS EN PLATOS -->
 
-<!-- <section class="w-100 text-white"> -->
-<section class="w-100 text-white bg-light p-2 rounded shadow-sm">
+<section class="w-100 text-white bg-light rounded shadow-sm">
 
-  <div class="d-flex flex-wrap gap-1 align-items-start justify-content-center">
+  <div class="d-flex flex-wrap align-items-start justify-content-center">
     {% for plato in platos %}
 
       <div class="card position-relative border-0 bg-transparent plato-card" style="width: 6rem;">
 
-        <!-- <a href="{% url 'videos-update' plato.id %}">
-          <img src="{{ plato.image_url }}"
-              class="img-fluid {% if user.id == plato.propietario.id and not plato.proviene_de %}
-                          sombra-verde
-                          {% elif user.id == plato.propietario.id and plato.proviene_de %}
-                          sombra-naranja
-                          {% else %}
-                          sombra-violeta
-                          {% endif %}"
-              alt="Imagen del Plato">
-        </a> -->
-
-        <!-- <a href="#"
-          data-bs-toggle="modal"
-          data-bs-target="#asignarPlatoModal"
-          onclick="setPlatoInfo('{{ plato.id }}', 'plato')">
-          <img src="{{ plato.image_url }}"
-              class="img-fluid {% if user.id == plato.propietario.id and not plato.proviene_de %}
-                          sombra-verde
-                          {% elif user.id == plato.propietario.id and plato.proviene_de %}
-                          sombra-naranja
-                          {% else %}
-                          sombra-violeta
-                          {% endif %}"
-              alt="Imagen del Plato">
-        </a> -->
-        <!-- Thumb (imagen + overlays) -->
+        <!-- THUMB -->
         <div class="plato-thumb">
 
           <a href="#"
-            data-bs-toggle="modal"
-            data-bs-target="#asignarPlatoModal"
-            onclick="setPlatoInfo('{{ plato.id }}', 'plato')"
-            class="d-block text-decoration-none position-relative">
+             data-bs-toggle="modal"
+             data-bs-target="#asignarPlatoModal"
+             onclick="setPlatoInfo('{{ plato.id }}', 'plato')"
+             class="d-block text-decoration-none">
 
             <img src="{{ plato.image_url }}"
-                class="img-fluid {% if user.id == plato.propietario.id and not plato.proviene_de %}
-                            sombra-verde
-                            {% elif user.id == plato.propietario.id and plato.proviene_de %}
-                            sombra-naranja
-                            {% else %}
-                            sombra-violeta
-                            {% endif %}"
-                alt="Imagen del Plato">
+                 class="img-fluid
+                 {% if user.id == plato.propietario.id and not plato.proviene_de %}
+                   sombra-verde
+                 {% elif user.id == plato.propietario.id and plato.proviene_de %}
+                   sombra-naranja
+                 {% else %}
+                   sombra-violeta
+                 {% endif %}"
+                 alt="Imagen del Plato">
 
-            <!-- Ícono + verde centrado -->
+            <!-- + central -->
             <div class="plato-plus text-success">
               <i class="fa-solid fa-plus-circle"></i>
             </div>
+
           </a>
 
-          <!-- Badge de grupo (si tiene variedades) -->
+          <!-- Badge variedades (DENTRO del thumb) -->
           {% if plato.variedades_count > 0 %}
             <span class="plato-badge">
               📁 {{ plato.variedades_count|add:"1" }}
             </span>
           {% endif %}
 
-         
-          <!-- Acciones secundarias (hover) -->
-          <div class="plato-actions">
-
-            {% if amigues %}
-            <a href="#"
-              data-bs-toggle="modal"
-              data-bs-target="#compartirModal"
-              onclick="setPlatoInfo('{{ plato.id }}', 'plato')"
-              class="plato-action-btn text-primary"
-              title="Compartir">
-              <i class="fa-solid fa-share-nodes"></i>
-            </a>
-            {% endif %}
-
-            <a href="{% url 'videos-update' plato.id %}"
-              class="plato-action-btn text-dark"
-              title="Editar">
-              <i class="fa-regular fa-pen-to-square"></i>
-            </a>
-
-            <a href="#"
-              data-bs-toggle="modal"
-              data-bs-target="#confirmDeleteModal"
-              data-url="{% url 'eliminar-plato' plato.id %}"
-              data-nombre="{{ plato.nombre_plato }}"
-              class="plato-action-btn text-danger"
-              title="Eliminar">
-              <i class="fa-solid fa-trash-can"></i>
-            </a>
-
-          </div>
-
         </div>
+        <!-- /THUMB -->
 
-        <!-- Título abajo + menú ⋯ al lado del nombre -->
-        <div class="plato-title d-flex align-items-center justify-content-between gap-1">
+        <!-- TÍTULO -->
+        <div class="plato-title">
 
-          <span class="flex-grow-1">
-            {% if plato.variedades_count > 0 %}
-              {{ plato.nombre_para_front }}
-            {% else %}
-              {{ plato.nombre_plato }}
-            {% endif %}
-          </span>
+          <div class="plato-header">
 
-          <!-- Menú acciones (⋯) -->
+            <span>
+              {% if plato.variedades_count > 0 %}
+                {{ plato.nombre_para_front }}
+              {% else %}
+                {{ plato.nombre_plato }}
+              {% endif %}
+            </span>
+
+            <!-- Acciones hover desktop -->
+            <div class="plato-actions">
+
+              {% if amigues %}
+              <a href="#"
+                 data-bs-toggle="modal"
+                 data-bs-target="#compartirModal"
+                 onclick="setPlatoInfo('{{ plato.id }}', 'plato')"
+                 class="plato-action-btn text-primary"
+                 title="Compartir">
+                <i class="fa-solid fa-share-nodes"></i>
+              </a>
+              {% endif %}
+
+              <a href="{% url 'videos-update' plato.id %}"
+                 class="plato-action-btn text-dark"
+                 title="Editar">
+                <i class="fa-regular fa-pen-to-square"></i>
+              </a>
+
+              <a href="#"
+                 data-bs-toggle="modal"
+                 data-bs-target="#confirmDeleteModal"
+                 data-url="{% url 'eliminar-plato' plato.id %}"
+                 data-nombre="{{ plato.nombre_plato }}"
+                 class="plato-action-btn text-danger"
+                 title="Eliminar">
+                <i class="fa-solid fa-trash-can"></i>
+              </a>
+
+            </div>
+
+          <!-- Menú ⋯ (mobile / fallback) -->
           <div class="dropdown plato-menu">
-            <button class="btn btn-sm btn-light py-0 px-1"
+            <button class="btn btn-sm btn-light py-0 px-3"
                     type="button"
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
                     title="Opciones">
-                    
               <i class="fa-solid fa-ellipsis-vertical"></i>
             </button>
 
@@ -220,10 +196,10 @@
               {% if amigues %}
               <li>
                 <a class="dropdown-item"
-                  href="#"
-                  data-bs-toggle="modal"
-                  data-bs-target="#compartirModal"
-                  onclick="setPlatoInfo('{{ plato.id }}', 'plato')">
+                   href="#"
+                   data-bs-toggle="modal"
+                   data-bs-target="#compartirModal"
+                   onclick="setPlatoInfo('{{ plato.id }}', 'plato')">
                   <i class="fa-solid fa-share-nodes me-2"></i> Compartir
                 </a>
               </li>
@@ -233,52 +209,28 @@
 
               <li>
                 <a class="dropdown-item text-danger"
-                  href="#"
-                  data-bs-toggle="modal"
-                  data-bs-target="#confirmDeleteModal"
-                  data-url="{% url 'eliminar-plato' plato.id %}"
-                  data-nombre="{{ plato.nombre_plato }}">
+                   href="#"
+                   data-bs-toggle="modal"
+                   data-bs-target="#confirmDeleteModal"
+                   data-url="{% url 'eliminar-plato' plato.id %}"
+                   data-nombre="{{ plato.nombre_plato }}">
                   <i class="fa-solid fa-trash-can me-2"></i> Eliminar
                 </a>
               </li>
             </ul>
           </div>
+          </div>
 
         </div>
-
-        <!--  plato.nombre_plato }} -->
-        <!--  plato.nombre_para_front }} -->
-
-        <!-- PARA ABRIR UPDATE EN MODAL / AL BORRAR ESTO VER QUÉ MÁS ESTÁ AL SERVICIO DEL MODAL EN ESTE TEMPLATE -->
-        <!-- <a href="{% url 'videos-update' plato.id %}?tipopag={{ tipopag|default:'Dash' }}"
-          class="btn-editar-plato"
-          data-id="{{ plato.id }}"
-          data-nombre="{{ plato.nombre_plato }}"
-          data-url="{% url 'videos-update' plato.id %}?tipopag={{ tipopag|default:'Dash' }}"
-          data-bs-toggle="modal"
-          data-bs-target="#modalPlato"
-          title="Editar plato">
-          EEM
-        </a>  -->
-
-        <!-- <button type="button"
-                class="btn btn-sm btn-outline-primary js-plato-ingredientes"
-                data-url="{% url 'plato_ingredientes' plato.id %}">
-          Ver ingredientes
-        </button> -->
-
-        {% if plato.propietario != user %}
-          <a href="{% url 'agregar-a-mi-lista' plato.id %}" class="btn btn-success"
-            style="font-size: 12px; padding: 2px 5px;">AGREGAR A MI LISTA</a>
-          <a href="{% url 'descartar-sugerido' plato.id %}" class="btn btn-success"
-            style="font-size: 12px; padding: 2px 5px;">NO ME INTERESA ESTE PLATO</a>
-        {% endif %}
+        <!-- /TÍTULO -->
 
       </div>
 
     {% endfor %}
   </div>
 </section>
+
+
 
 
 <!-- modal de confirmación de eliminación de plato -->
