@@ -30,19 +30,18 @@
    =========================================================== */
 .plato-card {
   padding: 0;
-  margin: 0;
+  margin-bottom: 0.75rem; /* espacio vertical entre filas */
   border: 0;
-  margin-bottom: 0.75rem; /* asegura separación entre filas si algún gap falla */
-
   background: transparent;
   line-height: 0; /* elimina espacio residual de inline-block */
 }
 
+/* Flex container: espacio entre tarjetas */
 section > .d-flex {
-  flex-wrap: wrap;        /* ya lo tenés */
-  gap: 0.75rem;           /* horizontal y vertical entre tarjetas */
-  justify-content: center; /* mantiene centradas las filas */
-  align-items: flex-start; /* alinea tops de las cards */
+  flex-wrap: wrap;
+  gap: 0.75rem;  /* separación horizontal y vertical */
+  justify-content: center;
+  align-items: flex-start;
 }
 
 
@@ -78,12 +77,12 @@ section > .d-flex {
 .plato-plus {
   pointer-events: none;
   position: absolute;
-  inset: 0; /* top:0; right:0; bottom:0; left:0 */
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.8rem;
-  z-index: 5; /* encima de la imagen, debajo del badge si se desea */
+  z-index: 5;
 }
 
 /* Badge en esquina inferior derecha */
@@ -91,7 +90,7 @@ section > .d-flex {
   position: absolute;
   bottom: 0.25rem;
   right: 0.25rem;
-  z-index: 6; /* encima de la imagen */
+  z-index: 6;
   padding: 0.18rem 0.4rem;
   border-radius: 0.45rem;
   font-size: 0.6rem;
@@ -99,7 +98,7 @@ section > .d-flex {
   background: rgba(0,0,0,0.65);
   color: #fff;
   backdrop-filter: blur(2px);
-  pointer-events: none; /* no interfiere con clicks */
+  pointer-events: none;
 }
 
 
@@ -110,7 +109,9 @@ section > .d-flex {
   position: absolute;
   left: 0.25rem;
   right: 0.25rem;
-  bottom: 0.25rem;
+  bottom: auto; /* usaremos top para bajar hover */
+  top: 100%;    /* justo debajo del título */
+  margin-top: 0.25rem; /* espacio extra debajo del título */
   z-index: 3;
   display: flex;
   justify-content: center;
@@ -203,7 +204,7 @@ section > .d-flex {
 @media (hover: hover) and (pointer: fine) {
   .plato-title:hover .plato-actions {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(-5px); /* baja más el hover */
     pointer-events: auto;
   }
 }
