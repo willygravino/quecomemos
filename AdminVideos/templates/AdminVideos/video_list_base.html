@@ -97,11 +97,14 @@
         <!-- THUMB -->
         <div class="plato-thumb">
 
+         
+
           <a href="#"
-             data-bs-toggle="modal"
-             data-bs-target="#asignarPlatoModal"
-             onclick="setPlatoInfo('{{ plato.id }}', 'plato')"
-             class="d-block text-decoration-none">
+            data-bs-toggle="modal"
+            data-bs-target="#asignarPlatoModal"
+            onclick="setPlatoInfo('{{ plato.id }}', 'plato', '{{ plato.nombre_plato }}')"
+            class="d-block text-decoration-none">
+                        
 
             <img src="{{ plato.image_url }}"
                  class="img-fluid

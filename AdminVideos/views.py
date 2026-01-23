@@ -767,7 +767,7 @@ def compartir_lista(request, token):
 
 
     def fresh_until(fecha_uso):
-        return fecha_uso or (today + timedelta(days=7))
+        return fecha_uso or (today + timedelta(hours=3))
 
     def estado_final(pi, limite):
         if not pi:
@@ -776,7 +776,7 @@ def compartir_lista(request, token):
             return "no-tengo"
         if (
             pi.last_bought_at
-            and pi.last_bought_at >= timezone.now() - timedelta(days=7)
+            and pi.last_bought_at >= timezone.now() - timedelta(hours=3)
             and today <= limite
         ):
             return "recien-comprado"
@@ -1852,51 +1852,6 @@ def FiltroDePlatos(request):
 
     DIAS_ES = ['LU','MA','MI','JU','VI','SA','DO']  # tu mapeo
 
-    # if False:  # 🔴 BLOQUE DESACTIVADO (refactor nuevo menú)
-
-    #     registros_antiguos = ElegidosXDia.objects.filter(
-    #         el_dia_en_que_comemos__lt=fecha_actual, user=request.user
-    #     )
-
-    #     with transaction.atomic():
-    #         for registro in registros_antiguos:
-    #             fecha = registro.el_dia_en_que_comemos
-    #             datos = registro.platos_que_comemos or {}
-
-    #             historico, _ = HistoricoDia.objects.get_or_create(
-    #                 fecha=fecha,
-    #                 propietario=request.user,
-    #                 defaults={'dia_semana': DIAS_ES[fecha.weekday()]}
-    #             )
-    #             if not historico.dia_semana:
-    #                 historico.dia_semana = DIAS_ES[fecha.weekday()]
-    #                 historico.save(update_fields=['dia_semana'])
-
-    #             for momento in ["desayuno", "almuerzo", "merienda", "cena"]:
-    #                 for plato_data in datos.get(momento, []):
-    #                     pid = plato_data.get("id_plato")
-    #                     if not pid:
-    #                         continue
-
-    #                     # Intentamos resolver el Plato SOLO para capturar snapshot de nombre (si aún existe)
-    #                     plato_obj = Plato.objects.filter(id=pid, propietario=request.user).only('id','nombre_plato').first()
-    #                     nombre_snap = plato_obj.nombre_plato if plato_obj else (plato_data.get("nombre_plato") or "Plato eliminado")
-
-    #                     HistoricoItem.objects.get_or_create(
-    #                         historico=historico,
-    #                         plato_id_ref=pid,
-    #                         momento=momento
-    #                         # defaults={'plato_nombre_snapshot': nombre_snap}
-    #                     )
-
-    #             registro.delete()
-
-
-
-
-
-
-
     # # Calcular y agregar las fechas y nombres de los días para los próximos 6 días
     dias_desde_hoy = [(fecha_actual + timedelta(days=i)) for i in range(0, 7)]
 
@@ -2071,7 +2026,13 @@ def FiltroDePlatos(request):
 # ---------------------
 
 
-    dia_activo = request.session.get('dia_activo', None)  # 🟢 Recuperamos la fecha activa
+    # dia_activo = request.session.get('dia_activo', None)  # 🟢 Recuperamos la fecha activa
+
+    dia_activo = request.session.get('dia_activo', None)  # sigue siendo string "YYYY-MM-DD"
+    dia_activo_obj = None
+    if dia_activo:
+        dia_activo_obj = datetime.datetime.strptime(dia_activo, "%Y-%m-%d").date()
+
 
     # Inicializar un diccionario donde cada fecha tendrá listas separadas para cada tipo de comida
     platos_dia_x_dia = defaultdict(lambda: {"desayuno": [], "almuerzo": [], "merienda": [], "cena": []})
@@ -2118,6 +2079,8 @@ def FiltroDePlatos(request):
                 "parametro": tipo_parametro,
                 "mensajes": mensajes_agrupados,
                 'dia_activo': dia_activo,
+                'dia_activo_obj': dia_activo_obj, # solo para filtros |date en el template/modal
+
                 "platos_dia_x_dia": platos_dia_x_dia,
                 # "idesplatos": ids_platos_importados,
                 # "ides_descartable": ids_platos_compartidos,
