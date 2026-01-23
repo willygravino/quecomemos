@@ -365,9 +365,6 @@ class MenuItem(models.Model):
     menu = models.ForeignKey(MenuDia, on_delete=models.CASCADE, related_name="items")
     momento = models.CharField(max_length=20, choices=MOMENTO_CHOICES)
 
-    fijo = models.BooleanField(default=False)  # <-- NUEVO CAMPO
-
-
     # Uno u otro (plato o lugar)
     plato = models.ForeignKey("Plato", null=True, blank=True, on_delete=models.CASCADE, related_name="en_menus")
     lugar = models.ForeignKey("Lugar", null=True, blank=True, on_delete=models.CASCADE, related_name="en_menus")
@@ -571,7 +568,44 @@ class Profile(models.Model):
 
 
     
-     
+class HabitoSemanal(models.Model):
+    DIAS_SEMANA = (
+        (0, "Lunes"),
+        (1, "Martes"),
+        (2, "Miércoles"),
+        (3, "Jueves"),
+        (4, "Viernes"),
+        (5, "Sábado"),
+        (6, "Domingo"),
+    )
+
+    MOMENTOS = (
+        ("desayuno", "Desayuno"),
+        ("almuerzo", "Almuerzo"),
+        ("merienda", "Merienda"),
+        ("cena", "Cena"),
+    )
+
+    perfil = models.ForeignKey(
+        Profile,
+        on_delete=models.CASCADE,
+        related_name="habitos_semanales"
+    )
+
+    dia_semana = models.IntegerField(choices=DIAS_SEMANA)
+    momento = models.CharField(max_length=20, choices=MOMENTOS)
+
+    plato = models.ForeignKey(
+        Plato,
+        on_delete=models.CASCADE
+    )
+
+    class Meta:
+        unique_together = ("perfil", "dia_semana", "momento", "plato")
+
+    def __str__(self):
+        return f"{self.get_dia_semana_display()} - {self.momento} - {self.plato}"
+    
      
 
 class Mensaje(models.Model):

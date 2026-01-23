@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
 from AdminVideos import models
-from AdminVideos.models import HistoricoDia, HistoricoItem, Ingrediente, IngredienteEnPlato, IngredienteEstado, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente
+from AdminVideos.models import HabitoSemanal, HistoricoDia, HistoricoItem, Ingrediente, IngredienteEnPlato, IngredienteEstado, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string   # ✅ ← ESTA ES LA CLAVE
 from django.http import Http404, HttpRequest, JsonResponse
@@ -41,34 +41,76 @@ from django.core.exceptions import ValidationError
 from django.core.exceptions import PermissionDenied
 
 
+
 @login_required
 def fijar_plato(request, plato_id, comida):
     usuario = request.user
-    dia_str = request.session.get('dia_activo')
+
+    dia_str = request.session.get("dia_activo")
     if not dia_str:
         messages.error(request, "No hay día activo seleccionado.")
         return redirect("filtro-de-platos")
 
+    # Fecha activa → día de la semana
     dia = datetime.datetime.strptime(dia_str, "%Y-%m-%d").date()
+    dia_semana = dia.weekday()  # 0=Lunes ... 6=Domingo
 
-    menu_dia, _ = MenuDia.objects.get_or_create(propietario=usuario, fecha=dia)
+    perfil = usuario.profile
 
-    plato = get_object_or_404(Plato, id=plato_id, propietario=usuario)
-
-    menu_item, created = MenuItem.objects.get_or_create(
-        menu=menu_dia,
-        momento=comida,
-        plato=plato,
-        defaults={"elegido": True, "fijo": True}  # fijo=True lo marca como “fijado”
+    plato = get_object_or_404(
+        Plato,
+        id=plato_id,
+        propietario=usuario
     )
 
-    if not created:
-        # Si ya existía, solo marcamos fijo=True
-        menu_item.fijo = True
-        menu_item.save()
+    habito, created = HabitoSemanal.objects.get_or_create(
+        perfil=perfil,
+        plato=plato,
+        dia_semana=dia_semana,
+        momento=comida
+    )
 
-    messages.success(request, f"{plato.nombre_plato} ahora está fijado para {comida}.")
+    if created:
+        messages.success(
+            request,
+            f"{plato.nombre_plato} quedó fijo los {habito.get_dia_semana_display()} en {comida}."
+        )
+    else:
+        messages.info(
+            request,
+            f"{plato.nombre_plato} ya estaba fijado para ese día y momento."
+        )
+
     return redirect("filtro-de-platos")
+
+
+@login_required
+def toggle_habito_semanal(request, plato_id, dia_semana, momento):
+    perfil = request.user.profile
+
+    plato = get_object_or_404(
+        Plato,
+        id=plato_id,
+        propietario=request.user
+    )
+
+    habito, creado = HabitoSemanal.objects.get_or_create(
+        perfil=perfil,
+        plato=plato,
+        dia_semana=dia_semana,
+        momento=momento,
+    )
+
+    if not creado:
+        habito.delete()
+        estado = "off"
+    else:
+        estado = "on"
+
+    return JsonResponse({
+        "estado": estado
+    })
+
 
 
 @login_required
@@ -1886,10 +1928,52 @@ def FiltroDePlatos(request):
     # Obtener la fecha actual
     fecha_actual = datetime.datetime.now().date()
 
+    # Obtener el usuario actual
+    usuario = request.user
+    try:
+        perfil = usuario.profile
+    except Profile.DoesNotExist:
+        return redirect("profile-create")
+    
     DIAS_ES = ['LU','MA','MI','JU','VI','SA','DO']  # tu mapeo
+
+    habitos = (
+    HabitoSemanal.objects
+    .filter(perfil=perfil)
+    .select_related("plato"))
+
+    
+    habitos_set = {
+        (h.plato_id, h.dia_semana, h.momento)
+        for h in habitos
+    }
 
     # # Calcular y agregar las fechas y nombres de los días para los próximos 6 días
     dias_desde_hoy = [(fecha_actual + timedelta(days=i)) for i in range(0, 7)]
+
+    for fecha in dias_desde_hoy:
+        dia_semana = fecha.weekday()  # 0=lunes ... 6=domingo
+
+        habitos_del_dia = [h for h in habitos if h.dia_semana == dia_semana]
+
+        if not habitos_del_dia:
+            continue  # ese día no tiene hábitos
+
+        menu_dia, _ = MenuDia.objects.get_or_create(
+            propietario=usuario,
+            fecha=fecha
+        )
+
+        for habito in habitos_del_dia:
+            MenuItem.objects.get_or_create(
+                menu=menu_dia,
+                momento=habito.momento,
+                plato=habito.plato,
+                defaults={
+                    "elegido": True
+                }
+            )
+
 
     primer_dia = dias_desde_hoy[0].isoformat()
 
@@ -2087,27 +2171,33 @@ def FiltroDePlatos(request):
         fec = item.menu.fecha
         dias_programados.add(fec)
 
+        dia_semana = fec.weekday()
+
         if item.plato:
+            fijo = (item.plato.id, dia_semana, item.momento) in habitos_set
+
             platos_dia_x_dia[fec][item.momento].append({
                 "id": item.plato.id,
                 "nombre": item.plato.nombre_plato,
-                "fijo": item.fijo  # ✅ agregamos esta clave
+                "fijo": fijo,
+                "dia_semana": dia_semana,   # 👈 ESTA LÍNEA
 
             })
+
         elif item.lugar:
             platos_dia_x_dia[fec][item.momento].append({
                 "id": item.lugar.id,
                 "nombre": item.lugar.nombre,
                 "fijo": False
-
-
             })
 
 
     # Convertir defaultdict a dict antes de pasarlo a la plantilla
     platos_dia_x_dia = dict(platos_dia_x_dia)
 
-
+    habitos_lookup = {
+    (h.dia_semana, h.momento, h.plato_id): h.id
+    for h in habitos}
 
     contexto = {
                 'formulario': form,
@@ -2127,6 +2217,8 @@ def FiltroDePlatos(request):
                 # "ides_descartable": ids_platos_compartidos,
                 "platos_compartidos": platos_compartidos,
                 "lugares": lugares,
+                "habitos_lookup": habitos_lookup,
+
                 # "sumados": sumar_historico
 
                }
