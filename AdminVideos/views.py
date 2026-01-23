@@ -43,6 +43,36 @@ from django.core.exceptions import PermissionDenied
 
 
 @login_required
+def fijar_o_eliminar_habito(request, plato_id, comida):
+    usuario = request.user
+
+    dia_str = request.session.get("dia_activo")
+    if not dia_str:
+        messages.error(request, "No hay día activo seleccionado.")
+        return redirect("filtro-de-platos")
+
+    # Fecha activa → día de la semana
+    dia = datetime.datetime.strptime(dia_str, "%Y-%m-%d").date()
+    dia_semana = dia.weekday()  # 0=Lunes ... 6=Domingo
+
+    perfil = usuario.profile
+
+    plato = get_object_or_404(Plato, id=plato_id, propietario=usuario)
+
+    try:
+        habito = HabitoSemanal.objects.get(perfil=perfil, plato=plato, dia_semana=dia_semana, momento=comida)
+        # Si ya existe el hábito, lo eliminamos
+        habito.delete()
+        messages.success(request, f"Se eliminó el hábito de {plato.nombre_plato} para el {comida}.")
+    except HabitoSemanal.DoesNotExist:
+        # Si no existe, lo creamos
+        HabitoSemanal.objects.create(perfil=perfil, plato=plato, dia_semana=dia_semana, momento=comida)
+        messages.success(request, f"Se fijó el hábito de {plato.nombre_plato} para el {comida}.")
+
+    return redirect("filtro-de-platos")
+
+
+@login_required
 def fijar_plato(request, plato_id, comida):
     usuario = request.user
 

@@ -39,7 +39,10 @@
                     <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
                         &nbsp; {{ plato.nombre }}
                     </a>
-                    <a href="{% url 'fijar-plato' plato.id 'desayuno' %}" title="Fijar plato para siempre">
+                    
+
+                     <!-- Solo un pin que cambia entre fijar y eliminar el hábito -->
+                    <a href="{% url 'fijar-o-eliminar-habito' plato.id 'desayuno' %}" title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
                         <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                     </a>
 
@@ -48,9 +51,7 @@
                         <i class="fa-solid fa-trash-can"></i>
                     </a>
 
-                    <a href="{% url 'eliminar-habito' plato.id 'desayuno' %}" title="Eliminar hábito">
-                        <i class="bi bi-pin-angle-fill ms-2 fa-lg text-danger"></i>
-                    </a>
+                  
 
 
 
@@ -70,17 +71,17 @@
                     <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
                         &nbsp; {{ plato.nombre }}
                     </a>
-                    <a href="{% url 'fijar-plato' plato.id 'almuerzo' %}" title="Fijar plato para siempre">
+
+                    <a href="{% url 'fijar-o-eliminar-habito' plato.id 'almuerzo' %}" title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
                         <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                     </a>
+                    
                     <a href="{% url 'eliminar-programado' nombre_plato=plato.nombre comida='almuerzo' fecha=dia %}"
                        class="btn btn-sm p-0" title="Eliminar">
                         <i class="fa-solid fa-trash-can"></i>
                     </a>
 
-                    <a href="{% url 'eliminar-habito' plato.id 'almuerzo' %}" title="Eliminar hábito">
-                        <i class="bi bi-pin-angle-fill ms-2 fa-lg text-danger"></i>
-                    </a>
+                  
 
                 </div>
             {% endfor %}
@@ -98,17 +99,17 @@
                     <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
                         &nbsp; {{ plato.nombre }}
                     </a>
-                    <a href="{% url 'fijar-plato' plato.id 'merienda' %}" title="Fijar plato para siempre">
+
+                    <a href="{% url 'fijar-o-eliminar-habito' plato.id 'merienda' %}" title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
                         <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                     </a>
+                   
                     <a href="{% url 'eliminar-programado' nombre_plato=plato.nombre comida='merienda' fecha=dia %}"
                        class="btn btn-sm p-0" title="Eliminar">
                         <i class="fa-solid fa-trash-can"></i>
                     </a>
                     
-                    <a href="{% url 'eliminar-habito' plato.id 'merienda' %}" title="Eliminar hábito">
-                        <i class="bi bi-pin-angle-fill ms-2 fa-lg text-danger"></i>
-                    </a> 
+                    
 
                 </div>
             {% endfor %}
@@ -126,18 +127,16 @@
                     <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
                         &nbsp; {{ plato.nombre }}
                     </a>
-                    <a href="{% url 'fijar-plato' plato.id 'cena' %}" title="Fijar plato para siempre">
+                    
+                    <a href="{% url 'fijar-o-eliminar-habito' plato.id 'cena' %}" title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
                         <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                     </a>
+
                     <a href="{% url 'eliminar-programado' nombre_plato=plato.nombre comida='cena' fecha=dia %}"
                        class="btn btn-sm p-0" title="Eliminar">
                         <i class="fa-solid fa-trash-can"></i>
                     </a>
                     
-                    <a href="{% url 'eliminar-habito' plato.id 'cena' %}" title="Eliminar hábito">
-                        <i class="bi bi-pin-angle-fill ms-2 fa-lg text-danger"></i>
-                    </a>
-
                 </div>
             {% endfor %}
         {% else %}
