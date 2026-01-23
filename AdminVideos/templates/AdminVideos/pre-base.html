@@ -46,8 +46,8 @@
                         <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                     </a>
 
-                    <a href="{% url 'eliminar-programado' nombre_plato=plato.nombre comida='desayuno' fecha=dia %}"
-                       class="btn btn-sm p-0" title="Eliminar">
+                    <a href="{% url 'eliminar-programado' plato.id 'desayuno' dia %}" 
+                    class="btn btn-sm p-0" title="Eliminar">
                         <i class="fa-solid fa-trash-can"></i>
                     </a>
 
@@ -76,8 +76,8 @@
                         <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                     </a>
                     
-                    <a href="{% url 'eliminar-programado' nombre_plato=plato.nombre comida='almuerzo' fecha=dia %}"
-                       class="btn btn-sm p-0" title="Eliminar">
+                   <a href="{% url 'eliminar-programado' plato.id 'almuerzo' dia %}" 
+                    class="btn btn-sm p-0" title="Eliminar">
                         <i class="fa-solid fa-trash-can"></i>
                     </a>
 
@@ -104,8 +104,8 @@
                         <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                     </a>
                    
-                    <a href="{% url 'eliminar-programado' nombre_plato=plato.nombre comida='merienda' fecha=dia %}"
-                       class="btn btn-sm p-0" title="Eliminar">
+                    <a href="{% url 'eliminar-programado' plato.id 'merienda' dia %}" 
+                    class="btn btn-sm p-0" title="Eliminar">
                         <i class="fa-solid fa-trash-can"></i>
                     </a>
                     
@@ -132,8 +132,8 @@
                         <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                     </a>
 
-                    <a href="{% url 'eliminar-programado' nombre_plato=plato.nombre comida='cena' fecha=dia %}"
-                       class="btn btn-sm p-0" title="Eliminar">
+                   <a href="{% url 'eliminar-programado' plato.id 'cena' dia %}" 
+                    class="btn btn-sm p-0" title="Eliminar">
                         <i class="fa-solid fa-trash-can"></i>
                     </a>
                     

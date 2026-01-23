@@ -59,7 +59,7 @@ urlpatterns = [
     path('eliminar-lugar/<int:lugar_id>/', eliminar_lugar, name='eliminar-lugar'),
     # path('duplicar-plato/<int:plato_id>/', duplicar_plato, name='duplicar-plato'),
 
-    path('eliminar/<str:nombre_plato>/<str:comida>/<str:fecha>/', eliminar_plato_programado, name='eliminar-programado'),
+    path('eliminar/<int:plato_id>/<str:comida>/<str:fecha>/', eliminar_plato_programado, name='eliminar-programado'),
 
     # path('eliminar-menu', eliminar_menu_programado, name='eliminar-menu'),
 
