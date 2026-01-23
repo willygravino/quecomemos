@@ -365,6 +365,9 @@ class MenuItem(models.Model):
     menu = models.ForeignKey(MenuDia, on_delete=models.CASCADE, related_name="items")
     momento = models.CharField(max_length=20, choices=MOMENTO_CHOICES)
 
+    fijo = models.BooleanField(default=False)  # <-- NUEVO CAMPO
+
+
     # Uno u otro (plato o lugar)
     plato = models.ForeignKey("Plato", null=True, blank=True, on_delete=models.CASCADE, related_name="en_menus")
     lugar = models.ForeignKey("Lugar", null=True, blank=True, on_delete=models.CASCADE, related_name="en_menus")

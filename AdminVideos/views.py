@@ -41,7 +41,34 @@ from django.core.exceptions import ValidationError
 from django.core.exceptions import PermissionDenied
 
 
+@login_required
+def fijar_plato(request, plato_id, comida):
+    usuario = request.user
+    dia_str = request.session.get('dia_activo')
+    if not dia_str:
+        messages.error(request, "No hay día activo seleccionado.")
+        return redirect("filtro-de-platos")
 
+    dia = datetime.datetime.strptime(dia_str, "%Y-%m-%d").date()
+
+    menu_dia, _ = MenuDia.objects.get_or_create(propietario=usuario, fecha=dia)
+
+    plato = get_object_or_404(Plato, id=plato_id, propietario=usuario)
+
+    menu_item, created = MenuItem.objects.get_or_create(
+        menu=menu_dia,
+        momento=comida,
+        plato=plato,
+        defaults={"elegido": True, "fijo": True}  # fijo=True lo marca como “fijado”
+    )
+
+    if not created:
+        # Si ya existía, solo marcamos fijo=True
+        menu_item.fijo = True
+        menu_item.save()
+
+    messages.success(request, f"{plato.nombre_plato} ahora está fijado para {comida}.")
+    return redirect("filtro-de-platos")
 
 
 @login_required
@@ -1783,8 +1810,6 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
         return Profile.objects.filter(user=self.request.user).exists()
 
 
-
-
 def filtrar_platos(
     usuario,
     tipo_parametro,
@@ -1795,50 +1820,61 @@ def filtrar_platos(
     dificultad,
     palabra_clave
 ):
+    """
+    Filtra platos según el usuario, tipo, comida seleccionada, y filtros adicionales.
+    - Solo platos padre (excluye variedades)
+    - misplatos: platos del usuario logueado
+    - quecomemos: platos de usuario 'quecomemos', excluyendo descartados
+    """
 
-    # Si no se selecciona 'quecomemos' ni 'misplatos', no mostrar platos
+    # Si no se selecciona ninguna de las dos opciones, no mostrar nada
     if quecomemos != "quecomemos" and misplatos != "misplatos":
         return Plato.objects.none()
 
-    # 🔒 BASE: SOLO PLATOS PADRE (excluye variedades)
-    query = Q(plato_padre__isnull=True)
+    # Comenzamos con un queryset vacío
+    platos_qs = Plato.objects.none()
 
+    # 🔹 Platos del usuario logueado
+    if misplatos == "misplatos":
+        qs_misplatos = Plato.objects.filter(
+            propietario=usuario,
+            plato_padre__isnull=True
+        )
+        platos_qs = platos_qs | qs_misplatos
+
+    # 🔹 Platos de "quecomemos" (filtrando descartados)
     if quecomemos == "quecomemos":
         usuario_quecomemos = User.objects.filter(username="quecomemos").first()
         if usuario_quecomemos:
-            query |= Q(propietario=usuario_quecomemos, plato_padre__isnull=True)
+            platos_descartados = usuario.profile.sugeridos_descartados or []
+            qs_quecomemos = Plato.objects.filter(
+                propietario=usuario_quecomemos,
+                plato_padre__isnull=True
+            ).exclude(id__in=platos_descartados)
+            platos_qs = platos_qs | qs_quecomemos
 
-        platos_descartados = usuario.profile.sugeridos_descartados
-        if platos_descartados:
-            query &= ~Q(id__in=platos_descartados)
-
-    if misplatos == "misplatos":
-        query |= Q(propietario=usuario, plato_padre__isnull=True)
-
+    # 🔹 Aplicar filtros adicionales
     if tipo_parametro and tipo_parametro != "Dash":
-        query &= Q(tipos__icontains=tipo_parametro)
+        platos_qs = platos_qs.filter(tipos__icontains=tipo_parametro)
 
     if medios and medios != '-':
-        query &= Q(medios=medios)
+        platos_qs = platos_qs.filter(medios=medios)
 
     if categoria and categoria != '-':
-        query &= Q(categoria=categoria)
+        platos_qs = platos_qs.filter(categoria=categoria)
 
     if dificultad and dificultad != '-':
-        query &= Q(dificultad=dificultad)
+        platos_qs = platos_qs.filter(dificultad=dificultad)
 
     if palabra_clave:
-        query &= (
+        platos_qs = platos_qs.filter(
             Q(ingredientes__icontains=palabra_clave) |
             Q(nombre_plato__icontains=palabra_clave)
         )
 
-    # ✅ ACÁ está el paso clave
-    return (
-        Plato.objects
-        .filter(query)
-        .annotate(variedades_count=Count("variedades_hijas"))
-    )
+    # 🔹 Anotar cantidad de variedades hijas
+    return platos_qs.annotate(variedades_count=Count("variedades_hijas"))
+
 
 
 
@@ -2054,12 +2090,17 @@ def FiltroDePlatos(request):
         if item.plato:
             platos_dia_x_dia[fec][item.momento].append({
                 "id": item.plato.id,
-                "nombre": item.plato.nombre_plato
+                "nombre": item.plato.nombre_plato,
+                "fijo": item.fijo  # ✅ agregamos esta clave
+
             })
         elif item.lugar:
             platos_dia_x_dia[fec][item.momento].append({
                 "id": item.lugar.id,
-                "nombre": item.lugar.nombre
+                "nombre": item.lugar.nombre,
+                "fijo": False
+
+
             })
 
 
