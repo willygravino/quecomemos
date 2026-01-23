@@ -42,10 +42,18 @@
                     <a href="{% url 'fijar-plato' plato.id 'desayuno' %}" title="Fijar plato para siempre">
                         <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                     </a>
+
                     <a href="{% url 'eliminar-programado' nombre_plato=plato.nombre comida='desayuno' fecha=dia %}"
                        class="btn btn-sm p-0" title="Eliminar">
                         <i class="fa-solid fa-trash-can"></i>
                     </a>
+
+                    <a href="{% url 'eliminar-habito' plato.id 'desayuno' %}" title="Eliminar hábito">
+                        <i class="bi bi-pin-angle-fill ms-2 fa-lg text-danger"></i>
+                    </a>
+
+
+
                 </div>
             {% endfor %}
         {% else %}
@@ -69,6 +77,11 @@
                        class="btn btn-sm p-0" title="Eliminar">
                         <i class="fa-solid fa-trash-can"></i>
                     </a>
+
+                    <a href="{% url 'eliminar-habito' plato.id 'almuerzo' %}" title="Eliminar hábito">
+                        <i class="bi bi-pin-angle-fill ms-2 fa-lg text-danger"></i>
+                    </a>
+
                 </div>
             {% endfor %}
         {% else %}
@@ -92,6 +105,11 @@
                        class="btn btn-sm p-0" title="Eliminar">
                         <i class="fa-solid fa-trash-can"></i>
                     </a>
+                    
+                    <a href="{% url 'eliminar-habito' plato.id 'merienda' %}" title="Eliminar hábito">
+                        <i class="bi bi-pin-angle-fill ms-2 fa-lg text-danger"></i>
+                    </a> 
+
                 </div>
             {% endfor %}
         {% else %}
@@ -115,6 +133,11 @@
                        class="btn btn-sm p-0" title="Eliminar">
                         <i class="fa-solid fa-trash-can"></i>
                     </a>
+                    
+                    <a href="{% url 'eliminar-habito' plato.id 'cena' %}" title="Eliminar hábito">
+                        <i class="bi bi-pin-angle-fill ms-2 fa-lg text-danger"></i>
+                    </a>
+
                 </div>
             {% endfor %}
         {% else %}

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import (
-    HistoricoDia, HistoricoItem,
+    HabitoSemanal, HistoricoDia, HistoricoItem,
     Ingrediente, IngredienteEnPlato,
     MenuDia, MenuItem,
     Plato, Profile, Mensaje, Lugar
@@ -127,3 +127,6 @@ class HistoricoItemAdmin(admin.ModelAdmin):
     list_display = ("id", "historico", "momento", "plato_id_ref")
     list_filter = ("momento",)
     search_fields = ("historico__propietario__username", "plato_id_ref")
+
+
+admin.site.register(HabitoSemanal)

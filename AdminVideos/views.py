@@ -85,6 +85,39 @@ def fijar_plato(request, plato_id, comida):
 
 
 @login_required
+def eliminar_habito(request, plato_id, comida):
+    usuario = request.user
+
+    # Fecha activa → día de la semana
+    dia_str = request.session.get("dia_activo")
+    if not dia_str:
+        messages.error(request, "No hay día activo seleccionado.")
+        return redirect("filtro-de-platos")
+
+    dia = datetime.datetime.strptime(dia_str, "%Y-%m-%d").date()
+    dia_semana = dia.weekday()  # 0=Lunes ... 6=Domingo
+
+    perfil = usuario.profile
+    plato = get_object_or_404(Plato, id=plato_id, propietario=usuario)
+
+    # Buscar y eliminar el hábito
+    try:
+        habito = HabitoSemanal.objects.get(
+            perfil=perfil,
+            plato=plato,
+            dia_semana=dia_semana,
+            momento=comida
+        )
+        habito.delete()
+        messages.success(request, f"{plato.nombre_plato} ha sido eliminado del hábito en {comida}.")
+    except HabitoSemanal.DoesNotExist:
+        messages.info(request, f"{plato.nombre_plato} no estaba fijado como hábito para este día y momento.")
+
+    return redirect("filtro-de-platos")
+
+
+
+@login_required
 def toggle_habito_semanal(request, plato_id, dia_semana, momento):
     perfil = request.user.profile
 
