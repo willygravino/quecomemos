@@ -72,109 +72,6 @@ def fijar_o_eliminar_habito(request, plato_id, comida):
     return redirect("filtro-de-platos")
 
 
-@login_required
-def fijar_plato(request, plato_id, comida):
-    usuario = request.user
-
-    dia_str = request.session.get("dia_activo")
-    if not dia_str:
-        messages.error(request, "No hay día activo seleccionado.")
-        return redirect("filtro-de-platos")
-
-    # Fecha activa → día de la semana
-    dia = datetime.datetime.strptime(dia_str, "%Y-%m-%d").date()
-    dia_semana = dia.weekday()  # 0=Lunes ... 6=Domingo
-
-    perfil = usuario.profile
-
-    plato = get_object_or_404(
-        Plato,
-        id=plato_id,
-        propietario=usuario
-    )
-
-    habito, created = HabitoSemanal.objects.get_or_create(
-        perfil=perfil,
-        plato=plato,
-        dia_semana=dia_semana,
-        momento=comida
-    )
-
-    if created:
-        messages.success(
-            request,
-            f"{plato.nombre_plato} quedó fijo los {habito.get_dia_semana_display()} en {comida}."
-        )
-    else:
-        messages.info(
-            request,
-            f"{plato.nombre_plato} ya estaba fijado para ese día y momento."
-        )
-
-    return redirect("filtro-de-platos")
-
-
-@login_required
-def eliminar_habito(request, plato_id, comida):
-    usuario = request.user
-
-    # Fecha activa → día de la semana
-    dia_str = request.session.get("dia_activo")
-    if not dia_str:
-        messages.error(request, "No hay día activo seleccionado.")
-        return redirect("filtro-de-platos")
-
-    dia = datetime.datetime.strptime(dia_str, "%Y-%m-%d").date()
-    dia_semana = dia.weekday()  # 0=Lunes ... 6=Domingo
-
-    perfil = usuario.profile
-    plato = get_object_or_404(Plato, id=plato_id, propietario=usuario)
-
-    # Buscar y eliminar el hábito
-    try:
-        habito = HabitoSemanal.objects.get(
-            perfil=perfil,
-            plato=plato,
-            dia_semana=dia_semana,
-            momento=comida
-        )
-        habito.delete()
-        messages.success(request, f"{plato.nombre_plato} ha sido eliminado del hábito en {comida}.")
-    except HabitoSemanal.DoesNotExist:
-        messages.info(request, f"{plato.nombre_plato} no estaba fijado como hábito para este día y momento.")
-
-    return redirect("filtro-de-platos")
-
-
-
-@login_required
-def toggle_habito_semanal(request, plato_id, dia_semana, momento):
-    perfil = request.user.profile
-
-    plato = get_object_or_404(
-        Plato,
-        id=plato_id,
-        propietario=request.user
-    )
-
-    habito, creado = HabitoSemanal.objects.get_or_create(
-        perfil=perfil,
-        plato=plato,
-        dia_semana=dia_semana,
-        momento=momento,
-    )
-
-    if not creado:
-        habito.delete()
-        estado = "off"
-    else:
-        estado = "on"
-
-    return JsonResponse({
-        "estado": estado
-    })
-
-
 
 @login_required
 def plato_ingredientes(request: HttpRequest, pk: int):
@@ -1997,45 +1894,61 @@ def FiltroDePlatos(request):
         perfil = usuario.profile
     except Profile.DoesNotExist:
         return redirect("profile-create")
-    
-    DIAS_ES = ['LU','MA','MI','JU','VI','SA','DO']  # tu mapeo
 
-    habitos = (
-    HabitoSemanal.objects
-    .filter(perfil=perfil)
-    .select_related("plato"))
+    DIAS_ES = ['LU', 'MA', 'MI', 'JU', 'VI', 'SA', 'DO']  # tu mapeo
 
-    
+    # Recuperamos los hábitos semanales del usuario
+    habitos = HabitoSemanal.objects.filter(perfil=perfil).select_related("plato")
+
+    # Convertir los hábitos en un conjunto con (plato_id, dia_semana, momento)
     habitos_set = {
         (h.plato_id, h.dia_semana, h.momento)
         for h in habitos
     }
 
-    # # Calcular y agregar las fechas y nombres de los días para los próximos 6 días
+    # Calcular y agregar las fechas y nombres de los días para los próximos 6 días
     dias_desde_hoy = [(fecha_actual + timedelta(days=i)) for i in range(0, 7)]
 
     for fecha in dias_desde_hoy:
         dia_semana = fecha.weekday()  # 0=lunes ... 6=domingo
 
+        # Filtrar hábitos para el día actual
         habitos_del_dia = [h for h in habitos if h.dia_semana == dia_semana]
 
         if not habitos_del_dia:
-            continue  # ese día no tiene hábitos
+            continue  # Si no hay hábitos para ese día, pasamos al siguiente
 
-        menu_dia, _ = MenuDia.objects.get_or_create(
+        # Verificar si ya existe un menú para este día
+        menu_dia, creado = MenuDia.objects.get_or_create(
             propietario=usuario,
             fecha=fecha
         )
 
-        for habito in habitos_del_dia:
-            MenuItem.objects.get_or_create(
-                menu=menu_dia,
-                momento=habito.momento,
-                plato=habito.plato,
-                defaults={
-                    "elegido": True
-                }
-            )
+        # Solo asignar los hábitos si el menú se acaba de crear (es decir, no existía previamente)
+        if creado:
+            # Asignar los platos fijados a ese día y momento
+            for habito in habitos_del_dia:
+                plato = habito.plato
+                momento = habito.momento
+
+                # Asegurarnos de asignar solo el plato base o sus variantes
+                platos_a_asignar = [plato] + list(plato.variedades_hijas.all())
+
+                creados = 0
+                for p in platos_a_asignar:
+                    _, created = MenuItem.objects.get_or_create(
+                        menu=menu_dia,
+                        momento=momento,
+                        plato=p,
+                        defaults={"elegido": True},
+                    )
+                    if created:
+                        creados += 1
+
+                messages.success(
+                    request,
+                    f"Se asignaron {creados}/{len(platos_a_asignar)} platos al menú de {fecha} en {momento}."
+                )
 
 
     primer_dia = dias_desde_hoy[0].isoformat()
