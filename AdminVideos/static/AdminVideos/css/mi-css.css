@@ -227,3 +227,27 @@ section > .d-flex {
   font-size: 18px;
   cursor: pointer;
 }
+/* ===========================================================
+   ACCIONES SUPERIORES FORM PLATO (DERECHA)
+   Íconos horizontales arriba a la derecha (más grandes)
+   =========================================================== */
+
+.plato-form {
+  position: relative;
+}
+
+.plato-form-actions {
+  position: absolute;
+  top: -0.7rem;
+  right: -0.2rem;
+  display: flex;
+  gap: 0.6rem;
+  z-index: 50;
+}
+
+.plato-form-actions .plato-action-btn {
+  width: 2rem;
+  height: 2rem;
+  font-size: 1.3rem;
+}
+

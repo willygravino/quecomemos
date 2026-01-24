@@ -64,6 +64,7 @@
            <!-- <form id="platoForm" method="post" enctype="multipart/form-data" novalidate> -->
             <form
               id="platoForm"
+              class="plato-form"
               method="post"
               enctype="multipart/form-data"
               novalidate
@@ -72,6 +73,43 @@
 
 
                 {% csrf_token %}
+
+                {% if form.instance.pk %}
+                  <div class="plato-form-actions">
+
+                    <!-- CLONAR PLATO -->
+                    <a href="{% url 'agregar-a-mi-lista' form.instance.pk %}?duplicar=true"
+                      class="plato-action-btn text-dark"
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="top"
+                      title="Clonar plato">
+                      <i class="fa-regular fa-copy"></i>
+                    </a>
+
+                    <!-- VER LISTA DE INGREDIENTES -->
+                    <a href="#"
+                      class="plato-action-btn text-primary js-plato-ingredientes"
+                      data-url="{% url 'plato_ingredientes' form.instance.pk %}"
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="top"
+                      title="Ver lista de ingredientes">
+                      <i class="fa-solid fa-list-check"></i>
+                    </a>
+
+                    <!-- PROGRAMAR PLATO (abre modal + tooltip) -->
+                    <a href="#"
+                      class="plato-action-btn bg-success text-white"
+                      data-bs-toggle="modal"
+                      data-bs-target="#asignarPlatoModal"
+                      onclick="setPlatoInfo('{{ form.instance.pk }}', 'plato')"
+                      title="Programar este plato">
+                      <i class="fa-solid fa-plus"></i>
+                    </a>
+
+
+                  </div>
+                {% endif %}
+
 
                 <!-- Nombre del Plato -->
 
@@ -95,30 +133,7 @@
 
                   <div class="col-auto d-flex flex-column align-items-start gap-1">
 
-                    {% if form.instance.pk %}
-                      <a href="{% url 'agregar-a-mi-lista' form.instance.pk %}?duplicar=true"
-                        class="btn btn-sm"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="top"
-                        title="Clonar plato">
-                        <i class="fa-solid fa-clone" style="font-size:2rem;"></i>
-                      </a>
-
-
-                      <button type="button"
-                              class="btn btn-sm btn-outline-primary js-plato-ingredientes"
-                              data-url="{% url 'plato_ingredientes' form.instance.pk %}">
-                        Compartir lista de compras
-                      </button>
-
-                      <button type="button"
-                              class="btn btn-sm btn-outline-primary"
-                              data-bs-toggle="modal"
-                              data-bs-target="#asignarPlatoModal"
-                              onclick="setPlatoInfo('{{ form.instance.pk }}', 'plato')">
-                        Programar este plato
-                      </button>
-                    {% endif %}
+                    
 
                   </div>
 
@@ -303,13 +318,14 @@
         <button type="button"
                 class="btn btn-sm btn-primary js-open-variedad-modal"
                 data-url="{% url 'plato_variedad_create' form.instance.pk %}">
-          + Agregar variedad MODAL
+          + Agregar variedad
         </button>
 
-        <a class="btn btn-sm btn-primary"
-          href="{% url 'plato_variedad_create' form.instance.pk %}?tipopag={{ tipopag }}">
+        <!-- POR AHORA COMENTO, SACAR TODO JS ETC CUANDO LO ELIMINE -->
+        <!-- <a class="btn btn-sm btn-primary"
+          href="% url 'plato_variedad_create' form.instance.pk %}?tipopag= tipopag }}">
           + Agregar variedad pantalla completa
-        </a>
+        </a> -->
 
 
         
@@ -330,15 +346,16 @@
                   <small class="text-muted">ID: {{ v.id }}</small>
                 </div>
 
-                <a class="btn btn-sm btn-outline-secondary"
-                  href="{% url 'plato_variedad_update' v.id %}">
+                <!-- POR AHORA COMENTO PERO CUANDO LO SAQUE, SACAR TODA LA LÓGICA DE JS -->
+                <!-- <a class="btn btn-sm btn-outline-secondary"
+                  href="% url 'plato_variedad_update' v.id %}">
                   Editar
-                </a>
+                </a> -->
 
                 <button type="button"
                         class="btn btn-sm btn-outline-secondary js-open-variedad-modal"
                         data-url="{% url 'plato_variedad_update' v.id %}?tipopag={{ tipopag }}">
-                  Editar en Modal
+                  Editar
                 </button>
 
                 <button type="button"
@@ -581,6 +598,8 @@
     </div>
   </div>
 </div>
+
+
 
 
 

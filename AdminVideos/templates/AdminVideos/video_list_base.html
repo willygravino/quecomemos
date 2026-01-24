@@ -9,10 +9,10 @@
   <div class="container">
     <div class="d-flex justify-content-center flex-wrap gap-3">
 
-      <!-- Botón CUANDO LO SAQUE, SACAR TODA LA LOGICA QUE CARGA FORMULARIO EN MODAL -->
-       <button class="btn btn-primary" id="btnNuevoPrincipal">
+      <!-- COMENTO POR AHORA PERO CUANDO LO SAQUE, SACAR TODA LA LOGICA QUE CARGA FORMULARIO EN MODAL -->
+       <!-- <button class="btn btn-primary" id="btnNuevoPrincipal">
         Nuevo Plato Principal
-      </button> 
+      </button>  -->
 
       {% with tipopag=request.GET.tipopag %}
       {% if tipopag == "Delivery" or tipopag == "Comerafuera" %}
@@ -160,6 +160,14 @@
                 <i class="fa-solid fa-share-nodes"></i>
               </a>
               {% endif %}
+
+              <a href="#"
+                class="plato-action-btn text-primary js-plato-ingredientes"
+                data-url="{% url 'plato_ingredientes' plato.id %}"
+                title="Compartir lista de ingredientes">
+                <i class="fa-solid fa-list-check"></i>
+              </a>
+
 
               <a href="{% url 'videos-update' plato.id %}"
                  class="plato-action-btn text-dark"
