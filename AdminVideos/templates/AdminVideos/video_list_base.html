@@ -148,6 +148,17 @@
 
 
               <!-- Badge variedades -->
+
+              {% if plato.ultima_programacion %}
+                <span class="badge bg-secondary position-absolute top-0 start-0 m-2">
+                  Hace {{ plato.dias_desde_ultima }} día{% if plato.dias_desde_ultima != 1 %}s{% endif %}
+                </span>
+              {% else %}
+                <span class="badge bg-success position-absolute top-0 start-0 m-2">
+                  Nunca usado
+                </span>
+              {% endif %}
+
               {% if plato.variedades_count > 0 %}
                 <span class="badge bg-dark position-absolute top-0 end-0 m-2">
                   📁 {{ plato.variedades_count|add:"1" }}
