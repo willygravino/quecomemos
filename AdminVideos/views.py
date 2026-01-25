@@ -27,7 +27,7 @@ from datetime import datetime, timedelta
 from .forms import IngredienteEnPlatoFormSet, LugarForm, PlatoFilterForm, PlatoForm, CustomAuthenticationForm
 from datetime import date, datetime
 from django.contrib.auth.models import User  # Asegúrate de importar el modelo User
-from django.db.models import Q, Subquery, OuterRef, Prefetch, Min
+from django.db.models import Q, Subquery, OuterRef, Prefetch, Min, Max, F
 import random
 from django.shortcuts import redirect, reverse
 from django.shortcuts import redirect
@@ -39,6 +39,8 @@ from django.db import transaction
 from django.views.decorators.http import require_http_methods
 from django.core.exceptions import ValidationError
 from django.core.exceptions import PermissionDenied
+from django.db.models.expressions import OrderBy
+
 
 
 
@@ -1812,6 +1814,8 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
         return Profile.objects.filter(user=self.request.user).exists()
 
 
+
+
 def filtrar_platos(
     usuario,
     tipo_parametro,
@@ -1822,13 +1826,6 @@ def filtrar_platos(
     dificultad,
     palabra_clave
 ):
-    """
-    Filtra platos según el usuario, tipo, comida seleccionada, y filtros adicionales.
-    - Solo platos padre (excluye variedades)
-    - misplatos: platos del usuario logueado
-    - quecomemos: platos de usuario 'quecomemos', excluyendo descartados
-    """
-
     # Si no se selecciona ninguna de las dos opciones, no mostrar nada
     if quecomemos != "quecomemos" and misplatos != "misplatos":
         return Plato.objects.none()
@@ -1859,13 +1856,13 @@ def filtrar_platos(
     if tipo_parametro and tipo_parametro != "Dash":
         platos_qs = platos_qs.filter(tipos__icontains=tipo_parametro)
 
-    if medios and medios != '-':
+    if medios and medios != "-":
         platos_qs = platos_qs.filter(medios=medios)
 
-    if categoria and categoria != '-':
+    if categoria and categoria != "-":
         platos_qs = platos_qs.filter(categoria=categoria)
 
-    if dificultad and dificultad != '-':
+    if dificultad and dificultad != "-":
         platos_qs = platos_qs.filter(dificultad=dificultad)
 
     if palabra_clave:
@@ -1874,12 +1871,30 @@ def filtrar_platos(
             Q(nombre_plato__icontains=palabra_clave)
         )
 
-    # 🔹 Anotar cantidad de variedades hijas
-    return platos_qs.annotate(variedades_count=Count("variedades_hijas"))
+    # Orden de prioridad de los platos:
+    # 1) Menos días programados primero (0 = nunca usado → arriba del todo)
+    # 2) A igualdad de días, los que hace más tiempo que no aparecen
+    #    (NULL = nunca programado → primero; fechas viejas → antes que recientes)
+    # 3) Como desempate final, los más nuevos (-id)
 
+    platos_qs = platos_qs.annotate(
+        programaciones_count=Count(
+            "en_menus__menu__fecha",
+            filter=Q(en_menus__menu__propietario=usuario) & Q(en_menus__plato__isnull=False),
+            distinct=True,  # cuenta días únicos
+        ),
+        ultima_programacion=Max(
+            "en_menus__menu__fecha",
+            filter=Q(en_menus__menu__propietario=usuario) & Q(en_menus__plato__isnull=False),
+        ),
+        variedades_count=Count("variedades_hijas", distinct=True),
+    ).order_by(
+        "programaciones_count",
+        OrderBy(F("ultima_programacion"), descending=False, nulls_first=True),
+        "-id",
+    )
 
-
-
+    return platos_qs
 
 
 @login_required(login_url=reverse_lazy('login'), redirect_field_name=None)
