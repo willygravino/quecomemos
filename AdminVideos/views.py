@@ -1877,11 +1877,28 @@ def filtrar_platos(
     #    (NULL = nunca programado → primero; fechas viejas → antes que recientes)
     # 3) Como desempate final, los más nuevos (-id)
 
+    # queryset ANOTADO para variedades (hijas) del usuario "usuario"
+    variedades_qs = Plato.objects.annotate(
+        programaciones_count=Count(
+            "en_menus__menu__fecha",
+            filter=Q(en_menus__menu__propietario=usuario) & Q(en_menus__plato__isnull=False),
+            distinct=True,
+        ),
+        ultima_programacion=Max(
+            "en_menus__menu__fecha",
+            filter=Q(en_menus__menu__propietario=usuario) & Q(en_menus__plato__isnull=False),
+        ),
+    ).order_by(
+        "programaciones_count",
+        OrderBy(F("ultima_programacion"), descending=False, nulls_first=True),
+        "-id",
+    )
+
     platos_qs = platos_qs.annotate(
         programaciones_count=Count(
             "en_menus__menu__fecha",
             filter=Q(en_menus__menu__propietario=usuario) & Q(en_menus__plato__isnull=False),
-            distinct=True,  # cuenta días únicos
+            distinct=True,
         ),
         ultima_programacion=Max(
             "en_menus__menu__fecha",
@@ -1892,9 +1909,12 @@ def filtrar_platos(
         "programaciones_count",
         OrderBy(F("ultima_programacion"), descending=False, nulls_first=True),
         "-id",
+    ).prefetch_related(
+        Prefetch("variedades_hijas", queryset=variedades_qs)
     )
 
     return platos_qs
+
 
 
 @login_required(login_url=reverse_lazy('login'), redirect_field_name=None)
@@ -2046,6 +2066,16 @@ def FiltroDePlatos(request):
             dificultad=dificultad,
             palabra_clave=palabra_clave
         )
+
+        hoy = timezone.localdate()
+
+        for p in platos:
+            p.dias_desde_ultima = (hoy - p.ultima_programacion).days if getattr(p, "ultima_programacion", None) else None
+
+            # variedades vienen prefetcheadas y ANOTADAS (por el Prefetch)
+            for v in p.variedades_hijas.all():
+                v.dias_desde_ultima = (hoy - v.ultima_programacion).days if getattr(v, "ultima_programacion", None) else None
+
 
     # Filtra las fechas únicas en `el_dia_en_que_comemos` para los objetos del usuario actual
     # fechas_existentes = ElegidosXDia.objects.filter(user=usuario,el_dia_en_que_comemos__gte=fecha_actual).values_list('el_dia_en_que_comemos', flat=True).distinct()
