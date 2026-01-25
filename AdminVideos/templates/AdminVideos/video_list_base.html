@@ -16,22 +16,27 @@
 
       {% with tipopag=request.GET.tipopag %}
       {% if tipopag == "Delivery" or tipopag == "Comerafuera" %}
-        <a class="btn btn-primary w-75 w-sm-100 text-white border border-dark rounded text-center" href="{% url 'crear-lugar' %}?tipopag={{ tipopag|default:'Dash' }}">
-            {% if tipopag and tipopag != "Dash" %}
-              AGREGAR {{ tipopag }}
-            {% else %}
-              AGREGAR PLATO PRINCIPAL
-            {% endif %}
-          </a>
-      
-      {% else %}
-        <a class="btn btn-primary w-75 w-sm-100 text-white border border-dark rounded  text-center" href="{% url 'videos-create' %}?tipopag={{ tipopag|default:'Dash' }}">
+        <a class="btn btn-outline-succes w-100 rounded text-center fw-semibold"
+          href="{% url 'crear-lugar' %}?tipopag={{ tipopag|default:'Dash' }}">
           {% if tipopag and tipopag != "Dash" %}
-            AGREGAR {{ tipopag }}
+            AGREGAR {{ tipopag }} ffffffff
           {% else %}
-            AGREGAR PLATO PRINCIPAL
+            AGREGAR PLATO PRINCIPAL fff
           {% endif %}
         </a>
+
+      
+      {% else %}
+        <a class="btn btn-outline-primary w-100 rounded text-center fw-semibold py-2"
+          href="{% url 'videos-create' %}?tipopag={{ tipopag|default:'Dash' }}">
+          {% if tipopag and tipopag != "Dash" %}
+            + AGREGAR RECETA DE {{ tipopag|upper }}
+
+          {% else %}
+            + AGREGAR RECETA DE PLATO PRINCIPAL
+          {% endif %}
+        </a>
+
       {% endif %}
     </div>
   </div>
@@ -88,7 +93,8 @@
      SECCIÓN: PLATOS EN CAROUSEL
      (Bootstrap puro)
 =========================== -->
-<section class="w-100 bg-light rounded shadow-sm mb-3">
+<section class="w-100 bg-light rounded shadow-sm p-3 mb-3">
+
 
   <div id="platosCarousel" class="carousel slide" data-bs-ride="false">
 
