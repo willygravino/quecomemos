@@ -84,7 +84,149 @@
   </div>
 </section>
 
+<!-- ===========================
+     SECCIÓN: PLATOS EN CAROUSEL
+     (Bootstrap puro)
+=========================== -->
+<section class="w-100 bg-light rounded shadow-sm mb-3">
 
+  <div id="platosCarousel" class="carousel slide" data-bs-ride="false">
+
+    <!-- Indicadores -->
+    <div class="carousel-indicators">
+      {% for plato in platos %}
+        <button type="button"
+                data-bs-target="#platosCarousel"
+                data-bs-slide-to="{{ forloop.counter0 }}"
+                class="{% if forloop.first %}active{% endif %}"
+                aria-current="{% if forloop.first %}true{% endif %}"
+                aria-label="Plato {{ forloop.counter }}">
+        </button>
+      {% endfor %}
+    </div>
+
+    <div class="carousel-inner">
+
+      {% for plato in platos %}
+        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+          <div class="d-flex justify-content-center py-2">
+
+            <div class="card position-relative" style="width: 18rem;">
+
+              <!-- THUMB -->
+              <a href="#"
+                data-bs-toggle="modal"
+                data-bs-target="#asignarPlatoModal"
+                onclick="setPlatoInfo('{{ plato.id }}', 'plato', '{{ plato.nombre_plato }}')"
+                class="text-decoration-none plato-carousel-thumb"
+                data-bs-ride="false"
+                data-bs-interval="false">
+
+                <img src="{{ plato.image_url }}"
+                    class="
+                    {% if user.id == plato.propietario.id and not plato.proviene_de %}
+                      sombra-verde
+                    {% elif user.id == plato.propietario.id and plato.proviene_de %}
+                      sombra-naranja
+                    {% else %}
+                      sombra-violeta
+                    {% endif %}"
+                    alt="Imagen del Plato">
+
+                <!-- + central (igual que en la lista) -->
+                <div class="plato-carousel-plus text-success">
+                  <i class="fa-solid fa-plus-circle"></i>
+                </div>
+
+              </a>
+
+
+              <!-- Badge variedades -->
+              {% if plato.variedades_count > 0 %}
+                <span class="badge bg-dark position-absolute top-0 end-0 m-2">
+                  📁 {{ plato.variedades_count|add:"1" }}
+                </span>
+              {% endif %}
+
+              <div class="card-body">
+
+                <!-- TÍTULO -->
+                <h6 class="card-title text-center mb-2">
+                  {% if plato.variedades_count > 0 %}
+                    {{ plato.nombre_para_front }}
+                  {% else %}
+                    {{ plato.nombre_plato }}
+                  {% endif %}
+                </h6>
+
+                <!-- ACCIONES -->
+                <div class="d-flex flex-wrap justify-content-center gap-2">
+
+                  <!-- Ingredientes -->
+                  <a href="#"
+                     class="btn btn-sm btn-outline-primary js-plato-ingredientes"
+                     data-url="{% url 'plato_ingredientes' plato.id %}"
+                     title="Ver ingredientes">
+                    <i class="fa-solid fa-list-check me-1"></i> Ingredientes
+                  </a>
+
+                  <!-- Compartir -->
+                  {% if amigues %}
+                  <a href="#"
+                     class="btn btn-sm btn-outline-secondary"
+                     data-bs-toggle="modal"
+                     data-bs-target="#compartirModal"
+                     onclick="setPlatoInfo('{{ plato.id }}', 'plato')"
+                     title="Compartir">
+                    <i class="fa-solid fa-share-nodes me-1"></i> Compartir
+                  </a>
+                  {% endif %}
+
+                  <!-- Editar -->
+                  <a href="{% url 'videos-update' plato.id %}"
+                     class="btn btn-sm btn-outline-dark"
+                     title="Editar">
+                    <i class="fa-regular fa-pen-to-square me-1"></i> Editar
+                  </a>
+
+                  <!-- Eliminar -->
+                  <a href="#"
+                     class="btn btn-sm btn-outline-danger"
+                     data-bs-toggle="modal"
+                     data-bs-target="#confirmDeleteModal"
+                     data-url="{% url 'eliminar-plato' plato.id %}"
+                     data-nombre="{{ plato.nombre_plato }}"
+                     title="Eliminar">
+                    <i class="fa-solid fa-trash-can me-1"></i> Eliminar
+                  </a>
+
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      {% endfor %}
+
+    </div>
+
+    <!-- Controles -->
+    <button class="carousel-control-prev" type="button"
+            data-bs-target="#platosCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon"></span>
+      <span class="visually-hidden">Anterior</span>
+    </button>
+
+    <button class="carousel-control-next" type="button"
+            data-bs-target="#platosCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon"></span>
+      <span class="visually-hidden">Siguiente</span>
+    </button>
+
+  </div>
+</section>
+ 
 <!-- ESTAS SON LAS TARJETAS DE PLATOS, SI ES QUE ESTAMOS EN PLATOS -->
 
 <section class="w-100 text-white bg-light rounded shadow-sm">
