@@ -2,216 +2,339 @@
   
 {% block pestanias-menues-platos %}
 
-         <!-- PESTAÑAS - MENÚES PROGRAMADOS - PLATOS -->
+<!-- PESTAÑAS - MENÚES PROGRAMADOS - PLATOS -->
 
-            <!-- Tab Content -->
-            <div class="tab-content bg-white" id="diasTabContent">
+<!-- Tab Content -->
+<div class="tab-content bg-white" id="diasTabContent">
 
-                {% for dia in dias_desde_hoy %}
-                <div class="tab-pane {% if dia_activo == dia|date:'Y-m-d' %}active{% elif forloop.first and not dia_activo %}active{% endif %}"
-                    id="tab-content-{{ dia|date:'Y-m-d' }}" role="tabpanel" aria-labelledby="tab-{{ dia|date:'Y-m-d' }}">
+  {% for dia in dias_desde_hoy %}
+  <div class="tab-pane {% if dia_activo == dia|date:'Y-m-d' %}active{% elif forloop.first and not dia_activo %}active{% endif %}"
+       id="tab-content-{{ dia|date:'Y-m-d' }}" role="tabpanel" aria-labelledby="tab-{{ dia|date:'Y-m-d' }}">
 
-                    <div class="text-dark p-1 small">
+    <div class="text-dark p-1 small">
+      <div class="position-relative">
 
-                        <div class="position-relative">
+        <div class="border border-2 border-primary rounded p-2 mt-2 bg-light shadow-sm">
+          <div class="row align-items-start">
+            <div class="col p-1">
 
-                            <div class="border border-2 border-primary rounded p-2 mt-2 bg-light shadow-sm">
-                                <div class="row d-flex align-items-start">
-                                    <div class="col p-1">
+              {% if dia in platos_dia_x_dia %}
+                <!-- Si hay platos programados para este día, los mostramos -->
+                {% for dia_plato in platos_dia_x_dia.items %}
+                  {% if dia_plato.0 == dia %}
 
-                                        {% if dia in platos_dia_x_dia %}
-                                        <!-- Si hay platos programados para este día, los mostramos -->
-                                        {% for dia_plato in platos_dia_x_dia.items %}
-                                        {% if dia_plato.0 == dia %}
+                    {# ========================= #}
+                    {# DESKTOP / TABLET: 4 columnas (como ahora) #}
+                    {# ========================= #}
+                    <div class="d-none d-md-block">
+                      <div class="row gx-0">
 
-                                <div class="row gx-0">
+                        <!-- Desayuno -->
+                        <div class="col-md-3">
+                          <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Desayuno</h6>
+                          {% if dia_plato.1.desayuno %}
+                            {% for plato in dia_plato.1.desayuno %}
+                              <div class="mb-1 ms-1 d-flex align-items-center text-primary">
+                                <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
+                                  &nbsp; {{ plato.nombre }}
+                                </a>
 
+                                <a href="{% url 'fijar-o-eliminar-habito' plato.id 'desayuno' %}"
+                                   title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
+                                  <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
+                                </a>
 
+                                <a href="{% url 'eliminar-programado' plato.id 'desayuno' dia %}"
+                                   class="btn btn-sm p-0" title="Eliminar">
+                                  <i class="fa-solid fa-trash-can"></i>
+                                </a>
+                              </div>
+                            {% endfor %}
+                          {% else %}
+                            <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
+                          {% endif %}
+                        </div>
 
+                        <!-- Almuerzo -->
+                        <div class="col-md-3">
+                          <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Almuerzo</h6>
+                          {% if dia_plato.1.almuerzo %}
+                            {% for plato in dia_plato.1.almuerzo %}
+                              <div class="mb-1 ms-1 d-flex align-items-center text-primary">
+                                <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
+                                  &nbsp; {{ plato.nombre }}
+                                </a>
 
-    <!-- Desayuno -->
-    <div class="col-md-3">
-        <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Desayuno</h6>
-        {% if dia_plato.1.desayuno %}
-            {% for plato in dia_plato.1.desayuno %}
-                <div class="mb-1 s-1 d-flex align-items-center text-primary">
-                    <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
-                        &nbsp; {{ plato.nombre }}
-                    </a>
-                    
+                                <a href="{% url 'fijar-o-eliminar-habito' plato.id 'almuerzo' %}"
+                                   title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
+                                  <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
+                                </a>
 
-                     <!-- Solo un pin que cambia entre fijar y eliminar el hábito -->
-                    <a href="{% url 'fijar-o-eliminar-habito' plato.id 'desayuno' %}" title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
-                        <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
-                    </a>
+                                <a href="{% url 'eliminar-programado' plato.id 'almuerzo' dia %}"
+                                   class="btn btn-sm p-0" title="Eliminar">
+                                  <i class="fa-solid fa-trash-can"></i>
+                                </a>
+                              </div>
+                            {% endfor %}
+                          {% else %}
+                            <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
+                          {% endif %}
+                        </div>
 
-                    <a href="{% url 'eliminar-programado' plato.id 'desayuno' dia %}" 
-                    class="btn btn-sm p-0" title="Eliminar">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </a>
+                        <!-- Merienda -->
+                        <div class="col-md-3">
+                          <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Merienda</h6>
+                          {% if dia_plato.1.merienda %}
+                            {% for plato in dia_plato.1.merienda %}
+                              <div class="mb-1 ms-1 d-flex align-items-center text-primary">
+                                <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
+                                  &nbsp; {{ plato.nombre }}
+                                </a>
 
-                  
+                                <a href="{% url 'fijar-o-eliminar-habito' plato.id 'merienda' %}"
+                                   title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
+                                  <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
+                                </a>
 
+                                <a href="{% url 'eliminar-programado' plato.id 'merienda' dia %}"
+                                   class="btn btn-sm p-0" title="Eliminar">
+                                  <i class="fa-solid fa-trash-can"></i>
+                                </a>
+                              </div>
+                            {% endfor %}
+                          {% else %}
+                            <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
+                          {% endif %}
+                        </div>
 
+                        <!-- Cena -->
+                        <div class="col-md-3">
+                          <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Cena</h6>
+                          {% if dia_plato.1.cena %}
+                            {% for plato in dia_plato.1.cena %}
+                              <div class="mb-1 ms-1 d-flex align-items-center text-primary">
+                                <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
+                                  &nbsp; {{ plato.nombre }}
+                                </a>
 
-                </div>
-            {% endfor %}
-        {% else %}
-            <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
+                                <a href="{% url 'fijar-o-eliminar-habito' plato.id 'cena' %}"
+                                   title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
+                                  <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
+                                </a>
+
+                                <a href="{% url 'eliminar-programado' plato.id 'cena' dia %}"
+                                   class="btn btn-sm p-0" title="Eliminar">
+                                  <i class="fa-solid fa-trash-can"></i>
+                                </a>
+                              </div>
+                            {% endfor %}
+                          {% else %}
+                            <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
+                          {% endif %}
+                        </div>
+
+                      </div>
+                    </div>
+
+                    {# ========================= #}
+                    {# MOBILE: Carousel 4 slides (1 comida por slide) #}
+                    {# ========================= #}
+                    <div class="d-block d-md-none">
+                        <div id="comidasCarousel-{{ dia|date:'Y-m-d' }}"
+                            class="carousel slide comidas-carousel"
+                            data-bs-touch="true"
+                            data-bs-wrap="true">                        
+                            <div class="carousel-inner">
+
+                          <!-- Slide 1: Desayuno -->
+                          <div class="carousel-item active">
+                            <div class="p-1">
+                              <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Desayuno</h6>
+                              {% if dia_plato.1.desayuno %}
+                                {% for plato in dia_plato.1.desayuno %}
+                                  <div class="mb-1 ms-1 d-flex align-items-center text-primary">
+                                    <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
+                                      &nbsp; {{ plato.nombre }}
+                                    </a>
+
+                                    <a href="{% url 'fijar-o-eliminar-habito' plato.id 'desayuno' %}"
+                                       title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
+                                      <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
+                                    </a>
+
+                                    <a href="{% url 'eliminar-programado' plato.id 'desayuno' dia %}"
+                                       class="btn btn-sm p-0" title="Eliminar">
+                                      <i class="fa-solid fa-trash-can"></i>
+                                    </a>
+                                  </div>
+                                {% endfor %}
+                              {% else %}
+                                <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
+                              {% endif %}
+                            </div>
+                          </div>
+
+                          <!-- Slide 2: Almuerzo -->
+                          <div class="carousel-item">
+                            <div class="p-1">
+                              <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Almuerzo</h6>
+                              {% if dia_plato.1.almuerzo %}
+                                {% for plato in dia_plato.1.almuerzo %}
+                                  <div class="mb-1 ms-1 d-flex align-items-center text-primary">
+                                    <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
+                                      &nbsp; {{ plato.nombre }}
+                                    </a>
+
+                                    <a href="{% url 'fijar-o-eliminar-habito' plato.id 'almuerzo' %}"
+                                       title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
+                                      <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
+                                    </a>
+
+                                    <a href="{% url 'eliminar-programado' plato.id 'almuerzo' dia %}"
+                                       class="btn btn-sm p-0" title="Eliminar">
+                                      <i class="fa-solid fa-trash-can"></i>
+                                    </a>
+                                  </div>
+                                {% endfor %}
+                              {% else %}
+                                <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
+                              {% endif %}
+                            </div>
+                          </div>
+
+                          <!-- Slide 3: Merienda -->
+                          <div class="carousel-item">
+                            <div class="p-1">
+                              <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Merienda</h6>
+                              {% if dia_plato.1.merienda %}
+                                {% for plato in dia_plato.1.merienda %}
+                                  <div class="mb-1 ms-1 d-flex align-items-center text-primary">
+                                    <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
+                                      &nbsp; {{ plato.nombre }}
+                                    </a>
+
+                                    <a href="{% url 'fijar-o-eliminar-habito' plato.id 'merienda' %}"
+                                       title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
+                                      <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
+                                    </a>
+
+                                    <a href="{% url 'eliminar-programado' plato.id 'merienda' dia %}"
+                                       class="btn btn-sm p-0" title="Eliminar">
+                                      <i class="fa-solid fa-trash-can"></i>
+                                    </a>
+                                  </div>
+                                {% endfor %}
+                              {% else %}
+                                <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
+                              {% endif %}
+                            </div>
+                          </div>
+
+                          <!-- Slide 4: Cena -->
+                          <div class="carousel-item">
+                            <div class="p-1">
+                              <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Cena</h6>
+                              {% if dia_plato.1.cena %}
+                                {% for plato in dia_plato.1.cena %}
+                                  <div class="mb-1 ms-1 d-flex align-items-center text-primary">
+                                    <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
+                                      &nbsp; {{ plato.nombre }}
+                                    </a>
+
+                                    <a href="{% url 'fijar-o-eliminar-habito' plato.id 'cena' %}"
+                                       title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
+                                      <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
+                                    </a>
+
+                                    <a href="{% url 'eliminar-programado' plato.id 'cena' dia %}"
+                                       class="btn btn-sm p-0" title="Eliminar">
+                                      <i class="fa-solid fa-trash-can"></i>
+                                    </a>
+                                  </div>
+                                {% endfor %}
+                              {% else %}
+                                <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
+                              {% endif %}
+                            </div>
+                          </div>
+
+                        </div>
+
+                        <!-- Controles -->
+                        <button class="carousel-control-prev" type="button"
+                                data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}" data-bs-slide="prev">
+                          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                          <span class="visually-hidden">Anterior</span>
+                        </button>
+
+                        <button class="carousel-control-next" type="button"
+                                data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}" data-bs-slide="next">
+                          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                          <span class="visually-hidden">Siguiente</span>
+                        </button>
+
+                      </div>
+
+                      <!-- Indicador simple (opcional, sin scroll) -->
+                      <div class="text-center mt-1 text-muted" style="font-size:.7rem;">
+                        Desayuno · Almuerzo · Merienda · Cena
+                      </div>
+                    </div>
+
+                  {% endif %}
+                {% endfor %}
+              {% else %}
+                <h3 class="text-muted text-center mt-1" style="font-size: 1rem;">
+                  Aún no programaste ningún plato para este día.
+                </h3>
+              {% endif %}
+
+            </div>
+          </div>
+        </div>
+
+        <span class="fs-7 position-absolute top-0 start-50 translate-middle bg-light text-primary px-0"
+              style="transform: translate(-50%, -50%);">
+          <a href="/random-dia/{{ dia|date:'l'|slice:':2'|upper }}/" class="btn btn-sm text-danger">
+            <span class="material-symbols-outlined" style="font-size: 20px;">wand_shine</span>
+          </a>
+          Menú programado&nbsp;
+
+          {% if dia in platos_dia_x_dia %}
+            <!-- aquí tu botón eliminar menú si lo activás -->
+          {% endif %}
+
+          &nbsp;
+        </span>
+
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-info">{{ message }}</div>
+          {% endfor %}
         {% endif %}
+
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+  <div class="border border-primary rounded p-2 position-relative m-2">
+    <small class="position-absolute top-0 start-50 translate-middle bg-white px-3 text-primary"
+           style="transform: translate(-50%, -50%);">
+      Platos
+    </small>
+
+    <div class="shadow rounded p-2 m-2 mb-0">
+      {% block filtro %}{% endblock %}
     </div>
 
-    <!-- Almuerzo -->
-    <div class="col-md-3">
-        <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Almuerzo</h6>
-        {% if dia_plato.1.almuerzo %}
-            {% for plato in dia_plato.1.almuerzo %}
-                <div class="mb-1 ms-1 d-flex align-items-center text-primary">
-                    <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
-                        &nbsp; {{ plato.nombre }}
-                    </a>
-
-                    <a href="{% url 'fijar-o-eliminar-habito' plato.id 'almuerzo' %}" title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
-                        <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
-                    </a>
-                    
-                   <a href="{% url 'eliminar-programado' plato.id 'almuerzo' dia %}" 
-                    class="btn btn-sm p-0" title="Eliminar">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </a>
-
-                  
-
-                </div>
-            {% endfor %}
-        {% else %}
-            <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
-        {% endif %}
+    <div class="my-3">
+      {% block principal %}{% endblock %}
     </div>
-
-    <!-- Merienda -->
-    <div class="col-md-3">
-        <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Merienda</h6>
-        {% if dia_plato.1.merienda %}
-            {% for plato in dia_plato.1.merienda %}
-                <div class="mb-1 ms-1 d-flex align-items-center text-primary">
-                    <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
-                        &nbsp; {{ plato.nombre }}
-                    </a>
-
-                    <a href="{% url 'fijar-o-eliminar-habito' plato.id 'merienda' %}" title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
-                        <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
-                    </a>
-                   
-                    <a href="{% url 'eliminar-programado' plato.id 'merienda' dia %}" 
-                    class="btn btn-sm p-0" title="Eliminar">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </a>
-                    
-                    
-
-                </div>
-            {% endfor %}
-        {% else %}
-            <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
-        {% endif %}
-    </div>
-
-    <!-- Cena -->
-    <div class="col-md-3">
-        <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Cena</h6>
-        {% if dia_plato.1.cena %}
-            {% for plato in dia_plato.1.cena %}
-                <div class="mb-1 ms-1 d-flex align-items-center text-primary">
-                    <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
-                        &nbsp; {{ plato.nombre }}
-                    </a>
-                    
-                    <a href="{% url 'fijar-o-eliminar-habito' plato.id 'cena' %}" title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
-                        <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
-                    </a>
-
-                   <a href="{% url 'eliminar-programado' plato.id 'cena' dia %}" 
-                    class="btn btn-sm p-0" title="Eliminar">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </a>
-                    
-                </div>
-            {% endfor %}
-        {% else %}
-            <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
-        {% endif %}
-    </div>
+  </div>
 
 </div>
 
+<!-- FIN DE PESTAÑAS - MENÚES PROGRAMADOS - PLATOS -->
 
-
-                                        {% endif %}
-                                        {% endfor %}
-                                        {% else %}
-                                        <h3 class="text-muted text-center mt-1" style="font-size: 1rem;">
-                                            Aún no programaste ningún plato para este día.
-                                        </h3>
-
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <span class="fs-7 position-absolute top-0 start-50 translate-middle bg-light text-primary px-0"
-                                style="transform: translate(-50%, -50%);">
-                                <a href="/random-dia/{{ dia|date:'l'|slice:':2'|upper }}/" class="btn btn-sm text-danger">
-                                    <span class="material-symbols-outlined" style="font-size: 20px;">wand_shine</span>
-                                </a>
-                                Menú programado&nbsp;
-
-                                {% if dia in platos_dia_x_dia %}
-                                    <!-- <a href="% url 'eliminar-menu' %}" class="btn btn-link p-0" title="Eliminar menú del día">
-                                    <i class="fa-solid fa-trash-can fa-lg" style="font-size: 18px;"></i>
-                                    </a> -->
-                                {% endif %}
-
-                                &nbsp;
-
-                            </span>
-
-                            {% if messages %}
-                            {% for message in messages %}
-                            <div class="alert alert-info">{{ message }}</div>
-                            {% endfor %}
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-
-
-
-
-                <div class="border border-primary rounded p-2 position-relative m-2">
-                    <!-- Título encima del borde -->
-                    <small class="position-absolute top-0 start-50 translate-middle bg-white px-3 text-primary"
-                        style="transform: translate(-50%, -50%);">
-                        Platos
-                    </small>
-
-                    <!-- Contenido de los bloques -->
-                    <div class="shadow rounded p-2 m-2 mb-0">
-                        {% block filtro %}
-                        {% endblock %}
-                    </div>
-
-                    <div class="my-3">
-                        {% block principal %}
-                        {% endblock %}
-                    </div>
-                </div>
-            </div>
-
-        <!-- FIN DE PESTAÑAS - MENÚES PROGRAMADOS - PLATOS -->
-
-
-  
 {% endblock %}
-  

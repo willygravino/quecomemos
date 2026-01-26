@@ -330,35 +330,6 @@ section > .d-flex {
   filter: invert(1) drop-shadow(0 0 2px rgba(0,0,0,.4));
 }
 
-/* ===========================
-   Carousel más rápido
-=========================== */
-#platosCarousel .carousel-item {
-  transition-duration: 0.25s; /* default ~0.6s */
-}
-
-/* Thumb grande del padre en carousel */
-.plato-carousel-thumb{
-  position: relative;
-  display: block;
-  border-radius: .75rem;
-  overflow: hidden;
-  line-height: 0;
-}
-.plato-carousel-thumb img{
-  display:block;
-  width:100%;
-  height: 220px;
-  object-fit: cover;
-}
-.plato-carousel-plus{
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  font-size: 2.2rem;
-  text-shadow: 0 2px 6px rgba(0,0,0,.25);
-}
 
 /* Mini thumb para variedades */
 .plato-mini-thumb{
@@ -381,4 +352,39 @@ section > .d-flex {
   transform:translate(-50%,-50%);
   font-size: 1.6rem;
   text-shadow: 0 2px 6px rgba(0,0,0,.25);
+}
+
+/* ===========================================================
+   Carousel comidas (mobile) – rápido (manual) + flechas alto contraste
+   =========================================================== */
+
+/* Transición rápida entre slides (manual) */
+.comidas-carousel .carousel-item {
+  transition: transform 0.25s ease-in-out;
+}
+
+/* Flechas: máximo contraste */
+.comidas-carousel .carousel-control-prev,
+.comidas-carousel .carousel-control-next {
+  width: 3rem;
+  opacity: 1;
+}
+
+/* Flechas simples sin fondo (primary) */
+.comidas-carousel .carousel-control-prev-icon,
+.comidas-carousel .carousel-control-next-icon {
+  background-color: transparent;
+  filter: invert(27%) sepia(98%) saturate(747%) hue-rotate(190deg);
+  padding: 0;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+
+
+/* Extra: que el botón sea clickeable cómodo sin tapar contenido */
+.comidas-carousel .carousel-control-prev,
+.comidas-carousel .carousel-control-next {
+  top: 0.25rem;
+  bottom: 0.25rem;
 }
