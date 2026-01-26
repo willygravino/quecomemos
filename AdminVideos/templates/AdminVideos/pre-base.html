@@ -16,7 +16,7 @@
 
         <div class="border border-2 border-primary rounded p-2 mt-2 bg-light shadow-sm">
           <div class="row align-items-start">
-            <div class="col p-1">
+            <div class="col py-2">
 
               {% if dia in platos_dia_x_dia %}
                 <!-- Si hay platos programados para este día, los mostramos -->
@@ -293,19 +293,17 @@
           </div>
         </div>
 
-        <span class="fs-7 position-absolute top-0 start-50 translate-middle bg-light text-primary px-0"
-              style="transform: translate(-50%, -50%);">
-          <a href="/random-dia/{{ dia|date:'l'|slice:':2'|upper }}/" class="btn btn-sm text-danger">
-            <span class="material-symbols-outlined" style="font-size: 20px;">wand_shine</span>
-          </a>
-          Menú programado&nbsp;
+        <span class="menu-programado-badge position-absolute top-0 start-50 translate-middle text-primary">
+            <a href="/random-dia/{{ dia|date:'l'|slice:':2'|upper }}/" class="btn btn-sm text-danger p-0 me-1">
+                <span class="material-symbols-outlined" style="font-size: 20px;">wand_shine</span>
+            </a>
+            <span class="menu-programado-text">Menú programado</span>
 
-          {% if dia in platos_dia_x_dia %}
-            <!-- aquí tu botón eliminar menú si lo activás -->
-          {% endif %}
-
-          &nbsp;
+            {% if dia in platos_dia_x_dia %}
+                <!-- aquí tu botón eliminar menú si lo activás -->
+            {% endif %}
         </span>
+
 
         {% if messages %}
           {% for message in messages %}
