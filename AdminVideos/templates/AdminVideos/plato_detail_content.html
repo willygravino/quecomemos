@@ -1,0 +1,153 @@
+{% load static %}
+
+<div class="card shadow-sm">
+
+  <!-- Imagen -->
+  <img class="card-img-top"
+       style="height: 225px; width: 100%; display: block; object-fit: cover;"
+       src="{{ plato.image_url }}"
+       alt="{{ plato.nombre_plato }}">
+
+  <div class="card-body">
+
+    <!-- Título -->
+    <h3 class="mb-2">{{ plato.nombre_plato }}</h3>
+
+    {% if plato_padre %}
+        <div class="mb-2">
+            <small class="text-muted">Variedad de:</small>
+            <a href="#"
+            class="ms-1 js-ver-detalle-plato"
+            data-detail-url="{% url 'platos-detail' plato_padre.id %}">
+            {{ plato_padre.nombre_para_front }}
+            </a>
+        </div>
+    {% endif %}
+
+    <!-- Ingredientes (resaltado) -->
+    <p class="card-text fw-bold mb-3">
+      Ingredientes: {{ plato.ingredientes }}
+    </p>
+
+    <!-- Detalle -->
+    {% if plato.descripcion_plato %}
+      <p class="card-text"><strong>Descripción:</strong> {{ plato.descripcion_plato }}</p>
+    {% endif %}
+
+    {% if plato.receta %}
+      <p class="card-text"><strong>Receta:</strong> {{ plato.receta }}</p>
+    {% endif %}
+
+    {% if plato.medios %}
+      <p class="card-text"><strong>Medios:</strong> {{ plato.medios }}</p>
+    {% endif %}
+
+    {% if plato.categoria %}
+      <p class="card-text"><strong>Categoría:</strong> {{ plato.categoria }}</p>
+    {% endif %}
+
+    {% if plato.elaboracion %}
+      <p class="card-text"><strong>Elaboración:</strong> {{ plato.elaboracion }}</p>
+    {% endif %}
+
+    {% if plato.coccion %}
+      <p class="card-text"><strong>Cocción:</strong> {{ plato.coccion }}</p>
+    {% endif %}
+
+    <!-- Tipos -->
+    {% if tipos_lista %}
+      <p class="card-text">
+        <strong>Tipos asociados:</strong>
+        {% for tipo in tipos_lista %}
+          <span class="badge bg-secondary">{{ tipo }}</span>
+        {% endfor %}
+      </p>
+    {% else %}
+      <p class="text-muted mb-2">Sin tipos asociados</p>
+    {% endif %}
+
+    <!-- Estacionalidad -->
+    {% if plato.estacionalidad %}
+      <p class="card-text"><strong>Estacionalidad:</strong> {{ plato.estacionalidad }}</p>
+    {% endif %}
+
+    <!-- Enlace -->
+    {% if plato.enlace %}
+      <p class="card-text mb-2">
+        <strong>Enlace:</strong>
+        <a href="{{ plato.enlace }}" target="_blank" rel="noopener">{{ plato.enlace }}</a>
+      </p>
+    {% endif %}
+
+    <!-- Contacto (ojo con la tilde: si tu campo real no tiene tilde, cambialo) -->
+    {% if plato.teléfono %}
+      <p class="card-text"><strong>Contacto:</strong> {{ plato.teléfono }}</p>
+    {% endif %}
+
+    
+
+
+    <!-- Importado -->
+    {% if plato.proviene_de %}
+      <p class="card-text text-success fw-bold">
+        Plato importado originalmente de la lista de {{ plato.proviene_de }}
+      </p>
+    {% endif %}
+
+    {% if variedades %}
+    <hr class="my-3">
+
+    <h6 class="mb-2">Variedades</h6>
+
+    <div class="list-group">
+        {% for v in variedades %}
+        <div class="list-group-item d-flex align-items-center justify-content-between">
+            <div class="me-2">
+            <div class="fw-semibold">{{ v.nombre_plato }}</div>
+
+            {% if v.tipos %}
+                <small class="text-muted">{{ v.tipos }}</small>
+            {% endif %}
+            </div>
+
+            <!-- ✅ Abre el MISMO modal con el detalle de la variedad -->
+            <a href="#"
+            class="btn btn-sm btn-outline-dark js-ver-detalle-plato"
+            data-detail-url="{% url 'platos-detail' v.id %}">
+            <i class="fa-regular fa-eye me-1"></i> Ver detalle
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+
+    <hr class="my-3">
+
+    <!-- Acciones (solo si el plato es del usuario) -->
+    {% if user.id == plato.propietario.id %}
+
+      <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'videos-update' plato.id %}"
+           class="btn btn-sm btn-outline-secondary">
+          Editar
+        </a>
+
+        <a href="{% url 'agregar-a-mi-lista' plato.id %}?duplicar=true"
+           class="btn btn-sm btn-outline-secondary"
+           title="Si querés modificar la receta de este plato, podés hacer un duplicado para conservar la receta original">
+          Duplicar
+        </a>
+
+        <a href="{% url 'eliminar-plato' plato.id %}"
+           class="btn btn-sm btn-outline-secondary">
+          Eliminar
+        </a>
+      </div>
+
+    {% else %}
+      <small class="text-muted">Sugerencia de Quecomemos</small>
+    {% endif %}
+
+  </div>
+</div>

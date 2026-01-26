@@ -199,10 +199,27 @@
                     </a>
                     {% endif %}
 
-                    <a href="{% url 'videos-update' grupo.id %}"
-                       class="btn btn-sm btn-outline-dark">
-                      <i class="fa-regular fa-pen-to-square me-1"></i> Editar
-                    </a>
+              {% if grupo.propietario == request.user %}
+                <!-- Botón Editar: navegación normal -->
+                <a href="{% url 'videos-update' grupo.id %}"
+                  class="btn btn-sm btn-outline-dark">
+                  <i class="fa-regular fa-pen-to-square me-1"></i> Editar
+                </a>
+              {% else %}
+                <!-- Botón Ver: abre modal -->
+                <a href="#"
+                  class="btn btn-sm btn-outline-dark js-ver-detalle-plato"
+                  data-detail-url="{% url 'platos-detail' grupo.id %}"
+                  title="Ver detalle">
+                  <i class="fa-regular fa-eye me-1"></i> Ver
+                </a>
+              {% endif %}
+              
+
+
+
+              
+
 
                     <a href="#"
                        class="btn btn-sm btn-outline-danger"
@@ -407,20 +424,23 @@
 
 
               {% if plato.propietario == request.user %}
-                <!-- Botón para editar -->
+                <!-- Botón para editar (sigue navegando normal) -->
                 <a href="{% url 'videos-update' plato.id %}"
                   class="plato-action-btn text-dark"
                   title="Editar">
                   <i class="fa-regular fa-pen-to-square"></i>
                 </a>
               {% else %}
-                <!-- Botón solo para ver (puedes cambiar el icono y el link según tu vista de detalle) -->
-                <a href="{% url 'platos-detail' plato.id %}"
-                  class="plato-action-btn text-secondary"
-                  title="Ver">
+                <!-- Botón para VER DETALLE EN MODAL -->
+                <a href="#"
+                  class="plato-action-btn text-secondary js-ver-detalle-plato"
+                  data-detail-url="{% url 'platos-detail' plato.id %}"
+                  title="Ver detalle">
                   <i class="fa-regular fa-eye"></i>
                 </a>
+
               {% endif %}
+
 
               <a href="#"
                  data-bs-toggle="modal"
@@ -446,10 +466,24 @@
 
             <ul class="dropdown-menu dropdown-menu-end">
               <li>
-                <a class="dropdown-item" href="{% url 'videos-update' plato.id %}">
-                  <i class="fa-regular fa-pen-to-square me-2"></i> Editar
+                <a class="dropdown-item" href="{% url 'plato_ingredientes' plato.id %}">
+                  <i class="fa-solid fa-list-check me-2"></i> Ingredientes
                 </a>
               </li>
+
+              <li>
+                <a class="dropdown-item" href="{% url 'videos-update' plato.id %}">
+                  <i class="fa-solid fa-pen-to-square me-2"></i> Editar
+                </a>
+              </li>
+
+              <a href="#"
+                class="dropdown-item js-ver-detalle-plato"
+                data-detail-url="{% url 'platos-detail' plato.id %}">
+                <i class="fa-solid fa-eye me-2"></i> Ver detalle
+              </a>
+
+
 
               {% if amigues %}
               <li>

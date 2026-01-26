@@ -64,8 +64,8 @@ urlpatterns = [
     # path('eliminar-menu', eliminar_menu_programado, name='eliminar-menu'),
 
 
-    path('plato/<pk>/detail', PlatoDetail.as_view(), name="platos-detail"),
-    path('lugar/<pk>/detail', LugarDetail.as_view(), name="lugar-detail"),
+    path('plato/<int:pk>/detail/', PlatoDetail.as_view(), name="platos-detail"),
+    path('lugar/<int:pk>/detail', LugarDetail.as_view(), name="lugar-detail"),
 
     path('videos/create/', PlatoCreate.as_view(), name="videos-create"),
     path('lugar/crear', CrearLugar.as_view(), name="crear-lugar"),

@@ -241,7 +241,7 @@ def plato_ingredientes(request: HttpRequest, pk: int):
     if is_ajax:
         return render(request, "AdminVideos/_modal_plato_ingredientes.html", ctx)
 
-    return render(request, "AdminVideos/plato_ingredientes_page.html", ctx)
+    return render(request, "AdminVideos/_modal_plato_ingredientes.html", ctx)
 
 def compartir_ing_plato(request, token, pk: int):
     share_user, perfil = _get_user_by_token_or_404(token)
@@ -1457,31 +1457,99 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
 
 
 
+# class PlatoDetail(DetailView):
+#     model = Plato
+#     template_name = 'AdminVideos/plato_detail.html'
+#     context_object_name = "plato"
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+
+#         # Perfil y amigues (como ya tenés)
+#         perfil = get_object_or_404(Profile, user=self.request.user)
+#         context["amigues"] = perfil.amigues
+
+#         # Obtener el plato actual
+#         plato = self.get_object()
+
+#         # Convertir el campo 'tipos' (string separado por comas) a lista
+#         if plato.tipos:
+#             context['tipos_lista'] = [t.strip() for t in plato.tipos.split(',')]
+#         else:
+#             context['tipos_lista'] = []
+
+#         return context
+
+
+# class PlatoDetail(DetailView):
+#     model = Plato
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         plato = self.get_object()
+
+#         if plato.tipos:
+#             context["tipos_lista"] = [t.strip() for t in plato.tipos.split(",")]
+#         else:
+#             context["tipos_lista"] = []
+
+#         return context
+
+#     def get(self, request, *args, **kwargs):
+#         self.object = self.get_object()
+#         context = self.get_context_data()
+
+#         # 🔥 SI ES AJAX → devolvemos solo el HTML
+#         if request.headers.get("x-requested-with") == "XMLHttpRequest":
+#             html = render_to_string(
+#                 "AdminVideos/plato_detail_content.html",
+#                 context,
+#                 request=request
+#             )
+#             return JsonResponse({"html": html})
+
+#         # fallback (si alguien entra directo a la URL)
+#         return super().get(request, *args, **kwargs)
+
+
 class PlatoDetail(DetailView):
     model = Plato
-    template_name = 'AdminVideos/plato_detail.html'
+    template_name = "AdminVideos/plato_detail.html"  # fallback normal
     context_object_name = "plato"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        # Perfil y amigues (como ya tenés)
-        perfil = get_object_or_404(Profile, user=self.request.user)
-        context["amigues"] = perfil.amigues
-
-        # Obtener el plato actual
         plato = self.get_object()
 
-        # Convertir el campo 'tipos' (string separado por comas) a lista
+        # Tipos: string "Entrada,Principal" -> lista
         if plato.tipos:
-            context['tipos_lista'] = [t.strip() for t in plato.tipos.split(',')]
+            context["tipos_lista"] = [t.strip() for t in plato.tipos.split(",") if t.strip()]
         else:
-            context['tipos_lista'] = []
+            context["tipos_lista"] = []
+
+        # ✅ Variedades hijas (usa related_name="variedades_hijas")
+        context["variedades"] = plato.variedades_hijas.all().order_by("nombre_plato")
+
+        # ✅ Padre (si este plato es una variedad)
+        context["plato_padre"] = plato.plato_padre  # puede ser None
 
         return context
 
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        context = self.get_context_data()
 
+        # AJAX: devolver parcial como JSON
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            html = render_to_string(
+                "AdminVideos/plato_detail_content.html",
+                context,
+                request=request
+            )
+            return JsonResponse({"html": html})
 
+        return super().get(request, *args, **kwargs)
+    
 
 class PlatoVariedadCreate(PlatoCreate):
     

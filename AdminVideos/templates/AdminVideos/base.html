@@ -575,6 +575,131 @@
     </script>
 
 
+    <!--
+  Modal Bootstrap reutilizable para mostrar
+  el detalle de un plato sin salir de la pantalla principal
+-->
+<div class="modal fade" id="platoDetailModal" tabindex="-1">
+
+  <!--
+    modal-dialog:
+    - modal-lg → ancho grande (ideal para cards con info)
+    - modal-dialog-centered → centrado vertical
+    - modal-dialog-scrollable → scroll interno si el contenido es largo
+  -->
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+
+    <div class="modal-content">
+
+      <!--
+        CABECERA DEL MODAL
+        Contiene el título y el botón de cerrar
+      -->
+      <div class="modal-header">
+        <h5 class="modal-title">Detalle del plato</h5>
+
+        <!--
+          Botón estándar de Bootstrap para cerrar el modal
+        -->
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Cerrar">
+        </button>
+      </div>
+
+      <!--
+        CUERPO DEL MODAL
+        Acá se inyecta dinámicamente el HTML del plato
+        mediante fetch + AJAX
+      -->
+      <div class="modal-body" id="platoDetailModalBody">
+
+        <!--
+          Contenido temporal mientras se carga el detalle
+        -->
+        <div class="text-center text-muted py-5">
+          Cargando…
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<script>
+/*
+  SCRIPT: Carga dinámica del detalle de un Plato en un modal Bootstrap
+
+  ¿Qué hace?
+  - Escucha clicks en cualquier botón/link con la clase `.js-ver-detalle-plato`
+  - Toma la URL real del detalle desde `data-detail-url`
+  - Hace una petición AJAX (fetch) a Django
+  - Django responde con HTML ya renderizado (parcial)
+  - Inserta ese HTML dentro del modal
+  - Abre (o reutiliza) el modal Bootstrap
+
+  ¿Por qué así?
+  - Evita navegar a otra página
+  - Reutiliza la misma vista para padre y variedades
+  - Funciona desde dashboard, cards y desde dentro del modal
+  - No hardcodea URLs en JS (menos errores)
+*/
+
+document.addEventListener("click", function (e) {
+
+  // Buscamos si el click ocurrió sobre (o dentro de) un elemento
+  // que tenga la clase disparadora del modal
+  const btn = e.target.closest(".js-ver-detalle-plato");
+  if (!btn) return; // si no es ese botón, no hacemos nada
+
+  // Evita que un <a href="#"> navegue
+  e.preventDefault();
+
+  // URL real del detalle del plato (viene del template Django)
+  const url = btn.dataset.detailUrl;
+
+  // Contenedor del cuerpo del modal donde se inyecta el HTML
+  const modalBody = document.getElementById("platoDetailModalBody");
+
+  // Estado de carga mientras se espera la respuesta del servidor
+  modalBody.innerHTML = `
+    <div class="text-center py-5 text-muted">
+      Cargando…
+    </div>
+  `;
+
+  // Petición AJAX al backend
+  fetch(url, {
+    headers: {
+      "X-Requested-With": "XMLHttpRequest"
+    }
+  })
+    // Django devuelve JSON con una clave "html"
+    .then(response => response.json())
+
+    // Insertamos el HTML y abrimos el modal
+    .then(data => {
+      modalBody.innerHTML = data.html;
+
+      bootstrap.Modal
+        .getOrCreateInstance(document.getElementById("platoDetailModal"))
+        .show();
+    })
+
+    // Log básico por si algo falla
+    .catch(err => {
+      console.error("Error cargando detalle del plato:", err);
+    });
+
+});
+</script>
+
+
+
+
 
 
 <!-- jQuery (tu versión local, no uses la de CDN para evitar duplicados) -->
