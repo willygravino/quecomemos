@@ -205,6 +205,16 @@
                   class="btn btn-sm btn-outline-dark">
                   <i class="fa-regular fa-pen-to-square me-1"></i> Editar
                 </a>
+
+                <a href="#"
+                    class="btn btn-sm btn-outline-danger"
+                    data-bs-toggle="modal"
+                    data-bs-target="#confirmDeleteModal"
+                    data-url="{% url 'eliminar-plato' grupo.id %}"
+                    data-nombre="{{ grupo.nombre_plato }}">
+                  <i class="fa-solid fa-trash-can me-1"></i> Eliminar
+                </a>
+
               {% else %}
                 <!-- Botón Ver: abre modal -->
                 <a href="#"
@@ -215,21 +225,6 @@
                 </a>
               {% endif %}
               
-
-
-
-              
-
-
-                    <a href="#"
-                       class="btn btn-sm btn-outline-danger"
-                       data-bs-toggle="modal"
-                       data-bs-target="#confirmDeleteModal"
-                       data-url="{% url 'eliminar-plato' grupo.id %}"
-                       data-nombre="{{ grupo.nombre_plato }}">
-                      <i class="fa-solid fa-trash-can me-1"></i> Eliminar
-                    </a>
-
                   </div>
 
                   {# ===== VARIEDADES ANIDADAS (MINI GRILLA) ===== #}
@@ -273,21 +268,33 @@
                                     <i class="fa-solid fa-list-check"></i>
                                   </a>
 
-                                  <a href="{% url 'videos-update' v.id %}"
-                                     class="btn btn-sm btn-outline-dark py-0 px-2"
-                                     title="Editar">
-                                    <i class="fa-regular fa-pen-to-square"></i>
-                                  </a>
+                                  {% if grupo.propietario == request.user %}
 
+                                    <a href="{% url 'videos-update' v.id %}"
+                                      class="btn btn-sm btn-outline-dark py-0 px-2"
+                                      title="Editar">
+                                      <i class="fa-regular fa-pen-to-square"></i>
+                                    </a>
+
+                                    <a href="#"
+                                      class="btn btn-sm btn-outline-danger py-0 px-2"
+                                      data-bs-toggle="modal"
+                                      data-bs-target="#confirmDeleteModal"
+                                      data-url="{% url 'eliminar-plato' v.id %}"
+                                      data-nombre="{{ v.nombre_plato }}"
+                                      title="Eliminar">
+                                      <i class="fa-solid fa-trash-can"></i>
+                                    </a>
+                                  {% else %}
+                                  <!-- Botón Ver: abre modal -->
                                   <a href="#"
-                                     class="btn btn-sm btn-outline-danger py-0 px-2"
-                                     data-bs-toggle="modal"
-                                     data-bs-target="#confirmDeleteModal"
-                                     data-url="{% url 'eliminar-plato' v.id %}"
-                                     data-nombre="{{ v.nombre_plato }}"
-                                     title="Eliminar">
-                                    <i class="fa-solid fa-trash-can"></i>
+                                    class="btn btn-sm btn-outline-dark js-ver-detalle-plato"
+                                    data-detail-url="{% url 'platos-detail' grupo.id %}"
+                                    title="Ver detalle">
+                                    <i class="fa-regular fa-eye me-1"></i> Ver
                                   </a>
+                                {% endif %}
+
                                 </div>
 
                                 {% if v.ultima_programacion %}

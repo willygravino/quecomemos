@@ -1028,26 +1028,62 @@ def eliminar_lugar(request, lugar_id):
 
     return redirect(url)
 
+# @login_required
+# def eliminar_plato(request, plato_id):
+#     plato = get_object_or_404(Plato, id=plato_id, propietario=request.user)
+
+#     if request.method == 'POST':
+#         perfil = get_object_or_404(Profile, user=request.user)
+
+#         if plato.id_original in perfil.sugeridos_descartados:
+#             perfil.sugeridos_descartados.remove(plato.id_original)
+
+#         if plato.id_original in perfil.sugeridos_importados:
+#             perfil.sugeridos_importados.remove(plato.id_original)
+
+#         perfil.save()
+#         plato.delete()
+#         return redirect('filtro-de-platos')
+
+#     # Si viene por GET, no borrar:
+#     from django.http import HttpResponseNotAllowed
+#     return HttpResponseNotAllowed(['POST'])
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect
+from django.http import HttpResponseNotAllowed
+from django.db import transaction
+
 @login_required
 def eliminar_plato(request, plato_id):
+    # ✅ Seguridad: solo permite borrar platos del usuario logueado
     plato = get_object_or_404(Plato, id=plato_id, propietario=request.user)
 
-    if request.method == 'POST':
+    # ✅ Solo por POST
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+
+    with transaction.atomic():
+        # Perfil (siempre del usuario logueado)
         perfil = get_object_or_404(Profile, user=request.user)
 
-        if plato.id_original in perfil.sugeridos_descartados:
+        # Limpieza de listas (si id_original es None, no hacemos nada)
+        if plato.id_original and plato.id_original in perfil.sugeridos_descartados:
             perfil.sugeridos_descartados.remove(plato.id_original)
 
-        if plato.id_original in perfil.sugeridos_importados:
+        if plato.id_original and plato.id_original in perfil.sugeridos_importados:
             perfil.sugeridos_importados.remove(plato.id_original)
 
         perfil.save()
-        plato.delete()
-        return redirect('filtro-de-platos')
 
-    # Si viene por GET, no borrar:
-    from django.http import HttpResponseNotAllowed
-    return HttpResponseNotAllowed(['POST'])
+        # ✅ Si es PLATO PADRE: borrar TODAS sus variedades hijas
+        # (extra seguro: también filtramos por propietario=request.user)
+        Plato.objects.filter(plato_padre=plato, propietario=request.user).delete()
+
+        # ✅ Borrar el plato (padre o variedad)
+        plato.delete()
+
+    return redirect("filtro-de-platos")
 
 
 
@@ -2935,75 +2971,6 @@ def plato_opciones_asignar(request, pk):
 
 
 
-# @login_required
-# def eliminar_plato_programado(request, nombre_plato, comida, fecha):
-#     usuario = request.user
-
-#     # 1) Normalizar fecha: si viene "YYYY-MM-DD" en string, pasar a date
-#     if isinstance(fecha, str):
-#         fecha = datetime.datetime.strptime(fecha, "%Y-%m-%d").date()
-
-#     # 2) Traer el menú del día (modelo nuevo)
-#     menu = get_object_or_404(MenuDia, propietario=usuario, fecha=fecha)
-
-#     # 3) Borrar SOLO el item del momento que coincida por nombre (plato o lugar)
-#     menu.items.filter(momento=comida).filter(
-#         plato__nombre_plato=nombre_plato
-#     ).delete()
-
-#     # (opcional) si también querés borrar "lugares" por nombre:
-#     menu.items.filter(momento=comida).filter(
-#         lugar__nombre=nombre_plato
-#     ).delete()
-
-#     # 4) Si el día quedó sin items, borrar el día completo
-#     if not menu.items.exists():
-#         menu.delete()
-
-#     return redirect("filtro-de-platos")
-
-# @login_required
-# def eliminar_plato_programado(request, plato_id, comida, fecha):
-#     usuario = request.user
-
-#     # 1) Normalizar fecha: si viene "YYYY-MM-DD" en string, pasar a date
-#     if isinstance(fecha, str):
-#         fecha = datetime.datetime.strptime(fecha, "%Y-%m-%d").date()
-
-#     # 2) Traer el menú del día (modelo nuevo)
-#     menu = get_object_or_404(MenuDia, propietario=usuario, fecha=fecha)
-
-#     # 3) Buscar el plato por ID y borrar SOLO el item del momento que coincida por ID
-#     try:
-#         plato = Plato.objects.get(id=plato_id, propietario=usuario)
-#     except Plato.DoesNotExist:
-#         messages.error(request, f"Plato con ID '{plato_id}' no encontrado.")
-#         return redirect("filtro-de-platos")
-
-#     # Eliminar el plato programado por ID del plato
-#     items_borrados = menu.items.filter(momento=comida).filter(plato=plato).delete()
-
-#     # Si se eliminó el plato, mostrar un mensaje
-#     if items_borrados[0] > 0:
-#         messages.success(request, f"Plato '{plato.nombre_plato}' eliminado correctamente.")
-#     else:
-#         messages.warning(request, f"No se encontró el plato '{plato.nombre_plato}' para {comida}.")
-
-#     # 4) Si también quieres borrar "lugares" por nombre (por ID también se puede hacer, si quieres ser más preciso):
-#     lugares_borrados = menu.items.filter(momento=comida).filter(lugar__nombre=plato.nombre_plato).delete()
-
-#     # Si se eliminó un lugar, mostrar un mensaje (opcional)
-#     if lugares_borrados[0] > 0:
-#         messages.success(request, f"Lugar '{plato.nombre_plato}' eliminado correctamente.")
-#     else:
-#         messages.warning(request, f"No se encontró el lugar '{plato.nombre_plato}' para {comida}.")
-
-#     # 5) Si el día quedó sin items, borrar el día completo
-#     if not menu.items.exists():
-#         menu.delete()
-#         messages.success(request, f"Menú del día {fecha} eliminado ya que no tiene platos o lugares asignados.")
-
-#     return redirect("filtro-de-platos")
 
 @login_required
 def eliminar_plato_programado(request, plato_id, comida, fecha):
