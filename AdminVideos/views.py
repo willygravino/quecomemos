@@ -2893,7 +2893,7 @@ class AsignarPlato(View):
         try:
             if tipo == "plato":
                 # plato “en juego”
-                plato_base = Plato.objects.get(id=objeto_id, propietario=request.user)
+                plato_base = Plato.objects.get(id=objeto_id)
 
                 # ✅ NUEVO: si el form manda platos_ids, asignamos solo esos
                 ids_post = [x for x in request.POST.getlist("platos_ids") if x.isdigit()]
@@ -2903,12 +2903,12 @@ class AsignarPlato(View):
                     allowed_ids = set([plato_base.id] + list(plato_base.variedades_hijas.values_list("id", flat=True)))
                     selected_ids = [int(x) for x in ids_post if int(x) in allowed_ids]
 
-                    platos_a_asignar = list(
-                        Plato.objects.filter(id__in=selected_ids, propietario=request.user)
-                    )
+                    platos_a_asignar = list(Plato.objects.filter(id__in=selected_ids))
+
                 else:
                     # comportamiento actual (por ahora)
                     platos_a_asignar = [plato_base] + list(plato_base.variedades_hijas.all())
+                    
 
                 creados = 0
                 for p in platos_a_asignar:
@@ -2947,7 +2947,7 @@ class AsignarPlato(View):
 @login_required
 def plato_opciones_asignar(request, pk):
     # Plato base
-    plato = get_object_or_404(Plato, pk=pk, propietario=request.user)
+    plato = get_object_or_404(Plato, pk=pk)
 
     # Padre + hijas
     opciones = [{
