@@ -11,30 +11,30 @@
                 <div class="tab-pane {% if dia_activo == dia|date:'Y-m-d' %}active{% elif forloop.first and not dia_activo %}active{% endif %}"
                     id="tab-content-{{ dia|date:'Y-m-d' }}" role="tabpanel" aria-labelledby="tab-{{ dia|date:'Y-m-d' }}">
 
-                    <div class="text-dark p-2 small">
+                    <div class="text-dark p-1 small">
 
                         <div class="position-relative">
 
                             <div class="border border-2 border-primary rounded p-2 mt-2 bg-light shadow-sm">
                                 <div class="row d-flex align-items-start">
-                                    <div class="col p-2">
+                                    <div class="col p-1">
 
                                         {% if dia in platos_dia_x_dia %}
                                         <!-- Si hay platos programados para este día, los mostramos -->
                                         {% for dia_plato in platos_dia_x_dia.items %}
                                         {% if dia_plato.0 == dia %}
 
-                                        <div class="row">
+                                <div class="row gx-0">
 
 
 
 
     <!-- Desayuno -->
     <div class="col-md-3">
-        <h6 class="fw-bold ml-1 bg-primary text-white p-1 rounded">Desayuno</h6>
+        <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Desayuno</h6>
         {% if dia_plato.1.desayuno %}
             {% for plato in dia_plato.1.desayuno %}
-                <div class="mb-1 ml-1 d-flex align-items-center text-primary">
+                <div class="mb-1 s-1 d-flex align-items-center text-primary">
                     <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
                         &nbsp; {{ plato.nombre }}
                     </a>
@@ -57,16 +57,16 @@
                 </div>
             {% endfor %}
         {% else %}
-            <p class="mb-1 ml-1 d-flex align-items-center">No hay platos programados.</p>
+            <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
         {% endif %}
     </div>
 
     <!-- Almuerzo -->
     <div class="col-md-3">
-        <h6 class="fw-bold ml-1 bg-primary text-white p-1 rounded">Almuerzo</h6>
+        <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Almuerzo</h6>
         {% if dia_plato.1.almuerzo %}
             {% for plato in dia_plato.1.almuerzo %}
-                <div class="mb-1 ml-1 d-flex align-items-center text-primary">
+                <div class="mb-1 ms-1 d-flex align-items-center text-primary">
                     <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
                         &nbsp; {{ plato.nombre }}
                     </a>
@@ -85,16 +85,16 @@
                 </div>
             {% endfor %}
         {% else %}
-            <p class="mb-1 ml-1 d-flex align-items-center">No hay platos programados.</p>
+            <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
         {% endif %}
     </div>
 
     <!-- Merienda -->
     <div class="col-md-3">
-        <h6 class="fw-bold ml-1 bg-primary text-white p-1 rounded">Merienda</h6>
+        <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Merienda</h6>
         {% if dia_plato.1.merienda %}
             {% for plato in dia_plato.1.merienda %}
-                <div class="mb-1 ml-1 d-flex align-items-center text-primary">
+                <div class="mb-1 ms-1 d-flex align-items-center text-primary">
                     <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
                         &nbsp; {{ plato.nombre }}
                     </a>
@@ -113,16 +113,16 @@
                 </div>
             {% endfor %}
         {% else %}
-            <p class="mb-1 ml-1 d-flex align-items-center">No hay platos programados.</p>
+            <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
         {% endif %}
     </div>
 
     <!-- Cena -->
     <div class="col-md-3">
-        <h6 class="fw-bold ml-1 bg-primary text-white p-1 rounded">Cena</h6>
+        <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Cena</h6>
         {% if dia_plato.1.cena %}
             {% for plato in dia_plato.1.cena %}
-                <div class="mb-1 ml-1 d-flex align-items-center text-primary">
+                <div class="mb-1 ms-1 d-flex align-items-center text-primary">
                     <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
                         &nbsp; {{ plato.nombre }}
                     </a>
@@ -139,7 +139,7 @@
                 </div>
             {% endfor %}
         {% else %}
-            <p class="mb-1 ml-1 d-flex align-items-center">No hay platos programados.</p>
+            <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
         {% endif %}
     </div>
 
@@ -167,9 +167,9 @@
                                 Menú programado&nbsp;
 
                                 {% if dia in platos_dia_x_dia %}
-                                    <!-- <a href="% url 'eliminar-menu' %}" class="btn btn-link p-0" title="Eliminar menú del día"> -->
+                                    <!-- <a href="% url 'eliminar-menu' %}" class="btn btn-link p-0" title="Eliminar menú del día">
                                     <i class="fa-solid fa-trash-can fa-lg" style="font-size: 18px;"></i>
-                                    </a>
+                                    </a> -->
                                 {% endif %}
 
                                 &nbsp;
