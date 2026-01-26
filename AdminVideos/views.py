@@ -1049,10 +1049,6 @@ def eliminar_lugar(request, lugar_id):
 #     from django.http import HttpResponseNotAllowed
 #     return HttpResponseNotAllowed(['POST'])
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect
-from django.http import HttpResponseNotAllowed
-from django.db import transaction
 
 @login_required
 def eliminar_plato(request, plato_id):
@@ -2059,14 +2055,12 @@ def FiltroDePlatos(request):
 
     primer_dia = dias_desde_hoy[0].isoformat()
 
-    # Obtener el día activo de la sesión o asignar el primer día si no está definido
-    dia_activo = request.session.get('dia_activo', primer_dia)
+    # ✅ Asegurar dia_activo siempre (string "YYYY-MM-DD")
+    dia_activo = request.session.get("dia_activo") or primer_dia
+    request.session["dia_activo"] = dia_activo  # deja persistido para próximos requests
 
-    # Si 'dia_activo' es menor que el primer día, reasignarlo
-    if dia_activo < primer_dia:
-        request.session['dia_activo'] = primer_dia
-
-    pla = ""
+    # ✅ Convertir a date para poder usar |date en template
+    dia_activo_obj = datetime.datetime.strptime(dia_activo, "%Y-%m-%d").date()
 
     dias_programados = set()  # Usamos set para evitar fechas repetidas
 
