@@ -1321,6 +1321,12 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
     form_class = PlatoForm
     template_name = "AdminVideos/plato_update.html"
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        if obj.propietario != self.request.user:
+            raise PermissionDenied("No tienes permiso para editar este plato.")
+        return obj
+
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         context = self.get_context_data()
@@ -1450,6 +1456,33 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
         return self.render_to_response(context)
 
 
+
+class PlatoDetail(DetailView):
+    model = Plato
+    template_name = 'AdminVideos/plato_detail.html'
+    context_object_name = "plato"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Perfil y amigues (como ya tenés)
+        perfil = get_object_or_404(Profile, user=self.request.user)
+        context["amigues"] = perfil.amigues
+
+        # Obtener el plato actual
+        plato = self.get_object()
+
+        # Convertir el campo 'tipos' (string separado por comas) a lista
+        if plato.tipos:
+            context['tipos_lista'] = [t.strip() for t in plato.tipos.split(',')]
+        else:
+            context['tipos_lista'] = []
+
+        return context
+
+
+
+
 class PlatoVariedadCreate(PlatoCreate):
     
 #     Crea un Plato hijo asociado a un Plato padre.
@@ -1520,59 +1553,6 @@ class PlatoVariedadCreate(PlatoCreate):
 
         return super().get_template_names()
 
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-
-    #     if self.request.method == "POST":
-    #         # POST: que valide lo que vino del modal
-    #         context["ingrediente_formset"] = IngredienteEnPlatoFormSet(self.request.POST)
-    #         return context
-
-    #     # GET: clonar ingredientes del padre como initial
-    #     inicial = []
-    #     # 👇 ajustá el related_name si el tuyo es distinto
-    #     for rel in self.padre.ingredienteenplato_set.all():
-    #         inicial.append({
-    #             "ingrediente": rel.ingrediente_id,
-    #             "nombre_ingrediente": rel.ingrediente.nombre if rel.ingrediente else "",
-    #             "cantidad": rel.cantidad,
-    #             "unidad": rel.unidad,
-    #         })
-
-    #     context["ingrediente_formset"] = IngredienteEnPlatoFormSet(initial=inicial)
-    #     return context
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-
-    #     # ✅ SIEMPRE: en variedades queremos mostrar tipos disponibles
-    #     context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
-
-    #     # ✅ tipopag: si no vino en la URL del modal, inferir desde el padre
-    #     tipopag = self.request.GET.get("tipopag")
-    #     if not tipopag:
-    #         raw = (self.padre.tipos or "").split(",")[0].strip()
-    #         tipopag = raw or "Dash"
-    #     context["tipopag"] = tipopag
-
-    #     context["plato_padre_obj"] = self.padre
-
-    #     # POST: que valide lo que vino del modal
-    #     if self.request.method == "POST":
-    #         context["ingrediente_formset"] = IngredienteEnPlatoFormSet(self.request.POST)
-    #         return context
-
-    #     # GET: clonar ingredientes del padre como initial
-    #     inicial = []
-    #     for rel in self.padre.ingredientes_en_plato.select_related("ingrediente").all():
-    #         inicial.append({
-    #             "ingrediente": rel.ingrediente_id,
-    #             "nombre_ingrediente": rel.ingrediente.nombre if rel.ingrediente else "",
-    #             "cantidad": rel.cantidad,
-    #             "unidad": rel.unidad,
-    #         })
-
-    #     context["ingrediente_formset"] = IngredienteEnPlatoFormSet(initial=inicial)
-    #     return context
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1654,19 +1634,6 @@ class PlatoVariedadCreate(PlatoCreate):
                         lista_ingredientes.append(texto)
 
             plato.ingredientes = ", ".join(lista_ingredientes)
-
-            # legacy variedades (si ya lo estás vaciando en template, quedará {})
-            # variedades = {}
-            # for i in range(1, 7):
-            #     variedad = form.cleaned_data.get(f"variedad{i}")
-            #     ingredientes_variedad_str = form.cleaned_data.get(f"ingredientes_de_variedad{i}")
-            #     if variedad:
-            #         variedades[f"variedad{i}"] = {
-            #             "nombre": variedad,
-            #             "ingredientes": ingredientes_variedad_str,
-            #             "elegido": True,
-            #         }
-            # plato.variedades = variedades
 
             plato.save()
             form.save_m2m()

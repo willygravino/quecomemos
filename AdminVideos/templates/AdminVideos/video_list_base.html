@@ -406,11 +406,21 @@
               </a>
 
 
-              <a href="{% url 'videos-update' plato.id %}"
-                 class="plato-action-btn text-dark"
-                 title="Editar">
-                <i class="fa-regular fa-pen-to-square"></i>
-              </a>
+              {% if plato.propietario == request.user %}
+                <!-- Botón para editar -->
+                <a href="{% url 'videos-update' plato.id %}"
+                  class="plato-action-btn text-dark"
+                  title="Editar">
+                  <i class="fa-regular fa-pen-to-square"></i>
+                </a>
+              {% else %}
+                <!-- Botón solo para ver (puedes cambiar el icono y el link según tu vista de detalle) -->
+                <a href="{% url 'platos-detail' plato.id %}"
+                  class="plato-action-btn text-secondary"
+                  title="Ver">
+                  <i class="fa-regular fa-eye"></i>
+                </a>
+              {% endif %}
 
               <a href="#"
                  data-bs-toggle="modal"
