@@ -401,62 +401,35 @@ class MenuItem(models.Model):
         obj = self.plato or self.lugar
         return f"{self.menu.fecha} - {self.momento} - {obj}"
 
-# class ElegidosXDia(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="usuario_que_come", null=True)
-#     el_dia_en_que_comemos = models.DateField(null=True)  # Campo de fecha
-#     platos_que_comemos = models.JSONField(null=True, blank=True)
 
-#     def __str__(self):
-#          return f'Menu Elegido {self.el_dia_en_que_comemos}'
+class MenuItemExtra(models.Model):
+    TIPO_GUARNICION = "guarnicion"
+    TIPO_SALSA = "salsa"
+    TIPO_POSTRE = "postre"
 
-
-class HistoricoDia(models.Model):
-    fecha = models.DateField()
-    dia_semana = models.CharField(max_length=2, blank=True)
-    ya_sugerido = models.BooleanField(default=False)
-    propietario = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    class Meta:
-        unique_together = ('fecha', 'propietario')  # 👈 Esto es lo importante
-
-    @property
-    def nombre_dia(self):
-        return self.fecha.strftime("%A").capitalize()
-
-    def __str__(self):
-        return f"Comidas del {self.fecha} ({self.nombre_dia})"
-
-
-
-
-
-class HistoricoItem(models.Model):
-    DESAYUNO = 'desayuno'
-    ALMUERZO = 'almuerzo'
-    MERIENDA = 'merienda'
-    CENA = 'cena'
-
-    MOMENTO_CHOICES = [
-        (DESAYUNO, 'Desayuno'),
-        (ALMUERZO, 'Almuerzo'),
-        (MERIENDA, 'Merienda'),
-        (CENA, 'Cena'),
+    TIPO_CHOICES = [
+        (TIPO_GUARNICION, "Guarnición"),
+        (TIPO_SALSA, "Salsa"),
+        (TIPO_POSTRE, "Postre"),
     ]
 
-    historico = models.ForeignKey(HistoricoDia, on_delete=models.CASCADE, related_name='items')
+    menu_item = models.ForeignKey(
+        "MenuItem",  # o MenuItem directo si está en el mismo archivo
+        related_name="extras",
+        on_delete=models.CASCADE,
+    )
+    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
+    nombre = models.CharField(max_length=80)
 
-    # 👉 snapshot mínimo
-    plato_id_ref = models.IntegerField()  # ID del Plato en el momento del guardado
-    # plato_nombre_snapshot = models.CharField(max_length=100)  # nombre del Plato en ese momento (o lo que quieras “congelar”)
-
-    momento = models.CharField(max_length=20, choices=MOMENTO_CHOICES)
+    orden = models.PositiveSmallIntegerField(default=0)  # opcional, para ordenar
+    creado_en = models.DateTimeField(auto_now_add=True)  # opcional
 
     class Meta:
-        unique_together = ('historico', 'plato_id_ref', 'momento')
+        ordering = ["tipo", "orden", "id"]
 
     def __str__(self):
-        return f"{self.historico.fecha} - {self.momento} - {self.plato_id_ref}"
-        
+        return f"{self.get_tipo_display()}: {self.nombre}"
+
 
 
 class ProfileIngrediente(models.Model):

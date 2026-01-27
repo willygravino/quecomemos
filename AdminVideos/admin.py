@@ -1,8 +1,9 @@
 from django.contrib import admin
 from .models import (
-    HabitoSemanal, HistoricoDia, HistoricoItem,
+    HabitoSemanal,
     Ingrediente, IngredienteEnPlato,
     MenuDia, MenuItem,
+    MenuItemExtra,
     Plato, Profile, Mensaje, Lugar
 )
 
@@ -99,34 +100,11 @@ class MenuItemAdmin(admin.ModelAdmin):
     date_hierarchy = "creado_el"
 
 
-# =====================================================
-# HISTORICODIA -> HistoricoItem (INLINE)
-# =====================================================
-class HistoricoItemInline(admin.TabularInline):
-    model = HistoricoItem
-    extra = 0
-    fields = ("momento", "plato_id_ref")
-
-
-@admin.register(HistoricoDia)
-class HistoricoDiaAdmin(admin.ModelAdmin):
-    list_display = ("id", "propietario", "fecha", "dia_semana", "ya_sugerido", "items_count")
-    list_filter = ("ya_sugerido", "fecha", "propietario")
-    search_fields = ("propietario__username",)
-    date_hierarchy = "fecha"
-    inlines = [HistoricoItemInline]
-
-    def items_count(self, obj):
-        return obj.items.count()
-    items_count.short_description = "Items"
-
-
-# (Opcional) mantener HistoricoItem suelto
-@admin.register(HistoricoItem)
-class HistoricoItemAdmin(admin.ModelAdmin):
-    list_display = ("id", "historico", "momento", "plato_id_ref")
-    list_filter = ("momento",)
-    search_fields = ("historico__propietario__username", "plato_id_ref")
-
-
 admin.site.register(HabitoSemanal)
+
+
+@admin.register(MenuItemExtra)
+class MenuItemExtraAdmin(admin.ModelAdmin):
+    list_display = ("id", "menu_item", "tipo", "nombre", "orden")
+    list_filter = ("tipo",)
+    search_fields = ("nombre",)

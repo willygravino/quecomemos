@@ -1,6 +1,6 @@
 
 from django import forms
-from .models import Ingrediente, IngredienteEnPlato, Lugar, Plato, TipoPlato
+from .models import Ingrediente, IngredienteEnPlato, Lugar, MenuItem, MenuItemExtra, Plato, TipoPlato
 from django.contrib.auth.forms import AuthenticationForm
 
 
@@ -127,6 +127,25 @@ class PlatoForm(forms.ModelForm):
         return obj
 
 
+
+class MenuItemExtraForm(forms.ModelForm):
+    class Meta:
+        model = MenuItemExtra
+        fields = ("tipo", "nombre", "orden")
+        widgets = {
+            "tipo": forms.Select(attrs={"class": "form-select form-select-sm"}),
+            "nombre": forms.TextInput(attrs={"class": "form-control form-control-sm", "placeholder": "Ej: Puré / Chimichurri / Flan"}),
+            "orden": forms.NumberInput(attrs={"class": "form-control form-control-sm", "style": "max-width: 90px;"}),
+        }
+
+
+MenuItemExtraFormSet = forms.inlineformset_factory(
+    parent_model=MenuItem,
+    model=MenuItemExtra,
+    form=MenuItemExtraForm,
+    extra=0,          # arrancamos sin filas “vacías” por defecto
+    can_delete=True,  # permite borrar extras existentes desde el formset
+)
 
         
 class IngredienteEnPlatoForm(forms.ModelForm):

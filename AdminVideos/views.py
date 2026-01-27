@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
 from AdminVideos import models
-from AdminVideos.models import HabitoSemanal, HistoricoDia, HistoricoItem, Ingrediente, IngredienteEnPlato, IngredienteEstado, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente
+from AdminVideos.models import HabitoSemanal, Ingrediente, IngredienteEnPlato, IngredienteEstado, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string   # ✅ ← ESTA ES LA CLAVE
 from django.http import Http404, HttpRequest, JsonResponse
@@ -2305,7 +2305,6 @@ def FiltroDePlatos(request):
                 "lugares": lugares,
                 "habitos_lookup": habitos_lookup,
 
-                # "sumados": sumar_historico
 
                }
     
@@ -3086,87 +3085,6 @@ def normalizar_dia(dia):
         c for c in unicodedata.normalize('NFD', dia.upper())
         if unicodedata.category(c) != 'Mn'
     )
-
-
-# def generar_elegido_desde_historico(historico, fecha_activa):
-#     """Crea un ElegidosXDia para la fecha activa a partir de un HistoricoDia con HistoricoItem."""
-
-#     # 1) limpiar el ElegidosXDia existente
-#     ElegidosXDia.objects.filter(
-#         user=historico.propietario,
-#         el_dia_en_que_comemos=fecha_activa
-#     ).delete()
-
-#     # 2) crear nuevo contenedor vacío
-#     menu_dia = ElegidosXDia.objects.create(
-#         user=historico.propietario,
-#         el_dia_en_que_comemos=fecha_activa,
-#         platos_que_comemos={}
-#     )
-#     data = {m: [] for m in MOMENTOS}
-
-#     # 3) agrupar ids por momento
-#     ids_por_momento = {m: [] for m in MOMENTOS}
-#     for it in historico.items.all():
-#         if it.momento in ids_por_momento:
-#             ids_por_momento[it.momento].append(it.plato_id_ref)
-
-#     # 4) búsqueda y serialización
-#     for momento in MOMENTOS:
-#         ids = ids_por_momento[momento]
-#         if not ids:
-#             continue
-
-#         platos_qs = Plato.objects.filter(id__in=ids)
-#         mapa = {p.id: p for p in platos_qs}
-
-#         for pid in ids:
-#             p = mapa.get(pid)
-#             if not p:
-#                 continue  # plato eliminado
-
-#             # evitar duplicados
-#             if any(item.get("id_plato") == str(p.id) for item in data[momento]):
-#                 continue
-
-#             plato_json = {
-#                 "id_plato": str(p.id),
-#                 "plato": p.nombre_plato,
-#                 "tipo": p.tipos,
-#                 "ingredientes": p.ingredientes,
-#                 "variedades": {
-#                     vid: {
-#                         "nombre": info.get("nombre"),
-#                         "ingredientes": info.get("ingredientes"),
-#                         "elegido": True,
-#                     } for vid, info in (p.variedades or {}).items()
-#                 },
-#                 "elegido": True,
-#             }
-#             data[momento].append(plato_json)
-
-#     # 5) guardar y devolver
-#     menu_dia.platos_que_comemos = data
-#     menu_dia.save()
-#     return menu_dia
-
-
-def _validar_y_purgar(historico: HistoricoDia) -> bool:
-    """True si TODOS los platos existen. Si falta alguno, borra items + histórico y devuelve False."""
-    ids = list(historico.items.values_list("plato_id_ref", flat=True))
-    if not ids:
-        with transaction.atomic():
-            historico.items.all().delete()
-            historico.delete()
-        return False
-
-    existentes = set(Plato.objects.filter(id__in=ids).values_list("id", flat=True))
-    if len(existentes) != len(ids):
-        with transaction.atomic():
-            historico.items.all().delete()
-            historico.delete()
-        return False
-    return True
 
 
 @login_required
