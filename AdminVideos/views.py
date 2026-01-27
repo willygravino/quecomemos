@@ -2308,6 +2308,17 @@ def FiltroDePlatos(request):
                 # "sumados": sumar_historico
 
                }
+    
+    contexto["guarniciones"] = Plato.objects.filter(
+                propietario=request.user
+            ).filter(
+                Q(tipos__icontains="Guarnicion") | Q(tipos__icontains="Guarnición")
+            ).order_by("nombre_plato")
+
+    contexto["salsas"] = Plato.objects.filter(
+                propietario=request.user,
+                tipos__icontains="Salsa"
+            ).order_by("nombre_plato")
 
     return render(request, 'AdminVideos/lista_filtrada.html', contexto)
 
@@ -2921,10 +2932,50 @@ class AsignarPlato(View):
                     if created:
                         creados += 1
 
+                # ===== Guarnición y Salsa (opcionales, validadas) =====
+                def _tiene_tipo(plato: Plato, tipo_txt: str) -> bool:
+                    # tu campo es un string con cosas tipo "Entrada,Principal,Postre"
+                    # hacemos match simple por substring (y soportamos tilde en Guarnición)
+                    t = (plato.tipos or "")
+                    if tipo_txt == "Guarnicion":
+                        return ("Guarnicion" in t) or ("Guarnición" in t)
+                    return (tipo_txt in t)
+
+                def _asignar_extra(extra_id_str: str, tipo_requerido: str):
+                    if not extra_id_str or not extra_id_str.isdigit():
+                        return 0
+
+                    extra = Plato.objects.filter(
+                        id=int(extra_id_str),
+                        propietario=request.user,
+                    ).first()
+
+                    if not extra:
+                        return 0
+
+                    # validar tipo exacto esperado
+                    if not _tiene_tipo(extra, tipo_requerido):
+                        return 0
+
+                    _, created = MenuItem.objects.get_or_create(
+                        menu=menu_dia,
+                        momento=momento,
+                        plato=extra,
+                        defaults={"elegido": True},
+                    )
+                    return 1 if created else 0
+
+                creados_extras = 0
+                creados_extras += _asignar_extra(request.POST.get("guarnicion_id"), "Guarnicion")
+                creados_extras += _asignar_extra(request.POST.get("salsa_id"), "Salsa")
+
+                total = len(platos_a_asignar)
                 messages.success(
                     request,
-                    f"Asignados {creados}/{len(platos_a_asignar)} platos a {momento}."
+                    f"Asignados {creados}/{total} platos a {momento}."
+                    + (f" Extras agregados: {creados_extras}." if creados_extras else "")
                 )
+
 
             elif tipo == "lugar":
                 lugar = Lugar.objects.get(id=objeto_id)
