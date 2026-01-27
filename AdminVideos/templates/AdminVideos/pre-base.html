@@ -143,11 +143,15 @@
                         <div id="comidasCarousel-{{ dia|date:'Y-m-d' }}"
                             class="carousel slide comidas-carousel"
                             data-bs-touch="true"
-                            data-bs-wrap="true">                        
+                            data-bs-wrap="true"
+                            data-bs-ride="false"
+                            data-bs-interval="false">
+
+                        
                             <div class="carousel-inner">
 
                           <!-- Slide 1: Desayuno -->
-                          <div class="carousel-item active">
+                          <div class="carousel-item">
                             <div class="p-1">
                               <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Desayuno</h6>
                               {% if dia_plato.1.desayuno %}
@@ -175,7 +179,7 @@
                           </div>
 
                           <!-- Slide 2: Almuerzo -->
-                          <div class="carousel-item">
+                          <div class="carousel-item active">
                             <div class="p-1">
                               <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Almuerzo</h6>
                               {% if dia_plato.1.almuerzo %}
@@ -275,11 +279,38 @@
 
                       </div>
 
-                      <!-- Indicador simple (opcional, sin scroll) -->
-                      <div class="text-center mt-1 text-muted" style="font-size:.7rem;">
-                        Desayuno · Almuerzo · Merienda · Cena
+                      <!-- Indicador simple con links a cada slide -->
+                      <div class="text-center mt-1" style="font-size:.7rem;">
+                        <a href="#"
+                          class="text-muted mx-1"
+                          data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}"
+                          data-bs-slide-to="0">
+                          Desayuno
+                        </a>
+                        ·
+                        <a href="#"
+                          class="text-muted mx-1"
+                          data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}"
+                          data-bs-slide-to="1">
+                          Almuerzo
+                        </a>
+                        ·
+                        <a href="#"
+                          class="text-muted mx-1"
+                          data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}"
+                          data-bs-slide-to="2">
+                          Merienda
+                        </a>
+                        ·
+                        <a href="#"
+                          class="text-muted mx-1"
+                          data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}"
+                          data-bs-slide-to="3">
+                          Cena
+                        </a>
                       </div>
-                    </div>
+                  </div>
+
 
                   {% endif %}
                 {% endfor %}
