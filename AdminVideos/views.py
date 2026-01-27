@@ -24,7 +24,7 @@ from django.views.generic import CreateView, UpdateView, DeleteView, DetailView
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from datetime import datetime, timedelta
-from .forms import IngredienteEnPlatoFormSet, LugarForm, PlatoFilterForm, PlatoForm, CustomAuthenticationForm
+from .forms import IngredienteEnPlatoFormSet, LugarForm, MenuItemExtraFormSet, PlatoFilterForm, PlatoForm, CustomAuthenticationForm
 from datetime import date, datetime
 from django.contrib.auth.models import User  # Asegúrate de importar el modelo User
 from django.db.models import Q, Subquery, OuterRef, Prefetch, Min, Max, F
@@ -42,6 +42,29 @@ from django.core.exceptions import PermissionDenied
 from django.db.models.expressions import OrderBy
 
 
+@login_required
+@require_http_methods(["GET", "POST"])
+def menuitem_extras_modal(request, menuitem_id):
+    # 👇 clave: el dueño se valida por el MenuDia asociado
+    menu_item = get_object_or_404(MenuItem, id=menuitem_id, menu__propietario=request.user)
+
+    if request.method == "POST":
+        formset = MenuItemExtraFormSet(request.POST, instance=menu_item)
+        if formset.is_valid():
+            formset.save()
+            return JsonResponse({"ok": True})
+
+        html = render(request, "AdminVideos/partials/menuitem_extras_modal.html", {
+            "menu_item": menu_item,
+            "formset": formset,
+        }).content.decode("utf-8")
+        return JsonResponse({"ok": False, "html": html}, status=400)
+
+    formset = MenuItemExtraFormSet(instance=menu_item)
+    return render(request, "AdminVideos/partials/menuitem_extras_modal.html", {
+        "menu_item": menu_item,
+        "formset": formset,
+    })
 
 
 @login_required
@@ -2263,19 +2286,22 @@ def FiltroDePlatos(request):
             fijo = (item.plato.id, dia_semana, item.momento) in habitos_set
 
             platos_dia_x_dia[fec][item.momento].append({
-                "id": item.plato.id,
+                "menuitem_id": item.id,                 # ✅ este es el que necesitamos para extras
+                "plato_id": item.plato.id,              # ✅ para seguir yendo a videos-update
                 "nombre": item.plato.nombre_plato,
                 "fijo": fijo,
-                "dia_semana": dia_semana,   # 👈 ESTA LÍNEA
-
+                "dia_semana": dia_semana,
             })
+
 
         elif item.lugar:
             platos_dia_x_dia[fec][item.momento].append({
-                "id": item.lugar.id,
+                "menuitem_id": item.id,   # ✅ también existe el MenuItem aunque sea lugar
+                "lugar_id": item.lugar.id,
                 "nombre": item.lugar.nombre,
                 "fijo": False
             })
+
 
 
     # Convertir defaultdict a dict antes de pasarlo a la plantilla

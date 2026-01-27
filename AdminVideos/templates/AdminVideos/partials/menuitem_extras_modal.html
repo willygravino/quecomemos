@@ -1,0 +1,123 @@
+<!-- ============================================
+     MODAL EXTRAS
+     Contenido inyectado por AJAX
+     ============================================ -->
+
+<div class="modal-header">
+  <h5 class="modal-title">Extras del plato programado</h5>
+
+  <!-- Botón cerrar -->
+  <button type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Cerrar"></button>
+</div>
+
+<!-- ============================================
+     FORM PRINCIPAL
+     Guarda guarniciones / salsas / postres
+     ============================================ -->
+<form id="extrasForm"
+      method="post"
+      action="{% url 'menuitem-extras-modal' menu_item.id %}">
+
+  <div class="modal-body">
+    {% csrf_token %}
+
+    <!-- Management form del formset (OBLIGATORIO) -->
+    {{ formset.management_form }}
+
+    <!-- Botones para agregar extras -->
+    <div class="d-flex gap-2 flex-wrap mb-2">
+      <button type="button"
+              class="btn btn-sm btn-outline-primary js-add-extra"
+              data-tipo="guarnicion">
+        + Guarnición
+      </button>
+
+      <button type="button"
+              class="btn btn-sm btn-outline-primary js-add-extra"
+              data-tipo="salsa">
+        + Salsa
+      </button>
+
+      <button type="button"
+              class="btn btn-sm btn-outline-primary js-add-extra"
+              data-tipo="postre">
+        + Postre
+      </button>
+    </div>
+
+    <!-- Contenedor de filas de extras -->
+    <div id="extrasRows" class="vstack gap-2">
+
+      {% for f in formset %}
+        <!-- Fila de extra existente -->
+        <div class="extra-row border rounded p-2 bg-white">
+
+          <div class="row g-2 align-items-end">
+            <div class="col-4">
+              <label class="form-label small mb-1">Tipo</label>
+              {{ f.tipo }}
+            </div>
+
+            <div class="col-6">
+              <label class="form-label small mb-1">Nombre</label>
+              {{ f.nombre }}
+            </div>
+
+            <div class="col-2">
+              <label class="form-label small mb-1">Orden</label>
+              {{ f.orden }}
+            </div>
+          </div>
+
+          <!-- Checkbox eliminar extra -->
+          <div class="d-flex justify-content-end mt-2">
+            <div class="form-check">
+              {{ f.DELETE }}
+              <label class="form-check-label small">Eliminar</label>
+            </div>
+          </div>
+
+          <!-- ID oculto del formset -->
+          {{ f.id }}
+        </div>
+
+      {% empty %}
+        <!-- Mensaje cuando no hay extras -->
+        <div class="text-muted small" id="extrasEmptyMsg">
+          Todavía no agregaste extras.
+        </div>
+      {% endfor %}
+
+    </div>
+
+    <!-- ============================================
+         Empty form oculto
+         Se clona vía JS para agregar filas nuevas
+         ============================================ -->
+    <div id="extrasEmptyForm" class="d-none">
+      {{ formset.empty_form.tipo }}
+      {{ formset.empty_form.nombre }}
+      {{ formset.empty_form.orden }}
+      {{ formset.empty_form.DELETE }}
+      {{ formset.empty_form.id }}
+    </div>
+
+  </div>
+
+  <!-- Footer del modal -->
+  <div class="modal-footer">
+    <button type="button"
+            class="btn btn-secondary btn-sm"
+            data-bs-dismiss="modal">
+      Cerrar
+    </button>
+
+    <button type="submit"
+            class="btn btn-primary btn-sm">
+      Guardar
+    </button>
+  </div>
+</form>

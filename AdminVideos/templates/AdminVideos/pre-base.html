@@ -35,19 +35,27 @@
                           {% if dia_plato.1.desayuno %}
                             {% for plato in dia_plato.1.desayuno %}
                               <div class="mb-1 ms-1 d-flex align-items-center text-primary">
-                                <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
+                                <a href="{% url 'videos-update' plato.plato_id %}" class="text-decoration-none me-2">
                                   &nbsp; {{ plato.nombre }}
                                 </a>
 
-                                <a href="{% url 'fijar-o-eliminar-habito' plato.id 'desayuno' %}"
+                                <a href="{% url 'fijar-o-eliminar-habito' plato.plato_id 'desayuno' %}"
                                    title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
                                   <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                                 </a>
 
-                                <a href="{% url 'eliminar-programado' plato.id 'desayuno' dia %}"
+                                <a href="{% url 'eliminar-programado' plato.plato_id 'desayuno' dia %}"
                                    class="btn btn-sm p-0" title="Eliminar">
                                   <i class="fa-solid fa-trash-can"></i>
                                 </a>
+
+                                <a href="{% url 'menuitem-extras-modal' plato.menuitem_id %}"
+                                  class="btn btn-sm p-0 ms-2 text-primary js-extras"
+                                  title="Extras (guarnición/salsa/postre)">
+                                  <i class="fa-solid fa-list"></i>
+                                </a>
+
+
                               </div>
                             {% endfor %}
                           {% else %}
@@ -61,19 +69,26 @@
                           {% if dia_plato.1.almuerzo %}
                             {% for plato in dia_plato.1.almuerzo %}
                               <div class="mb-1 ms-1 d-flex align-items-center text-primary">
-                                <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
+                                <a href="{% url 'videos-update' plato.plato_id %}" class="text-decoration-none me-2">
                                   &nbsp; {{ plato.nombre }}
                                 </a>
 
-                                <a href="{% url 'fijar-o-eliminar-habito' plato.id 'almuerzo' %}"
+                                <a href="{% url 'fijar-o-eliminar-habito' plato.plato_id 'almuerzo' %}"
                                    title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
                                   <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                                 </a>
 
-                                <a href="{% url 'eliminar-programado' plato.id 'almuerzo' dia %}"
+                                <a href="{% url 'eliminar-programado' plato.plato_id 'almuerzo' dia %}"
                                    class="btn btn-sm p-0" title="Eliminar">
                                   <i class="fa-solid fa-trash-can"></i>
                                 </a>
+
+                                <a href="{% url 'menuitem-extras-modal' plato.menuitem_id %}"
+                                  class="btn btn-sm p-0 ms-2 text-primary js-extras"
+                                  title="Extras (guarnición/salsa/postre)">
+                                  <i class="fa-solid fa-list"></i>
+                                </a>
+
                               </div>
                             {% endfor %}
                           {% else %}
@@ -87,19 +102,26 @@
                           {% if dia_plato.1.merienda %}
                             {% for plato in dia_plato.1.merienda %}
                               <div class="mb-1 ms-1 d-flex align-items-center text-primary">
-                                <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
+                                <a href="{% url 'videos-update' plato.plato_id %}" class="text-decoration-none me-2">
                                   &nbsp; {{ plato.nombre }}
                                 </a>
 
-                                <a href="{% url 'fijar-o-eliminar-habito' plato.id 'merienda' %}"
+                                <a href="{% url 'fijar-o-eliminar-habito' plato.plato_id 'merienda' %}"
                                    title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
                                   <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                                 </a>
 
-                                <a href="{% url 'eliminar-programado' plato.id 'merienda' dia %}"
+                                <a href="{% url 'eliminar-programado' plato.plato_id 'merienda' dia %}"
                                    class="btn btn-sm p-0" title="Eliminar">
                                   <i class="fa-solid fa-trash-can"></i>
                                 </a>
+
+                                <a href="{% url 'menuitem-extras-modal' plato.menuitem_id %}"
+                                  class="btn btn-sm p-0 ms-2 text-primary js-extras"
+                                  title="Extras (guarnición/salsa/postre)">
+                                  <i class="fa-solid fa-list"></i>
+                                </a>
+
                               </div>
                             {% endfor %}
                           {% else %}
@@ -113,19 +135,27 @@
                           {% if dia_plato.1.cena %}
                             {% for plato in dia_plato.1.cena %}
                               <div class="mb-1 ms-1 d-flex align-items-center text-primary">
-                                <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
+                                <a href="{% url 'videos-update' plato.plato_id %}" class="text-decoration-none me-2">
                                   &nbsp; {{ plato.nombre }}
                                 </a>
 
-                                <a href="{% url 'fijar-o-eliminar-habito' plato.id 'cena' %}"
+                                <a href="{% url 'fijar-o-eliminar-habito' plato.plato_id 'cena' %}"
                                    title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
                                   <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                                 </a>
 
-                                <a href="{% url 'eliminar-programado' plato.id 'cena' dia %}"
+                                <a href="{% url 'eliminar-programado' plato.plato_id 'cena' dia %}"
                                    class="btn btn-sm p-0" title="Eliminar">
                                   <i class="fa-solid fa-trash-can"></i>
                                 </a>
+
+                                <a href="{% url 'menuitem-extras-modal' plato.menuitem_id %}"
+                                  class="btn btn-sm p-0 ms-2 text-primary js-extras"
+                                  title="Extras (guarnición/salsa/postre)">
+                                  <i class="fa-solid fa-list"></i>
+                                </a>
+
+
                               </div>
                             {% endfor %}
                           {% else %}
@@ -157,19 +187,26 @@
                               {% if dia_plato.1.desayuno %}
                                 {% for plato in dia_plato.1.desayuno %}
                                   <div class="mb-1 ms-1 d-flex align-items-center text-primary">
-                                    <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
+                                    <a href="{% url 'videos-update' plato.plato_id %}" class="text-decoration-none me-2">
                                       &nbsp; {{ plato.nombre }}
                                     </a>
 
-                                    <a href="{% url 'fijar-o-eliminar-habito' plato.id 'desayuno' %}"
+                                    <a href="{% url 'fijar-o-eliminar-habito' plato.plato_id 'desayuno' %}"
                                        title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
                                       <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                                     </a>
 
-                                    <a href="{% url 'eliminar-programado' plato.id 'desayuno' dia %}"
+                                    <a href="{% url 'eliminar-programado' plato.plato_id 'desayuno' dia %}"
                                        class="btn btn-sm p-0" title="Eliminar">
                                       <i class="fa-solid fa-trash-can"></i>
                                     </a>
+
+                                    <a href="{% url 'menuitem-extras-modal' plato.menuitem_id %}"
+                                      class="btn btn-sm p-0 ms-2 text-primary js-extras"
+                                      title="Extras (guarnición/salsa/postre)">
+                                      <i class="fa-solid fa-list"></i>
+                                    </a>
+
                                   </div>
                                 {% endfor %}
                               {% else %}
@@ -185,19 +222,27 @@
                               {% if dia_plato.1.almuerzo %}
                                 {% for plato in dia_plato.1.almuerzo %}
                                   <div class="mb-1 ms-1 d-flex align-items-center text-primary">
-                                    <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
+                                    <a href="{% url 'videos-update' plato.plato_id %}" class="text-decoration-none me-2">
                                       &nbsp; {{ plato.nombre }}
                                     </a>
 
-                                    <a href="{% url 'fijar-o-eliminar-habito' plato.id 'almuerzo' %}"
+                                    <a href="{% url 'fijar-o-eliminar-habito' plato.plato_id 'almuerzo' %}"
                                        title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
                                       <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                                     </a>
 
-                                    <a href="{% url 'eliminar-programado' plato.id 'almuerzo' dia %}"
+                                    <a href="{% url 'eliminar-programado' plato.plato_id 'almuerzo' dia %}"
                                        class="btn btn-sm p-0" title="Eliminar">
                                       <i class="fa-solid fa-trash-can"></i>
                                     </a>
+
+                                    <a href="{% url 'menuitem-extras-modal' plato.menuitem_id %}"
+                                      class="btn btn-sm p-0 ms-2 text-primary js-extras"
+                                      title="Extras (guarnición/salsa/postre)">
+                                      <i class="fa-solid fa-list"></i>
+                                    </a>
+
+
                                   </div>
                                 {% endfor %}
                               {% else %}
@@ -213,19 +258,27 @@
                               {% if dia_plato.1.merienda %}
                                 {% for plato in dia_plato.1.merienda %}
                                   <div class="mb-1 ms-1 d-flex align-items-center text-primary">
-                                    <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
+                                    <a href="{% url 'videos-update' plato.plato_id %}" class="text-decoration-none me-2">
                                       &nbsp; {{ plato.nombre }}
                                     </a>
 
-                                    <a href="{% url 'fijar-o-eliminar-habito' plato.id 'merienda' %}"
+                                    <a href="{% url 'fijar-o-eliminar-habito' plato.plato_id 'merienda' %}"
                                        title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
                                       <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                                     </a>
 
-                                    <a href="{% url 'eliminar-programado' plato.id 'merienda' dia %}"
+                                    <a href="{% url 'eliminar-programado' plato.plato_id 'merienda' dia %}"
                                        class="btn btn-sm p-0" title="Eliminar">
                                       <i class="fa-solid fa-trash-can"></i>
                                     </a>
+
+
+                                    <a href="{% url 'menuitem-extras-modal' plato.menuitem_id %}"
+                                      class="btn btn-sm p-0 ms-2 text-primary js-extras"
+                                      title="Extras (guarnición/salsa/postre)">
+                                      <i class="fa-solid fa-list"></i>
+                                    </a>
+
                                   </div>
                                 {% endfor %}
                               {% else %}
@@ -241,19 +294,27 @@
                               {% if dia_plato.1.cena %}
                                 {% for plato in dia_plato.1.cena %}
                                   <div class="mb-1 ms-1 d-flex align-items-center text-primary">
-                                    <a href="{% url 'videos-update' plato.id %}" class="text-decoration-none me-2">
+                                    <a href="{% url 'videos-update' plato.plato_id %}" class="text-decoration-none me-2">
                                       &nbsp; {{ plato.nombre }}
                                     </a>
 
-                                    <a href="{% url 'fijar-o-eliminar-habito' plato.id 'cena' %}"
+                                    <a href="{% url 'fijar-o-eliminar-habito' plato.plato_id 'cena' %}"
                                        title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
                                       <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                                     </a>
 
-                                    <a href="{% url 'eliminar-programado' plato.id 'cena' dia %}"
+                                    <a href="{% url 'eliminar-programado' plato.plato_id 'cena' dia %}"
                                        class="btn btn-sm p-0" title="Eliminar">
                                       <i class="fa-solid fa-trash-can"></i>
                                     </a>
+
+                                    <a href="{% url 'menuitem-extras-modal' plato.menuitem_id %}"
+                                      class="btn btn-sm p-0 ms-2 text-primary js-extras"
+                                      title="Extras (guarnición/salsa/postre)">
+                                      <i class="fa-solid fa-list"></i>
+                                    </a>
+
+
                                   </div>
                                 {% endfor %}
                               {% else %}
@@ -366,4 +427,102 @@
 
 <!-- FIN DE PESTAÑAS - MENÚES PROGRAMADOS - PLATOS -->
 
+{# =========================================================
+   MODAL: Extras del plato programado
+   - Se abre por AJAX
+   - El contenido se inyecta dinámicamente
+   - SOLO debe existir UNA VEZ en el DOM
+   ========================================================= #}
+
+<div class="modal fade" id="extrasModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+
+    {# Acá se va a cargar el HTML del partial (formset de extras) #}
+    <div class="modal-content" id="extrasModalContent">
+      {# vacío a propósito #}
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   ABRIR MODAL DE EXTRAS (AJAX)
+   - Escucha clicks en botones .js-extras
+   - Carga el HTML del modal vía fetch
+   - Abre el modal Bootstrap
+   ========================================================= */
+
+document.addEventListener("click", async function (e) {
+
+  // Buscamos si el click vino de un botón "Extras"
+  const btn = e.target.closest(".js-extras");
+  if (!btn) return; // si no, salimos
+
+  e.preventDefault(); // evita navegar al href
+
+  try {
+    // Pedimos el HTML del modal al backend
+    const response = await fetch(btn.href, {
+      headers: { "X-Requested-With": "XMLHttpRequest" }
+    });
+
+    const html = await response.text();
+
+    // Inyectamos el contenido en el modal
+    const content = document.getElementById("extrasModalContent");
+    content.innerHTML = html;
+
+    // Abrimos el modal
+    const modalEl = document.getElementById("extrasModal");
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+
+  } catch (err) {
+    console.error("Error cargando extras:", err);
+  }
+});
+</script>
+
+<script>
+/* =========================================================
+   GUARDAR EXTRAS (SUBMIT AJAX)
+   - Envía el formset por fetch
+   - Si hay errores: re-renderiza el modal
+   - Si OK: cierra el modal
+   ========================================================= */
+
+document.addEventListener("submit", async function (e) {
+
+  // Solo interceptamos el form del modal
+  const form = e.target.closest("#extrasForm");
+  if (!form) return;
+
+  e.preventDefault();
+
+  try {
+    const response = await fetch(form.action, {
+      method: "POST",
+      headers: { "X-Requested-With": "XMLHttpRequest" },
+      body: new FormData(form),
+    });
+
+    // Si todo OK → cerrar modal
+    if (response.ok) {
+      const modalEl = document.getElementById("extrasModal");
+      bootstrap.Modal.getInstance(modalEl)?.hide();
+      return;
+    }
+
+    // Si hay errores → backend devuelve HTML del modal
+    const data = await response.json();
+    if (data.html) {
+      document.getElementById("extrasModalContent").innerHTML = data.html;
+    }
+
+  } catch (err) {
+    console.error("Error guardando extras:", err);
+  }
+});
+</script>
+ 
 {% endblock %}
