@@ -388,3 +388,18 @@ section > .d-flex {
   top: 0.25rem;
   bottom: 0.25rem;
 }
+
+
+/* icono del usuario */
+.img-profile {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+
+  border: 2px solid var(--bs-primary);
+  padding: 4px;
+
+  background-color: #f8f9fa;
+  object-fit: cover;
+}
+

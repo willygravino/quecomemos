@@ -534,8 +534,9 @@ class Profile(models.Model):
 
     @property
     def avatar_url(self):
-        return self.avatar.url if self.avatar else "/media/avatares/user.png"
-
+        return self.avatar.url if self.avatar else "/static/AdminVideos/img/user.svg"
+    
+    
     def __str__(self):
         return f"Perfil de {self.user}"
 
