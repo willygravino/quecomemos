@@ -1072,14 +1072,6 @@ def eliminar_lugar(request, lugar_id):
 #     from django.http import HttpResponseNotAllowed
 #     return HttpResponseNotAllowed(['POST'])
 
-from django.contrib.auth.decorators import login_required
-from django.db import transaction
-from django.http import HttpResponseNotAllowed
-from django.shortcuts import get_object_or_404, redirect
-
-from AdminVideos.models import Plato, VariedadPlato  # <- agrega VariedadPlato
-from .models import Profile  # ajusta si tu Profile está en otro lado
-
 
 @login_required
 def eliminar_plato(request, plato_id):
@@ -1103,16 +1095,15 @@ def eliminar_plato(request, plato_id):
 
         perfil.save()
 
-        # ✅ (NUEVO) Si este plato está referenciado como base en VariedadPlato, borrar esas filas primero
-        VariedadPlato.objects.filter(plato_base_id=plato.id).delete()
-
-        # ✅ Si es PLATO PADRE: borrar TODAS sus variedades hijas (modelo Plato->plato_padre)
+        # ✅ Si es PLATO PADRE: borrar TODAS sus variedades hijas
+        # (extra seguro: también filtramos por propietario=request.user)
         Plato.objects.filter(plato_padre=plato, propietario=request.user).delete()
 
         # ✅ Borrar el plato (padre o variedad)
         plato.delete()
 
     return redirect("filtro-de-platos")
+
 
 
 class LugarUpdate(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
