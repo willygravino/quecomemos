@@ -3012,7 +3012,10 @@ def plato_opciones_asignar(request, pk):
             "nombre": v.nombre_plato,
         })
 
-    return JsonResponse({"opciones": opciones})
+    return JsonResponse({
+        "opciones": opciones,          # lo que ya devolvías
+        "tipos_base": plato.tipos or ""  # 👈 nuevo
+    })
 
 
 

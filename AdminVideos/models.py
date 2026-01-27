@@ -103,7 +103,7 @@ class Plato(models.Model):
 
     tipos = models.CharField(
         max_length=200,
-        blank=True,
+        blank=False,
         help_text="Seleccioná los tipos (Ej: Entrada,Principal,Postre)"
     )
 

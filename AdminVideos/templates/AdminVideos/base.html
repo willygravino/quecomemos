@@ -745,8 +745,6 @@ Root globl para modales cargados dinámicamente (AJAX)
 <div id="modal-root"></div>
 
 {# ===== Modal global: asignar plato ===== #}
-
-<!-- ===== Modal global: asignar plato ===== -->
 <div class="modal fade" id="asignarPlatoModal" tabindex="-1" aria-labelledby="asignarPlatoLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -757,7 +755,8 @@ Root globl para modales cargados dinámicamente (AJAX)
         <div class="modal-header">
           <h5 class="modal-title" id="asignarPlatoLabel">
             <span id="modalTitulo">
-            Tildá los platos que quieras programar para el día <span id="diaActivoTexto">{{ dia_activo_obj|date:"l j"|capfirst }}</span>
+              Tildá los platos que quieras programar para el día
+              <span id="diaActivoTexto">{{ dia_activo_obj|date:"l j"|capfirst }}</span>
             </span>
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
@@ -786,31 +785,30 @@ Root globl para modales cargados dinámicamente (AJAX)
           </div>
 
           <!-- ===== Guarnición (opcional) ===== -->
-            <div class="mt-3">
+          <div id="bloqueGuarnicion" class="mt-3">
             <label class="form-label">Guarnición (opcional)</label>
             <select name="guarnicion_id" class="form-select" id="guarnicionSelect">
-                <option value="">— No agregar —</option>
-                {% for g in guarniciones %}
+              <option value="">— No agregar —</option>
+              {% for g in guarniciones %}
                 <option value="{{ g.id }}">{{ g.nombre_plato }}</option>
-                {% empty %}
+              {% empty %}
                 <option value="" disabled>No tenés guarniciones cargadas</option>
-                {% endfor %}
+              {% endfor %}
             </select>
-            </div>
+          </div>
 
-            <!-- ===== Salsa (opcional) ===== -->
-            <div class="mt-3">
+          <!-- ===== Salsa (opcional) ===== -->
+          <div id="bloqueSalsa" class="mt-3">
             <label class="form-label">Salsa (opcional)</label>
             <select name="salsa_id" class="form-select" id="salsaSelect">
-                <option value="">— No agregar —</option>
-                {% for s in salsas %}
+              <option value="">— No agregar —</option>
+              {% for s in salsas %}
                 <option value="{{ s.id }}">{{ s.nombre_plato }}</option>
-                {% empty %}
+              {% empty %}
                 <option value="" disabled>No tenés salsas cargadas</option>
-                {% endfor %}
+              {% endfor %}
             </select>
-            </div>
-
+          </div>
 
         </div>
 
@@ -823,22 +821,50 @@ Root globl para modales cargados dinámicamente (AJAX)
   </div>
 </div>
 
+
+
 <script>
+/**
+ * setPlatoInfo
+ * ------------------------------
+ * Prepara y configura el modal de "Asignar plato".
+ *
+ * - Define qué plato (o elemento) se va a programar
+ * - Actualiza el título del modal según el día activo
+ * - Carga y muestra las variedades del plato (si existen)
+ * - Muestra Guarnición/Salsa SOLO si el plato base es de tipo "Principal"
+ *   (usando tipos_base que viene del endpoint opciones-asignar)
+ */
 async function setPlatoInfo(platoId, tipo, nombrePlato) {
     const idAsignar = document.getElementById("platoIdInputAsignar");
     const tipoAsignar = document.getElementById("tipoObjetoAsignar");
-    const bloque = document.getElementById("bloque-platos-para-asignar");
-    const lista = document.getElementById("lista-platos-para-asignar");
+    const bloqueVar = document.getElementById("bloque-platos-para-asignar");
+    const listaVar = document.getElementById("lista-platos-para-asignar");
     const titulo = document.getElementById("modalTitulo");
 
+    // Bloques extras (Guarnición/Salsa)
+    const bloqueGuarnicion = document.getElementById("bloqueGuarnicion");
+    const bloqueSalsa = document.getElementById("bloqueSalsa");
+    const guarnicionSelect = document.getElementById("guarnicionSelect");
+    const salsaSelect = document.getElementById("salsaSelect");
+
+    // Setear hidden inputs
     if (idAsignar) idAsignar.value = platoId;
     if (tipoAsignar) tipoAsignar.value = tipo;
 
-    // Limpiar estado previo
-    lista.innerHTML = "";
-    bloque.classList.add("d-none");
+    // Limpiar estado previo de variedades
+    if (listaVar) listaVar.innerHTML = "";
+    if (bloqueVar) bloqueVar.classList.add("d-none");
 
-    // Si no es un plato, solo ponemos título
+    // Reset extras cada vez que abrís el modal
+    if (guarnicionSelect) guarnicionSelect.value = "";
+    if (salsaSelect) salsaSelect.value = "";
+
+    // Por defecto: ocultar extras (se habilitan solo si es Principal)
+    if (bloqueGuarnicion) bloqueGuarnicion.classList.add("d-none");
+    if (bloqueSalsa) bloqueSalsa.classList.add("d-none");
+
+    // Si no es un plato (ej: lugar), solo título y salir
     if (tipo !== "plato") {
         titulo.textContent = `Programar ${nombrePlato} para el día {{ dia_activo_obj|date:"l j"|capfirst }}`;
         return;
@@ -849,19 +875,34 @@ async function setPlatoInfo(platoId, tipo, nombrePlato) {
             headers: { "X-Requested-With": "XMLHttpRequest" },
             credentials: "same-origin",
         });
-        if (!res.ok) return;
-
-        const data = await res.json();
-        const opciones = data.opciones || [];
-
-        if (opciones.length <= 1) {
-            // Solo un plato padre
+        if (!res.ok) {
+            // Si falla el fetch, al menos dejamos título simple
             titulo.textContent = `Programar ${nombrePlato} para el día {{ dia_activo_obj|date:"l j"|capfirst }}`;
             return;
         }
 
-        // Hay varias variedades
-        bloque.classList.remove("d-none");
+        const data = await res.json();
+
+        // ===== NUEVO: decidir si mostrar extras solo si es Principal =====
+        const tiposBase = (data.tipos_base || "");
+        const tiposArr = tiposBase.split(",").map(t => t.trim()).filter(Boolean);
+        const esPrincipal = tiposArr.includes("Principal");
+
+        const mostrarExtras = esPrincipal; // solo para platos Principal
+        if (bloqueGuarnicion) bloqueGuarnicion.classList.toggle("d-none", !mostrarExtras);
+        if (bloqueSalsa) bloqueSalsa.classList.toggle("d-none", !mostrarExtras);
+
+        // ===== Tu lógica de variedades (igual, solo usando data.opciones) =====
+        const opciones = data.opciones || [];
+
+        if (opciones.length <= 1) {
+            // Solo un plato (sin variedades)
+            titulo.textContent = `Programar ${nombrePlato} para el día {{ dia_activo_obj|date:"l j"|capfirst }}`;
+            return;
+        }
+
+        // Hay varias variedades: mostrar checklist
+        if (bloqueVar) bloqueVar.classList.remove("d-none");
         titulo.textContent = `Tildá los platos que quieras programar para el día {{ dia_activo_obj|date:"l j"|capfirst }}`;
 
         for (const op of opciones) {
@@ -886,13 +927,22 @@ async function setPlatoInfo(platoId, tipo, nombrePlato) {
 
             wrap.appendChild(cb);
             wrap.appendChild(span);
-            lista.appendChild(wrap);
+            if (listaVar) listaVar.appendChild(wrap);
         }
     } catch (e) {
         console.error(e);
+        // fallback: título simple
+        titulo.textContent = `Programar ${nombrePlato} para el día {{ dia_activo_obj|date:"l j"|capfirst }}`;
     }
 }
 </script>
+
+
+
+
+
+
+
 
 <script>
 /*
