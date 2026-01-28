@@ -215,7 +215,7 @@ class Ingrediente(models.Model):
     CONSERVA = "conserva"
     AZUCAR = "azucar"
 
-    CONDIMENTO = "Condimento"
+    CONDIMENTO = "condimento"
     ESPECIA = "especia"
 
     DETALLE_CHOICES_GROUPED = [
@@ -245,8 +245,7 @@ class Ingrediente(models.Model):
             (HARINA_BLANCA, "Harina Blanca"),
             (ACEITE, "Aceite"),
             (CONSERVA, "Conserva"),
-            (AZUCAR, "Azúcar"),
-            (ESPECIA, "Especia"),
+            (AZUCAR, "Azúcar")
         ]),
      
         ("Condimentos", [
