@@ -403,3 +403,18 @@ section > .d-flex {
   object-fit: cover;
 }
 
+/* TITULO DEL MENU DE PROGRAMADOS */
+.menu-programado-faja {
+    background: #ffffff;
+    padding: 0px 8px;      /* 🔥 más larga: cubre icono + texto */
+    border-radius: 0px;     /* opcional, queda más fino */
+    z-index: 2;
+}
+
+.menu-programado-badge {
+    z-index: 3;
+}
+
+.menu-programado-text {
+    white-space: nowrap;
+}

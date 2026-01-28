@@ -32,7 +32,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <!-- mi css -->
-    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=43" rel="stylesheet">  <!-- al final + bust de caché -->
+    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=44" rel="stylesheet">  <!-- al final + bust de caché -->
 
 
    
@@ -753,18 +753,12 @@ Root globl para modales cargados dinámicamente (AJAX)
 
         <!-- Header -->
         <div class="modal-header">
-         
-            <h5 class="modal-title fw-normal">
-                <span id="modalTextoBase">
-                    Tildá los platos que quieras programar para el día
-                </span>
-                <span id="diaActivoTexto" class="fw-bold text-primary">
-                    {{ dia_activo_obj|date:"l j"|capfirst }}
-                </span>
-            </h5>
-
-         
-
+          <h5 class="modal-title" id="asignarPlatoLabel">
+            <span id="modalTitulo">
+              Tildá los platos que quieras programar para el día
+              <span id="diaActivoTexto">{{ dia_activo_obj|date:"l j"|capfirst }}</span>
+            </span>
+          </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
 
@@ -880,27 +874,7 @@ Root globl para modales cargados dinámicamente (AJAX)
 /* ============================================================
    PREPARAR MODAL AL ABRIR (PLATO / LUGAR)
    ============================================================ */
-function actualizarDiaActivoDesdeHidden() {
-  const hidden = document.getElementById("diaSeleccionado");
-  const span   = document.getElementById("diaActivoTexto");
-  if (!hidden || !span) return;
-
-  const fechaISO = hidden.value;
-  if (!fechaISO) return;
-
-  const f = new Date(fechaISO + "T00:00:00");
-  span.textContent = f.toLocaleDateString("es-ES", {
-    weekday: "long",
-    day: "numeric"
-  }).replace(/^\w/, c => c.toUpperCase());
-}
-
-
 async function setPlatoInfo(platoId, tipo, nombrePlato) {
-
-    actualizarDiaActivoDesdeHidden(); // ✅ ESTA LÍNEA FALTABA
-
-
   const idAsignar   = document.getElementById("platoIdInputAsignar");
   const tipoAsignar = document.getElementById("tipoObjetoAsignar");
   const titulo      = document.getElementById("modalTitulo");
@@ -924,8 +898,8 @@ async function setPlatoInfo(platoId, tipo, nombrePlato) {
 
   // Caso: no es plato (ej. lugar)
   if (tipo !== "plato") {
-    setTituloBase(`Programar ${nombrePlato} para el día`);
-
+    titulo.textContent =
+      `Programar ${nombrePlato} para el día {{ dia_activo_obj|date:"l j"|capfirst }}`;
     return;
   }
 
@@ -936,8 +910,8 @@ async function setPlatoInfo(platoId, tipo, nombrePlato) {
     });
 
     if (!res.ok) {
-      setTituloBase(`Programar ${nombrePlato} para el día`);
-
+      titulo.textContent =
+        `Programar ${nombrePlato} para el día {{ dia_activo_obj|date:"l j"|capfirst }}`;
       return;
     }
 
@@ -957,14 +931,15 @@ async function setPlatoInfo(platoId, tipo, nombrePlato) {
     const opciones = data.opciones || [];
 
     if (opciones.length <= 1) {
-      setTituloBase(`Programar ${nombrePlato} para el día`);
-
+      titulo.textContent =
+        `Programar ${nombrePlato} para el día {{ dia_activo_obj|date:"l j"|capfirst }}`;
       return;
     }
 
     // Mostrar checklist de variedades
     if (bloqueVar) bloqueVar.classList.remove("d-none");
-        setTituloBase("Tildá los platos que quieras programar para el día");
+    titulo.textContent =
+      `Tildá los platos que quieras programar para el día {{ dia_activo_obj|date:"l j"|capfirst }}`;
 
     for (const op of opciones) {
       const wrap = document.createElement("label");
@@ -988,8 +963,8 @@ async function setPlatoInfo(platoId, tipo, nombrePlato) {
 
   } catch (e) {
     console.error(e);
-    setTituloBase(`Programar ${nombrePlato} para el día`);
-
+    titulo.textContent =
+      `Programar ${nombrePlato} para el día {{ dia_activo_obj|date:"l j"|capfirst }}`;
   }
 }
 

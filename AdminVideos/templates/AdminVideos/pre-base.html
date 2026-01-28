@@ -348,16 +348,27 @@
           </div>
         </div>
 
-        <span class="menu-programado-badge position-absolute top-0 start-50 translate-middle text-primary">
-            <a href="/random-dia/{{ dia|date:'l'|slice:':2'|upper }}/" class="btn btn-sm text-danger p-0 me-1">
-                <span class="material-symbols-outlined" style="font-size: 20px;">wand_shine</span>
-            </a>
-            <span class="menu-programado-text">Menú programado</span>
+       <span class="menu-programado-badge position-absolute top-0 start-50 translate-middle">
 
-            {% if dia in platos_dia_x_dia %}
-                <!-- aquí tu botón eliminar menú si lo activás -->
-            {% endif %}
+    <span class="menu-programado-faja d-inline-flex align-items-center">
+
+        <a href="/random-dia/{{ dia|date:'l'|slice:':2'|upper }}/"
+           class="btn btn-sm text-danger p-0 me-1">
+            <span class="material-symbols-outlined" style="font-size: 20px;">
+                wand_shine
+            </span>
+        </a>
+
+        <span class="menu-programado-text text-primary">
+            Menú programado
         </span>
+
+    </span>
+
+    {% if dia in platos_dia_x_dia %}
+        <!-- botón eliminar -->
+    {% endif %}
+</span>
 
 
         {% if messages %}
