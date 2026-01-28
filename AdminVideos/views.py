@@ -1,19 +1,13 @@
 from collections import defaultdict
 from django.db.models import Count
 import json
-import locale
-from copy import deepcopy
-from django.contrib.auth import get_user_model
 import unicodedata
-from django.core.signing import dumps as signed_dumps
-from django.core.signing import loads as signed_loads, BadSignature
 from django import forms
 from django.contrib import messages  # Para mostrar mensajes al usuario
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
-from AdminVideos import models
 from AdminVideos.models import HabitoSemanal, Ingrediente, IngredienteEnPlato, IngredienteEstado, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string   # ✅ ← ESTA ES LA CLAVE
@@ -24,7 +18,7 @@ from django.views.generic import CreateView, UpdateView, DeleteView, DetailView
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from datetime import datetime, timedelta
-from .forms import IngredienteEnPlatoFormSet, LugarForm, MenuItemExtraFormSet, PlatoFilterForm, PlatoForm, CustomAuthenticationForm
+from .forms import IngredienteEnPlatoFormSet, LugarForm, PlatoFilterForm, PlatoForm, CustomAuthenticationForm
 from datetime import date, datetime
 from django.contrib.auth.models import User  # Asegúrate de importar el modelo User
 from django.db.models import Q, Subquery, OuterRef, Prefetch, Min, Max, F
@@ -41,30 +35,6 @@ from django.core.exceptions import ValidationError
 from django.core.exceptions import PermissionDenied
 from django.db.models.expressions import OrderBy
 
-
-@login_required
-@require_http_methods(["GET", "POST"])
-def menuitem_extras_modal(request, menuitem_id):
-    # 👇 clave: el dueño se valida por el MenuDia asociado
-    menu_item = get_object_or_404(MenuItem, id=menuitem_id, menu__propietario=request.user)
-
-    if request.method == "POST":
-        formset = MenuItemExtraFormSet(request.POST, instance=menu_item)
-        if formset.is_valid():
-            formset.save()
-            return JsonResponse({"ok": True})
-
-        html = render(request, "AdminVideos/partials/menuitem_extras_modal.html", {
-            "menu_item": menu_item,
-            "formset": formset,
-        }).content.decode("utf-8")
-        return JsonResponse({"ok": False, "html": html}, status=400)
-
-    formset = MenuItemExtraFormSet(instance=menu_item)
-    return render(request, "AdminVideos/partials/menuitem_extras_modal.html", {
-        "menu_item": menu_item,
-        "formset": formset,
-    })
 
 
 @login_required
@@ -2901,6 +2871,124 @@ def agregar_a_mi_lista(request, plato_id):
 
     return redirect("descartar-sugerido", plato_id=plato_id)
 
+# class AsignarPlato(View):
+
+#     def post(self, request):
+#         tipo = request.POST.get("tipo_elemento")   # "plato" | "lugar"
+#         objeto_id = request.POST.get("plato_id")
+#         dia = request.POST.get("dia") or request.session.get("dia_activo")
+#         momento = request.POST.get("comida")
+
+#         if not dia:
+#             messages.error(request, "No hay día activo seleccionado.")
+#             return redirect("filtro-de-platos")
+
+#         try:
+#             fecha = datetime.datetime.strptime(dia, "%Y-%m-%d").date()
+#         except Exception:
+#             messages.error(request, "Fecha inválida.")
+#             return redirect("filtro-de-platos")
+
+#         request.session["dia_activo"] = dia
+
+#         menu_dia, _ = MenuDia.objects.get_or_create(
+#             propietario=request.user,
+#             fecha=fecha,
+#         )
+
+#         try:
+#             if tipo == "plato":
+#                 # plato “en juego”
+#                 plato_base = Plato.objects.get(id=objeto_id)
+
+#                 # ✅ NUEVO: si el form manda platos_ids, asignamos solo esos
+#                 ids_post = [x for x in request.POST.getlist("platos_ids") if x.isdigit()]
+
+#                 if ids_post:
+#                     # solo permitimos asignar el plato base o sus hijas
+#                     allowed_ids = set([plato_base.id] + list(plato_base.variedades_hijas.values_list("id", flat=True)))
+#                     selected_ids = [int(x) for x in ids_post if int(x) in allowed_ids]
+
+#                     platos_a_asignar = list(Plato.objects.filter(id__in=selected_ids))
+
+#                 else:
+#                     # comportamiento actual (por ahora)
+#                     platos_a_asignar = [plato_base] + list(plato_base.variedades_hijas.all())
+                    
+
+#                 creados = 0
+#                 for p in platos_a_asignar:
+#                     _, created = MenuItem.objects.get_or_create(
+#                         menu=menu_dia,
+#                         momento=momento,
+#                         plato=p,
+#                         defaults={"elegido": True},
+#                     )
+#                     if created:
+#                         creados += 1
+
+#                 # ===== Guarnición y Salsa (opcionales, validadas) =====
+#                 def _tiene_tipo(plato: Plato, tipo_txt: str) -> bool:
+#                     # tu campo es un string con cosas tipo "Entrada,Principal,Postre"
+#                     # hacemos match simple por substring (y soportamos tilde en Guarnición)
+#                     t = (plato.tipos or "")
+#                     if tipo_txt == "Guarnicion":
+#                         return ("Guarnicion" in t) or ("Guarnición" in t)
+#                     return (tipo_txt in t)
+
+#                 def _asignar_extra(extra_id_str: str, tipo_requerido: str):
+#                     if not extra_id_str or not extra_id_str.isdigit():
+#                         return 0
+
+#                     extra = Plato.objects.filter(
+#                         id=int(extra_id_str),
+#                         propietario=request.user,
+#                     ).first()
+
+#                     if not extra:
+#                         return 0
+
+#                     # validar tipo exacto esperado
+#                     if not _tiene_tipo(extra, tipo_requerido):
+#                         return 0
+
+#                     _, created = MenuItem.objects.get_or_create(
+#                         menu=menu_dia,
+#                         momento=momento,
+#                         plato=extra,
+#                         defaults={"elegido": True},
+#                     )
+#                     return 1 if created else 0
+
+#                 creados_extras = 0
+#                 creados_extras += _asignar_extra(request.POST.get("guarnicion_id"), "Guarnicion")
+#                 creados_extras += _asignar_extra(request.POST.get("salsa_id"), "Salsa")
+
+#                 total = len(platos_a_asignar)
+#                 messages.success(
+#                     request,
+#                     f"Asignados {creados}/{total} platos a {momento}."
+#                     + (f" Extras agregados: {creados_extras}." if creados_extras else "")
+#                 )
+
+
+#             elif tipo == "lugar":
+#                 lugar = Lugar.objects.get(id=objeto_id)
+#                 MenuItem.objects.create(
+#                     menu=menu_dia,
+#                     momento=momento,
+#                     lugar=lugar,
+#                 )
+#                 messages.success(request, f"Lugar {lugar.nombre} asignado correctamente a {momento}.")
+#             else:
+#                 messages.error(request, "Tipo de elemento inválido.")
+
+#         except Exception:
+#             messages.warning(request, "Ese elemento ya estaba asignado a esa comida en ese día.")
+
+#         return redirect("filtro-de-platos")
+
+
 class AsignarPlato(View):
 
     def post(self, request):
@@ -2931,20 +3019,19 @@ class AsignarPlato(View):
                 # plato “en juego”
                 plato_base = Plato.objects.get(id=objeto_id)
 
-                # ✅ NUEVO: si el form manda platos_ids, asignamos solo esos
+                # ✅ Si el form manda platos_ids, asignamos solo esos (padre y/o hijas)
                 ids_post = [x for x in request.POST.getlist("platos_ids") if x.isdigit()]
 
                 if ids_post:
-                    # solo permitimos asignar el plato base o sus hijas
-                    allowed_ids = set([plato_base.id] + list(plato_base.variedades_hijas.values_list("id", flat=True)))
+                    allowed_ids = set(
+                        [plato_base.id] +
+                        list(plato_base.variedades_hijas.values_list("id", flat=True))
+                    )
                     selected_ids = [int(x) for x in ids_post if int(x) in allowed_ids]
-
                     platos_a_asignar = list(Plato.objects.filter(id__in=selected_ids))
-
                 else:
-                    # comportamiento actual (por ahora)
+                    # fallback: padre + todas sus hijas
                     platos_a_asignar = [plato_base] + list(plato_base.variedades_hijas.all())
-                    
 
                 creados = 0
                 for p in platos_a_asignar:
@@ -2957,16 +3044,16 @@ class AsignarPlato(View):
                     if created:
                         creados += 1
 
-                # ===== Guarnición y Salsa (opcionales, validadas) =====
+                # ===== Extras (0..N) validados por tipo =====
                 def _tiene_tipo(plato: Plato, tipo_txt: str) -> bool:
-                    # tu campo es un string con cosas tipo "Entrada,Principal,Postre"
-                    # hacemos match simple por substring (y soportamos tilde en Guarnición)
+                    # tu campo es un string tipo "Entrada,Principal,Postre"
+                    # match simple por substring (soporta tilde en Guarnición)
                     t = (plato.tipos or "")
                     if tipo_txt == "Guarnicion":
                         return ("Guarnicion" in t) or ("Guarnición" in t)
                     return (tipo_txt in t)
 
-                def _asignar_extra(extra_id_str: str, tipo_requerido: str):
+                def _asignar_extra(extra_id_str: str, tipo_requerido: str) -> int:
                     if not extra_id_str or not extra_id_str.isdigit():
                         return 0
 
@@ -2978,7 +3065,6 @@ class AsignarPlato(View):
                     if not extra:
                         return 0
 
-                    # validar tipo exacto esperado
                     if not _tiene_tipo(extra, tipo_requerido):
                         return 0
 
@@ -2990,9 +3076,21 @@ class AsignarPlato(View):
                     )
                     return 1 if created else 0
 
+                # 👇 NUEVO: leer extras múltiples del modal
+                extra_tipos = request.POST.getlist("extra_tipo")
+                extra_ids = request.POST.getlist("extra_id")
+
                 creados_extras = 0
-                creados_extras += _asignar_extra(request.POST.get("guarnicion_id"), "Guarnicion")
-                creados_extras += _asignar_extra(request.POST.get("salsa_id"), "Salsa")
+                for tipo_req, extra_id_str in zip(extra_tipos, extra_ids):
+                    # ignorar filas incompletas
+                    if not extra_id_str or not extra_id_str.isdigit():
+                        continue
+
+                    # solo tipos permitidos
+                    if tipo_req not in ("Guarnicion", "Salsa", "Postre"):
+                        continue
+
+                    creados_extras += _asignar_extra(extra_id_str, tipo_req)
 
                 total = len(platos_a_asignar)
                 messages.success(
@@ -3000,7 +3098,6 @@ class AsignarPlato(View):
                     f"Asignados {creados}/{total} platos a {momento}."
                     + (f" Extras agregados: {creados_extras}." if creados_extras else "")
                 )
-
 
             elif tipo == "lugar":
                 lugar = Lugar.objects.get(id=objeto_id)
@@ -3017,6 +3114,11 @@ class AsignarPlato(View):
             messages.warning(request, "Ese elemento ya estaba asignado a esa comida en ese día.")
 
         return redirect("filtro-de-platos")
+
+
+
+
+
 
 
 
