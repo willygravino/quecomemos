@@ -337,9 +337,31 @@
         dataType: "json",
         delay: 250,
         data: (params) => ({ q: params.term || "" }),
-        processResults: (data) => ({
-          results: (data || []).map((item) => ({ id: item.id, text: item.nombre })),
-        }),
+
+
+
+        
+
+        processResults: (data) => {
+          // Caso 1: API estilo Select2 => { results: [{id, text}, ...] }
+          if (data && Array.isArray(data.results)) {
+            return { results: data.results };
+          }
+
+          // Caso 2: tu API vieja => [{id, nombre}, ...]
+          if (Array.isArray(data)) {
+            return {
+              results: data.map((item) => ({ id: item.id, text: item.nombre })),
+            };
+          }
+
+          return { results: [] };
+        },
+
+
+
+
+
         cache: true,
       },
       minimumInputLength: 0,

@@ -299,14 +299,27 @@ def compartir_ing_plato(request, token, pk: int):
 
 @require_http_methods(["GET", "POST"])
 def api_ingredientes(request):
+
     if request.method == "GET":
         q = (request.GET.get('q') or '').strip()
         qs = Ingrediente.objects.all()
         if q:
             qs = qs.filter(nombre__icontains=q)
+
         ingredientes = qs.order_by('nombre')[:50]
-        data = [{"id": ing.id, "nombre": ing.nombre} for ing in ingredientes]
-        return JsonResponse(data, safe=False)
+
+        return JsonResponse({
+            "results": [{"id": ing.id, "text": ing.nombre} for ing in ingredientes]
+        })
+
+    # if request.method == "GET":
+    #     q = (request.GET.get('q') or '').strip()
+    #     qs = Ingrediente.objects.all()
+    #     if q:
+    #         qs = qs.filter(nombre__icontains=q)
+    #     ingredientes = qs.order_by('nombre')[:50]
+    #     data = [{"id": ing.id, "nombre": ing.nombre} for ing in ingredientes]
+    #     return JsonResponse(data, safe=False)
 
     # POST: crear si no existe; si existe, devolvés el existente (UX más amable)
     try:

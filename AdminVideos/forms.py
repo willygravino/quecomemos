@@ -46,18 +46,18 @@ class ElegirPlatoForm(forms.Form):
 
 class PlatoForm(forms.ModelForm):
     # Legacy (lo vas a borrar después, pero no rompe nada ahora)
-    variedad1 = forms.CharField(max_length=100, required=False)
-    ingredientes_de_variedad1 = forms.CharField(max_length=120, required=False)
-    variedad2 = forms.CharField(max_length=100, required=False)
-    ingredientes_de_variedad2 = forms.CharField(max_length=120, required=False)
-    variedad3 = forms.CharField(max_length=100, required=False)
-    ingredientes_de_variedad3 = forms.CharField(max_length=120, required=False)
-    variedad4 = forms.CharField(max_length=100, required=False)
-    ingredientes_de_variedad4 = forms.CharField(max_length=120, required=False)
-    variedad5 = forms.CharField(max_length=100, required=False)
-    ingredientes_de_variedad5 = forms.CharField(max_length=120, required=False)
-    variedad6 = forms.CharField(max_length=100, required=False)
-    ingredientes_de_variedad6 = forms.CharField(max_length=120, required=False)
+    # variedad1 = forms.CharField(max_length=100, required=False)
+    # ingredientes_de_variedad1 = forms.CharField(max_length=120, required=False)
+    # variedad2 = forms.CharField(max_length=100, required=False)
+    # ingredientes_de_variedad2 = forms.CharField(max_length=120, required=False)
+    # variedad3 = forms.CharField(max_length=100, required=False)
+    # ingredientes_de_variedad3 = forms.CharField(max_length=120, required=False)
+    # variedad4 = forms.CharField(max_length=100, required=False)
+    # ingredientes_de_variedad4 = forms.CharField(max_length=120, required=False)
+    # variedad5 = forms.CharField(max_length=100, required=False)
+    # ingredientes_de_variedad5 = forms.CharField(max_length=120, required=False)
+    # variedad6 = forms.CharField(max_length=100, required=False)
+    # ingredientes_de_variedad6 = forms.CharField(max_length=120, required=False)
 
     # ✅ Tipos: lista durante validación, CSV al guardar
     tipos = forms.MultipleChoiceField(
@@ -167,13 +167,24 @@ class IngredienteEnPlatoForm(forms.ModelForm):
         self.fields['unidad'].choices = [('', 'Unidad de medida')] + list(self.fields['unidad'].choices)
 
     def save(self, commit=True):
-        nombre = self.cleaned_data.get('nombre_ingrediente')
+        # 1️⃣ Si viene ingrediente_id desde el hidden (Select2), usarlo
+        ingrediente_id = self.data.get(self.add_prefix("ingrediente"))
+        if ingrediente_id:
+            self.instance.ingrediente_id = ingrediente_id
+            return super().save(commit=commit)
+
+        # 2️⃣ Fallback: si no vino ID, usar nombre_ingrediente
+        nombre = (self.cleaned_data.get("nombre_ingrediente") or "").strip()
         if nombre:
-            ingrediente_obj, created = Ingrediente.objects.get_or_create(
-                nombre__iexact=nombre, defaults={'nombre': nombre}
-            )
+            ingrediente_obj = Ingrediente.objects.filter(
+                nombre__iexact=nombre
+            ).first()
+            if not ingrediente_obj:
+                ingrediente_obj = Ingrediente.objects.create(nombre=nombre)
             self.instance.ingrediente = ingrediente_obj
+
         return super().save(commit=commit)
+
     
     def clean_cantidad(self):
         cantidad = self.cleaned_data.get('cantidad')
