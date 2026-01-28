@@ -744,8 +744,7 @@ Root globl para modales cargados dinámicamente (AJAX)
  Contenedor único para modales dinámicos (ingredientes, compartir, etc.) -->
 <div id="modal-root"></div>
 
-{# ===== Modal global: asignar plato ===== #}
-{# ===== Modal global: asignar plato ===== #}
+ <!-- ===== Modal global: asignar plato =====  -->
 <div class="modal fade" id="asignarPlatoModal" tabindex="-1" aria-labelledby="asignarPlatoLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -754,12 +753,18 @@ Root globl para modales cargados dinámicamente (AJAX)
 
         <!-- Header -->
         <div class="modal-header">
-          <h5 class="modal-title" id="asignarPlatoLabel">
-            <span id="modalTitulo">
-              Tildá los platos que quieras programar para el día
-              <span id="diaActivoTexto">{{ dia_activo_obj|date:"l j"|capfirst }}</span>
-            </span>
-          </h5>
+         
+            <h5 class="modal-title fw-normal">
+                <span id="modalTextoBase">
+                    Tildá los platos que quieras programar para el día
+                </span>
+                <span id="diaActivoTexto" class="fw-bold text-primary">
+                    {{ dia_activo_obj|date:"l j"|capfirst }}
+                </span>
+            </h5>
+
+         
+
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
 
@@ -875,7 +880,27 @@ Root globl para modales cargados dinámicamente (AJAX)
 /* ============================================================
    PREPARAR MODAL AL ABRIR (PLATO / LUGAR)
    ============================================================ */
+function actualizarDiaActivoDesdeHidden() {
+  const hidden = document.getElementById("diaSeleccionado");
+  const span   = document.getElementById("diaActivoTexto");
+  if (!hidden || !span) return;
+
+  const fechaISO = hidden.value;
+  if (!fechaISO) return;
+
+  const f = new Date(fechaISO + "T00:00:00");
+  span.textContent = f.toLocaleDateString("es-ES", {
+    weekday: "long",
+    day: "numeric"
+  }).replace(/^\w/, c => c.toUpperCase());
+}
+
+
 async function setPlatoInfo(platoId, tipo, nombrePlato) {
+
+    actualizarDiaActivoDesdeHidden(); // ✅ ESTA LÍNEA FALTABA
+
+
   const idAsignar   = document.getElementById("platoIdInputAsignar");
   const tipoAsignar = document.getElementById("tipoObjetoAsignar");
   const titulo      = document.getElementById("modalTitulo");
@@ -899,8 +924,8 @@ async function setPlatoInfo(platoId, tipo, nombrePlato) {
 
   // Caso: no es plato (ej. lugar)
   if (tipo !== "plato") {
-    titulo.textContent =
-      `Programar ${nombrePlato} para el día {{ dia_activo_obj|date:"l j"|capfirst }}`;
+    setTituloBase(`Programar ${nombrePlato} para el día`);
+
     return;
   }
 
@@ -911,8 +936,8 @@ async function setPlatoInfo(platoId, tipo, nombrePlato) {
     });
 
     if (!res.ok) {
-      titulo.textContent =
-        `Programar ${nombrePlato} para el día {{ dia_activo_obj|date:"l j"|capfirst }}`;
+      setTituloBase(`Programar ${nombrePlato} para el día`);
+
       return;
     }
 
@@ -932,15 +957,14 @@ async function setPlatoInfo(platoId, tipo, nombrePlato) {
     const opciones = data.opciones || [];
 
     if (opciones.length <= 1) {
-      titulo.textContent =
-        `Programar ${nombrePlato} para el día {{ dia_activo_obj|date:"l j"|capfirst }}`;
+      setTituloBase(`Programar ${nombrePlato} para el día`);
+
       return;
     }
 
     // Mostrar checklist de variedades
     if (bloqueVar) bloqueVar.classList.remove("d-none");
-    titulo.textContent =
-      `Tildá los platos que quieras programar para el día {{ dia_activo_obj|date:"l j"|capfirst }}`;
+        setTituloBase("Tildá los platos que quieras programar para el día");
 
     for (const op of opciones) {
       const wrap = document.createElement("label");
@@ -964,8 +988,8 @@ async function setPlatoInfo(platoId, tipo, nombrePlato) {
 
   } catch (e) {
     console.error(e);
-    titulo.textContent =
-      `Programar ${nombrePlato} para el día {{ dia_activo_obj|date:"l j"|capfirst }}`;
+    setTituloBase(`Programar ${nombrePlato} para el día`);
+
   }
 }
 
