@@ -303,8 +303,34 @@ def api_ingredientes(request):
     if request.method == "GET":
         q = (request.GET.get('q') or '').strip()
         qs = Ingrediente.objects.all()
+    
+
         if q:
-            qs = qs.filter(nombre__icontains=q)
+            q_low = q.lower()
+
+            # Expansiones rápidas (sin tocar modelo)
+            EXPAND = {
+                "carne": ["nalga", "bola de lomo", "cuadrada", "peceto", "carne picada", "asado", "vacio", "entraña", "roast beef", "ojo de bife", "bife de chorizo"],
+                "vaca":  ["nalga", "bola de lomo", "cuadrada", "peceto", "carne picada", "asado", "vacio", "entraña"],
+                "res":   ["nalga", "bola de lomo", "cuadrada", "peceto", "carne picada", "asado", "vacio", "entraña"],
+                "pollo": ["suprema", "pechuga", "muslo", "pata", "alitas", "pollo entero", "cuarto trasero"],
+                "cerdo": ["bondiola", "carré", "costilla", "pechito", "matambre", "paleta", "chuleta", "jamón de cerdo"],
+                "cordero": ["pierna", "costillar", "paleta", "chuleta", "cordero trozado"],
+                "queso": ["mozzarella", "cremoso", "tybo", "pategrás", "sardo", "reggianito", "azul", "port salut", "ricota"],
+            }
+
+            terms = [q]
+            if q_low in EXPAND:
+                terms = [q] + EXPAND[q_low]   # incluye el texto original también
+
+
+            from django.db.models import Q
+            cond = Q()
+            for t in terms:
+                cond |= Q(nombre__icontains=t)
+
+            qs = qs.filter(cond)
+
 
         ingredientes = qs.order_by('nombre')[:50]
 
