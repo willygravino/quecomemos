@@ -1,0 +1,315 @@
+nombre,tipo,detalle
+Aceite de girasol,almacen,aceite
+Aceite de oliva,almacen,aceite
+Aceite de sésamo,almacen,aceite
+Azúcar,almacen,azucar
+Azúcar impalpable,almacen,azucar
+Azúcar mascabo,almacen,azucar
+Azúcar rubia,almacen,azucar
+Arroz,almacen,cereal
+Arroz basmati,almacen,cereal
+Arroz integral,almacen,cereal
+Arroz jazmín,almacen,cereal
+Arroz yamaní,almacen,cereal
+Avena,almacen,cereal
+Cuscús,almacen,cereal
+Fideos,almacen,cereal
+Galletas,almacen,cereal
+Galletitas,almacen,cereal
+Maicena,almacen,cereal
+Pan rallado,almacen,cereal
+Pastas secas,almacen,cereal
+Quinoa,almacen,cereal
+Tostadas,almacen,cereal
+Trigo burgol,almacen,cereal
+Arvejas en lata,almacen,conserva
+Atún en lata,almacen,conserva
+Choclo en lata,almacen,conserva
+Extracto de tomate,almacen,conserva
+Jengibre encurtido,almacen,conserva
+Kimchi,almacen,conserva
+Salsa de tomate,almacen,conserva
+Tomate triturado,almacen,conserva
+Ají molido,almacen,especia
+Canela,almacen,especia
+Chimichurri seco,almacen,especia
+Cinco especias,almacen,especia
+Comino,almacen,especia
+Condimento para empanadas,almacen,especia
+Condimento para pizza,almacen,especia
+Curry en polvo,almacen,especia
+Cúrcuma,almacen,especia
+Garam masala,almacen,especia
+Laurel,almacen,especia
+Mix para tacos,almacen,especia
+Nuez moscada,almacen,especia
+Orégano seco,almacen,especia
+Pimentón ahumado,almacen,especia
+Pimentón dulce,almacen,especia
+Pimienta blanca,almacen,especia
+Pimienta en grano,almacen,especia
+Pimienta negra,almacen,especia
+Ras el hanout,almacen,especia
+Za'atar,almacen,especia
+Harina 000,almacen,harina_blanca
+Harina 0000,almacen,harina_blanca
+Harina de arroz,almacen,harina_blanca
+Harina de avena,almacen,harina_blanca
+Harina de garbanzo,almacen,harina_blanca
+Harina de maíz,almacen,harina_blanca
+Harina integral,almacen,harina_blanca
+Arvejas secas,almacen,legumbre
+Garbanzos,almacen,legumbre
+Garbanzos cocidos,almacen,legumbre
+Lentejas,almacen,legumbre
+Lentejas negras,almacen,legumbre
+Lentejas rojas,almacen,legumbre
+Porotos aduki,almacen,legumbre
+Porotos blancos,almacen,legumbre
+Porotos colorados,almacen,legumbre
+Porotos mung,almacen,legumbre
+Porotos negros,almacen,legumbre
+Almendras,almacen,otro
+Avellanas,almacen,otro
+Cacao amargo,almacen,otro
+Caldo en cubo,almacen,otro
+Chocolate amargo,almacen,otro
+Extracto de vainilla,almacen,otro
+Ketchup,almacen,otro
+Leche de coco,almacen,otro
+Levadura fresca,almacen,otro
+Levadura seca,almacen,otro
+Maní,almacen,otro
+Mayonesa,almacen,otro
+Miel,almacen,otro
+Mirin,almacen,otro
+Mostaza,almacen,otro
+Nori,almacen,otro
+Nueces,almacen,otro
+Pasta de ajo,almacen,otro
+Pasta de curry amarillo,almacen,otro
+Pasta de curry rojo,almacen,otro
+Pasta de curry verde,almacen,otro
+Pasta de jengibre,almacen,otro
+Pasta de maní,almacen,otro
+Pasta gochujang,almacen,otro
+Pasta miso,almacen,otro
+Polvo de hornear,almacen,otro
+Sal ahumada,almacen,otro
+Sal fina,almacen,otro
+Sal gruesa,almacen,otro
+Salsa de ostras,almacen,otro
+Salsa de pescado,almacen,otro
+Salsa de soja,almacen,otro
+Salsa de soja light,almacen,otro
+Salsa hoisin,almacen,otro
+Salsa ponzu,almacen,otro
+Salsa teriyaki,almacen,otro
+Semillas de chía,almacen,otro
+Semillas de lino,almacen,otro
+Semillas de sésamo,almacen,otro
+Sriracha,almacen,otro
+Tahini,almacen,otro
+Vinagre,almacen,otro
+Vinagre de arroz,almacen,otro
+Wasabi,almacen,otro
+Chinchulines,carniceria,achuras
+Chorizo,carniceria,achuras
+Hígado,carniceria,achuras
+Molleja,carniceria,achuras
+Morcilla,carniceria,achuras
+Riñón,carniceria,achuras
+Alitas de pollo,carniceria,ave
+Cuarto trasero de pollo,carniceria,ave
+Muslo de pollo,carniceria,ave
+Pata de pollo,carniceria,ave
+Pechuga de pollo,carniceria,ave
+Pollo entero,carniceria,ave
+Suprema de pollo,carniceria,ave
+Asado,carniceria,carne_roja
+Asado de tira,carniceria,carne_roja
+Bife de chorizo,carniceria,carne_roja
+Bola de lomo,carniceria,carne_roja
+Brazuelo,carniceria,carne_roja
+Carne picada,carniceria,carne_roja
+Cuadrada,carniceria,carne_roja
+Entraña,carniceria,carne_roja
+Garrón,carniceria,carne_roja
+Lomo,carniceria,carne_roja
+Nalga,carniceria,carne_roja
+Ojo de bife,carniceria,carne_roja
+Paleta,carniceria,carne_roja
+Peceto,carniceria,carne_roja
+Roast beef,carniceria,carne_roja
+Tapa de asado,carniceria,carne_roja
+Vacío,carniceria,carne_roja
+Bondiola de cerdo,carniceria,cerdo
+Carré de cerdo,carniceria,cerdo
+Chuleta de cerdo,carniceria,cerdo
+Costilla de cerdo,carniceria,cerdo
+Jamón de cerdo,carniceria,cerdo
+Matambre de cerdo,carniceria,cerdo
+Paleta de cerdo,carniceria,cerdo
+Pechito de cerdo,carniceria,cerdo
+Chuleta de cordero,carniceria,cordero
+Cordero trozado,carniceria,cordero
+Costillar de cordero,carniceria,cordero
+Paleta de cordero,carniceria,cordero
+Pierna de cordero,carniceria,cordero
+Chorizo seco,fiambrieria,embutido
+Longaniza,fiambrieria,embutido
+Mortadela,fiambrieria,embutido
+Salame,fiambrieria,embutido
+Salame milán,fiambrieria,embutido
+Salchichón primavera,fiambrieria,embutido
+Bondiola,fiambrieria,fiambre
+Jamón,fiambrieria,fiambre
+Jamón cocido,fiambrieria,fiambre
+Jamón crudo,fiambrieria,fiambre
+Lomo cocido,fiambrieria,fiambre
+Panceta,fiambrieria,fiambre
+Queso azul,fiambrieria,queso
+Queso cremoso,fiambrieria,queso
+Queso mozzarella,fiambrieria,queso
+Queso pategrás,fiambrieria,queso
+Queso port salut,fiambrieria,queso
+Queso rallado,fiambrieria,queso
+Queso reggianito,fiambrieria,queso
+Queso ricota,fiambrieria,queso
+Queso sardo,fiambrieria,queso
+Queso tybo,fiambrieria,queso
+Crema de leche,lacteos,otro
+Dulce de leche,lacteos,otro
+Flan,lacteos,otro
+Leche descremada,lacteos,otro
+Leche en polvo,lacteos,otro
+Leche entera,lacteos,otro
+Leche semidescremada,lacteos,otro
+Manteca,lacteos,otro
+Margarina,lacteos,otro
+Postre lácteo,lacteos,otro
+Queso untable,lacteos,otro
+Yogur bebible,lacteos,otro
+Yogur griego,lacteos,otro
+Yogur natural,lacteos,otro
+Arvejas congeladas,otro,otro
+Brócoli congelado,otro,otro
+Choclo congelado,otro,otro
+Empanadas congeladas,otro,otro
+Espinaca congelada,otro,otro
+Frutillas congeladas,otro,otro
+Hamburguesas congeladas,otro,otro
+Helado,otro,otro
+Milanesas congeladas,otro,otro
+Mix de frutos rojos congelados,otro,otro
+Nuggets de pollo,otro,otro
+Papas fritas congeladas,otro,otro
+Pescado congelado,otro,otro
+Pizzas congeladas,otro,otro
+Vegetales mixtos congelados,otro,otro
+Bizcochos,panaderia,pan
+Facturas,panaderia,pan
+Focaccia,panaderia,pan
+Medialunas,panaderia,pan
+Pan de hamburguesa,panaderia,pan
+Pan de molde,panaderia,pan
+Pan de panchos,panaderia,pan
+Pan flauta,panaderia,pan
+Pan francés,panaderia,pan
+Pan integral,panaderia,pan
+Pan lactal,panaderia,pan
+Pebete,panaderia,pan
+Pizza,panaderia,pan
+Prepizza,panaderia,pan
+Tortillas,panaderia,pan
+Almeja,pescaderia,marisco
+Calamar,pescaderia,marisco
+Camarón,pescaderia,marisco
+Langostino,pescaderia,marisco
+Mejillón,pescaderia,marisco
+Vieira,pescaderia,marisco
+Abadejo,pescaderia,pescado
+Anchoa,pescaderia,pescado
+Atún,pescaderia,pescado
+Atún fresco,pescaderia,pescado
+Brótola,pescaderia,pescado
+Corvina,pescaderia,pescado
+Lenguado,pescaderia,pescado
+Merluza,pescaderia,pescado
+Merluza negra,pescaderia,pescado
+Pejerrey,pescaderia,pescado
+Salmón,pescaderia,pescado
+Sardina,pescaderia,pescado
+Trucha,pescaderia,pescado
+Ananá,verduleria,fruta
+Arándanos,verduleria,fruta
+Banana,verduleria,fruta
+Cerezas,verduleria,fruta
+Ciruela,verduleria,fruta
+Durazno,verduleria,fruta
+Frambuesas,verduleria,fruta
+Frutilla,verduleria,fruta
+Granada,verduleria,fruta
+Higos,verduleria,fruta
+Kiwi,verduleria,fruta
+Limón,verduleria,fruta
+Mandarina,verduleria,fruta
+Mango,verduleria,fruta
+Manzana,verduleria,fruta
+Melón,verduleria,fruta
+Moras,verduleria,fruta
+Naranja,verduleria,fruta
+Papaya,verduleria,fruta
+Pera,verduleria,fruta
+Sandía,verduleria,fruta
+Uva,verduleria,fruta
+Albahaca,verduleria,hierba_fresca
+Cilantro,verduleria,hierba_fresca
+Orégano fresco,verduleria,hierba_fresca
+Perejil,verduleria,hierba_fresca
+Romero,verduleria,hierba_fresca
+Tomillo,verduleria,hierba_fresca
+Batata,verduleria,tuberculo
+Nabo,verduleria,tuberculo
+Papa,verduleria,tuberculo
+Rábano blanco,verduleria,tuberculo
+Acelga,verduleria,verdura
+Achicoria,verduleria,verdura
+Ajo,verduleria,verdura
+Apio,verduleria,verdura
+Berenjena,verduleria,verdura
+Berro,verduleria,verdura
+Brócoli,verduleria,verdura
+Calabaza,verduleria,verdura
+Cebolla,verduleria,verdura
+Cebolla de verdeo,verduleria,verdura
+Cebolla morada,verduleria,verdura
+Chalota,verduleria,verdura
+Choclo,verduleria,verdura
+Coliflor,verduleria,verdura
+Cúrcuma fresca,verduleria,verdura
+Endivia,verduleria,verdura
+Escarola,verduleria,verdura
+Espinaca,verduleria,verdura
+Hinojo,verduleria,verdura
+Jengibre,verduleria,verdura
+Kale,verduleria,verdura
+Lechuga,verduleria,verdura
+Morrón amarillo,verduleria,verdura
+Morrón rojo,verduleria,verdura
+Morrón verde,verduleria,verdura
+Pepino,verduleria,verdura
+Puerro,verduleria,verdura
+Radicheta,verduleria,verdura
+Remolacha,verduleria,verdura
+Repollo,verduleria,verdura
+Repollo morado,verduleria,verdura
+Rábano,verduleria,verdura
+Rúcula,verduleria,verdura
+Tomate,verduleria,verdura
+Tomate cherry,verduleria,verdura
+Tomate perita,verduleria,verdura
+Zanahoria,verduleria,verdura
+Zapallo,verduleria,verdura
+Zapallo anco,verduleria,verdura
+Zucchini,verduleria,verdura
