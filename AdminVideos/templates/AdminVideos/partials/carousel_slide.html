@@ -1,0 +1,39 @@
+<div class="carousel-item {% if forloop.first %}active{% endif %}">
+  <div class="p-1">
+    <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">{{ titulo }}</h6>
+    {% if platos %}
+      {% for plato in platos %}
+        <div class="mb-1 ms-1 d-flex align-items-center text-primary">
+          <a href="{% url 'videos-update' plato.plato_id %}" class="text-decoration-none me-2">
+            &nbsp; {{ plato.nombre }}
+          </a>
+
+          <a href="{% url 'fijar-o-eliminar-habito' plato.plato_id tipo %}"
+             title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}"
+             class="ms-2">
+            <i class="bi bi-pin-angle-fill fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
+          </a>
+
+          <a href="{% url 'eliminar-programado' plato.plato_id tipo dia %}"
+             class="btn btn-sm p-0 ms-2" title="Eliminar">
+            <i class="fa-solid fa-trash-can"></i>
+          </a>
+        </div>
+
+        <!-- Solo mostrar los botones si el plato es de tipo 'Principal' -->
+        {% if 'Principal' in plato.tipo %}
+          <div class="ms-5">
+            <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;" id="agregar-salsa-{{ plato.plato_id }}">
+              + Salsa
+            </button>
+            <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;" id="agregar-guarnicion-{{ plato.plato_id }}">
+              + Guarnición
+            </button>
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% else %}
+      <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
+    {% endif %}
+  </div>
+</div>
