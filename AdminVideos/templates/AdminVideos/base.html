@@ -90,17 +90,6 @@
 
             </li>
 
-            {% if parametro == "Dip" %}
-            <li class="nav-item active">
-                {% else %}
-            <li class="nav-item">
-                {% endif %}
-
-                <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Dip">
-                    <i class="fas fa-solid fa-bowl-rice" style="font-size: 1.3rem;"></i>
-                    <span>Dips y Salsas</span>
-                </a>
-            </li>
 
 
             {% if parametro == "Principal" %}
@@ -114,6 +103,17 @@
                 </a>
             </li>
 
+            {% if parametro == "Dip" %}
+            <li class="nav-item active">
+                {% else %}
+            <li class="nav-item">
+                {% endif %}
+
+                <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Dip">
+                    <i class="fas fa-solid fa-bowl-rice" style="font-size: 1.3rem;"></i>
+                    <span>Dips y Salsas</span>
+                </a>
+            </li>
 
             {% if parametro == "Guarnicion" %}
             <li class="nav-item active">
@@ -145,6 +145,7 @@
                 {% endif %}
                 <a class="nav-link" href="{% url 'filtro-de-platos' %}?tipopag=Trago">
                     <i class="fa-solid fa-martini-glass-citrus" style="font-size: 1.3rem;"></i>
+                    <span>Bebidas</span>
                     <span>Tragos</span>
                 </a>
             </li>

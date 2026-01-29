@@ -2299,6 +2299,7 @@ def FiltroDePlatos(request):
                 "plato_id": item.plato.id,              # ✅ para seguir yendo a videos-update
                 "nombre": item.plato.nombre_plato,
                 "fijo": fijo,
+                "tipo": item.plato.tipos,
                 "dia_semana": dia_semana,
             })
 
@@ -2308,6 +2309,7 @@ def FiltroDePlatos(request):
                 "menuitem_id": item.id,   # ✅ también existe el MenuItem aunque sea lugar
                 "lugar_id": item.lugar.id,
                 "nombre": item.lugar.nombre,
+                "tipo": "",
                 "fijo": False
             })
 
