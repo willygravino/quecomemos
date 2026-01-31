@@ -23,26 +23,195 @@
                 {% for dia_plato in platos_dia_x_dia.items %}
                   {% if dia_plato.0 == dia %}
 
+                   
                     {# ========================= #}
                     {# DESKTOP / TABLET: 4 columnas (como ahora) #}
                     {# ========================= #}
                     <div class="d-none d-md-block">
                       <div class="row gx-0">
-
                         <!-- Desayuno -->
-                        {% include 'AdminVideos/partials/plato_card.html' with titulo='Desayuno' platos=dia_plato.1.desayuno tipo='desayuno' dia=dia %}
+                        <div class="col-md-3">
+                          <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Desayuno</h6>
+
+                          {% if dia_plato.1.desayuno %}
+                            {% for plato in dia_plato.1.desayuno %}
+                              <div class="mb-1 ms-1 d-flex align-items-center text-primary justify-content-between">
+                                <!-- Nombre del plato que usa todo el ancho disponible -->
+                                  <a href="{% url 'videos-update' plato.plato_id %}" class="text-decoration-none me-2 w-75">
+                                    &nbsp; {{ plato.nombre }} plato id {{ plato.plato_id }}
+                                  </a>
+                              
+                                <!-- Íconos de Fijar y Eliminar al lado del nombre -->
+                                <div class="d-flex">
+                                  <a href="{% url 'fijar-o-eliminar-habito' plato.plato_id 'desayuno' %}"
+                                    title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}"
+                                    class="ms-2">
+                                    <i class="bi bi-pin-angle-fill fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
+                                  </a>
+
+                                  <a href="{% url 'eliminar-programado' plato.plato_id 'desayuno' dia %}"
+                                    class="btn btn-sm p-0 ms-2" title="Eliminar">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                  </a>
+                                </div>
+                              </div>
+
+                              <!-- Solo mostrar los botones si el plato es de tipo 'Principal' -->
+                              {% if 'Principal' in plato.tipo %}
+                                <div class="ms-5">
+                                  <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;" id="agregar-salsa-{{ plato.plato_id }}">
+                                    + Salsa
+                                  </button>
+                                  <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;" id="agregar-guarnicion-{{ plato.plato_id }}">
+                                    + Guarnición
+                                  </button>
+                                </div>
+                              {% endif %}
+                            {% endfor %}
+                          {% else %}
+                            <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
+                          {% endif %}
+                        </div>
 
                         <!-- Almuerzo -->
-                        {% include 'AdminVideos/partials/plato_card.html' with titulo='Almuerzo' platos=dia_plato.1.almuerzo tipo='almuerzo' dia=dia %}
+                        <div class="col-md-3">
+                          <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Almuerzo</h6>
+
+                          {% if dia_plato.1.almuerzo %}
+                            {% for plato in dia_plato.1.almuerzo %}
+                              <div class="mb-1 ms-1 d-flex align-items-center text-primary justify-content-between">
+                                <!-- Nombre del plato que usa todo el ancho disponible -->
+                                  <a href="{% url 'videos-update' plato.plato_id %}" class="text-decoration-none me-2 w-75">
+                                    &nbsp; {{ plato.nombre }} plato id {{ plato.plato_id }}
+                                  </a>
+                              
+
+                                <!-- Íconos de Fijar y Eliminar al lado del nombre -->
+                                <div class="d-flex">
+                                  <a href="{% url 'fijar-o-eliminar-habito' plato.plato_id 'almuerzo' %}"
+                                    title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}"
+                                    class="ms-2">
+                                    <i class="bi bi-pin-angle-fill fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
+                                  </a>
+
+                                  <a href="{% url 'eliminar-programado' plato.plato_id 'almuerzo' dia %}"
+                                    class="btn btn-sm p-0 ms-2" title="Eliminar">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                  </a>
+                                </div>
+                              </div>
+
+                              <!-- Solo mostrar los botones si el plato es de tipo 'Principal' -->
+                              {% if 'Principal' in plato.tipo %}
+                                <div class="ms-5">
+                                  <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;" id="agregar-salsa-{{ plato.plato_id }}">
+                                    + Salsa
+                                  </button>
+                                  <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;" id="agregar-guarnicion-{{ plato.plato_id }}">
+                                    + Guarnición
+                                  </button>
+                                </div>
+                              {% endif %}
+                            {% endfor %}
+                          {% else %}
+                            <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
+                          {% endif %}
+                        </div>
 
                         <!-- Merienda -->
-                        {% include 'AdminVideos/partials/plato_card.html' with titulo='Merienda' platos=dia_plato.1.merienda tipo='merienda' dia=dia %}
+                        <div class="col-md-3">
+                          <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Merienda</h6>
+
+                          {% if dia_plato.1.merienda %}
+                            {% for plato in dia_plato.1.merienda %}
+                              <div class="mb-1 ms-1 d-flex align-items-center text-primary justify-content-between">
+                                <!-- Nombre del plato que usa todo el ancho disponible -->
+                                  <a href="{% url 'videos-update' plato.plato_id %}" class="text-decoration-none me-2 w-75">
+                                    &nbsp; {{ plato.nombre }} plato id {{ plato.plato_id }}
+                                  </a>
+                             
+
+                                <!-- Íconos de Fijar y Eliminar al lado del nombre -->
+                                <div class="d-flex">
+                                  <a href="{% url 'fijar-o-eliminar-habito' plato.plato_id 'merienda' %}"
+                                    title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}"
+                                    class="ms-2">
+                                    <i class="bi bi-pin-angle-fill fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
+                                  </a>
+
+                                  <a href="{% url 'eliminar-programado' plato.plato_id 'merienda' dia %}"
+                                    class="btn btn-sm p-0 ms-2" title="Eliminar">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                  </a>
+                                </div>
+                              </div>
+
+                              <!-- Solo mostrar los botones si el plato es de tipo 'Principal' -->
+                              {% if 'Principal' in plato.tipo %}
+                                <div class="ms-5">
+                                  <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;" id="agregar-salsa-{{ plato.plato_id }}">
+                                    + Salsa
+                                  </button>
+                                  <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;" id="agregar-guarnicion-{{ plato.plato_id }}">
+                                    + Guarnición
+                                  </button>
+                                </div>
+                              {% endif %}
+                            {% endfor %}
+                          {% else %}
+                            <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
+                          {% endif %}
+                        </div>
 
                         <!-- Cena -->
-                        {% include 'AdminVideos/partials/plato_card.html' with titulo='Cena' platos=dia_plato.1.cena tipo='cena' dia=dia %}
+                        <div class="col-md-3">
+                          <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Cena</h6>
 
+                          {% if dia_plato.1.cena %}
+                            {% for plato in dia_plato.1.cena %}
+                              <div class="mb-1 ms-1 d-flex align-items-center text-primary justify-content-between">
+                                <!-- Nombre del plato que usa todo el ancho disponible -->
+                                  <a href="{% url 'videos-update' plato.plato_id %}" class="text-decoration-none me-2 w-75">
+                                    &nbsp; {{ plato.nombre }} plato id {{ plato.plato_id }}
+                                  </a>
+                             
+
+                                <!-- Íconos de Fijar y Eliminar al lado del nombre -->
+                                <div class="d-flex">
+                                  <a href="{% url 'fijar-o-eliminar-habito' plato.plato_id 'cena' %}"
+                                    title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}"
+                                    class="ms-2">
+                                    <i class="bi bi-pin-angle-fill fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
+                                  </a>
+
+                                  <a href="{% url 'eliminar-programado' plato.plato_id 'cena' dia %}"
+                                    class="btn btn-sm p-0 ms-2" title="Eliminar">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                  </a>
+                                </div>
+                              </div>
+
+                              <!-- Solo mostrar los botones si el plato es de tipo 'Principal' -->
+                              {% if 'Principal' in plato.tipo %}
+                                <div class="ms-5">
+                                  <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;" id="agregar-salsa-{{ plato.plato_id }}">
+                                    + Salsa
+                                  </button>
+                                  <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;" id="agregar-guarnicion-{{ plato.plato_id }}">
+                                    + Guarnición
+                                  </button>
+                                </div>
+                              {% endif %}
+                            {% endfor %}
+                          {% else %}
+                            <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
+                          {% endif %}
+                        </div>
                       </div>
                     </div>
+
+
+
 
                     {# ========================= #}
                     {# MOBILE: Carousel 4 slides (1 comida por slide) #}

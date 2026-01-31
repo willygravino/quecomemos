@@ -2272,9 +2272,54 @@ def FiltroDePlatos(request):
         dia_activo_obj = datetime.datetime.strptime(dia_activo, "%Y-%m-%d").date()
 
 
+    # # Inicializar un diccionario donde cada fecha tendrá listas separadas para cada tipo de comida
+    # platos_dia_x_dia = defaultdict(lambda: {"desayuno": [], "almuerzo": [], "merienda": [], "cena": []})
+
+
+    # items = (
+    #     MenuItem.objects
+    #     .filter(
+    #         menu__propietario=request.user,
+    #         menu__fecha__in=fechas_existentes
+    #     )
+    #     .select_related("menu", "plato", "lugar")
+    # )
+
+    # for item in items:
+    #     fec = item.menu.fecha
+    #     dias_programados.add(fec)
+
+    #     dia_semana = fec.weekday()
+
+    #     if item.plato:
+    #         fijo = (item.plato.id, dia_semana, item.momento) in habitos_set
+
+    #         platos_dia_x_dia[fec][item.momento].append({
+    #             "menuitem_id": item.id,                 # ✅ este es el que necesitamos para extras
+    #             "plato_id": item.plato.id,              # ✅ para seguir yendo a videos-update
+    #             "nombre": item.plato.nombre_plato,
+    #             "fijo": fijo,
+    #             "tipo": item.plato.tipos,
+    #             "dia_semana": dia_semana,
+    #         })
+
+
+    #     elif item.lugar:
+    #         platos_dia_x_dia[fec][item.momento].append({
+    #             "menuitem_id": item.id,   # ✅ también existe el MenuItem aunque sea lugar
+    #             "lugar_id": item.lugar.id,
+    #             "nombre": item.lugar.nombre,
+    #             "tipo": "",
+    #             "fijo": False
+    #         })
+
+
+
+    # # Convertir defaultdict a dict antes de pasarlo a la plantilla
+    # platos_dia_x_dia = dict(platos_dia_x_dia)
+
     # Inicializar un diccionario donde cada fecha tendrá listas separadas para cada tipo de comida
     platos_dia_x_dia = defaultdict(lambda: {"desayuno": [], "almuerzo": [], "merienda": [], "cena": []})
-
 
     items = (
         MenuItem.objects
@@ -2291,32 +2336,36 @@ def FiltroDePlatos(request):
 
         dia_semana = fec.weekday()
 
+        # Verificación para agregar solo platos válidos
         if item.plato:
-            fijo = (item.plato.id, dia_semana, item.momento) in habitos_set
+            # Comprobar que los campos necesarios no estén vacíos
+            if item.plato.id and item.plato.nombre_plato:
+                fijo = (item.plato.id, dia_semana, item.momento) in habitos_set
 
-            platos_dia_x_dia[fec][item.momento].append({
-                "menuitem_id": item.id,                 # ✅ este es el que necesitamos para extras
-                "plato_id": item.plato.id,              # ✅ para seguir yendo a videos-update
-                "nombre": item.plato.nombre_plato,
-                "fijo": fijo,
-                "tipo": item.plato.tipos,
-                "dia_semana": dia_semana,
-            })
+                platos_dia_x_dia[fec][item.momento].append({
+                    "menuitem_id": item.id,                 # ✅ este es el que necesitamos para extras
+                    "plato_id": item.plato.id,              # ✅ para seguir yendo a videos-update
+                    "nombre": item.plato.nombre_plato,
+                    "fijo": fijo,
+                    "tipo": item.plato.tipos,
+                    "dia_semana": dia_semana,
+                })
 
-
+        # Verificación para agregar solo lugares válidos
         elif item.lugar:
-            platos_dia_x_dia[fec][item.momento].append({
-                "menuitem_id": item.id,   # ✅ también existe el MenuItem aunque sea lugar
-                "lugar_id": item.lugar.id,
-                "nombre": item.lugar.nombre,
-                "tipo": "",
-                "fijo": False
-            })
-
-
+            # Comprobar que el lugar tiene un nombre válido
+            if item.lugar.id and item.lugar.nombre:
+                platos_dia_x_dia[fec][item.momento].append({
+                    "menuitem_id": item.id,   # ✅ también existe el MenuItem aunque sea lugar
+                    "lugar_id": item.lugar.id,
+                    "nombre": item.lugar.nombre,
+                    "tipo": "",
+                    "fijo": False
+                })
 
     # Convertir defaultdict a dict antes de pasarlo a la plantilla
     platos_dia_x_dia = dict(platos_dia_x_dia)
+
 
     habitos_lookup = {
     (h.dia_semana, h.momento, h.plato_id): h.id
@@ -3187,7 +3236,6 @@ def plato_opciones_asignar(request, pk):
 
 
 
-
 @login_required
 def eliminar_plato_programado(request, plato_id, comida, fecha):
     usuario = request.user
@@ -3206,7 +3254,7 @@ def eliminar_plato_programado(request, plato_id, comida, fecha):
         messages.error(request, f"Plato con ID '{plato_id}' no encontrado.")
         return redirect("filtro-de-platos")
 
-    # Eliminar el plato programado por ID del plato
+    # Eliminar solo los items de tipo 'plato' (no 'lugar')
     items_borrados = menu.items.filter(momento=comida).filter(plato=plato).delete()
 
     # Si se eliminó el plato, mostrar un mensaje
@@ -3215,21 +3263,14 @@ def eliminar_plato_programado(request, plato_id, comida, fecha):
     else:
         messages.warning(request, f"No se encontró el plato '{plato.nombre_plato}' para {comida}.")
 
-    # 4) Si también quieres borrar "lugares" por nombre (por ID también se puede hacer, si quieres ser más preciso):
-    lugares_borrados = menu.items.filter(momento=comida).filter(lugar__nombre=plato.nombre_plato).delete()
+    # 4) Si el día quedó sin items, borrar el día completo y agregar un mensaje
+    # if not menu.items.exists():
+    #     # Eliminar el menú y agregar el mensaje
+    #     menu.delete()
+    #     messages.success(request, f"Menú del día {fecha} de {usuario.username} eliminado ya que no tiene más platos programados.")
+    #     messages.info(request, f"Detalles del menú eliminado: {menu.fecha} - {comida} - {usuario.username}")
 
-    # Si se eliminó un lugar, mostrar un mensaje (opcional)
-    if lugares_borrados[0] > 0:
-        messages.success(request, f"Lugar '{plato.nombre_plato}' eliminado correctamente.")
-    else:
-        messages.warning(request, f"No se encontró el lugar '{plato.nombre_plato}' para {comida}.")
-
-    # 5) Si el día quedó sin items, borrar el día completo
-    if not menu.items.exists():
-        menu.delete()
-        messages.success(request, f"Menú del día {fecha} eliminado ya que no tiene platos o lugares asignados.")
-
-    # 6) Buscar y eliminar el hábito asociado a este plato, para ese día y comida
+    # 5) Buscar y eliminar el hábito asociado a este plato, para ese día y comida
     try:
         habito = HabitoSemanal.objects.get(
             perfil=usuario.profile,  # Correcto, accediendo al perfil
@@ -3242,8 +3283,8 @@ def eliminar_plato_programado(request, plato_id, comida, fecha):
     except HabitoSemanal.DoesNotExist:
         messages.warning(request, f"No se encontró el hábito para el plato '{plato.nombre_plato}' para {comida}.")
 
-
     return redirect("filtro-de-platos")
+
 
 
 MOMENTOS = ["desayuno", "almuerzo", "merienda", "cena"]
