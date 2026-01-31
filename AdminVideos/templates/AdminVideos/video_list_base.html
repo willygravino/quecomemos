@@ -16,12 +16,13 @@
 
       {% with tipopag=request.GET.tipopag %}
       {% if tipopag == "Delivery" or tipopag == "Comerafuera" %}
-        <a class="btn btn-outline-succes w-100 rounded text-center fw-semibold"
+        <a class="btn btn-outline-primary w-100 rounded text-center fw-semibold py-2"
+
           href="{% url 'crear-lugar' %}?tipopag={{ tipopag|default:'Dash' }}">
           {% if tipopag and tipopag != "Dash" %}
-            AGREGAR {{ tipopag }} ffffffff
+            + AGREGAR {{ tipopag|upper}}
           {% else %}
-            AGREGAR PLATO PRINCIPAL fff
+            + AGREGAR PLATO PRINCIPAL fff
           {% endif %}
         </a>
 
