@@ -2342,10 +2342,11 @@ def FiltroDePlatos(request):
 
             platos_dia_x_dia[fec][item.momento].append({
                 "menuitem_id": item.id,                 # ✅ este es el que necesitamos para extras
-                "plato_id": item.plato.id,              # ✅ para seguir yendo a videos-update
+                "objeto_id": item.plato.id,              # ✅ para seguir yendo a videos-update
                 "nombre": item.plato.nombre_plato,
                 "fijo": fijo,
                 "tipo": item.plato.tipos,
+                "es_lugar": False
                 # "dia_semana": dia_semana,
             })
 
@@ -2353,10 +2354,11 @@ def FiltroDePlatos(request):
         elif item.lugar:
             platos_dia_x_dia[fec][item.momento].append({
                 "menuitem_id": item.id,   # ✅ también existe el MenuItem aunque sea lugar
-                "plato_id": item.lugar.id, # NO DEBE SER BUENA PRACTICA PONER AL LUGAR EL ID PLATO_ID, GPT SE CONFUNDIO Y YO TAMBIÉN, DOS D
+                "objeto_id": item.lugar.id, # NO DEBE SER BUENA PRACTICA PONER AL LUGAR EL ID PLATO_ID, GPT SE CONFUNDIO Y YO TAMBIÉN, DOS D
                 "nombre": item.lugar.nombre,
                 "tipo": "",
-                "fijo": False
+                "fijo": False,
+                "es_lugar": True
             })
 
     # Convertir defaultdict a dict antes de pasarlo a la plantilla
@@ -2957,122 +2959,6 @@ def agregar_a_mi_lista(request, plato_id):
 
     return redirect("descartar-sugerido", plato_id=plato_id)
 
-# class AsignarPlato(View):
-
-#     def post(self, request):
-#         tipo = request.POST.get("tipo_elemento")   # "plato" | "lugar"
-#         objeto_id = request.POST.get("plato_id")
-#         dia = request.POST.get("dia") or request.session.get("dia_activo")
-#         momento = request.POST.get("comida")
-
-#         if not dia:
-#             messages.error(request, "No hay día activo seleccionado.")
-#             return redirect("filtro-de-platos")
-
-#         try:
-#             fecha = datetime.datetime.strptime(dia, "%Y-%m-%d").date()
-#         except Exception:
-#             messages.error(request, "Fecha inválida.")
-#             return redirect("filtro-de-platos")
-
-#         request.session["dia_activo"] = dia
-
-#         menu_dia, _ = MenuDia.objects.get_or_create(
-#             propietario=request.user,
-#             fecha=fecha,
-#         )
-
-#         try:
-#             if tipo == "plato":
-#                 # plato “en juego”
-#                 plato_base = Plato.objects.get(id=objeto_id)
-
-#                 # ✅ NUEVO: si el form manda platos_ids, asignamos solo esos
-#                 ids_post = [x for x in request.POST.getlist("platos_ids") if x.isdigit()]
-
-#                 if ids_post:
-#                     # solo permitimos asignar el plato base o sus hijas
-#                     allowed_ids = set([plato_base.id] + list(plato_base.variedades_hijas.values_list("id", flat=True)))
-#                     selected_ids = [int(x) for x in ids_post if int(x) in allowed_ids]
-
-#                     platos_a_asignar = list(Plato.objects.filter(id__in=selected_ids))
-
-#                 else:
-#                     # comportamiento actual (por ahora)
-#                     platos_a_asignar = [plato_base] + list(plato_base.variedades_hijas.all())
-                    
-
-#                 creados = 0
-#                 for p in platos_a_asignar:
-#                     _, created = MenuItem.objects.get_or_create(
-#                         menu=menu_dia,
-#                         momento=momento,
-#                         plato=p,
-#                         defaults={"elegido": True},
-#                     )
-#                     if created:
-#                         creados += 1
-
-#                 # ===== Guarnición y Salsa (opcionales, validadas) =====
-#                 def _tiene_tipo(plato: Plato, tipo_txt: str) -> bool:
-#                     # tu campo es un string con cosas tipo "Entrada,Principal,Postre"
-#                     # hacemos match simple por substring (y soportamos tilde en Guarnición)
-#                     t = (plato.tipos or "")
-#                     if tipo_txt == "Guarnicion":
-#                         return ("Guarnicion" in t) or ("Guarnición" in t)
-#                     return (tipo_txt in t)
-
-#                 def _asignar_extra(extra_id_str: str, tipo_requerido: str):
-#                     if not extra_id_str or not extra_id_str.isdigit():
-#                         return 0
-
-#                     extra = Plato.objects.filter(
-#                         id=int(extra_id_str),
-#                         propietario=request.user,
-#                     ).first()
-
-#                     if not extra:
-#                         return 0
-
-#                     # validar tipo exacto esperado
-#                     if not _tiene_tipo(extra, tipo_requerido):
-#                         return 0
-
-#                     _, created = MenuItem.objects.get_or_create(
-#                         menu=menu_dia,
-#                         momento=momento,
-#                         plato=extra,
-#                         defaults={"elegido": True},
-#                     )
-#                     return 1 if created else 0
-
-#                 creados_extras = 0
-#                 creados_extras += _asignar_extra(request.POST.get("guarnicion_id"), "Guarnicion")
-#                 creados_extras += _asignar_extra(request.POST.get("salsa_id"), "Salsa")
-
-#                 total = len(platos_a_asignar)
-#                 messages.success(
-#                     request,
-#                     f"Asignados {creados}/{total} platos a {momento}."
-#                     + (f" Extras agregados: {creados_extras}." if creados_extras else "")
-#                 )
-
-
-#             elif tipo == "lugar":
-#                 lugar = Lugar.objects.get(id=objeto_id)
-#                 MenuItem.objects.create(
-#                     menu=menu_dia,
-#                     momento=momento,
-#                     lugar=lugar,
-#                 )
-#                 messages.success(request, f"Lugar {lugar.nombre} asignado correctamente a {momento}.")
-#             else:
-#                 messages.error(request, "Tipo de elemento inválido.")
-
-#         except Exception:
-#             messages.warning(request, "Ese elemento ya estaba asignado a esa comida en ese día.")
-
-#         return redirect("filtro-de-platos")
 
 
 class AsignarPlato(View):
@@ -3244,56 +3130,151 @@ def plato_opciones_asignar(request, pk):
 
 
 
+
+# @login_required
+# def eliminar_plato_programado(request, plato_id, comida, fecha):
+#     usuario = request.user
+
+#     # 1) Normalizar fecha: si viene "YYYY-MM-DD" en string, pasar a date
+#     if isinstance(fecha, str):
+#         fecha = datetime.datetime.strptime(fecha, "%Y-%m-%d").date()
+
+#     # 2) Traer el menú del día (modelo nuevo)
+#     menu = get_object_or_404(MenuDia, propietario=usuario, fecha=fecha)
+
+#     # 3) Buscar el plato por ID y borrar SOLO el item del momento que coincida por ID
+#     try:
+#         plato = Plato.objects.get(id=plato_id, propietario=usuario)
+#     except Plato.DoesNotExist:
+#         messages.error(request, f"Plato con ID '{plato_id}' no encontrado.")
+#         return redirect("filtro-de-platos")
+
+#     # Eliminar el plato programado por ID del plato
+#     items_borrados = menu.items.filter(momento=comida).filter(plato=plato).delete()
+
+#     # Si se eliminó el plato, mostrar un mensaje
+#     if items_borrados[0] > 0:
+#         messages.success(request, f"Plato '{plato.nombre_plato}' eliminado correctamente.")
+#     else:
+#         messages.warning(request, f"No se encontró el plato '{plato.nombre_plato}' para {comida}.")
+
+#     # 4) Si también quieres borrar "lugares" por nombre (por ID también se puede hacer, si quieres ser más preciso):
+#     lugares_borrados = menu.items.filter(momento=comida).filter(lugar__nombre=plato.nombre_plato).delete()
+
+#     # Si se eliminó un lugar, mostrar un mensaje (opcional)
+#     if lugares_borrados[0] > 0:
+#         messages.success(request, f"Lugar '{plato.nombre_plato}' eliminado correctamente.")
+#     else:
+#         messages.warning(request, f"No se encontró el lugar '{plato.nombre_plato}' para {comida}.")
+
+#     # 5) Si el día quedó sin items, borrar el día completo
+#     if not menu.items.exists():
+#         menu.delete()
+#         messages.success(request, f"Menú del día {fecha} eliminado ya que no tiene platos o lugares asignados.")
+
+#     # 6) Buscar y eliminar el hábito asociado a este plato, para ese día y comida
+#     try:
+#         habito = HabitoSemanal.objects.get(
+#             perfil=usuario.profile,  # Correcto, accediendo al perfil
+#             dia_semana=fecha.weekday(),  # Esto devuelve el número del día (0 = Lunes, 6 = Domingo)
+#             momento=comida,
+#             plato=plato
+#         )
+#         habito.delete()
+#         messages.success(request, f"Hábito '{plato.nombre_plato}' eliminado correctamente.")
+#     except HabitoSemanal.DoesNotExist:
+#         messages.warning(request, f"No se encontró el hábito para el plato '{plato.nombre_plato}' para {comida}.")
+
+
+#     return redirect("filtro-de-platos")
+
+
+
 @login_required
-def eliminar_plato_programado(request, plato_id, comida, fecha):
+def eliminar_programado(request, es_lugar, objeto_id, comida, fecha):
     usuario = request.user
 
-    # 1) Normalizar fecha: si viene "YYYY-MM-DD" en string, pasar a date
+    # 1) Normalizar fecha
     if isinstance(fecha, str):
-        fecha = datetime.datetime.strptime(fecha, "%Y-%m-%d").date()
+        try:
+            fecha = datetime.datetime.strptime(fecha, "%Y-%m-%d").date()
+        except ValueError:
+            messages.error(request, "Fecha inválida.")
+            return redirect("filtro-de-platos")
 
-    # 2) Traer el menú del día (modelo nuevo)
+    # 2) Traer el menú del día
     menu = get_object_or_404(MenuDia, propietario=usuario, fecha=fecha)
 
-    # 3) Buscar el plato por ID y borrar SOLO el item del momento que coincida por ID
+    # 3) Query base: items del momento (comida)
+    qs = menu.items.filter(momento=comida)
+
+    # 4) es_lugar llega como "1" o "0" desde el template (yesno:'1,0')
     try:
-        plato = Plato.objects.get(id=plato_id, propietario=usuario)
-    except Plato.DoesNotExist:
-        messages.error(request, f"Plato con ID '{plato_id}' no encontrado.")
+        es_lugar = bool(int(es_lugar))
+    except (TypeError, ValueError):
+        messages.error(request, "Tipo inválido (es_lugar).")
         return redirect("filtro-de-platos")
 
-    # Eliminar solo los items de tipo 'plato' (no 'lugar')
-    items_borrados = menu.items.filter(momento=comida).filter(plato=plato).delete()
+    # 5) Eliminar según el tipo
+    if es_lugar:
+        # ---- eliminar LUGAR ----
+        lugar_qs = Lugar.objects.all()
+        if hasattr(Lugar, "propietario"):
+            lugar_qs = lugar_qs.filter(propietario=usuario)
 
-    # Si se eliminó el plato, mostrar un mensaje
-    if items_borrados[0] > 0:
-        messages.success(request, f"Plato '{plato.nombre_plato}' eliminado correctamente.")
+        lugar = lugar_qs.filter(id=objeto_id).first()
+        if not lugar:
+            messages.error(request, f"Lugar con ID '{objeto_id}' no encontrado.")
+            return redirect("filtro-de-platos")
+
+        borrados, _ = qs.filter(lugar_id=lugar.id).delete()
+
+        if borrados:
+            messages.success(request, f"Lugar '{lugar.nombre}' eliminado correctamente.")
+        else:
+            messages.warning(request, f"No se encontró el lugar '{lugar.nombre}' para {comida}.")
+
+        # Hábito de lugar: SOLO si tu HabitoSemanal tiene FK lugar
+        if hasattr(HabitoSemanal, "lugar"):
+            HabitoSemanal.objects.filter(
+                perfil=usuario.profile,
+                dia_semana=fecha.weekday(),
+                momento=comida,
+                lugar_id=lugar.id
+            ).delete()
+
     else:
-        messages.warning(request, f"No se encontró el plato '{plato.nombre_plato}' para {comida}.")
+        # ---- eliminar PLATO ----
+        plato = Plato.objects.filter(id=objeto_id, propietario=usuario).first()
+        if not plato:
+            messages.error(request, f"Plato con ID '{objeto_id}' no encontrado.")
+            return redirect("filtro-de-platos")
 
-    # 4) Si el día quedó sin items, borrar el día completo y agregar un mensaje
-    # if not menu.items.exists():
-    #     # Eliminar el menú y agregar el mensaje
-    #     menu.delete()
-    #     messages.success(request, f"Menú del día {fecha} de {usuario.username} eliminado ya que no tiene más platos programados.")
-    #     messages.info(request, f"Detalles del menú eliminado: {menu.fecha} - {comida} - {usuario.username}")
+        borrados, _ = qs.filter(plato_id=plato.id).delete()
 
-    # 5) Buscar y eliminar el hábito asociado a este plato, para ese día y comida
-    try:
-        habito = HabitoSemanal.objects.get(
-            perfil=usuario.profile,  # Correcto, accediendo al perfil
-            dia_semana=fecha.weekday(),  # Esto devuelve el número del día (0 = Lunes, 6 = Domingo)
+        if borrados:
+            # Ojo: ajustá el nombre si tu campo no es "nombre"
+            messages.success(request, f"Plato '{plato.nombre_plato}' eliminado correctamente.")
+        else:
+            messages.warning(request, f"No se encontró el plato '{plato.nombre}' para {comida}.")
+
+        # Hábito de plato
+        HabitoSemanal.objects.filter(
+            perfil=usuario.profile,
+            dia_semana=fecha.weekday(),
             momento=comida,
-            plato=plato
-        )
-        habito.delete()
-        messages.success(request, f"Hábito '{plato.nombre_plato}' eliminado correctamente.")
-    except HabitoSemanal.DoesNotExist:
-        messages.warning(request, f"No se encontró el hábito para el plato '{plato.nombre_plato}' para {comida}.")
+            plato_id=plato.id
+        ).delete()
+
+    # 6) Si el día quedó sin items, borrar el día completo
+    # if not menu.items.exists():
+    #     menu.delete()
+    #     messages.success(request, f"Menú del día {fecha} eliminado ya que no tiene items.")
 
     return redirect("filtro-de-platos")
 
 
+    
 
 MOMENTOS = ["desayuno", "almuerzo", "merienda", "cena"]
 
