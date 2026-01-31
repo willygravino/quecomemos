@@ -21,10 +21,10 @@ class Lugar(models.Model):
         except (ValueError, FileNotFoundError):
             return '/media/avatares/lugar.png'
 
+       
     def __str__(self):
-        # return f"{self.delivery} - {self.nombre} de {self.propietario}"
         tipo = "Delivery" if self.delivery else "Comerafuera"
-        return f"{tipo} - {self.nombre} de {self.propietario}"
+        return f"{self.id} - {tipo} - {self.nombre} de {self.propietario}"
 
 class TipoPlato(models.Model):
     nombre = models.CharField(max_length=30, unique=True)

@@ -2338,30 +2338,26 @@ def FiltroDePlatos(request):
 
         # Verificación para agregar solo platos válidos
         if item.plato:
-            # Comprobar que los campos necesarios no estén vacíos
-            if item.plato.id and item.plato.nombre_plato:
-                fijo = (item.plato.id, dia_semana, item.momento) in habitos_set
+            fijo = (item.plato.id, dia_semana, item.momento) in habitos_set
 
-                platos_dia_x_dia[fec][item.momento].append({
-                    "menuitem_id": item.id,                 # ✅ este es el que necesitamos para extras
-                    "plato_id": item.plato.id,              # ✅ para seguir yendo a videos-update
-                    "nombre": item.plato.nombre_plato,
-                    "fijo": fijo,
-                    "tipo": item.plato.tipos,
-                    "dia_semana": dia_semana,
-                })
+            platos_dia_x_dia[fec][item.momento].append({
+                "menuitem_id": item.id,                 # ✅ este es el que necesitamos para extras
+                "plato_id": item.plato.id,              # ✅ para seguir yendo a videos-update
+                "nombre": item.plato.nombre_plato,
+                "fijo": fijo,
+                "tipo": item.plato.tipos,
+                # "dia_semana": dia_semana,
+            })
 
         # Verificación para agregar solo lugares válidos
         elif item.lugar:
-            # Comprobar que el lugar tiene un nombre válido
-            if item.lugar.id and item.lugar.nombre:
-                platos_dia_x_dia[fec][item.momento].append({
-                    "menuitem_id": item.id,   # ✅ también existe el MenuItem aunque sea lugar
-                    "lugar_id": item.lugar.id,
-                    "nombre": item.lugar.nombre,
-                    "tipo": "",
-                    "fijo": False
-                })
+            platos_dia_x_dia[fec][item.momento].append({
+                "menuitem_id": item.id,   # ✅ también existe el MenuItem aunque sea lugar
+                "plato_id": item.lugar.id, # NO DEBE SER BUENA PRACTICA PONER AL LUGAR EL ID PLATO_ID, GPT SE CONFUNDIO Y YO TAMBIÉN, DOS D
+                "nombre": item.lugar.nombre,
+                "tipo": "",
+                "fijo": False
+            })
 
     # Convertir defaultdict a dict antes de pasarlo a la plantilla
     platos_dia_x_dia = dict(platos_dia_x_dia)
@@ -3190,15 +3186,27 @@ class AsignarPlato(View):
                 )
 
             elif tipo == "lugar":
-                lugar = Lugar.objects.get(id=objeto_id)
-                MenuItem.objects.create(
+                lugar_id = request.POST.get("plato_id")  # Usamos plato_id para obtener el ID del lugar
+
+                if not lugar_id or not lugar_id.isdigit():
+                    messages.error(request, "ID de lugar no válido.")
+                    return redirect("filtro-de-platos")
+                
+                lugar = Lugar.objects.get(id=lugar_id)  # Buscar el lugar por el ID recibido
+
+                # Verifica que el objeto lugar está correcto
+                print(f"Lugar encontrado: {lugar.nombre} (ID: {lugar.id})")
+
+                # Asegúrate de que el objeto lugar se está pasando correctamente
+                menu_item = MenuItem.objects.create(
                     menu=menu_dia,
                     momento=momento,
-                    lugar=lugar,
+                    lugar=lugar,  # Asignamos el lugar al MenuItem
                 )
-                messages.success(request, f"Lugar {lugar.nombre} asignado correctamente a {momento}.")
-            else:
-                messages.error(request, "Tipo de elemento inválido.")
+                
+                messages.success(request, f"Lugar {lugar.nombre} (ID: {lugar.id}) asignado correctamente a {momento}.")
+
+           
 
         except Exception:
             messages.warning(request, "Ese elemento ya estaba asignado a esa comida en ese día.")

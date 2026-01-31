@@ -90,10 +90,11 @@ class MenuDiaAdmin(admin.ModelAdmin):
     items_count.short_description = "Items"
 
 
-# (Opcional) si igual querés poder administrar MenuItem suelto:
 @admin.register(MenuItem)
 class MenuItemAdmin(admin.ModelAdmin):
+    # list_display = ("id", "menu", "momento", "plato", "lugar", "lugar_id", "elegido", "creado_el")  # Agrega lugar_id
     list_display = ("id", "menu", "momento", "plato", "lugar", "elegido", "creado_el")
+
     list_filter = ("momento", "elegido", "creado_el")
     search_fields = ("menu__propietario__username", "plato__nombre_plato", "lugar__nombre")
     autocomplete_fields = ("menu", "plato", "lugar")
