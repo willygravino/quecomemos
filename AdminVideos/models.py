@@ -369,7 +369,7 @@ class MenuItem(models.Model):
     plato = models.ForeignKey("Plato", null=True, blank=True,
                             on_delete=models.PROTECT, related_name="en_menus")
     lugar = models.ForeignKey("Lugar", null=True, blank=True,
-                          on_delete=models.PROTECT, related_name="en_menus")
+                          on_delete=models.CASCADE, related_name="en_menus")
 
     # plato = models.ForeignKey("Plato", null=True, blank=True, on_delete=models.CASCADE, related_name="en_menus")
     # lugar = models.ForeignKey("Lugar", null=True, blank=True, on_delete=models.CASCADE, related_name="en_menus")
