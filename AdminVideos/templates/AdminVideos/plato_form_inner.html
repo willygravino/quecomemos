@@ -366,11 +366,19 @@
 
 
             <button type="button"
-                    class="btn btn-sm btn-outline-danger js-delete-variedad"
-                    data-url="{% url 'plato_variedad_delete' v.id %}"
-                    data-nombre="{{ v.nombre_plato|escapejs }}">
+                    class="btn btn-sm btn-outline-danger"
+                    data-bs-toggle="modal"
+                    data-bs-target="#confirmActionModal"
+                    data-confirm-title="Eliminar variedad"
+                    data-confirm-body="¿Seguro que querés eliminar <strong>{{ v.nombre_plato|escape }}</strong>?"
+                    data-confirm-action="{% url 'plato_variedad_delete' v.id %}"
+                    data-confirm-btn="Sí, eliminar">
               Eliminar
             </button>
+
+
+
+
           </div>
         {% endfor %}
       </div>
@@ -379,28 +387,6 @@
     {% endif %}
   </div>
 {% endif %}
-
-<!-- MODAL DE CONFIRMACIÓN DE ELIMINAR VARIEDAD -->
-<div class="modal fade" id="confirmDeleteVariedadModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Eliminar variedad</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-
-      <div class="modal-body">
-        ¿Seguro que querés eliminar <strong id="deleteVariedadNombre"></strong>?
-        <div class="text-muted small mt-2">Esta acción no se puede deshacer.</div>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" id="confirmDeleteVariedadBtn">Sí, eliminar</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- fin de variedades -->
 
