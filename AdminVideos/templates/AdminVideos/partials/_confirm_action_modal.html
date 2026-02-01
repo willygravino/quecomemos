@@ -1,0 +1,86 @@
+
+<!-- MODAL GENÉRICO DE CONFIRMACIÓN -->
+<div class="modal fade" id="confirmActionModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmActionTitle">Confirmar acción</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body">
+        <div id="confirmActionBody">¿Seguro?</div>
+        <div class="text-muted small mt-2" id="confirmActionHint">Esta acción no se puede deshacer.</div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="confirmActionBtn">Sí, continuar</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- FORM ÚNICO (POST + CSRF) -->
+<form id="confirmActionForm" method="post" class="d-none">
+  {% csrf_token %}
+</form>
+
+<!--SCRIPT PARA Modal genérico de confirmación (Bootstrap):
+reutiliza un solo modal para acciones (borrar, etc.).
+Lee data-confirm-* del botón, setea el action del form POST (con CSRF)
+y al confirmar envía el submit.  -->
+<!-- ESTE SCRIPT PODRÍA SEPARARSE A UN JS STATIC APARTE! MAS LIMPIO Y MANTENIBLE; LO HARÉ CUANDO DEPURE -->
+<script>
+  (function () {
+    const modalEl   = document.getElementById("confirmActionModal");
+    const titleEl   = document.getElementById("confirmActionTitle");
+    const bodyEl    = document.getElementById("confirmActionBody");
+    const hintEl    = document.getElementById("confirmActionHint");
+    const btnEl     = document.getElementById("confirmActionBtn");
+    const formEl    = document.getElementById("confirmActionForm");
+
+    if (!modalEl || !titleEl || !bodyEl || !btnEl || !formEl) return;
+
+    modalEl.addEventListener("show.bs.modal", function (event) {
+      const trigger = event.relatedTarget;
+      if (!trigger) return;
+
+      const title  = trigger.getAttribute("data-confirm-title") || "Confirmar acción";
+      const body   = trigger.getAttribute("data-confirm-body")  || "¿Seguro que querés continuar?";
+      const action = trigger.getAttribute("data-confirm-action");
+      const btnTxt = trigger.getAttribute("data-confirm-btn")   || "Sí, continuar";
+      const hint   = trigger.getAttribute("data-confirm-hint"); // opcional
+
+      titleEl.textContent = title;
+      bodyEl.innerHTML = body; // si no querés HTML, cambiá a textContent
+      btnEl.textContent = btnTxt;
+
+      if (hint === null) {
+        hintEl.textContent = "Esta acción no se puede deshacer.";
+        hintEl.classList.remove("d-none");
+      } else if (hint === "") {
+        hintEl.classList.add("d-none");
+      } else {
+        hintEl.textContent = hint;
+        hintEl.classList.remove("d-none");
+      }
+
+      if (!action) {
+        // si falta action, deshabilitamos para evitar submit a nada
+        btnEl.disabled = true;
+        formEl.removeAttribute("action");
+      } else {
+        btnEl.disabled = false;
+        formEl.setAttribute("action", action);
+      }
+    });
+
+    btnEl.addEventListener("click", function () {
+      if (!formEl.getAttribute("action")) return;
+      formEl.submit();
+    });
+  })();
+</script>
