@@ -603,10 +603,22 @@
             Menú programado
         </span>
 
+    {% if dia in platos_dia_x_dia %}
+        <a href="#"
+          data-bs-toggle="modal"
+          data-bs-target="#confirmActionModal"
+          data-confirm-title="Eliminar menú del día"
+          data-confirm-body="¿Seguro querés borrar lo que comemos en este día?"
+          data-confirm-action="{% url 'eliminar-menu-programado' %}"
+          data-confirm-btn="Sí, borrar"
+          title="Borrar menú del día"
+          aria-label="Borrar menú del día"
+          class="text-secondary text-decoration-none ali ms-1">
+          <i class="bi bi-trash-fill fa-lg"></i>
+        </a>
     </span>
 
-    {% if dia in platos_dia_x_dia %}
-        <!-- botón eliminar -->
+
     {% endif %}
 </span>
 

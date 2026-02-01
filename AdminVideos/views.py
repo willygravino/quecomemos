@@ -37,34 +37,6 @@ from django.db.models.expressions import OrderBy
 
 
 
-# @login_required
-# def fijar_o_eliminar_habito(request, plato_id, comida):
-#     usuario = request.user
-
-#     dia_str = request.session.get("dia_activo")
-#     if not dia_str:
-#         messages.error(request, "No hay día activo seleccionado.")
-#         return redirect("filtro-de-platos")
-
-#     # Fecha activa → día de la semana
-#     dia = datetime.datetime.strptime(dia_str, "%Y-%m-%d").date()
-#     dia_semana = dia.weekday()  # 0=Lunes ... 6=Domingo
-
-#     perfil = usuario.profile
-
-#     plato = get_object_or_404(Plato, id=plato_id, propietario=usuario)
-
-#     try:
-#         habito = HabitoSemanal.objects.get(perfil=perfil, plato=plato, dia_semana=dia_semana, momento=comida)
-#         # Si ya existe el hábito, lo eliminamos
-#         habito.delete()
-#         messages.success(request, f"Se eliminó el hábito de {plato.nombre_plato} para el {comida}.")
-#     except HabitoSemanal.DoesNotExist:
-#         # Si no existe, lo creamos
-#         HabitoSemanal.objects.create(perfil=perfil, plato=plato, dia_semana=dia_semana, momento=comida)
-#         messages.success(request, f"Se fijó el hábito de {plato.nombre_plato} para el {comida}.")
-
-#     return redirect("filtro-de-platos")
 
 
 @login_required
@@ -3251,6 +3223,89 @@ def plato_opciones_asignar(request, pk):
 
 
 
+# @login_required
+# def eliminar_programado(request, es_lugar, objeto_id, comida, fecha):
+#     usuario = request.user
+
+#     # 1) Normalizar fecha
+#     if isinstance(fecha, str):
+#         try:
+#             fecha = datetime.datetime.strptime(fecha, "%Y-%m-%d").date()
+#         except ValueError:
+#             messages.error(request, "Fecha inválida.")
+#             return redirect("filtro-de-platos")
+
+#     # 2) Traer el menú del día
+#     menu = get_object_or_404(MenuDia, propietario=usuario, fecha=fecha)
+
+#     # 3) Query base: items del momento (comida)
+#     qs = menu.items.filter(momento=comida)
+
+#     # 4) es_lugar llega como "1" o "0" desde el template (yesno:'1,0')
+#     try:
+#         es_lugar = bool(int(es_lugar))
+#     except (TypeError, ValueError):
+#         messages.error(request, "Tipo inválido (es_lugar).")
+#         return redirect("filtro-de-platos")
+
+#     # 5) Eliminar según el tipo
+#     if es_lugar:
+#         # ---- eliminar LUGAR ----
+#         lugar_qs = Lugar.objects.all()
+#         if hasattr(Lugar, "propietario"):
+#             lugar_qs = lugar_qs.filter(propietario=usuario)
+
+#         lugar = lugar_qs.filter(id=objeto_id).first()
+#         if not lugar:
+#             messages.error(request, f"Lugar con ID '{objeto_id}' no encontrado.")
+#             return redirect("filtro-de-platos")
+
+#         borrados, _ = qs.filter(lugar_id=lugar.id).delete()
+
+#         if borrados:
+#             messages.success(request, f"Lugar '{lugar.nombre}' eliminado correctamente.")
+#         else:
+#             messages.warning(request, f"No se encontró el lugar '{lugar.nombre}' para {comida}.")
+
+#         # Hábito de lugar: SOLO si tu HabitoSemanal tiene FK lugar
+#         if hasattr(HabitoSemanal, "lugar"):
+#             HabitoSemanal.objects.filter(
+#                 perfil=usuario.profile,
+#                 dia_semana=fecha.weekday(),
+#                 momento=comida,
+#                 lugar_id=lugar.id
+#             ).delete()
+
+#     else:
+#         # ---- eliminar PLATO ----
+#         plato = Plato.objects.filter(id=objeto_id, propietario=usuario).first()
+#         if not plato:
+#             messages.error(request, f"Plato con ID '{objeto_id}' no encontrado.")
+#             return redirect("filtro-de-platos")
+
+#         borrados, _ = qs.filter(plato_id=plato.id).delete()
+
+#         if borrados:
+#             # Ojo: ajustá el nombre si tu campo no es "nombre"
+#             messages.success(request, f"Plato '{plato.nombre_plato}' eliminado correctamente.")
+#         else:
+#             messages.warning(request, f"No se encontró el plato '{plato.nombre}' para {comida}.")
+
+#         # Hábito de plato
+#         HabitoSemanal.objects.filter(
+#             perfil=usuario.profile,
+#             dia_semana=fecha.weekday(),
+#             momento=comida,
+#             plato_id=plato.id
+#         ).delete()
+
+#     # 6) Si el día quedó sin items, borrar el día completo
+#     # if not menu.items.exists():
+#     #     menu.delete()
+#     #     messages.success(request, f"Menú del día {fecha} eliminado ya que no tiene items.")
+
+#     return redirect("filtro-de-platos")
+
 @login_required
 def eliminar_programado(request, es_lugar, objeto_id, comida, fecha):
     usuario = request.user
@@ -3266,19 +3321,20 @@ def eliminar_programado(request, es_lugar, objeto_id, comida, fecha):
     # 2) Traer el menú del día
     menu = get_object_or_404(MenuDia, propietario=usuario, fecha=fecha)
 
-    # 3) Query base: items del momento (comida)
+    # 3) Query base: items del momento
     qs = menu.items.filter(momento=comida)
 
-    # 4) es_lugar llega como "1" o "0" desde el template (yesno:'1,0')
+    # 4) es_lugar
     try:
         es_lugar = bool(int(es_lugar))
     except (TypeError, ValueError):
         messages.error(request, "Tipo inválido (es_lugar).")
         return redirect("filtro-de-platos")
 
-    # 5) Eliminar según el tipo
+    dia_semana = fecha.weekday()
+    perfil = usuario.profile
+
     if es_lugar:
-        # ---- eliminar LUGAR ----
         lugar_qs = Lugar.objects.all()
         if hasattr(Lugar, "propietario"):
             lugar_qs = lugar_qs.filter(propietario=usuario)
@@ -3292,20 +3348,18 @@ def eliminar_programado(request, es_lugar, objeto_id, comida, fecha):
 
         if borrados:
             messages.success(request, f"Lugar '{lugar.nombre}' eliminado correctamente.")
-        else:
-            messages.warning(request, f"No se encontró el lugar '{lugar.nombre}' para {comida}.")
 
-        # Hábito de lugar: SOLO si tu HabitoSemanal tiene FK lugar
-        if hasattr(HabitoSemanal, "lugar"):
+            # ✅ solo si realmente borré el item, borro el hábito de ESA comida y ESE día de semana
             HabitoSemanal.objects.filter(
-                perfil=usuario.profile,
-                dia_semana=fecha.weekday(),
+                perfil=perfil,
+                dia_semana=dia_semana,
                 momento=comida,
                 lugar_id=lugar.id
             ).delete()
+        else:
+            messages.warning(request, f"No se encontró el lugar '{lugar.nombre}' para {comida}.")
 
     else:
-        # ---- eliminar PLATO ----
         plato = Plato.objects.filter(id=objeto_id, propietario=usuario).first()
         if not plato:
             messages.error(request, f"Plato con ID '{objeto_id}' no encontrado.")
@@ -3313,27 +3367,22 @@ def eliminar_programado(request, es_lugar, objeto_id, comida, fecha):
 
         borrados, _ = qs.filter(plato_id=plato.id).delete()
 
+        nombre = getattr(plato, "nombre_plato", None) or getattr(plato, "nombre", str(plato))
+
         if borrados:
-            # Ojo: ajustá el nombre si tu campo no es "nombre"
-            messages.success(request, f"Plato '{plato.nombre_plato}' eliminado correctamente.")
+            messages.success(request, f"Plato '{nombre}' eliminado correctamente.")
+
+            # ✅ solo si realmente borré el item
+            HabitoSemanal.objects.filter(
+                perfil=perfil,
+                dia_semana=dia_semana,
+                momento=comida,
+                plato_id=plato.id
+            ).delete()
         else:
-            messages.warning(request, f"No se encontró el plato '{plato.nombre}' para {comida}.")
-
-        # Hábito de plato
-        HabitoSemanal.objects.filter(
-            perfil=usuario.profile,
-            dia_semana=fecha.weekday(),
-            momento=comida,
-            plato_id=plato.id
-        ).delete()
-
-    # 6) Si el día quedó sin items, borrar el día completo
-    # if not menu.items.exists():
-    #     menu.delete()
-    #     messages.success(request, f"Menú del día {fecha} eliminado ya que no tiene items.")
+            messages.warning(request, f"No se encontró el plato '{nombre}' para {comida}.")
 
     return redirect("filtro-de-platos")
-
 
     
 
@@ -3411,6 +3460,7 @@ def random_dia(request, dia_nombre):
 
     return redirect("filtro-de-platos")
 
+
 # def eliminar_menu_programado(request):
 #     # Recuperar la fecha activa desde la sesión
 #     dia_activo = request.session.get("dia_activo", None)
@@ -3432,3 +3482,73 @@ def random_dia(request, dia_nombre):
 #         messages.warning(request, f"No había un menú guardado para {dia_activo}")
 
 #     return redirect("filtro-de-platos")
+
+# from .models import MenuDia  # ajustá el import
+
+
+import datetime
+from django.contrib import messages
+from django.db import transaction
+from django.db.models import Q
+from django.shortcuts import redirect
+from django.views.decorators.http import require_POST
+
+from .models import MenuDia, MenuItem, HabitoSemanal
+
+
+@require_POST
+def eliminar_menu_programado(request):
+    dia_activo = request.session.get("dia_activo")
+    if not dia_activo:
+        messages.error(request, "No hay un día activo en la sesión.")
+        return redirect("filtro-de-platos")
+
+    try:
+        fecha = datetime.datetime.strptime(dia_activo, "%Y-%m-%d").date()
+    except ValueError:
+        messages.error(request, "Fecha inválida.")
+        return redirect("filtro-de-platos")
+
+    menu_id = MenuDia.objects.filter(
+        propietario=request.user,
+        fecha=fecha
+    ).values_list("id", flat=True).first()
+
+    if not menu_id:
+        messages.warning(request, f"No había un menú programado para {dia_activo}.")
+        return redirect("filtro-de-platos")
+
+    perfil = request.user.profile
+    dia_semana = fecha.weekday()
+
+    # Habitos del día de semana (NO hay herencia a variedades: solo ids exactos)
+    habitos = HabitoSemanal.objects.filter(
+        perfil=perfil,
+        dia_semana=dia_semana,
+    ).only("momento", "plato_id", "lugar_id")
+
+    keep_q = Q()
+    for h in habitos:
+        if h.plato_id:
+            keep_q |= Q(momento=h.momento, plato_id=h.plato_id)
+        if getattr(h, "lugar_id", None):
+            keep_q |= Q(momento=h.momento, lugar_id=h.lugar_id)
+
+    with transaction.atomic():
+        items_qs = MenuItem.objects.filter(menu_id=menu_id)
+
+        # Borramos TODO excepto lo que coincide EXACTO con un hábito
+        if keep_q:
+            qs_borrar = items_qs.exclude(keep_q)
+        else:
+            qs_borrar = items_qs
+
+        borrados = qs_borrar.count()
+        qs_borrar.delete()
+        # ✅ Tu signal (menu_id-based) borrará MenuDia si quedó sin items
+
+    messages.success(
+        request,
+        f"Se eliminó el menú programado del {dia_activo} (items borrados: {borrados})."
+    )
+    return redirect("filtro-de-platos")

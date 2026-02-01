@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.forms import ValidationError
 import uuid
 from django.conf import settings
+from django.db.models import Q
 
 class Lugar(models.Model):
     nombre = models.CharField(max_length=100)
@@ -365,8 +366,13 @@ class MenuItem(models.Model):
     momento = models.CharField(max_length=20, choices=MOMENTO_CHOICES)
 
     # Uno u otro (plato o lugar)
-    plato = models.ForeignKey("Plato", null=True, blank=True, on_delete=models.CASCADE, related_name="en_menus")
-    lugar = models.ForeignKey("Lugar", null=True, blank=True, on_delete=models.CASCADE, related_name="en_menus")
+    plato = models.ForeignKey("Plato", null=True, blank=True,
+                            on_delete=models.PROTECT, related_name="en_menus")
+    lugar = models.ForeignKey("Lugar", null=True, blank=True,
+                          on_delete=models.PROTECT, related_name="en_menus")
+
+    # plato = models.ForeignKey("Plato", null=True, blank=True, on_delete=models.CASCADE, related_name="en_menus")
+    # lugar = models.ForeignKey("Lugar", null=True, blank=True, on_delete=models.CASCADE, related_name="en_menus")
 
     creado_el = models.DateTimeField(auto_now_add=True)
     elegido = models.BooleanField(default=True)
@@ -540,47 +546,6 @@ class Profile(models.Model):
         return f"Perfil de {self.user}"
 
 
-    
-# class HabitoSemanal(models.Model):
-#     DIAS_SEMANA = (
-#         (0, "Lunes"),
-#         (1, "Martes"),
-#         (2, "Miércoles"),
-#         (3, "Jueves"),
-#         (4, "Viernes"),
-#         (5, "Sábado"),
-#         (6, "Domingo"),
-#     )
-
-#     MOMENTOS = (
-#         ("desayuno", "Desayuno"),
-#         ("almuerzo", "Almuerzo"),
-#         ("merienda", "Merienda"),
-#         ("cena", "Cena"),
-#     )
-
-#     perfil = models.ForeignKey(
-#         Profile,
-#         on_delete=models.CASCADE,
-#         related_name="habitos_semanales"
-#     )
-
-#     dia_semana = models.IntegerField(choices=DIAS_SEMANA)
-#     momento = models.CharField(max_length=20, choices=MOMENTOS)
-
-#     plato = models.ForeignKey(
-#         Plato,
-#         on_delete=models.CASCADE
-#     )
-
-#     class Meta:
-#         unique_together = ("perfil", "dia_semana", "momento", "plato")
-
-#     def __str__(self):
-#         return f"{self.get_dia_semana_display()} - {self.momento} - {self.plato}"
-    
-from django.db import models
-from django.db.models import Q
 
 class HabitoSemanal(models.Model):
     DIAS_SEMANA = (
