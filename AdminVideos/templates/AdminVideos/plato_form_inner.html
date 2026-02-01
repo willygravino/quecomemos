@@ -291,34 +291,40 @@
                     {{ form.image|add_class:"form-control" }}
                 </div> 
 
-<!-- Variedades VIEJO IBA AQUÍ-->
 
-<!-- --------- variedades -->
+<!-- 
+ ===========================
+  VARIEDADES
+  - Si el plato está guardado y es PADRE: habilitado
+  - Si no está guardado: botón deshabilitado + ayuda
+  ===========================  -->
 
-    <!-- # ===========================
-      VARIEDADES (NUEVO SISTEMA)
-      Solo para platos PADRE ya guardados
-      =========================== # -->
+<hr class="my-4">
 
-    
+<div class="d-flex align-items-center justify-content-between">
+  <h5 class="mb-0">Variedades</h5>
 
-
-    {% if form.instance.pk and not form.instance.plato_padre_id %}
-      <hr class="my-4">
-
-      <div class="d-flex align-items-center justify-content-between">
-        <h5 class="mb-0">Variedades</h5>
-
-        {# Por ahora link directo para no depender de urls.py (paso 3 lo conectamos con modal) #}
+  {% if form.instance.pk %}
+    {% if not form.instance.plato_padre_id %}
+      <button type="button"
+              class="btn btn-sm btn-primary js-open-variedad-modal"
+              data-url="{% url 'plato_variedad_create' form.instance.pk %}">
+        + Agregar variedad
+      </button>
    
-       
+    {% endif %}
+  {% else %}
+     <!-- Aún no está guardado: mostrar botón “muteado”  -->
+    <button type="button"
+            class="btn btn-sm btn-secondary"
+            disabled
+            aria-disabled="true"
+            data-bs-toggle="tooltip"
+            data-bs-placement="left"
+            title="Guardá el plato primero para poder agregar variedades.">
+      + Agregar variedad
+    </button>
 
-
-        <button type="button"
-                class="btn btn-sm btn-primary js-open-variedad-modal"
-                data-url="{% url 'plato_variedad_create' form.instance.pk %}">
-          + Agregar variedad
-        </button>
 
         <!-- POR AHORA COMENTO, SACAR TODO JS ETC CUANDO LO ELIMINE -->
         <!-- <a class="btn btn-sm btn-primary"
@@ -326,56 +332,55 @@
           + Agregar variedad pantalla completa
         </a> -->
 
+  {% endif %}
+</div>
 
-        
+{% if not form.instance.pk %}
+  <div class="text-muted small mt-2">
+    Podrás agregar variedades una vez que guardes el plato.
+  </div>
+{% endif %}
 
+{% if form.instance.pk and not form.instance.plato_padre_id %}
+  <div class="mt-3">
+    {% if variedades %}
+      <div class="list-group">
+        {% for v in variedades %}
+          <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <div class="fw-semibold">{{ v.nombre_plato }}</div>
+              <small class="text-muted">ID: {{ v.id }}</small>
+            </div>
 
+            <button type="button"
+                    class="btn btn-sm btn-outline-secondary js-open-variedad-modal"
+                    data-url="{% url 'plato_variedad_update' v.id %}?tipopag={{ tipopag }}">
+              Editar
+            </button>
 
-
-
-      </div>
-
-      <div class="mt-3">
-        {% if form.instance.variedades_hijas.exists %}
-          <div class="list-group">
-            {% for v in variedades %}
-              <div class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                  <div class="fw-semibold">{{ v.nombre_plato }}</div>
-                  <small class="text-muted">ID: {{ v.id }}</small>
-                </div>
-
-                <!-- POR AHORA COMENTO PERO CUANDO LO SAQUE, SACAR TODA LA LÓGICA DE JS -->
+             <!-- POR AHORA COMENTO PERO CUANDO LO SAQUE, SACAR TODA LA LÓGICA DE JS -->
                 <!-- <a class="btn btn-sm btn-outline-secondary"
                   href="% url 'plato_variedad_update' v.id %}">
                   Editar
                 </a> -->
 
-                <button type="button"
-                        class="btn btn-sm btn-outline-secondary js-open-variedad-modal"
-                        data-url="{% url 'plato_variedad_update' v.id %}?tipopag={{ tipopag }}">
-                  Editar
-                </button>
 
-                <button type="button"
-                        class="btn btn-sm btn-outline-danger js-delete-variedad"
-                        data-url="{% url 'plato_variedad_delete' v.id %}"
-                        data-nombre="{{ v.nombre_plato|escapejs }}">
-                  Eliminar
-                </button>
-
-
-                
-              </div>
-            {% endfor %}
+            <button type="button"
+                    class="btn btn-sm btn-outline-danger js-delete-variedad"
+                    data-url="{% url 'plato_variedad_delete' v.id %}"
+                    data-nombre="{{ v.nombre_plato|escapejs }}">
+              Eliminar
+            </button>
           </div>
-        {% else %}
-          <div class="text-muted">Todavía no hay variedades.</div>
-        {% endif %}
+        {% endfor %}
       </div>
+    {% else %}
+      <div class="text-muted">Todavía no hay variedades.</div>
     {% endif %}
+  </div>
+{% endif %}
 
-    <!-- MODAL DE CONFIRMACIÓN DE ELIMINAR VARIEDAD -->
+<!-- MODAL DE CONFIRMACIÓN DE ELIMINAR VARIEDAD -->
 <div class="modal fade" id="confirmDeleteVariedadModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -397,6 +402,7 @@
   </div>
 </div>
 
+<!-- fin de variedades -->
 
 
   <div class="text-center mt-2 mb-2">
