@@ -309,7 +309,6 @@
                   <!-- Pin solo si NO es lugar -->
                     <a href="{% url 'fijar-o-eliminar-habito' plato.es_lugar|yesno:'1,0' plato.objeto_id 'desayuno' %}">
 
-                       title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
                       <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                     </a>
 
@@ -368,7 +367,6 @@
                   {% endif %}
 
                     <a href="{% url 'fijar-o-eliminar-habito' plato.es_lugar|yesno:'1,0' plato.objeto_id 'almuerzo' %}">
-                       title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
                       <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                     </a>
 
@@ -425,7 +423,6 @@
                   {% endif %}
 
                     <a href="{% url 'fijar-o-eliminar-habito' plato.es_lugar|yesno:'1,0' plato.objeto_id 'merienda' %}">
-                       title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
                       <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                     </a>
 
@@ -482,7 +479,6 @@
                   {% endif %}
                     <a href="{% url 'fijar-o-eliminar-habito' plato.es_lugar|yesno:'1,0' plato.objeto_id 'cena' %}">
 
-                       title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
                       <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                     </a>
 

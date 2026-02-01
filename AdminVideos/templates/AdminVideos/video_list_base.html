@@ -22,7 +22,7 @@
           {% if tipopag and tipopag != "Dash" %}
             + AGREGAR {{ tipopag|upper}}
           {% else %}
-            + AGREGAR PLATO PRINCIPAL fff
+            + AGREGAR PLATO PRINCIPAL
           {% endif %}
         </a>
 
@@ -208,13 +208,16 @@
                 </a>
 
                 <a href="#"
-                    class="btn btn-sm btn-outline-danger"
-                    data-bs-toggle="modal"
-                    data-bs-target="#confirmDeleteModal"
-                    data-url="{% url 'eliminar-plato' grupo.id %}"
-                    data-nombre="{{ grupo.nombre_plato }}">
+                  class="btn btn-sm btn-outline-danger"
+                  data-bs-toggle="modal"
+                  data-bs-target="#confirmActionModal"
+                  data-confirm-title="Eliminar plato"
+                  data-confirm-body="¿Seguro que querés borrar <strong>{{ grupo.nombre_plato|escape }}</strong>?"
+                  data-confirm-action="{% url 'eliminar-plato' grupo.id %}"
+                  data-confirm-btn="Sí, borrar">
                   <i class="fa-solid fa-trash-can me-1"></i> Eliminar
                 </a>
+
 
               {% else %}
                 <!-- Botón Ver: abre modal -->
@@ -280,12 +283,15 @@
                                     <a href="#"
                                       class="btn btn-sm btn-outline-danger py-0 px-2"
                                       data-bs-toggle="modal"
-                                      data-bs-target="#confirmDeleteModal"
-                                      data-url="{% url 'eliminar-plato' v.id %}"
-                                      data-nombre="{{ v.nombre_plato }}"
+                                      data-bs-target="#confirmActionModal"
+                                      data-confirm-title="Eliminar plato"
+                                      data-confirm-body="¿Seguro que querés borrar <strong>{{ v.nombre_plato|escape }}</strong>?"
+                                      data-confirm-action="{% url 'eliminar-plato' v.id %}"
+                                      data-confirm-btn="Sí, borrar"
                                       title="Eliminar">
                                       <i class="fa-solid fa-trash-can"></i>
                                     </a>
+
                                   {% else %}
                                   <!-- Botón Ver: abre modal -->
                                   <a href="#"
@@ -449,16 +455,20 @@
 
               {% endif %}
 
-
+<!-- es el tachito que se abre por hover al pasar por el nombre del plato -->
               <a href="#"
-                 data-bs-toggle="modal"
-                 data-bs-target="#confirmDeleteModal"
-                 data-url="{% url 'eliminar-plato' plato.id %}"
-                 data-nombre="{{ plato.nombre_plato }}"
-                 class="plato-action-btn text-danger"
-                 title="Eliminar">
+                data-bs-toggle="modal"
+                data-bs-target="#confirmActionModal"
+                data-confirm-title="Eliminar plato"
+                data-confirm-body="¿Seguro que querés borrar <strong>{{ plato.nombre_plato|escape }}</strong>?"
+                data-confirm-action="{% url 'eliminar-plato' plato.id %}"
+                data-confirm-btn="Sí, borrar"
+                class="plato-action-btn text-secondary"
+                title="Eliminar"
+                aria-label="Eliminar plato">
                 <i class="fa-solid fa-trash-can"></i>
               </a>
+
 
             </div>
 
@@ -508,14 +518,21 @@
               <li><hr class="dropdown-divider"></li>
 
               <li>
+                
+                
                 <a class="dropdown-item text-danger"
-                   href="#"
-                   data-bs-toggle="modal"
-                   data-bs-target="#confirmDeleteModal"
-                   data-url="{% url 'eliminar-plato' plato.id %}"
-                   data-nombre="{{ plato.nombre_plato }}">
+                  href="#"
+                  data-bs-toggle="modal"
+                  data-bs-target="#confirmActionModal"
+                  data-confirm-title="Eliminar plato"
+                  data-confirm-body="¿Seguro que querés borrar <strong>{{ plato.nombre_plato|escape }}</strong>?"
+                  data-confirm-action="{% url 'eliminar-plato' plato.id %}"
+                  data-confirm-btn="Sí, borrar">
                   <i class="fa-solid fa-trash-can me-2"></i> Eliminar
                 </a>
+
+
+
               </li>
             </ul>
           </div>
@@ -530,33 +547,6 @@
   </div>
 </section>
 
-
-
-
-<!-- modal de confirmación de eliminación de plato -->
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0">
-      <div class="modal-header">
-        <h5 class="modal-title" id="confirmDeleteLabel">Confirmar eliminación</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-
-      <form method="post" id="deleteForm">
-        {% csrf_token %}
-        <div class="modal-body">
-          <p>¿Estás seguro de que querés borrar <strong id="platoNombre"></strong>?</p>
-          <p class="text-muted small mb-0">Esta acción no se puede deshacer.</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-danger">Sí, borrar</button>
-        </div>
-      </form>
-
-    </div>
-  </div>
-</div>
 
 
 <!-- ESTAS SON LAS TARJETAS DE LUGARES, SI ES QUE ESTAMOS EN LUGARES -->
@@ -592,10 +582,15 @@
                         </a>
                       </div>
                     {% endif %}
-                    <a href="#" data-bs-toggle="modal" data-bs-target="#asignarPlatoModal" class="btn btn-sm btn-primary p-0"
-                      onclick="setPlatoInfo('{{ lugar.id }}', 'lugar')" class="btn btn-sm btn-outline-primary">
+                    
+                    <a href="#"
+                      data-bs-toggle="modal"
+                      data-bs-target="#asignarPlatoModal"
+                      onclick="setPlatoInfo('{{ lugar.id }}', 'lugar')"
+                      class="btn btn-sm btn-primary p-0">
                       Programar
                     </a>
+
 
                   </div>
                 </div>
@@ -622,7 +617,7 @@
             {% csrf_token %}
 
             <div class="mb-3">
-              <h6>Compartir este plato {{ plato.id }} con:</h6>
+              <h6>Compartir con:</h6>
               <select id="amigue-select" name="amigue" class="form-select" aria-label="Seleccionar amigue">
                 {% for amigue in amigues %}
                 <option value="{{ amigue }}">{{ amigue }}</option>
@@ -646,25 +641,6 @@
     </div>
   </div>
 
-
-
-<!-- ELIMINAR PLATO -->
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  const modalEl = document.getElementById('confirmDeleteModal');
-  modalEl.addEventListener('show.bs.modal', function (event) {
-    const trigger = event.relatedTarget;
-    const url = trigger.getAttribute('data-url');
-    const nombre = trigger.getAttribute('data-nombre');
-
-    const form = modalEl.querySelector('#deleteForm');
-    const nombreEl = modalEl.querySelector('#platoNombre');
-
-    form.setAttribute('action', url);
-    nombreEl.textContent = nombre || '';
-  });
-});
-</script>
 
 <!-- Modal para cargar el formulario dinámicamente -->
 <div class="modal fade" id="modalPlato" tabindex="-1" aria-labelledby="modalPlatoLabel" aria-hidden="true">

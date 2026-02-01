@@ -249,63 +249,7 @@
   const CSRF_TOKEN = getCookie("csrftoken");
   window.__PLATO_FORM_INIT_LOADED__ = true;
 
-    // ===========================
-  // DELETE VARIEDAD (confirm modal)
-  // ===========================
-    if (!document.__deleteVariedadBound) {
-      let deleteUrl = null;
-
-      document.addEventListener("click", function (e) {
-        const btn = e.target.closest(".js-delete-variedad");
-        if (!btn) return;
-
-        deleteUrl = btn.dataset.url;
-        const nombre = btn.dataset.nombre || "esta variedad";
-
-        const nameEl = document.getElementById("deleteVariedadNombre");
-        if (nameEl) nameEl.textContent = nombre;
-
-        const modalEl = document.getElementById("confirmDeleteVariedadModal");
-        if (!modalEl) return;
-
-        const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-        modal.show();
-      });
-
-      const confirmBtn = document.getElementById("confirmDeleteVariedadBtn");
-      if (confirmBtn) {
-        confirmBtn.addEventListener("click", async function () {
-          if (!deleteUrl) return;
-
-          const resp = await fetch(deleteUrl, {
-            method: "POST",
-            headers: {
-              "X-Requested-With": "XMLHttpRequest",
-              "X-CSRFToken": CSRF_TOKEN || "",
-            },
-            credentials: "same-origin",
-          });
-
-          if (!resp.ok) {
-            alert("No se pudo eliminar. Revisá permisos/CSRF.");
-            return;
-          }
-
-          const modalEl = document.getElementById("confirmDeleteVariedadModal");
-          const inst = modalEl ? bootstrap.Modal.getInstance(modalEl) : null;
-          if (inst) inst.hide();
-
-          if (modalEl) {
-            modalEl.addEventListener("hidden.bs.modal", () => window.location.reload(), { once: true });
-          } else {
-            window.location.reload();
-          }
-        });
-      }
-
-      document.__deleteVariedadBound = true;
-    }
-
+    
 
 
   // ===== Utils =====
