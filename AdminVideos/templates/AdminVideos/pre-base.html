@@ -274,224 +274,317 @@
   </div>
 </div>
 
+<!-- COMIENZO DE CAROUSEL -->
 
 
+{# ========================= #}
+{# MOBILE: Carousel 4 slides (1 comida por slide) #}
+{# ========================= #}
 
+<div class="d-block d-md-none">
+  <div id="comidasCarousel-{{ dia|date:'Y-m-d' }}"
+       class="carousel slide comidas-carousel"
+       data-bs-touch="true"
+       data-bs-wrap="true"
+       data-bs-ride="false"
+       data-bs-interval="false">
 
-                    {# ========================= #}
-                    {# MOBILE: Carousel 4 slides (1 comida por slide) #}
-                    {# ========================= #}
+    <div class="carousel-inner">
 
+      <!-- Slide 1: Desayuno -->
+      <div class="carousel-item">
+        <div class="p-1">
+          <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Desayuno</h6>
 
+          {% if dia_plato.1.desayuno %}
+            {% for plato in dia_plato.1.desayuno %}
+              {% if plato.objeto_id %}
 
-                    
-                    <div class="d-block d-md-none">
-                        <div id="comidasCarousel-{{ dia|date:'Y-m-d' }}"
-                            class="carousel slide comidas-carousel"
-                            data-bs-touch="true"
-                            data-bs-wrap="true"
-                            data-bs-ride="false"
-                            data-bs-interval="false">
+                <div class="mb-1 ms-1 d-flex align-items-center text-primary">
 
-                        
-                            <div class="carousel-inner">
+                  <!-- Nombre (link solo si NO es lugar) -->
+                  {% if not plato.es_lugar %}
+                    <a href="{% url 'videos-update' plato.objeto_id %}"
+                       class="text-decoration-none me-2">
+                      &nbsp; {{ plato.nombre }}
+                    </a>
+                  {% else %}
+                    <span class="me-2">&nbsp; {{ plato.nombre }}</span>
+                  {% endif %}
 
-                          <!-- Slide 1: Desayuno -->
-                          <div class="carousel-item">
-                            <div class="p-1">
-                              <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Desayuno</h6>
-                              {% if dia_plato.1.desayuno %}
-                                {% for plato in dia_plato.1.desayuno %}
-                                  {% if plato.plato_id %}
+                  <!-- Pin solo si NO es lugar -->
+                  {% if not plato.es_lugar %}
+                    <a href="{% url 'fijar-o-eliminar-habito' plato.objeto_id 'desayuno' %}"
+                       title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
+                      <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
+                    </a>
+                  {% endif %}
 
-                                
-                                  <div class="mb-1 ms-1 d-flex align-items-center text-primary">
-                                    <a href="{% url 'videos-update' plato.plato_id %}" class="text-decoration-none me-2">
-                                      &nbsp; {{ plato.nombre }}
-                                    </a>
+                  <!-- Eliminar: manda es_lugar (1/0) + objeto_id -->
+                  <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'desayuno' dia %}"
+                     class="btn btn-sm p-0 ms-2" title="Eliminar">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </a>
 
-                                    <a href="{% url 'fijar-o-eliminar-habito' plato.plato_id 'desayuno' %}"
-                                       title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
-                                      <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
-                                    </a>
+                </div>
 
-                                    <a href="{% url 'eliminar-programado' plato.plato_id 'desayuno' dia %}"
-                                       class="btn btn-sm p-0" title="Eliminar">
-                                      <i class="fa-solid fa-trash-can"></i>
-                                    </a>
-
-                                   
-
-                                  </div>
-                                  {% else %}
-                              <p>Plato sin ID.</p>
-                            {% endif %}
-                                {% endfor %}
-                              {% else %}
-                                <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
-                              {% endif %}
-                            </div>
-                          </div>
-
-                          <!-- Slide 2: Almuerzo -->
-                          <div class="carousel-item active">
-                            <div class="p-1">
-                              <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Almuerzo</h6>
-                              {% if dia_plato.1.almuerzo %}
-                                {% for plato in dia_plato.1.almuerzo %}
-                                                                  {% if plato.plato_id %}
-
-                                  <div class="mb-1 ms-1 d-flex align-items-center text-primary">
-                                    <a href="{% url 'videos-update' plato.plato_id %}" class="text-decoration-none me-2">
-                                      &nbsp; {{ plato.nombre }}
-                                    </a>
-
-                                    <a href="{% url 'fijar-o-eliminar-habito' plato.plato_id 'almuerzo' %}"
-                                       title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
-                                      <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
-                                    </a>
-
-                                    <a href="{% url 'eliminar-programado' plato.plato_id 'almuerzo' dia %}"
-                                       class="btn btn-sm p-0" title="Eliminar">
-                                      <i class="fa-solid fa-trash-can"></i>
-                                    </a>
-
-
-                                  </div>
-                                  {% else %}
-                              <p>Plato sin ID.</p>
-                            {% endif %}
-                                {% endfor %}
-                              {% else %}
-                                <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
-                              {% endif %}
-                            </div>
-                          </div>
-
-                          <!-- Slide 3: Merienda -->
-                          <div class="carousel-item">
-                            <div class="p-1">
-                              <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Merienda</h6>
-                              {% if dia_plato.1.merienda %}
-                                {% for plato in dia_plato.1.merienda %}
-                                       {% if plato.plato_id %}
-
-                                  <div class="mb-1 ms-1 d-flex align-items-center text-primary">
-                                    <a href="{% url 'videos-update' plato.plato_id %}" class="text-decoration-none me-2">
-                                      &nbsp; {{ plato.nombre }}
-                                    </a>
-
-                                    <a href="{% url 'fijar-o-eliminar-habito' plato.plato_id 'merienda' %}"
-                                       title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
-                                      <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
-                                    </a>
-                               
-
-                                    <a href="{% url 'eliminar-programado' plato.tipo plato.objeto_id 'merienda' dia %}"
-                                      class="btn btn-sm p-0" title="Eliminar">
-                                      <i class="fa-solid fa-trash-can"></i>
-                                    </a>
-
-
-
-
-                                  </div>
-                                   {% else %}
-                              <p>Plato sin ID.</p>
-                            {% endif %}
-                                {% endfor %}
-                              {% else %}
-                                <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
-                              {% endif %}
-                            </div>
-                          </div>
-
-                          <!-- Slide 4: Cena -->
-                          <div class="carousel-item">
-                            <div class="p-1">
-                              <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Cena</h6>
-                              {% if dia_plato.1.cena %}
-                                {% for plato in dia_plato.1.cena %}
-                                                                       {% if plato.plato_id %}
-
-                                  <div class="mb-1 ms-1 d-flex align-items-center text-primary">
-                                    <a href="{% url 'videos-update' plato.plato_id %}" class="text-decoration-none me-2">
-                                      &nbsp; {{ plato.nombre }}
-                                    </a>
-
-                                    <a href="{% url 'fijar-o-eliminar-habito' plato.plato_id 'cena' %}"
-                                       title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
-                                      <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
-                                    </a>
-
-                                    <a href="{% url 'eliminar-programado' plato.plato_id 'cena' dia %}"
-                                       class="btn btn-sm p-0" title="Eliminar">
-                                      <i class="fa-solid fa-trash-can"></i>
-                                    </a>
-
-
-
-                                  </div>
-                                   {% else %}
-                              <p>Plato sin ID.</p>
-                            {% endif %}
-                                {% endfor %}
-                              {% else %}
-                                <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
-                              {% endif %}
-                            </div>
-                          </div>
-
-                        </div>
-
-                        <!-- Controles -->
-                        <button class="carousel-control-prev" type="button"
-                                data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}" data-bs-slide="prev">
-                          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                          <span class="visually-hidden">Anterior</span>
-                        </button>
-
-                        <button class="carousel-control-next" type="button"
-                                data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}" data-bs-slide="next">
-                          <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                          <span class="visually-hidden">Siguiente</span>
-                        </button>
-
-                      </div>
-
-                      <!-- Indicador simple con links a cada slide -->
-                      <div class="text-center mt-1" style="font-size:.7rem;">
-                        <a href="#"
-                          class="text-muted mx-1"
-                          data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}"
-                          data-bs-slide-to="0">
-                          Desayuno
-                        </a>
-                        ·
-                        <a href="#"
-                          class="text-muted mx-1"
-                          data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}"
-                          data-bs-slide-to="1">
-                          Almuerzo
-                        </a>
-                        ·
-                        <a href="#"
-                          class="text-muted mx-1"
-                          data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}"
-                          data-bs-slide-to="2">
-                          Merienda
-                        </a>
-                        ·
-                        <a href="#"
-                          class="text-muted mx-1"
-                          data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}"
-                          data-bs-slide-to="3">
-                          Cena
-                        </a>
-                      </div>
+                <!-- Extras SOLO si NO es lugar y es Principal -->
+                {% if not plato.es_lugar and 'Principal' in plato.tipo %}
+                  <div class="ms-4">
+                    <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
+                            id="agregar-salsa-{{ plato.objeto_id }}">
+                      + Salsa
+                    </button>
+                    <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
+                            id="agregar-guarnicion-{{ plato.objeto_id }}">
+                      + Guarnición
+                    </button>
                   </div>
+                {% endif %}
+
+              {% else %}
+                <p class="mb-1 ms-1 d-flex align-items-center text-danger">
+                  Este objeto no tiene ID válido.
+                </p>
+              {% endif %}
+            {% endfor %}
+          {% else %}
+            <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Slide 2: Almuerzo -->
+      <div class="carousel-item active">
+        <div class="p-1">
+          <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Almuerzo</h6>
+
+          {% if dia_plato.1.almuerzo %}
+            {% for plato in dia_plato.1.almuerzo %}
+              {% if plato.objeto_id %}
+
+                <div class="mb-1 ms-1 d-flex align-items-center text-primary">
+
+                  {% if not plato.es_lugar %}
+                    <a href="{% url 'videos-update' plato.objeto_id %}"
+                       class="text-decoration-none me-2">
+                      &nbsp; {{ plato.nombre }}
+                    </a>
+                  {% else %}
+                    <span class="me-2">&nbsp; {{ plato.nombre }}</span>
+                  {% endif %}
+
+                  {% if not plato.es_lugar %}
+                    <a href="{% url 'fijar-o-eliminar-habito' plato.objeto_id 'almuerzo' %}"
+                       title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
+                      <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
+                    </a>
+                  {% endif %}
+
+                  <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'almuerzo' dia %}"
+                     class="btn btn-sm p-0 ms-2" title="Eliminar">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </a>
+
+                </div>
+
+                {% if not plato.es_lugar and 'Principal' in plato.tipo %}
+                  <div class="ms-4">
+                    <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
+                            id="agregar-salsa-{{ plato.objeto_id }}">
+                      + Salsa
+                    </button>
+                    <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
+                            id="agregar-guarnicion-{{ plato.objeto_id }}">
+                      + Guarnición
+                    </button>
+                  </div>
+                {% endif %}
+
+              {% else %}
+                <p class="mb-1 ms-1 d-flex align-items-center text-danger">
+                  Este objeto no tiene ID válido.
+                </p>
+              {% endif %}
+            {% endfor %}
+          {% else %}
+            <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Slide 3: Merienda -->
+      <div class="carousel-item">
+        <div class="p-1">
+          <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Merienda</h6>
+
+          {% if dia_plato.1.merienda %}
+            {% for plato in dia_plato.1.merienda %}
+              {% if plato.objeto_id %}
+
+                <div class="mb-1 ms-1 d-flex align-items-center text-primary">
+
+                  {% if not plato.es_lugar %}
+                    <a href="{% url 'videos-update' plato.objeto_id %}"
+                       class="text-decoration-none me-2">
+                      &nbsp; {{ plato.nombre }}
+                    </a>
+                  {% else %}
+                    <span class="me-2">&nbsp; {{ plato.nombre }}</span>
+                  {% endif %}
+
+                  {% if not plato.es_lugar %}
+                    <a href="{% url 'fijar-o-eliminar-habito' plato.objeto_id 'merienda' %}"
+                       title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
+                      <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
+                    </a>
+                  {% endif %}
+
+                  <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'merienda' dia %}"
+                     class="btn btn-sm p-0 ms-2" title="Eliminar">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </a>
+
+                </div>
+
+                {% if not plato.es_lugar and 'Principal' in plato.tipo %}
+                  <div class="ms-4">
+                    <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
+                            id="agregar-salsa-{{ plato.objeto_id }}">
+                      + Salsa
+                    </button>
+                    <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
+                            id="agregar-guarnicion-{{ plato.objeto_id }}">
+                      + Guarnición
+                    </button>
+                  </div>
+                {% endif %}
+
+              {% else %}
+                <p class="mb-1 ms-1 d-flex align-items-center text-danger">
+                  Este objeto no tiene ID válido.
+                </p>
+              {% endif %}
+            {% endfor %}
+          {% else %}
+            <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Slide 4: Cena -->
+      <div class="carousel-item">
+        <div class="p-1">
+          <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Cena</h6>
+
+          {% if dia_plato.1.cena %}
+            {% for plato in dia_plato.1.cena %}
+              {% if plato.objeto_id %}
+
+                <div class="mb-1 ms-1 d-flex align-items-center text-primary">
+
+                  {% if not plato.es_lugar %}
+                    <a href="{% url 'videos-update' plato.objeto_id %}"
+                       class="text-decoration-none me-2">
+                      &nbsp; {{ plato.nombre }}
+                    </a>
+                  {% else %}
+                    <span class="me-2">&nbsp; {{ plato.nombre }}</span>
+                  {% endif %}
+
+                  {% if not plato.es_lugar %}
+                    <a href="{% url 'fijar-o-eliminar-habito' plato.objeto_id 'cena' %}"
+                       title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
+                      <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
+                    </a>
+                  {% endif %}
+
+                  <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'cena' dia %}"
+                     class="btn btn-sm p-0 ms-2" title="Eliminar">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </a>
+
+                </div>
+
+                {% if not plato.es_lugar and 'Principal' in plato.tipo %}
+                  <div class="ms-4">
+                    <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
+                            id="agregar-salsa-{{ plato.objeto_id }}">
+                      + Salsa
+                    </button>
+                    <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
+                            id="agregar-guarnicion-{{ plato.objeto_id }}">
+                      + Guarnición
+                    </button>
+                  </div>
+                {% endif %}
+
+              {% else %}
+                <p class="mb-1 ms-1 d-flex align-items-center text-danger">
+                  Este objeto no tiene ID válido.
+                </p>
+              {% endif %}
+            {% endfor %}
+          {% else %}
+            <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Controles -->
+    <button class="carousel-control-prev" type="button"
+            data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Anterior</span>
+    </button>
+
+    <button class="carousel-control-next" type="button"
+            data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Siguiente</span>
+    </button>
+
+  </div>
+
+  <!-- Indicador simple con links a cada slide -->
+  <div class="text-center mt-1" style="font-size:.7rem;">
+    <a href="#"
+       class="text-muted mx-1"
+       data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}"
+       data-bs-slide-to="0">
+      Desayuno
+    </a>
+    ·
+    <a href="#"
+       class="text-muted mx-1"
+       data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}"
+       data-bs-slide-to="1">
+      Almuerzo
+    </a>
+    ·
+    <a href="#"
+       class="text-muted mx-1"
+       data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}"
+       data-bs-slide-to="2">
+      Merienda
+    </a>
+    ·
+    <a href="#"
+       class="text-muted mx-1"
+       data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}"
+       data-bs-slide-to="3">
+      Cena
+    </a>
+  </div>
+</div>
 
 
+
+
+
+<!-- FIN DEL CAROUSEL -->
 
 
 
