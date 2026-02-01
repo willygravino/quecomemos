@@ -641,9 +641,10 @@
     </div>
   </div>
 
+{% comment %}
 
-<!-- Modal para cargar el formulario dinámicamente -->
-<div class="modal fade" id="modalPlato" tabindex="-1" aria-labelledby="modalPlatoLabel" aria-hidden="true">
+ Modal para cargar el formulario dinámicamente 
+ <div class="modal fade" id="modalPlato" tabindex="-1" aria-labelledby="modalPlatoLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
@@ -652,14 +653,14 @@
       </div>
 
       <div class="modal-body" id="modalPlatoBody">
-        <!-- Aquí se cargará el formulario dinámicamente -->
+        Aquí se cargará el formulario dinámicamente 
       </div>
     </div>
   </div>
-</div>
+</div> 
 
-
-
+ 
+TODO: reactivar modalPlato cuando volvamos a cargar el form en modal (btnNuevoPrincipal / btn-editar-plato)
 <script>
 document.addEventListener("DOMContentLoaded", function() {
   const modalEl = document.getElementById("modalPlato");
@@ -683,8 +684,10 @@ document.addEventListener("DOMContentLoaded", function() {
     .catch(err => console.error("Error cargando formulario:", err));
   });
 });
-</script>
+</script> 
 
+
+TODO: modalPlato desactivado por ahora (se reactivará cuando usemos btnNuevoPrincipal / btn-editar-plato)
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -716,6 +719,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 </script>
+{% endcomment %}
 
 
 
