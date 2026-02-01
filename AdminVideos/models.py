@@ -541,6 +541,47 @@ class Profile(models.Model):
 
 
     
+# class HabitoSemanal(models.Model):
+#     DIAS_SEMANA = (
+#         (0, "Lunes"),
+#         (1, "Martes"),
+#         (2, "Miércoles"),
+#         (3, "Jueves"),
+#         (4, "Viernes"),
+#         (5, "Sábado"),
+#         (6, "Domingo"),
+#     )
+
+#     MOMENTOS = (
+#         ("desayuno", "Desayuno"),
+#         ("almuerzo", "Almuerzo"),
+#         ("merienda", "Merienda"),
+#         ("cena", "Cena"),
+#     )
+
+#     perfil = models.ForeignKey(
+#         Profile,
+#         on_delete=models.CASCADE,
+#         related_name="habitos_semanales"
+#     )
+
+#     dia_semana = models.IntegerField(choices=DIAS_SEMANA)
+#     momento = models.CharField(max_length=20, choices=MOMENTOS)
+
+#     plato = models.ForeignKey(
+#         Plato,
+#         on_delete=models.CASCADE
+#     )
+
+#     class Meta:
+#         unique_together = ("perfil", "dia_semana", "momento", "plato")
+
+#     def __str__(self):
+#         return f"{self.get_dia_semana_display()} - {self.momento} - {self.plato}"
+    
+from django.db import models
+from django.db.models import Q
+
 class HabitoSemanal(models.Model):
     DIAS_SEMANA = (
         (0, "Lunes"),
@@ -568,18 +609,40 @@ class HabitoSemanal(models.Model):
     dia_semana = models.IntegerField(choices=DIAS_SEMANA)
     momento = models.CharField(max_length=20, choices=MOMENTOS)
 
-    plato = models.ForeignKey(
-        Plato,
-        on_delete=models.CASCADE
-    )
+    # ✅ Ahora puede ser plato O lugar
+    plato = models.ForeignKey(Plato, on_delete=models.CASCADE, null=True, blank=True)
+    lugar = models.ForeignKey(Lugar, on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
-        unique_together = ("perfil", "dia_semana", "momento", "plato")
+        constraints = [
+            # ✅ exactamente uno (plato XOR lugar)
+            models.CheckConstraint(
+                check=(
+                    (Q(plato__isnull=False) & Q(lugar__isnull=True)) |
+                    (Q(plato__isnull=True) & Q(lugar__isnull=False))
+                ),
+                name="habito_exactamente_un_objeto",
+            ),
+
+            # ✅ no duplicar hábitos de plato
+            models.UniqueConstraint(
+                fields=["perfil", "dia_semana", "momento", "plato"],
+                condition=Q(plato__isnull=False),
+                name="uniq_habito_plato",
+            ),
+
+            # ✅ no duplicar hábitos de lugar
+            models.UniqueConstraint(
+                fields=["perfil", "dia_semana", "momento", "lugar"],
+                condition=Q(lugar__isnull=False),
+                name="uniq_habito_lugar",
+            ),
+        ]
 
     def __str__(self):
-        return f"{self.get_dia_semana_display()} - {self.momento} - {self.plato}"
-    
-     
+        obj = self.plato if self.plato_id else self.lugar
+        return f"{self.get_dia_semana_display()} - {self.momento} - {obj}"
+
 
 class Mensaje(models.Model):
     usuario_que_envia = models.CharField(max_length=15, null=True, blank=True)

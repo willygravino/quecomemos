@@ -37,8 +37,38 @@ from django.db.models.expressions import OrderBy
 
 
 
+# @login_required
+# def fijar_o_eliminar_habito(request, plato_id, comida):
+#     usuario = request.user
+
+#     dia_str = request.session.get("dia_activo")
+#     if not dia_str:
+#         messages.error(request, "No hay día activo seleccionado.")
+#         return redirect("filtro-de-platos")
+
+#     # Fecha activa → día de la semana
+#     dia = datetime.datetime.strptime(dia_str, "%Y-%m-%d").date()
+#     dia_semana = dia.weekday()  # 0=Lunes ... 6=Domingo
+
+#     perfil = usuario.profile
+
+#     plato = get_object_or_404(Plato, id=plato_id, propietario=usuario)
+
+#     try:
+#         habito = HabitoSemanal.objects.get(perfil=perfil, plato=plato, dia_semana=dia_semana, momento=comida)
+#         # Si ya existe el hábito, lo eliminamos
+#         habito.delete()
+#         messages.success(request, f"Se eliminó el hábito de {plato.nombre_plato} para el {comida}.")
+#     except HabitoSemanal.DoesNotExist:
+#         # Si no existe, lo creamos
+#         HabitoSemanal.objects.create(perfil=perfil, plato=plato, dia_semana=dia_semana, momento=comida)
+#         messages.success(request, f"Se fijó el hábito de {plato.nombre_plato} para el {comida}.")
+
+#     return redirect("filtro-de-platos")
+
+
 @login_required
-def fijar_o_eliminar_habito(request, plato_id, comida):
+def fijar_o_eliminar_habito(request, es_lugar, objeto_id, comida):
     usuario = request.user
 
     dia_str = request.session.get("dia_activo")
@@ -46,26 +76,59 @@ def fijar_o_eliminar_habito(request, plato_id, comida):
         messages.error(request, "No hay día activo seleccionado.")
         return redirect("filtro-de-platos")
 
-    # Fecha activa → día de la semana
     dia = datetime.datetime.strptime(dia_str, "%Y-%m-%d").date()
-    dia_semana = dia.weekday()  # 0=Lunes ... 6=Domingo
+    dia_semana = dia.weekday()
 
     perfil = usuario.profile
+    es_lugar = int(es_lugar)
 
-    plato = get_object_or_404(Plato, id=plato_id, propietario=usuario)
+    if es_lugar == 1:
+        lugar = get_object_or_404(Lugar, id=objeto_id, propietario=usuario)
 
-    try:
-        habito = HabitoSemanal.objects.get(perfil=perfil, plato=plato, dia_semana=dia_semana, momento=comida)
-        # Si ya existe el hábito, lo eliminamos
-        habito.delete()
-        messages.success(request, f"Se eliminó el hábito de {plato.nombre_plato} para el {comida}.")
-    except HabitoSemanal.DoesNotExist:
-        # Si no existe, lo creamos
-        HabitoSemanal.objects.create(perfil=perfil, plato=plato, dia_semana=dia_semana, momento=comida)
-        messages.success(request, f"Se fijó el hábito de {plato.nombre_plato} para el {comida}.")
+        habito = HabitoSemanal.objects.filter(
+            perfil=perfil,
+            dia_semana=dia_semana,
+            momento=comida,
+            lugar=lugar
+        ).first()
+
+        if habito:
+            habito.delete()
+            messages.success(request, f"Se eliminó el hábito de {lugar.nombre} para {comida}.")
+        else:
+            HabitoSemanal.objects.create(
+                perfil=perfil,
+                dia_semana=dia_semana,
+                momento=comida,
+                lugar=lugar
+            )
+            messages.success(request, f"Se fijó el hábito de {lugar.nombre} para {comida}.")
+
+    else:
+        plato = get_object_or_404(Plato, id=objeto_id, propietario=usuario)
+
+        habito = HabitoSemanal.objects.filter(
+            perfil=perfil,
+            dia_semana=dia_semana,
+            momento=comida,
+            plato=plato
+        ).first()
+
+        nombre = getattr(plato, "nombre_plato", None) or getattr(plato, "nombre", str(plato))
+
+        if habito:
+            habito.delete()
+            messages.success(request, f"Se eliminó el hábito de {nombre} para {comida}.")
+        else:
+            HabitoSemanal.objects.create(
+                perfil=perfil,
+                dia_semana=dia_semana,
+                momento=comida,
+                plato=plato
+            )
+            messages.success(request, f"Se fijó el hábito de {nombre} para {comida}.")
 
     return redirect("filtro-de-platos")
-
 
 
 @login_required
@@ -2032,13 +2095,15 @@ def FiltroDePlatos(request):
     DIAS_ES = ['LU', 'MA', 'MI', 'JU', 'VI', 'SA', 'DO']  # tu mapeo
 
     # Recuperamos los hábitos semanales del usuario
-    habitos = HabitoSemanal.objects.filter(perfil=perfil).select_related("plato")
+    habitos = HabitoSemanal.objects.filter(perfil=perfil).select_related("plato", "lugar")
 
-    # Convertir los hábitos en un conjunto con (plato_id, dia_semana, momento)
-    habitos_set = {
-        (h.plato_id, h.dia_semana, h.momento)
-        for h in habitos
-    }
+    habitos_set = set()
+    for h in habitos:
+        if h.plato_id:
+            habitos_set.add(("plato", h.plato_id, h.dia_semana, h.momento))
+        elif h.lugar_id:
+            habitos_set.add(("lugar", h.lugar_id, h.dia_semana, h.momento))
+
 
     # Calcular y agregar las fechas y nombres de los días para los próximos 6 días
     dias_desde_hoy = [(fecha_actual + timedelta(days=i)) for i in range(0, 7)]
@@ -2060,29 +2125,69 @@ def FiltroDePlatos(request):
 
         # Solo asignar los hábitos si el menú se acaba de crear (es decir, no existía previamente)
         if creado:
-            # Asignar los platos fijados a ese día y momento
+            # Asignar los platos y lugares fijados a ese día y momento
             for habito in habitos_del_dia:
-                plato = habito.plato
                 momento = habito.momento
 
-                # Asegurarnos de asignar solo el plato base o sus variantes
-                platos_a_asignar = [plato] + list(plato.variedades_hijas.all())
+                if habito.plato_id:
+                    plato = habito.plato
 
-                creados = 0
-                for p in platos_a_asignar:
+                    platos_a_asignar = [plato] + list(plato.variedades_hijas.all())
+
+                    creados = 0
+                    for p in platos_a_asignar:
+                        _, created = MenuItem.objects.get_or_create(
+                            menu=menu_dia,
+                            momento=momento,
+                            plato=p,
+                            defaults={"elegido": True},
+                        )
+                        if created:
+                            creados += 1
+
+                    messages.success(
+                        request,
+                        f"Se asignaron {creados}/{len(platos_a_asignar)} platos al menú de {fecha} en {momento}."
+                    )
+
+                elif habito.lugar_id:
+                    lugar = habito.lugar
+
                     _, created = MenuItem.objects.get_or_create(
                         menu=menu_dia,
                         momento=momento,
-                        plato=p,
+                        lugar=lugar,
                         defaults={"elegido": True},
                     )
-                    if created:
-                        creados += 1
 
-                messages.success(
-                    request,
-                    f"Se asignaron {creados}/{len(platos_a_asignar)} platos al menú de {fecha} en {momento}."
-                )
+                    if created:
+                        messages.success(
+                            request,
+                            f"Se asignó el lugar {lugar.nombre} al menú de {fecha} en {momento}."
+                        )
+
+            # for habito in habitos_del_dia:
+            #     plato = habito.plato
+            #     momento = habito.momento
+
+            #     # Asegurarnos de asignar solo el plato base o sus variantes
+            #     platos_a_asignar = [plato] + list(plato.variedades_hijas.all())
+
+            #     creados = 0
+            #     for p in platos_a_asignar:
+            #         _, created = MenuItem.objects.get_or_create(
+            #             menu=menu_dia,
+            #             momento=momento,
+            #             plato=p,
+            #             defaults={"elegido": True},
+            #         )
+            #         if created:
+            #             creados += 1
+
+            #     messages.success(
+            #         request,
+            #         f"Se asignaron {creados}/{len(platos_a_asignar)} platos al menú de {fecha} en {momento}."
+            #     )
 
 
     primer_dia = dias_desde_hoy[0].isoformat()
@@ -2271,53 +2376,6 @@ def FiltroDePlatos(request):
     if dia_activo:
         dia_activo_obj = datetime.datetime.strptime(dia_activo, "%Y-%m-%d").date()
 
-
-    # # Inicializar un diccionario donde cada fecha tendrá listas separadas para cada tipo de comida
-    # platos_dia_x_dia = defaultdict(lambda: {"desayuno": [], "almuerzo": [], "merienda": [], "cena": []})
-
-
-    # items = (
-    #     MenuItem.objects
-    #     .filter(
-    #         menu__propietario=request.user,
-    #         menu__fecha__in=fechas_existentes
-    #     )
-    #     .select_related("menu", "plato", "lugar")
-    # )
-
-    # for item in items:
-    #     fec = item.menu.fecha
-    #     dias_programados.add(fec)
-
-    #     dia_semana = fec.weekday()
-
-    #     if item.plato:
-    #         fijo = (item.plato.id, dia_semana, item.momento) in habitos_set
-
-    #         platos_dia_x_dia[fec][item.momento].append({
-    #             "menuitem_id": item.id,                 # ✅ este es el que necesitamos para extras
-    #             "plato_id": item.plato.id,              # ✅ para seguir yendo a videos-update
-    #             "nombre": item.plato.nombre_plato,
-    #             "fijo": fijo,
-    #             "tipo": item.plato.tipos,
-    #             "dia_semana": dia_semana,
-    #         })
-
-
-    #     elif item.lugar:
-    #         platos_dia_x_dia[fec][item.momento].append({
-    #             "menuitem_id": item.id,   # ✅ también existe el MenuItem aunque sea lugar
-    #             "lugar_id": item.lugar.id,
-    #             "nombre": item.lugar.nombre,
-    #             "tipo": "",
-    #             "fijo": False
-    #         })
-
-
-
-    # # Convertir defaultdict a dict antes de pasarlo a la plantilla
-    # platos_dia_x_dia = dict(platos_dia_x_dia)
-
     # Inicializar un diccionario donde cada fecha tendrá listas separadas para cada tipo de comida
     platos_dia_x_dia = defaultdict(lambda: {"desayuno": [], "almuerzo": [], "merienda": [], "cena": []})
 
@@ -2338,7 +2396,8 @@ def FiltroDePlatos(request):
 
         # Verificación para agregar solo platos válidos
         if item.plato:
-            fijo = (item.plato.id, dia_semana, item.momento) in habitos_set
+            # si item.plato
+            fijo = ("plato", item.plato.id, dia_semana, item.momento) in habitos_set
 
             platos_dia_x_dia[fec][item.momento].append({
                 "menuitem_id": item.id,                 # ✅ este es el que necesitamos para extras
@@ -2352,12 +2411,14 @@ def FiltroDePlatos(request):
 
         # Verificación para agregar solo lugares válidos
         elif item.lugar:
+            fijo = ("lugar", item.lugar.id, dia_semana, item.momento) in habitos_set
+
             platos_dia_x_dia[fec][item.momento].append({
                 "menuitem_id": item.id,   # ✅ también existe el MenuItem aunque sea lugar
                 "objeto_id": item.lugar.id, # NO DEBE SER BUENA PRACTICA PONER AL LUGAR EL ID PLATO_ID, GPT SE CONFUNDIO Y YO TAMBIÉN, DOS D
                 "nombre": item.lugar.nombre,
                 "tipo": "",
-                "fijo": False,
+                "fijo": fijo,
                 "es_lugar": True
             })
 

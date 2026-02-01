@@ -86,7 +86,8 @@ urlpatterns = [
     path("platos/<int:pk>/ingredientes/", plato_ingredientes, name="plato_ingredientes"),
     path("platos/<int:pk>/opciones-asignar/", plato_opciones_asignar, name="plato_opciones_asignar"),
     path("s/<str:token>/plato/<int:pk>/", compartir_ing_plato, name="compartir-plato"),
-    path('fijar-o-eliminar-habito/<int:plato_id>/<str:comida>/', fijar_o_eliminar_habito, name='fijar-o-eliminar-habito'),
+
+    path('habito/<int:es_lugar>/<int:objeto_id>/<str:comida>/',fijar_o_eliminar_habito,name="fijar-o-eliminar-habito"),
 
 
 

@@ -51,14 +51,12 @@
 
               <!-- Íconos -->
               <div class="d-flex">
-                {# Pin solo si NO es lugar #}
-                {% if not plato.es_lugar %}
-                  <a href="{% url 'fijar-o-eliminar-habito' plato.objeto_id 'desayuno' %}"
-                     title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}"
-                     class="ms-2">
+                
+                  <a href="{% url 'fijar-o-eliminar-habito' plato.es_lugar|yesno:'1,0' plato.objeto_id 'desayuno' %}"
+                    title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}"
+                    class="ms-2">
                     <i class="bi bi-pin-angle-fill fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                   </a>
-                {% endif %}
 
                 {# Eliminar: manda es_lugar (1/0) + objeto_id #}
                 <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'desayuno' dia %}"
@@ -113,13 +111,13 @@
               {% endif %}
 
               <div class="d-flex">
-                {% if not plato.es_lugar %}
-                  <a href="{% url 'fijar-o-eliminar-habito' plato.objeto_id 'almuerzo' %}"
-                     title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}"
-                     class="ms-2">
+                  <a href="{% url 'fijar-o-eliminar-habito' plato.es_lugar|yesno:'1,0' plato.objeto_id 'almuerzo' %}"
+                  
+                    title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}"
+                    class="ms-2">
                     <i class="bi bi-pin-angle-fill fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                   </a>
-                {% endif %}
+                
 
                 <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'almuerzo' dia %}"
                    class="btn btn-sm p-0 ms-2" title="Eliminar">
@@ -172,13 +170,11 @@
               {% endif %}
 
               <div class="d-flex">
-                {% if not plato.es_lugar %}
-                  <a href="{% url 'fijar-o-eliminar-habito' plato.objeto_id 'merienda' %}"
-                     title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}"
-                     class="ms-2">
+                  <a href="{% url 'fijar-o-eliminar-habito' plato.es_lugar|yesno:'1,0' plato.objeto_id 'merienda' %}"
+                    title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}"
+                    class="ms-2">
                     <i class="bi bi-pin-angle-fill fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                   </a>
-                {% endif %}
 
                 <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'merienda' dia %}"
                    class="btn btn-sm p-0 ms-2" title="Eliminar">
@@ -231,13 +227,11 @@
               {% endif %}
 
               <div class="d-flex">
-                {% if not plato.es_lugar %}
-                  <a href="{% url 'fijar-o-eliminar-habito' plato.objeto_id 'cena' %}"
-                     title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}"
-                     class="ms-2">
+                  <a href="{% url 'fijar-o-eliminar-habito' plato.es_lugar|yesno:'1,0' plato.objeto_id 'cena' %}"
+                    title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}"
+                    class="ms-2">
                     <i class="bi bi-pin-angle-fill fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                   </a>
-                {% endif %}
 
                 <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'cena' dia %}"
                    class="btn btn-sm p-0 ms-2" title="Eliminar">
@@ -313,12 +307,11 @@
                   {% endif %}
 
                   <!-- Pin solo si NO es lugar -->
-                  {% if not plato.es_lugar %}
-                    <a href="{% url 'fijar-o-eliminar-habito' plato.objeto_id 'desayuno' %}"
+                    <a href="{% url 'fijar-o-eliminar-habito' plato.es_lugar|yesno:'1,0' plato.objeto_id 'desayuno' %}">
+
                        title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
                       <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                     </a>
-                  {% endif %}
 
                   <!-- Eliminar: manda es_lugar (1/0) + objeto_id -->
                   <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'desayuno' dia %}"
@@ -374,12 +367,10 @@
                     <span class="me-2">&nbsp; {{ plato.nombre }}</span>
                   {% endif %}
 
-                  {% if not plato.es_lugar %}
-                    <a href="{% url 'fijar-o-eliminar-habito' plato.objeto_id 'almuerzo' %}"
+                    <a href="{% url 'fijar-o-eliminar-habito' plato.es_lugar|yesno:'1,0' plato.objeto_id 'almuerzo' %}">
                        title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
                       <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                     </a>
-                  {% endif %}
 
                   <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'almuerzo' dia %}"
                      class="btn btn-sm p-0 ms-2" title="Eliminar">
@@ -433,12 +424,10 @@
                     <span class="me-2">&nbsp; {{ plato.nombre }}</span>
                   {% endif %}
 
-                  {% if not plato.es_lugar %}
-                    <a href="{% url 'fijar-o-eliminar-habito' plato.objeto_id 'merienda' %}"
+                    <a href="{% url 'fijar-o-eliminar-habito' plato.es_lugar|yesno:'1,0' plato.objeto_id 'merienda' %}">
                        title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
                       <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                     </a>
-                  {% endif %}
 
                   <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'merienda' dia %}"
                      class="btn btn-sm p-0 ms-2" title="Eliminar">
@@ -491,13 +480,11 @@
                   {% else %}
                     <span class="me-2">&nbsp; {{ plato.nombre }}</span>
                   {% endif %}
+                    <a href="{% url 'fijar-o-eliminar-habito' plato.es_lugar|yesno:'1,0' plato.objeto_id 'cena' %}">
 
-                  {% if not plato.es_lugar %}
-                    <a href="{% url 'fijar-o-eliminar-habito' plato.objeto_id 'cena' %}"
                        title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}">
                       <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
                     </a>
-                  {% endif %}
 
                   <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'cena' dia %}"
                      class="btn btn-sm p-0 ms-2" title="Eliminar">
