@@ -441,7 +441,7 @@ def obtener_parametros_sesion(request):
     # preseleccionados = request.session.get('preseleccionados', None)
 
     # Obtener el valor del parámetro 'tipo' desde la URL
-    tipo_parametro = request.GET.get('tipopag', 'Dash')
+    tipo_parametro = request.GET.get('tipopag', 'Principal')
 
     # # Obtener el usuario actual
     # usuario = request.user
@@ -681,17 +681,6 @@ def lista_de_compras(request):
     estado_map = {e.nombre: e for e in estado_qs}
 
 
-    # estados guardados para estos ingredientes
-    # pantry_qs = (
-    #     ProfileIngrediente.objects
-    #     .filter(profile=perfil, ingrediente_id__in=agregados.keys())
-    #     .only("ingrediente_id", "tengo", "comentario", "last_bought_at")
-    # )
-    # pantry_map = {pi.ingrediente_id: pi for pi in pantry_qs}
-
-   
-
-
     
 
     items = []
@@ -726,16 +715,16 @@ def lista_de_compras(request):
         "have": sum(i["estado"] == "tengo" for i in items),
     }
 
-    return render(
-        request,
-        "AdminVideos/lista_de_compras.html",
-        {
-            "menues": menues,                 # 👈 para render viejo sin adapters
-            "items_elegidos": items_elegidos, # si lo querés para debug o lista plana
+    context = {
+            "menues": menues,
+            "items_elegidos": items_elegidos,
             "share_url": share_url,
             "shopping": {"items": items, "summary": summary},
-        },
-    )
+            "parametro": "lista-compras",
+        }
+
+
+    return render(request,"AdminVideos/lista_de_compras.html",context)
 
 
 
@@ -1237,7 +1226,7 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             'Entrada': 'AdminVideos/entrada_form.html',
             'Dip': 'AdminVideos/dip_form.html',
             'Principal': 'AdminVideos/ppal_form.html',
-            'Dash': 'AdminVideos/ppal_form.html',
+            # 'Dash': 'AdminVideos/ppal_form.html',
             'Trago': 'AdminVideos/trago_form.html',
             'Salsa': 'AdminVideos/salsa_form.html',
             'Guarnicion': 'AdminVideos/guarnicion_form.html',
@@ -1255,7 +1244,7 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         "Torta": ["Torta", "Postre"],
         "Postre": ["Postre"],
         "Principal": ["Principal", "Guarnicion", "Entrada", "Picada"],
-        "Dash": ["Principal", "Guarnicion", "Entrada", "Picada"],
+        # "Dash": ["Principal", "Guarnicion", "Entrada", "Picada"],
         "Picada": ["Picada","Guarnicion", "Entrada"],
         "Salsa": ["Salsa", "Dip", "Guarnicion", "Entrada"],
     }
@@ -1264,8 +1253,8 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         template_param = self.request.GET.get('tipopag')
-        if template_param == "Dash":
-            template_param = "Principal"
+        # if template_param == "Dash":
+        #     template_param = "Principal"
 
         opciones = self.TIPOS_POR_TEMPLATE.get(template_param, [])
         if opciones:
@@ -1476,7 +1465,7 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
 
         # 👉 TIPOS: enviar TODOS al template
         context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
-        context["tipopag"] = self.request.GET.get("tipopag", "Dash")
+        context["tipopag"] = self.request.GET.get("tipopag", "Principal")
 
         # ❌ Variedades legacy: removido (ya no se usa)
         # context["variedades_en_base"] = ...
@@ -1556,59 +1545,6 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
 
 
 
-# class PlatoDetail(DetailView):
-#     model = Plato
-#     template_name = 'AdminVideos/plato_detail.html'
-#     context_object_name = "plato"
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-
-#         # Perfil y amigues (como ya tenés)
-#         perfil = get_object_or_404(Profile, user=self.request.user)
-#         context["amigues"] = perfil.amigues
-
-#         # Obtener el plato actual
-#         plato = self.get_object()
-
-#         # Convertir el campo 'tipos' (string separado por comas) a lista
-#         if plato.tipos:
-#             context['tipos_lista'] = [t.strip() for t in plato.tipos.split(',')]
-#         else:
-#             context['tipos_lista'] = []
-
-#         return context
-
-
-# class PlatoDetail(DetailView):
-#     model = Plato
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         plato = self.get_object()
-
-#         if plato.tipos:
-#             context["tipos_lista"] = [t.strip() for t in plato.tipos.split(",")]
-#         else:
-#             context["tipos_lista"] = []
-
-#         return context
-
-#     def get(self, request, *args, **kwargs):
-#         self.object = self.get_object()
-#         context = self.get_context_data()
-
-#         # 🔥 SI ES AJAX → devolvemos solo el HTML
-#         if request.headers.get("x-requested-with") == "XMLHttpRequest":
-#             html = render_to_string(
-#                 "AdminVideos/plato_detail_content.html",
-#                 context,
-#                 request=request
-#             )
-#             return JsonResponse({"html": html})
-
-#         # fallback (si alguien entra directo a la URL)
-#         return super().get(request, *args, **kwargs)
 
 
 class PlatoDetail(DetailView):
@@ -1711,7 +1647,7 @@ class PlatoVariedadCreate(PlatoCreate):
         if not tipopag:
             # tu campo 'tipos' es CSV; tomamos el primero como "tipopag" razonable
             raw = (self.padre.tipos or "").split(",")[0].strip()
-            tipopag = raw or "Dash"
+            tipopag = raw or "Principal"
 
         # hack simple: reutiliza tu mapping interno de PlatoCreate.get_template_names
         self.request.GET._mutable = True
@@ -1729,7 +1665,7 @@ class PlatoVariedadCreate(PlatoCreate):
         tipopag = self.request.GET.get("tipopag")
         if not tipopag:
             raw = (self.padre.tipos or "").split(",")[0].strip()
-            tipopag = raw or "Dash"
+            tipopag = raw or "Principal"
         context["tipopag"] = tipopag
 
         context["plato_padre_obj"] = self.padre
@@ -1987,7 +1923,7 @@ def filtrar_platos(
             platos_qs = platos_qs | qs_quecomemos
 
     # 🔹 Aplicar filtros adicionales
-    if tipo_parametro and tipo_parametro != "Dash":
+    if tipo_parametro:
         platos_qs = platos_qs.filter(tipos__icontains=tipo_parametro)
 
     if medios and medios != "-":
@@ -2064,7 +2000,7 @@ def FiltroDePlatos(request):
     except Profile.DoesNotExist:
         return redirect("profile-create")
 
-    DIAS_ES = ['LU', 'MA', 'MI', 'JU', 'VI', 'SA', 'DO']  # tu mapeo
+    # DIAS_ES = ['LU', 'MA', 'MI', 'JU', 'VI', 'SA', 'DO']  # tu mapeo
 
     # Recuperamos los hábitos semanales del usuario
     habitos = HabitoSemanal.objects.filter(perfil=perfil).select_related("plato", "lugar")
@@ -2138,29 +2074,7 @@ def FiltroDePlatos(request):
                             f"Se asignó el lugar {lugar.nombre} al menú de {fecha} en {momento}."
                         )
 
-            # for habito in habitos_del_dia:
-            #     plato = habito.plato
-            #     momento = habito.momento
-
-            #     # Asegurarnos de asignar solo el plato base o sus variantes
-            #     platos_a_asignar = [plato] + list(plato.variedades_hijas.all())
-
-            #     creados = 0
-            #     for p in platos_a_asignar:
-            #         _, created = MenuItem.objects.get_or_create(
-            #             menu=menu_dia,
-            #             momento=momento,
-            #             plato=p,
-            #             defaults={"elegido": True},
-            #         )
-            #         if created:
-            #             creados += 1
-
-            #     messages.success(
-            #         request,
-            #         f"Se asignaron {creados}/{len(platos_a_asignar)} platos al menú de {fecha} en {momento}."
-            #     )
-
+           
 
     primer_dia = dias_desde_hoy[0].isoformat()
 

@@ -30,7 +30,7 @@ urlpatterns = [
     path('api/ingredientes/', api_ingredientes, name='api_ingredientes'),
 
 
-    path('menu/elegido',lista_de_compras, name="menu-elegido"),
+    path('menu/elegido/',lista_de_compras, name="menu-elegido"),
     path('menu/amigues',amigues, name="amigues"),
     path('menu/historial',historial, name="historial"),
     path('menu/amigues/sumar',sumar_amigue, name="sumar-amigue"),
@@ -41,7 +41,7 @@ urlpatterns = [
     # path('descartar-sugerido/<str:nombre_plato>/', descartar_sugerido, name='descartar-sugerido'),
     path('descartar-sugerido/<int:plato_id>/', descartar_sugerido, name='descartar-sugerido'),
     path('agregar-compartido/<int:pk>/<int:mensaje_id>/', agregar_plato_compartido, name='agregar-plato-compartido'),
-    path('videos/list/filtro', FiltroDePlatos, name="filtro-de-platos"),
+    path('videos/list/filtro/', FiltroDePlatos, name="filtro-de-platos"),
     # path('lugares', Lugares, name="lugares"),
     # path('videos/reiniciar/sugeridos', reiniciar_sugeridos, name="reiniciar-sugeridos"),
     path('videos/<pk>/update', PlatoUpdate.as_view(), name="videos-update"),

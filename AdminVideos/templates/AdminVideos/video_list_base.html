@@ -213,10 +213,12 @@
                   data-bs-target="#confirmActionModal"
                   data-confirm-title="Eliminar plato"
                   data-confirm-body="¿Seguro que querés borrar <strong>{{ grupo.nombre_plato|escape }}</strong>?"
+                  data-confirm-hint="También se borrarán las programaciones de este plato. Esta acción no se puede deshacer."
                   data-confirm-action="{% url 'eliminar-plato' grupo.id %}"
                   data-confirm-btn="Sí, borrar">
                   <i class="fa-solid fa-trash-can me-1"></i> Eliminar
                 </a>
+
 
 
               {% else %}
@@ -286,6 +288,7 @@
                                       data-bs-target="#confirmActionModal"
                                       data-confirm-title="Eliminar plato"
                                       data-confirm-body="¿Seguro que querés borrar <strong>{{ v.nombre_plato|escape }}</strong>?"
+                                      data-confirm-hint="También se borrarán las programaciones de este plato. Esta acción no se puede deshacer."
                                       data-confirm-action="{% url 'eliminar-plato' v.id %}"
                                       data-confirm-btn="Sí, borrar"
                                       title="Eliminar">
@@ -461,6 +464,7 @@
                 data-bs-target="#confirmActionModal"
                 data-confirm-title="Eliminar plato"
                 data-confirm-body="¿Seguro que querés borrar <strong>{{ plato.nombre_plato|escape }}</strong>?"
+                data-confirm-hint="También se borrarán las programaciones de este plato.<br> Esta acción no se puede deshacer."
                 data-confirm-action="{% url 'eliminar-plato' plato.id %}"
                 data-confirm-btn="Sí, borrar"
                 class="plato-action-btn text-secondary"
@@ -526,6 +530,8 @@
                   data-bs-target="#confirmActionModal"
                   data-confirm-title="Eliminar plato"
                   data-confirm-body="¿Seguro que querés borrar <strong>{{ plato.nombre_plato|escape }}</strong>?"
+                  data-confirm-hint="También se borrarán las programaciones de este plato. Esta acción no se puede deshacer."
+
                   data-confirm-action="{% url 'eliminar-plato' plato.id %}"
                   data-confirm-btn="Sí, borrar">
                   <i class="fa-solid fa-trash-can me-2"></i> Eliminar
