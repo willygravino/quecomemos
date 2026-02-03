@@ -467,28 +467,19 @@ class ProfileIngrediente(models.Model):
         return f"{self.profile.user} - {self.ingrediente} ({'tengo' if self.tengo else 'no tengo'})"
 
 
-
 class IngredienteEstado(models.Model):
     class Estado(models.TextChoices):
         TENGO = "tengo", "Tengo"
         NO_TENGO = "no-tengo", "No tengo"
         RECIEN_COMPRADO = "recien-comprado", "Recién comprado"
 
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="ingredientes_estado",
-    )
-
-    # Guardamos el ingrediente como texto (por ahora), igual que hoy lo manejás
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="ingredientes_estado")
     nombre = models.CharField(max_length=120, db_index=True)
-
     estado = models.CharField(max_length=20, choices=Estado.choices, default=Estado.NO_TENGO)
-
     comentario = models.TextField(blank=True, default="")
 
-    # Para que “recién comprado” venza
-    estado_hasta = models.DateField(null=True, blank=True)
+    # ✅ timestamp real de compra
+    last_bought_at = models.DateTimeField(null=True, blank=True, db_index=True)
 
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -498,11 +489,9 @@ class IngredienteEstado(models.Model):
         ]
         indexes = [
             models.Index(fields=["user", "estado"]),
+            models.Index(fields=["user", "last_bought_at"]),  # opcional pero útil
         ]
 
-    def __str__(self):
-        return f"{self.user_id} - {self.nombre} ({self.estado})"
-    
 
 class Profile(models.Model):
     user = models.OneToOneField(

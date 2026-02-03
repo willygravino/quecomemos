@@ -547,10 +547,12 @@ def lista_de_compras(request):
 
             # checkbox: checked=1 => "no-tengo" (hay que comprar)
             if checked in ("0", "1"):
-                defaults["estado"] = (
-                    IngredienteEstado.Estado.NO_TENGO if checked == "1"
-                    else IngredienteEstado.Estado.TENGO
-                )
+                if checked == "1":
+                    defaults["estado"] = IngredienteEstado.Estado.NO_TENGO
+                    # opcional: NO tocamos last_bought_at al volver a "no-tengo"
+                else:
+                    defaults["estado"] = IngredienteEstado.Estado.TENGO
+                    defaults["last_bought_at"] = timezone.now()
 
             comentario_key = f"comentario_{ing_id}"
             if comentario_key in request.POST:
@@ -673,23 +675,34 @@ def lista_de_compras(request):
     nombres = [d["nombre"].casefold() for d in agregados.values()]
 
     estado_qs = (
-        IngredienteEstado.objects
-        .filter(user=request.user, nombre__in=nombres)
-        .only("nombre", "estado", "comentario", "estado_hasta", "updated_at")
-    )
+            IngredienteEstado.objects
+            .filter(user=request.user, nombre__in=nombres)
+            .only("nombre", "estado", "comentario", "last_bought_at", "updated_at")
+        )
+
 
     estado_map = {e.nombre: e for e in estado_qs}
 
 
-    
+    now = timezone.now()
 
     items = []
     for ing_id, data in agregados.items():
         key = data["nombre"].casefold()
         e = estado_map.get(key)
 
-        estado = e.estado if e else "tengo"
+        if not e:
+            estado = "tengo"
+        else:
+            if e.estado == IngredienteEstado.Estado.NO_TENGO:
+                estado = "no-tengo"
+            elif e.last_bought_at and e.last_bought_at >= now - timedelta(hours=3):
+                estado = "recien-comprado"
+            else:
+                estado = "tengo"
+
         comentario = e.comentario if (e and e.comentario) else ""
+
 
         items.append({
             "ingrediente_id": ing_id,
@@ -852,42 +865,50 @@ def compartir_lista(request, token):
     estado_map = { _norm(e.nombre): e for e in estado_qs }
 
 
+    now = timezone.localtime(timezone.now())
+    today = now.date()
 
-    def fresh_until(fecha_uso):
-        return fecha_uso or (today + timedelta(hours=3))
+    def fresh_until(needed_by):
+        # Evita que una needed_by vieja (ayer) bloquee el "recien-comprado"
+        if needed_by:
+            return max(today, needed_by)  # asumiendo needed_by es date
+        return today
 
     def estado_final(pi, limite):
         if not pi:
-            return "tengo"  # o "no-tengo" si querés default comprar; pero tu lista nueva usa "tengo"
+            return "tengo"
         if not pi.tengo:
             return "no-tengo"
-        if (
-            pi.last_bought_at
-            and pi.last_bought_at >= timezone.now() - timedelta(hours=3)
-            and today <= limite
-        ):
+
+        if pi.last_bought_at and timezone.localtime(pi.last_bought_at) >= now - timedelta(hours=3):
+            # Si querés mantener el criterio "solo si todavía se necesita":
+            # if today <= limite:
             return "recien-comprado"
+
         return "tengo"
 
-    # =====================================================
-    # Items para template compartido
-    # (Yo te recomiendo mostrar TODOS, y que el template tache "fresh".
-    #  Si querés, podés filtrar solo "no-tengo".)
-    # =====================================================
+
     items = []
     for ing_id, data in agregados.items():
         e = estado_map.get(data["nombre"].casefold())
+        if not e:
+            estado = "tengo"
+        else:
+            if e.estado == IngredienteEstado.Estado.NO_TENGO:
+                estado = "no-tengo"
+            elif e.last_bought_at and e.last_bought_at >= now - timedelta(hours=3):
+                estado = "recien-comprado"
+            else:
+                estado = "tengo"
+
+
         limite = fresh_until(data["needed_by"])
 
-        # Si no hay estado guardado para este ingrediente, NO lo mostramos en la lista compartida
-        if not e:
-            continue
+        # 🔥 acá usás el cálculo real
+        estado = estado_final(e, limite)
 
-        estado = e.estado
         comentario = e.comentario or ""
 
-
-        # Solo mostrar lo que falta comprar
         if estado in ("no-tengo", "recien-comprado"):
             items.append({
                 "ingrediente_id": ing_id,
@@ -896,7 +917,6 @@ def compartir_lista(request, token):
                 "estado": estado,
                 "needed_by": data["needed_by"],
             })
-
 
 
     # Orden como tu lista nueva

@@ -54,7 +54,7 @@
   // Por eso invertimos.
   // ===========================
   if (!document.__platoIngredientesToggleBound) {
-    // console.log("✅ platoIngredientesToggleBound cargado");
+    console.log("✅ platoIngredientesToggleBound cargado");
 
     document.addEventListener("change", async (ev) => {
       const chk = ev.target.closest("input[type='checkbox'][name='ingrediente_a_comprar_id']");
@@ -252,6 +252,12 @@
     
 
 
+  // ===== Utils =====
+  function log() {
+    if (window && window.console && console.log) {
+      console.log.apply(console, arguments);
+    }
+  }
 
 
   // ===== Select2 helpers =====
@@ -659,89 +665,116 @@
       guardarBtn.__bound = true;
     }
 
+  // // ===== Asegurar que el form tenga action correcto =====
+  // const formEl = context.querySelector("#platoForm") || context.querySelector("form[method='post']");
+  // if (formEl) {
+    
+    
+  //   const isUpdateMode = formEl.dataset.mode === "update";
+
+  //   // 👉 Si es edición, NO tocar el action
+  //   if (isUpdateMode) {
+  //     log("✏️ Modo edición detectado, action preservado:", formEl.action);
+  //   } else {
+  //     // 👉 Si es creación (modal)
+
+
+
+
+  //     let tipopag = "Principal";
+  //     const tipoInput = context.querySelector("input[name='tipos']:checked");
+  //     if (tipoInput) {
+  //       tipopag = tipoInput.value;
+  //     }
+
+  //     formEl.action = `/videos/create/?tipopag=${encodeURIComponent(tipopag)}`;
+  //     log("🆕 Modo creación, action forzado:", formEl.action);
+  //   }
+  // }
  
-    // ===== Guardado AJAX dentro del modal principal =====
-    // function setupAjaxSave(modalBody) {
-    //   const form = modalBody.querySelector("form");
-    //   if (!form) return;
-
-    //   form.addEventListener("submit", function (e) {
-    //     // Solo interceptar si el form está dentro del modal
-    //   if (!form.closest("#modalPlato")) return;
-
-    //     e.preventDefault();
-
-    //     // 🔹 Crear FormData con todos los inputs visibles y ocultos del modal
-    //     const formData = new FormData(form);
-
-    //     // // 🔹 Asegurar que el formset de ingredientes se incluya aunque esté fuera del <form>
-    //     // document.querySelectorAll("[name^='ingredientes_en_plato-']").forEach(el => {
-    //     //   if (!formData.has(el.name)) {
-    //     //     formData.append(el.name, el.value);
-    //     //   }
-    //     // });
-    //       modalBody.querySelectorAll("[name^='ingredientes_en_plato-'], #id_ingredientes_en_plato-TOTAL_FORMS, #id_ingredientes_en_plato-INITIAL_FORMS, #id_ingredientes_en_plato-MIN_NUM_FORMS, #id_ingredientes_en_plato-MAX_NUM_FORMS")
-    //     .forEach(el => {
-    //       if (el.type === "checkbox") {
-    //         if (el.checked) formData.set(el.name, el.value || "on");
-    //         else formData.delete(el.name);
-    //       } else {
-    //         formData.set(el.name, el.value);
-    //       }
-    //     });
 
 
+        // ===== Guardado AJAX dentro del modal principal =====
+    function setupAjaxSave(modalBody) {
+      const form = modalBody.querySelector("form");
+      if (!form) return;
 
-    // fetch(form.action, {
-    //     method: "POST",
-    //     body: formData,
-    //     headers: {
-    //       "X-Requested-With": "XMLHttpRequest",
-    //       "X-CSRFToken": CSRF_TOKEN || ""
-    //     },
-    //   })
-    //   .then(async response => {
-    //     const contentType = response.headers.get("content-type") || "";
+      form.addEventListener("submit", function (e) {
+        // Solo interceptar si el form está dentro del modal
+      if (!form.closest("#modalPlato")) return;
 
-    //     if (contentType.includes("application/json")) {
-    //       const data = await response.json();
+        e.preventDefault();
 
-    //       if (data.success) {
+        // 🔹 Crear FormData con todos los inputs visibles y ocultos del modal
+        const formData = new FormData(form);
 
-    //         const modal = bootstrap.Modal.getInstance(form.closest("#modalPlato"));
+        // // 🔹 Asegurar que el formset de ingredientes se incluya aunque esté fuera del <form>
+        // document.querySelectorAll("[name^='ingredientes_en_plato-']").forEach(el => {
+        //   if (!formData.has(el.name)) {
+        //     formData.append(el.name, el.value);
+        //   }
+        // });
+          modalBody.querySelectorAll("[name^='ingredientes_en_plato-'], #id_ingredientes_en_plato-TOTAL_FORMS, #id_ingredientes_en_plato-INITIAL_FORMS, #id_ingredientes_en_plato-MIN_NUM_FORMS, #id_ingredientes_en_plato-MAX_NUM_FORMS")
+        .forEach(el => {
+          if (el.type === "checkbox") {
+            if (el.checked) formData.set(el.name, el.value || "on");
+            else formData.delete(el.name);
+          } else {
+            formData.set(el.name, el.value);
+          }
+        });
 
-    //         modal.hide();
-    //         location.reload(); // refresca lista de platos
-    //       } else if (data.html) {
-    //         modalBody.innerHTML = data.html;
-    //         initPlatoForm(modalBody);
-    //       } else {
-    //         console.error("⚠️ Respuesta JSON inesperada:", data);
-    //       }
 
-    //     } else {
-    //       const text = await response.text();
-    //       console.error("❌ La respuesta no es JSON. Posible error en el backend:");
-    //       console.error(text); // Mostramos el HTML que causó el fallo
-    //       alert("Error inesperado del servidor. Revisa la consola para más información.");
-    //     }
-    //   })
-    //   .catch(err => {
-    //     console.error("❌ Error en el fetch:", err);
-    //     alert("Ocurrió un error al intentar guardar. Revisá la consola para más detalles.");
-    //   });
+
+    fetch(form.action, {
+        method: "POST",
+        body: formData,
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+          "X-CSRFToken": CSRF_TOKEN || ""
+        },
+      })
+      .then(async response => {
+        const contentType = response.headers.get("content-type") || "";
+
+        if (contentType.includes("application/json")) {
+          const data = await response.json();
+
+          if (data.success) {
+
+            const modal = bootstrap.Modal.getInstance(form.closest("#modalPlato"));
+
+            modal.hide();
+            location.reload(); // refresca lista de platos
+          } else if (data.html) {
+            modalBody.innerHTML = data.html;
+            initPlatoForm(modalBody);
+          } else {
+            console.error("⚠️ Respuesta JSON inesperada:", data);
+          }
+
+        } else {
+          const text = await response.text();
+          console.error("❌ La respuesta no es JSON. Posible error en el backend:");
+          console.error(text); // Mostramos el HTML que causó el fallo
+          alert("Error inesperado del servidor. Revisa la consola para más información.");
+        }
+      })
+      .catch(err => {
+        console.error("❌ Error en el fetch:", err);
+        alert("Ocurrió un error al intentar guardar. Revisá la consola para más detalles.");
+      });
           
 
 
 
-    //   });
-    // }
+      });
+    }
 
-
-  // Llamar a setupAjaxSave cuando se inicializa el form
-  //   setupAjaxSave(context);
-  //   log("✅ initPlatoForm completado para el contexto:", context);
-  // } // ← cierre de la función initPlatoForm
+    // Llamar a setupAjaxSave cuando se inicializa el form
+    setupAjaxSave(context);
+    log("✅ initPlatoForm completado para el contexto:", context);
+  } // ← cierre de la función initPlatoForm
 
   // Exponer globalmente
   window.initPlatoForm = initPlatoForm;
@@ -897,5 +930,3 @@
     }
   });
 })(); // ← cierre final del IIFE principal
-
-
