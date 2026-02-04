@@ -153,7 +153,8 @@
                       <button
                         class="btn btn-outline-secondary"
                         type="button"
-                        onclick="const el=this.previousElementSibling; el.value=''; el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true}));"
+                        onclick="const el=this.previousElementSibling; el.value=''; el.dispatchEvent(new Event('input',{bubbles:true}));"
+
                         title="Limpiar comentario"
                       >
                         &times;
@@ -312,89 +313,6 @@
 })();
 </script>
 
-
-<!-- 
-<script>
-(function () {
-  const form = document.getElementById('frm-menu');
-  if (!form) return;
-
-  const csrf = form.querySelector('input[name=csrfmiddlewaretoken]')?.value || '';
-  const origenInput = document.getElementById('post_origen');
-
-  function setOrigen(v) {
-    if (origenInput) origenInput.value = v; // "menu" o "ingredientes"
-  }
-
-  let t;
-  const debounce = (fn, ms=350) => (...args) => {
-    clearTimeout(t);
-    t = setTimeout(() => fn.apply(null, args), ms);
-  };
-
-  async function autosave() {
-    const fd = new FormData(form);
-    await fetch(form.action, {
-      method: 'POST',
-      headers: { 'X-CSRFToken': csrf },
-      body: fd,
-      credentials: 'same-origin'
-    });
-  }
-
-  // --- Cambios de menú (requieren recarga) ---
-  const afectaIngredientesSelector = [
-    'input[name="plato_seleccionado"]',
-    'input[name="variedad_seleccionada"]'
-  ].join(',');
-
-  form.querySelectorAll(afectaIngredientesSelector).forEach(el => {
-    el.addEventListener('change', async () => {
-      try {
-        setOrigen('menu');
-        await autosave();
-        location.reload();
-      } catch (e) {
-        console.error('No se pudo guardar y recargar', e);
-      }
-    });
-  });
-
-  // --- Cambios de ingredientes (NO recarga inmediata) ---
-  form.querySelectorAll('input[name="ingrediente_a_comprar_id"]').forEach(el => {
-    el.addEventListener('change', async () => {
-      try {
-        setOrigen('ingredientes');
-        await autosave();
-      } catch(e) {}
-    });
-  });
-
-  // comentarios: guardamos con debounce mientras escribís
-  form.querySelectorAll('input[name^="comentario_"]').forEach(el => {
-    const saveDebounced = debounce(async () => {
-      try {
-        setOrigen('ingredientes');
-        await autosave();
-      } catch(e) {}
-    }, 500);
-
-    el.addEventListener('input', saveDebounced);
-    el.addEventListener('change', async () => {
-      try {
-        setOrigen('ingredientes');
-        await autosave();
-      } catch(e) {}
-    });
-  });
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-  });
-
-
-})();
-</script> -->
 
 
 {% endblock %}

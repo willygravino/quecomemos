@@ -207,6 +207,22 @@ def plato_ingredientes(request: HttpRequest, pk: int):
             if comentario_key in request.POST:
                 defaults["comentario"] = (request.POST.get(comentario_key) or "").strip()
 
+            comentario = defaults.get("comentario", "")
+
+            # MODELO A: "no-tengo" sin comentario => no guardar (borrar si existe)
+            if checked == "1" and comentario == "":
+                IngredienteEstado.objects.filter(
+                    user=request.user,
+                    nombre=ing.nombre.casefold(),
+                ).delete()
+            else:
+                if defaults:
+                    IngredienteEstado.objects.update_or_create(
+                        user=request.user,
+                        nombre=ing.nombre.casefold(),
+                        defaults=defaults,
+                    )
+
             IngredienteEstado.objects.update_or_create(
                 user=request.user,
                 nombre=nombre_norm,
@@ -543,30 +559,66 @@ def lista_de_compras(request):
             if not ing:
                 return JsonResponse({"success": False, "error": "Ingrediente no existe"}, status=404)
 
-            defaults = {}
-
-            # checkbox: checked=1 => "no-tengo" (hay que comprar)
-            if checked in ("0", "1"):
-                if checked == "1":
-                    defaults["estado"] = IngredienteEstado.Estado.NO_TENGO
-                    # opcional: NO tocamos last_bought_at al volver a "no-tengo"
-                else:
-                    defaults["estado"] = IngredienteEstado.Estado.TENGO
-                    defaults["last_bought_at"] = timezone.now()
 
             comentario_key = f"comentario_{ing_id}"
-            if comentario_key in request.POST:
-                defaults["comentario"] = (request.POST.get(comentario_key) or "").strip()
+            comentario = (request.POST.get(comentario_key) or "").strip()
 
-            if defaults:
+            nombre_norm = ing.nombre.casefold()
+
+            # 1) Toggle NO_TENGO + comentario vacío => borrar (Modelo A) y terminar
+            if checked == "1" and comentario == "":
+                IngredienteEstado.objects.filter(user=request.user, nombre=nombre_norm).delete()
+                if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                    return JsonResponse({"success": True})
+
+            # 2) No vino toggle (solo comentario) y quedó vacío:
+            #    - si estaba NO_TENGO => borrar
+            #    - si estaba TENGO => limpiar comentario
+            elif checked not in ("0", "1") and comentario == "":
+                existing = (
+                    IngredienteEstado.objects
+                    .filter(user=request.user, nombre=nombre_norm)
+                    .only("estado")
+                    .first()
+                )
+
+                if existing and existing.estado == IngredienteEstado.Estado.NO_TENGO:
+                    IngredienteEstado.objects.filter(user=request.user, nombre=nombre_norm).delete()
+                elif existing and existing.estado == IngredienteEstado.Estado.TENGO:
+                    IngredienteEstado.objects.filter(user=request.user, nombre=nombre_norm).update(comentario="")
+
+                if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                    return JsonResponse({"success": True})
+
+            # 3) Todo lo demás => persistimos con update_or_create
+            else:
+                defaults = {}
+
+                if checked in ("0", "1"):
+                    if checked == "1":
+                        defaults["estado"] = IngredienteEstado.Estado.NO_TENGO
+                        # acá comentario necesariamente es NO vacío (caso vacío ya se manejó arriba)
+                    else:
+                        defaults["estado"] = IngredienteEstado.Estado.TENGO
+                        defaults["last_bought_at"] = timezone.now()
+                        # en TENGO permitimos comentario vacío (para limpiar)
+
+                    defaults["comentario"] = comentario
+
+                else:
+                    # solo comentario (no vacío)
+                    defaults["comentario"] = comentario
+
                 IngredienteEstado.objects.update_or_create(
                     user=request.user,
-                    nombre=ing.nombre.casefold(),  # clave consistente
+                    nombre=nombre_norm,
                     defaults=defaults,
                 )
 
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return JsonResponse({"success": True})
+                if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                    return JsonResponse({"success": True})
+
+
 
 
     # ⚠️ IMPORTANTE: menues estaba prefetcheado ANTES del update.
@@ -692,7 +744,7 @@ def lista_de_compras(request):
         e = estado_map.get(key)
 
         if not e:
-            estado = "tengo"
+            estado = "no-tengo"
         else:
             if e.estado == IngredienteEstado.Estado.NO_TENGO:
                 estado = "no-tengo"
@@ -744,6 +796,7 @@ def lista_de_compras(request):
 def _get_user_by_token_or_404(token):
     perfil = get_object_or_404(Profile, share_token=str(token))
     return perfil.user, perfil
+
 
 
 
@@ -865,50 +918,42 @@ def compartir_lista(request, token):
     estado_map = { _norm(e.nombre): e for e in estado_qs }
 
 
-    now = timezone.localtime(timezone.now())
-    today = now.date()
 
-    def fresh_until(needed_by):
-        # Evita que una needed_by vieja (ayer) bloquee el "recien-comprado"
-        if needed_by:
-            return max(today, needed_by)  # asumiendo needed_by es date
-        return today
+    def fresh_until(fecha_uso):
+        return fecha_uso or (today + timedelta(hours=3))
 
     def estado_final(pi, limite):
         if not pi:
-            return "tengo"
+            return "tengo"  # o "no-tengo" si querés default comprar; pero tu lista nueva usa "tengo"
         if not pi.tengo:
             return "no-tengo"
-
-        if pi.last_bought_at and timezone.localtime(pi.last_bought_at) >= now - timedelta(hours=3):
-            # Si querés mantener el criterio "solo si todavía se necesita":
-            # if today <= limite:
+        if (
+            pi.last_bought_at
+            and pi.last_bought_at >= timezone.now() - timedelta(hours=3)
+            and today <= limite
+        ):
             return "recien-comprado"
-
         return "tengo"
 
-
+    # =====================================================
+    # Items para template compartido
+    # (Yo te recomiendo mostrar TODOS, y que el template tache "fresh".
+    #  Si querés, podés filtrar solo "no-tengo".)
+    # =====================================================
     items = []
     for ing_id, data in agregados.items():
         e = estado_map.get(data["nombre"].casefold())
-        if not e:
-            estado = "tengo"
-        else:
-            if e.estado == IngredienteEstado.Estado.NO_TENGO:
-                estado = "no-tengo"
-            elif e.last_bought_at and e.last_bought_at >= now - timedelta(hours=3):
-                estado = "recien-comprado"
-            else:
-                estado = "tengo"
-
-
         limite = fresh_until(data["needed_by"])
 
-        # 🔥 acá usás el cálculo real
-        estado = estado_final(e, limite)
+        # Si no hay estado guardado para este ingrediente, NO lo mostramos en la lista compartida
+        if not e:
+            continue
 
+        estado = e.estado
         comentario = e.comentario or ""
 
+
+        # Solo mostrar lo que falta comprar
         if estado in ("no-tengo", "recien-comprado"):
             items.append({
                 "ingrediente_id": ing_id,
@@ -917,6 +962,7 @@ def compartir_lista(request, token):
                 "estado": estado,
                 "needed_by": data["needed_by"],
             })
+
 
 
     # Orden como tu lista nueva
@@ -938,53 +984,9 @@ def compartir_lista(request, token):
 
 
 
-# @csrf_exempt
-# @require_POST
-# def api_toggle_item(request, token):
-#     user, perfil = _get_user_by_token_or_404(token)
 
-#     try:
-#         payload = json.loads(request.body.decode("utf-8"))
-#     except Exception:
-#         return JsonResponse({"ok": False, "error": "JSON inválido"}, status=400)
 
-#     checked = bool(payload.get("checked"))
-#     nombre = (payload.get("nombre") or "").strip()
 
-#     if not nombre:
-#         return JsonResponse({"ok": False, "error": "nombre requerido"}, status=400)
-
-#     # Buscamos el ingrediente por nombre (case-insensitive)
-#     ingrediente = Ingrediente.objects.filter(nombre__iexact=nombre).first()
-#     if not ingrediente:
-#         return JsonResponse({"ok": False, "error": f"No existe Ingrediente con nombre='{nombre}'"}, status=404)
-
-#     pi, _ = ProfileIngrediente.objects.get_or_create(
-#         profile=perfil,
-#         ingrediente=ingrediente,
-#         defaults={"tengo": False},
-#     )
-
-#     # Convención pedida:
-#     # checked => tengo (y marco last_bought_at)
-#     # unchecked => no-tengo (y limpio last_bought_at)
-#     if checked:
-#         pi.tengo = True
-#         pi.last_bought_at = timezone.now()
-#     else:
-#         pi.tengo = False
-#         pi.last_bought_at = None
-
-#     pi.save(update_fields=["tengo", "last_bought_at"])
-
-#     return JsonResponse({
-#         "ok": True,
-#         "ingrediente_id": ingrediente.id,
-#         "nombre": ingrediente.nombre,
-#         "tengo": pi.tengo,
-#         "last_bought_at": pi.last_bought_at.isoformat() if pi.last_bought_at else None,
-#         "checked": checked,
-#     })
 
 @csrf_exempt
 @require_POST

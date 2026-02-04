@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
   <style>
     .striked { text-decoration: line-through; opacity: .65; }
@@ -75,41 +76,48 @@
 (function () {
   const API = "{% url 'api-toggle-item' token=api_token %}";
 
-  async function postToggle(nombre, checked) {
+
+  
+  
+  async function postToggle(ingrediente_id, checked) {
     try {
       await fetch(API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre, checked })
+        body: JSON.stringify({ ingrediente_id, checked })
       });
     } catch (e) {
       console.error("No se pudo persistir el cambio", e);
     }
   }
 
+
+
   // Recorremos cada checkbox de item
   document.querySelectorAll(".item-check").forEach((chk) => {
     const line = chk.closest(".item-line");
     if (!line) return;
 
-    const nombre = (line.dataset.nombre || "").trim();
+    const ingId = line.dataset.ingId;               // <-- data-ing-id del <li>
     const nombreEl = line.querySelector(".item-nombre"); // <-- SOLO el texto
 
     // --- UI inicial ---
-    // En lista compartida: tachado = checkbox checked (comprado)
     if (nombreEl) nombreEl.classList.toggle("striked", chk.checked);
 
     // --- Cambios ---
     chk.addEventListener("change", () => {
       const checked = chk.checked;
 
-      // Tachado SOLO del nombre (no de toda la fila)
+      // Tachado SOLO del nombre
       if (nombreEl) nombreEl.classList.toggle("striked", checked);
 
-      // Persistir (sin tocar backend: usa tu API existente)
-      postToggle(nombre, checked);
+      // Persistir usando ID (más seguro que nombre)
+      postToggle(ingId, checked);
     });
   });
+
+
+  
 })();
 </script>
 
