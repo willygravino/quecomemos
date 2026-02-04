@@ -127,101 +127,44 @@ def plato_ingredientes(request: HttpRequest, pk: int):
         if iep.ingrediente
     }
 
-    # =========================
-    # POST: 2 modos
-    # 1) JSON POST (fetch): guarda comentario y/o toggle en IngredienteEstado
-    # 2) Form POST (modal HTML): guarda checks + comentarios en IngredienteEstado
-    # =========================
+   
+
     if request.method == "POST":
-        content_type = (request.headers.get("Content-Type") or "").lower()
+        # ===== NUEVO: POST tipo "lista de compras" (toggle/comentario por ingrediente) =====
+        post_origen = request.POST.get("post_origen")
 
-        # ---------- (1) JSON POST (fetch) ----------
-        if "application/json" in content_type:
-            try:
-                payload = json.loads(request.body.decode("utf-8"))
-            except Exception:
-                return JsonResponse({"ok": False, "error": "JSON inválido"}, status=400)
+        if post_origen == "ingredientes":
+            ing_id = request.POST.get("toggle_ing_id") or request.POST.get("comment_ing_id")
+            checked = request.POST.get("toggle_ing_checked")  # "1" / "0" / None
 
-            nombre = _norm(payload.get("nombre"))
-            comentario = payload.get("comentario", None)
-            checked = payload.get("checked", None)  # opcional: si lo mandás, lo usa
+            if not (ing_id and str(ing_id).isdigit()):
+                return JsonResponse({"success": False, "error": "ing_id inválido"}, status=400)
 
-            if not nombre:
-                return JsonResponse({"ok": False, "error": "nombre requerido"}, status=400)
+            ing_id = int(ing_id)
 
-            defaults = {}
-
-            # Si viene checked, interpretamos:
-            # - en tu modal “checked = hay que comprar” => estado NO_TENGO
-            # Pero este JSON podría venir desde otros lados.
-            # Si vos querés que JSON siga la misma convención, dejalo así:
-            if checked is not None:
-                checked_bool = bool(checked)
-                defaults["estado"] = (
-                    IngredienteEstado.Estado.NO_TENGO if checked_bool
-                    else IngredienteEstado.Estado.TENGO
-                )
-
-            if comentario is not None:
-                defaults["comentario"] = (comentario or "").strip()
-
-            if defaults:
-                obj, _ = IngredienteEstado.objects.update_or_create(
-                    user=request.user,
-                    nombre=nombre,
-                    defaults=defaults,
-                )
-                return JsonResponse({
-                    "ok": True,
-                    "nombre": obj.nombre,
-                    "estado": obj.estado,
-                    "comentario": obj.comentario,
-                })
-
-            return JsonResponse({"ok": True})
-
-        # ---------- (2) Form POST (HTML modal): checks + comentarios ----------
-        # checked => "no-tengo" => aparece en POST como ingrediente_a_comprar_id
-        to_buy_ids = set(
-            int(x) for x in request.POST.getlist("ingrediente_a_comprar_id") if x.isdigit()
-        )
-
-        for iep in ingredientes_qs:
-            ing_id = iep.ingrediente_id
-            nombre_norm = ingid_to_nombre_norm.get(ing_id)
-            if not nombre_norm:
-                continue
-
-            # Convención del modal:
-            # - marcado (checked) => hay que comprar => NO_TENGO
-            # - no marcado => TENGO
-            estado = (
-                IngredienteEstado.Estado.NO_TENGO
-                if ing_id in to_buy_ids
-                else IngredienteEstado.Estado.TENGO
-            )
-
-            defaults = {"estado": estado}
+            # (lo que ya tenías abajo queda igual)
+            ing = Ingrediente.objects.filter(pk=ing_id).only("nombre").first()
+            if not ing:
+                return JsonResponse({"success": False, "error": "Ingrediente no existe"}, status=404)
 
             comentario_key = f"comentario_{ing_id}"
-            if comentario_key in request.POST:
-                defaults["comentario"] = (request.POST.get(comentario_key) or "").strip()
+            comentario = (request.POST.get(comentario_key) or "").strip()
+            nombre_norm = ing.nombre.casefold()
+                  
+            # 3) Persistir update_or_create
+            defaults = {}
 
-            comentario = defaults.get("comentario", "")
+            if checked in ("0", "1"):
+                if checked == "1":
+                    defaults["estado"] = IngredienteEstado.Estado.NO_TENGO
+                else:
+                    defaults["estado"] = IngredienteEstado.Estado.TENGO
+                    defaults["last_bought_at"] = timezone.now()
 
-            # MODELO A: "no-tengo" sin comentario => no guardar (borrar si existe)
-            if checked == "1" and comentario == "":
-                IngredienteEstado.objects.filter(
-                    user=request.user,
-                    nombre=ing.nombre.casefold(),
-                ).delete()
+                defaults["comentario"] = comentario
             else:
-                if defaults:
-                    IngredienteEstado.objects.update_or_create(
-                        user=request.user,
-                        nombre=ing.nombre.casefold(),
-                        defaults=defaults,
-                    )
+                # solo comentario (no vacío)
+                defaults["comentario"] = comentario
 
             IngredienteEstado.objects.update_or_create(
                 user=request.user,
@@ -229,7 +172,51 @@ def plato_ingredientes(request: HttpRequest, pk: int):
                 defaults=defaults,
             )
 
-        return JsonResponse({"success": True})
+            return JsonResponse({"success": True})
+
+        # Si NO vino el modo nuevo, usamos el guardado masivo del form completo
+        else:
+            to_buy_ids = set(
+                int(x) for x in request.POST.getlist("ingrediente_a_comprar_id") if x.isdigit()
+            )
+
+            for iep in ingredientes_qs:
+                ing = iep.ingrediente
+                if not ing:
+                    continue
+
+                ing_id = iep.ingrediente_id
+                nombre_norm = _norm(ing.nombre)
+
+                estado = (
+                    IngredienteEstado.Estado.NO_TENGO
+                    if ing_id in to_buy_ids
+                    else IngredienteEstado.Estado.TENGO
+                )
+
+                defaults = {"estado": estado}
+                
+                if estado == IngredienteEstado.Estado.TENGO:
+                    defaults["last_bought_at"] = timezone.now()
+
+
+                comentario_key = f"comentario_{ing_id}"
+                if comentario_key in request.POST:
+                    defaults["comentario"] = (request.POST.get(comentario_key) or "").strip()
+
+                if estado == IngredienteEstado.Estado.NO_TENGO and defaults.get("comentario", "") == "":
+                    IngredienteEstado.objects.filter(user=request.user, nombre=nombre_norm).delete()
+                else:
+                    IngredienteEstado.objects.update_or_create(
+                        user=request.user,
+                        nombre=nombre_norm,
+                        defaults=defaults,
+                    )
+
+            return JsonResponse({"success": True})
+
+
+
 
     # =========================
     # GET: preparar items para render
@@ -239,9 +226,10 @@ def plato_ingredientes(request: HttpRequest, pk: int):
     estado_qs = (
         IngredienteEstado.objects
         .filter(user=request.user, nombre__in=nombres_norm)
-        .only("nombre", "estado", "comentario", "estado_hasta", "updated_at")
+        .only("nombre", "estado", "comentario", "updated_at")
     )
-    estado_map = {e.nombre: e for e in estado_qs}
+
+    estado_map = {_norm(e.nombre): e for e in estado_qs}
 
     items = []
     for iep in ingredientes_qs:
@@ -250,7 +238,7 @@ def plato_ingredientes(request: HttpRequest, pk: int):
             continue
 
         key = ingid_to_nombre_norm.get(iep.ingrediente_id)
-        e = estado_map.get(key) if key else None
+        e = estado_map.get(_norm(key)) if key else None
 
         estado = e.estado if e else "tengo"
         comentario = (e.comentario or "") if e else ""
@@ -260,7 +248,9 @@ def plato_ingredientes(request: HttpRequest, pk: int):
             "nombre": ing.nombre,
             "cantidad": iep.cantidad,
             "unidad": iep.unidad,
-            "estado": estado,        # "no-tengo" => checkbox checked
+            "a_comprar": (estado == IngredienteEstado.Estado.NO_TENGO),
+
+            # "estado": estado,        # "no-tengo" => checkbox checked
             "comentario": comentario,
         })
 
@@ -280,12 +270,11 @@ def plato_ingredientes(request: HttpRequest, pk: int):
         ),
     }
 
-
-    is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
-    if is_ajax:
-        return render(request, "AdminVideos/_modal_plato_ingredientes.html", ctx)
-
     return render(request, "AdminVideos/_modal_plato_ingredientes.html", ctx)
+
+
+
+
 
 def compartir_ing_plato(request, token, pk: int):
     share_user, perfil = _get_user_by_token_or_404(token)
