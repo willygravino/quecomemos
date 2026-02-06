@@ -4,48 +4,6 @@
 (function () {
   "use strict";
 
-  // ===========================
-  // PLATO INGREDIENTES (modal): guardar comentarios (debounce)
-  // ===========================
-  if (!document.__platoIngredientesComentarioBound) {
-    let t = null;
-
-    document.addEventListener("input", (ev) => {
-      const inp = ev.target.closest("input[type='text'][data-ing-nombre]");
-      if (!inp) return;
-
-      const modal = inp.closest("#platoIngredientesModal");
-      if (!modal) return;
-
-      const api = modal.getAttribute("data-api-toggle");
-      if (!api) return;
-
-      const nombre = (inp.dataset.ingNombre || "").trim();
-      const comentario = (inp.value || "").trim();
-
-      // debounce simple para no postear cada tecla
-      clearTimeout(t);
-      t = setTimeout(async () => {
-        try {
-          const res = await fetch(api, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ nombre, comentario })
-          });
-
-          const data = await res.json().catch(() => ({}));
-          if (!res.ok || data.ok === false) {
-            console.error("API error (comentario):", res.status, data);
-          }
-        } catch (e) {
-          console.error("No se pudo persistir el comentario", e);
-        }
-      }, 400);
-    });
-
-    document.__platoIngredientesComentarioBound = true;
-  }
-
 /**
  * PLATO INGREDIENTES (modal)
  * Guarda checkbox + comentario por ingrediente_id (POST FormData a la vista del modal),
