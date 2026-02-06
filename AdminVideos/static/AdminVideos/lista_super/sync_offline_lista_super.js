@@ -17,14 +17,23 @@ export async function postToggleOfflineFirst(API, ingrediente_id, checked) {
   try {
     await enviarToggle(API, ingrediente_id, checked);
     return { ok: true, queued: false };
-  } catch (e) {
+  
+    } catch (e) {
     await colaGuardarEstadoFinal({
-      ingrediente_id,
-      checked,
-      client_ts: new Date().toISOString(),
+        ingrediente_id,
+        checked,
+        client_ts: new Date().toISOString(),
     });
+
+    // Aviso suave (no error) solo si está realmente offline
+    if (!navigator.onLine) {
+        console.log("📌 Sin internet: guardado para sincronizar luego.");
+    }
+
     return { ok: false, queued: true };
-  }
+    }
+
+
 }
 
 let syncEnCurso = false;

@@ -5,10 +5,14 @@ const CACHE = "lista-super-v2";
 
 // Archivos estáticos propios (mismo origen) que queremos guardar en caché.
 const ASSETS = [
+  // Archivos PWA básicos
   "/static/AdminVideos/lista_super/manifest_lista_super.json",
-  "/static/AdminVideos/lista_super/sw_lista_super.js"
-  // Más adelante agregamos: idb_cola_offline.js, sync_offline_lista_super.js, css propio, etc.
+
+  // JS offline: necesarios para que funcione sin internet
+  "/static/AdminVideos/lista_super/idb_cola_offline.js",
+  "/static/AdminVideos/lista_super/sync_offline_lista_super.js",
 ];
+
 
 // Instalación: crea el caché y guarda assets básicos.
 self.addEventListener("install", (event) => {
