@@ -2,7 +2,6 @@ from django.contrib import admin
 from .models import (
     HabitoSemanal,
     Ingrediente, IngredienteEnPlato,
-    IngredienteEstado,
     MenuDia, MenuItem,
     MenuItemExtra,
     Plato, Profile, Mensaje, Lugar,
@@ -112,6 +111,5 @@ class MenuItemExtraAdmin(admin.ModelAdmin):
     list_filter = ("tipo",)
     search_fields = ("nombre",)
 
-admin.site.register(IngredienteEstado)
 admin.site.register(ProfileIngrediente)
 

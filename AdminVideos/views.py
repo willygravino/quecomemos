@@ -8,7 +8,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
-from AdminVideos.models import HabitoSemanal, Ingrediente, IngredienteEnPlato, IngredienteEstado, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente
+from AdminVideos.models import HabitoSemanal, Ingrediente, IngredienteEnPlato, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string   # ✅ ← ESTA ES LA CLAVE
 from django.http import Http404, HttpRequest, HttpResponseNotAllowed, JsonResponse

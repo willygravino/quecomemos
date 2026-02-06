@@ -464,33 +464,33 @@ class ProfileIngrediente(models.Model):
         unique_together = ("profile", "ingrediente")
 
     def __str__(self):
-        return f"{self.profile.user} - {self.ingrediente} ({'tengo' if self.tengo else 'no tengo'})"
+        return f"{self.profile.user} - {self.ingrediente} - {self.comentario} ({'tengo' if self.tengo else 'no tengo'})" 
 
 
-class IngredienteEstado(models.Model):
-    class Estado(models.TextChoices):
-        TENGO = "tengo", "Tengo"
-        NO_TENGO = "no-tengo", "No tengo"
-        RECIEN_COMPRADO = "recien-comprado", "Recién comprado"
+# class IngredienteEstado(models.Model):
+#     class Estado(models.TextChoices):
+#         TENGO = "tengo", "Tengo"
+#         NO_TENGO = "no-tengo", "No tengo"
+#         RECIEN_COMPRADO = "recien-comprado", "Recién comprado"
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="ingredientes_estado")
-    nombre = models.CharField(max_length=120, db_index=True)
-    estado = models.CharField(max_length=20, choices=Estado.choices, default=Estado.NO_TENGO)
-    comentario = models.TextField(blank=True, default="")
+#     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="ingredientes_estado")
+#     nombre = models.CharField(max_length=120, db_index=True)
+#     estado = models.CharField(max_length=20, choices=Estado.choices, default=Estado.NO_TENGO)
+#     comentario = models.TextField(blank=True, default="")
 
-    # ✅ timestamp real de compra
-    last_bought_at = models.DateTimeField(null=True, blank=True, db_index=True)
+#     # ✅ timestamp real de compra
+#     last_bought_at = models.DateTimeField(null=True, blank=True, db_index=True)
 
-    updated_at = models.DateTimeField(auto_now=True)
+#     updated_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=["user", "nombre"], name="uniq_user_ingrediente_nombre"),
-        ]
-        indexes = [
-            models.Index(fields=["user", "estado"]),
-            models.Index(fields=["user", "last_bought_at"]),  # opcional pero útil
-        ]
+#     class Meta:
+#         constraints = [
+#             models.UniqueConstraint(fields=["user", "nombre"], name="uniq_user_ingrediente_nombre"),
+#         ]
+#         indexes = [
+#             models.Index(fields=["user", "estado"]),
+#             models.Index(fields=["user", "last_bought_at"]),  # opcional pero útil
+#         ]
 
 
 class Profile(models.Model):

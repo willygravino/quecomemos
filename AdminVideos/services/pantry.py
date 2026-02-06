@@ -22,8 +22,8 @@ def persist_profile_ingrediente_from_post(*, perfil: Profile, post) -> PantrySav
     Unifica lógica de POST 'ingredientes':
     - toggle (checked "1" => necesito comprar => tengo=False)
     - comentario
-    - limpieza: tengo=False + comentario vacío => borrar (porque sin registro = no-tengo)
-    - tengo=True => guardar siempre (aunque comentario vacío), porque si no se perdería el "tengo"
+    - limpieza: si finalmente queda tengo=False y comentario vacío => borrar
+    - tengo=True => guardar siempre (aunque comentario vacío)
     """
     ing_id = post.get("toggle_ing_id") or post.get("comment_ing_id")
     checked = post.get("toggle_ing_checked")  # "1" / "0" / None
@@ -33,21 +33,27 @@ def persist_profile_ingrediente_from_post(*, perfil: Profile, post) -> PantrySav
 
     ing_id_int = int(ing_id)
 
-    # Validar existencia
     if not Ingrediente.objects.filter(pk=ing_id_int).exists():
         return PantrySaveResult(ok=False, error="Ingrediente no existe", ing_id=ing_id_int)
 
     comentario_key = f"comentario_{ing_id_int}"
     comentario = (post.get(comentario_key) or "").strip()
 
+    # 👇 IMPORTANTe: estado actual si el POST viene solo con comentario
+    existing = (
+        ProfileIngrediente.objects
+        .filter(profile=perfil, ingrediente_id=ing_id_int)
+        .only("tengo")
+        .first()
+    )
+    existing_tengo = existing.tengo if existing else None
+
     defaults = {}
 
     if checked in ("0", "1"):
         if checked == "1":
-            # necesito comprar => NO lo tengo
             defaults["tengo"] = False
         else:
-            # lo tengo => registro explícito
             defaults["tengo"] = True
             defaults["last_bought_at"] = timezone.now()
 
@@ -56,8 +62,12 @@ def persist_profile_ingrediente_from_post(*, perfil: Profile, post) -> PantrySav
         # solo comentario
         defaults["comentario"] = comentario
 
-    # Limpieza: si NO lo tengo y comentario vacío => borrar (default sin registro = no-tengo)
-    if defaults.get("tengo") is False and defaults.get("comentario", "") == "":
+    # ✅ Limpieza correcta:
+    # - Si el POST define tengo=False, usamos eso
+    # - Si no lo define (solo comentario), usamos el estado existente
+    final_tengo = defaults.get("tengo", existing_tengo)
+
+    if final_tengo is False and defaults.get("comentario", "") == "":
         ProfileIngrediente.objects.filter(profile=perfil, ingrediente_id=ing_id_int).delete()
         return PantrySaveResult(ok=True, ing_id=ing_id_int)
 
