@@ -207,8 +207,16 @@
       </section>
     </div>
 
-
+    
 <script>
+/**
+ * LISTA DE COMPRAS (page)
+ * Este script queda SOLO para:
+ * - Toggle de platos del menú (requiere recarga)
+ *
+ * Ingredientes + comentarios:
+ * - los maneja pantry_bind.js (reutilizable)
+ */
 (function () {
   const form = document.getElementById('frm-menu');
   if (!form) return;
@@ -253,61 +261,6 @@
       }
     });
   });
-
- // --- Cambios de ingredientes (persisten) ---
-  form.querySelectorAll('input[name="ingrediente_a_comprar_id"]').forEach(el => {
-    el.addEventListener('change', async () => {
-      try {
-        setOrigen('ingredientes');
-
-        // ✅ seteo de hidden inputs
-        document.getElementById('toggle_ing_id').value = el.value; // ingrediente_id
-        document.getElementById('toggle_ing_checked').value = el.checked ? "1" : "0";
-        document.getElementById('comment_ing_id').value = el.value; // opcional
-
-        await autosave();
-      } catch (e) {
-        console.error(e);
-      }
-    });
-  });
-
-
-
-
-  // comentarios: guardamos con debounce mientras escribís
-  let t;
-  const debounce = (fn, ms=350) => (...args) => {
-    clearTimeout(t);
-    t = setTimeout(() => fn.apply(null, args), ms);
-  };
-
-
-
-  form.querySelectorAll('input[name^="comentario_"]').forEach(el => {
-    const ingId = el.name.replace("comentario_", ""); // saca el ID del nombre
-
-    const saveDebounced = debounce(async () => {
-      try {
-        setOrigen('ingredientes');
-        document.getElementById('comment_ing_id').value = ingId; // ✅ clave
-        await autosave();
-      } catch(e) {}
-    }, 500);
-
-    el.addEventListener('input', saveDebounced);
-
-    el.addEventListener('change', async () => {
-      try {
-        setOrigen('ingredientes');
-        document.getElementById('comment_ing_id').value = ingId; // ✅ clave
-        await autosave();
-      } catch(e) {}
-    });
-  });
-
-
-
 
   form.addEventListener('submit', (e) => e.preventDefault());
 })();
