@@ -256,6 +256,158 @@ def fijar_o_eliminar_habito(request, es_lugar, objeto_id, comida):
 
 
 
+
+@require_http_methods(["GET", "POST"])
+def api_ingredientes(request):
+
+    if request.method == "GET":
+        q = (request.GET.get('q') or '').strip()
+        qs = Ingrediente.objects.all()
+    
+
+        if q:
+            q_low = q.lower()
+
+            # Expansiones rápidas (sin tocar modelo)
+            EXPAND = {
+                "carne": ["nalga", "bola de lomo", "cuadrada", "peceto", "carne picada", "asado", "vacio", "entraña", "roast beef", "ojo de bife", "bife de chorizo"],
+                "vaca":  ["nalga", "bola de lomo", "cuadrada", "peceto", "carne picada", "asado", "vacio", "entraña"],
+                "res":   ["nalga", "bola de lomo", "cuadrada", "peceto", "carne picada", "asado", "vacio", "entraña"],
+                "pollo": ["suprema", "pechuga", "muslo", "pata", "alitas", "pollo entero", "cuarto trasero"],
+                "cerdo": ["bondiola", "carré", "costilla", "pechito", "matambre", "paleta", "chuleta", "jamón de cerdo"],
+                "cordero": ["pierna", "costillar", "paleta", "chuleta", "cordero trozado"],
+                "queso": ["mozzarella", "cremoso", "tybo", "pategrás", "sardo", "reggianito", "azul", "port salut", "ricota"],
+            }
+
+            terms = [q]
+            if q_low in EXPAND:
+                terms = [q] + EXPAND[q_low]   # incluye el texto original también
+
+
+            from django.db.models import Q
+            cond = Q()
+            for t in terms:
+                cond |= Q(nombre__icontains=t)
+
+            qs = qs.filter(cond)
+
+
+        ingredientes = qs.order_by('nombre')[:50]
+
+        return JsonResponse({
+            "results": [{"id": ing.id, "text": ing.nombre} for ing in ingredientes]
+        })
+
+    # if request.method == "GET":
+    #     q = (request.GET.get('q') or '').strip()
+    #     qs = Ingrediente.objects.all()
+    #     if q:
+    #         qs = qs.filter(nombre__icontains=q)
+    #     ingredientes = qs.order_by('nombre')[:50]
+    #     data = [{"id": ing.id, "nombre": ing.nombre} for ing in ingredientes]
+    #     return JsonResponse(data, safe=False)
+
+    # POST: crear si no existe; si existe, devolvés el existente (UX más amable)
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except Exception:
+        return JsonResponse({"error": "JSON inválido"}, status=400)
+
+    nombre = (payload.get("nombre") or "").strip()
+    tipo = (payload.get("tipo") or "").strip()
+    detalle = (payload.get("detalle") or "").strip() or ""
+
+    # Validaciones mínimas
+    if not nombre:
+        return JsonResponse({"errors": {"nombre": ["Requerido"]}}, status=400)
+    if not tipo:
+        return JsonResponse({"errors": {"tipo": ["Requerido"]}}, status=400)
+
+    # Si ya existe por nombre (case-insensitive), devolvés ese ID
+    existente = Ingrediente.objects.filter(nombre__iexact=nombre).first()
+    if existente:
+        return JsonResponse({"id": existente.id, "nombre": existente.nombre, "existed": True}, status=200)
+
+    # Crear nuevo respetando la clean() del modelo (detalle vs tipo)
+    try:
+        obj = Ingrediente(nombre=nombre, tipo=tipo, detalle=detalle)
+        obj.full_clean()     # ejecuta clean() + field validators
+        obj.save()
+    except ValidationError as e:
+        return JsonResponse({"errors": e.message_dict}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
+    return JsonResponse({"id": obj.id, "nombre": obj.nombre}, status=201)
+
+
+
+def set_dia_activo(request):
+    if request.method == "POST":
+        dia = request.POST.get("dia_activo")
+        if dia:
+            request.session["dia_activo"] = dia
+            return JsonResponse({"status": "ok"})
+    return JsonResponse({"status": "error"}, status=400)
+
+
+def obtener_parametros_sesion(request):
+
+    # Recupera los parámetros de sesión y los valores de los parámetros URL.
+
+    # Recuperar parámetros de sesión
+    medios = request.session.get('medios_estable', None)
+    categoria = request.session.get('categoria_estable', None)
+    dificultad = request.session.get('dificultad_estable', None)
+    palabra_clave = request.session.get('palabra_clave', "")
+
+    quecomemos = request.session.get('quecomemos', None)
+    misplatos = request.session.get('misplatos', "misplatos")
+    # preseleccionados = request.session.get('preseleccionados', None)
+
+    # Obtener el valor del parámetro 'tipo' desde la URL
+    tipo_parametro = request.GET.get('tipopag', 'Principal')
+
+    # # Obtener el usuario actual
+    # usuario = request.user
+
+    # Devolver las variables por separado
+    return tipo_parametro, quecomemos, misplatos, medios, categoria, dificultad, palabra_clave
+
+# class SugerenciasRandom(TemplateView):
+#     template_name = 'AdminVideos/random.html'
+
+def index(request):
+    return redirect(reverse_lazy("filtro-de-platos"))
+
+def about(request):
+    return render(request, "AdminVideos/about.html")
+
+
+
+def limpiar_none(value):
+    return None if value == 'None' or value == '' else value
+
+def agregar_plato(diccionario, clave, plato, ingredientes):
+    """
+    Agrega un plato al diccionario si el plato no es None.
+
+    :param diccionario: Diccionario donde se agregará el plato.
+    :param clave: Clave en el diccionario (por ejemplo, "guarnicion1").
+    :param plato: Nombre del plato.
+    :param ingredientes: Ingredientes del plato.
+    :param elegido: Indica si el plato está elegido. Por defecto, True.
+    """
+    if plato is not None:
+        diccionario[clave] = {
+            "plato": plato,
+            "ingredientes": ingredientes,
+            "elegido": True
+        }
+
+
+
+
 @login_required
 def plato_ingredientes(request: HttpRequest, pk: int):
     # ======================================================
@@ -489,157 +641,6 @@ def compartir_ing_plato(request, token, pk: int):
         "api_token": perfil.share_token,
         "token": f"user-{perfil.pk}",
     })
-
-
-
-@require_http_methods(["GET", "POST"])
-def api_ingredientes(request):
-
-    if request.method == "GET":
-        q = (request.GET.get('q') or '').strip()
-        qs = Ingrediente.objects.all()
-    
-
-        if q:
-            q_low = q.lower()
-
-            # Expansiones rápidas (sin tocar modelo)
-            EXPAND = {
-                "carne": ["nalga", "bola de lomo", "cuadrada", "peceto", "carne picada", "asado", "vacio", "entraña", "roast beef", "ojo de bife", "bife de chorizo"],
-                "vaca":  ["nalga", "bola de lomo", "cuadrada", "peceto", "carne picada", "asado", "vacio", "entraña"],
-                "res":   ["nalga", "bola de lomo", "cuadrada", "peceto", "carne picada", "asado", "vacio", "entraña"],
-                "pollo": ["suprema", "pechuga", "muslo", "pata", "alitas", "pollo entero", "cuarto trasero"],
-                "cerdo": ["bondiola", "carré", "costilla", "pechito", "matambre", "paleta", "chuleta", "jamón de cerdo"],
-                "cordero": ["pierna", "costillar", "paleta", "chuleta", "cordero trozado"],
-                "queso": ["mozzarella", "cremoso", "tybo", "pategrás", "sardo", "reggianito", "azul", "port salut", "ricota"],
-            }
-
-            terms = [q]
-            if q_low in EXPAND:
-                terms = [q] + EXPAND[q_low]   # incluye el texto original también
-
-
-            from django.db.models import Q
-            cond = Q()
-            for t in terms:
-                cond |= Q(nombre__icontains=t)
-
-            qs = qs.filter(cond)
-
-
-        ingredientes = qs.order_by('nombre')[:50]
-
-        return JsonResponse({
-            "results": [{"id": ing.id, "text": ing.nombre} for ing in ingredientes]
-        })
-
-    # if request.method == "GET":
-    #     q = (request.GET.get('q') or '').strip()
-    #     qs = Ingrediente.objects.all()
-    #     if q:
-    #         qs = qs.filter(nombre__icontains=q)
-    #     ingredientes = qs.order_by('nombre')[:50]
-    #     data = [{"id": ing.id, "nombre": ing.nombre} for ing in ingredientes]
-    #     return JsonResponse(data, safe=False)
-
-    # POST: crear si no existe; si existe, devolvés el existente (UX más amable)
-    try:
-        payload = json.loads(request.body.decode("utf-8"))
-    except Exception:
-        return JsonResponse({"error": "JSON inválido"}, status=400)
-
-    nombre = (payload.get("nombre") or "").strip()
-    tipo = (payload.get("tipo") or "").strip()
-    detalle = (payload.get("detalle") or "").strip() or ""
-
-    # Validaciones mínimas
-    if not nombre:
-        return JsonResponse({"errors": {"nombre": ["Requerido"]}}, status=400)
-    if not tipo:
-        return JsonResponse({"errors": {"tipo": ["Requerido"]}}, status=400)
-
-    # Si ya existe por nombre (case-insensitive), devolvés ese ID
-    existente = Ingrediente.objects.filter(nombre__iexact=nombre).first()
-    if existente:
-        return JsonResponse({"id": existente.id, "nombre": existente.nombre, "existed": True}, status=200)
-
-    # Crear nuevo respetando la clean() del modelo (detalle vs tipo)
-    try:
-        obj = Ingrediente(nombre=nombre, tipo=tipo, detalle=detalle)
-        obj.full_clean()     # ejecuta clean() + field validators
-        obj.save()
-    except ValidationError as e:
-        return JsonResponse({"errors": e.message_dict}, status=400)
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=400)
-
-    return JsonResponse({"id": obj.id, "nombre": obj.nombre}, status=201)
-
-
-
-def set_dia_activo(request):
-    if request.method == "POST":
-        dia = request.POST.get("dia_activo")
-        if dia:
-            request.session["dia_activo"] = dia
-            return JsonResponse({"status": "ok"})
-    return JsonResponse({"status": "error"}, status=400)
-
-
-def obtener_parametros_sesion(request):
-
-    # Recupera los parámetros de sesión y los valores de los parámetros URL.
-
-    # Recuperar parámetros de sesión
-    medios = request.session.get('medios_estable', None)
-    categoria = request.session.get('categoria_estable', None)
-    dificultad = request.session.get('dificultad_estable', None)
-    palabra_clave = request.session.get('palabra_clave', "")
-
-    quecomemos = request.session.get('quecomemos', None)
-    misplatos = request.session.get('misplatos', "misplatos")
-    # preseleccionados = request.session.get('preseleccionados', None)
-
-    # Obtener el valor del parámetro 'tipo' desde la URL
-    tipo_parametro = request.GET.get('tipopag', 'Principal')
-
-    # # Obtener el usuario actual
-    # usuario = request.user
-
-    # Devolver las variables por separado
-    return tipo_parametro, quecomemos, misplatos, medios, categoria, dificultad, palabra_clave
-
-# class SugerenciasRandom(TemplateView):
-#     template_name = 'AdminVideos/random.html'
-
-def index(request):
-    return redirect(reverse_lazy("filtro-de-platos"))
-
-def about(request):
-    return render(request, "AdminVideos/about.html")
-
-
-
-def limpiar_none(value):
-    return None if value == 'None' or value == '' else value
-
-def agregar_plato(diccionario, clave, plato, ingredientes):
-    """
-    Agrega un plato al diccionario si el plato no es None.
-
-    :param diccionario: Diccionario donde se agregará el plato.
-    :param clave: Clave en el diccionario (por ejemplo, "guarnicion1").
-    :param plato: Nombre del plato.
-    :param ingredientes: Ingredientes del plato.
-    :param elegido: Indica si el plato está elegido. Por defecto, True.
-    """
-    if plato is not None:
-        diccionario[clave] = {
-            "plato": plato,
-            "ingredientes": ingredientes,
-            "elegido": True
-        }
-
 
 
 @login_required
