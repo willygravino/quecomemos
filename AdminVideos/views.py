@@ -714,13 +714,14 @@ def plato_ingredientes(request: HttpRequest, pk: int):
         "plato": plato,
         "items": items,
         "api_token": perfil.share_token,
-        "share_url": request.build_absolute_uri(
-            reverse("compartir-plato", args=[perfil.share_token, plato.pk])
-        ),
+        "action_url": request.build_absolute_uri(reverse("plato_ingredientes", args=[plato.pk])),
         "shopping_url": request.build_absolute_uri(
             reverse("compartir-lista", args=[perfil.share_token])
         ),
     }
+
+       
+
 
     return render(request, "AdminVideos/_modal_plato_ingredientes.html", ctx)
 

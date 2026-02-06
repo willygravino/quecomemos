@@ -4,6 +4,7 @@
 (function () {
   "use strict";
 
+
 /**
  * PLATO INGREDIENTES (modal)
  * Guarda checkbox + comentario por ingrediente_id (POST FormData a la vista del modal),
@@ -32,7 +33,7 @@ if (!document.__platoIngredientesToggleBound) {
     const comentario = commentInput ? (commentInput.value || "") : "";
 
     const csrf = form.querySelector("input[name='csrfmiddlewaretoken']")?.value || "";
-    const url = form.getAttribute("action") || window.location.href;
+    const url = form.action;
 
     try {
       const fd = new FormData();
@@ -78,7 +79,7 @@ if (!document.__platoIngredientesToggleBound) {
     const comentario = inp.value || "";
 
     const csrf = form.querySelector("input[name='csrfmiddlewaretoken']")?.value || "";
-    const url = form.getAttribute("action") || window.location.href;
+    const url = form.action;
 
     try {
       const fd = new FormData();
