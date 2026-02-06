@@ -34,6 +34,7 @@
     <!-- mi css -->
     <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=55" rel="stylesheet">  <!-- al final + bust de caché -->
 
+    <link rel="manifest" href="{% static 'AdminVideos/lista_super/manifest_lista_super.json' %}?v=1">
 
    
 
@@ -1152,6 +1153,16 @@ document.addEventListener("click", function (e) {
 <script src="{% static 'AdminVideos/js/form_init.js' %}?v=1024"></script>
 <script src="{% static 'AdminVideos/js/pantry_bind.js' %}?v=3"></script>
 
+<script>
+  (function () {
+    // Service Worker: habilita offline/cache para el sitio
+    if (!("serviceWorker" in navigator)) return;
+
+    // Subí el ?v cuando cambies sw_lista_super.js
+    const swUrl = "{% static 'AdminVideos/lista_super/sw_lista_super.js' %}?v=3";
+    navigator.serviceWorker.register(swUrl).catch(console.error);
+  })();
+</script>
 
 
 </body>

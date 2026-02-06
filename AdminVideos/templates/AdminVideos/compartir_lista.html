@@ -76,6 +76,18 @@
 
   </div>
 
+
+<script type="module">
+  // Carga el módulo de sync offline y lo deja disponible en window
+  import { postToggleOfflineFirst, syncPendientes } from "{% static 'AdminVideos/lista_super/sync_offline_lista_super.js' %}?v=2";
+
+  // Exponemos funciones para poder usarlas desde tu script actual (que no es módulo).
+  window.__listaSuperPostToggle = postToggleOfflineFirst;
+  window.__listaSuperSyncPendientes = syncPendientes;
+</script>
+
+
+
 <script>
 (function () {
   const API = "{% url 'api-toggle-item' token=api_token %}";
@@ -83,17 +95,19 @@
 
   
   
-  async function postToggle(ingrediente_id, checked) {
-    try {
-      await fetch(API, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ingrediente_id, checked })
-      });
-    } catch (e) {
-      console.error("No se pudo persistir el cambio", e);
+ async function postToggle(ingrediente_id, checked) {
+    // Usa la versión offline-first: si no hay internet, queda en cola local
+    const fn = window.__listaSuperPostToggle;
+    if (!fn) return;
+
+    const r = await fn(API, ingrediente_id, checked);
+
+    // Opcional: si quedó en cola, lo logueamos (podés mostrar un badge después)
+    if (r && r.queued) {
+      console.log("📌 Guardado offline, se enviará cuando haya internet.");
     }
   }
+
 
 
 
@@ -120,6 +134,15 @@
     });
   });
 
+// Cuando vuelve el internet, intenta sincronizar la cola pendiente
+window.addEventListener("online", () => {
+  const sync = window.__listaSuperSyncPendientes;
+  if (sync) sync(API);
+});
+
+// También intentamos sync al cargar la página (por si ya hay cola y ahora hay internet)
+const sync = window.__listaSuperSyncPendientes;
+if (sync) sync(API);
 
   
 })();
