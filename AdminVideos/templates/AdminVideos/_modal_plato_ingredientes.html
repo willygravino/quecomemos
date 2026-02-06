@@ -6,9 +6,8 @@
 
       <div class="modal-header">
         <div class="small text-muted">
-  items: {{ items|length }}
 </div>
-        <h5 class="modal-title">Ingredientes: {{ plato.nombre_plato }}</h5>
+        <h5 class="modal-title">Ingredientes del plato: {{ plato.nombre_plato }}</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
 
@@ -75,26 +74,38 @@
               Este plato no tiene ingredientes cargados.
             </div>
           {% endif %}
+          
 
-          <hr class="my-3">
+<div class="d-flex mt-3 gap-2">
+  <!-- Botón principal: ocupa el ancho -->
+  <a class="btn btn-outline-secondary flex-grow-1"
+     href="{% url 'compartir-lista' token=api_token %}">
+    Ver lista del plato
+  </a>
 
-          <a class="btn btn-primary" href="{% url 'compartir-lista' token=api_token %}">
-            Ver lista del plato
-          </a>
+  <!-- WhatsApp: botón ícono -->
+  <a class="btn btn-success d-inline-flex align-items-center justify-content-center btn-icon-square"
+     target="_blank" rel="noopener"
+     href="https://wa.me/?text={{ share_url|urlencode }}"
+     aria-label="Compartir por WhatsApp" title="Compartir por WhatsApp">
+    <i class="bi bi-whatsapp"></i>
+  </a>
+
+  <!-- Copiar: botón ícono -->
+  <button type="button"
+          class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center btn-icon-square"
+          id="btnCopyLink"
+          data-link="{{ share_url }}"
+          aria-label="Copiar link" title="Copiar link">
+    <i class="bi bi-clipboard"></i>
+  </button>
+</div>
 
 
-          <div class="d-grid gap-2">
-            <a class="btn btn-success" target="_blank"
-              href="https://wa.me/?text={{ share_url|urlencode }}">
-              Compartir por WhatsApp
-            </a>
 
-            <button type="button" class="btn btn-outline-secondary" id="btnCopyLink"
-                    data-link="{{ share_url }}">
-              Copiar link
-            </button>
-          </div>
-        </div>
+
+
+
       </form>
 
     </div>
