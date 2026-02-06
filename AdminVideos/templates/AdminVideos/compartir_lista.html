@@ -71,19 +71,6 @@
         </button>
       </div>
 
-      <script>
-      (function () {
-        const btn = document.getElementById("btn-volver");
-        if (!btn) return;
-
-        btn.addEventListener("click", () => {
-          // flag para que la página anterior se refresque al volver
-          sessionStorage.setItem("pantry_should_refresh", "1");
-          if (history.length > 1) history.back();
-          else window.close();        });
-      })();
-      </script>
-   
 
     {% endif %}
 
@@ -140,6 +127,32 @@
 
 
 
+<!--
+  BOTÓN "VOLVER" (lista compartida)
+  - Antes de volver, deja una bandera en sessionStorage.
+  - La página anterior (lista_de_compras / pantalla que abre el modal) escucha esa bandera en "pageshow"
+    y fuerza un reload 1 sola vez para traer estados actualizados (comprado / recién comprado, etc.).
+  - Si no hay historial (por ejemplo, se abrió directamente en una pestaña nueva), intenta cerrar la pestaña.
+-->
+<script>
+(function () {
+  const btn = document.getElementById("btn-volver");
+  if (!btn) return;
+
+  btn.addEventListener("click", () => {
+    // Bandera para que la página anterior se refresque al volver
+    sessionStorage.setItem("pantry_should_refresh", "1");
+
+    // Volver al lugar correcto si existe historial
+    if (history.length > 1) {
+      history.back();
+    } else {
+      // Si no hay historial (pestaña nueva), intentamos cerrar
+      window.close();
+    }
+  });
+})();
+</script>
 
 
 </body>

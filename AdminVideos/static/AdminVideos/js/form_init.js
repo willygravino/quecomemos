@@ -5,21 +5,33 @@
   "use strict";
 
   // AUTO-REFRESH AL VOLVER DESDE LISTA COMPARTIDA
-  // Esto NO debe ir dentro del HTML del modal, porque si el modal se inyecta por AJAX,
-  // los <script> del partial pueden no ejecutarse.
-  //  Este mismo snippet funciona para:
-  // - lista_de_compras.html (ingredientes del plato)
+  
+  // Este snippet refresca la página al volver desde la lista compartida.
+// Aplica a cualquier página que cargue form_init.js (por ejemplo: lista_de_compras, pantallas con modal, etc.)
+
   (function () {
     if (window.__shareBackRefreshBound) return;
     window.__shareBackRefreshBound = true;
+
+
 
     window.addEventListener("pageshow", () => {
       const shouldRefresh = sessionStorage.getItem("pantry_should_refresh") === "1";
       if (!shouldRefresh) return;
 
       sessionStorage.removeItem("pantry_should_refresh");
+
+      // Evita doble reload accidental en algunos navegadores
+      if (window.__didBackRefreshOnce) return;
+      window.__didBackRefreshOnce = true;
+
       location.reload();
     });
+
+
+
+
+
   })();
 
 
