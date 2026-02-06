@@ -590,41 +590,43 @@
           </div>
         </div>
 
-       <span class="menu-programado-badge position-absolute top-0 start-50 translate-middle">
+        <span class="menu-programado-badge position-absolute top-0 start-50 translate-middle">
+          <span class="menu-programado-pill">
 
-    <span class="menu-programado-faja d-inline-flex align-items-center">
-
-        <a href="/random-dia/{{ dia|date:'l'|slice:':2'|upper }}/"
-           class="btn btn-sm text-danger p-0 me-1">
-            <span class="material-symbols-outlined" style="font-size: 20px;">
+            <a href="/random-dia/{{ dia|date:'l'|slice:':2'|upper }}/"
+              class="btn btn-sm text-danger p-0 me-1">
+              <span class="material-symbols-outlined" style="font-size: 16px;">
                 wand_shine
-            </span>
-        </a>
+              </span>
+            </a>
 
-        <span class="menu-programado-text text-primary">
-            Menú programado
+            <span class="menu-programado-text text-primary">
+              Menú programado
+            </span>
+
+            {% if dia in platos_dia_x_dia %}
+              <a href="#"
+                data-bs-toggle="modal"
+                data-bs-target="#confirmActionModal"
+                data-confirm-title="Eliminar menú del día"
+                data-confirm-body="¿Seguro querés borrar lo que comemos en este día?"
+                data-confirm-action="{% url 'eliminar-menu-programado' %}"
+                data-confirm-btn="Sí, borrar"
+                title="Borrar menú del día"
+                aria-label="Borrar menú del día"
+                class="text-secondary text-decoration-none ms-1">
+                <i class="bi bi-trash-fill fa-lg"></i>
+              </a>
+            {% endif %}
+
+          </span>
         </span>
 
-    {% if dia in platos_dia_x_dia %}
-        <a href="#"
-          data-bs-toggle="modal"
-          data-bs-target="#confirmActionModal"
-          data-confirm-title="Eliminar menú del día"
-          data-confirm-body="¿Seguro querés borrar lo que comemos en este día?"
-          data-confirm-action="{% url 'eliminar-menu-programado' %}"
-          data-confirm-btn="Sí, borrar"
-          title="Borrar menú del día"
-          aria-label="Borrar menú del día"
-          class="text-secondary text-decoration-none ali ms-1">
-          <i class="bi bi-trash-fill fa-lg"></i>
-        </a>
-    </span>
 
 
-    {% endif %}
-</span>
 
 
+  
         {% if messages %}
           {% for message in messages %}
             <div class="alert alert-info">{{ message }}</div>
@@ -637,10 +639,19 @@
   {% endfor %}
 
   <div class="border border-primary rounded p-2 position-relative m-2">
-    <small class="position-absolute top-0 start-50 translate-middle bg-white px-3 text-primary"
-           style="transform: translate(-50%, -50%);">
-      Platos
-    </small>
+   
+    <span class="position-absolute top-0 start-50 translate-middle bg-white px-2 py-0
+                d-inline-block text-center rounded-pill"
+          style="transform: translate(-50%, -50%); max-width: 92%; line-height: 1.15;">
+      <span class="menu-programado-text text-primary">
+        Sugerencias de
+        {% if parametro == "Principal" %}
+          Plato principal
+        {% else %}
+          {{ parametro }}
+        {% endif %}
+      </span>
+    </span>
 
     <div class="shadow rounded p-2 m-2 mb-0">
       {% block filtro %}{% endblock %}

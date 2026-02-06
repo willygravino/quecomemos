@@ -480,3 +480,25 @@ section > .d-flex {
   position: relative;
   top: -1px;
 }
+
+/* Menú programado */
+/* Píldora blanca bien ceñida (solo para tapar el borde detrás) */
+.menu-programado-pill{
+  background: #fff;
+
+  padding: 0 .10rem;              /* MUY ceñido */
+  border-radius: 999px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: .22rem;                    /* mínima separación entre iconos y texto */
+  line-height: .5;  
+
+  box-shadow: 0 0 0 .08rem #fff;  /* halo MUY finito (tapa solo el bordecito) */
+}
+
+/* Texto: importante pero sin agrandar el “ancho” visual */
+.menu-programado-text{
+  font-weight: 600;
+  font-size: .88rem;
+}
