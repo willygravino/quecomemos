@@ -63,11 +63,28 @@
     {% endif %}
 
     {% if request.user.is_authenticated %}
-      <div class="mt-3 d-flex justify-content-end">
-        <a href="{% url 'menu-elegido' %}" class="btn btn-secondary btn-sm">
+     
+
+      <div class="mt-3 d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-volver">
           ← Volver
-        </a>
+        </button>
       </div>
+
+      <script>
+      (function () {
+        const btn = document.getElementById("btn-volver");
+        if (!btn) return;
+
+        btn.addEventListener("click", () => {
+          // flag para que la página anterior se refresque al volver
+          sessionStorage.setItem("pantry_should_refresh", "1");
+          if (history.length > 1) history.back();
+          else window.close();        });
+      })();
+      </script>
+   
+
     {% endif %}
 
   </div>
