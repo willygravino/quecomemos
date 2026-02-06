@@ -5,7 +5,8 @@ from .models import (
     IngredienteEstado,
     MenuDia, MenuItem,
     MenuItemExtra,
-    Plato, Profile, Mensaje, Lugar
+    Plato, Profile, Mensaje, Lugar,
+    ProfileIngrediente
 )
 
 # =====================================================
@@ -112,3 +113,5 @@ class MenuItemExtraAdmin(admin.ModelAdmin):
     search_fields = ("nombre",)
 
 admin.site.register(IngredienteEstado)
+admin.site.register(ProfileIngrediente)
+

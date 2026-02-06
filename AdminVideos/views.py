@@ -103,36 +103,184 @@ def fijar_o_eliminar_habito(request, es_lugar, objeto_id, comida):
     return redirect("filtro-de-platos")
 
 
+# @login_required
+# def plato_ingredientes(request: HttpRequest, pk: int):
+#     plato = get_object_or_404(Plato, pk=pk)
+#     perfil = get_object_or_404(Profile, user=request.user)
+
+#     ingredientes_qs = (
+#         plato.ingredientes_en_plato
+#         .select_related("ingrediente")
+#         .all()
+#     )
+
+#     # =========================
+#     # Helpers
+#     # =========================
+    
+
+
+   
+
+#     if request.method == "POST":
+#         # ===== NUEVO: POST tipo "lista de compras" (toggle/comentario por ingrediente) =====
+#         post_origen = request.POST.get("post_origen")
+
+#         if post_origen == "ingredientes":
+#             ing_id = request.POST.get("toggle_ing_id") or request.POST.get("comment_ing_id")
+#             checked = request.POST.get("toggle_ing_checked")  # "1" / "0" / None
+
+#             if not (ing_id and str(ing_id).isdigit()):
+#                 return JsonResponse({"success": False, "error": "ing_id inválido"}, status=400)
+
+#             ing_id = int(ing_id)
+
+#             # (lo que ya tenías abajo queda igual)
+#             ing = Ingrediente.objects.filter(pk=ing_id).only("nombre").first()
+#             if not ing:
+#                 return JsonResponse({"success": False, "error": "Ingrediente no existe"}, status=404)
+
+#             comentario_key = f"comentario_{ing_id}"
+#             comentario = (request.POST.get(comentario_key) or "").strip()
+                  
+#             defaults = {}
+
+#             if checked in ("0", "1"):
+#                 # checked "1" = hay que comprar => tengo=False
+#                 if checked == "1":
+#                     defaults["tengo"] = False
+#                 else:
+#                     defaults["tengo"] = True
+#                     defaults["last_bought_at"] = timezone.now()
+
+#                 defaults["comentario"] = comentario
+#             else:
+#                 defaults["comentario"] = comentario
+
+#             ProfileIngrediente.objects.update_or_create(
+#                     profile=perfil,
+#                     ingrediente_id=ing_id,
+#                     defaults=defaults,
+#                 )
+
+
+#             return JsonResponse({"success": True})
+
+#         # Si NO vino el modo nuevo, usamos el guardado masivo del form completo
+#         else:
+#             to_buy_ids = set(int(x) for x in request.POST.getlist("ingrediente_a_comprar_id") if x.isdigit())
+
+#             for iep in ingredientes_qs:
+#                 ing = iep.ingrediente
+#                 if not ing:
+#                     continue
+
+#                 ing_id = iep.ingrediente_id
+#                 if not ing_id:
+#                     continue
+
+#                 # si está en to_buy => no lo tengo
+#                 tengo = (ing_id not in to_buy_ids)
+
+#                 defaults = {"tengo": tengo}
+
+#                 if tengo:
+#                     defaults["last_bought_at"] = timezone.now()
+
+#                 comentario_key = f"comentario_{ing_id}"
+#                 if comentario_key in request.POST:
+#                     defaults["comentario"] = (request.POST.get(comentario_key) or "").strip()
+
+#                 # si NO tengo y comentario vacío => borrar (para no ensuciar DB)
+#                 if (not tengo) and defaults.get("comentario", "") == "":
+#                     ProfileIngrediente.objects.filter(profile=perfil, ingrediente_id=ing_id).delete()
+#                 else:
+#                     ProfileIngrediente.objects.update_or_create(
+#                         profile=perfil,
+#                         ingrediente_id=ing_id,
+#                         defaults=defaults,
+#                     )
+
+#             return JsonResponse({"success": True})
+
+#     # =========================
+#     # GET: preparar items para render
+#     # =========================
+#     ing_ids = [iep.ingrediente_id for iep in ingredientes_qs if iep.ingrediente_id]
+
+#     pantry_qs = (
+#         ProfileIngrediente.objects
+#         .filter(profile=perfil, ingrediente_id__in=ing_ids)
+#         .only("ingrediente_id", "tengo", "comentario", "updated_at")
+#     )
+
+#     pantry_map = {p.ingrediente_id: p for p in pantry_qs}
+
+#     items = []
+#     for iep in ingredientes_qs:
+#         ing = iep.ingrediente
+#         if not ing:
+#             continue
+
+#         p = pantry_map.get(iep.ingrediente_id)
+#         tengo = p.tengo if p else True
+#         comentario = (p.comentario or "") if p else ""
+
+#         items.append({
+#             "ingrediente_id": iep.ingrediente_id,
+#             "nombre": ing.nombre,
+#             "cantidad": iep.cantidad,
+#             "unidad": iep.unidad,
+#             "a_comprar": (not tengo),
+#             "comentario": comentario,
+#         })
+
+
+#     if not perfil.share_token:
+#         perfil.ensure_share_token()
+
+    
+#     ctx = {
+#         "plato": plato,
+#         "items": items,
+#         "api_token": perfil.share_token,
+#         "share_url": request.build_absolute_uri(
+#             reverse("compartir-plato", args=[perfil.share_token, plato.pk])
+#         ),
+#         "shopping_url": request.build_absolute_uri(
+#             reverse("compartir-lista", args=[perfil.share_token])  # <-- tu vista compartir_lista
+#         ),
+#     }
+
+#     return render(request, "AdminVideos/_modal_plato_ingredientes.html", ctx)
+
+
+
 @login_required
 def plato_ingredientes(request: HttpRequest, pk: int):
+    # ======================================================
+    # 1) Cargar plato + perfil del usuario
+    # ======================================================
     plato = get_object_or_404(Plato, pk=pk)
     perfil = get_object_or_404(Profile, user=request.user)
 
+    # Ingredientes del plato (relación intermedia IEP)
     ingredientes_qs = (
         plato.ingredientes_en_plato
         .select_related("ingrediente")
         .all()
     )
 
-    # =========================
-    # Helpers
-    # =========================
-    def _norm(s: str) -> str:
-        return " ".join((s or "").strip().lower().split())
-
-    # Mapa id -> nombre normalizado (para update/create consistente)
-    ingid_to_nombre_norm = {
-        iep.ingrediente_id: _norm(iep.ingrediente.nombre)
-        for iep in ingredientes_qs
-        if iep.ingrediente
-    }
-
-   
-
+    # ======================================================
+    # 2) POST: guardar cambios (modo nuevo AJAX o masivo form)
+    # ======================================================
     if request.method == "POST":
-        # ===== NUEVO: POST tipo "lista de compras" (toggle/comentario por ingrediente) =====
         post_origen = request.POST.get("post_origen")
 
+        # --------------------------------------------------
+        # 2.A) POST modo "ingredientes" (toggle/comentario por ingrediente)
+        #     - Se usa cuando tocás un checkbox o editás un comentario puntual
+        # --------------------------------------------------
         if post_origen == "ingredientes":
             ing_id = request.POST.get("toggle_ing_id") or request.POST.get("comment_ing_id")
             checked = request.POST.get("toggle_ing_checked")  # "1" / "0" / None
@@ -142,40 +290,46 @@ def plato_ingredientes(request: HttpRequest, pk: int):
 
             ing_id = int(ing_id)
 
-            # (lo que ya tenías abajo queda igual)
-            ing = Ingrediente.objects.filter(pk=ing_id).only("nombre").first()
+            # Validar que el ingrediente exista (evita guardar basura)
+            ing = Ingrediente.objects.filter(pk=ing_id).only("id").first()
             if not ing:
                 return JsonResponse({"success": False, "error": "Ingrediente no existe"}, status=404)
 
+            # Comentario viene como comentario_<id>
             comentario_key = f"comentario_{ing_id}"
             comentario = (request.POST.get(comentario_key) or "").strip()
-            nombre_norm = ing.nombre.casefold()
-                  
-            # 3) Persistir update_or_create
+
+            # defaults para ProfileIngrediente
             defaults = {}
 
+            # Si viene checked => actualizamos tengo/no tengo (+ last_bought_at si tengo)
             if checked in ("0", "1"):
+                # checked "1" = marcado como "necesito comprar" => tengo=False
                 if checked == "1":
-                    defaults["estado"] = IngredienteEstado.Estado.NO_TENGO
+                    defaults["tengo"] = False
                 else:
-                    defaults["estado"] = IngredienteEstado.Estado.TENGO
+                    defaults["tengo"] = True
                     defaults["last_bought_at"] = timezone.now()
 
                 defaults["comentario"] = comentario
             else:
-                # solo comentario (no vacío)
+                # Si no viene checked, solo se actualiza comentario
                 defaults["comentario"] = comentario
 
-            IngredienteEstado.objects.update_or_create(
-                user=request.user,
-                nombre=nombre_norm,
+            ProfileIngrediente.objects.update_or_create(
+                profile=perfil,
+                ingrediente_id=ing_id,
                 defaults=defaults,
             )
 
             return JsonResponse({"success": True})
 
-        # Si NO vino el modo nuevo, usamos el guardado masivo del form completo
+        # --------------------------------------------------
+        # 2.B) POST masivo del form completo
+        #     - Se usa cuando guardás toda la lista de una vez
+        # --------------------------------------------------
         else:
+            # Los que vienen tildados son "a comprar" => tengo=False
             to_buy_ids = set(
                 int(x) for x in request.POST.getlist("ingrediente_a_comprar_id") if x.isdigit()
             )
@@ -186,50 +340,47 @@ def plato_ingredientes(request: HttpRequest, pk: int):
                     continue
 
                 ing_id = iep.ingrediente_id
-                nombre_norm = _norm(ing.nombre)
+                if not ing_id:
+                    continue
 
-                estado = (
-                    IngredienteEstado.Estado.NO_TENGO
-                    if ing_id in to_buy_ids
-                    else IngredienteEstado.Estado.TENGO
-                )
+                # Si está en to_buy => NO lo tengo
+                tengo = (ing_id not in to_buy_ids)
 
-                defaults = {"estado": estado}
-                
-                if estado == IngredienteEstado.Estado.TENGO:
+                defaults = {"tengo": tengo}
+
+                # Si lo tengo, registramos compra/actualización (opcional pero útil)
+                if tengo:
                     defaults["last_bought_at"] = timezone.now()
 
-
+                # Comentario del ingrediente
                 comentario_key = f"comentario_{ing_id}"
                 if comentario_key in request.POST:
                     defaults["comentario"] = (request.POST.get(comentario_key) or "").strip()
 
-                if estado == IngredienteEstado.Estado.NO_TENGO and defaults.get("comentario", "") == "":
-                    IngredienteEstado.objects.filter(user=request.user, nombre=nombre_norm).delete()
+                # Si NO lo tengo y no hay comentario, borramos el registro para no llenar la DB
+                if (not tengo) and defaults.get("comentario", "") == "":
+                    ProfileIngrediente.objects.filter(profile=perfil, ingrediente_id=ing_id).delete()
                 else:
-                    IngredienteEstado.objects.update_or_create(
-                        user=request.user,
-                        nombre=nombre_norm,
+                    ProfileIngrediente.objects.update_or_create(
+                        profile=perfil,
+                        ingrediente_id=ing_id,
                         defaults=defaults,
                     )
 
             return JsonResponse({"success": True})
 
+    # ======================================================
+    # 3) GET: preparar items para renderizar el modal
+    #    - lee el estado por ingrediente_id desde ProfileIngrediente
+    # ======================================================
+    ing_ids = [iep.ingrediente_id for iep in ingredientes_qs if iep.ingrediente_id]
 
-
-
-    # =========================
-    # GET: preparar items para render
-    # =========================
-    nombres_norm = list(ingid_to_nombre_norm.values())
-
-    estado_qs = (
-        IngredienteEstado.objects
-        .filter(user=request.user, nombre__in=nombres_norm)
-        .only("nombre", "estado", "comentario", "updated_at")
+    pantry_qs = (
+        ProfileIngrediente.objects
+        .filter(profile=perfil, ingrediente_id__in=ing_ids)
+        .only("ingrediente_id", "tengo", "comentario", "updated_at")
     )
-
-    estado_map = {_norm(e.nombre): e for e in estado_qs}
+    pantry_map = {p.ingrediente_id: p for p in pantry_qs}
 
     items = []
     for iep in ingredientes_qs:
@@ -237,27 +388,31 @@ def plato_ingredientes(request: HttpRequest, pk: int):
         if not ing:
             continue
 
-        key = ingid_to_nombre_norm.get(iep.ingrediente_id)
-        e = estado_map.get(_norm(key)) if key else None
+        ing_id = iep.ingrediente_id
+        if not ing_id:
+            continue
 
-        estado = e.estado if e else "tengo"
-        comentario = (e.comentario or "") if e else ""
+        p = pantry_map.get(ing_id)
+
+        # Si no hay registro, asumimos que lo tiene (no se compra)
+        tengo = p.tengo if p else True
+        comentario = (p.comentario or "") if p else ""
 
         items.append({
-            "ingrediente_id": iep.ingrediente_id,
+            "ingrediente_id": ing_id,
             "nombre": ing.nombre,
             "cantidad": iep.cantidad,
             "unidad": iep.unidad,
-            "a_comprar": (estado == IngredienteEstado.Estado.NO_TENGO),
-
-            # "estado": estado,        # "no-tengo" => checkbox checked
+            "a_comprar": (not tengo),      # True => checkbox checked
             "comentario": comentario,
         })
 
+    # ======================================================
+    # 4) Links / tokens (lo tuyo, sin cambiar lógica)
+    # ======================================================
     if not perfil.share_token:
         perfil.ensure_share_token()
 
-    
     ctx = {
         "plato": plato,
         "items": items,
@@ -266,14 +421,11 @@ def plato_ingredientes(request: HttpRequest, pk: int):
             reverse("compartir-plato", args=[perfil.share_token, plato.pk])
         ),
         "shopping_url": request.build_absolute_uri(
-            reverse("compartir-lista", args=[perfil.share_token])  # <-- tu vista compartir_lista
+            reverse("compartir-lista", args=[perfil.share_token])
         ),
     }
 
     return render(request, "AdminVideos/_modal_plato_ingredientes.html", ctx)
-
-
-
 
 
 def compartir_ing_plato(request, token, pk: int):
