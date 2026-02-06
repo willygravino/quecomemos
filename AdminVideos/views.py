@@ -394,8 +394,8 @@ def plato_ingredientes(request: HttpRequest, pk: int):
 
         p = pantry_map.get(ing_id)
 
-        # Si no hay registro, asumimos que lo tiene (no se compra)
-        tengo = p.tengo if p else True
+        # Si no hay registro, asumimos que NO lo tiene (=> hay que comprar)
+        tengo = p.tengo if p else False
         comentario = (p.comentario or "") if p else ""
 
         items.append({
@@ -406,6 +406,9 @@ def plato_ingredientes(request: HttpRequest, pk: int):
             "a_comprar": (not tengo),      # True => checkbox checked
             "comentario": comentario,
         })
+
+    # ✅ Orden igual que lista de compras
+    items.sort(key=lambda i: i["nombre"].casefold())
 
     # ======================================================
     # 4) Links / tokens (lo tuyo, sin cambiar lógica)
