@@ -688,78 +688,80 @@ def lista_de_compras(request):
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return JsonResponse({"success": True})
         
+
     if request.method == "POST" and post_origen == "ingredientes":
+        # =====================================================
+        # POST ingredientes: toggle + comentario por ingrediente_id
+        # (misma lógica que tenías con IngredienteEstado)
+        # =====================================================
         ing_id = request.POST.get("toggle_ing_id") or request.POST.get("comment_ing_id")
         checked = request.POST.get("toggle_ing_checked")  # "1" o "0" o None
 
         if ing_id and ing_id.isdigit():
             ing_id = int(ing_id)
 
-            # nombre del ingrediente (lo buscamos una vez)
-            ing = Ingrediente.objects.filter(pk=ing_id).only("nombre").first()
+            # Validar existencia del ingrediente (evita guardar ids inválidos)
+            ing = Ingrediente.objects.filter(pk=ing_id).only("id").first()
             if not ing:
                 return JsonResponse({"success": False, "error": "Ingrediente no existe"}, status=404)
-
 
             comentario_key = f"comentario_{ing_id}"
             comentario = (request.POST.get(comentario_key) or "").strip()
 
-            nombre_norm = ing.nombre.casefold()
-
-            # 1) Toggle NO_TENGO + comentario vacío => borrar (Modelo A) y terminar
+            # 1) Toggle "NO_TENGO" + comentario vacío => borrar y terminar
+            #    (como no habrá registro, el default en GET seguirá siendo "no-tengo")
             if checked == "1" and comentario == "":
-                IngredienteEstado.objects.filter(user=request.user, nombre=nombre_norm).delete()
+                ProfileIngrediente.objects.filter(profile=perfil, ingrediente_id=ing_id).delete()
                 if request.headers.get("X-Requested-With") == "XMLHttpRequest":
                     return JsonResponse({"success": True})
 
-            # 2) No vino toggle (solo comentario) y quedó vacío:
-            #    - si estaba NO_TENGO => borrar
-            #    - si estaba TENGO => limpiar comentario
+            # 2) Solo comentario (sin toggle) y quedó vacío:
+            #    - si estaba NO_TENGO (tengo=False) => borrar
+            #    - si estaba TENGO (tengo=True) => limpiar comentario
             elif checked not in ("0", "1") and comentario == "":
                 existing = (
-                    IngredienteEstado.objects
-                    .filter(user=request.user, nombre=nombre_norm)
-                    .only("estado")
+                    ProfileIngrediente.objects
+                    .filter(profile=perfil, ingrediente_id=ing_id)
+                    .only("tengo")
                     .first()
                 )
 
-                if existing and existing.estado == IngredienteEstado.Estado.NO_TENGO:
-                    IngredienteEstado.objects.filter(user=request.user, nombre=nombre_norm).delete()
-                elif existing and existing.estado == IngredienteEstado.Estado.TENGO:
-                    IngredienteEstado.objects.filter(user=request.user, nombre=nombre_norm).update(comentario="")
+                if existing and existing.tengo is False:
+                    ProfileIngrediente.objects.filter(profile=perfil, ingrediente_id=ing_id).delete()
+                elif existing and existing.tengo is True:
+                    ProfileIngrediente.objects.filter(profile=perfil, ingrediente_id=ing_id).update(comentario="")
 
                 if request.headers.get("X-Requested-With") == "XMLHttpRequest":
                     return JsonResponse({"success": True})
 
-            # 3) Todo lo demás => persistimos con update_or_create
+            # 3) Todo lo demás => update_or_create
             else:
                 defaults = {}
 
                 if checked in ("0", "1"):
                     if checked == "1":
-                        defaults["estado"] = IngredienteEstado.Estado.NO_TENGO
-                        # acá comentario necesariamente es NO vacío (caso vacío ya se manejó arriba)
+                        # "necesito comprar" => no lo tengo
+                        defaults["tengo"] = False
+                        # comentario necesariamente NO vacío (caso vacío ya se manejó arriba)
                     else:
-                        defaults["estado"] = IngredienteEstado.Estado.TENGO
+                        # "lo tengo" => tengo=True + marca de compra reciente
+                        defaults["tengo"] = True
                         defaults["last_bought_at"] = timezone.now()
-                        # en TENGO permitimos comentario vacío (para limpiar)
+                        # permitimos comentario vacío para limpiar
 
                     defaults["comentario"] = comentario
-
                 else:
                     # solo comentario (no vacío)
                     defaults["comentario"] = comentario
 
-                IngredienteEstado.objects.update_or_create(
-                    user=request.user,
-                    nombre=nombre_norm,
+                ProfileIngrediente.objects.update_or_create(
+                    profile=perfil,
+                    ingrediente_id=ing_id,
                     defaults=defaults,
                 )
 
                 if request.headers.get("X-Requested-With") == "XMLHttpRequest":
                     return JsonResponse({"success": True})
-
-
 
 
     # ⚠️ IMPORTANTE: menues estaba prefetcheado ANTES del update.
@@ -865,37 +867,39 @@ def lista_de_compras(request):
 
         agregados[ing_id]["usos"].append({"plato_id": row.plato_id, "fecha": needed_by})
     
-    nombres = [d["nombre"].casefold() for d in agregados.values()]
-
-    estado_qs = (
-            IngredienteEstado.objects
-            .filter(user=request.user, nombre__in=nombres)
-            .only("nombre", "estado", "comentario", "last_bought_at", "updated_at")
-        )
 
 
-    estado_map = {e.nombre: e for e in estado_qs}
+    # =====================================================
+    # Traer estados por ingrediente_id (ProfileIngrediente)
+    # =====================================================
+    ing_ids = list(agregados.keys())
 
+    pantry_qs = (
+        ProfileIngrediente.objects
+        .filter(profile=perfil, ingrediente_id__in=ing_ids)
+        .only("ingrediente_id", "tengo", "comentario", "last_bought_at", "updated_at")
+    )
+
+    pantry_map = {p.ingrediente_id: p for p in pantry_qs}
 
     now = timezone.now()
 
     items = []
     for ing_id, data in agregados.items():
-        key = data["nombre"].casefold()
-        e = estado_map.get(key)
+        p = pantry_map.get(ing_id)
 
-        if not e:
+        # Default igual que hoy: si no hay registro => "no-tengo"
+        if not p:
             estado = "no-tengo"
         else:
-            if e.estado == IngredienteEstado.Estado.NO_TENGO:
+            if p.tengo is False:
                 estado = "no-tengo"
-            elif e.last_bought_at and e.last_bought_at >= now - timedelta(hours=3):
+            elif p.last_bought_at and p.last_bought_at >= now - timedelta(hours=3):
                 estado = "recien-comprado"
             else:
                 estado = "tengo"
 
-        comentario = e.comentario if (e and e.comentario) else ""
-
+        comentario = (p.comentario or "") if p else ""
 
         items.append({
             "ingrediente_id": ing_id,
