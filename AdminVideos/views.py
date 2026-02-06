@@ -698,6 +698,7 @@ def _get_user_by_token_or_404(token):
 
 
 
+
 def compartir_lista(request, token):
     share_user, perfil = _get_user_by_token_or_404(token)
 
@@ -790,51 +791,32 @@ def compartir_lista(request, token):
 
     # =====================================================
     # Estados guardados (tengo / comentario / last_bought_at)
+    # AHORA por ProfileIngrediente (NO por nombre)
     # =====================================================
-    # pantry_qs = (
-    #     ProfileIngrediente.objects
-    #     .filter(profile=perfil, ingrediente_id__in=agregados.keys())
-    #     .only("ingrediente_id", "tengo", "comentario", "last_bought_at")
-    # )
-    # pantry_map = {pi.ingrediente_id: pi for pi in pantry_qs}
-
-    # comentarios/estado por nombre (vienen del modal por plato)
-    # usamos nombre__iexact para que "Banana" y "banana" maten el problema de mayúsculas
-
-    def _norm(s: str) -> str:
-        return " ".join((s or "").strip().lower().split())
-
-    nombres_norm = [_norm(data["nombre"]) for data in agregados.values()]
-
-    estado_qs = (
-        IngredienteEstado.objects
-        .filter(user=share_user, nombre__in=nombres_norm)
-        .only("nombre", "estado", "comentario", "last_bought_at")
+    pantry_qs = (
+        ProfileIngrediente.objects
+        .filter(profile=perfil, ingrediente_id__in=agregados.keys())
+        .only("ingrediente_id", "tengo", "comentario", "last_bought_at")
     )
-
-    estado_map = {_norm(e.nombre): e for e in estado_qs}
+    pantry_map = {pi.ingrediente_id: pi for pi in pantry_qs}
 
     now = timezone.now()
 
     items = []
     for ing_id, data in agregados.items():
-        key = _norm(data["nombre"])
-        e = estado_map.get(key)
+        pi = pantry_map.get(ing_id)
 
-        # MODELO A: si no existe registro => no-tengo
-        if not e:
-            estado = "no-tengo"
-            comentario = ""
-        else:
-            comentario = e.comentario or ""
-            if e.estado == IngredienteEstado.Estado.NO_TENGO:
-                estado = "no-tengo"
+        comentario = (pi.comentario or "") if pi else ""
+
+        if pi and pi.tengo:
+            # Solo mostrar si es reciente
+            if pi.last_bought_at and pi.last_bought_at >= now - timedelta(hours=3):
+                estado = "recien-comprado"
             else:
-                # e.estado == TENGO
-                if e.last_bought_at and e.last_bought_at >= now - timedelta(hours=3):
-                    estado = "recien-comprado"
-                else:
-                    estado = "tengo"
+                continue
+        else:
+            # NO hay registro, o tengo=False => por defecto: falta comprar
+            estado = "no-tengo"
 
         items.append({
             "ingrediente_id": ing_id,
@@ -844,24 +826,20 @@ def compartir_lista(request, token):
             "needed_by": data["needed_by"],
         })
 
-    items.sort(key=lambda i: i["nombre"].casefold())
 
+
+    items.sort(key=lambda i: i["nombre"].casefold())
 
     # Tokens
     if not perfil.share_token:
         perfil.ensure_share_token()
 
     return render(request, "AdminVideos/compartir_lista.html", {
-    "items": items,
-    "token": f"user-{perfil.pk}",
-    "api_token": perfil.share_token,
-    "DEBUG_VISTA": f"compartir_lista items={len(items)}",
+        "items": items,
+        "token": f"user-{perfil.pk}",
+        "api_token": perfil.share_token,
+        "DEBUG_VISTA": f"compartir_lista items={len(items)}",
     })
-
-
-
-
-
 
 
 @csrf_exempt
@@ -885,55 +863,181 @@ def api_toggle_item(request, token):
     except Exception:
         return JsonResponse({"ok": False, "error": "ingrediente_id inválido"}, status=400)
 
-    ing = Ingrediente.objects.filter(pk=ing_id).only("nombre").first()
-    if not ing:
+    if not Ingrediente.objects.filter(pk=ing_id).exists():
         return JsonResponse({"ok": False, "error": "Ingrediente no existe"}, status=404)
 
-    nombre_norm = ing.nombre.casefold()
     checked = bool(checked)
 
-    # En LISTA COMPARTIDA: checked=True => TENGO (comprado)
+    pi = (
+        ProfileIngrediente.objects
+        .filter(profile=perfil, ingrediente_id=ing_id)
+        .only("id", "comentario")
+        .first()
+    )
+    comentario = (pi.comentario or "").strip() if pi else ""
+
     if checked:
-        obj, _created = IngredienteEstado.objects.update_or_create(
-            user=user,
-            nombre=nombre_norm,
-            defaults={
-                "estado": IngredienteEstado.Estado.TENGO,
-                "last_bought_at": timezone.now(),
-            },
+        obj, _ = ProfileIngrediente.objects.update_or_create(
+            profile=perfil,
+            ingrediente_id=ing_id,
+            defaults={"tengo": True, "last_bought_at": timezone.now()},
         )
         return JsonResponse({
             "ok": True,
             "ingrediente_id": ing_id,
-            "estado": obj.estado,
+            "tengo": True,
             "last_bought_at": obj.last_bought_at.isoformat() if obj.last_bought_at else None,
         })
 
-    # checked=False => NO_TENGO
-    existing = (
-        IngredienteEstado.objects
-        .filter(user=user, nombre=nombre_norm)
-        .only("comentario")
-        .first()
+    # checked=False => "no tengo"
+    # Si no hay comentario, volvemos al default (sin registro)
+    if comentario == "":
+        ProfileIngrediente.objects.filter(profile=perfil, ingrediente_id=ing_id).delete()
+        return JsonResponse({"ok": True, "ingrediente_id": ing_id, "tengo": False, "last_bought_at": None})
+
+    # Si hay comentario, lo conservamos, pero marcamos tengo=False
+    obj, _ = ProfileIngrediente.objects.update_or_create(
+        profile=perfil,
+        ingrediente_id=ing_id,
+        defaults={"tengo": False},
     )
-
-    # Modelo A: NO_TENGO sin comentario => borrar registro
-    if existing and (existing.comentario or "").strip():
-        IngredienteEstado.objects.filter(user=user, nombre=nombre_norm).update(
-            estado=IngredienteEstado.Estado.NO_TENGO
-        )
-    else:
-        IngredienteEstado.objects.filter(user=user, nombre=nombre_norm).delete()
-
     return JsonResponse({
         "ok": True,
         "ingrediente_id": ing_id,
-        "estado": IngredienteEstado.Estado.NO_TENGO,
-        "last_bought_at": None,
+        "tengo": False,
+        "last_bought_at": obj.last_bought_at.isoformat() if obj.last_bought_at else None,
     })
 
 
+# @csrf_exempt
+# @require_POST
+# def api_toggle_item(request, token):
+#     user, perfil = _get_user_by_token_or_404(token)
 
+#     try:
+#         payload = json.loads(request.body.decode("utf-8"))
+#     except Exception:
+#         return JsonResponse({"ok": False, "error": "JSON inválido"}, status=400)
+
+#     ing_id = payload.get("ingrediente_id", None)
+#     checked = payload.get("checked", None)
+
+#     if ing_id is None or checked is None:
+#         return JsonResponse({"ok": False, "error": "ingrediente_id y checked requeridos"}, status=400)
+
+#     try:
+#         ing_id = int(ing_id)
+#     except Exception:
+#         return JsonResponse({"ok": False, "error": "ingrediente_id inválido"}, status=400)
+
+#     ing = Ingrediente.objects.filter(pk=ing_id).only("nombre").first()
+#     if not ing:
+#         return JsonResponse({"ok": False, "error": "Ingrediente no existe"}, status=404)
+
+#     nombre_norm = ing.nombre.casefold()
+#     checked = bool(checked)
+
+#     # En LISTA COMPARTIDA: checked=True => TENGO (comprado)
+#     if checked:
+#         obj, _created = IngredienteEstado.objects.update_or_create(
+#             user=user,
+#             nombre=nombre_norm,
+#             defaults={
+#                 "estado": IngredienteEstado.Estado.TENGO,
+#                 "last_bought_at": timezone.now(),
+#             },
+#         )
+#         return JsonResponse({
+#             "ok": True,
+#             "ingrediente_id": ing_id,
+#             "estado": obj.estado,
+#             "last_bought_at": obj.last_bought_at.isoformat() if obj.last_bought_at else None,
+#         })
+
+#     # checked=False => NO_TENGO
+#     existing = (
+#         IngredienteEstado.objects
+#         .filter(user=user, nombre=nombre_norm)
+#         .only("comentario")
+#         .first()
+#     )
+
+#     # Modelo A: NO_TENGO sin comentario => borrar registro
+#     if existing and (existing.comentario or "").strip():
+#         IngredienteEstado.objects.filter(user=user, nombre=nombre_norm).update(
+#             estado=IngredienteEstado.Estado.NO_TENGO
+#         )
+#     else:
+#         IngredienteEstado.objects.filter(user=user, nombre=nombre_norm).delete()
+
+#     return JsonResponse({
+#         "ok": True,
+#         "ingrediente_id": ing_id,
+#         "estado": IngredienteEstado.Estado.NO_TENGO,
+#         "last_bought_at": None,
+#     })
+
+
+
+# @csrf_exempt
+# @require_POST
+# def api_toggle_item(request, token):
+#     user, perfil = _get_user_by_token_or_404(token)
+
+#     try:
+#         payload = json.loads(request.body.decode("utf-8"))
+#     except Exception:
+#         return JsonResponse({"ok": False, "error": "JSON inválido"}, status=400)
+
+#     ing_id = payload.get("ingrediente_id", None)
+#     checked = payload.get("checked", None)
+
+#     if ing_id is None or checked is None:
+#         return JsonResponse({"ok": False, "error": "ingrediente_id y checked requeridos"}, status=400)
+
+#     try:
+#         ing_id = int(ing_id)
+#     except Exception:
+#         return JsonResponse({"ok": False, "error": "ingrediente_id inválido"}, status=400)
+
+#     # Validar que existe el ingrediente
+#     ing = Ingrediente.objects.filter(pk=ing_id).only("id").first()
+#     if not ing:
+#         return JsonResponse({"ok": False, "error": "Ingrediente no existe"}, status=404)
+
+#     checked = bool(checked)
+
+#     # checked=True => tengo (comprado)
+#     if checked:
+#         obj, _created = ProfileIngrediente.objects.update_or_create(
+#             profile=perfil,
+#             ingrediente_id=ing_id,
+#             defaults={
+#                 "tengo": True,
+#                 "last_bought_at": timezone.now(),
+#             },
+#         )
+#         return JsonResponse({
+#             "ok": True,
+#             "ingrediente_id": ing_id,
+#             "tengo": True,
+#             "last_bought_at": obj.last_bought_at.isoformat() if obj.last_bought_at else None,
+#         })
+
+#     # checked=False => no tengo (pero NO borramos el registro)
+#     obj, _created = ProfileIngrediente.objects.update_or_create(
+#         profile=perfil,
+#         ingrediente_id=ing_id,
+#         defaults={
+#             "tengo": False,
+#         },
+#     )
+#     return JsonResponse({
+#         "ok": True,
+#         "ingrediente_id": ing_id,
+#         "tengo": False,
+#         "last_bought_at": obj.last_bought_at.isoformat() if obj.last_bought_at else None,
+#     })
 
 
 

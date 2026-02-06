@@ -78,9 +78,10 @@
 
           <hr class="my-3">
 
-          <a class="btn btn-primary" target="_blank" href="{{ share_url }}">
+          <a class="btn btn-primary" target="_blank" href="{% url 'compartir-lista' token=api_token %}">
             Ver lista del plato
           </a>
+
 
           <div class="d-grid gap-2">
             <a class="btn btn-success" target="_blank"
