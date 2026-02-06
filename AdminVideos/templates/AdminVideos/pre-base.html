@@ -531,36 +531,42 @@
 
   </div>
 
-  <!-- Indicador simple con links a cada slide -->
-  <div class="text-center mt-1" style="font-size:.7rem;">
-    <a href="#"
-       class="text-muted mx-1"
-       data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}"
-       data-bs-slide-to="0">
-      Desayuno
-    </a>
-    ·
-    <a href="#"
-       class="text-muted mx-1"
-       data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}"
-       data-bs-slide-to="1">
-      Almuerzo
-    </a>
-    ·
-    <a href="#"
-       class="text-muted mx-1"
-       data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}"
-       data-bs-slide-to="2">
-      Merienda
-    </a>
-    ·
-    <a href="#"
-       class="text-muted mx-1"
-       data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}"
-       data-bs-slide-to="3">
-      Cena
-    </a>
-  </div>
+  <!-- Zócalo del carousel: links a cada slide + tilde si hay plato en esa comida -->
+<div class="text-center mt-1" style="font-size:.7rem;">
+  <a href="#"
+     class="text-muted mx-1 meal-link {% if dia_plato.1.desayuno %}has-plato{% endif %}"
+     data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}"
+     data-bs-slide-to="0">
+    Desayuno
+  </a>
+  ·
+  <a href="#"
+     class="text-muted mx-1 meal-link {% if dia_plato.1.almuerzo %}has-plato{% endif %}"
+     data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}"
+     data-bs-slide-to="1">
+    Almuerzo
+  </a>
+  ·
+  <a href="#"
+     class="text-muted mx-1 meal-link {% if dia_plato.1.merienda %}has-plato{% endif %}"
+     data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}"
+     data-bs-slide-to="2">
+    Merienda
+  </a>
+  ·
+  <a href="#"
+     class="text-muted mx-1 meal-link {% if dia_plato.1.cena %}has-plato{% endif %}"
+     data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}"
+     data-bs-slide-to="3">
+    Cena
+  </a>
+</div>
+
+
+
+
+
+
 </div>
 
 

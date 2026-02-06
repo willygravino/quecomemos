@@ -464,3 +464,19 @@ section > .d-flex {
   color: rgba(255,255,255,1) !important;
   text-shadow: 0 0 6px rgba(255,255,255,.35);
 }
+
+
+/* Zócalo del carousel: muestra un tilde verde minimalista al lado del link cuando tiene plato (.has-plato) */
+
+.meal-link.has-plato::after{
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 10px;
+  margin-left: 5px;
+  border-right: 2px solid #198754;
+  border-bottom: 2px solid #198754;
+  transform: rotate(45deg);
+  position: relative;
+  top: -1px;
+}
