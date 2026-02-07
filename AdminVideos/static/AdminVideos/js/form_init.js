@@ -650,6 +650,8 @@
           const data = await response.json();
 
           console.log("AJAX save response:", data);
+          console.log("toast msg redirect:", data.redirect_url);
+
 
           if (data.success) {
             const modal = bootstrap.Modal.getInstance(form.closest("#modalPlato"));

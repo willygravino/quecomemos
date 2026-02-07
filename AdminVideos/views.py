@@ -1433,7 +1433,7 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
 
         # --- Si es un request AJAX (modal): devolvemos redirect_url ---
         if is_ajax:
-            redirect_url = _add_qs(return_to or "/", guardado="ok")
+            redirect_url = _add_qs(return_to or "/", msg="Guardado OK.", level="success")
             return JsonResponse({
                 "success": True,
                 "redirect_url": redirect_url,   # 👈 clave para que el JS navegue
@@ -1443,11 +1443,14 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
 
         # --- Si NO es AJAX: si hay return_to, volvemos ahí ---
         if return_to:
-            return redirect(_add_qs(return_to, guardado="ok"))
+            return redirect(_add_qs(return_to, msg="Guardado OK.", level="success"))
 
         # --- Comportamiento normal (tu lógica original) ---
         template_param = self.request.GET.get('tipopag')
-        tail = f"?tipopag={template_param}&guardado=ok" if template_param else "?guardado=ok"
+        if template_param:
+            tail = _add_qs(f"?tipopag={template_param}", msg="Guardado OK.", level="success")
+        else:
+            tail = _add_qs("", msg="Guardado OK.", level="success")
         return redirect(f"{reverse('videos-create')}{tail}")
 
     # def form_valid(self, form):
@@ -1651,23 +1654,27 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
         if uploaded and not getattr(uploaded, "name", None):
             uploaded.name = "upload.jpg"
 
+        # Helper: agregar querystring sin romper el existente
+        def _add_qs(url, **params):
+            parts = urlparse(url)
+            q = dict(parse_qsl(parts.query))
+            q.update({k: v for k, v in params.items() if v is not None})
+            return urlunparse(parts._replace(query=urlencode(q)))
+
         with transaction.atomic():
             plato = form.save(commit=False)
             plato.propietario = self.request.user
 
             # reconstruir string "ingredientes" desde el formset
-            lista_ingredientes = []
-            for ing_form in ingrediente_formset:
-                if ing_form.cleaned_data and not ing_form.cleaned_data.get("DELETE", False):
-                    nombre = ing_form.cleaned_data.get("nombre_ingrediente")
-                    texto = (nombre or "").strip()
-                    if texto:
-                        lista_ingredientes.append(texto)
+            # lista_ingredientes = []
+            # for ing_form in ingrediente_formset:
+            #     if ing_form.cleaned_data and not ing_form.cleaned_data.get("DELETE", False):
+            #         nombre = ing_form.cleaned_data.get("nombre_ingrediente")
+            #         texto = (nombre or "").strip()
+            #         if texto:
+            #             lista_ingredientes.append(texto)
 
-            plato.ingredientes = ", ".join(lista_ingredientes)
-
-            # ❌ Variedades legacy: removido (ya no se guarda plato.variedades)
-            # plato.variedades = ...
+            # plato.ingredientes = ", ".join(lista_ingredientes)
 
             plato.save()
             form.save_m2m()
@@ -1675,23 +1682,88 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
             ingrediente_formset.instance = plato
             ingrediente_formset.save()
 
-        # 1️⃣ Si fue llamado desde un modal (AJAX), responder con JSON
-        if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
+        # Resolver return_to (para volver a donde fue llamado)
+        return_to = (
+            self.request.POST.get("return_to")
+            or self.request.GET.get("return_to")
+            or self.request.META.get("HTTP_REFERER")
+            or "/"
+        )
+
+        # Seguridad: evitar redirecciones a otro dominio
+        if return_to and not url_has_allowed_host_and_scheme(return_to, allowed_hosts={self.request.get_host()}):
+            return_to = "/"
+
+        redirect_url = _add_qs(return_to, msg="Modificado OK.", level="success")
+
+        # 1️⃣ Si fue llamado desde un modal (AJAX), responder con JSON + redirect_url
+        if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return JsonResponse({
                 "success": True,
+                "redirect_url": redirect_url,
                 "nombre": plato.nombre_plato,
                 "id": plato.id,
             })
 
-        # 2️⃣ Si hay return_to (volver a donde fue llamado)
-        return_to = self.request.POST.get("return_to") or self.request.GET.get("return_to")
-        if return_to:
-            return redirect(return_to)
+        # 2️⃣ No-AJAX: volver a donde fue llamado con toast
+        return redirect(redirect_url)
+ 
 
-        # 3️⃣ Fallback: redirigir normalmente
-        template_param = self.request.GET.get("tipopag")
-        tail = f"?tipopag={template_param}&modificado=ok" if template_param else "?modificado=ok"
-        return redirect(f"{reverse('videos-create')}{tail}")
+    # def form_valid(self, form):
+    #     context = self.get_context_data()
+    #     ingrediente_formset = context["ingrediente_formset"]
+
+    #     if not ingrediente_formset.is_valid():
+    #         return self.render_to_response(self.get_context_data(form=form))
+
+    #     # 🔒 Imagen: normalizar (si no viene nueva, no tocar la actual)
+    #     uploaded = self.request.FILES.get("image")
+    #     if uploaded and not getattr(uploaded, "name", None):
+    #         uploaded.name = "upload.jpg"
+
+    #     with transaction.atomic():
+    #         plato = form.save(commit=False)
+    #         plato.propietario = self.request.user
+
+    #         # reconstruir string "ingredientes" desde el formset
+    #         lista_ingredientes = []
+    #         for ing_form in ingrediente_formset:
+    #             if ing_form.cleaned_data and not ing_form.cleaned_data.get("DELETE", False):
+    #                 nombre = ing_form.cleaned_data.get("nombre_ingrediente")
+    #                 texto = (nombre or "").strip()
+    #                 if texto:
+    #                     lista_ingredientes.append(texto)
+
+    #         plato.ingredientes = ", ".join(lista_ingredientes)
+
+    #         # ❌ Variedades legacy: removido (ya no se guarda plato.variedades)
+    #         # plato.variedades = ...
+
+    #         plato.save()
+    #         form.save_m2m()
+
+    #         ingrediente_formset.instance = plato
+    #         ingrediente_formset.save()
+
+    #     # 1️⃣ Si fue llamado desde un modal (AJAX), responder con JSON
+    #     if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
+    #         return JsonResponse({
+    #             "success": True,
+    #             "nombre": plato.nombre_plato,
+    #             "id": plato.id,
+    #         })
+
+    #     # 2️⃣ Si hay return_to (volver a donde fue llamado)
+    #     return_to = self.request.POST.get("return_to") or self.request.GET.get("return_to")
+    #     if return_to:
+    #         return redirect(return_to)
+
+    #     # 3️⃣ Fallback: redirigir normalmente
+    #     template_param = self.request.GET.get("tipopag")
+    #     tail = f"?tipopag={template_param}&modificado=ok" if template_param else "?modificado=ok"
+    #     return redirect(f"{reverse('videos-create')}{tail}")
+
+
 
     def form_invalid(self, form):
         context = self.get_context_data(form=form)

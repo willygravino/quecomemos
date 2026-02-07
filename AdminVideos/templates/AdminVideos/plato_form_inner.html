@@ -404,28 +404,6 @@
             </form>
 
 
-
-{% if request.GET.modificado == "ok" %}
-<div class="modal show d-block" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.5);">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">¡Modificado exitosamente!</h5>
-            </div>
-            <div class="modal-body">
-                <p>¿Qué querés hacer ahora?</p>
-            </div>
-            <div class="modal-footer">
-                <a class="btn btn-primary" href="/">Ir a Home</a>
-                <a class="btn btn-secondary" href="{% url 'filtro-de-platos' %}">Ver todos mis platos</a>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
-
-
-
 <!-- Modal Bootstrap -->
 <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
     <div class="modal-dialog">
