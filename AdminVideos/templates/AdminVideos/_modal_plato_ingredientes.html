@@ -79,14 +79,14 @@
 <div class="d-flex mt-3 gap-2">
   <!-- Botón principal: ocupa el ancho -->
   <a class="btn btn-outline-secondary flex-grow-1"
-     href="{% url 'compartir-lista' token=api_token %}">
+     href="{{ plato_share_url }}">
     Ver lista del plato
   </a>
 
   <!-- WhatsApp: botón ícono -->
   <a class="btn btn-success d-inline-flex align-items-center justify-content-center btn-icon-square"
      target="_blank" rel="noopener"
-     href="https://wa.me/?text={{ action_url|urlencode }}"
+      href="https://wa.me/?text={{ plato_share_url|urlencode }}"
      aria-label="Compartir por WhatsApp" title="Compartir por WhatsApp">
     <i class="bi bi-whatsapp"></i>
   </a>

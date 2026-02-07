@@ -387,46 +387,61 @@ def plato_ingredientes(request: HttpRequest, pk: int):
         "plato": plato,
         "items": items,
         "api_token": perfil.share_token,
-        "action_url": request.build_absolute_uri(reverse("plato_ingredientes", args=[plato.pk])),
-        "shopping_url": request.build_absolute_uri(
-            reverse("compartir-lista", args=[perfil.share_token])
+
+        # URL de la pantalla de ingredientes del plato (tu vista normal)
+        "action_url": request.build_absolute_uri(
+            reverse("plato_ingredientes", args=[plato.pk])
+        ),
+
+        # URL para COMPARTIR solo este plato (usa tu ruta: s/<token>/plato/<pk>/)
+        "plato_share_url": request.build_absolute_uri(
+            reverse("compartir-plato", args=[perfil.share_token, plato.pk])
         ),
     }
 
-       
-
-
     return render(request, "AdminVideos/_modal_plato_ingredientes.html", ctx)
 
-
+from datetime import timedelta
+from django.utils import timezone
+from django.shortcuts import get_object_or_404, render
 
 def compartir_ing_plato(request, token, pk: int):
     share_user, perfil = _get_user_by_token_or_404(token)
     plato = get_object_or_404(Plato, pk=pk)
 
+    # Ingredientes del plato
     ingredientes_qs = (
         plato.ingredientes_en_plato
         .select_related("ingrediente")
         .all()
     )
 
-    def _norm(s: str) -> str:
-        return " ".join((s or "").strip().lower().split())
-
-    # nombres normalizados del plato
-    nombres_norm = [
-        _norm(iep.ingrediente.nombre)
+    # IDs de ingredientes del plato
+    ing_ids = [
+        iep.ingrediente_id
         for iep in ingredientes_qs
-        if iep.ingrediente
+        if iep.ingrediente_id and iep.ingrediente
     ]
 
-    # estados del dueño del token (NO request.user)
-    estado_qs = (
-        IngredienteEstado.objects
-        .filter(user=share_user, nombre__in=nombres_norm)
-        .only("nombre", "estado", "comentario", "estado_hasta", "updated_at")
+    # Si no hay ingredientes, render vacío
+    if not ing_ids:
+        if not perfil.share_token:
+            perfil.ensure_share_token()
+        return render(request, "AdminVideos/compartir_lista.html", {
+            "items": [],
+            "api_token": perfil.share_token,
+            "token": f"user-{perfil.pk}",
+        })
+
+    # Estados guardados por ingrediente_id (nuevo modelo)
+    pantry_qs = (
+        ProfileIngrediente.objects
+        .filter(profile=perfil, ingrediente_id__in=ing_ids)
+        .only("ingrediente_id", "tengo", "comentario", "last_bought_at")
     )
-    estado_map = { _norm(e.nombre): e for e in estado_qs }
+    pantry_map = {pi.ingrediente_id: pi for pi in pantry_qs}
+
+    now = timezone.now()
 
     items = []
     for iep in ingredientes_qs:
@@ -434,13 +449,18 @@ def compartir_ing_plato(request, token, pk: int):
         if not ing:
             continue
 
-        key = _norm(ing.nombre)
-        e = estado_map.get(key)
+        pi = pantry_map.get(iep.ingrediente_id)
+        comentario = (pi.comentario or "") if pi else ""
 
-        estado = e.estado if e else "tengo"
-        comentario = (e.comentario or "") if e else ""
+        if pi and pi.tengo:
+            # Solo mostrar si es "recién comprado" (mismo criterio que compartir_lista)
+            if pi.last_bought_at and pi.last_bought_at >= now - timedelta(hours=3):
+                estado = "recien-comprado"
+            else:
+                continue  # tengo normal -> no mostrar
+        else:
+            estado = "no-tengo"
 
-        # formato EXACTO que espera compartir_lista.html
         items.append({
             "ingrediente_id": iep.ingrediente_id,
             "nombre": ing.nombre,
@@ -458,7 +478,6 @@ def compartir_ing_plato(request, token, pk: int):
         "api_token": perfil.share_token,
         "token": f"user-{perfil.pk}",
     })
-
 
 
 
