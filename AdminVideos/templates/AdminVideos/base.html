@@ -1130,8 +1130,6 @@ document.addEventListener("click", function (e) {
 
 
 
-
-
 <!-- jQuery (tu versión local, no uses la de CDN para evitar duplicados) -->
 <script src="{% static 'AdminVideos/vendor/jquery/jquery.min.js' %}"></script>
 
@@ -1142,15 +1140,12 @@ document.addEventListener("click", function (e) {
 <script src="{% static 'AdminVideos/vendor/jquery-easing/jquery.easing.min.js' %}"></script>
 <script src="{% static 'AdminVideos/js/sb-admin-2.min.js' %}"></script>
 
-<!-- Charts -->
-<script src="{% static 'AdminVideos/vendor/chart.js/Chart.min.js' %}"></script>
-<script src="{% static 'AdminVideos/js/demo/chart-area-demo.js' %}"></script>
-<script src="{% static 'AdminVideos/js/demo/chart-pie-demo.js' %}"></script>
+
 
 <!-- Select2 (después de jQuery y Bootstrap) -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-<script src="{% static 'AdminVideos/js/form_init.js' %}?v=1024"></script>
+<script src="{% static 'AdminVideos/js/form_init.js' %}?v=1025"></script>
 <script src="{% static 'AdminVideos/js/pantry_bind.js' %}?v=3"></script>
 
 <script>
@@ -1163,6 +1158,47 @@ document.addEventListener("click", function (e) {
     navigator.serviceWorker.register(swUrl).catch(console.error);
   })();
 </script>
+
+{# ==========================================
+   TOAST "GUARDADO OK"
+   Si la URL trae ?guardado=ok, muestra un toast verde con ✅,
+   se auto-cierra y limpia el parámetro para que no se repita al refrescar.
+   ========================================== #}
+{% if request.GET.guardado == "ok" %}
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1080;">
+    <div id="toastGuardado"
+         class="toast align-items-center text-bg-success border-0 shadow-sm"
+         role="alert" aria-live="polite" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body d-flex align-items-center gap-2">
+          <span class="ok-pop" aria-hidden="true">✅</span>
+          <span><strong>Guardado exitosamente.</strong></span>
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                data-bs-dismiss="toast" aria-label="Cerrar"></button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .ok-pop { display:inline-block; transform:scale(.85); animation: okPop .35s ease-out forwards; }
+    @keyframes okPop { from { transform:scale(.6); opacity:0; } to { transform:scale(1); opacity:1; } }
+  </style>
+
+  <script>
+    (function () {
+      const el = document.getElementById("toastGuardado");
+      if (!el || !window.bootstrap) return;
+
+      new bootstrap.Toast(el, { delay: 2800, autohide: true }).show();
+
+      // limpiar guardado=ok para que no reaparezca al refrescar
+      const url = new URL(window.location.href);
+      url.searchParams.delete("guardado");
+      window.history.replaceState({}, "", url.toString());
+    })();
+  </script>
+{% endif %}
 
 
 </body>

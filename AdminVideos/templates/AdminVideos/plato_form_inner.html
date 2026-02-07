@@ -395,31 +395,15 @@
                     <button type="submit" class="btn btn-success px-5">Guardar</button>
                 </div>
 
-  <input type="hidden" name="return_to" value="{{ request.GET.return_to|default:'' }}">
+              <input type="hidden" name="return_to"
+       value="{{ request.GET.return_to|default:request.META.HTTP_REFERER|default:'/' }}">
+
+  
 
 
             </form>
 
 
-{% if request.GET.guardado == "ok" %}
-<div class="modal show d-block" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.5);">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">¡Guardado exitosamente!</h5>
-            </div>
-            <div class="modal-body">
-                <p>¿Qué querés hacer ahora?</p>
-            </div>
-            <div class="modal-footer">
-                <a class="btn btn-primary" href="{{ request.path }}?tipopag={{ request.GET.tipopag }}">Crear otro
-                    plato</a>
-                <a class="btn btn-secondary" href="/">Ir a Home</a>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
 
 {% if request.GET.modificado == "ok" %}
 <div class="modal show d-block" tabindex="-1" role="dialog" style="background: rgba(0,0,0,0.5);">

@@ -600,33 +600,6 @@
       });
       guardarBtn.__bound = true;
     }
-
-  // // ===== Asegurar que el form tenga action correcto =====
-  // const formEl = context.querySelector("#platoForm") || context.querySelector("form[method='post']");
-  // if (formEl) {
-    
-    
-  //   const isUpdateMode = formEl.dataset.mode === "update";
-
-  //   // 👉 Si es edición, NO tocar el action
-  //   if (isUpdateMode) {
-  //     log("✏️ Modo edición detectado, action preservado:", formEl.action);
-  //   } else {
-  //     // 👉 Si es creación (modal)
-
-
-
-
-  //     let tipopag = "Principal";
-  //     const tipoInput = context.querySelector("input[name='tipos']:checked");
-  //     if (tipoInput) {
-  //       tipopag = tipoInput.value;
-  //     }
-
-  //     formEl.action = `/videos/create/?tipopag=${encodeURIComponent(tipopag)}`;
-  //     log("🆕 Modo creación, action forzado:", formEl.action);
-  //   }
-  // }
  
 
 
@@ -676,15 +649,25 @@
         if (contentType.includes("application/json")) {
           const data = await response.json();
 
+          console.log("AJAX save response:", data);
+
           if (data.success) {
-
             const modal = bootstrap.Modal.getInstance(form.closest("#modalPlato"));
+            if (modal) modal.hide();
 
-            modal.hide();
-            location.reload(); // refresca lista de platos
+            // ✅ volver a la página origen (lo manda el backend)
+            if (data.redirect_url) {
+              window.location.assign(data.redirect_url);
+              return;
+            }
+
+            // fallback si no vino redirect_url
+            location.reload();
+
           } else if (data.html) {
             modalBody.innerHTML = data.html;
             initPlatoForm(modalBody);
+
           } else {
             console.error("⚠️ Respuesta JSON inesperada:", data);
           }
