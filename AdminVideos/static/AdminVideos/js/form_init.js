@@ -265,6 +265,7 @@
       }
     }
 
+    
     if (initId && initText) {
       const option = new Option(initText, initId, true, true);
       $select.append(option).trigger("change");
@@ -514,7 +515,12 @@
     
   // Evita doble init SOLO en página completa.
   // En modal se reemplaza HTML (AJAX), así que necesitamos re-init siempre.
-  const isModalContext = !!(context.closest && context.closest("#modalPlato"));
+  const isModalContext = !!(
+    context.closest &&
+    (context.closest("#modalPlato") || context.closest("#variedadModal"))
+  );
+
+
   if (!isModalContext) {
     if (context.__platoFormInitialized) {
       log("ℹ️ initPlatoForm: ya estaba inicializado para este context");

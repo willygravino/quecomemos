@@ -1909,6 +1909,42 @@ class PlatoVariedadCreate(PlatoCreate):
 
 
 
+# class PlatoVariedadUpdate(PlatoUpdate):
+#     def dispatch(self, request, *args, **kwargs):
+#         self.object = self.get_object()
+
+#         if self.object.plato_padre_id is None:
+#             raise PermissionDenied("Este plato no es una variedad.")
+
+#         if self.object.propietario_id != request.user.id:
+#             raise PermissionDenied()
+        
+#         self.padre = self.object.plato_padre
+
+#         return super().dispatch(request, *args, **kwargs)
+    
+#     def get_success_url(self):
+#         # cuando se guarda una VARIEDAD, el "éxito" debe volver al PADRE
+#         url = reverse("videos-update", kwargs={"pk": self.padre.id})
+
+#         rt = self.request.GET.get("return_to")
+#         if rt:
+#             url += "?" + urlencode({"return_to": rt})
+
+#         return url
+    
+#     def form_valid(self, form):
+#         # usa la lógica de guardado del update normal
+#         resp = super().form_valid(form)
+
+#         # ✅ si es AJAX (modal), respetar JSON (tu JS ya cierra y recarga)
+#         if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
+#             return resp
+
+#         # ✅ pantalla completa: volver al padre
+#         return redirect(reverse("videos-update", kwargs={"pk": self.padre.id}))
+
+
 class PlatoVariedadUpdate(PlatoUpdate):
     def dispatch(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -1918,21 +1954,55 @@ class PlatoVariedadUpdate(PlatoUpdate):
 
         if self.object.propietario_id != request.user.id:
             raise PermissionDenied()
-        
+
         self.padre = self.object.plato_padre
 
         return super().dispatch(request, *args, **kwargs)
-    
+
+    def get_success_url(self):
+        # cuando se guarda una VARIEDAD, el "éxito" debe volver al PADRE
+        url = reverse("videos-update", kwargs={"pk": self.padre.id})
+
+        rt = self.request.GET.get("return_to")
+        if rt:
+            url += "?" + urlencode({"return_to": rt})
+
+        return url
+
+    def _parent_url(self):
+        """
+        URL final al padre, preservando return_to y tipopag
+        (mismo espíritu que tu create).
+        """
+        url = reverse("videos-update", kwargs={"pk": self.padre.id})
+
+        rt = (self.request.POST.get("return_to") or self.request.GET.get("return_to") or "").strip()
+        tp = (self.request.POST.get("tipopag") or self.request.GET.get("tipopag") or "").strip()
+
+        params = {}
+        if rt:
+            params["return_to"] = rt
+        if tp:
+            params["tipopag"] = tp
+
+        if params:
+            url += "?" + urlencode(params)
+
+        return url
+
     def form_valid(self, form):
         # usa la lógica de guardado del update normal
-        resp = super().form_valid(form)
+        super().form_valid(form)
 
-        # ✅ si es AJAX (modal), respetar JSON (tu JS ya cierra y recarga)
-        if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
-            return resp
+        parent_url = self._parent_url()
+
+        # ✅ si es AJAX (modal), devolver JSON con redirect_url al PADRE
+        # (NO devolvemos el resp del super(), porque ese suele apuntar a la principal)
+        if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({"success": True, "redirect_url": parent_url})
 
         # ✅ pantalla completa: volver al padre
-        return redirect(reverse("videos-update", kwargs={"pk": self.padre.id}))
+        return redirect(parent_url)
 
 
 
