@@ -796,18 +796,20 @@
           const payload = await resp.json();
 
           if (payload.success) {
-            const modalEl2 = modalEl; // el mismo modal del principio
+            const modalEl2 = modalEl;
             const inst = bootstrap.Modal.getInstance(modalEl2);
 
-            // cerrar
+            const go = () => {
+              if (payload.redirect_url) {
+                window.location.assign(payload.redirect_url);
+              } else {
+                window.location.reload();
+              }
+            };
+
             if (inst) inst.hide();
 
-            // recargar cuando el modal terminó de cerrarse
-            modalEl2.addEventListener(
-              "hidden.bs.modal",
-              () => window.location.reload(),
-              { once: true }
-            );
+            modalEl2.addEventListener("hidden.bs.modal", go, { once: true });
             return;
           }
 

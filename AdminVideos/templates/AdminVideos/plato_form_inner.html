@@ -61,7 +61,6 @@
         <div class="card-body">
 
 
-           <!-- <form id="platoForm" method="post" enctype="multipart/form-data" novalidate> -->
             <form
               id="platoForm"
               class="plato-form"
@@ -115,9 +114,6 @@
 
                 <div class="mb-3 row">
                   <div class="col">
-                    <!-- <label for="{{ form.nombre_plato.id_for_label }}" class="form-label">
-                      Nombre del Plato:
-                    </label> -->
 
                     <label class="form-label">Nombre del Plato: <span class="text-danger">*</span></label>
 
@@ -177,15 +173,16 @@
     <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-id" value="{{ ing_form.instance.pk }}">
   {% endif %}
   <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-ingrediente"
-       value="{{ ing_form.instance.ingrediente_id|default:ing_form.initial.ingrediente|default:'' }}">
+       value="{% firstof ing_form.instance.ingrediente_id ing_form.initial.ingrediente '' %}">
 
   <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-nombre_ingrediente"
-        value="{{ ing_form.instance.ingrediente.nombre|default:ing_form.initial.nombre_ingrediente|default:'' }}">
+        value="{% firstof ing_form.instance.ingrediente.nombre ing_form.initial.nombre_ingrediente '' %}">
 
-  <select class="form-select form-select-sm ingrediente-select ..."
-          data-initial-id="{{ ing_form.instance.ingrediente_id|default:ing_form.initial.ingrediente|default:'' }}"
-          data-initial-text="{{ ing_form.instance.ingrediente.nombre|default:ing_form.initial.nombre_ingrediente|default:'' }}">
-  </select>
+  <select class="form-select form-select-sm ingrediente-select"
+        data-initial-id="{{ ... }}"
+        data-initial-text="{{ ... }}">
+</select>
+
 
 
   <!-- Cantidad -->
@@ -259,7 +256,8 @@
                 {% for tipo in items %}
                 <div class="form-check form-check-inline">
                     <input class="form-check-input" type="checkbox" name="tipos" id="id_tipos_{{ forloop.counter0 }}"
-                        value="{{ tipo }}" {% if tipo == tipopag or tipo in form.tipos.value %}checked{% endif %}>
+                        value="{{ tipo }}" {% if tipo in form.tipos.value %}checked{% endif %}>
+
                     <label class="form-check-label" for="id_tipos_{{ forloop.counter0 }}"> &nbsp; {{ tipo }} </label>
                 </div>
                 {% endfor %}
@@ -307,8 +305,8 @@
   {% if form.instance.pk %}
     {% if not form.instance.plato_padre_id %}
       <button type="button"
-              class="btn btn-sm btn-primary js-open-variedad-modal"
-              data-url="{% url 'plato_variedad_create' form.instance.pk %}">
+        class="btn btn-sm btn-primary js-open-variedad-modal"
+        data-url="{% url 'plato_variedad_create' form.instance.pk %}?return_to={{ request.GET.return_to|urlencode }}">
         + Agregar variedad
       </button>
    
@@ -353,10 +351,11 @@
             </div>
 
             <button type="button"
-                    class="btn btn-sm btn-outline-secondary js-open-variedad-modal"
-                    data-url="{% url 'plato_variedad_update' v.id %}?tipopag={{ tipopag }}">
+              class="btn btn-sm btn-outline-secondary js-open-variedad-modal"
+              data-url="{% url 'plato_variedad_update' v.id %}?tipopag={{ tipopag }}&return_to={{ request.GET.return_to|urlencode }}">
               Editar
             </button>
+
 
              <!-- POR AHORA COMENTO PERO CUANDO LO SAQUE, SACAR TODA LA LÓGICA DE JS -->
                 <!-- <a class="btn btn-sm btn-outline-secondary"
@@ -370,7 +369,7 @@
                     data-bs-toggle="modal"
                     data-bs-target="#confirmActionModal"
                     data-confirm-title="Eliminar variedad"
-                    data-confirm-body="¿Seguro que querés eliminar <strong>{{ v.nombre_plato|escape }}</strong>?"
+                    data-confirm-body="¿Seguro que querés eliminar {{ v.nombre_plato|escape }}?"
                     data-confirm-action="{% url 'plato_variedad_delete' v.id %}"
                     data-confirm-btn="Sí, eliminar">
               Eliminar
@@ -395,14 +394,16 @@
                     <button type="submit" class="btn btn-success px-5">Guardar</button>
                 </div>
 
-              <input type="hidden" name="return_to"
-       value="{{ request.GET.return_to|default:request.META.HTTP_REFERER|default:'/' }}">
+             <input type="hidden" name="return_to" value="{% firstof request.POST.return_to request.GET.return_to '/' %}">
 
   
 
 
             </form>
 
+    </div> <!-- card-body -->
+  </div>   <!-- card -->
+</div>     <!-- container -->
 
 <!-- Modal Bootstrap -->
 <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">

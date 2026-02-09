@@ -1,5 +1,5 @@
 from collections import defaultdict
-from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
+from urllib.parse import parse_qs, parse_qsl, urlencode, urlparse, urlunparse
 from django.db.models import Count
 import json
 import unicodedata
@@ -220,7 +220,8 @@ def obtener_parametros_sesion(request):
     # preseleccionados = request.session.get('preseleccionados', None)
 
     # Obtener el valor del parámetro 'tipo' desde la URL
-    tipo_parametro = request.GET.get('tipopag', 'Principal')
+    tipo_parametro = (request.GET.get("tipopag") or "Principal").strip()
+
 
     # # Obtener el usuario actual
     # usuario = request.user
@@ -1253,6 +1254,15 @@ class CrearLugar(LoginRequiredMixin, CreateView):
         return redirect(reverse("crear-lugar") + f"?tipopag={template_param}")
 
 
+# ==========================================
+# Helper: agregar params a una URL (sin romper querystring)
+# ==========================================
+def _add_qs(url, **params):
+    parts = urlparse(url)
+    q = dict(parse_qsl(parts.query))
+    q.update({k: v for k, v in params.items() if v is not None})
+    return urlunparse(parts._replace(query=urlencode(q)))
+
 
 class PlatoCreate(LoginRequiredMixin, CreateView):
     model = Plato
@@ -1321,7 +1331,7 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             if len(form.fields['tipos'].choices) == 1:
                 form.fields['tipos'].widget = forms.MultipleHiddenInput()
         else:
-            form.fields['tipos'].choices = []
+            form.fields['tipos'].choices = Plato.TIPOS_CHOICES
             form.fields['tipos'].initial = []
 
         # Imagen no requerida (por si el widget envia archivo sin nombre)
@@ -1333,7 +1343,7 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         template_param = self.request.GET.get('tipopag')
-        context['items'] = self.TIPOS_POR_TEMPLATE.get(template_param, [])
+        context['items'] = [k for (k, _) in Plato.TIPOS_CHOICES]
         context['tipopag'] = template_param
 
         if self.request.method == 'POST':
@@ -1353,15 +1363,7 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         for key in self.request.POST:
             print(key, "=>", self.request.POST.get(key))
 
-        # ==========================================
-        # Helper: agregar params a una URL (sin romper querystring)
-        # ==========================================
-        def _add_qs(url, **params):
-            parts = urlparse(url)
-            q = dict(parse_qsl(parts.query))
-            q.update({k: v for k, v in params.items() if v is not None})
-            return urlunparse(parts._replace(query=urlencode(q)))
-
+       
         # ✅ Unificamos detección AJAX (así no te quedan 2 returns distintos)
         is_ajax = self.request.headers.get("X-Requested-With") == "XMLHttpRequest"
 
@@ -1387,28 +1389,17 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             plato = form.save(commit=False)
             plato.propietario = self.request.user
 
-            # --- Concatenar ingredientes del formset ---
-            # lista_ingredientes = []
-            # for ing_form in ingrediente_formset:
-            #     if ing_form.cleaned_data and not ing_form.cleaned_data.get("DELETE", False):
-            #         nombre = ing_form.cleaned_data.get("nombre_ingrediente")
-            #         texto = (nombre or '').strip()
-            #         if texto:
-            #             lista_ingredientes.append(texto)
-
-            # plato.ingredientes = ", ".join(lista_ingredientes)
-
-            # --- Guardar variedades ---
-            # variedades = {}
-            # for i in range(1, 7):
-            #     variedad = form.cleaned_data.get(f'variedad{i}')
-            #     ingredientes_variedad_str = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
-            #     if variedad:
-            #         variedades[f"variedad{i}"] = {
-            #             "nombre": variedad,
-            #             "ingredientes": ingredientes_variedad_str,
-            #             "elegido": True
-            #         }
+            # # # --- Guardar variedades ---
+            # # variedades = {}
+            # # for i in range(1, 7):
+            # #     variedad = form.cleaned_data.get(f'variedad{i}')
+            # #     ingredientes_variedad_str = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
+            # #     if variedad:
+            # #         variedades[f"variedad{i}"] = {
+            # #             "nombre": variedad,
+            # #             "ingredientes": ingredientes_variedad_str,
+            # #             "elegido": True
+            # #         }
 
             # plato.variedades = variedades
             plato.save()
@@ -1453,119 +1444,6 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             tail = _add_qs("", msg="Guardado OK.", level="success")
         return redirect(f"{reverse('videos-create')}{tail}")
 
-    # def form_valid(self, form):
-        
-    #     context = self.get_context_data()
-    #     ingrediente_formset = context['ingrediente_formset']
-
-    #     print("🔹 Headers:", dict(self.request.headers))
-    #     print("🔹 User:", self.request.user)
-
-    #     print("== POST RECEIVED ==")
-    #     for key in self.request.POST:
-    #         print(key, "=>", self.request.POST.get(key))
-    
-    #     # --- Validación del formset ---
-    #     if not ingrediente_formset.is_valid():
-    #         # Si vino por AJAX (modal)
-    #         if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-    #             html = render_to_string('AdminVideos/plato_form_inner.html', context, request=self.request)
-    #             return JsonResponse({'success': False, 'html': html})
-    #         # Si es página normal
-    #         return self.render_to_response(self.get_context_data(form=form))
-
-
-    #     # --- Manejo de imagen ---
-    #     uploaded = self.request.FILES.get('image')
-    #     if not uploaded:
-    #         form.instance.image = None
-    #     else:
-    #         if not getattr(uploaded, 'name', None):
-    #             uploaded.name = 'upload.jpg'
-
-    #     # --- Guardado atómico ---
-    #     with transaction.atomic():
-    #         plato = form.save(commit=False)
-    #         plato.propietario = self.request.user
-
-    #         # --- Concatenar ingredientes del formset ---
-    #         lista_ingredientes = []
-    #         for ing_form in ingrediente_formset:
-    #             if ing_form.cleaned_data and not ing_form.cleaned_data.get("DELETE", False):
-    #                 nombre = ing_form.cleaned_data.get("nombre_ingrediente")
-    #                 texto = (nombre or '').strip()
-    #                 if texto:
-    #                     lista_ingredientes.append(texto)
-
-    #         plato.ingredientes = ", ".join(lista_ingredientes)
-
-    #         # --- Guardar variedades ---
-    #         variedades = {}
-    #         for i in range(1, 7):
-    #             variedad = form.cleaned_data.get(f'variedad{i}')
-    #             ingredientes_variedad_str = form.cleaned_data.get(f'ingredientes_de_variedad{i}')
-    #             if variedad:
-    #                 variedades[f"variedad{i}"] = {
-    #                     "nombre": variedad,
-    #                     "ingredientes": ingredientes_variedad_str,
-    #                     "elegido": True
-    #                 }
-
-    #         plato.variedades = variedades
-    #         plato.save()
-    #         form.save_m2m()
-
-    #         ingrediente_formset.instance = plato
-    #         ingrediente_formset.save()
-
-        
-    #     # --- Si es un request AJAX (modal) ---
-    #     if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-    #         return JsonResponse({'success': True, 'nombre': plato.nombre_plato})
-
-    #     # # --- Si hay return_to (volver a formulario anterior) ---
-    #     # return_to = self.request.POST.get("return_to") or self.request.GET.get("return_to")
-    #     # if return_to:
-    #     #     return redirect(return_to)
-
-    #     # 🔹 Si viene desde modal (AJAX), responder JSON
-    #     if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
-    #         return JsonResponse({
-    #             "success": True,
-    #             "nombre": plato.nombre_plato,
-    #             "id": plato.id,
-    #         })
-
-
-    #     # --- Comportamiento normal (página completa) ---
-    #     template_param = self.request.GET.get('tipopag')
-    #     tail = f"?tipopag={template_param}&guardado=ok" if template_param else "?guardado=ok"
-    #     return redirect(f"{reverse('videos-create')}{tail}")
-
-
-    # def form_invalid(self, form):
-    #     context = self.get_context_data(form=form)
-    #     print("❌ Errores del formulario principal:")
-    #     print(form.errors)
-
-    #     ingrediente_formset = context.get('ingrediente_formset')
-    #     if ingrediente_formset:
-    #         print("❌ Errores del formset de ingredientes:")
-    #         for i, f in enumerate(ingrediente_formset.forms):
-    #             if f.errors:
-    #                 print(f"Errores en el formulario #{i}: {f.errors}")
-
-    #     # 🔹 Si la petición viene del modal (AJAX)
-    #     if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-    #         html = render_to_string('AdminVideos/plato_form_inner.html', context, request=self.request)
-    #         return JsonResponse({'success': False, 'html': html})
-
-    #     # 🔹 Si es una página completa
-    #     return self.render_to_response(context)
-
-
-
-
 
 class PlatoUpdate(LoginRequiredMixin, UpdateView):
     model = Plato
@@ -1597,11 +1475,11 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
         form.fields["tipos"].choices = Plato.TIPOS_CHOICES
 
         # Sugerir tipopag si no hay initial
-        if not form.initial.get("tipos"):
-            tipopag = self.request.GET.get("tipopag")
-            valid_keys = {k for k, _ in Plato.TIPOS_CHOICES}
-            if tipopag in valid_keys:
-                form.fields["tipos"].initial = [tipopag]
+        # if not form.initial.get("tipos"):
+        #     tipopag = self.request.GET.get("tipopag")
+        #     valid_keys = {k for k, _ in Plato.TIPOS_CHOICES}
+        #     if tipopag in valid_keys:
+        #         form.fields["tipos"].initial = [tipopag]
 
         # Imagen no requerida
         if "image" in form.fields:
@@ -1626,14 +1504,29 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
 
         context["ingrediente_formset"] = formset
 
-        # 👉 TIPOS: enviar TODOS al template
+        # 👉 TIPOS: enviar TODOS al template (para render del menú lateral)
         context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
-        context["tipopag"] = self.request.GET.get("tipopag", "Principal")
 
-        # ❌ Variedades legacy: removido (ya no se usa)
-        # context["variedades_en_base"] = ...
-        # context["ingredientes_variedad"] = ...
-        # ✅ Variedades (hijos) en orden fijo (creación)
+        # ✅ tipopag SOLO para "menú activo" (contexto de navegación)
+        # 1) si viene en la URL del update, usarlo
+        tipopag = (self.request.GET.get("tipopag") or "").strip()
+
+        # 2) si no viene, sacarlo del return_to (?tipopag=...)
+        if not tipopag:
+            return_to = (
+                self.request.GET.get("return_to")
+                or self.request.POST.get("return_to")
+                or ""
+            ).strip()
+
+            if return_to:
+                qs = parse_qs(urlparse(return_to).query)
+                tipopag = (qs.get("tipopag") or [""])[0].strip()
+
+        # 3) si no hay origen, NO inventamos nada
+        context["tipopag"] = tipopag  # puede ser ""
+
+        # ✅ Variedades (hijos) en orden fijo
         context["variedades"] = (
             Plato.objects
             .filter(plato_padre=self.object)
@@ -1641,6 +1534,8 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
         )
 
         return context
+
+
 
     def form_valid(self, form):
         context = self.get_context_data()
@@ -1708,61 +1603,6 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
         # 2️⃣ No-AJAX: volver a donde fue llamado con toast
         return redirect(redirect_url)
  
-
-    # def form_valid(self, form):
-    #     context = self.get_context_data()
-    #     ingrediente_formset = context["ingrediente_formset"]
-
-    #     if not ingrediente_formset.is_valid():
-    #         return self.render_to_response(self.get_context_data(form=form))
-
-    #     # 🔒 Imagen: normalizar (si no viene nueva, no tocar la actual)
-    #     uploaded = self.request.FILES.get("image")
-    #     if uploaded and not getattr(uploaded, "name", None):
-    #         uploaded.name = "upload.jpg"
-
-    #     with transaction.atomic():
-    #         plato = form.save(commit=False)
-    #         plato.propietario = self.request.user
-
-    #         # reconstruir string "ingredientes" desde el formset
-    #         lista_ingredientes = []
-    #         for ing_form in ingrediente_formset:
-    #             if ing_form.cleaned_data and not ing_form.cleaned_data.get("DELETE", False):
-    #                 nombre = ing_form.cleaned_data.get("nombre_ingrediente")
-    #                 texto = (nombre or "").strip()
-    #                 if texto:
-    #                     lista_ingredientes.append(texto)
-
-    #         plato.ingredientes = ", ".join(lista_ingredientes)
-
-    #         # ❌ Variedades legacy: removido (ya no se guarda plato.variedades)
-    #         # plato.variedades = ...
-
-    #         plato.save()
-    #         form.save_m2m()
-
-    #         ingrediente_formset.instance = plato
-    #         ingrediente_formset.save()
-
-    #     # 1️⃣ Si fue llamado desde un modal (AJAX), responder con JSON
-    #     if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
-    #         return JsonResponse({
-    #             "success": True,
-    #             "nombre": plato.nombre_plato,
-    #             "id": plato.id,
-    #         })
-
-    #     # 2️⃣ Si hay return_to (volver a donde fue llamado)
-    #     return_to = self.request.POST.get("return_to") or self.request.GET.get("return_to")
-    #     if return_to:
-    #         return redirect(return_to)
-
-    #     # 3️⃣ Fallback: redirigir normalmente
-    #     template_param = self.request.GET.get("tipopag")
-    #     tail = f"?tipopag={template_param}&modificado=ok" if template_param else "?modificado=ok"
-    #     return redirect(f"{reverse('videos-create')}{tail}")
-
 
 
     def form_invalid(self, form):
@@ -1857,6 +1697,13 @@ class PlatoVariedadCreate(PlatoCreate):
         return initial
 
     def dispatch(self, request, *args, **kwargs):
+
+        print("VARIEDAD DISPATCH view=", self.__class__.__name__)
+        print("VARIEDAD DISPATCH path=", request.path)
+        print("VARIEDAD DISPATCH kwargs=", kwargs)
+        print(">>> HIT PlatoVariedadCreate", request.method, request.path, kwargs)
+
+
         self.padre = get_object_or_404(Plato, pk=kwargs["padre_id"])
 
         # regla: NO variedades de variedades
@@ -1927,7 +1774,6 @@ class PlatoVariedadCreate(PlatoCreate):
 
 
 
-
     def form_valid(self, form):
         context = self.get_context_data()
         ingrediente_formset = context["ingrediente_formset"]
@@ -1935,7 +1781,6 @@ class PlatoVariedadCreate(PlatoCreate):
         print("=== VARIEDAD CREATE POST CHECK ===")
         print("keys TOTAL_FORMS:", [k for k in self.request.POST.keys() if "TOTAL_FORMS" in k])
         print("keys INITIAL_FORMS:", [k for k in self.request.POST.keys() if "INITIAL_FORMS" in k])
-
 
         # --- Validación del formset ---
         if not ingrediente_formset.is_valid():
@@ -1959,7 +1804,7 @@ class PlatoVariedadCreate(PlatoCreate):
             # ✅ CLAVE: asociar variedad al padre
             plato.plato_padre = self.padre
 
-            # --- Concatenar ingredientes del formset (igual) ---
+            # ✅ (1) RESTAURAR: reconstruir string "ingredientes" ANTES del save
             lista_ingredientes = []
             for ing_form in ingrediente_formset:
                 if ing_form.cleaned_data and not ing_form.cleaned_data.get("DELETE", False):
@@ -1967,7 +1812,6 @@ class PlatoVariedadCreate(PlatoCreate):
                     texto = (nombre or "").strip()
                     if texto:
                         lista_ingredientes.append(texto)
-
             plato.ingredientes = ", ".join(lista_ingredientes)
 
             plato.save()
@@ -1985,11 +1829,6 @@ class PlatoVariedadCreate(PlatoCreate):
                         break
 
             if not hay_al_menos_uno:
-                # 1) borrar cualquier cosa que haya quedado (por seguridad)
-                # (en create normalmente no hay, pero no molesta)
-                # plato.ingredientes_en_plato.all().delete()  # si ya existen
-
-                # 2) clonar relaciones desde el padre
                 from .models import IngredienteEnPlato  # ajustá si tu import es distinto
 
                 IngredienteEnPlato.objects.bulk_create([
@@ -2003,7 +1842,6 @@ class PlatoVariedadCreate(PlatoCreate):
                     if rel.ingrediente_id
                 ])
 
-                # 3) y reconstruir el string "ingredientes"
                 nombres = [
                     rel.ingrediente.nombre
                     for rel in self.padre.ingredientes_en_plato.select_related("ingrediente").all()
@@ -2012,20 +1850,64 @@ class PlatoVariedadCreate(PlatoCreate):
                 plato.ingredientes = ", ".join(nombres)
                 plato.save(update_fields=["ingredientes"])
             else:
-                ingrediente_formset.instance = plato
                 ingrediente_formset.save()
 
-            ingrediente_formset.save()
+            # ✅ (2) NO volver a guardar si ya se guardó en el else
+            # (si no hay_al_menos_uno == False, usamos bulk_create arriba; si True, ya hicimos save)
+            # ingrediente_formset.save()  <- eliminado
 
-        # AJAX (modal) — lo dejamos compatible para el paso 4
-        if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
-            return JsonResponse({"success": True, "nombre": plato.nombre_plato, "id": plato.id})
-
-        # ✅ Redirect seguro: volver al padre (edit) con flag opcional
-        # 🔹 SI ES PANTALLA COMPLETA → VOLVER AL PADRE
-        return redirect(
-            reverse("videos-update", kwargs={"pk": self.padre.id})
+        # --- destino: volver al padre, preservando return_to + toast ---
+        return_to = (
+            self.request.POST.get("return_to")
+            or self.request.GET.get("return_to")
+            or ""
         )
+
+        tipopag = (self.request.GET.get("tipopag") or self.request.POST.get("tipopag") or "").strip()
+
+        parent_url = reverse("videos-update", kwargs={"pk": self.padre.id})
+
+        if return_to:
+            parent_url = _add_qs(parent_url, return_to=return_to)
+
+        if tipopag:
+            parent_url = _add_qs(parent_url, tipopag=tipopag)
+
+        parent_url = _add_qs(parent_url, msg="Variedad OK.", level="success")
+
+        # AJAX (modal)
+        if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({
+                "success": True,
+                "redirect_url": parent_url,
+                "nombre": plato.nombre_plato,
+                "id": plato.id,
+            })
+
+        # pantalla completa
+        return redirect(parent_url)
+
+
+    def form_invalid(self, form):
+        # Si es AJAX, devolvemos JSON con el HTML del form + errores
+        if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            context = self.get_context_data(form=form)
+
+            # IMPORTANTE: si el POST venía con formset también, pásalo para que se renderice
+            if "ingrediente_formset" not in context:
+                context["ingrediente_formset"] = IngredienteEnPlatoFormSet(self.request.POST)
+
+            html = render_to_string(
+                "AdminVideos/plato_form_inner.html",
+                context,
+                request=self.request
+            )
+            return JsonResponse({"success": False, "html": html}, status=400)
+
+        # No-AJAX: comportamiento normal
+        return super().form_invalid(form)
+
+
 
 class PlatoVariedadUpdate(PlatoUpdate):
     def dispatch(self, request, *args, **kwargs):
@@ -2036,6 +1918,8 @@ class PlatoVariedadUpdate(PlatoUpdate):
 
         if self.object.propietario_id != request.user.id:
             raise PermissionDenied()
+        
+        self.padre = self.object.plato_padre
 
         return super().dispatch(request, *args, **kwargs)
     
@@ -2556,7 +2440,7 @@ def FiltroDePlatos(request):
                 "quecomemos_ck": quecomemos,
                 "misplatos_ck": misplatos,
                 "amigues" : amigues,
-                "parametro": tipo_parametro,
+                "parametro_activo": tipo_parametro,
                 "mensajes": mensajes_agrupados,
                 'dia_activo': dia_activo,
                 'dia_activo_obj': dia_activo_obj, # solo para filtros |date en el template/modal
@@ -2570,6 +2454,10 @@ def FiltroDePlatos(request):
 
 
                }
+    
+    tipopag = (request.GET.get("tipopag") or "Principal").strip()
+    contexto["tipopag"] = tipopag
+
     
     contexto["guarniciones"] = Plato.objects.filter(
                 propietario=request.user

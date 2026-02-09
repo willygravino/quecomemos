@@ -70,220 +70,189 @@
     Carta de platos
   </div>
   <hr class="my-2 border border-white opacity-100">
+<!-- 
+{# ============================
+   MENÚ LATERAL POR TIPOS
+   - Usa SOLO tipopag para activo
+   - Lista de Compras activa por url_name
+   ============================ #}
+
+{# 1) PRINCIPAL #} -->
+<li class="nav-item {% if tipopag == 'Principal' %}active{% endif %}">
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
+            {% if tipopag == 'Principal' %}is-active{% endif %}"
+     href="{% url 'filtro-de-platos' %}?tipopag=Principal">
+
+    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
+          style="width: 38px; height: 38px;">
+      <i class="fa-solid fa-utensils {% if tipopag != 'Principal' %}text-white-50{% endif %}"
+         style="font-size: 1.1rem;"></i>
+    </span>
+
+    <span class="item-text mt-2 small {% if tipopag == 'Principal' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+      Platos Principales
+    </span>
+  </a>
+</li>
+
+<hr class="sidebar-divider">
 
 
-  <!-- Platos Principales -->
-  {% if parametro == "Principal" %}
-    <li class="nav-item active">
-  {% else %}
-    <li class="nav-item">
-  {% endif %}
-      <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
-                {% if parametro == 'Principal' %}is-active{% endif %}"
-         href="{% url 'filtro-de-platos' %}?tipopag=Principal">
+<!-- {# 2) ENTRADA #} -->
+<li class="nav-item {% if tipopag == 'Entrada' %}active{% endif %}">
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
+            {% if tipopag == 'Entrada' %}is-active{% endif %}"
+     href="{% url 'filtro-de-platos' %}?tipopag=Entrada{% if dia_activo %}&dia_activo={{ dia_activo }}{% endif %}">
 
-        <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
-              style="width: 38px; height: 38px;">
-          <i class="fa-solid fa-utensils {% if parametro != 'Principal' %}text-white-50{% endif %}" style="font-size: 1.1rem;"></i>
-        </span>
+    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
+          style="width: 38px; height: 38px;">
+      <i class="fa-solid fa-shrimp {% if tipopag != 'Entrada' %}text-white-50{% endif %}"
+         style="font-size: 1.1rem;"></i>
+    </span>
 
-        <span class="item-text mt-2 small {% if parametro == 'Principal' %}text-white fw-bold{% else %}text-white-50{% endif %}">
-          Platos Principales
-        </span>
-      </a>
-    </li>
-
-  <!-- Divider -->
-  <hr class="sidebar-divider">
+    <span class="item-text mt-2 small {% if tipopag == 'Entrada' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+      Entradas
+    </span>
+  </a>
+</li>
 
 
-  <!-- Entradas -->
-  {% if parametro == "Entrada" %}
-    <li class="nav-item active">
-  {% else %}
-    <li class="nav-item">
-  {% endif %}
-      <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
-                {% if parametro == 'Entrada' %}is-active{% endif %}"
-         href="{% url 'filtro-de-platos' %}?tipopag=Entrada{% if dia_activo %}&dia_activo={{ dia_activo }}{% endif %}">
+<!-- {# 3) DIP #} -->
+<li class="nav-item {% if tipopag == 'Dip' %}active{% endif %}">
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
+            {% if tipopag == 'Dip' %}is-active{% endif %}"
+     href="{% url 'filtro-de-platos' %}?tipopag=Dip">
 
-        <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
-              style="width: 38px; height: 38px;">
-          <i class="fa-solid fa-shrimp {% if parametro != 'Entrada' %}text-white-50{% endif %}" style="font-size: 1.1rem;"></i>
-        </span>
+    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
+          style="width: 38px; height: 38px;">
+      <i class="fas fa-solid fa-bowl-rice {% if tipopag != 'Dip' %}text-white-50{% endif %}"
+         style="font-size: 1.1rem;"></i>
+    </span>
 
-        <span class="item-text mt-2 small {% if parametro == 'Entrada' %}text-white fw-bold{% else %}text-white-50{% endif %}">
-          Entradas
-        </span>
-      </a>
-    </li>
+    <span class="item-text mt-2 small {% if tipopag == 'Dip' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+      Dips y Salsas
+    </span>
+  </a>
+</li>
 
 
-  <!-- Dips y Salsas -->
-  {% if parametro == "Dip" %}
-    <li class="nav-item active">
-  {% else %}
-    <li class="nav-item">
-  {% endif %}
-      <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
-                {% if parametro == 'Dip' %}is-active{% endif %}"
-         href="{% url 'filtro-de-platos' %}?tipopag=Dip">
+<!-- {# 4) GUARNICION #} -->
+<li class="nav-item {% if tipopag == 'Guarnicion' %}active{% endif %}">
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
+            {% if tipopag == 'Guarnicion' %}is-active{% endif %}"
+     href="{% url 'filtro-de-platos' %}?tipopag=Guarnicion">
 
-        <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
-              style="width: 38px; height: 38px;">
-          <i class="fas fa-solid fa-bowl-rice {% if parametro != 'Dip' %}text-white-50{% endif %}" style="font-size: 1.1rem;"></i>
-        </span>
+    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
+          style="width: 38px; height: 38px;">
+      <i class="fa-solid fa-plate-wheat {% if tipopag != 'Guarnicion' %}text-white-50{% endif %}"
+         style="font-size: 1.1rem;"></i>
+    </span>
 
-        <span class="item-text mt-2 small {% if parametro == 'Dip' %}text-white fw-bold{% else %}text-white-50{% endif %}">
-          Dips y Salsas
-        </span>
-      </a>
-    </li>
+    <span class="item-text mt-2 small {% if tipopag == 'Guarnicion' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+      Guarniciones
+    </span>
+  </a>
+</li>
 
 
-  <!-- Guarniciones -->
-  {% if parametro == "Guarnicion" %}
-    <li class="nav-item active">
-  {% else %}
-    <li class="nav-item">
-  {% endif %}
-      <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
-                {% if parametro == 'Guarnicion' %}is-active{% endif %}"
-         href="{% url 'filtro-de-platos' %}?tipopag=Guarnicion">
+<!-- {# 5) POSTRE #} -->
+<li class="nav-item {% if tipopag == 'Postre' %}active{% endif %}">
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
+            {% if tipopag == 'Postre' %}is-active{% endif %}"
+     href="{% url 'filtro-de-platos' %}?tipopag=Postre">
 
-        <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
-              style="width: 38px; height: 38px;">
-          <i class="fa-solid fa-plate-wheat {% if parametro != 'Guarnicion' %}text-white-50{% endif %}" style="font-size: 1.1rem;"></i>
-        </span>
+    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
+          style="width: 38px; height: 38px;">
+      <i class="fa-solid fa-ice-cream {% if tipopag != 'Postre' %}text-white-50{% endif %}"
+         style="font-size: 1.1rem;"></i>
+    </span>
 
-        <span class="item-text mt-2 small {% if parametro == 'Guarnicion' %}text-white fw-bold{% else %}text-white-50{% endif %}">
-          Guarniciones
-        </span>
-      </a>
-    </li>
+    <span class="item-text mt-2 small {% if tipopag == 'Postre' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+      <span class="d-block">Postres</span>
+      <span class="d-block">Reposterías</span>
+    </span>
+  </a>
+</li>
 
 
-  <!-- Postres / Reposterías -->
-  {% if parametro == "Postre" %}
-    <li class="nav-item active">
-  {% else %}
-    <li class="nav-item">
-  {% endif %}
-      <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
-                {% if parametro == 'Postre' %}is-active{% endif %}"
-         href="{% url 'filtro-de-platos' %}?tipopag=Postre">
+<!-- {# 6) TRAGO #} -->
+<li class="nav-item {% if tipopag == 'Trago' %}active{% endif %}">
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
+            {% if tipopag == 'Trago' %}is-active{% endif %}"
+     href="{% url 'filtro-de-platos' %}?tipopag=Trago">
 
-        <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
-              style="width: 38px; height: 38px;">
-          <i class="fa-solid fa-ice-cream {% if parametro != 'Postre' %}text-white-50{% endif %}" style="font-size: 1.1rem;"></i>
-        </span>
+    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
+          style="width: 38px; height: 38px;">
+      <i class="fa-solid fa-martini-glass-citrus {% if tipopag != 'Trago' %}text-white-50{% endif %}"
+         style="font-size: 1.1rem;"></i>
+    </span>
 
-        <span class="item-text mt-2 small {% if parametro == 'Postre' %}text-white fw-bold{% else %}text-white-50{% endif %}">
-          <span class="d-block">Postres</span>
-          <span class="d-block">Reposterías</span>
-        </span>
-      </a>
-    </li>
+    <span class="item-text mt-2 small {% if tipopag == 'Trago' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+      <span class="d-block">Bebidas</span>
+      <span class="d-block">Tragos</span>
+    </span>
+  </a>
+</li>
 
-
-  <!-- Bebidas / Tragos -->
-  {% if parametro == "Trago" %}
-    <li class="nav-item active">
-  {% else %}
-    <li class="nav-item">
-  {% endif %}
-      <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
-                {% if parametro == 'Trago' %}is-active{% endif %}"
-         href="{% url 'filtro-de-platos' %}?tipopag=Trago">
-
-        <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
-              style="width: 38px; height: 38px;">
-          <i class="fa-solid fa-martini-glass-citrus {% if parametro != 'Trago' %}text-white-50{% endif %}" style="font-size: 1.1rem;"></i>
-        </span>
-
-        <span class="item-text mt-2 small {% if parametro == 'Trago' %}text-white fw-bold{% else %}text-white-50{% endif %}">
-          <span class="d-block">Bebidas</span>
-          <span class="d-block">Tragos</span>
-        </span>
-      </a>
-    </li>
+<hr class="sidebar-divider d-none d-md-block">
 
 
-  <!-- Divider -->
-  <hr class="sidebar-divider d-none d-md-block">
+<!-- {# 7) DELIVERY #} -->
+<li class="nav-item {% if tipopag == 'Delivery' %}active{% endif %}">
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
+            {% if tipopag == 'Delivery' %}is-active{% endif %}"
+     href="{% url 'filtro-de-platos' %}?tipopag=Delivery">
+
+    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
+          style="width: 38px; height: 38px;">
+      <i class="fa-solid fa-mobile-screen-button {% if tipopag != 'Delivery' %}text-white-50{% endif %}"
+         style="font-size: 1.1rem;"></i>
+    </span>
+
+    <span class="item-text mt-2 small {% if tipopag == 'Delivery' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+      Delivery
+    </span>
+  </a>
+</li>
 
 
-  <!-- Delivery -->
-  {% if parametro == "Delivery" %}
-    <li class="nav-item active">
-  {% else %}
-    <li class="nav-item">
-  {% endif %}
-      <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
-                {% if parametro == 'Delivery' %}is-active{% endif %}"
-         href="{% url 'filtro-de-platos' %}?tipopag=Delivery">
+<!-- {# 8) COMER AFUERA #} -->
+<li class="nav-item {% if tipopag == 'Comerafuera' %}active{% endif %}">
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
+            {% if tipopag == 'Comerafuera' %}is-active{% endif %}"
+     href="{% url 'filtro-de-platos' %}?tipopag=Comerafuera">
 
-        <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
-              style="width: 38px; height: 38px;">
-          <i class="fa-solid fa-mobile-screen-button {% if parametro != 'Delivery' %}text-white-50{% endif %}" style="font-size: 1.1rem;"></i>
-        </span>
+    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
+          style="width: 38px; height: 38px;">
+      <i class="fa-solid fa-person-walking-dashed-line-arrow-right {% if tipopag != 'Comerafuera' %}text-white-50{% endif %}"
+         style="font-size: 1.1rem;"></i>
+    </span>
 
-        <span class="item-text mt-2 small {% if parametro == 'Delivery' %}text-white fw-bold{% else %}text-white-50{% endif %}">
-          Delivery
-        </span>
-      </a>
-    </li>
+    <span class="item-text mt-2 small {% if tipopag == 'Comerafuera' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+      Comer afuera
+    </span>
+  </a>
+</li>
 
+<hr class="sidebar-divider d-none d-md-block">
 
-  <!-- Comer afuera -->
-  {% if parametro == "Comerafuera" %}
-    <li class="nav-item active">
-  {% else %}
-    <li class="nav-item">
-  {% endif %}
-      <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
-                {% if parametro == 'Comerafuera' %}is-active{% endif %}"
-         href="{% url 'filtro-de-platos' %}?tipopag=Comerafuera">
+{# 9) LISTA DE COMPRAS (NO es tipopag) #}
+<li class="nav-item {% if request.resolver_match.url_name == 'menu-elegido' %}active{% endif %}">
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
+            {% if request.resolver_match.url_name == 'menu-elegido' %}is-active{% endif %}"
+     href="{% url 'menu-elegido' %}">
 
-        <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
-              style="width: 38px; height: 38px;">
-          <i class="fa-solid fa-person-walking-dashed-line-arrow-right {% if parametro != 'Comerafuera' %}text-white-50{% endif %}" style="font-size: 1.1rem;"></i>
-        </span>
+    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
+          style="width: 38px; height: 38px;">
+      <i class="fa-solid fa-list-check {% if request.resolver_match.url_name != 'menu-elegido' %}text-white-50{% endif %}"
+         style="font-size: 1.1rem;"></i>
+    </span>
 
-        <span class="item-text mt-2 small {% if parametro == 'Comerafuera' %}text-white fw-bold{% else %}text-white-50{% endif %}">
-          Comer afuera
-        </span>
-      </a>
-    </li>
-
-
-  <!-- Divider -->
-  <hr class="sidebar-divider d-none d-md-block">
-
-
-  <!-- Lista de Compras -->
- 
-
-{% if request.resolver_match.url_name == "menu-elegido" %}
-    <li class="nav-item active">
-  {% else %}
-    <li class="nav-item">
-  {% endif %}
-      <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
-                {% if parametro == 'lista-compras' %}is-active{% endif %}"
-         href="{% url 'menu-elegido' %}?tipopag=lista-compras">
-
-        <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
-              style="width: 38px; height: 38px;">
-          <i class="fa-solid fa-list-check {% if parametro != 'lista-compras' %}text-white-50{% endif %}" style="font-size: 1.1rem;"></i>
-        </span>
-
-        <span class="item-text mt-2 small {% if parametro == 'lista-compras' %}text-white fw-bold{% else %}text-white-50{% endif %}">
-          Lista de Compras
-        </span>
-      </a>
-    </li>
-
+    <span class="item-text mt-2 small {% if request.resolver_match.url_name == 'menu-elegido' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+      Lista de Compras
+    </span>
+  </a>
+</li>
 
   <!-- Divider -->
   <hr class="sidebar-divider d-none d-md-block">
@@ -1145,7 +1114,7 @@ document.addEventListener("click", function (e) {
 <!-- Select2 (después de jQuery y Bootstrap) -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-<script src="{% static 'AdminVideos/js/form_init.js' %}?v=1027"></script>
+<script src="{% static 'AdminVideos/js/form_init.js' %}?v=1028"></script>
 <script src="{% static 'AdminVideos/js/pantry_bind.js' %}?v=3"></script>
 
 <script>
