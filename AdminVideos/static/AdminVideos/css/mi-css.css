@@ -436,32 +436,40 @@ section > .d-flex {
 
 /* INACTIVO: hover -> texto blanco + círculo claro + icono azul */
 .sidebar .menu-item:not(.is-active):hover .item-text{
+    /* hover del texto "postre" cuando no está seleccionado */
+
   color: hsl(219, 70%, 94%) !important;
   text-shadow: 0 0 6px rgba(255,255,255,.25);
 }
 .sidebar .menu-item:not(.is-active):hover .icon-wrap{
-  background: hsl(218, 85%, 76%); /* light */
+  /* hover del fondo del icono cuando no está activo */
+  background: #5173ef; /* light */
 }
 .sidebar .menu-item:not(.is-active):hover .icon-wrap i{
-  color: #537ebf !important; /* primary */
+  /* hover del icono  cuando no está activo */
+  color: #5173ef !important; /* primary */
 }
 
 /* ACTIVO (normal): círculo claro + icono azul */
 .sidebar .menu-item.is-active .icon-wrap{
-  background: #f8f9fa;
+  /* fondo del icono cuando está seleccionado */
+  background: #f8f9faea;
 }
 .sidebar .menu-item.is-active .icon-wrap i{
+  /* color del icono cuando está seleccionado */
   color: #537ebf !important;
 }
 
 /* ACTIVO: hover -> invertir (círculo azul + icono blanco) y texto resalta */
 .sidebar .menu-item.is-active:hover .icon-wrap{
-  background: hsl(218, 87%, 91%); /* primary */
+  /* hover del fondo del ícono cuando está activo o no activo pero afecta al icono*/
+  background: #f2f4fc; /* primary */
 }
 .sidebar .menu-item.is-active:hover .icon-wrap i{
-  color: #537ebf !important;
+  color: #b153bf !important;
 }
 .sidebar .menu-item.is-active:hover .item-text{
+  /* hover del texto "postre" cuando está activo */
   color: rgba(255,255,255,1) !important;
   text-shadow: 0 0 6px rgba(255,255,255,.35);
 }
