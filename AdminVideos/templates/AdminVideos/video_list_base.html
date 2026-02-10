@@ -50,11 +50,7 @@
 <!-- ESTAS SON LAS TARJETAS DE COMPARTIDOS -->
 <section class="w-100 py-2">
   <div class="container">
-      {% if not platos and tipopag != "Delivery" and tipopag != "Comerafuera" %}
-      <div class="alert alert-info text-center" role="alert">
-        <i class="bi bi-geo-alt-fill"></i> No hay platos ingresados para mostrar.
-      </div>
-      {% else %}
+      
           {% if platos_compartidos %}
 
 
@@ -88,7 +84,7 @@
 
 
           {% endif %}
-      {% endif %}
+      
   </div>
 </section>
 
@@ -99,6 +95,8 @@
      - Padre en card principal
      - Variedades en mini-grilla debajo
 =========================== -->
+
+{% if platos %}
 <section class="w-100 bg-light rounded shadow-sm p-3 mb-3">
 
   <div id="platosCarousel" class="carousel slide comidas-carousel" data-bs-ride="false" data-bs-interval="false">
@@ -357,7 +355,12 @@
     </button>
 
   </div>
-</section>
+</section>              
+{% elif tipopag != "Delivery" and tipopag != "Comerafuera"%}
+  <div class="alert alert-info text-center" role="alert">
+        <i class="bi bi-geo-alt-fill"></i> No hay {{tipopag}} ingresados para mostrar.
+  </div>
+{% endif %}
 
  
 <!-- ESTAS SON LAS TARJETAS DE PLATOS, SI ES QUE ESTAMOS EN PLATOS -->

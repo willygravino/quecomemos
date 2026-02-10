@@ -1129,12 +1129,12 @@ document.addEventListener("click", function (e) {
 </script>
 
 
-
-{# ==========================================
+<!-- 
+==========================================
    TOAST GLOBAL POR QUERYSTRING
    Si la URL trae ?msg=... (y opcionalmente &level=success|danger|warning|info),
    muestra un toast y luego limpia esos parámetros sin recargar.
-   ========================================== #}
+   ==========================================  -->
 {% if request.GET.msg %}
   {% include "AdminVideos/partials/_toast_msg.html" %}
 {% endif %}
