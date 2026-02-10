@@ -638,6 +638,50 @@
   </div>
   {% endfor %}
 
+  
+<!-- ESTE ES EL BOTÓN DE AGREGAR -->
+<section class="w-100 text-white mt-1">
+  <div class="container">
+    <div class="d-flex justify-content-center flex-wrap gap-0">
+
+      <!-- COMENTO POR AHORA PERO CUANDO LO SAQUE, SACAR TODA LA LOGICA QUE CARGA FORMULARIO EN MODAL -->
+       <!-- <button class="btn btn-primary" id="btnNuevoPrincipal">
+        Nuevo Plato Principal
+      </button>  -->
+
+      <!-- % with tipopag=request.GET.tipopag %} -->
+      {% if tipopag == "Delivery" or tipopag == "Comerafuera" %}
+        <a class="btn btn-outline-primary w-100 rounded text-center fw-semibold py-0"
+
+          href="{% url 'crear-lugar' %}?tipopag={{ tipopag|default:'Dash' }}">
+          {% if tipopag and tipopag != "Dash" %}
+            + AGREGAR {{ tipopag|upper}}
+          {% else %}
+            + AGREGAR PLATO PRINCIPAL
+          {% endif %}
+        </a>
+
+      
+      {% else %}
+        <a class="btn btn-outline-primary w-100 rounded text-center fw-semibold py-2"
+          href="{% url 'videos-create' %}?tipopag={{ tipopag|default:''|urlencode }}&return_to={{ request.get_full_path|urlencode }}">
+          
+
+      {% if tipopag and tipopag != "Dash" %}
+            + AGREGAR RECETA DE {{ tipopag|upper }}
+
+          {% else %}
+            + AGREGAR RECETA DE PLATO PRINCIPAL
+          {% endif %}
+        </a>
+
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+
+
   <div class="border border-primary rounded p-2 position-relative m-2">
    
     <span class="position-absolute top-0 start-50 translate-middle bg-white px-2 py-0
@@ -645,10 +689,10 @@
           style="transform: translate(-50%, -50%); max-width: 92%; line-height: 1.15;">
       <span class="menu-programado-text text-primary">
         Sugerencias de
-        {% if parametro == "Principal" %}
+        {% if tipopag == "Principal" %}
           Plato principal
         {% else %}
-          {{ parametro }}
+          {{ tipopag }}
         {% endif %}
       </span>
     </span>

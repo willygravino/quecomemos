@@ -4,6 +4,8 @@
 
 {% block lista_platos %}
 
+{% comment %}
+
 <!-- ESTE ES EL BOTÓN DE AGREGAR -->
 <section class="w-100 text-white">
   <div class="container">
@@ -14,7 +16,7 @@
         Nuevo Plato Principal
       </button>  -->
 
-      {% with tipopag=request.GET.tipopag %}
+      <!-- % with tipopag=request.GET.tipopag %} -->
       {% if tipopag == "Delivery" or tipopag == "Comerafuera" %}
         <a class="btn btn-outline-primary w-100 rounded text-center fw-semibold py-2"
 
@@ -44,6 +46,8 @@
     </div>
   </div>
 </section>
+
+{% endcomment %}
 
 <!-- <H5>{{platos_compartidos}}  </H5> -->
 
@@ -622,7 +626,12 @@
   {% endif %}
 </section>
 
+{% comment %}
+
 {% endwith %}
+
+{% endcomment %}
+
 
   <!-- Modal para compartir plato -->
   <div class="modal fade" id="compartirModal" tabindex="-1" aria-labelledby="compartirModalLabel" aria-hidden="true">
