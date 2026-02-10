@@ -98,7 +98,7 @@ section > .d-flex {
   height: 3.4rem;
   border-radius: 50%;
 
-  background: rgba(25, 135, 84, 0.9); /* verde bootstrap */
+  background: rgba(20, 205, 119, 0.9); /* verde bootstrap */
   color: #fff;
 
   display: flex;
@@ -124,6 +124,7 @@ section > .d-flex {
   font-size: 0.6rem;
   line-height: 1;
   background: rgba(0,0,0,0.4);
+  /* color numero de platos */
   color: #fff;
   backdrop-filter: blur(2px);
   pointer-events: none;
@@ -435,14 +436,14 @@ section > .d-flex {
 
 /* INACTIVO: hover -> texto blanco + círculo claro + icono azul */
 .sidebar .menu-item:not(.is-active):hover .item-text{
-  color: rgba(255,255,255,1) !important;
+  color: hsl(219, 70%, 94%) !important;
   text-shadow: 0 0 6px rgba(255,255,255,.25);
 }
 .sidebar .menu-item:not(.is-active):hover .icon-wrap{
-  background: #f8f9fa; /* light */
+  background: hsl(218, 85%, 76%); /* light */
 }
 .sidebar .menu-item:not(.is-active):hover .icon-wrap i{
-  color: #0d6efd !important; /* primary */
+  color: #537ebf !important; /* primary */
 }
 
 /* ACTIVO (normal): círculo claro + icono azul */
@@ -450,15 +451,15 @@ section > .d-flex {
   background: #f8f9fa;
 }
 .sidebar .menu-item.is-active .icon-wrap i{
-  color: #0d6efd !important;
+  color: #537ebf !important;
 }
 
 /* ACTIVO: hover -> invertir (círculo azul + icono blanco) y texto resalta */
 .sidebar .menu-item.is-active:hover .icon-wrap{
-  background: #0d6efd; /* primary */
+  background: hsl(218, 87%, 91%); /* primary */
 }
 .sidebar .menu-item.is-active:hover .icon-wrap i{
-  color: #fff !important;
+  color: #537ebf !important;
 }
 .sidebar .menu-item.is-active:hover .item-text{
   color: rgba(255,255,255,1) !important;
