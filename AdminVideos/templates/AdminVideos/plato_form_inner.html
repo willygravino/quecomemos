@@ -73,29 +73,24 @@
 
                 {% csrf_token %}
 
-                {% if form.instance.pk %}
-                  <div class="plato-form-actions">
+                <div class="plato-form-actions">
 
-                    <!-- CLONAR PLATO -->
+                  {% if form.instance.pk %}
+                    <!-- CLONAR -->
                     <a href="{% url 'agregar-a-mi-lista' form.instance.pk %}?duplicar=true"
-                      class="plato-action-btn text-dark"
-                      data-bs-toggle="tooltip"
-                      data-bs-placement="top"
-                      title="Clonar plato">
+                      class="plato-action-btn text-dark" title="Clonar plato">
                       <i class="fa-regular fa-copy"></i>
                     </a>
 
-                    <!-- VER LISTA DE INGREDIENTES -->
+                    <!-- INGREDIENTES -->
                     <a href="#"
                       class="plato-action-btn text-primary js-plato-ingredientes"
                       data-url="{% url 'plato_ingredientes' form.instance.pk %}"
-                      data-bs-toggle="tooltip"
-                      data-bs-placement="top"
                       title="Ver lista de ingredientes">
                       <i class="fa-solid fa-list-check"></i>
                     </a>
 
-                    <!-- PROGRAMAR PLATO (abre modal + tooltip) -->
+                    <!-- PROGRAMAR -->
                     <a href="#"
                       class="plato-action-btn bg-success text-white"
                       data-bs-toggle="modal"
@@ -104,17 +99,17 @@
                       title="Programar este plato">
                       <i class="fa-solid fa-plus"></i>
                     </a>
+                  {% endif %}
 
-                    <!-- CERRAR -->
-                    <a href="{{ request.GET.return_to|default:'/' }}"
-                      class="plato-action-btn text-muted"
-                      title="Cerrar">
-                      <i class="fa-solid fa-xmark"></i>
-                    </a>
+                  <!-- CERRAR -->
+                 <a href="{{ request.GET.return_to|default:'/' }}"
+                    class="plato-action-btn text-muted js-close-plato-form"
+                    title="Cerrar">
+                    <i class="fa-solid fa-xmark"></i>
+                  </a>
 
 
-                  </div>
-                {% endif %}
+                </div>
 
 
                 <!-- Nombre del Plato -->

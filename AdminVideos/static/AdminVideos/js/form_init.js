@@ -752,6 +752,9 @@
       const data = await res.json();
 
       modalBody.innerHTML = data.html;
+      // quitar la X del form cuando está en modal de variedad
+      modalBody.querySelector(".js-close-plato-form")?.remove();
+
 
       // Re-init de todo lo del form (select2 + formset + etc.) en el HTML nuevo
       // OJO: tu initPlatoForm detecta modal por #modalPlato, así que acá va a
