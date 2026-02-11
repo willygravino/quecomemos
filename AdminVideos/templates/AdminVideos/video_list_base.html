@@ -367,207 +367,219 @@
 {% endif %}
 
  
-<!-- ESTAS SON LAS TARJETAS DE PLATOS, SI ES QUE ESTAMOS EN PLATOS -->
-
+<!-- LISTA TIPO GMAIL (PLATOS) -->
 <section class="w-100 text-white bg-light rounded shadow-sm">
 
-  <div class="d-flex flex-wrap align-items-start justify-content-center">
+  <!-- Header opcional (tipo Gmail: checkbox + títulos) -->
+  <div class="px-2 py-2 border-bottom d-flex align-items-center gap-2 text-dark">
+    <input class="form-check-input" type="checkbox" id="chk-platos-all" aria-label="Seleccionar todos">
+    <div class="flex-grow-1 small text-muted">Platos</div>
+    <div class="small text-muted d-none d-md-block">Acciones</div>
+  </div>
+
+  <div class="list-group list-group-flush">
+
     {% for plato in platos %}
 
-      <div class="card position-relative border-0 bg-transparent plato-card" style="width: 6rem;">
 
-        <!-- THUMB -->
-        <div class="plato-thumb">
+    <div class="list-group-item text-dark px-2 py-2 border-bottom border-secondary-subtle list-group-item-action plato-row"
+      data-row
+      data-plato-id="{{ plato.id }}">
 
-         
+   
+        <div class="d-flex align-items-center gap-2">
 
-          <a href="#"
-            data-bs-toggle="modal"
-            data-bs-target="#asignarPlatoModal"
-            onclick="setPlatoInfo('{{ plato.id }}', 'plato', '{{ plato.nombre_plato }}')"
-            class="d-block text-decoration-none">
-                        
+          <!-- Checkbox -->
+          <div class="form-check m-0">
+            <input class="form-check-input js-plato-select"
+              type="checkbox"
+              name="platos_selected"
+              value="{{ plato.id }}">
 
-            <img src="{{ plato.image_url }}"
-                 class="img-fluid
-                 {% if user.id == plato.propietario.id and not plato.proviene_de %}
-                   sombra-verde
-                 {% elif user.id == plato.propietario.id and plato.proviene_de %}
-                   sombra-naranja
-                 {% else %}
-                   sombra-violeta
-                 {% endif %}"
-                 alt="Imagen del Plato">
+          </div>
 
-            <!-- + central -->
-            <!-- <div class="plato-plus text-success">
-              <i class="fa-solid fa-plus-circle"></i>
-            </div> -->
 
-            <!-- + central -->
-            <div class="plato-plus">
-              <span>P</span>
+          <!-- Thumb chico (abre asignarPlatoModal como antes) -->
+          <div class="flex-shrink-0">
+            <a href="#"
+               data-bs-toggle="modal"
+               data-bs-target="#asignarPlatoModal"
+               onclick="setPlatoInfo('{{ plato.id }}', 'plato', '{{ plato.nombre_plato }}')"
+               class="d-inline-block text-decoration-none">
+
+              <img src="{{ plato.image_url }}"
+                   style="width: 38px; height: 38px; object-fit: cover; border-radius: 8px;"
+                   class="
+                   {% if user.id == plato.propietario.id and not plato.proviene_de %}
+                     sombra-verde
+                   {% elif user.id == plato.propietario.id and plato.proviene_de %}
+                     sombra-naranja
+                   {% else %}
+                     sombra-violeta
+                   {% endif %}"
+                   alt="Imagen del Plato">
+            </a>
+          </div>
+
+          <!-- Centro: nombre + badge -->
+          <div class="flex-grow-1 min-w-0">
+
+            <div class="d-flex align-items-center gap-2 min-w-0">
+
+              <!-- Nombre (trunca como lista de mails) -->
+              <div class="fw-semibold text-truncate">
+                {% if plato.variedades_count > 0 %}
+                  {{ plato.nombre_para_front }}
+                {% else %}
+                  {{ plato.nombre_plato }}
+                {% endif %}
+              </div>
+
+              <!-- Badge variedades -->
+              {% if plato.variedades_count > 0 %}
+                <span class="badge rounded-pill bg-secondary-subtle text-dark flex-shrink-0">
+                  📁 {{ plato.variedades_count|add:"1" }}
+                </span>
+              {% endif %}
+
             </div>
 
-          </a>
+            <!-- Sub-línea opcional (si querés meter meta info) -->
+            {# <div class="small text-muted text-truncate">Algún dato extra...</div> #}
 
-          <!-- Badge variedades (DENTRO del thumb) -->
-          {% if plato.variedades_count > 0 %}
-            <span class="plato-badge">
-              📁 {{ plato.variedades_count|add:"1" }}
-            </span>
-          {% endif %}
+          </div>
 
-        </div>
-        <!-- /THUMB -->
+          <!-- Acciones (desktop) -->
+          <div class="d-none d-md-flex align-items-center gap-1 flex-shrink-0">
 
-        <!-- TÍTULO -->
-        <div class="plato-title">
-
-          <div class="plato-header">
-
-            <span>
-              {% if plato.variedades_count > 0 %}
-                {{ plato.nombre_para_front }}
-              {% else %}
-                {{ plato.nombre_plato }}
-              {% endif %}
-            </span>
-
-            <!-- Acciones hover desktop -->
-            <div class="plato-actions">
-
-              {% if amigues %}
+            {% if amigues %}
               <a href="#"
                  data-bs-toggle="modal"
                  data-bs-target="#compartirModal"
                  onclick="setPlatoInfo('{{ plato.id }}', 'plato')"
-                 class="plato-action-btn text-primary"
-                 title="Compartir">
+                 class="btn btn-sm btn-outline-primary"
+                 title="Compartir"
+                 aria-label="Compartir">
                 <i class="fa-solid fa-share-nodes"></i>
               </a>
-              {% endif %}
+            {% endif %}
 
-              <a href="#"
-                class="plato-action-btn text-primary js-plato-ingredientes"
-                data-url="{% url 'plato_ingredientes' plato.id %}"
-                title="Compartir lista de ingredientes">
-                <i class="fa-solid fa-list-check"></i>
+            <a href="#"
+               class="btn btn-sm btn-outline-primary js-plato-ingredientes"
+               data-url="{% url 'plato_ingredientes' plato.id %}"
+               title="Compartir lista de ingredientes"
+               aria-label="Ingredientes">
+              <i class="fa-solid fa-list-check"></i>
+            </a>
+
+            {% if plato.propietario == request.user %}
+              <a href="{% url 'videos-update' plato.id %}?return_to={{ request.get_full_path|urlencode }}{% if tipopag %}&tipopag={{ tipopag|urlencode }}{% endif %}"
+                 class="btn btn-sm btn-outline-dark"
+                 title="Editar"
+                 aria-label="Editar">
+                <i class="fa-regular fa-pen-to-square"></i>
               </a>
-
-
-              {% if plato.propietario == request.user %}
-                <!-- Botón para editar (sigue navegando normal) -->
-                <a href="{% url 'videos-update' plato.id %}?return_to={{ request.get_full_path|urlencode }}
-"
-                  class="plato-action-btn text-dark"
-                  title="Editar">
-                  <i class="fa-regular fa-pen-to-square"></i>
-                </a>
-              {% else %}
-                <!-- Botón para VER DETALLE EN MODAL -->
-                <a href="#"
-                  class="plato-action-btn text-secondary js-ver-detalle-plato"
-                  data-detail-url="{% url 'platos-detail' plato.id %}"
-                  title="Ver detalle">
-                  <i class="fa-regular fa-eye"></i>
-                </a>
-
-              {% endif %}
-
-<!-- es el tachito que se abre por hover al pasar por el nombre del plato -->
+            {% else %}
               <a href="#"
-                data-bs-toggle="modal"
-                data-bs-target="#confirmActionModal"
-                data-confirm-title="Eliminar plato"
-                data-confirm-body="¿Seguro que querés borrar <strong>{{ plato.nombre_plato|escape }}</strong>?"
-                data-confirm-hint="También se borrarán las programaciones de este plato.<br> Esta acción no se puede deshacer."
-                data-confirm-action="{% url 'eliminar-plato' plato.id %}"
-                data-confirm-btn="Sí, borrar"
-                class="plato-action-btn text-secondary"
-                title="Eliminar"
-                aria-label="Eliminar plato">
-                <i class="fa-solid fa-trash-can"></i>
+                 class="btn btn-sm btn-outline-secondary js-ver-detalle-plato"
+                 data-detail-url="{% url 'platos-detail' plato.id %}"
+                 title="Ver detalle"
+                 aria-label="Ver detalle">
+                <i class="fa-regular fa-eye"></i>
               </a>
+            {% endif %}
 
+            <a href="#"
+               data-bs-toggle="modal"
+               data-bs-target="#confirmActionModal"
+               data-confirm-title="Eliminar plato"
+               data-confirm-body="¿Seguro que querés borrar <strong>{{ plato.nombre_plato|escape }}</strong>?"
+               data-confirm-hint="También se borrarán las programaciones de este plato.<br> Esta acción no se puede deshacer."
+               data-confirm-action="{% url 'eliminar-plato' plato.id %}"
+               data-confirm-btn="Sí, borrar"
+               class="btn btn-sm btn-outline-secondary"
+               title="Eliminar"
+               aria-label="Eliminar plato">
+              <i class="fa-solid fa-trash-can"></i>
+            </a>
 
-            </div>
+          </div>
 
           <!-- Menú ⋯ (mobile / fallback) -->
-          <div class="dropdown plato-menu">
+          <div class="dropdown d-md-none flex-shrink-0">
             <button class="btn btn-sm btn-light py-0 px-3"
                     type="button"
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
-                    title="Opciones">
+                    title="Opciones"
+                    aria-label="Opciones">
               <i class="fa-solid fa-ellipsis-vertical"></i>
             </button>
 
             <ul class="dropdown-menu dropdown-menu-end">
+
               <li>
-                <a class="dropdown-item" href="{% url 'plato_ingredientes' plato.id %}">
+                <a class="dropdown-item"
+                   href="#"
+                   class="js-plato-ingredientes"
+                   data-url="{% url 'plato_ingredientes' plato.id %}">
                   <i class="fa-solid fa-list-check me-2"></i> Ingredientes
                 </a>
               </li>
 
-              <li>
+              {% if plato.propietario == request.user %}
+                <li>
                   <a class="dropdown-item"
-                    href="{% url 'videos-update' plato.id %}?return_to={{ request.get_full_path|urlencode }}{% if tipopag %}&tipopag={{ tipopag|urlencode }}{% endif %}">
+                     href="{% url 'videos-update' plato.id %}?return_to={{ request.get_full_path|urlencode }}{% if tipopag %}&tipopag={{ tipopag|urlencode }}{% endif %}">
                     <i class="fa-solid fa-pen-to-square me-2"></i> Editar
                   </a>
-               </li>
-
-              <a href="#"
-                class="dropdown-item js-ver-detalle-plato"
-                data-detail-url="{% url 'platos-detail' plato.id %}">
-                <i class="fa-solid fa-eye me-2"></i> Ver detalle
-              </a>
-
-
+                </li>
+              {% else %}
+                <li>
+                  <a class="dropdown-item js-ver-detalle-plato"
+                     href="#"
+                     data-detail-url="{% url 'platos-detail' plato.id %}">
+                    <i class="fa-solid fa-eye me-2"></i> Ver detalle
+                  </a>
+                </li>
+              {% endif %}
 
               {% if amigues %}
-              <li>
-                <a class="dropdown-item"
-                   href="#"
-                   data-bs-toggle="modal"
-                   data-bs-target="#compartirModal"
-                   onclick="setPlatoInfo('{{ plato.id }}', 'plato')">
-                  <i class="fa-solid fa-share-nodes me-2"></i> Compartir
-                </a>
-              </li>
+                <li>
+                  <a class="dropdown-item"
+                     href="#"
+                     data-bs-toggle="modal"
+                     data-bs-target="#compartirModal"
+                     onclick="setPlatoInfo('{{ plato.id }}', 'plato')">
+                    <i class="fa-solid fa-share-nodes me-2"></i> Compartir
+                  </a>
+                </li>
               {% endif %}
 
               <li><hr class="dropdown-divider"></li>
 
               <li>
-                
-                
                 <a class="dropdown-item text-danger"
-                  href="#"
-                  data-bs-toggle="modal"
-                  data-bs-target="#confirmActionModal"
-                  data-confirm-title="Eliminar plato"
-                  data-confirm-body="¿Seguro que querés borrar <strong>{{ plato.nombre_plato|escape }}</strong>?"
-                  data-confirm-hint="También se borrarán las programaciones de este plato. Esta acción no se puede deshacer."
-
-                  data-confirm-action="{% url 'eliminar-plato' plato.id %}"
-                  data-confirm-btn="Sí, borrar">
+                   href="#"
+                   data-bs-toggle="modal"
+                   data-bs-target="#confirmActionModal"
+                   data-confirm-title="Eliminar plato"
+                   data-confirm-body="¿Seguro que querés borrar <strong>{{ plato.nombre_plato|escape }}</strong>?"
+                   data-confirm-hint="También se borrarán las programaciones de este plato. Esta acción no se puede deshacer."
+                   data-confirm-action="{% url 'eliminar-plato' plato.id %}"
+                   data-confirm-btn="Sí, borrar">
                   <i class="fa-solid fa-trash-can me-2"></i> Eliminar
                 </a>
-
-
-
               </li>
+
             </ul>
-          </div>
           </div>
 
         </div>
-        <!-- /TÍTULO -->
-
       </div>
 
     {% endfor %}
+
   </div>
 </section>
 
@@ -750,6 +762,36 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 {% endcomment %}
 
+<script>
+// ==========================================
+// FILAS TIPO GMAIL (selección de platos)
+// - Cuando tildás/destildás el checkbox de un plato,
+//   marca/desmarca visualmente toda la fila.
+// - Se apoya en una clase de estado: "is-selected"
+//   (para que el CSS pinte el fondo).
+// - Usa delegación de eventos: funciona aunque la lista
+//   se renderice/inserte por AJAX.
+// - Inicializa el estado al cargar (por si hay checks ya marcados).
+// ==========================================
+(function () {
+  function sync(chk) {
+    const row = chk.closest("[data-row]");
+    if (!row) return;
+    row.classList.toggle("is-selected", chk.checked);
+  }
+
+  // Inicializa el estado visual al cargar
+  document.querySelectorAll("input.js-plato-select").forEach(sync);
+
+  // Cambios de checkbox (delegado)
+  document.addEventListener("change", (ev) => {
+    const chk = ev.target.closest("input.js-plato-select");
+    if (!chk) return;
+    sync(chk);
+  });
+})();
+
+</script>
 
 
 

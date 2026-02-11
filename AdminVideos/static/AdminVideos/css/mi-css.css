@@ -511,3 +511,6 @@ section > .d-flex {
   font-weight: 600;
   font-size: .88rem;
 }
+
+/* FILA SELECCIONADA DE PLATO */
+.plato-row.is-selected { background: rgba(13,110,253,.12); }
