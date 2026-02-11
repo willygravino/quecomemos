@@ -443,7 +443,7 @@ section > .d-flex {
 }
 .sidebar .menu-item:not(.is-active):hover .icon-wrap{
   /* hover del fondo del icono cuando no está activo */
-  background: #5173ef; /* light */
+  background: #d0d8f8; /* light */
 }
 .sidebar .menu-item:not(.is-active):hover .icon-wrap i{
   /* hover del icono  cuando no está activo */
@@ -466,7 +466,7 @@ section > .d-flex {
   background: #f2f4fc; /* primary */
 }
 .sidebar .menu-item.is-active:hover .icon-wrap i{
-  color: #b153bf !important;
+  color: #304768 !important;
 }
 .sidebar .menu-item.is-active:hover .item-text{
   /* hover del texto "postre" cuando está activo */

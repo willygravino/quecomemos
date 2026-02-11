@@ -638,48 +638,52 @@
   </div>
   {% endfor %}
 
-  
-<!-- ESTE ES EL BOTÓN DE AGREGAR -->
+  <!-- ESTE ES EL BOTÓN DE AGREGAR -->
 <section class="w-100 text-white mt-1">
   <div class="container">
-    <div class="d-flex justify-content-center flex-wrap gap-0">
+    <div class="d-flex justify-content-center flex-wrap {% if tipopag == 'Picada' %}gap-2{% else %}gap-0{% endif %}">
 
+      
       <!-- COMENTO POR AHORA PERO CUANDO LO SAQUE, SACAR TODA LA LOGICA QUE CARGA FORMULARIO EN MODAL -->
        <!-- <button class="btn btn-primary" id="btnNuevoPrincipal">
         Nuevo Plato Principal
       </button>  -->
 
-      <!-- % with tipopag=request.GET.tipopag %} -->
+      <!-- {# Si es Delivery o Comerafuera, mantenés el flujo de "crear lugar" #} -->
       {% if tipopag == "Delivery" or tipopag == "Comerafuera" %}
-        <a class="btn btn-outline-primary w-100 rounded text-center fw-semibold py-0"
 
-          href="{% url 'crear-lugar' %}?tipopag={{ tipopag|default:'Dash' }}">
-          {% if tipopag and tipopag != "Dash" %}
-            + AGREGAR {{ tipopag|upper}}
-          {% else %}
-            + AGREGAR PLATO PRINCIPAL
-          {% endif %}
+        <a class="btn btn-outline-primary w-100 rounded text-center fw-semibold py-0"
+           href="{% url 'crear-lugar' %}?tipopag={{ tipopag|default:'Principal'|urlencode }}">
+          + AGREGAR {{ tipopag|upper }}
         </a>
 
-      
       {% else %}
-        <a class="btn btn-outline-primary w-100 rounded text-center fw-semibold py-2"
-          href="{% url 'videos-create' %}?tipopag={{ tipopag|default:''|urlencode }}&return_to={{ request.get_full_path|urlencode }}">
-          
 
-      {% if tipopag and tipopag != "Dash" %}
+        <!-- {# Botón principal: Agregar receta #} -->
+        <a class="btn btn-outline-primary rounded text-center fw-semibold py-2 {% if tipopag == 'Picada' %}flex-grow-1{% else %}w-100{% endif %}"
+           href="{% url 'videos-create' %}?tipopag={{ tipopag|default:''|urlencode }}&return_to={{ request.get_full_path|urlencode }}">
+          {% if tipopag %}
             + AGREGAR RECETA DE {{ tipopag|upper }}
-
           {% else %}
             + AGREGAR RECETA DE PLATO PRINCIPAL
           {% endif %}
         </a>
 
+        {# Botón extra solo para Picada #}
+        {% if tipopag == "Picada" %}
+          <a class="btn btn-outline-primary rounded text-center fw-semibold py-2 flex-grow-1"
+             href="{% url 'videos-create' %}?return_to={{ request.get_full_path|urlencode }}">
+            ARMAR PICADA
+          </a>
+        {% endif %}
+
       {% endif %}
+
     </div>
   </div>
 </section>
 
+  
 
 
   <div class="border border-primary rounded p-2 position-relative m-2">

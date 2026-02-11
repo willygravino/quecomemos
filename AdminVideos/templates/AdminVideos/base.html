@@ -32,7 +32,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <!-- mi css -->
-    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=62" rel="stylesheet">  <!-- al final + bust de caché -->
+    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=64" rel="stylesheet">  <!-- al final + bust de caché -->
 
     <link rel="manifest" href="{% static 'AdminVideos/lista_super/manifest_lista_super.json' %}?v=1">
 
@@ -150,6 +150,25 @@
 
     <span class="item-text mt-2 small {% if tipopag == 'Guarnicion' %}text-white fw-bold{% else %}text-white-50{% endif %}">
       Guarniciones
+    </span>
+  </a>
+</li>
+
+
+<!-- {# 4.2) PICADAS #} -->
+<li class="nav-item {% if tipopag == 'Picada' %}active{% endif %}">
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
+            {% if tipopag == 'Picada' %}is-active{% endif %}"
+     href="{% url 'filtro-de-platos' %}?tipopag=Picada">
+
+    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
+          style="width: 38px; height: 38px;">
+      <i class="fa-solid fa-cheese {% if tipopag != 'Picada' %}text-white-50{% endif %}"
+         style="font-size: 1.1rem;"></i>
+    </span>
+
+    <span class="item-text mt-2 small {% if tipopag == 'Picada' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+      Picadas
     </span>
   </a>
 </li>
