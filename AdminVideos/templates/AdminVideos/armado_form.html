@@ -1,0 +1,23 @@
+<h2>Crear {{ view.tipo_armado }}</h2>
+
+<form method="post">
+  {% csrf_token %}
+
+  {{ form.non_field_errors }}
+
+  <div style="margin-bottom: 12px;">
+    {{ form.nombre.label_tag }}<br>
+    {{ form.nombre }}
+    {{ form.nombre.errors }}
+  </div>
+
+  <hr>
+
+  <h4>Elegí ingredientes</h4>
+  {{ form.items.errors }}
+  {{ form.items }}
+
+  <hr>
+
+  <button type="submit">Guardar</button>
+</form>

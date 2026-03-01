@@ -1,6 +1,6 @@
 
 from django import forms
-from .models import Ingrediente, IngredienteEnPlato, Lugar, MenuItem, MenuItemExtra, Plato, TipoPlato
+from .models import Armado, Ingrediente, IngredienteEnPlato, Lugar, MenuItem, MenuItemExtra, Plato, TipoPlato
 from django.contrib.auth.forms import AuthenticationForm
 
 
@@ -212,3 +212,27 @@ class CustomAuthenticationForm(AuthenticationForm):
         ),
         'inactive': ("Esta cuenta está inactiva."),
     }
+
+
+
+class ArmadoForm(forms.ModelForm):
+    class Meta:
+        model = Armado
+        fields = ["nombre", "items"]
+        widgets = {
+            "items": forms.CheckboxSelectMultiple,
+        }
+
+    def __init__(self, *args, propietario=None, tipo_armado=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        qs = Plato.objects.all()
+
+        if propietario is not None:
+            qs = qs.filter(propietario=propietario)
+
+        # Filtro simple (por ahora) usando tu CharField "tipos"
+        if tipo_armado:
+            qs = qs.filter(tipos__icontains=tipo_armado)
+
+        self.fields["items"].queryset = qs.order_by("nombre_plato")

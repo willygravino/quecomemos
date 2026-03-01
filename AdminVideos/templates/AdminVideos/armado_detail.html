@@ -1,0 +1,12 @@
+<h2>{{ object.tipo_armado }}: {{ object.nombre }}</h2>
+
+<hr>
+
+<h4>Ingredientes elegidos</h4>
+<ul>
+  {% for item in object.items.all %}
+    <li>{{ item.nombre_plato }}</li>
+  {% empty %}
+    <li>No hay ingredientes aún.</li>
+  {% endfor %}
+</ul>

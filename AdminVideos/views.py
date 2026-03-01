@@ -19,7 +19,7 @@ from django.views.generic import CreateView, UpdateView, DeleteView, DetailView
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from datetime import datetime, timedelta
-from .forms import IngredienteEnPlatoFormSet, LugarForm, PlatoFilterForm, PlatoForm, CustomAuthenticationForm
+from .forms import ArmadoForm, IngredienteEnPlatoFormSet, LugarForm, PlatoFilterForm, PlatoForm, CustomAuthenticationForm
 from datetime import date, datetime
 from django.contrib.auth.models import User  # Asegúrate de importar el modelo User
 from django.db.models import Q, Subquery, OuterRef, Prefetch, Min, Max, F
@@ -3597,7 +3597,7 @@ from django.db.models import Q
 from django.shortcuts import redirect
 from django.views.decorators.http import require_POST
 
-from .models import MenuDia, MenuItem, HabitoSemanal
+from .models import Armado, MenuDia, MenuItem, HabitoSemanal
 
 
 @require_POST
@@ -3656,3 +3656,40 @@ def eliminar_menu_programado(request):
         f"Se eliminó el menú programado del {dia_activo} (items borrados: {borrados})."
     )
     return redirect("filtro-de-platos")
+
+
+class ArmadoCreateView(LoginRequiredMixin, CreateView):
+    model = Armado
+    form_class = ArmadoForm
+    template_name = "AdminVideos/armado_form.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        # tipo viene por URL: /armados/nuevo/Picada/
+        self.tipo_armado = self.kwargs["tipo_armado"]
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["propietario"] = self.request.user
+        kwargs["tipo_armado"] = self.tipo_armado
+        return kwargs
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.propietario = self.request.user
+        obj.tipo_armado = self.tipo_armado
+        obj.save()
+        form.save_m2m()
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse("armado-detail", kwargs={"pk": self.object.pk})
+    
+
+class ArmadoDetailView(LoginRequiredMixin, DetailView):
+    model = Armado
+    template_name = "AdminVideos/armado_detail.html"
+
+    def get_queryset(self):
+        # Seguridad: solo ver tus armados
+        return Armado.objects.filter(propietario=self.request.user)

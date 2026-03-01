@@ -670,9 +670,10 @@
         </a>
 
         {# Botón extra solo para Picada #}
+        
         {% if tipopag == "Picada" %}
           <a class="btn btn-outline-primary rounded text-center fw-semibold py-2 flex-grow-1"
-             href="{% url 'videos-create' %}?return_to={{ request.get_full_path|urlencode }}">
+            href="{% url 'armado-create' 'Picada' %}">
             ARMAR PICADA
           </a>
         {% endif %}

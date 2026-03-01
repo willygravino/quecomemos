@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import (
+    Armado,
     HabitoSemanal,
     Ingrediente, IngredienteEnPlato,
     MenuDia, MenuItem,
@@ -113,3 +114,9 @@ class MenuItemExtraAdmin(admin.ModelAdmin):
 
 admin.site.register(ProfileIngrediente)
 
+
+@admin.register(Armado)
+class ArmadoAdmin(admin.ModelAdmin):
+    list_display = ("id", "tipo_armado", "nombre", "propietario", "creada")
+    list_filter = ("tipo_armado",)
+    filter_horizontal = ("items",)
