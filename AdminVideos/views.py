@@ -9,7 +9,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
-from AdminVideos.models import HabitoSemanal, Ingrediente, IngredienteEnPlato, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente
+from AdminVideos.models import Armado, HabitoSemanal, Ingrediente, IngredienteEnPlato, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string   # ✅ ← ESTA ES LA CLAVE
 from django.http import Http404, HttpRequest, HttpResponseNotAllowed, JsonResponse
@@ -2862,181 +2862,6 @@ def descartar_sugerido(request, plato_id):
 
 
 
-# @login_required
-# def agregar_a_mi_lista(request, plato_id):
-#     # 1) Plato original
-#     plato_original = get_object_or_404(Plato, id=plato_id)
-
-#     # 2) Perfil del usuario (asegura que exista)
-#     profile = get_object_or_404(Profile, user=request.user)
-
-#     # 3) Leer flag GET
-#     duplicar = request.GET.get('duplicar') == 'true'
-
-#     # 4) Nombre copia
-#     nombre_copia = (
-#         f"Copia de {plato_original.nombre_plato}"
-#         if duplicar else
-#         plato_original.nombre_plato
-#     )
-
-#     # 5) proviene_de ES CharField en tu modelo → guardar texto (p. ej. username)
-#     proviene_de_str = (
-#         plato_original.propietario.username
-#         if plato_original.propietario != request.user else
-#         ""
-#     )
-
-#     # 6) Copiar variedades sin compartir referencia (por si luego lo mutás)
-#     variedades_copia = deepcopy(plato_original.variedades)
-
-#     # 7) Crear el nuevo plato AJUSTADO al modelo
-#     nuevo_plato = Plato.objects.create(
-#         nombre_plato=nombre_copia,
-#         receta=plato_original.receta,
-#         # descripcion_plato=plato_original.descripcion_plato,
-#         ingredientes=plato_original.ingredientes,
-#         medios=plato_original.medios,
-#         categoria=plato_original.categoria,
-#         elaboracion=plato_original.elaboracion,
-#         coccion=plato_original.coccion,
-#         tipos=plato_original.tipos,                  # 👈 existe en el modelo (no 'tipo')
-#         estacionalidad=plato_original.estacionalidad,
-#         propietario=request.user,
-#         image=plato_original.image,                  # referencia al mismo archivo (ok)
-#         variedades=variedades_copia,
-#         proviene_de=proviene_de_str,                 # 👈 string, no User
-#         id_original=plato_original.id
-#     )
-
-#     # 8) Evitar duplicados en sugeridos_importados → por ID, no por nombre
-#     if plato_original.id not in profile.sugeridos_importados:
-#         profile.sugeridos_importados.append(plato_original.id)
-#         profile.save(update_fields=["sugeridos_importados"])
-
-#     # 9) Redirigir (tu lógica actual)
-#     return redirect('descartar-sugerido', plato_id=plato_id)
-
-
-# def agregar_a_mi_lista(request, plato_id):
-#     # Obtener el plato a copiar
-#     plato_original = get_object_or_404(Plato, id=plato_id)
-
-#     # Obtener el perfil del usuario logueado
-#     profile = request.user.profile
-
-#     # Lee el parámetro GET
-#     duplicar = request.GET.get('duplicar') == 'true'
-
-#     # Determina el nombre del nuevo plato
-#     nombre_copia = f"Copia de {plato_original.nombre_plato}" if duplicar else plato_original.nombre_plato
-
-
-#     # Verificar si el plato original pertenece a otro usuario
-#     proviene_de = plato_original.propietario if plato_original.propietario != request.user else None
-
-
-#     # Crear una copia del plato, asignando el nuevo propietario
-#     nuevo_plato = Plato.objects.create(
-#         nombre_plato=nombre_copia,
-#         receta=plato_original.receta,
-#         descripcion_plato=plato_original.descripcion_plato,
-#         ingredientes=plato_original.ingredientes,
-#         medios=plato_original.medios,
-#         categoria=plato_original.categoria,
-#         dificultad=plato_original.dificultad,
-#         tipo=plato_original.tipo,
-#         calorias=plato_original.calorias,
-#         propietario=request.user,  # Asignar al usuario logueado
-#         image=plato_original.image,  # Copiar la imagen si aplica
-#         variedades=plato_original.variedades,
-#         proviene_de= proviene_de,
-#         id_original=plato_original.id
-#     )
-
-#   # Verificar si el plato_id ya está en la lista para evitar duplicados
-#     if plato_original.nombre_plato not in profile.sugeridos_importados:
-#         profile.sugeridos_importados.append(plato_id)  # Agregar el ID del plato a la lista
-#         profile.save()  # Guardar los cambios en el perfil
-
-#     # Redirigir a la vista para descartar el plato después de agregarlo
-#     return redirect('descartar-sugerido', plato_id=plato_id)
-
-
-# @login_required
-# def agregar_a_mi_lista(request, plato_id):
-#     # 1) Plato original
-#     plato_original = get_object_or_404(Plato, id=plato_id)
-
-#     # 2) Perfil del usuario
-#     profile = get_object_or_404(Profile, user=request.user)
-
-#     # 3) Flag GET
-#     duplicar = request.GET.get('duplicar') == 'true'
-
-#     # 4) Nombre
-#     nombre_copia = (
-#         f"Copia de {plato_original.nombre_plato}"
-#         if duplicar else
-#         plato_original.nombre_plato
-#     )
-
-#     # 5) proviene_de (string)
-#     proviene_de_str = (
-#         plato_original.propietario.username
-#         if plato_original.propietario != request.user else
-#         ""
-#     )
-
-#     # 6) Copiar variedades
-#     variedades_copia = deepcopy(plato_original.variedades)
-
-#     # 7) Crear nuevo plato (SIN ingredientes todavía)
-#     nuevo_plato = Plato.objects.create(
-#         nombre_plato=nombre_copia,
-#         receta=plato_original.receta,
-#         ingredientes="",  # 👈 se reconstruye luego
-#         medios=plato_original.medios,
-#         categoria=plato_original.categoria,
-#         elaboracion=plato_original.elaboracion,
-#         coccion=plato_original.coccion,
-#         tipos=plato_original.tipos,
-#         estacionalidad=plato_original.estacionalidad,
-#         propietario=request.user,
-#         image=plato_original.image,
-#         variedades=variedades_copia,
-#         proviene_de=proviene_de_str,
-#         id_original=plato_original.id
-#     )
-
-#     # 8) Copiar ingredientes estructurados + reconstruir texto
-#     ingredientes_texto = []
-
-#     for ing in plato_original.ingredientes_en_plato.all():
-#         IngredienteEnPlato.objects.create(
-#             plato=nuevo_plato,
-#             ingrediente=ing.ingrediente,
-#             cantidad=ing.cantidad,
-#             unidad=ing.unidad,
-#         )
-
-#         if ing.ingrediente:
-#             ingredientes_texto.append(ing.ingrediente.nombre)
-
-#     # Guardar el campo CharField como en CreateView
-#     nuevo_plato.ingredientes = ", ".join(ingredientes_texto)
-#     nuevo_plato.save(update_fields=["ingredientes"])
-
-#     # 9) Evitar duplicados en sugeridos_importados
-#     if plato_original.id not in profile.sugeridos_importados:
-#         profile.sugeridos_importados.append(plato_original.id)
-#         profile.save(update_fields=["sugeridos_importados"])
-
-#     # 10) Redirigir
-#     return redirect('descartar-sugerido', plato_id=plato_id)
-
-# ✅ View corregida (clona padre + variedades + ingredientes)
-
 @login_required
 def agregar_a_mi_lista(request, plato_id):
     plato_original = get_object_or_404(Plato, id=plato_id)
@@ -3268,148 +3093,6 @@ def plato_opciones_asignar(request, pk):
 
 
 
-# @login_required
-# def eliminar_plato_programado(request, plato_id, comida, fecha):
-#     usuario = request.user
-
-#     # 1) Normalizar fecha: si viene "YYYY-MM-DD" en string, pasar a date
-#     if isinstance(fecha, str):
-#         fecha = datetime.datetime.strptime(fecha, "%Y-%m-%d").date()
-
-#     # 2) Traer el menú del día (modelo nuevo)
-#     menu = get_object_or_404(MenuDia, propietario=usuario, fecha=fecha)
-
-#     # 3) Buscar el plato por ID y borrar SOLO el item del momento que coincida por ID
-#     try:
-#         plato = Plato.objects.get(id=plato_id, propietario=usuario)
-#     except Plato.DoesNotExist:
-#         messages.error(request, f"Plato con ID '{plato_id}' no encontrado.")
-#         return redirect("filtro-de-platos")
-
-#     # Eliminar el plato programado por ID del plato
-#     items_borrados = menu.items.filter(momento=comida).filter(plato=plato).delete()
-
-#     # Si se eliminó el plato, mostrar un mensaje
-#     if items_borrados[0] > 0:
-#         messages.success(request, f"Plato '{plato.nombre_plato}' eliminado correctamente.")
-#     else:
-#         messages.warning(request, f"No se encontró el plato '{plato.nombre_plato}' para {comida}.")
-
-#     # 4) Si también quieres borrar "lugares" por nombre (por ID también se puede hacer, si quieres ser más preciso):
-#     lugares_borrados = menu.items.filter(momento=comida).filter(lugar__nombre=plato.nombre_plato).delete()
-
-#     # Si se eliminó un lugar, mostrar un mensaje (opcional)
-#     if lugares_borrados[0] > 0:
-#         messages.success(request, f"Lugar '{plato.nombre_plato}' eliminado correctamente.")
-#     else:
-#         messages.warning(request, f"No se encontró el lugar '{plato.nombre_plato}' para {comida}.")
-
-#     # 5) Si el día quedó sin items, borrar el día completo
-#     if not menu.items.exists():
-#         menu.delete()
-#         messages.success(request, f"Menú del día {fecha} eliminado ya que no tiene platos o lugares asignados.")
-
-#     # 6) Buscar y eliminar el hábito asociado a este plato, para ese día y comida
-#     try:
-#         habito = HabitoSemanal.objects.get(
-#             perfil=usuario.profile,  # Correcto, accediendo al perfil
-#             dia_semana=fecha.weekday(),  # Esto devuelve el número del día (0 = Lunes, 6 = Domingo)
-#             momento=comida,
-#             plato=plato
-#         )
-#         habito.delete()
-#         messages.success(request, f"Hábito '{plato.nombre_plato}' eliminado correctamente.")
-#     except HabitoSemanal.DoesNotExist:
-#         messages.warning(request, f"No se encontró el hábito para el plato '{plato.nombre_plato}' para {comida}.")
-
-
-#     return redirect("filtro-de-platos")
-
-
-
-# @login_required
-# def eliminar_programado(request, es_lugar, objeto_id, comida, fecha):
-#     usuario = request.user
-
-#     # 1) Normalizar fecha
-#     if isinstance(fecha, str):
-#         try:
-#             fecha = datetime.datetime.strptime(fecha, "%Y-%m-%d").date()
-#         except ValueError:
-#             messages.error(request, "Fecha inválida.")
-#             return redirect("filtro-de-platos")
-
-#     # 2) Traer el menú del día
-#     menu = get_object_or_404(MenuDia, propietario=usuario, fecha=fecha)
-
-#     # 3) Query base: items del momento (comida)
-#     qs = menu.items.filter(momento=comida)
-
-#     # 4) es_lugar llega como "1" o "0" desde el template (yesno:'1,0')
-#     try:
-#         es_lugar = bool(int(es_lugar))
-#     except (TypeError, ValueError):
-#         messages.error(request, "Tipo inválido (es_lugar).")
-#         return redirect("filtro-de-platos")
-
-#     # 5) Eliminar según el tipo
-#     if es_lugar:
-#         # ---- eliminar LUGAR ----
-#         lugar_qs = Lugar.objects.all()
-#         if hasattr(Lugar, "propietario"):
-#             lugar_qs = lugar_qs.filter(propietario=usuario)
-
-#         lugar = lugar_qs.filter(id=objeto_id).first()
-#         if not lugar:
-#             messages.error(request, f"Lugar con ID '{objeto_id}' no encontrado.")
-#             return redirect("filtro-de-platos")
-
-#         borrados, _ = qs.filter(lugar_id=lugar.id).delete()
-
-#         if borrados:
-#             messages.success(request, f"Lugar '{lugar.nombre}' eliminado correctamente.")
-#         else:
-#             messages.warning(request, f"No se encontró el lugar '{lugar.nombre}' para {comida}.")
-
-#         # Hábito de lugar: SOLO si tu HabitoSemanal tiene FK lugar
-#         if hasattr(HabitoSemanal, "lugar"):
-#             HabitoSemanal.objects.filter(
-#                 perfil=usuario.profile,
-#                 dia_semana=fecha.weekday(),
-#                 momento=comida,
-#                 lugar_id=lugar.id
-#             ).delete()
-
-#     else:
-#         # ---- eliminar PLATO ----
-#         plato = Plato.objects.filter(id=objeto_id, propietario=usuario).first()
-#         if not plato:
-#             messages.error(request, f"Plato con ID '{objeto_id}' no encontrado.")
-#             return redirect("filtro-de-platos")
-
-#         borrados, _ = qs.filter(plato_id=plato.id).delete()
-
-#         if borrados:
-#             # Ojo: ajustá el nombre si tu campo no es "nombre"
-#             messages.success(request, f"Plato '{plato.nombre_plato}' eliminado correctamente.")
-#         else:
-#             messages.warning(request, f"No se encontró el plato '{plato.nombre}' para {comida}.")
-
-#         # Hábito de plato
-#         HabitoSemanal.objects.filter(
-#             perfil=usuario.profile,
-#             dia_semana=fecha.weekday(),
-#             momento=comida,
-#             plato_id=plato.id
-#         ).delete()
-
-#     # 6) Si el día quedó sin items, borrar el día completo
-#     # if not menu.items.exists():
-#     #     menu.delete()
-#     #     messages.success(request, f"Menú del día {fecha} eliminado ya que no tiene items.")
-
-#     return redirect("filtro-de-platos")
-
 @login_required
 def eliminar_programado(request, es_lugar, objeto_id, comida, fecha):
     usuario = request.user
@@ -3590,14 +3273,6 @@ def random_dia(request, dia_nombre):
 # from .models import MenuDia  # ajustá el import
 
 
-import datetime
-from django.contrib import messages
-from django.db import transaction
-from django.db.models import Q
-from django.shortcuts import redirect
-from django.views.decorators.http import require_POST
-
-from .models import Armado, MenuDia, MenuItem, HabitoSemanal
 
 
 @require_POST
@@ -3658,13 +3333,39 @@ def eliminar_menu_programado(request):
     return redirect("filtro-de-platos")
 
 
+# class ArmadoCreateView(LoginRequiredMixin, CreateView):
+#     model = Armado
+#     form_class = ArmadoForm
+#     template_name = "AdminVideos/armado_form.html"
+
+#     def dispatch(self, request, *args, **kwargs):
+#         # tipo viene por URL: /armados/nuevo/Picada/
+#         self.tipo_armado = self.kwargs["tipo_armado"]
+#         return super().dispatch(request, *args, **kwargs)
+
+#     def get_form_kwargs(self):
+#         kwargs = super().get_form_kwargs()
+#         kwargs["propietario"] = self.request.user
+#         kwargs["tipo_armado"] = self.tipo_armado
+#         return kwargs
+
+#     def form_valid(self, form):
+#         obj = form.save(commit=False)
+#         obj.propietario = self.request.user
+#         obj.tipo_armado = self.tipo_armado
+#         obj.save()
+#         form.save_m2m()
+#         return super().form_valid(form)
+
+#     def get_success_url(self):
+#         return reverse("armado-detail", kwargs={"pk": self.object.pk})
+    
 class ArmadoCreateView(LoginRequiredMixin, CreateView):
     model = Armado
     form_class = ArmadoForm
-    template_name = "AdminVideos/armado_form.html"
+    template_name = "AdminVideos/partials/armado_form_modal.html"
 
     def dispatch(self, request, *args, **kwargs):
-        # tipo viene por URL: /armados/nuevo/Picada/
         self.tipo_armado = self.kwargs["tipo_armado"]
         return super().dispatch(request, *args, **kwargs)
 
@@ -3674,17 +3375,32 @@ class ArmadoCreateView(LoginRequiredMixin, CreateView):
         kwargs["tipo_armado"] = self.tipo_armado
         return kwargs
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["tipo_armado"] = self.tipo_armado
+        return context
+
     def form_valid(self, form):
         obj = form.save(commit=False)
         obj.propietario = self.request.user
         obj.tipo_armado = self.tipo_armado
         obj.save()
         form.save_m2m()
+        self.object = obj
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse("armado-detail", kwargs={"pk": self.object.pk})
-    
+        tipopag = self.request.GET.get("tipopag", self.tipo_armado)
+        dia_activo = self.request.GET.get("dia_activo")
+
+        url = reverse("filtro-de-platos")
+
+        if dia_activo:
+            return f"{url}?tipopag={tipopag}&dia_activo={dia_activo}"
+
+        return f"{url}?tipopag={tipopag}"
+        
+
 
 class ArmadoDetailView(LoginRequiredMixin, DetailView):
     model = Armado

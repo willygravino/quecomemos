@@ -1158,6 +1158,72 @@ document.addEventListener("click", function (e) {
   {% include "AdminVideos/partials/_toast_msg.html" %}
 {% endif %}
 
+<!--
+========================================================
+ AJAX Bootstrap Modal Loader
+--------------------------------------------------------
+Este script permite abrir modales de Bootstrap que
+cargan su contenido desde una vista Django vía AJAX.
+
+Funcionamiento:
+
+1. Un botón abre el modal con:
+   data-bs-toggle="modal"
+   data-bs-target="#armadoModal"
+   data-url="URL_DE_LA_VISTA"
+
+2. Cuando el modal se abre, el script:
+   - lee la URL desde data-url
+   - hace un fetch (AJAX) a esa vista
+   - inserta el HTML recibido dentro del modal-body
+
+Esto permite:
+✔ cargar formularios Django dentro de modales
+✔ evitar recargar la página
+✔ reutilizar la misma vista normalmente o en modal
+
+Requisitos:
+- Bootstrap 5
+- modal-body con id="armadoModalBody"
+========================================================
+-->
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const armadoModal = document.getElementById("armadoModal");
+  if (!armadoModal) return;
+
+  const modalBody = document.getElementById("armadoModalBody");
+
+  armadoModal.addEventListener("show.bs.modal", function (event) {
+
+    const button = event.relatedTarget;
+    const url = button.getAttribute("data-url");
+
+    modalBody.innerHTML = '<div class="text-center py-4">Cargando...</div>';
+
+    fetch(url, {
+      headers: {
+        "X-Requested-With": "XMLHttpRequest"
+      }
+    })
+    .then(response => response.text())
+    .then(html => {
+      modalBody.innerHTML = html;
+    })
+    
+    .catch(error => {
+      modalBody.innerHTML =
+        '<div class="alert alert-danger">Error cargando contenido</div>';
+      console.error(error);
+    });
+
+  });
+
+});
+</script>
+
 
 </body>
 

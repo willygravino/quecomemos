@@ -1,23 +1,17 @@
-<h2>Crear {{ view.tipo_armado }}</h2>
+{% extends "base.html" %}
 
-<form method="post">
-  {% csrf_token %}
-
-  {{ form.non_field_errors }}
-
-  <div style="margin-bottom: 12px;">
-    {{ form.nombre.label_tag }}<br>
-    {{ form.nombre }}
-    {{ form.nombre.errors }}
-  </div>
-
+{% block content %}
+<div class="container py-4">
+  <h2>{{ tipo_armado }}</h2>
   <hr>
 
-  <h4>Elegí ingredientes</h4>
-  {{ form.items.errors }}
-  {{ form.items }}
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
 
-  <hr>
-
-  <button type="submit">Guardar</button>
-</form>
+    <div class="mt-3">
+      <button type="submit" class="btn btn-primary">Guardar</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
