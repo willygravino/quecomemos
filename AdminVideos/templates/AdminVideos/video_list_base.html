@@ -188,11 +188,26 @@
                   <!-- Acciones -->
                   <div class="d-flex flex-wrap justify-content-center gap-2">
 
-                    <a href="#"
-                       class="btn btn-sm btn-outline-primary js-plato-ingredientes"
-                       data-url="{% url 'plato_ingredientes' grupo.id %}">
-                      <i class="fa-solid fa-list-check me-1"></i> Ingredientes
-                    </a>
+                    {% if grupo.es_armado %}
+  <a href="#"
+     class="btn btn-sm btn-outline-primary js-armado-ingredientes"
+     data-bs-toggle="modal"
+     data-bs-target="#verArmadoModal"
+     data-armado-id="{{ grupo.armado_obj.id }}">
+    <i class="fa-solid fa-list-check me-1"></i> Ingredientes
+  </a>
+{% elif grupo.id %}
+  <a href="#"
+     class="btn btn-sm btn-outline-primary js-plato-ingredientes"
+     data-url="{% url 'plato_ingredientes' grupo.id %}">
+    <i class="fa-solid fa-list-check me-1"></i> Ingredientes
+  </a>
+{% else %}
+  <span class="btn btn-sm btn-outline-secondary disabled">
+    <i class="fa-solid fa-list-check me-1"></i> Ingredientes
+  </span>
+{% endif %}
+                   
 
                     {% if amigues %}
                     <a href="#"
@@ -204,42 +219,42 @@
                     </a>
                     {% endif %}
 
-              {% if grupo.propietario == request.user %}
-                <!-- Botón Editar: navegación normal -->
-                <!-- <a href="% url 'videos-update' grupo.id %}"
-                  class="btn btn-sm btn-outline-dark">
-                  <i class="fa-regular fa-pen-to-square me-1"></i> Editar
-                </a> -->
+{% if grupo.es_armado %}
 
-                <a href="{% url 'videos-update' grupo.id %}?return_to={{ request.get_full_path|urlencode }}"
-                  class="btn btn-sm btn-outline-dark">
-                  <i class="fa-regular fa-pen-to-square me-1"></i> Editar
-                </a>
+  <span class="btn btn-sm btn-outline-secondary disabled">
+    <i class="fa-regular fa-eye me-1"></i> Ver
+  </span>
+
+{% elif grupo.propietario == request.user %}
+
+  <a href="{% url 'videos-update' grupo.id %}?return_to={{ request.get_full_path|urlencode }}"
+    class="btn btn-sm btn-outline-dark">
+    <i class="fa-regular fa-pen-to-square me-1"></i> Editar
+  </a>
+
+  <a href="#"
+    class="btn btn-sm btn-outline-danger"
+    data-bs-toggle="modal"
+    data-bs-target="#confirmActionModal"
+    data-confirm-title="Eliminar plato"
+    data-confirm-body="¿Seguro que querés borrar <strong>{{ grupo.nombre_plato|escape }}</strong>?"
+    data-confirm-hint="También se borrarán las programaciones de este plato. Esta acción no se puede deshacer."
+    data-confirm-action="{% url 'eliminar-plato' grupo.id %}"
+    data-confirm-btn="Sí, borrar">
+    <i class="fa-solid fa-trash-can me-1"></i> Eliminar
+  </a>
+
+{% else %}
+  <a href="#"
+    class="btn btn-sm btn-outline-dark js-ver-detalle-plato"
+    data-detail-url="{% url 'platos-detail' grupo.id %}"
+    title="Ver detalle">
+    <i class="fa-regular fa-eye me-1"></i> Ver
+  </a>
+{% endif %}
 
 
-                <a href="#"
-                  class="btn btn-sm btn-outline-danger"
-                  data-bs-toggle="modal"
-                  data-bs-target="#confirmActionModal"
-                  data-confirm-title="Eliminar plato"
-                  data-confirm-body="¿Seguro que querés borrar <strong>{{ grupo.nombre_plato|escape }}</strong>?"
-                  data-confirm-hint="También se borrarán las programaciones de este plato. Esta acción no se puede deshacer."
-                  data-confirm-action="{% url 'eliminar-plato' grupo.id %}"
-                  data-confirm-btn="Sí, borrar">
-                  <i class="fa-solid fa-trash-can me-1"></i> Eliminar
-                </a>
 
-
-
-              {% else %}
-                <!-- Botón Ver: abre modal -->
-                <a href="#"
-                  class="btn btn-sm btn-outline-dark js-ver-detalle-plato"
-                  data-detail-url="{% url 'platos-detail' grupo.id %}"
-                  title="Ver detalle">
-                  <i class="fa-regular fa-eye me-1"></i> Ver
-                </a>
-              {% endif %}
               
                   </div>
 
@@ -464,44 +479,68 @@
               </a>
             {% endif %}
 
-            <a href="#"
-               class="btn btn-sm btn-outline-primary js-plato-ingredientes"
-               data-url="{% url 'plato_ingredientes' plato.id %}"
-               title="Compartir lista de ingredientes"
-               aria-label="Ingredientes">
-              <i class="fa-solid fa-list-check"></i>
-            </a>
+           <li>
+                {% if plato.es_armado %}
+                  <a class="dropdown-item js-armado-ingredientes"
+                    href="#"
+                    data-bs-toggle="modal"
+                    data-bs-target="#verArmadoModal"
+                    data-armado-id="{{ plato.armado_obj.id }}">
+                    <i class="fa-solid fa-list-check me-2"></i> Ingredientes
+                  </a>
+                {% elif plato.id %}
+                  <a class="dropdown-item js-plato-ingredientes"
+                    href="#"
+                    data-url="{% url 'plato_ingredientes' plato.id %}">
+                    <i class="fa-solid fa-list-check me-2"></i> Ingredientes
+                  </a>
+                {% else %}
+                  <span class="dropdown-item text-muted">
+                    <i class="fa-solid fa-list-check me-2"></i> Ingredientes
+                  </span>
+                {% endif %}
+              </li>
 
-            {% if plato.propietario == request.user %}
-              <a href="{% url 'videos-update' plato.id %}?return_to={{ request.get_full_path|urlencode }}{% if tipopag %}&tipopag={{ tipopag|urlencode }}{% endif %}"
-                 class="btn btn-sm btn-outline-dark"
-                 title="Editar"
-                 aria-label="Editar">
-                <i class="fa-regular fa-pen-to-square"></i>
-              </a>
-            {% else %}
-              <a href="#"
-                 class="btn btn-sm btn-outline-secondary js-ver-detalle-plato"
-                 data-detail-url="{% url 'platos-detail' plato.id %}"
-                 title="Ver detalle"
-                 aria-label="Ver detalle">
-                <i class="fa-regular fa-eye"></i>
-              </a>
-            {% endif %}
+              {% if plato.es_armado %}
+                <span class="btn btn-sm btn-outline-secondary disabled"
+                      title="Ver detalle"
+                      aria-label="Ver detalle">
+                  <i class="fa-regular fa-eye"></i>
+                </span>
 
-            <a href="#"
-               data-bs-toggle="modal"
-               data-bs-target="#confirmActionModal"
-               data-confirm-title="Eliminar plato"
-               data-confirm-body="¿Seguro que querés borrar <strong>{{ plato.nombre_plato|escape }}</strong>?"
-               data-confirm-hint="También se borrarán las programaciones de este plato.<br> Esta acción no se puede deshacer."
-               data-confirm-action="{% url 'eliminar-plato' plato.id %}"
-               data-confirm-btn="Sí, borrar"
-               class="btn btn-sm btn-outline-secondary"
-               title="Eliminar"
-               aria-label="Eliminar plato">
-              <i class="fa-solid fa-trash-can"></i>
-            </a>
+              {% elif plato.propietario == request.user %}
+                <a href="{% url 'videos-update' plato.id %}?return_to={{ request.get_full_path|urlencode }}{% if tipopag %}&tipopag={{ tipopag|urlencode }}{% endif %}"
+                  class="btn btn-sm btn-outline-dark"
+                  title="Editar"
+                  aria-label="Editar">
+                  <i class="fa-regular fa-pen-to-square"></i>
+                </a>
+
+              {% else %}
+                <a href="#"
+                  class="btn btn-sm btn-outline-secondary js-ver-detalle-plato"
+                  data-detail-url="{% url 'platos-detail' plato.id %}"
+                  title="Ver detalle"
+                  aria-label="Ver detalle">
+                  <i class="fa-regular fa-eye"></i>
+                </a>
+              {% endif %}
+
+              {% if not plato.es_armado %}
+                <a href="#"
+                  data-bs-toggle="modal"
+                  data-bs-target="#confirmActionModal"
+                  data-confirm-title="Eliminar plato"
+                  data-confirm-body="¿Seguro que querés borrar <strong>{{ plato.nombre_plato|escape }}</strong>?"
+                  data-confirm-hint="También se borrarán las programaciones de este plato.<br> Esta acción no se puede deshacer."
+                  data-confirm-action="{% url 'eliminar-plato' plato.id %}"
+                  data-confirm-btn="Sí, borrar"
+                  class="btn btn-sm btn-outline-secondary"
+                  title="Eliminar"
+                  aria-label="Eliminar plato">
+                  <i class="fa-solid fa-trash-can"></i>
+                </a>
+              {% endif %}
 
           </div>
 
@@ -519,26 +558,41 @@
             <ul class="dropdown-menu dropdown-menu-end">
 
               <li>
-                <a class="dropdown-item"
-                   href="#"
-                   class="js-plato-ingredientes"
-                   data-url="{% url 'plato_ingredientes' plato.id %}">
-                  <i class="fa-solid fa-list-check me-2"></i> Ingredientes
-                </a>
+                {% if plato.es_armado %}
+                  <a class="dropdown-item js-armado-ingredientes"
+                    href="#"
+                    data-bs-toggle="modal"
+                    data-bs-target="#verArmadoModal"
+                    data-armado-id="{{ plato.armado_obj.id }}">
+                    <i class="fa-solid fa-list-check me-2"></i> Ingredientes
+                  </a>
+                {% else %}
+                  <a class="dropdown-item js-plato-ingredientes"
+                    href="#"
+                    data-url="{% url 'plato_ingredientes' plato.id %}">
+                    <i class="fa-solid fa-list-check me-2"></i> Ingredientes
+                  </a>
+                {% endif %}
               </li>
 
-              {% if plato.propietario == request.user %}
+              {% if plato.es_armado %}
+                <li>
+                  <span class="dropdown-item text-muted">
+                    <i class="fa-solid fa-eye me-2"></i> Ver detalle
+                  </span>
+                </li>
+              {% elif plato.propietario == request.user %}
                 <li>
                   <a class="dropdown-item"
-                     href="{% url 'videos-update' plato.id %}?return_to={{ request.get_full_path|urlencode }}{% if tipopag %}&tipopag={{ tipopag|urlencode }}{% endif %}">
+                    href="{% url 'videos-update' plato.id %}?return_to={{ request.get_full_path|urlencode }}{% if tipopag %}&tipopag={{ tipopag|urlencode }}{% endif %}">
                     <i class="fa-solid fa-pen-to-square me-2"></i> Editar
                   </a>
                 </li>
               {% else %}
                 <li>
                   <a class="dropdown-item js-ver-detalle-plato"
-                     href="#"
-                     data-detail-url="{% url 'platos-detail' plato.id %}">
+                    href="#"
+                    data-detail-url="{% url 'platos-detail' plato.id %}">
                     <i class="fa-solid fa-eye me-2"></i> Ver detalle
                   </a>
                 </li>
@@ -558,19 +612,21 @@
 
               <li><hr class="dropdown-divider"></li>
 
-              <li>
-                <a class="dropdown-item text-danger"
-                   href="#"
-                   data-bs-toggle="modal"
-                   data-bs-target="#confirmActionModal"
-                   data-confirm-title="Eliminar plato"
-                   data-confirm-body="¿Seguro que querés borrar <strong>{{ plato.nombre_plato|escape }}</strong>?"
-                   data-confirm-hint="También se borrarán las programaciones de este plato. Esta acción no se puede deshacer."
-                   data-confirm-action="{% url 'eliminar-plato' plato.id %}"
-                   data-confirm-btn="Sí, borrar">
-                  <i class="fa-solid fa-trash-can me-2"></i> Eliminar
-                </a>
-              </li>
+              {% if not plato.es_armado %}
+                <li>
+                  <a class="dropdown-item text-danger"
+                    href="#"
+                    data-bs-toggle="modal"
+                    data-bs-target="#confirmActionModal"
+                    data-confirm-title="Eliminar plato"
+                    data-confirm-body="¿Seguro que querés borrar <strong>{{ plato.nombre_plato|escape }}</strong>?"
+                    data-confirm-hint="También se borrarán las programaciones de este plato. Esta acción no se puede deshacer."
+                    data-confirm-action="{% url 'eliminar-plato' plato.id %}"
+                    data-confirm-btn="Sí, borrar">
+                    <i class="fa-solid fa-trash-can me-2"></i> Eliminar
+                  </a>
+                </li>
+                {% endif %}
 
             </ul>
           </div>

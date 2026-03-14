@@ -2085,6 +2085,63 @@ def filtrar_platos(
     # Si no se selecciona ninguna de las dos opciones, no mostrar nada
     if quecomemos != "quecomemos" and misplatos != "misplatos":
         return Plato.objects.none()
+    
+    # Caso especial: las Picadas se construyen desde Armado
+    if tipo_parametro == "Picada":
+        armados_qs = Armado.objects.none()
+
+        if misplatos == "misplatos":
+            qs_mis_armados = Armado.objects.filter(
+                propietario=usuario,
+                tipo_armado="Picada",
+            )
+            armados_qs = armados_qs | qs_mis_armados
+
+        if quecomemos == "quecomemos":
+            usuario_quecomemos = User.objects.filter(username="quecomemos").first()
+            if usuario_quecomemos:
+                qs_quecomemos_armados = Armado.objects.filter(
+                    propietario=usuario_quecomemos,
+                    tipo_armado="Picada",
+                )
+                armados_qs = armados_qs | qs_quecomemos_armados
+
+        if palabra_clave:
+            armados_qs = armados_qs.filter(
+                Q(nombre__icontains=palabra_clave) |
+                Q(items__nombre_plato__icontains=palabra_clave) |
+                Q(items__ingredientes__icontains=palabra_clave)
+            ).distinct()
+
+        armados_qs = armados_qs.prefetch_related("items").order_by("-id")
+
+        platos_virtuales = []
+        for armado in armados_qs:
+            plato_virtual = Plato(
+                id=-armado.id,  # negativo para evitar choque con ids reales
+                nombre_plato=armado.nombre,
+                tipos="Picada",
+                propietario=armado.propietario,
+                ingredientes=", ".join(
+                    armado.items.values_list("nombre_plato", flat=True)
+                ),
+            )
+
+            # atributos extra que el template espera
+            plato_virtual.es_armado = True
+            plato_virtual.armado_obj = armado
+            plato_virtual.programaciones_count = 0
+            plato_virtual.ultima_programacion = None
+            plato_virtual.dias_desde_ultima = None
+            plato_virtual.variedades_count = 0
+            plato_virtual.proviene_de = ""
+            # plato_virtual.image_url = "/media/avatares/tabla_picada.png"
+            # plato_virtual.variedades_hijas = []
+
+            platos_virtuales.append(plato_virtual)
+
+        return platos_virtuales
+                
 
     # Comenzamos con un queryset vacío
     platos_qs = Plato.objects.none()
@@ -2275,6 +2332,8 @@ def FiltroDePlatos(request):
 
     # Recuperar los parámetros desde la sesión y la URL
     tipo_parametro, quecomemos, misplatos, medios, categoria, dificultad, palabra_clave = obtener_parametros_sesion(request)
+    tipopag = (request.GET.get("tipopag") or tipo_parametro or "Principal").strip()
+    tipo_parametro = tipopag
 
     # Obtener el usuario actual
     usuario = request.user
@@ -2525,7 +2584,7 @@ def FiltroDePlatos(request):
 
                }
     
-    tipopag = (request.GET.get("tipopag") or "Principal").strip()
+    # tipopag = (request.GET.get("tipopag") or "Principal").strip()
     contexto["tipopag"] = tipopag
 
     
