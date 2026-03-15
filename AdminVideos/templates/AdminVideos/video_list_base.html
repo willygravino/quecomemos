@@ -107,7 +107,8 @@
 
     <!-- Indicadores (1 por grupo/padre) -->
     <div class="carousel-indicators">
-      {% for grupo in platos %}
+      {% for grupo in carousel_items %}
+
         <button type="button"
                 data-bs-target="#platosCarousel"
                 data-bs-slide-to="{{ forloop.counter0 }}"
@@ -120,7 +121,8 @@
 
     <div class="carousel-inner">
 
-      {% for grupo in platos %}
+      {% for grupo in carousel_items %}
+
         <div class="carousel-item {% if forloop.first %}active{% endif %}">
           <div class="d-flex justify-content-center py-2">
 

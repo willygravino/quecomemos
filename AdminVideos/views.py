@@ -2084,7 +2084,11 @@ def filtrar_platos(
 ):
     # Si no se selecciona ninguna de las dos opciones, no mostrar nada
     if quecomemos != "quecomemos" and misplatos != "misplatos":
-        return Plato.objects.none()
+        return {
+                    "armados": [],
+                    "platos": Plato.objects.none()}
+                
+    armados_virtuales = []
     
     # Caso especial: las Picadas se construyen desde Armado
     if tipo_parametro == "Picada":
@@ -2140,7 +2144,9 @@ def filtrar_platos(
 
             platos_virtuales.append(plato_virtual)
 
-        return platos_virtuales
+        armados_virtuales = platos_virtuales    
+
+        # return platos_virtuales
                 
 
     # Comenzamos con un queryset vacío
@@ -2226,7 +2232,14 @@ def filtrar_platos(
         Prefetch("variedades_hijas", queryset=variedades_qs)
     )
 
-    return platos_qs
+    # # Si hay armados (caso Picada), agregarlos antes del queryset
+    # if armados_virtuales:
+    #     return list(armados_virtuales) + list(platos_qs)
+    
+    return {
+    "armados": armados_virtuales,
+    "platos": platos_qs,
+            }   
 
 
 
@@ -2388,8 +2401,8 @@ def FiltroDePlatos(request):
 
     else:
         lugares = ""
-        # Llamar a la función filtrar_platos pasando las variables recuperadas
-        platos = filtrar_platos(
+
+        resultado_filtro = filtrar_platos(
             usuario=usuario,
             tipo_parametro=tipo_parametro,
             quecomemos=quecomemos,
@@ -2400,18 +2413,20 @@ def FiltroDePlatos(request):
             palabra_clave=palabra_clave
         )
 
+        armados = resultado_filtro["armados"]
+        platos = resultado_filtro["platos"]
+
         hoy = timezone.localdate()
+
+        for p in armados:
+            p.dias_desde_ultima = (hoy - p.ultima_programacion).days if getattr(p, "ultima_programacion", None) else None
 
         for p in platos:
             p.dias_desde_ultima = (hoy - p.ultima_programacion).days if getattr(p, "ultima_programacion", None) else None
 
-            # variedades vienen prefetcheadas y ANOTADAS (por el Prefetch)
             for v in p.variedades_hijas.all():
                 v.dias_desde_ultima = (hoy - v.ultima_programacion).days if getattr(v, "ultima_programacion", None) else None
-
-
-    # Filtra las fechas únicas en `el_dia_en_que_comemos` para los objetos del usuario actual
-    # fechas_existentes = ElegidosXDia.objects.filter(user=usuario,el_dia_en_que_comemos__gte=fecha_actual).values_list('el_dia_en_que_comemos', flat=True).distinct()
+       
 
     # REFACTORIZACIÓN
     fechas_existentes = list(
@@ -2420,11 +2435,6 @@ def FiltroDePlatos(request):
             fecha__gte=fecha_actual
         ).values_list('fecha', flat=True)
     )
-
-
-
-    # Obtén el perfil del usuario autenticado
-    # perfil = get_object_or_404(Profile, user=usuario)
 
     try:
         perfil = Profile.objects.get(user=usuario)
@@ -2470,11 +2480,6 @@ def FiltroDePlatos(request):
 
     # Obtener los IDs de los platos compartidos junto con el ID del mensaje
     ids_platos_compartidos = {msg.id_elemento: msg.id for msg in mensajes_platos_compartidos if msg.id_elemento}
-
-    # Buscar los platos correspondientes en la base de datos
-    # los_platos_compartidos = {
-    #     str(plato.id): plato for plato in Plato.objects.filter(id__in=ids_platos_compartidos)
-    # }
 
     los_platos_compartidos = {
         plato.id: plato for plato in Plato.objects.filter(id__in=ids_platos_compartidos)
@@ -2556,6 +2561,7 @@ def FiltroDePlatos(request):
     # Convertir defaultdict a dict antes de pasarlo a la plantilla
     platos_dia_x_dia = dict(platos_dia_x_dia)
 
+    carousel_items = armados if armados else platos
 
     habitos_lookup = {
     (h.dia_semana, h.momento, h.plato_id): h.id
@@ -2564,6 +2570,8 @@ def FiltroDePlatos(request):
     contexto = {
                 'formulario': form,
                 'platos': platos,
+                'armados': armados,
+                "carousel_items": carousel_items,
                 "dias_desde_hoy": dias_desde_hoy,
                 "dias_programados": dias_programados,
                 "quecomemos_ck": quecomemos,
