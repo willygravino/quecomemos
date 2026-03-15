@@ -213,7 +213,7 @@
 
                     {% if amigues %}
                     <a href="#"
-                       class="btn btn-sm btn-outline-secondary"
+                       class="btn btn-sm btn-outline-primary"
                        data-bs-toggle="modal"
                        data-bs-target="#compartirModal"
                        onclick="setPlatoInfo('{{ grupo.id }}', 'plato')">
@@ -543,7 +543,6 @@
               </a>
             {% endif %}
 
-           <li>
                 {% if plato.es_armado %}
                   <a class="dropdown-item js-armado-ingredientes"
                     href="#"
@@ -553,20 +552,19 @@
                     <i class="fa-solid fa-list-check me-2"></i> Ingredientes
                   </a>
                 {% elif plato.id %}
-                  <a class="dropdown-item js-plato-ingredientes"
+                  <a class="btn btn-sm btn-outline-primary js-plato-ingredientes"
                     href="#"
                     data-url="{% url 'plato_ingredientes' plato.id %}">
-                    <i class="fa-solid fa-list-check me-2"></i> Ingredientes
+                    <i class="fa-solid fa-list-check"></i> 
                   </a>
                 {% else %}
                   <span class="dropdown-item text-muted">
-                    <i class="fa-solid fa-list-check me-2"></i> Ingredientes
+                    <i class="fa-solid fa-list-check me-2"></i> Ingredienteshhh
                   </span>
                 {% endif %}
-              </li>
 
               {% if plato.es_armado %}
-                <span class="btn btn-sm btn-outline-secondary disabled"
+                <span class="btn btn-sm btn-outline-primary disabled"
                       title="Ver detalle"
                       aria-label="Ver detalle">
                   <i class="fa-regular fa-eye"></i>
@@ -574,7 +572,7 @@
 
               {% elif plato.propietario == request.user %}
                 <a href="{% url 'videos-update' plato.id %}?return_to={{ request.get_full_path|urlencode }}{% if tipopag %}&tipopag={{ tipopag|urlencode }}{% endif %}"
-                  class="btn btn-sm btn-outline-dark"
+                  class="btn btn-sm btn-outline-primary"
                   title="Editar"
                   aria-label="Editar">
                   <i class="fa-regular fa-pen-to-square"></i>
@@ -582,7 +580,7 @@
 
               {% else %}
                 <a href="#"
-                  class="btn btn-sm btn-outline-secondary js-ver-detalle-plato"
+                  class="btn btn-sm btn-outline-primary js-ver-detalle-plato"
                   data-detail-url="{% url 'platos-detail' plato.id %}"
                   title="Ver detalle"
                   aria-label="Ver detalle">
@@ -599,7 +597,7 @@
                   data-confirm-hint="También se borrarán las programaciones de este plato y sus variedades. Esta acción no se puede deshacer."
                   data-confirm-action="{% url 'eliminar-plato' plato.id %}"
                   data-confirm-btn="Sí, borrar"
-                  class="btn btn-sm btn-outline-secondary"
+                  class="btn btn-sm btn-outline-primary"
                   title="Eliminar"
                   aria-label="Eliminar plato">
                   <i class="fa-solid fa-trash-can"></i>
