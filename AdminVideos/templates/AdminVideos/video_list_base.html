@@ -221,40 +221,53 @@
                     </a>
                     {% endif %}
 
-{% if grupo.es_armado %}
+        {% if grupo.es_armado %}
 
-  <span class="btn btn-sm btn-outline-secondary disabled">
-    <i class="fa-regular fa-eye me-1"></i> Ver
-  </span>
+          <span class="btn btn-sm btn-outline-secondary disabled">
+            <i class="fa-regular fa-eye me-1"></i> Ver
+          </span>
 
-{% elif grupo.propietario == request.user %}
+          {% if grupo.propietario == request.user %}
+            <a href="#"
+              class="btn btn-sm btn-outline-danger"
+              data-bs-toggle="modal"
+              data-bs-target="#confirmActionModal"
+              data-confirm-title="Eliminar armado"
+              data-confirm-body="¿Seguro que querés borrar <strong>{{ grupo.nombre_plato|escape }}</strong>?"
+              data-confirm-hint="Esta acción no puede ser revertida."
+              data-confirm-action="{% url 'eliminar-armado' grupo.armado_obj.id %}?return_to={{ request.get_full_path|urlencode }}"
+              data-confirm-btn="Sí, borrar">
+              <i class="fa-solid fa-trash-can me-1"></i> Eliminar
+            </a>
+          {% endif %}
 
-  <a href="{% url 'videos-update' grupo.id %}?return_to={{ request.get_full_path|urlencode }}"
-    class="btn btn-sm btn-outline-dark">
-    <i class="fa-regular fa-pen-to-square me-1"></i> Editar
-  </a>
+        {% elif grupo.propietario == request.user %}
 
-  <a href="#"
-    class="btn btn-sm btn-outline-danger"
-    data-bs-toggle="modal"
-    data-bs-target="#confirmActionModal"
-    data-confirm-title="Eliminar plato"
-    data-confirm-body="¿Seguro que querés borrar <strong>{{ grupo.nombre_plato|escape }}</strong>?"
-    data-confirm-hint="También se borrarán las programaciones de este plato. Esta acción no se puede deshacer."
-    data-confirm-action="{% url 'eliminar-plato' grupo.id %}"
-    data-confirm-btn="Sí, borrar">
-    <i class="fa-solid fa-trash-can me-1"></i> Eliminar
-  </a>
+          <a href="{% url 'videos-update' grupo.id %}?return_to={{ request.get_full_path|urlencode }}"
+            class="btn btn-sm btn-outline-dark">
+            <i class="fa-regular fa-pen-to-square me-1"></i> Editar
+          </a>
 
-{% else %}
-  <a href="#"
-    class="btn btn-sm btn-outline-dark js-ver-detalle-plato"
-    data-detail-url="{% url 'platos-detail' grupo.id %}"
-    title="Ver detalle">
-    <i class="fa-regular fa-eye me-1"></i> Ver
-  </a>
-{% endif %}
+          <a href="#"
+            class="btn btn-sm btn-outline-danger"
+            data-bs-toggle="modal"
+            data-bs-target="#confirmActionModal"
+            data-confirm-title="Eliminar plato"
+            data-confirm-body="¿Seguro que querés borrar <strong>{{ grupo.nombre_plato|escape }}</strong>?"
+            data-confirm-hint="También se borrarán las programaciones de este plato. Esta acción no se puede deshacer."
+            data-confirm-action="{% url 'eliminar-plato' grupo.id %}"
+            data-confirm-btn="Sí, borrar">
+            <i class="fa-solid fa-trash-can me-1"></i> Eliminar
+          </a>
 
+        {% else %}
+          <a href="#"
+            class="btn btn-sm btn-outline-dark js-ver-detalle-plato"
+            data-detail-url="{% url 'platos-detail' grupo.id %}"
+            title="Ver detalle">
+            <i class="fa-regular fa-eye me-1"></i> Ver
+          </a>
+        {% endif %}
 
 
               

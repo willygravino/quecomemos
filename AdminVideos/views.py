@@ -44,6 +44,15 @@ from django.utils.http import url_has_allowed_host_and_scheme
 
 
 
+class ArmadoDeleteView(LoginRequiredMixin, DeleteView):
+    model = Armado
+
+    def get_queryset(self):
+        return Armado.objects.filter(propietario=self.request.user)
+
+    def get_success_url(self):
+        return self.request.GET.get("return_to") or reverse("filtro-de-platos")
+    
 
 @login_required
 def fijar_o_eliminar_habito(request, es_lugar, objeto_id, comida):
