@@ -42,6 +42,45 @@ from AdminVideos.services.pantry import (
 )
 from django.utils.http import url_has_allowed_host_and_scheme
 
+# Paso 8.1: eliminar varios platos seleccionados con la misma lógica que eliminar_plato
+@login_required
+def eliminar_platos_masivo(request):
+    # ✅ Solo por POST
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+
+    ids = request.POST.getlist("ids")
+
+    # ✅ Nos quedamos solo con IDs numéricos válidos
+    ids_validos = [int(i) for i in ids if str(i).isdigit()]
+
+    if not ids_validos:
+        return redirect("filtro-de-platos")
+
+    with transaction.atomic():
+        # Perfil del usuario logueado
+        perfil = get_object_or_404(Profile, user=request.user)
+
+        # Solo platos del usuario logueado
+        platos = Plato.objects.filter(id__in=ids_validos, propietario=request.user)
+
+        for plato in platos:
+            # Limpieza de listas
+            if plato.id_original and plato.id_original in perfil.sugeridos_descartados:
+                perfil.sugeridos_descartados.remove(plato.id_original)
+
+            if plato.id_original and plato.id_original in perfil.sugeridos_importados:
+                perfil.sugeridos_importados.remove(plato.id_original)
+
+            # Si es plato padre: borrar variedades hijas
+            Plato.objects.filter(plato_padre=plato, propietario=request.user).delete()
+
+            # Borrar plato
+            plato.delete()
+
+        perfil.save()
+
+    return redirect("filtro-de-platos")
 
 
 class ArmadoDeleteView(LoginRequiredMixin, DeleteView):

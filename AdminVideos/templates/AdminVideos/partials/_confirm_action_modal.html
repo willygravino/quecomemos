@@ -28,19 +28,18 @@
   {% csrf_token %}
 </form>
 
-<!--SCRIPT PARA Modal genérico de confirmación (Bootstrap):
-reutiliza un solo modal para acciones (borrar, etc.).
-Lee data-confirm-* del botón, setea el action del form POST (con CSRF)
-y al confirmar envía el submit.  -->
-<!-- ESTE SCRIPT PODRÍA SEPARARSE A UN JS STATIC APARTE! MAS LIMPIO Y MANTENIBLE; LO HARÉ CUANDO DEPURE -->
+<!-- Paso 8.5: modal genérico de confirmación compatible con acción individual y eliminación masiva -->
 <script>
   (function () {
-    const modalEl   = document.getElementById("confirmActionModal");
-    const titleEl   = document.getElementById("confirmActionTitle");
-    const bodyEl    = document.getElementById("confirmActionBody");
-    const hintEl    = document.getElementById("confirmActionHint");
-    const btnEl     = document.getElementById("confirmActionBtn");
-    const formEl    = document.getElementById("confirmActionForm");
+    const modalEl        = document.getElementById("confirmActionModal");
+    const titleEl        = document.getElementById("confirmActionTitle");
+    const bodyEl         = document.getElementById("confirmActionBody");
+    const hintEl         = document.getElementById("confirmActionHint");
+    const btnEl          = document.getElementById("confirmActionBtn");
+    const formEl         = document.getElementById("confirmActionForm");
+    const bulkDeleteForm = document.getElementById("bulk-delete-form");
+
+    let submitMode = "default";
 
     if (!modalEl || !titleEl || !bodyEl || !btnEl || !formEl) return;
 
@@ -48,11 +47,12 @@ y al confirmar envía el submit.  -->
       const trigger = event.relatedTarget;
       if (!trigger) return;
 
-      const title  = trigger.getAttribute("data-confirm-title") || "Confirmar acción";
-      const body   = trigger.getAttribute("data-confirm-body")  || "¿Seguro que querés continuar?";
-      const action = trigger.getAttribute("data-confirm-action");
-      const btnTxt = trigger.getAttribute("data-confirm-btn")   || "Sí, continuar";
-      const hint   = trigger.getAttribute("data-confirm-hint"); // opcional
+      const title      = trigger.getAttribute("data-confirm-title") || "Confirmar acción";
+      const body       = trigger.getAttribute("data-confirm-body") || "¿Seguro que querés continuar?";
+      const action     = trigger.getAttribute("data-confirm-action");
+      const btnTxt     = trigger.getAttribute("data-confirm-btn") || "Sí, continuar";
+      const hint       = trigger.getAttribute("data-confirm-hint");
+      const submitForm = trigger.getAttribute("data-confirm-submit-form");
 
       titleEl.textContent = title;
       bodyEl.innerHTML = body; // si no querés HTML, cambiá a textContent
@@ -68,8 +68,18 @@ y al confirmar envía el submit.  -->
         hintEl.classList.remove("d-none");
       }
 
+      // Nuevo: si el trigger indica un form específico para submit, usamos ese modo
+      if (submitForm === "bulk-delete-form") {
+        submitMode = "bulk-delete";
+        btnEl.disabled = !bulkDeleteForm;
+        formEl.removeAttribute("action");
+        return;
+      }
+
+      // Lógica original para acciones individuales
+      submitMode = "default";
+
       if (!action) {
-        // si falta action, deshabilitamos para evitar submit a nada
         btnEl.disabled = true;
         formEl.removeAttribute("action");
       } else {
@@ -79,6 +89,14 @@ y al confirmar envía el submit.  -->
     });
 
     btnEl.addEventListener("click", function () {
+      // Nuevo: submit del form masivo
+      if (submitMode === "bulk-delete") {
+        if (!bulkDeleteForm) return;
+        bulkDeleteForm.submit();
+        return;
+      }
+
+      // Lógica original para acciones individuales
       if (!formEl.getAttribute("action")) return;
       formEl.submit();
     });
