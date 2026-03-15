@@ -401,11 +401,60 @@
 <section class="w-100 text-white bg-light rounded shadow-sm">
 
   <!-- Header opcional (tipo Gmail: checkbox + títulos) -->
-  <div class="px-2 py-2 border-bottom d-flex align-items-center gap-2 text-dark">
+  <div class="px-2 py-2 border-bottom d-flex align-items-center gap-2 text-dark flex-wrap">
+
+  <!-- Seleccionar todos -->
+  <div class="form-check m-0">
     <input class="form-check-input" type="checkbox" id="chk-platos-all" aria-label="Seleccionar todos">
-    <div class="flex-grow-1 small text-muted">Platos</div>
-    <div class="small text-muted d-none d-md-block">Acciones</div>
   </div>
+
+  <!-- Título / contador -->
+  <div class="flex-grow-1 d-flex align-items-center gap-2 min-w-0">
+    <span class="small text-muted mb-0">Platos</span>
+    <span id="platos-selected-count" class="badge rounded-pill bg-primary d-none">0 seleccionados</span>
+  </div>
+
+  <!-- Acciones masivas -->
+  <div class="dropdown">
+    <button
+      class="btn btn-sm btn-outline-secondary dropdown-toggle"
+      type="button"
+      id="bulkPlatosActionsBtn"
+      data-bs-toggle="dropdown"
+      aria-expanded="false"
+      disabled>
+      Acciones masivas
+    </button>
+
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="bulkPlatosActionsBtn">
+      <li>
+        <button class="dropdown-item" type="button" id="bulk-select-all">
+          <i class="fa-solid fa-check-double me-2"></i>Seleccionar todos
+        </button>
+      </li>
+      <li>
+        <button class="dropdown-item" type="button" id="bulk-unselect-all">
+          <i class="fa-solid fa-xmark me-2"></i>Deseleccionar todos
+        </button>
+      </li>
+
+      {% if amigues %}
+      <li>
+        <button class="dropdown-item" type="button" id="bulk-share">
+          <i class="fa-solid fa-share-nodes me-2"></i>Compartir seleccionados
+        </button>
+      </li>
+      {% endif %}
+
+      <li>
+        <button class="dropdown-item text-danger" type="button" id="bulk-delete">
+          <i class="fa-solid fa-trash-can me-2"></i>Eliminar seleccionados
+        </button>
+      </li>
+    </ul>
+  </div>
+
+</div>
 
   <div class="list-group list-group-flush">
 
@@ -864,6 +913,156 @@ document.addEventListener("DOMContentLoaded", function () {
 
 </script>
 
+<!-- Paso 3: seleccionar/deseleccionar todos y mostrar cuántos platos están seleccionados -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const masterCheckbox = document.getElementById('chk-platos-all');
+  const rowCheckboxes = document.querySelectorAll('.js-plato-select');
+  const selectedCountBadge = document.getElementById('platos-selected-count');
 
+  function updateSelectedCount() {
+    const selected = Array.from(rowCheckboxes).filter(function (checkbox) {
+      return checkbox.checked;
+    }).length;
+
+    if (!selectedCountBadge) return;
+
+    if (selected > 0) {
+      selectedCountBadge.classList.remove('d-none');
+      selectedCountBadge.textContent = `${selected} seleccionado${selected > 1 ? 's' : ''}`;
+    } else {
+      selectedCountBadge.classList.add('d-none');
+      selectedCountBadge.textContent = '0 seleccionados';
+    }
+  }
+
+  if (masterCheckbox) {
+    masterCheckbox.addEventListener('change', function () {
+      rowCheckboxes.forEach(function (checkbox) {
+        checkbox.checked = masterCheckbox.checked;
+      });
+      updateSelectedCount();
+    });
+  }
+
+  rowCheckboxes.forEach(function (checkbox) {
+    checkbox.addEventListener('change', function () {
+      updateSelectedCount();
+    });
+  });
+
+  updateSelectedCount();
+});
+</script>
+
+<!-- Paso 7: seleccionar/deseleccionar, contar seleccionados, habilitar Acciones masivas,
+sincronizar el checkbox general y abrir modal para eliminación masiva -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const masterCheckbox = document.getElementById('chk-platos-all');
+  const rowCheckboxes = document.querySelectorAll('.js-plato-select');
+  const selectedCountBadge = document.getElementById('platos-selected-count');
+  const bulkActionsBtn = document.getElementById('bulkPlatosActionsBtn');
+  const bulkDeleteBtn = document.getElementById('bulk-delete');
+
+  // Obtener los IDs de los platos actualmente seleccionados
+  function getSelectedIds() {
+    return Array.from(rowCheckboxes)
+      .filter(function (checkbox) {
+        return checkbox.checked;
+      })
+      .map(function (checkbox) {
+        return checkbox.value;
+      });
+  }
+
+  // Actualizar contador, botón de acciones masivas y estado del checkbox general
+  function updateSelectedCount() {
+    const total = rowCheckboxes.length;
+    const selected = Array.from(rowCheckboxes).filter(function (checkbox) {
+      return checkbox.checked;
+    }).length;
+
+    if (selectedCountBadge) {
+      if (selected > 0) {
+        selectedCountBadge.classList.remove('d-none');
+        selectedCountBadge.textContent = `${selected} seleccionado${selected > 1 ? 's' : ''}`;
+      } else {
+        selectedCountBadge.classList.add('d-none');
+        selectedCountBadge.textContent = '0 seleccionados';
+      }
+    }
+
+    if (bulkActionsBtn) {
+      bulkActionsBtn.disabled = selected === 0;
+    }
+
+    if (masterCheckbox) {
+      if (selected === 0) {
+        masterCheckbox.checked = false;
+        masterCheckbox.indeterminate = false;
+      } else if (selected === total) {
+        masterCheckbox.checked = true;
+        masterCheckbox.indeterminate = false;
+      } else {
+        masterCheckbox.checked = false;
+        masterCheckbox.indeterminate = true;
+      }
+    }
+  }
+
+  // Checkbox general: marcar o desmarcar todos
+  if (masterCheckbox) {
+    masterCheckbox.addEventListener('change', function () {
+      rowCheckboxes.forEach(function (checkbox) {
+        checkbox.checked = masterCheckbox.checked;
+      });
+      updateSelectedCount();
+    });
+  }
+
+  // Checkboxes individuales: recalcular estado general
+  rowCheckboxes.forEach(function (checkbox) {
+    checkbox.addEventListener('change', function () {
+      updateSelectedCount();
+    });
+  });
+
+  // Acción masiva: abrir modal de confirmación para eliminar seleccionados
+  if (bulkDeleteBtn) {
+    bulkDeleteBtn.addEventListener('click', function () {
+      const idsSeleccionados = getSelectedIds();
+      if (!idsSeleccionados.length) return;
+
+      const cantidad = idsSeleccionados.length;
+      const actionUrl = `/platos/eliminar-masivo/?ids=${idsSeleccionados.join(',')}`;
+
+      const trigger = document.createElement('button');
+      trigger.type = 'button';
+      trigger.style.display = 'none';
+      trigger.setAttribute('data-bs-toggle', 'modal');
+      trigger.setAttribute('data-bs-target', '#confirmActionModal');
+      trigger.setAttribute('data-confirm-title', 'Eliminar platos seleccionados');
+      trigger.setAttribute(
+        'data-confirm-body',
+        `¿Seguro que querés borrar <strong>${cantidad}</strong> plato(s) seleccionado(s)?`
+      );
+      trigger.setAttribute(
+        'data-confirm-hint',
+        'También se borrarán las programaciones de esos platos. Esta acción no se puede deshacer.'
+      );
+      trigger.setAttribute('data-confirm-action', actionUrl);
+      trigger.setAttribute('data-confirm-btn', 'Sí, borrar');
+
+      document.body.appendChild(trigger);
+      trigger.click();
+      trigger.remove();
+    });
+  }
+
+  // Estado inicial
+  updateSelectedCount();
+});
+</script>
 
 {% endblock %}
