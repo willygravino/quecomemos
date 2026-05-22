@@ -18,3 +18,10 @@ cmds = [
   "/opt/venv/bin/python -m pip install --upgrade pip setuptools",  # Instala pip y setuptools dentro del venv
   "/opt/venv/bin/python -m pip install -r requirements.txt"  # Instala las dependencias en el venv
 ]
+[phases.build]
+cmds = [
+  "/opt/venv/bin/python manage.py collectstatic --noinput"
+]
+
+[start]
+cmd = "/opt/venv/bin/gunicorn nuestrotubo.wsgi:application --bind 0.0.0.0:$PORT"
