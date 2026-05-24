@@ -668,7 +668,15 @@
             <div class="fw-semibold">${componenteNombre}</div>
             <small class="text-muted">ID: ${componenteId}</small>
           </div>
+
+          <button type="button"
+                  class="btn btn-sm btn-outline-danger eliminar-componente"
+                  data-componente-id="${componenteId}">
+            Eliminar
+          </button>
         `;
+
+
 
         ul.appendChild(li);
 
@@ -685,6 +693,56 @@
       });
 
       guardarComponenteBtn.__bound = true;
+    }
+
+    // ===== Eliminar plato asociado
+    const componentesUl =
+      context.querySelector("#componentes-ul") ||
+      document.getElementById("componentes-ul");
+
+    if (componentesUl && !componentesUl.__deleteComponenteBound) {
+      componentesUl.addEventListener("click", function (ev) {
+        const btn = ev.target.closest(".eliminar-componente");
+        if (!btn) return;
+
+        ev.preventDefault();
+
+        const componenteId = btn.dataset.componenteId;
+        if (!componenteId) return;
+
+        const hiddenBox =
+          context.querySelector("#componentes-hidden-fields") ||
+          document.getElementById("componentes-hidden-fields");
+
+        if (!hiddenBox) {
+          console.error("Falta #componentes-hidden-fields");
+          return;
+        }
+
+        // Eliminar el input hidden que Django usa para guardar componentes
+        hiddenBox
+          .querySelectorAll(`input[name="componentes"][value="${componenteId}"]`)
+          .forEach((input) => input.remove());
+
+        // Eliminar visualmente de la lista
+        const li = btn.closest("li");
+        if (li) li.remove();
+
+        // Si no queda ningún componente visible, mostrar mensaje vacío
+        const quedanComponentes = componentesUl.querySelectorAll(
+          "li[data-componente-id]"
+        ).length;
+
+        if (quedanComponentes === 0) {
+          const emptyLi = document.createElement("li");
+          emptyLi.className = "list-group-item text-muted";
+          emptyLi.id = "componentes-empty";
+          emptyLi.textContent = "Todavía no hay platos asociados.";
+          componentesUl.appendChild(emptyLi);
+        }
+      });
+
+      componentesUl.__deleteComponenteBound = true;
     }
 
 

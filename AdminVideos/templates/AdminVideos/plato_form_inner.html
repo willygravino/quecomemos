@@ -245,6 +245,12 @@
           <div class="fw-semibold">{{ componente.nombre_plato }}</div>
           <small class="text-muted">ID: {{ componente.id }}</small>
         </div>
+
+        <button type="button"
+                class="btn btn-sm btn-outline-danger eliminar-componente"
+                data-componente-id="{{ componente.id }}">
+          Eliminar
+        </button>
       </li>
     {% empty %}
       <li class="list-group-item text-muted" id="componentes-empty">
