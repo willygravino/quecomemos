@@ -51,12 +51,19 @@ class PlatoForm(forms.ModelForm):
         label="Tipos",
     )
 
+    componentes = forms.ModelMultipleChoiceField(
+        queryset=Plato.objects.none(),
+        required=False,
+        widget=forms.MultipleHiddenInput,
+    )
+
     class Meta:
         model = Plato
         fields = [
             "nombre_plato",
             "receta",
             "ingredientes",
+            "componentes",
             "porciones",
             "medios",
             "elaboracion",
@@ -69,7 +76,21 @@ class PlatoForm(forms.ModelForm):
         ]
 
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
+
+        # ✅ Componentes: platos que se pueden asociar a este plato
+        if "componentes" in self.fields:
+            qs = Plato.objects.none()
+
+            if self.user and self.user.is_authenticated:
+                qs = Plato.objects.filter(propietario=self.user)
+
+            # Evitamos que un plato pueda asociarse a sí mismo
+            if self.instance and self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+
+            self.fields["componentes"].queryset = qs
 
         # ✅ Si en DB guardás "Principal,Guarnicion", convertimos a lista sin espacios
         if self.instance and self.instance.tipos:
@@ -80,12 +101,34 @@ class PlatoForm(forms.ModelForm):
         # Placeholders
         if "porciones" in self.fields:
             self.fields["porciones"].widget.attrs.update({"placeholder": "Porciones"})
+
         if "elaboracion" in self.fields:
             self.fields["elaboracion"].widget.attrs.update({"placeholder": "Preparación (min)"})
+
         if "coccion" in self.fields:
             self.fields["coccion"].widget.attrs.update({"placeholder": "Cocción (min)"})
+
         if "enlace" in self.fields:
             self.fields["enlace"].widget.attrs.update({"placeholder": "Enlace al video o receta"})
+
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+
+    #     # ✅ Si en DB guardás "Principal,Guarnicion", convertimos a lista sin espacios
+    #     if self.instance and self.instance.tipos:
+    #         self.initial["tipos"] = [
+    #             t.strip() for t in self.instance.tipos.split(",") if t.strip()
+    #         ]
+
+    #     # Placeholders
+    #     if "porciones" in self.fields:
+    #         self.fields["porciones"].widget.attrs.update({"placeholder": "Porciones"})
+    #     if "elaboracion" in self.fields:
+    #         self.fields["elaboracion"].widget.attrs.update({"placeholder": "Preparación (min)"})
+    #     if "coccion" in self.fields:
+    #         self.fields["coccion"].widget.attrs.update({"placeholder": "Cocción (min)"})
+    #     if "enlace" in self.fields:
+    #         self.fields["enlace"].widget.attrs.update({"placeholder": "Enlace al video o receta"})
 
     def clean(self):
         cleaned_data = super().clean()

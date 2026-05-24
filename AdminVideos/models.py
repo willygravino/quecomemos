@@ -88,7 +88,6 @@ class Plato(models.Model):
     elaboracion = models.IntegerField(null=True, blank=True)
     coccion = models.IntegerField(null=True, blank=True)
 
-    # tipos = models.ManyToManyField(TipoPlato, related_name="platos")
 
     TIPOS_CHOICES = [
         ('Entrada', 'Entrada'),
@@ -121,6 +120,14 @@ class Plato(models.Model):
        ]
 
     estacionalidad = models.CharField(max_length=20, choices=ESTACIONALIDAD_CHOICES, default=TODO_EL_AÑO,null=True)  
+
+    componentes = models.ManyToManyField(
+        "self",
+        symmetrical=False,
+        blank=True,
+        related_name="forma_parte_de",
+        help_text="Otros platos que componen este plato"
+    )
 
     propietario = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="propietario")
 

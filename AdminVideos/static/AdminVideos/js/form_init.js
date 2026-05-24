@@ -588,7 +588,6 @@
 
 
 
-    // ===== Botón "Guardar" del modal ingredientes
      // ===== Botón "Guardar" del modal ingredientes
     const guardarBtn = context.querySelector("#guardarIngrediente");
     if (guardarBtn && !guardarBtn.__bound) {
@@ -607,6 +606,87 @@
       guardarBtn.__bound = true;
     }
  
+    // ===== Botón "Asociar" del modal componentes/platos asociados
+    const guardarComponenteBtn =
+      context.querySelector("#guardarComponente") ||
+      document.getElementById("guardarComponente");
+
+    if (guardarComponenteBtn && !guardarComponenteBtn.__bound) {
+      guardarComponenteBtn.addEventListener("click", function () {
+        const select =
+          context.querySelector("#modal-componente") ||
+          document.getElementById("modal-componente");
+
+        const hiddenBox =
+          context.querySelector("#componentes-hidden-fields") ||
+          document.getElementById("componentes-hidden-fields");
+
+        const ul =
+          context.querySelector("#componentes-ul") ||
+          document.getElementById("componentes-ul");
+
+        if (!select || !hiddenBox || !ul) {
+          console.error("Falta #modal-componente, #componentes-hidden-fields o #componentes-ul");
+          return;
+        }
+
+        const componenteId = select.value;
+        const componenteNombre = select.options[select.selectedIndex]?.text?.trim() || "";
+
+        if (!componenteId) {
+          alert("Seleccioná un plato para asociar.");
+          return;
+        }
+
+        // Evitar duplicados
+        const yaExiste = hiddenBox.querySelector(
+          `input[name="componentes"][value="${componenteId}"]`
+        );
+
+        if (yaExiste) {
+          alert("Ese plato ya está asociado.");
+          return;
+        }
+
+        // Crear hidden para que Django reciba componentes=<id>
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "componentes";
+        input.value = componenteId;
+        hiddenBox.appendChild(input);
+
+        // Sacar mensaje vacío si existe
+        const emptyLi = ul.querySelector("#componentes-empty");
+        if (emptyLi) emptyLi.remove();
+
+        // Mostrar en la lista
+        const li = document.createElement("li");
+        li.className = "list-group-item d-flex justify-content-between align-items-center";
+        li.dataset.componenteId = componenteId;
+        li.innerHTML = `
+          <div>
+            <div class="fw-semibold">${componenteNombre}</div>
+            <small class="text-muted">ID: ${componenteId}</small>
+          </div>
+        `;
+
+        ul.appendChild(li);
+
+        // Limpiar select
+        select.value = "";
+
+        // Cerrar modal
+        const modalEl =
+          context.querySelector("#componenteModal") ||
+          document.getElementById("componenteModal");
+
+        const modal = modalEl ? bootstrap.Modal.getInstance(modalEl) : null;
+        if (modal) modal.hide();
+      });
+
+      guardarComponenteBtn.__bound = true;
+    }
+
 
 
         // ===== Guardado AJAX dentro del modal principal =====

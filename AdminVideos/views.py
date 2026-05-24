@@ -1318,6 +1318,11 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
     # Fallback de template por si tipopag no matchea
     DEFAULT_TEMPLATE = 'AdminVideos/ppal_form.html'
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
     def get(self, request, *args, **kwargs):
         self.object = None  # ← necesario para evitar AttributeError
         context = self.get_context_data()
@@ -1503,6 +1508,11 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
         if obj.propietario != self.request.user:
             raise PermissionDenied("No tienes permiso para editar este plato.")
         return obj
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()

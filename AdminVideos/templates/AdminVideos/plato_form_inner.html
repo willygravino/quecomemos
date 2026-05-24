@@ -219,8 +219,40 @@
 </div>
 
 
+<div id="componentes-hidden-fields" class="d-none">
+  {{ form.componentes }}
+</div>
 
+<hr class="my-4">
 
+<div id="componentes-section" class="mb-4">
+  <div class="d-flex align-items-center justify-content-between">
+    <h5 class="mb-0">Platos asociados</h5>
+
+    <button type="button"
+            class="btn btn-sm btn-outline-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#componenteModal">
+      + Asociar otro plato
+    </button>
+  </div>
+
+  <ul id="componentes-ul" class="list-group mt-3">
+    {% for componente in form.instance.componentes.all %}
+      <li class="list-group-item d-flex justify-content-between align-items-center"
+          data-componente-id="{{ componente.id }}">
+        <div>
+          <div class="fw-semibold">{{ componente.nombre_plato }}</div>
+          <small class="text-muted">ID: {{ componente.id }}</small>
+        </div>
+      </li>
+    {% empty %}
+      <li class="list-group-item text-muted" id="componentes-empty">
+        Todavía no hay platos asociados.
+      </li>
+    {% endfor %}
+  </ul>
+</div>
 
                 <!-- Otros campos -->
 
@@ -522,6 +554,45 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
         <button type="button" class="btn btn-primary" id="guardarIngrediente">Guardar</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Modal componentes / platos asociados -->
+<div class="modal fade" id="componenteModal" tabindex="-1" aria-labelledby="componenteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="componenteModalLabel">Asociar otro plato</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="modal-componente" class="form-label">Plato</label>
+          <select id="modal-componente" class="form-select" style="width:100%">
+            <option value="">Seleccioná un plato</option>
+
+            {% for plato_opcion in form.fields.componentes.queryset %}
+              <option value="{{ plato_opcion.id }}">
+                {{ plato_opcion.nombre_plato }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancelar
+        </button>
+
+        <button type="button" class="btn btn-primary" id="guardarComponente">
+          Asociar
+        </button>
       </div>
 
     </div>
