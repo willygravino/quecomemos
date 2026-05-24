@@ -9,7 +9,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
-from AdminVideos.models import Armado, HabitoSemanal, Ingrediente, IngredienteEnPlato, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente
+from AdminVideos.models import HabitoSemanal, Ingrediente, IngredienteEnPlato, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string   # ✅ ← ESTA ES LA CLAVE
 from django.http import Http404, HttpRequest, HttpResponseNotAllowed, JsonResponse
@@ -19,7 +19,7 @@ from django.views.generic import CreateView, UpdateView, DeleteView, DetailView
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from datetime import datetime, timedelta
-from .forms import ArmadoForm, IngredienteEnPlatoFormSet, LugarForm, PlatoFilterForm, PlatoForm, CustomAuthenticationForm
+from .forms import IngredienteEnPlatoFormSet, LugarForm, PlatoFilterForm, PlatoForm, CustomAuthenticationForm
 from datetime import date, datetime
 from django.contrib.auth.models import User  # Asegúrate de importar el modelo User
 from django.db.models import Q, Subquery, OuterRef, Prefetch, Min, Max, F
@@ -82,15 +82,6 @@ def eliminar_platos_masivo(request):
 
     return redirect("filtro-de-platos")
 
-
-class ArmadoDeleteView(LoginRequiredMixin, DeleteView):
-    model = Armado
-
-    def get_queryset(self):
-        return Armado.objects.filter(propietario=self.request.user)
-
-    def get_success_url(self):
-        return self.request.GET.get("return_to") or reverse("filtro-de-platos")
     
 
 @login_required
@@ -2143,69 +2134,8 @@ def filtrar_platos(
     # Si no se selecciona ninguna de las dos opciones, no mostrar nada
     if quecomemos != "quecomemos" and misplatos != "misplatos":
         return {
-                    "armados": [],
-                    "platos": Plato.objects.none()}
-                
-    armados_virtuales = []
-    
-    # Caso especial: las Picadas se construyen desde Armado
-    if tipo_parametro == "Picada":
-        armados_qs = Armado.objects.none()
-
-        if misplatos == "misplatos":
-            qs_mis_armados = Armado.objects.filter(
-                propietario=usuario,
-                tipo_armado="Picada",
-            )
-            armados_qs = armados_qs | qs_mis_armados
-
-        if quecomemos == "quecomemos":
-            usuario_quecomemos = User.objects.filter(username="quecomemos").first()
-            if usuario_quecomemos:
-                qs_quecomemos_armados = Armado.objects.filter(
-                    propietario=usuario_quecomemos,
-                    tipo_armado="Picada",
-                )
-                armados_qs = armados_qs | qs_quecomemos_armados
-
-        if palabra_clave:
-            armados_qs = armados_qs.filter(
-                Q(nombre__icontains=palabra_clave) |
-                Q(items__nombre_plato__icontains=palabra_clave) |
-                Q(items__ingredientes__icontains=palabra_clave)
-            ).distinct()
-
-        armados_qs = armados_qs.prefetch_related("items").order_by("-id")
-
-        platos_virtuales = []
-        for armado in armados_qs:
-            plato_virtual = Plato(
-                id=-armado.id,  # negativo para evitar choque con ids reales
-                nombre_plato=armado.nombre,
-                tipos="Picada",
-                propietario=armado.propietario,
-                ingredientes=", ".join(
-                    armado.items.values_list("nombre_plato", flat=True)
-                ),
-            )
-
-            # atributos extra que el template espera
-            plato_virtual.es_armado = True
-            plato_virtual.armado_obj = armado
-            plato_virtual.programaciones_count = 0
-            plato_virtual.ultima_programacion = None
-            plato_virtual.dias_desde_ultima = None
-            plato_virtual.variedades_count = 0
-            plato_virtual.proviene_de = ""
-            # plato_virtual.image_url = "/media/avatares/tabla_picada.png"
-            # plato_virtual.variedades_hijas = []
-
-            platos_virtuales.append(plato_virtual)
-
-        armados_virtuales = platos_virtuales    
-
-        # return platos_virtuales
-                
+            "platos": Plato.objects.none()
+        }
 
     # Comenzamos con un queryset vacío
     platos_qs = Plato.objects.none()
@@ -2290,16 +2220,10 @@ def filtrar_platos(
         Prefetch("variedades_hijas", queryset=variedades_qs)
     )
 
-    # # Si hay armados (caso Picada), agregarlos antes del queryset
-    # if armados_virtuales:
-    #     return list(armados_virtuales) + list(platos_qs)
     
     return {
-    "armados": armados_virtuales,
-    "platos": platos_qs,
-            }   
-
-
+        "platos": platos_qs,
+    }
 
 @login_required(login_url=reverse_lazy('login'), redirect_field_name=None)
 def FiltroDePlatos(request):
@@ -2471,13 +2395,9 @@ def FiltroDePlatos(request):
             palabra_clave=palabra_clave
         )
 
-        armados = resultado_filtro["armados"]
         platos = resultado_filtro["platos"]
 
         hoy = timezone.localdate()
-
-        for p in armados:
-            p.dias_desde_ultima = (hoy - p.ultima_programacion).days if getattr(p, "ultima_programacion", None) else None
 
         for p in platos:
             p.dias_desde_ultima = (hoy - p.ultima_programacion).days if getattr(p, "ultima_programacion", None) else None
@@ -2619,8 +2539,6 @@ def FiltroDePlatos(request):
     # Convertir defaultdict a dict antes de pasarlo a la plantilla
     platos_dia_x_dia = dict(platos_dia_x_dia)
 
-    carousel_items = armados if armados else platos
-
     habitos_lookup = {
     (h.dia_semana, h.momento, h.plato_id): h.id
     for h in habitos}
@@ -2628,8 +2546,7 @@ def FiltroDePlatos(request):
     contexto = {
                 'formulario': form,
                 'platos': platos,
-                'armados': armados,
-                "carousel_items": carousel_items,
+                "carousel_items": platos,
                 "dias_desde_hoy": dias_desde_hoy,
                 "dias_programados": dias_programados,
                 "quecomemos_ck": quecomemos,
@@ -3457,80 +3374,3 @@ def eliminar_menu_programado(request):
     )
     return redirect("filtro-de-platos")
 
-
-# class ArmadoCreateView(LoginRequiredMixin, CreateView):
-#     model = Armado
-#     form_class = ArmadoForm
-#     template_name = "AdminVideos/armado_form.html"
-
-#     def dispatch(self, request, *args, **kwargs):
-#         # tipo viene por URL: /armados/nuevo/Picada/
-#         self.tipo_armado = self.kwargs["tipo_armado"]
-#         return super().dispatch(request, *args, **kwargs)
-
-#     def get_form_kwargs(self):
-#         kwargs = super().get_form_kwargs()
-#         kwargs["propietario"] = self.request.user
-#         kwargs["tipo_armado"] = self.tipo_armado
-#         return kwargs
-
-#     def form_valid(self, form):
-#         obj = form.save(commit=False)
-#         obj.propietario = self.request.user
-#         obj.tipo_armado = self.tipo_armado
-#         obj.save()
-#         form.save_m2m()
-#         return super().form_valid(form)
-
-#     def get_success_url(self):
-#         return reverse("armado-detail", kwargs={"pk": self.object.pk})
-    
-class ArmadoCreateView(LoginRequiredMixin, CreateView):
-    model = Armado
-    form_class = ArmadoForm
-    template_name = "AdminVideos/partials/armado_form_modal.html"
-
-    def dispatch(self, request, *args, **kwargs):
-        self.tipo_armado = self.kwargs["tipo_armado"]
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["propietario"] = self.request.user
-        kwargs["tipo_armado"] = self.tipo_armado
-        return kwargs
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["tipo_armado"] = self.tipo_armado
-        return context
-
-    def form_valid(self, form):
-        obj = form.save(commit=False)
-        obj.propietario = self.request.user
-        obj.tipo_armado = self.tipo_armado
-        obj.save()
-        form.save_m2m()
-        self.object = obj
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        tipopag = self.request.GET.get("tipopag", self.tipo_armado)
-        dia_activo = self.request.GET.get("dia_activo")
-
-        url = reverse("filtro-de-platos")
-
-        if dia_activo:
-            return f"{url}?tipopag={tipopag}&dia_activo={dia_activo}"
-
-        return f"{url}?tipopag={tipopag}"
-        
-
-
-class ArmadoDetailView(LoginRequiredMixin, DetailView):
-    model = Armado
-    template_name = "AdminVideos/armado_detail.html"
-
-    def get_queryset(self):
-        # Seguridad: solo ver tus armados
-        return Armado.objects.filter(propietario=self.request.user)

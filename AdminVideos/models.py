@@ -169,35 +169,6 @@ class Plato(models.Model):
 
     def __str__(self):
         return f"{self.id} - {self.nombre_plato} de {self.propietario}"
-
-
-class Armado(models.Model):
-    PICADA = "Picada"
-    ENSALADA = "Ensalada"
-
-    TIPO_ARMADO_CHOICES = [
-        (PICADA, "Picada"),
-        (ENSALADA, "Ensalada"),
-    ]
-
-    nombre = models.CharField(max_length=60)
-    tipo_armado = models.CharField(max_length=30, choices=TIPO_ARMADO_CHOICES)
-    propietario = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="armados"
-    )
-    items = models.ManyToManyField(
-        "Plato",
-        blank=True,
-        related_name="armados"
-    )
-
-    creada = models.DateTimeField(auto_now_add=True)
-    actualizada = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"{self.id} - {self.tipo_armado}: {self.nombre} ({self.propietario})"
     
 
 class Ingrediente(models.Model):
