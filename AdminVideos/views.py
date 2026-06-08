@@ -1336,6 +1336,8 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             'Trago': 'AdminVideos/trago_form.html',
             'Salsa': 'AdminVideos/salsa_form.html',
             'Guarnicion': 'AdminVideos/guarnicion_form.html',
+            'Picada': 'AdminVideos/ppal_form.html',
+            'Ingrediente de picada': 'AdminVideos/ppal_form.html',
             'Postre': 'AdminVideos/postre_form.html',
             'Delivery': 'AdminVideos/delivery.html',
             'Comerafuera': 'AdminVideos/comerafuera.html',
@@ -1351,7 +1353,8 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         "Postre": ["Postre"],
         "Principal": ["Principal", "Guarnicion", "Entrada", "Picada"],
         # "Dash": ["Principal", "Guarnicion", "Entrada", "Picada"],
-        "Picada": ["Picada","Guarnicion", "Entrada"],
+        "Ingrediente de picada": ["Ingrediente de picada","Guarnicion", "Entrada"],
+        "Picada": ["Picada"],
         "Salsa": ["Salsa", "Dip", "Guarnicion", "Entrada"],
     }
 
@@ -2160,7 +2163,14 @@ def filtrar_platos(
             platos_qs = platos_qs | qs_quecomemos
 
     # 🔹 Aplicar filtros adicionales
-    if tipo_parametro:
+    # if tipo_parametro:
+    #     platos_qs = platos_qs.filter(tipos__icontains=tipo_parametro)
+    if tipo_parametro == "Picada":
+        platos_qs = platos_qs.filter(
+            Q(tipos__icontains="Picada") |
+            Q(tipos__icontains="Ingrediente de picada")
+        )
+    elif tipo_parametro:
         platos_qs = platos_qs.filter(tipos__icontains=tipo_parametro)
 
     if medios and medios != "-":
@@ -2397,6 +2407,18 @@ def FiltroDePlatos(request):
 
         platos = resultado_filtro["platos"]
 
+        if tipo_parametro == "Picada":
+            platos_carousel = platos.filter(tipos__icontains="Picada").exclude(
+                tipos__icontains="Ingrediente de picada"
+            )
+
+            platos_listado = platos.filter(
+                tipos__icontains="Ingrediente de picada"
+            )
+        else:
+            platos_carousel = platos
+            platos_listado = platos
+
         hoy = timezone.localdate()
 
         for p in platos:
@@ -2545,8 +2567,8 @@ def FiltroDePlatos(request):
 
     contexto = {
                 'formulario': form,
-                'platos': platos,
-                "carousel_items": platos,
+                'platos': platos_listado,
+                "carousel_items": platos_carousel,
                 "dias_desde_hoy": dias_desde_hoy,
                 "dias_programados": dias_programados,
                 "quecomemos_ck": quecomemos,

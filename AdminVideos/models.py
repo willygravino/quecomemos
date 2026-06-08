@@ -89,17 +89,30 @@ class Plato(models.Model):
     coccion = models.IntegerField(null=True, blank=True)
 
 
+    # TIPOS_CHOICES = [
+    #     ('Entrada', 'Entrada'),
+    #     ('Guarnicion', 'Guarnición'),
+    #     ('Trago', 'Trago'),
+    #     ('Dip', 'Dip'),
+    #     ('Torta', 'Torta'),
+    #     ('Postre', 'Postre'),
+    #     ('Principal', 'Principal'),
+    #     ('Picada', 'Picada'),
+    #     ('Salsa', 'Salsa'),
+    # ]
+
     TIPOS_CHOICES = [
-        ('Entrada', 'Entrada'),
-        ('Guarnicion', 'Guarnición'),
-        ('Trago', 'Trago'),
-        ('Dip', 'Dip'),
-        ('Torta', 'Torta'),
-        ('Postre', 'Postre'),
-        ('Principal', 'Principal'),
-        ('Picada', 'Picada'),
-        ('Salsa', 'Salsa'),
-    ]
+    ('Entrada', 'Entrada'),
+    ('Guarnicion', 'Guarnición'),
+    ('Trago', 'Trago'),
+    ('Dip', 'Dip'),
+    ('Torta', 'Torta'),
+    ('Postre', 'Postre'),
+    ('Principal', 'Principal'),
+    ('Picada', 'Picada'),
+    ('Ingrediente de picada', 'Ingrediente de picada'),
+    ('Salsa', 'Salsa'),
+]
 
     tipos = models.CharField(
         max_length=200,
@@ -165,7 +178,16 @@ class Plato(models.Model):
         except (ValueError, FileNotFoundError):
             # return '/media/avatares/logo.png'
             return '/media/avatares/hoja_thumbnail.png'
-        
+
+
+    @property
+    def es_picada(self):
+        return self.tipos == "Picada"
+
+    @property
+    def es_ingrediente_picada(self):
+        return self.tipos == "Ingrediente de picada"
+            
 
     def __str__(self):
         return f"{self.id} - {self.nombre_plato} de {self.propietario}"

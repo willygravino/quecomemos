@@ -35,10 +35,10 @@
           
 
       {% if tipopag and tipopag != "Dash" %}
-            + AGREGAR RECETA DE {{ tipopag|upper }}
+            + AGREGAR RECETA nbbnnn DE {{ tipopag|upper }}
 
           {% else %}
-            + AGREGAR RECETA DE PLATO PRINCIPAL
+            + AGREGAR RECETA njjhjhjh DE PLATO PRINCIPAL
           {% endif %}
         </a>
 
@@ -100,14 +100,14 @@
      - Variedades en mini-grilla debajo
 =========================== -->
 
-{% if platos %}
-<section class="w-100 bg-warning rounded shadow-sm p-3 mb-3">
+{% if carousel_items %}
+ <section class="w-100 bg-warning rounded shadow-sm p-3 mb-3">
 
   <div id="platosCarousel" class="carousel slide comidas-carousel" data-bs-ride="false" data-bs-interval="false">
 
     <!-- Indicadores (1 por grupo/padre) -->
     <div class="carousel-indicators">
-      {% for grupo in platos %}
+      {% for grupo in carousel_items %}
 
         <button type="button"
                 data-bs-target="#platosCarousel"
@@ -121,7 +121,7 @@
 
     <div class="carousel-inner">
 
-      {% for grupo in platos %}
+      {% for grupo in carousel_items %}
 
         <div class="carousel-item {% if forloop.first %}active{% endif %}">
           <div class="d-flex justify-content-center py-2">

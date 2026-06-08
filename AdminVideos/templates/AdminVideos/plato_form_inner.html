@@ -290,29 +290,48 @@
                     </div>
 
 
-            <div class="mb-3 border rounded p-3 bg-light{% if form.tipos.errors %} border-danger{% endif %}">
-                <label class="form-label d-block">Tipo de plato:</label>
-                {% if items %}
-                {% for tipo in items %}
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" name="tipos" id="id_tipos_{{ forloop.counter0 }}"
-                        value="{{ tipo }}" {% if tipo in form.tipos.value %}checked{% endif %}>
 
-                    <label class="form-check-label" for="id_tipos_{{ forloop.counter0 }}"> &nbsp; {{ tipo }} </label>
-                </div>
-                {% endfor %}
-                {% else %}
-                <p>No hay tipos disponibles.</p>
-                {% endif %}
 
-                {% if form.tipos.errors %}
-                <div class="invalid-feedback d-block">
-                    {% for error in form.tipos.errors %}
-                    {{ error }}
+              {% if tipopag == "Picada" and not form.instance.es_ingrediente_picada %}
+                <input type="hidden" name="tipos" value="Picada">
+              {% else %}
+                <div class="mb-3 border rounded p-3 bg-light{% if form.tipos.errors %} border-danger{% endif %}">
+                  <label class="form-label d-block">Tipo de plato:</label>
+
+                  {% if items %}
+                    {% for tipo in items %}
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input"
+                              type="checkbox"
+                              name="tipos"
+                              id="id_tipos_{{ forloop.counter0 }}"
+                              value="{{ tipo }}"
+                              {% if tipo in form.tipos.value %}checked{% endif %}>
+
+                        <label class="form-check-label" for="id_tipos_{{ forloop.counter0 }}">
+                          &nbsp; {{ tipo }}
+                        </label>
+                      </div>
                     {% endfor %}
+                  {% else %}
+                    <p>No hay tipos disponibles.</p>
+                  {% endif %}
+
+                  {% if form.tipos.errors %}
+                    <div class="invalid-feedback d-block">
+                      {% for error in form.tipos.errors %}
+                        {{ error }}
+                      {% endfor %}
+                    </div>
+                  {% endif %}
                 </div>
-                {% endif %}
-            </div>
+              {% endif %}
+
+
+
+
+
+
 
 
                 <div class="mb-3">

@@ -111,25 +111,6 @@ class PlatoForm(forms.ModelForm):
         if "enlace" in self.fields:
             self.fields["enlace"].widget.attrs.update({"placeholder": "Enlace al video o receta"})
 
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-
-    #     # ✅ Si en DB guardás "Principal,Guarnicion", convertimos a lista sin espacios
-    #     if self.instance and self.instance.tipos:
-    #         self.initial["tipos"] = [
-    #             t.strip() for t in self.instance.tipos.split(",") if t.strip()
-    #         ]
-
-    #     # Placeholders
-    #     if "porciones" in self.fields:
-    #         self.fields["porciones"].widget.attrs.update({"placeholder": "Porciones"})
-    #     if "elaboracion" in self.fields:
-    #         self.fields["elaboracion"].widget.attrs.update({"placeholder": "Preparación (min)"})
-    #     if "coccion" in self.fields:
-    #         self.fields["coccion"].widget.attrs.update({"placeholder": "Cocción (min)"})
-    #     if "enlace" in self.fields:
-    #         self.fields["enlace"].widget.attrs.update({"placeholder": "Enlace al video o receta"})
-
     def clean(self):
         cleaned_data = super().clean()
 
