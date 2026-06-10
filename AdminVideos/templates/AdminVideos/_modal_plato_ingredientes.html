@@ -1,7 +1,7 @@
 
 <div class="modal fade" id="platoIngredientesModal" tabindex="-1" aria-hidden="true">
 
-  <div class="modal-dialog modal-dialog-scrollable">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg">
     <div class="modal-content">
 
       <div class="modal-header">
@@ -11,95 +11,184 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
 
-      <form id="frm-plato-ingredientes" method="post" action="{{ action_url }}">
+    
+
+
+
+
+
+
+
+
+<div class="modal-body">
+
+    <form id="frm-plato-ingredientes" method="post" action="{{ action_url }}">
         {% csrf_token %}
 
-        <div class="modal-body">
-          {% if items %}
-                  <h6 class="mb-1">Marcá lo que necesites comprar:</h6>
+  <h6 class="mb-2">Marcá lo que necesites comprar:</h6>
 
-            <ul class="list-group">
-              {% for item in items %}
-                <li class="list-group-item">
-                  <div class="d-flex flex-column gap-2">
+  {# Ingredientes directos del plato #}
+  {% if items %}
+    <div class="mb-3">
+      <div class="fw-semibold mb-2">
+        {{ plato.nombre_plato }}
+      </div>
 
-                    <div class="d-flex align-items-start justify-content-between gap-2">
-                      <div class="form-check m-0 flex-grow-1">
-                        <input
-                          class="form-check-input"
-                          type="checkbox"
-                          id="ing-{{ item.ingrediente_id }}"
-                          name="ingrediente_a_comprar_id"
-                          value="{{ item.ingrediente_id }}"
-                          {% if item.a_comprar %}checked{% endif %}
-                          
-                        >
-                        <label class="form-check-label fw-semibold" for="ing-{{ item.ingrediente_id }}">
-                          {{ item.nombre }}
-                        </label>
-                      </div>
+      <ul class="list-group">
+        {% for item in items %}
+          <li class="list-group-item">
+            <div class="d-flex flex-column gap-2">
 
-                      <small class="text-muted">
-                        {{ item.cantidad }} {{ item.unidad }}
-                      </small>
-                    </div>
+              <div class="d-flex align-items-start justify-content-between gap-2">
+                <div class="form-check m-0 flex-grow-1">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="ing-directo-{{ item.ingrediente_id }}"
+                    name="ingrediente_a_comprar_id"
+                    value="{{ item.ingrediente_id }}"
+                    {% if item.a_comprar %}checked{% endif %}
+                  >
 
-                    <div class="input-group input-group-sm">
-                     
-                      <input
-                        type="text"
-                        class="form-control"
-                        name="comentario_{{ item.ingrediente_id }}"
-                        value="{{ item.comentario }}"
-                        placeholder="Comentario"
-                      >
+                  <label class="form-check-label fw-semibold" for="ing-directo-{{ item.ingrediente_id }}">
+                    {{ item.nombre }}
+                  </label>
+                </div>
 
-                      <button
-                        class="btn btn-outline-secondary"
-                        type="button"
-                        onclick="const el=this.previousElementSibling; el.value=''; el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true}));"
-                        title="Limpiar comentario"
-                      >
-                        &times;
-                      </button>
+                <small class="text-muted">
+                  {{ item.cantidad }} {{ item.unidad }}
+                </small>
+              </div>
 
-                    </div>
+              <div class="input-group input-group-sm">
+                <input
+                  type="text"
+                  class="form-control"
+                  name="comentario_{{ item.ingrediente_id }}"
+                  value="{{ item.comentario }}"
+                  placeholder="Comentario"
+                >
 
-                  </div>
-                </li>
-              {% endfor %}
-            </ul>
-          {% else %}
-            <div class="alert alert-secondary mb-0">
-              Este plato no tiene ingredientes cargados.
+                <button
+                  class="btn btn-outline-secondary"
+                  type="button"
+                  onclick="const el=this.previousElementSibling; el.value=''; el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true}));"
+                  title="Limpiar comentario"
+                >
+                  &times;
+                </button>
+              </div>
+
             </div>
-          {% endif %}
-          
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
 
-<div class="d-flex mt-3 gap-2">
-  <!-- Botón principal: ocupa el ancho -->
-  <a class="btn btn-outline-secondary flex-grow-1"
-     href="{{ plato_share_url }}">
-    Ver lista del plato
-  </a>
 
-  <!-- WhatsApp: botón ícono -->
-  <a class="btn btn-success d-inline-flex align-items-center justify-content-center btn-icon-square"
-     target="_blank" rel="noopener"
-      href="https://wa.me/?text={{ plato_share_url|urlencode }}"
-     aria-label="Compartir por WhatsApp" title="Compartir por WhatsApp">
-    <i class="bi bi-whatsapp"></i>
-  </a>
+  {# Ingredientes de platos asociados #}
+  {% if componentes_items %}
+    {% for bloque in componentes_items %}
+      {% if bloque.items %}
+        <div class="mb-3">
+          <div class="fw-semibold mb-2">
+            {{ bloque.plato.nombre_plato }}
+          </div>
 
-  <!-- Copiar: botón ícono -->
-  <button type="button"
-          class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center btn-icon-square"
-          id="btnCopyLink"
-          data-link="{{ share_url }}"
-          aria-label="Copiar link" title="Copiar link">
-    <i class="bi bi-clipboard"></i>
-  </button>
+          <ul class="list-group">
+            {% for item in bloque.items %}
+              <li class="list-group-item">
+                <div class="d-flex flex-column gap-2">
+
+                  <div class="d-flex align-items-start justify-content-between gap-2">
+                    <div class="form-check m-0 flex-grow-1">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="ing-comp-{{ bloque.plato.id }}-{{ item.ingrediente_id }}"
+                        name="ingrediente_a_comprar_id"
+                        value="{{ item.ingrediente_id }}"
+                        {% if item.a_comprar %}checked{% endif %}
+                      >
+
+                      <label class="form-check-label fw-semibold" for="ing-comp-{{ bloque.plato.id }}-{{ item.ingrediente_id }}">
+                        {{ item.nombre }}
+                      </label>
+                    </div>
+
+                    <small class="text-muted">
+                      {{ item.cantidad }} {{ item.unidad }}
+                    </small>
+                  </div>
+
+                  <div class="input-group input-group-sm">
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="comentario_{{ item.ingrediente_id }}"
+                      value="{{ item.comentario }}"
+                      placeholder="Comentario"
+                    >
+
+                    <button
+                      class="btn btn-outline-secondary"
+                      type="button"
+                      onclick="const el=this.previousElementSibling; el.value=''; el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true}));"
+                      title="Limpiar comentario"
+                    >
+                      &times;
+                    </button>
+                  </div>
+
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+
+  {% if not items and not componentes_items %}
+    <div class="alert alert-secondary mb-0">
+      Este plato no tiene ingredientes cargados.
+    </div>
+  {% endif %}
+
+
+  <div class="d-flex mt-3 gap-2">
+    <a class="btn btn-outline-secondary flex-grow-1"
+       href="{{ plato_share_url }}">
+      Ver lista del plato
+    </a>
+
+    <a class="btn btn-success d-inline-flex align-items-center justify-content-center btn-icon-square"
+       target="_blank" rel="noopener"
+       href="https://wa.me/?text={{ plato_share_url|urlencode }}"
+       aria-label="Compartir por WhatsApp" title="Compartir por WhatsApp">
+      <i class="bi bi-whatsapp"></i>
+    </a>
+
+    <button type="button"
+            class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center btn-icon-square"
+            id="btnCopyLink"
+            data-link="{{ plato_share_url }}"
+            aria-label="Copiar link" title="Copiar link">
+      <i class="bi bi-clipboard"></i>
+    </button>
+  </div>
+
 </div>
+
+
+
+
+
+
+
+
 
 
 

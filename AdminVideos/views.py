@@ -309,12 +309,30 @@ def plato_ingredientes(request: HttpRequest, pk: int):
     plato = get_object_or_404(Plato, pk=pk)
     perfil = get_object_or_404(Profile, user=request.user)
 
-    # Ingredientes del plato (relación intermedia IEP)
-    ingredientes_qs = (
+    # # Ingredientes del plato (relación intermedia IEP)
+    # ingredientes_qs = (
+    #     plato.ingredientes_en_plato
+    #     .select_related("ingrediente")
+    #     .all()
+    # )
+
+    # Ingredientes directos del plato
+    ingredientes_directos_qs = (
         plato.ingredientes_en_plato
         .select_related("ingrediente")
         .all()
     )
+
+    # Ingredientes de los platos asociados
+    ingredientes_componentes = []
+
+    for componente in plato.componentes.prefetch_related("ingredientes_en_plato__ingrediente").all():
+        ingredientes_componentes.extend(
+            componente.ingredientes_en_plato.all()
+        )
+
+    # Ingredientes finales
+    ingredientes_qs = list(ingredientes_directos_qs) + ingredientes_componentes
 
     # ======================================================
     # 2) POST: guardar cambios (modo nuevo AJAX o masivo form)
@@ -419,6 +437,41 @@ def plato_ingredientes(request: HttpRequest, pk: int):
     # ✅ Orden igual que lista de compras
     sort_items_by_name(items)
 
+    componentes_items = []
+
+    for componente in plato.componentes.prefetch_related("ingredientes_en_plato__ingrediente").all():
+        subitems = []
+
+        for iep in componente.ingredientes_en_plato.all():
+            ing = iep.ingrediente
+            if not ing:
+                continue
+
+            ing_id = iep.ingrediente_id
+            if not ing_id:
+                continue
+
+            p = pantry_map.get(ing_id)
+
+            tengo = p.tengo if p else False
+            comentario = (p.comentario or "") if p else ""
+
+            subitems.append({
+                "ingrediente_id": ing_id,
+                "nombre": ing.nombre,
+                "cantidad": iep.cantidad,
+                "unidad": iep.unidad,
+                "a_comprar": (not tengo),
+                "comentario": comentario,
+            })
+
+        sort_items_by_name(subitems)
+
+        componentes_items.append({
+            "plato": componente,
+            "items": subitems,
+        })
+
     # ======================================================
     # 4) Links / tokens (lo tuyo, sin cambiar lógica)
     # ======================================================
@@ -427,6 +480,7 @@ def plato_ingredientes(request: HttpRequest, pk: int):
 
     ctx = {
         "plato": plato,
+        "componentes_items": componentes_items,
         "items": items,
         "api_token": perfil.share_token,
 
@@ -443,9 +497,7 @@ def plato_ingredientes(request: HttpRequest, pk: int):
 
     return render(request, "AdminVideos/_modal_plato_ingredientes.html", ctx)
 
-from datetime import timedelta
-from django.utils import timezone
-from django.shortcuts import get_object_or_404, render
+
 
 def compartir_ing_plato(request, token, pk: int):
     share_user, perfil = _get_user_by_token_or_404(token)
@@ -1124,33 +1176,6 @@ class LugarDetail(DetailView):
 
 
 
-# @login_required
-# def eliminar_lugar(request, lugar_id):
-#     lugar = get_object_or_404(Lugar, id=lugar_id)
-
-#     # Verificar si el usuario es el propietario del lugar
-#     if lugar.propietario != request.user:
-#         raise Http404("No tenés permiso para eliminar este lugar.")
-
-#     # Obtener el perfil del usuario actual
-#     perfil = get_object_or_404(Profile, user=request.user)
-
-#     # Eliminar el lugar si aparece en listas personalizadas (si aplica)
-#     if lugar.id in perfil.sugeridos_descartados:
-#         perfil.sugeridos_descartados.remove(lugar.id)
-#         perfil.save()
-
-#     if lugar.id in perfil.sugeridos_importados:
-#         perfil.sugeridos_importados.remove(lugar.id)
-#         perfil.save()
-
-#     # Eliminar el lugar de la base de datos
-#     lugar.delete()
-
-#     # Redirigir a la página que quieras (modificá este nombre si tenés otra vista)
-#     return redirect('filtro-de-platos')
-
-
 @login_required
 def eliminar_lugar(request, lugar_id):
     lugar = get_object_or_404(Lugar, id=lugar_id)
@@ -1176,42 +1201,50 @@ def eliminar_lugar(request, lugar_id):
 
     return redirect(url)
 
+
 # @login_required
 # def eliminar_plato(request, plato_id):
+#     # ✅ Seguridad: solo permite borrar platos del usuario logueado
 #     plato = get_object_or_404(Plato, id=plato_id, propietario=request.user)
 
-#     if request.method == 'POST':
+#     # ✅ Solo por POST
+#     if request.method != "POST":
+#         return HttpResponseNotAllowed(["POST"])
+
+#     with transaction.atomic():
+#         # Perfil (siempre del usuario logueado)
 #         perfil = get_object_or_404(Profile, user=request.user)
 
-#         if plato.id_original in perfil.sugeridos_descartados:
+#         # Limpieza de listas (si id_original es None, no hacemos nada)
+#         if plato.id_original and plato.id_original in perfil.sugeridos_descartados:
 #             perfil.sugeridos_descartados.remove(plato.id_original)
 
-#         if plato.id_original in perfil.sugeridos_importados:
+#         if plato.id_original and plato.id_original in perfil.sugeridos_importados:
 #             perfil.sugeridos_importados.remove(plato.id_original)
 
 #         perfil.save()
+
+#         # ✅ Si es PLATO PADRE: borrar TODAS sus variedades hijas
+#         # (extra seguro: también filtramos por propietario=request.user)
+#         Plato.objects.filter(plato_padre=plato, propietario=request.user).delete()
+
+#         # ✅ Borrar el plato (padre o variedad)
 #         plato.delete()
-#         return redirect('filtro-de-platos')
 
-#     # Si viene por GET, no borrar:
-#     from django.http import HttpResponseNotAllowed
-#     return HttpResponseNotAllowed(['POST'])
-
+#     return redirect("filtro-de-platos")
 
 @login_required
 def eliminar_plato(request, plato_id):
-    # ✅ Seguridad: solo permite borrar platos del usuario logueado
     plato = get_object_or_404(Plato, id=plato_id, propietario=request.user)
 
-    # ✅ Solo por POST
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
 
+    return_to = request.POST.get("return_to") or request.GET.get("return_to")
+
     with transaction.atomic():
-        # Perfil (siempre del usuario logueado)
         perfil = get_object_or_404(Profile, user=request.user)
 
-        # Limpieza de listas (si id_original es None, no hacemos nada)
         if plato.id_original and plato.id_original in perfil.sugeridos_descartados:
             perfil.sugeridos_descartados.remove(plato.id_original)
 
@@ -1220,12 +1253,12 @@ def eliminar_plato(request, plato_id):
 
         perfil.save()
 
-        # ✅ Si es PLATO PADRE: borrar TODAS sus variedades hijas
-        # (extra seguro: también filtramos por propietario=request.user)
         Plato.objects.filter(plato_padre=plato, propietario=request.user).delete()
 
-        # ✅ Borrar el plato (padre o variedad)
         plato.delete()
+
+    if return_to:
+        return redirect(return_to)
 
     return redirect("filtro-de-platos")
 
@@ -3310,31 +3343,6 @@ def random_dia(request, dia_nombre):
         )
 
     return redirect("filtro-de-platos")
-
-
-# def eliminar_menu_programado(request):
-#     # Recuperar la fecha activa desde la sesión
-#     dia_activo = request.session.get("dia_activo", None)
-
-#     if not dia_activo:
-#         messages.error(request, "No hay un día activo en la sesión.")
-#         return redirect("filtro-de-platos")
-
-#     # Buscar y eliminar el registro
-#     elegido = ElegidosXDia.objects.filter(
-#         user=request.user,
-#         el_dia_en_que_comemos=dia_activo
-#     ).first()
-
-#     if elegido:
-#         elegido.delete()
-#         messages.success(request, f"Se eliminó el menú del {dia_activo}")
-#     else:
-#         messages.warning(request, f"No había un menú guardado para {dia_activo}")
-
-#     return redirect("filtro-de-platos")
-
-# from .models import MenuDia  # ajustá el import
 
 
 

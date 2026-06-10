@@ -226,7 +226,7 @@
                         data-confirm-title="Eliminar plato"
                         data-confirm-body="¿Seguro que querés borrar {{ grupo.nombre_plato|escape }}?"
                         data-confirm-hint="También se borrarán las programaciones de este plato y sus variedades. Esta acción no se puede deshacer."
-                        data-confirm-action="{% url 'eliminar-plato' grupo.id %}"
+                        data-confirm-action="{% url 'eliminar-plato' grupo.id %}?return_to={{ request.get_full_path|urlencode }}"
                         data-confirm-btn="Sí, borrar">
                         <i class="fa-solid fa-trash-can me-1"></i> Eliminar
                       </a>
@@ -550,7 +550,7 @@
                 data-confirm-title="Eliminar plato"
                 data-confirm-body="¿Seguro que querés borrar {{ plato.nombre_plato|escape }}?"
                 data-confirm-hint="También se borrarán las programaciones de este plato y sus variedades. Esta acción no se puede deshacer."
-                data-confirm-action="{% url 'eliminar-plato' plato.id %}"
+                data-confirm-action="{% url 'eliminar-plato' plato.id %}?return_to={{ request.get_full_path|urlencode }}"
                 data-confirm-btn="Sí, borrar"
                 class="btn btn-sm btn-outline-primary"
                 title="Eliminar"

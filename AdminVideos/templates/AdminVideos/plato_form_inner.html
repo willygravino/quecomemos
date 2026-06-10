@@ -292,7 +292,8 @@
 
 
 
-              {% if tipopag == "Picada" and not form.instance.es_ingrediente_picada %}
+              {% if tipopag == "Picada" and form.instance.tipos != "Ingrediente de picada" %}
+
                 <input type="hidden" name="tipos" value="Picada">
               {% else %}
                 <div class="mb-3 border rounded p-3 bg-light{% if form.tipos.errors %} border-danger{% endif %}">
