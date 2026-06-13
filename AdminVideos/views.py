@@ -34,13 +34,15 @@ from django.db import transaction
 from django.views.decorators.http import require_http_methods
 from django.core.exceptions import ValidationError
 from django.core.exceptions import PermissionDenied
-from django.db.models.expressions import OrderBy
 from AdminVideos.services.pantry import (
     persist_profile_ingrediente_from_post,
     get_pantry_map,
     sort_items_by_name,
 )
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.db.models.expressions import OrderBy
+from django.db.models import Case, When, IntegerField
+
 
 # Paso 8.1: eliminar varios platos seleccionados con la misma lógica que eliminar_plato
 @login_required
@@ -504,11 +506,29 @@ def compartir_ing_plato(request, token, pk: int):
     plato = get_object_or_404(Plato, pk=pk)
 
     # Ingredientes del plato
-    ingredientes_qs = (
+    # ingredientes_qs = (
+    #     plato.ingredientes_en_plato
+    #     .select_related("ingrediente")
+    #     .all()
+    # )
+
+    # Ingredientes directos del plato
+    ingredientes_directos_qs = (
         plato.ingredientes_en_plato
         .select_related("ingrediente")
         .all()
     )
+
+    # Ingredientes de platos asociados/componentes
+    ingredientes_componentes = []
+
+    for componente in plato.componentes.prefetch_related("ingredientes_en_plato__ingrediente").all():
+        ingredientes_componentes.extend(
+            componente.ingredientes_en_plato.all()
+        )
+
+    # Ingredientes finales: directos + componentes
+    ingredientes_qs = list(ingredientes_directos_qs) + ingredientes_componentes
 
     # IDs de ingredientes del plato
     ing_ids = [
@@ -593,8 +613,27 @@ def lista_de_compras(request):
                 queryset=(
                     MenuItem.objects
                     .select_related("plato", "lugar")
-                    .order_by("id")
+                    .prefetch_related("plato__componentes")
+                    .annotate(
+                        momento_orden=Case(
+                            When(momento="desayuno", then=0),
+                            When(momento="almuerzo", then=1),
+                            When(momento="merienda", then=2),
+                            When(momento="cena", then=3),
+                            default=99,
+                            output_field=IntegerField(),
+                        )
+                    )
+                    .order_by("momento_orden", "id")
                 ),
+                # queryset=(
+                #     MenuItem.objects
+                #     # .select_related("plato", "lugar")
+                #     # .order_by("id")
+                #     .select_related("plato", "lugar")
+                #     .prefetch_related("plato__componentes")
+                #     .order_by("id")
+                # ),
             )
         )
     )
@@ -624,6 +663,45 @@ def lista_de_compras(request):
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return JsonResponse({"success": True})
 
+    if request.method == "POST" and post_origen == "componente":
+        menuitem_id = request.POST.get("toggle_componente_menuitem_id")
+        componente_plato_id = request.POST.get("toggle_componente_plato_id")
+        checked = request.POST.get("toggle_componente_checked") == "1"
+
+        if (
+            menuitem_id and menuitem_id.isdigit()
+            and componente_plato_id and componente_plato_id.isdigit()
+        ):
+            menuitem_padre = get_object_or_404(
+                MenuItem,
+                id=int(menuitem_id),
+                menu__propietario=request.user,
+                menu__fecha__gte=today,
+                plato__isnull=False,
+            )
+
+            componente = get_object_or_404(
+                Plato,
+                id=int(componente_plato_id),
+            )
+
+            if checked:
+                MenuItem.objects.update_or_create(
+                    menu=menuitem_padre.menu,
+                    momento=menuitem_padre.momento,
+                    plato=componente,
+                    defaults={"elegido": True},
+                )
+            else:
+                MenuItem.objects.filter(
+                    menu=menuitem_padre.menu,
+                    momento=menuitem_padre.momento,
+                    plato=componente,
+                ).update(elegido=False)
+
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({"success": True})
+
     # ✅ REFACTORIZADO: POST ingredientes usa helper (sin tocar el resto)
     if request.method == "POST" and post_origen == "ingredientes":
         result = persist_profile_ingrediente_from_post(perfil=perfil, post=request.POST)
@@ -645,8 +723,24 @@ def lista_de_compras(request):
                 queryset=(
                     MenuItem.objects
                     .select_related("plato", "lugar")
-                    .order_by("id")
+                    .prefetch_related("plato__componentes")
+                    .annotate(
+                        momento_orden=Case(
+                            When(momento="desayuno", then=0),
+                            When(momento="almuerzo", then=1),
+                            When(momento="merienda", then=2),
+                            When(momento="cena", then=3),
+                            default=99,
+                            output_field=IntegerField(),
+                        )
+                    )
+                    .order_by("momento_orden", "id")
                 ),
+                # queryset=(
+                #     MenuItem.objects
+                #     .select_related("plato", "lugar")
+                #     .order_by("id")
+                # ),
             )
         )
     )
@@ -661,6 +755,19 @@ def lista_de_compras(request):
     )
 
     plato_ids = list(items_elegidos.values_list("plato_id", flat=True))
+
+    platos_elegidos_ids = set(plato_ids)
+
+    componentes_ids = list(
+        Plato.objects
+        .filter(
+            forma_parte_de__id__in=plato_ids,
+            id__in=platos_elegidos_ids,   # 👈 solo componentes elegidos
+        )
+        .values_list("id", flat=True)
+    )
+
+    plato_ids_con_componentes = list(set(plato_ids + componentes_ids))
 
     # si no hay platos elegidos
     if not plato_ids:
@@ -682,7 +789,7 @@ def lista_de_compras(request):
     # =====================================================
     ingredientes_rows = (
         IngredienteEnPlato.objects
-        .filter(plato_id__in=plato_ids)
+        .filter(plato_id__in=plato_ids_con_componentes)
         .select_related("ingrediente", "plato")
         .only(
             "plato_id",
@@ -791,12 +898,25 @@ def lista_de_compras(request):
         "have": sum(i["estado"] == "tengo" for i in items),
     }
 
+    componentes_elegidos_keys = set(
+    f"{menu_id}_{momento}_{plato_id}"
+    for menu_id, momento, plato_id in MenuItem.objects
+    .filter(
+        menu__propietario=request.user,
+        menu__fecha__gte=today,
+        plato__isnull=False,
+        elegido=True,
+    )
+    .values_list("menu_id", "momento", "plato_id")
+    )   
+
     context = {
         "menues": menues,
         "items_elegidos": items_elegidos,
         "share_url": share_url,
         "shopping": {"items": items, "summary": summary},
         "parametro": "lista-compras",
+        "componentes_elegidos_keys": componentes_elegidos_keys,
     }
 
     return render(request, "AdminVideos/lista_de_compras.html", context)

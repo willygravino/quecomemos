@@ -18,6 +18,10 @@
   <input type="hidden" name="toggle_ing_checked" id="toggle_ing_checked" value="">
   <input type="hidden" name="comment_ing_id" id="comment_ing_id" value="">
 
+  <input type="hidden" name="toggle_componente_menuitem_id" id="toggle_componente_menuitem_id" value="">
+  <input type="hidden" name="toggle_componente_plato_id" id="toggle_componente_plato_id" value="">
+  <input type="hidden" name="toggle_componente_checked" id="toggle_componente_checked" value="">
+
 
   <div class="row g-1 ml-1">
 
@@ -60,6 +64,36 @@
                   <label class="form-check-label" for="plato{{ item.plato_id }}_{{ menu.fecha|date:'Ymd' }}">
                     {{ item.plato.nombre_plato }}
                   </label>
+
+
+
+{% for componente in item.plato.componentes.all %}
+  {% with menu_id_str=item.menu_id|stringformat:"s" componente_id_str=componente.id|stringformat:"s" %}
+    {% with key=menu_id_str|add:"_"|add:item.momento|add:"_"|add:componente_id_str %}
+      <div class="form-check small text-muted">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          name="componente_seleccionado"
+          value="{{ item.id }}_{{ componente.id }}"
+          {% if key in componentes_elegidos_keys %}checked{% endif %}
+        >
+        <label class="form-check-label">
+          {{ componente.nombre_plato }}
+        </label>
+      </div>
+    {% endwith %}
+  {% endwith %}
+{% endfor %}
+
+
+
+
+
+
+
+
+                  
                 </div>
 
               {% elif item.lugar %}
@@ -227,6 +261,7 @@
   const toggleIdInput = document.getElementById('toggle_plato_id');
   const toggleCheckedInput = document.getElementById('toggle_plato_checked');
 
+
   function setOrigen(v) {
     if (origenInput) origenInput.value = v;
   }
@@ -258,6 +293,27 @@
         location.reload();
       } catch (e) {
         console.error('No se pudo guardar y recargar', e);
+      }
+    });
+  });
+
+
+  form.querySelectorAll('input[name="componente_seleccionado"]').forEach(el => {
+    el.addEventListener('change', async () => {
+      try {
+        setOrigen('menu');
+
+        const val = el.value || "";
+        const [menuItemId, componentePlatoId] = val.split("_");
+
+        if (toggleIdInput) toggleIdInput.value = componentePlatoId;
+        if (toggleCheckedInput) toggleCheckedInput.value = el.checked ? "1" : "0";
+
+        await autosave();
+        location.reload();
+
+      } catch (e) {
+        console.error('No se pudo guardar componente', e);
       }
     });
   });
