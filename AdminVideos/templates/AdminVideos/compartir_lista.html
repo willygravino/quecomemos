@@ -24,10 +24,20 @@
       <i class="bi bi-hand-index-thumb me-1"></i> Tildá lo que ya compraste / tenés
     </h6>
 
-    {% if items %}
+
+    {% if items_por_rubro %}
       <div class="card">
-        <ul class="list-group list-group-flush" id="lista">
-          {% for it in items %}
+
+        {% for rubro, items_rubro in items_por_rubro.items %}
+
+          <div class="card-header fw-bold">
+            {{ rubro }}
+          </div>
+
+          <ul class="list-group list-group-flush">
+
+            {% for it in items_rubro %}
+    
           <li class="list-group-item py-2 item-line d-flex align-items-start gap-2"
               data-ing-id="{{ it.ingrediente_id }}"
               data-estado="{{ it.estado }}"
@@ -55,10 +65,15 @@
               {% endif %}
             </label>
           </li>
-          {% endfor %}
-        </ul>
-      </div>
-    {% else %}
+          
+        {% endfor %}
+      </ul>
+
+    {% endfor %}
+
+  </div>
+{% else %}
+
       <div class="alert alert-info">No hay ingredientes.</div>
     {% endif %}
 

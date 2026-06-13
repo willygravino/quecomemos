@@ -1078,6 +1078,7 @@ def compartir_lista(request, token):
         items.append({
             "ingrediente_id": ing_id,
             "nombre": data["nombre"],
+            "tipo": data["tipo"],
             "comentario": comentario,
             "estado": estado,
             "needed_by": data["needed_by"],
@@ -1087,12 +1088,37 @@ def compartir_lista(request, token):
 
     items.sort(key=lambda i: i["nombre"].casefold())
 
+    RUBROS_LABELS = {
+    "verduleria": "Verdulería",
+    "fiambreria": "Fiambriería",
+    "carniceria": "Carnicería",
+    "pescaderia": "Pescadería",
+    "panaderia": "Panadería",
+    "almacen": "Almacén",
+    "lacteos": "Lácteos",
+    "bebidas": "Bebidas",
+    "otro": "Otros",
+    }
+
+    items_por_rubro = defaultdict(list)
+
+    for item in items:
+        rubro = item.get("tipo") or "otro"
+        items_por_rubro[rubro].append(item)
+
+    items_por_rubro = {
+        RUBROS_LABELS.get(rubro, rubro): lista
+        for rubro, lista in items_por_rubro.items()
+    }
+
     # Tokens
     if not perfil.share_token:
         perfil.ensure_share_token()
 
+  
     return render(request, "AdminVideos/compartir_lista.html", {
         "items": items,
+        "items_por_rubro": items_por_rubro,
         "token": f"user-{perfil.pk}",
         "api_token": perfil.share_token,
         "DEBUG_VISTA": f"compartir_lista items={len(items)}",
