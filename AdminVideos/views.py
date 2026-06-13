@@ -888,6 +888,12 @@ def lista_de_compras(request):
 
     sort_items_by_name(items)
 
+    items_por_rubro = defaultdict(list)
+
+    for item in items:
+        rubro = item.get("tipo") or "otro"
+        items_por_rubro[rubro].append(item)
+
     token = perfil.ensure_share_token()
     share_url = request.build_absolute_uri(reverse("compartir-lista", args=[token]))
 
@@ -910,6 +916,23 @@ def lista_de_compras(request):
     .values_list("menu_id", "momento", "plato_id")
     )   
 
+    RUBROS_LABELS = {
+    "verduleria": "Verdulería",
+    "fiambreria": "Fiambriería",
+    "carniceria": "Carnicería",
+    "pescaderia": "Pescadería",
+    "panaderia": "Panadería",
+    "almacen": "Almacén",
+    "lacteos": "Lácteos",
+    "bebidas": "Bebidas",
+    "otro": "Otros",
+    }
+
+    items_por_rubro = {
+        RUBROS_LABELS.get(rubro, rubro): lista
+        for rubro, lista in items_por_rubro.items()
+    }
+
     context = {
         "menues": menues,
         "items_elegidos": items_elegidos,
@@ -917,7 +940,8 @@ def lista_de_compras(request):
         "shopping": {"items": items, "summary": summary},
         "parametro": "lista-compras",
         "componentes_elegidos_keys": componentes_elegidos_keys,
-    }
+        "shopping_por_rubro": items_por_rubro, 
+           }
 
     return render(request, "AdminVideos/lista_de_compras.html", context)
 

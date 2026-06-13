@@ -131,11 +131,20 @@
         
         <h6 class="mb-1">Marcá lo que necesites comprar:</h6>
 
-        {% if shopping.items %}
+        {% if shopping_por_rubro %}
           <div class="card me-3">
-            <ul class="list-group list-group-flush">
 
-              {% for item in shopping.items %}
+            {% for rubro, items_rubro in shopping_por_rubro.items %}
+
+              <div class="card-header fw-bold">
+                {{ rubro|title }}
+              </div>
+
+              <ul class="list-group list-group-flush">
+
+                {% for item in items_rubro %}
+
+
                 <li class="list-group-item py-1 px-2">
 
                   <div class="d-flex flex-column flex-sm-row align-items-sm-center gap-2">
@@ -200,10 +209,11 @@
 
                 </li>
               {% endfor %}
-
             </ul>
+          {% endfor %}
           </div>
         {% else %}
+
           <div class="alert alert-info py-1 px-2 small">
             No hay ingredientes para mostrar
           </div>
