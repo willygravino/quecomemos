@@ -3001,15 +3001,27 @@ def ajax_listado_platos(request):
 
     contexto = {
         "platos": platos_listado,
+        "carousel_items": platos_carousel,
         "amigues": perfil.amigues,
         "tipopag": tipopag,
     }
 
-    return render(
-        request,
+    html_listado = render_to_string(
         "AdminVideos/partials/_listado_platos.html",
-        contexto
+        contexto,
+        request=request
     )
+
+    html_carousel = render_to_string(
+        "AdminVideos/partials/_carousel_platos.html",
+        contexto,
+        request=request
+    )
+
+    return JsonResponse({
+        "html_listado": html_listado,
+        "html_carousel": html_carousel,
+    })
 
 
 
