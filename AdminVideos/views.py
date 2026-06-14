@@ -254,7 +254,7 @@ def obtener_parametros_sesion(request):
     medios = request.session.get('medios_estable', None)
     categoria = request.session.get('categoria_estable', None)
     dificultad = request.session.get('dificultad_estable', None)
-    palabra_clave = request.session.get('palabra_clave', "")
+    palabra_clave = (request.POST.get("palabra_clave") or "").strip()
 
     quecomemos = request.session.get('quecomemos', None)
     misplatos = request.session.get('misplatos', "misplatos")
@@ -2387,9 +2387,10 @@ def filtrar_platos(
 
     if palabra_clave:
         platos_qs = platos_qs.filter(
+            Q(nombre_plato__icontains=palabra_clave) |
             Q(ingredientes__icontains=palabra_clave) |
-            Q(nombre_plato__icontains=palabra_clave)
-        )
+            Q(ingredientes_en_plato__ingrediente__nombre__icontains=palabra_clave)
+        ).distinct()
 
     # Orden de prioridad de los platos:
     # 1) Menos días programados primero (0 = nunca usado → arriba del todo)

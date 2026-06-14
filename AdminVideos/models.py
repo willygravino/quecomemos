@@ -45,7 +45,12 @@ class Plato(models.Model):
     receta = models.CharField(max_length=80, blank=True)
     # descripcion_plato = models.CharField(max_length=300, blank=True)
     
-    ingredientes = models.CharField('Ingresá los ingredientes, separados por coma', max_length=400, blank=True)
+    ingredientes = models.CharField(
+    "Ingredientes legacy, separados por coma",
+    max_length=400,
+    blank=True,
+    help_text="Campo legacy. Se conserva temporalmente como texto derivado de IngredienteEnPlato."
+)
 
     # ingredientes_detallados = models.JSONField(null=True, blank=True,help_text="Estructura: [{'ingrediente': 'harina', 'cantidad': 200, 'unidad': 'g'}]")
 
