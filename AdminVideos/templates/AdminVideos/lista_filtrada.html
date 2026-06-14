@@ -12,6 +12,8 @@
 
     {% csrf_token %}
 
+    <input type="hidden" name="tipopag" value="{{ tipopag }}">
+
     <div class="input-group w-auto">
       <input 
         type="search" 
@@ -83,12 +85,18 @@ document.addEventListener("DOMContentLoaded", function () {
       return response.json();
     })
     
+  
     .then(function (data) {
       contenedor.innerHTML = data.html_listado;
 
       const contenedorCarousel = document.getElementById("contenedor-carousel-platos");
       if (contenedorCarousel) {
         contenedorCarousel.innerHTML = data.html_carousel;
+      }
+
+      const contenedorLugares = document.getElementById("contenedor-listado-lugares");
+      if (contenedorLugares) {
+        contenedorLugares.innerHTML = data.html_lugares;
       }
 
       if (typeof initListadoPlatos === "function") {

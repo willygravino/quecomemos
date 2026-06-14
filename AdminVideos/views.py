@@ -2693,7 +2693,8 @@ def obtener_estado_filtros(request, dia_activo):
     tipo_parametro, quecomemos, misplatos, medios, categoria, dificultad, palabra_clave = obtener_parametros_sesion(request)
 
     tipopag = (
-        request.GET.get("tipopag")
+        request.POST.get("tipopag")
+        or request.GET.get("tipopag")
         or tipo_parametro
         or "Principal"
     ).strip()
@@ -2755,11 +2756,18 @@ def obtener_resultados_principales(
     dificultad,
     palabra_clave
 ):
+
+
     if tipo_parametro == "Delivery":
         lugares = Lugar.objects.filter(
             propietario=usuario,
             delivery=True
         )
+
+        if palabra_clave:
+            lugares = lugares.filter(
+                Q(nombre__icontains=palabra_clave)
+            )
 
         platos = ""
         platos_carousel = ""
@@ -2767,11 +2775,17 @@ def obtener_resultados_principales(
 
         return lugares, platos, platos_carousel, platos_listado
 
+
     if tipo_parametro == "Comerafuera":
         lugares = Lugar.objects.filter(
             propietario=usuario,
             delivery=False
         )
+
+        if palabra_clave:
+            lugares = lugares.filter(
+                Q(nombre__icontains=palabra_clave)
+            )
 
         platos = ""
         platos_carousel = ""
@@ -3003,6 +3017,7 @@ def ajax_listado_platos(request):
     contexto = {
         "platos": platos_listado,
         "carousel_items": platos_carousel,
+        "lugares": lugares,
         "amigues": perfil.amigues,
         "tipopag": tipopag,
     }
@@ -3019,9 +3034,16 @@ def ajax_listado_platos(request):
         request=request
     )
 
+    html_lugares = render_to_string(
+        "AdminVideos/partials/_listado_lugares.html",
+        contexto,
+        request=request
+    )
+
     return JsonResponse({
         "html_listado": html_listado,
         "html_carousel": html_carousel,
+        "html_lugares": html_lugares,
     })
 
 
