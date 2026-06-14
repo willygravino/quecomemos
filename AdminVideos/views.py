@@ -2689,53 +2689,78 @@ def obtener_platos_dia_x_dia(usuario, fechas_existentes, habitos_set):
 
     return dict(platos_dia_x_dia), dias_programados
 
-def obtener_estado_filtros(request, dia_activo):
-    tipo_parametro, quecomemos, misplatos, medios, categoria, dificultad, palabra_clave = obtener_parametros_sesion(request)
+
+
+
+
+def obtener_estado_filtros_platos(request, dia_activo):
+    """
+    Centraliza el estado de filtros de la pantalla de platos.
+
+    Reglas:
+    - En POST, el request actual manda.
+      Esto es importante para AJAX: si un checkbox no viene,
+      significa que está destildado.
+    - En GET, se usan valores de sesión como estado inicial.
+    - tipopag puede venir por POST, GET o sesión, en ese orden.
+    - La sesión se actualiza solo cuando llega un POST de filtros.
+    """
+
+    (
+        tipo_sesion,
+        quecomemos_sesion,
+        misplatos_sesion,
+        medios_sesion,
+        categoria_sesion,
+        dificultad_sesion,
+        palabra_sesion,
+    ) = obtener_parametros_sesion(request)
 
     tipopag = (
         request.POST.get("tipopag")
         or request.GET.get("tipopag")
-        or tipo_parametro
+        or tipo_sesion
         or "Principal"
     ).strip()
-
-    tipo_parametro = tipopag
 
     if request.method == "POST":
         form = PlatoFilterForm(request.POST)
 
-        if form.is_valid():
-            medios = form.cleaned_data.get("medios")
-            categoria = form.cleaned_data.get("categoria")
-            dificultad = form.cleaned_data.get("dificultad")
-            palabra_clave = form.cleaned_data.get("palabra_clave")
+        medios = request.POST.get("medios") or None
+        categoria = request.POST.get("categoria") or None
+        dificultad = request.POST.get("dificultad") or None
+        palabra_clave = (request.POST.get("palabra_clave") or "").strip()
 
-            request.session["medios_estable"] = medios
-            request.session["categoria_estable"] = categoria
-            request.session["dificultad_estable"] = dificultad
-            request.session["palabra_clave"] = palabra_clave
+        quecomemos = request.POST.get("quecomemos")
+        misplatos = request.POST.get("misplatos")
 
-            quecomemos = request.POST.get("quecomemos")
-            misplatos = request.POST.get("misplatos")
-
-            request.session["quecomemos"] = quecomemos
-            request.session["misplatos"] = misplatos
-
-            request.session["dia_activo"] = dia_activo
+        request.session["medios_estable"] = medios
+        request.session["categoria_estable"] = categoria
+        request.session["dificultad_estable"] = dificultad
+        request.session["palabra_clave"] = palabra_clave
+        request.session["quecomemos"] = quecomemos
+        request.session["misplatos"] = misplatos
+        request.session["dia_activo"] = dia_activo
 
     else:
-        items_iniciales = {
+        medios = medios_sesion
+        categoria = categoria_sesion
+        dificultad = dificultad_sesion
+        palabra_clave = palabra_sesion
+
+        quecomemos = quecomemos_sesion
+        misplatos = misplatos_sesion
+
+        form = PlatoFilterForm(initial={
             "medios": medios,
             "categoria": categoria,
             "dificultad": dificultad,
             "palabra_clave": palabra_clave,
-        }
-
-        form = PlatoFilterForm(initial=items_iniciales)
+        })
 
     return {
         "form": form,
-        "tipo_parametro": tipo_parametro,
+        "tipo_parametro": tipopag,
         "tipopag": tipopag,
         "quecomemos": quecomemos,
         "misplatos": misplatos,
@@ -2744,6 +2769,11 @@ def obtener_estado_filtros(request, dia_activo):
         "dificultad": dificultad,
         "palabra_clave": palabra_clave,
     }
+
+
+
+
+
 
 
 def obtener_resultados_principales(
@@ -2884,7 +2914,7 @@ def FiltroDePlatos(request):
 
     dia_activo, dia_activo_obj = obtener_dia_activo(request, dias_desde_hoy)
 
-    estado_filtros = obtener_estado_filtros(request, dia_activo)
+    estado_filtros = obtener_estado_filtros_platos(request, dia_activo)
     form = estado_filtros["form"]
     tipo_parametro = estado_filtros["tipo_parametro"]
     tipopag = estado_filtros["tipopag"]
@@ -2992,7 +3022,7 @@ def ajax_listado_platos(request):
     fecha_actual, dias_desde_hoy = obtener_dias_desde_hoy()
     dia_activo, dia_activo_obj = obtener_dia_activo(request, dias_desde_hoy)
 
-    estado_filtros = obtener_estado_filtros(request, dia_activo)
+    estado_filtros = obtener_estado_filtros_platos(request, dia_activo)
 
     tipo_parametro = estado_filtros["tipo_parametro"]
     tipopag = estado_filtros["tipopag"]
