@@ -2438,53 +2438,57 @@ def filtrar_platos(
         "platos": platos_qs,
     }
 
-@login_required(login_url=reverse_lazy('login'), redirect_field_name=None)
-def FiltroDePlatos(request):
 
-    # Obtener la fecha actual
+def obtener_dias_desde_hoy(cantidad=7):
     fecha_actual = datetime.datetime.now().date()
+    dias_desde_hoy = [
+        fecha_actual + timedelta(days=i)
+        for i in range(0, cantidad)
+    ]
+    return fecha_actual, dias_desde_hoy
 
-    # Obtener el usuario actual
-    usuario = request.user
+
+def obtener_perfil_usuario(usuario):
     try:
-        perfil = usuario.profile
+        return usuario.profile
     except Profile.DoesNotExist:
-        return redirect("profile-create")
+        return None
 
-    # DIAS_ES = ['LU', 'MA', 'MI', 'JU', 'VI', 'SA', 'DO']  # tu mapeo
 
-    # Recuperamos los hábitos semanales del usuario
-    habitos = HabitoSemanal.objects.filter(perfil=perfil).select_related("plato", "lugar")
+def obtener_habitos_usuario(perfil):
+    habitos = HabitoSemanal.objects.filter(
+        perfil=perfil
+    ).select_related("plato", "lugar")
 
     habitos_set = set()
+
     for h in habitos:
         if h.plato_id:
             habitos_set.add(("plato", h.plato_id, h.dia_semana, h.momento))
         elif h.lugar_id:
             habitos_set.add(("lugar", h.lugar_id, h.dia_semana, h.momento))
 
+    return habitos, habitos_set
 
-    # Calcular y agregar las fechas y nombres de los días para los próximos 6 días
-    dias_desde_hoy = [(fecha_actual + timedelta(days=i)) for i in range(0, 7)]
 
+def asegurar_menus_desde_habitos(request, usuario, dias_desde_hoy, habitos):
     for fecha in dias_desde_hoy:
         dia_semana = fecha.weekday()  # 0=lunes ... 6=domingo
 
-        # Filtrar hábitos para el día actual
-        habitos_del_dia = [h for h in habitos if h.dia_semana == dia_semana]
+        habitos_del_dia = [
+            h for h in habitos
+            if h.dia_semana == dia_semana
+        ]
 
         if not habitos_del_dia:
-            continue  # Si no hay hábitos para ese día, pasamos al siguiente
+            continue
 
-        # Verificar si ya existe un menú para este día
         menu_dia, creado = MenuDia.objects.get_or_create(
             propietario=usuario,
             fecha=fecha
         )
 
-        # Solo asignar los hábitos si el menú se acaba de crear (es decir, no existía previamente)
         if creado:
-            # Asignar los platos y lugares fijados a ese día y momento
             for habito in habitos_del_dia:
                 momento = habito.momento
 
@@ -2494,6 +2498,7 @@ def FiltroDePlatos(request):
                     platos_a_asignar = [plato] + list(plato.variedades_hijas.all())
 
                     creados = 0
+
                     for p in platos_a_asignar:
                         _, created = MenuItem.objects.get_or_create(
                             menu=menu_dia,
@@ -2501,6 +2506,7 @@ def FiltroDePlatos(request):
                             plato=p,
                             defaults={"elegido": True},
                         )
+
                         if created:
                             creados += 1
 
@@ -2525,124 +2531,369 @@ def FiltroDePlatos(request):
                             f"Se asignó el lugar {lugar.nombre} al menú de {fecha} en {momento}."
                         )
 
-           
-
+def obtener_dia_activo(request, dias_desde_hoy):
     primer_dia = dias_desde_hoy[0].isoformat()
 
-    # ✅ Asegurar dia_activo siempre (string "YYYY-MM-DD")
     dia_activo = request.session.get("dia_activo") or primer_dia
-    request.session["dia_activo"] = dia_activo  # deja persistido para próximos requests
+    request.session["dia_activo"] = dia_activo
 
-    # ✅ Convertir a date para poder usar |date en template
-    dia_activo_obj = datetime.datetime.strptime(dia_activo, "%Y-%m-%d").date()
+    dia_activo_obj = datetime.datetime.strptime(
+        dia_activo,
+        "%Y-%m-%d"
+    ).date()
 
-    dias_programados = set()  # Usamos set para evitar fechas repetidas
+    return dia_activo, dia_activo_obj
 
-    # Recuperar los parámetros desde la sesión y la URL
+def obtener_fechas_existentes_menu(usuario, fecha_actual):
+    return list(
+        MenuDia.objects.filter(
+            propietario=usuario,
+            fecha__gte=fecha_actual
+        ).values_list("fecha", flat=True)
+    )
+
+def obtener_mensajes_agrupados(usuario):
+    subquery_ultimo_mensaje = (
+        Mensaje.objects
+        .filter(
+            usuario_que_envia=OuterRef("usuario_que_envia"),
+            destinatario=usuario
+        )
+        .order_by("-creado_el")
+        .values("id")[:1]
+    )
+
+    mensajes_x_usuario = Mensaje.objects.filter(
+        id__in=Subquery(subquery_ultimo_mensaje)
+    )
+
+    mensajes_agrupados = {
+        mensaje.usuario_que_envia if isinstance(mensaje.usuario_que_envia, str) else mensaje.usuario_que_envia.username: {
+            "avatar_url": getattr(
+                mensaje.usuario_que_envia.profile,
+                "avatar_url",
+                "/media/avatares/logo.png"
+            ) if hasattr(mensaje.usuario_que_envia, "profile") else "/media/avatares/logo.png",
+            "mensaje": {
+                "contenido": mensaje.mensaje,
+                "creado_el": (timezone.now() - mensaje.creado_el).days,
+                "leido": mensaje.leido,
+            }
+        }
+        for mensaje in mensajes_x_usuario
+    }
+
+    return mensajes_agrupados
+
+
+def obtener_platos_compartidos_pendientes(usuario):
+    mensajes_platos_compartidos = (
+        Mensaje.objects
+        .filter(destinatario=usuario, importado=False)
+        .exclude(tipo_mensaje__in=["mensaje", "solicitar"])
+    )
+
+    ids_platos_compartidos = {
+        msg.id_elemento: msg.id
+        for msg in mensajes_platos_compartidos
+        if msg.id_elemento
+    }
+
+    los_platos_compartidos = {
+        plato.id: plato
+        for plato in Plato.objects.filter(id__in=ids_platos_compartidos)
+    }
+
+    platos_compartidos = [
+        {
+            "id_plato": msg.id_elemento,
+            "mensaje_id": msg.id,
+            "mensaje": msg.mensaje,
+            "nombre_plato": msg.nombre_elemento_compartido,
+            "quien_comparte": msg.usuario_que_envia,
+            "receta": los_platos_compartidos[msg.id_elemento].receta
+                if msg.id_elemento in los_platos_compartidos else "",
+            "ingredientes": los_platos_compartidos[msg.id_elemento].ingredientes
+                if msg.id_elemento in los_platos_compartidos else "",
+            "image_url": los_platos_compartidos[msg.id_elemento].image_url
+                if msg.id_elemento in los_platos_compartidos else "",
+        }
+        for msg in mensajes_platos_compartidos
+        if msg.nombre_elemento_compartido
+    ]
+
+    return platos_compartidos
+
+
+def obtener_platos_dia_x_dia(usuario, fechas_existentes, habitos_set):
+    dias_programados = set()
+
+    platos_dia_x_dia = defaultdict(
+        lambda: {
+            "desayuno": [],
+            "almuerzo": [],
+            "merienda": [],
+            "cena": [],
+        }
+    )
+
+    items = (
+        MenuItem.objects
+        .filter(
+            menu__propietario=usuario,
+            menu__fecha__in=fechas_existentes
+        )
+        .select_related("menu", "plato", "lugar")
+    )
+
+    for item in items:
+        fec = item.menu.fecha
+        dias_programados.add(fec)
+
+        dia_semana = fec.weekday()
+
+        if item.plato:
+            fijo = (
+                "plato",
+                item.plato.id,
+                dia_semana,
+                item.momento
+            ) in habitos_set
+
+            platos_dia_x_dia[fec][item.momento].append({
+                "menuitem_id": item.id,
+                "objeto_id": item.plato.id,
+                "nombre": item.plato.nombre_plato,
+                "fijo": fijo,
+                "tipo": item.plato.tipos,
+                "es_lugar": False,
+            })
+
+        elif item.lugar:
+            fijo = (
+                "lugar",
+                item.lugar.id,
+                dia_semana,
+                item.momento
+            ) in habitos_set
+
+            platos_dia_x_dia[fec][item.momento].append({
+                "menuitem_id": item.id,
+                "objeto_id": item.lugar.id,
+                "nombre": item.lugar.nombre,
+                "tipo": "",
+                "fijo": fijo,
+                "es_lugar": True,
+            })
+
+    return dict(platos_dia_x_dia), dias_programados
+
+def obtener_estado_filtros(request, dia_activo):
     tipo_parametro, quecomemos, misplatos, medios, categoria, dificultad, palabra_clave = obtener_parametros_sesion(request)
-    tipopag = (request.GET.get("tipopag") or tipo_parametro or "Principal").strip()
+
+    tipopag = (
+        request.GET.get("tipopag")
+        or tipo_parametro
+        or "Principal"
+    ).strip()
+
     tipo_parametro = tipopag
+
+    if request.method == "POST":
+        form = PlatoFilterForm(request.POST)
+
+        if form.is_valid():
+            medios = form.cleaned_data.get("medios")
+            categoria = form.cleaned_data.get("categoria")
+            dificultad = form.cleaned_data.get("dificultad")
+            palabra_clave = form.cleaned_data.get("palabra_clave")
+
+            request.session["medios_estable"] = medios
+            request.session["categoria_estable"] = categoria
+            request.session["dificultad_estable"] = dificultad
+            request.session["palabra_clave"] = palabra_clave
+
+            quecomemos = request.POST.get("quecomemos")
+            misplatos = request.POST.get("misplatos")
+
+            request.session["quecomemos"] = quecomemos
+            request.session["misplatos"] = misplatos
+
+            request.session["dia_activo"] = dia_activo
+
+    else:
+        items_iniciales = {
+            "medios": medios,
+            "categoria": categoria,
+            "dificultad": dificultad,
+            "palabra_clave": palabra_clave,
+        }
+
+        form = PlatoFilterForm(initial=items_iniciales)
+
+    return {
+        "form": form,
+        "tipo_parametro": tipo_parametro,
+        "tipopag": tipopag,
+        "quecomemos": quecomemos,
+        "misplatos": misplatos,
+        "medios": medios,
+        "categoria": categoria,
+        "dificultad": dificultad,
+        "palabra_clave": palabra_clave,
+    }
+
+
+def obtener_resultados_principales(
+    usuario,
+    tipo_parametro,
+    quecomemos,
+    misplatos,
+    medios,
+    categoria,
+    dificultad,
+    palabra_clave
+):
+    if tipo_parametro == "Delivery":
+        lugares = Lugar.objects.filter(
+            propietario=usuario,
+            delivery=True
+        )
+
+        platos = ""
+        platos_carousel = ""
+        platos_listado = ""
+
+        return lugares, platos, platos_carousel, platos_listado
+
+    if tipo_parametro == "Comerafuera":
+        lugares = Lugar.objects.filter(
+            propietario=usuario,
+            delivery=False
+        )
+
+        platos = ""
+        platos_carousel = ""
+        platos_listado = ""
+
+        return lugares, platos, platos_carousel, platos_listado
+
+    lugares = ""
+
+    resultado_filtro = filtrar_platos(
+        usuario=usuario,
+        tipo_parametro=tipo_parametro,
+        quecomemos=quecomemos,
+        misplatos=misplatos,
+        medios=medios,
+        categoria=categoria,
+        dificultad=dificultad,
+        palabra_clave=palabra_clave,
+    )
+
+    platos = resultado_filtro["platos"]
+
+    if tipo_parametro == "Picada":
+        platos_carousel = platos.filter(
+            tipos__icontains="Picada"
+        ).exclude(
+            tipos__icontains="Ingrediente de picada"
+        )
+
+        platos_listado = platos.filter(
+            tipos__icontains="Ingrediente de picada"
+        )
+    else:
+        platos_carousel = platos
+        platos_listado = platos
+
+    hoy = timezone.localdate()
+
+    for p in platos:
+        p.dias_desde_ultima = (
+            hoy - p.ultima_programacion
+        ).days if getattr(p, "ultima_programacion", None) else None
+
+        for v in p.variedades_hijas.all():
+            v.dias_desde_ultima = (
+                hoy - v.ultima_programacion
+            ).days if getattr(v, "ultima_programacion", None) else None
+
+    return lugares, platos, platos_carousel, platos_listado
+
+
+def obtener_extras_platos(usuario):
+    guarniciones = (
+        Plato.objects
+        .filter(propietario=usuario)
+        .filter(
+            Q(tipos__icontains="Guarnicion") |
+            Q(tipos__icontains="Guarnición")
+        )
+        .order_by("nombre_plato")
+    )
+
+    salsas = (
+        Plato.objects
+        .filter(
+            propietario=usuario,
+            tipos__icontains="Salsa"
+        )
+        .order_by("nombre_plato")
+    )
+
+    return guarniciones, salsas
+
+
+def obtener_habitos_lookup(habitos):
+    return {
+        (h.dia_semana, h.momento, h.plato_id): h.id
+        for h in habitos
+    }
+
+@login_required(login_url=reverse_lazy('login'), redirect_field_name=None)
+def FiltroDePlatos(request):
+
+    fecha_actual, dias_desde_hoy = obtener_dias_desde_hoy()
 
     # Obtener el usuario actual
     usuario = request.user
 
-    # Formularios y datos iniciales
-    if request.method == "POST":
+    perfil = obtener_perfil_usuario(usuario)
+    if perfil is None:
+        return redirect("profile-create")
 
-            form = PlatoFilterForm(request.POST)
+    habitos, habitos_set = obtener_habitos_usuario(perfil)
+    
+    asegurar_menus_desde_habitos(request, usuario, dias_desde_hoy, habitos)
 
-            if form.is_valid():
+    dia_activo, dia_activo_obj = obtener_dia_activo(request, dias_desde_hoy)
 
-                medios = form.cleaned_data.get('medios')
-                categoria = form.cleaned_data.get('categoria')
-                dificultad = form.cleaned_data.get('dificultad')
-                palabra_clave =  form.cleaned_data.get('palabra_clave')
+    estado_filtros = obtener_estado_filtros(request, dia_activo)
+    form = estado_filtros["form"]
+    tipo_parametro = estado_filtros["tipo_parametro"]
+    tipopag = estado_filtros["tipopag"]
+    quecomemos = estado_filtros["quecomemos"]
+    misplatos = estado_filtros["misplatos"]
+    medios = estado_filtros["medios"]
+    categoria = estado_filtros["categoria"]
+    dificultad = estado_filtros["dificultad"]
+    palabra_clave = estado_filtros["palabra_clave"]
 
-                request.session['medios_estable'] = medios
-                request.session['categoria_estable'] = categoria
-                request.session['dificultad_estable'] = dificultad
-                request.session['palabra_clave'] = palabra_clave
-
-                quecomemos = request.POST.get('quecomemos')
-                misplatos = request.POST.get('misplatos')
-
-                request.session['quecomemos'] = quecomemos
-                request.session['misplatos'] = misplatos
-
-                request.session['dia_activo'] = dia_activo
-
-
-    else:
-        items_iniciales = {
-
-                        'medios': medios,
-                        'categoria': categoria,
-                        'dificultad': dificultad,
-                        'palabra_clave': palabra_clave
-
-                    }
-
-        form = PlatoFilterForm(initial=items_iniciales)
-
-    if tipo_parametro == "Delivery":
-        lugares = Lugar.objects.filter(propietario=request.user, delivery=True)
-        platos = ""
-
-
-    elif tipo_parametro == "Comerafuera":
-        lugares = Lugar.objects.filter(propietario=request.user, delivery=False)
-        platos = ""
-
-
-    else:
-        lugares = ""
-
-        resultado_filtro = filtrar_platos(
-            usuario=usuario,
-            tipo_parametro=tipo_parametro,
-            quecomemos=quecomemos,
-            misplatos=misplatos,
-            medios=medios,
-            categoria=categoria,
-            dificultad=dificultad,
-            palabra_clave=palabra_clave
-        )
-
-        platos = resultado_filtro["platos"]
-
-        if tipo_parametro == "Picada":
-            platos_carousel = platos.filter(tipos__icontains="Picada").exclude(
-                tipos__icontains="Ingrediente de picada"
-            )
-
-            platos_listado = platos.filter(
-                tipos__icontains="Ingrediente de picada"
-            )
-        else:
-            platos_carousel = platos
-            platos_listado = platos
-
-        hoy = timezone.localdate()
-
-        for p in platos:
-            p.dias_desde_ultima = (hoy - p.ultima_programacion).days if getattr(p, "ultima_programacion", None) else None
-
-            for v in p.variedades_hijas.all():
-                v.dias_desde_ultima = (hoy - v.ultima_programacion).days if getattr(v, "ultima_programacion", None) else None
-       
-
-    # REFACTORIZACIÓN
-    fechas_existentes = list(
-        MenuDia.objects.filter(
-            propietario=usuario,
-            fecha__gte=fecha_actual
-        ).values_list('fecha', flat=True)
+    lugares, platos, platos_carousel, platos_listado = obtener_resultados_principales(
+        usuario=usuario,
+        tipo_parametro=tipo_parametro,
+        quecomemos=quecomemos,
+        misplatos=misplatos,
+        medios=medios,
+        categoria=categoria,
+        dificultad=dificultad,
+        palabra_clave=palabra_clave,
     )
 
-    try:
-        perfil = Profile.objects.get(user=usuario)
-    except Profile.DoesNotExist:
-        return redirect('profile-create')  # Asegúrate de tener una vista para que el usuario cree su perfil
+
+
+    fechas_existentes = obtener_fechas_existentes_menu(usuario, fecha_actual)
 
     # Accede al atributo `amigues` desde la instancia
     amigues = perfil.amigues  # Esto cargará la lista almacenada en JSONField
@@ -2650,31 +2901,10 @@ def FiltroDePlatos(request):
     # el avatar
     avatar = perfil.avatar_url
 
-    # -------------------   LISTA DE PRIMEROS MENSAJES
-    # Subquery para obtener el último mensaje de cada usuario
-    subquery_ultimo_mensaje = (
-        Mensaje.objects.filter(usuario_que_envia=OuterRef('usuario_que_envia'), destinatario=usuario)
-        .order_by('-creado_el')
-        .values('id')[:1]  # Tomamos solo el ID del mensaje más reciente
-    )
+    mensajes_agrupados = obtener_mensajes_agrupados(usuario)
 
-    # Filtramos solo los últimos mensajes de cada usuario
-    mensajes_x_usuario = Mensaje.objects.filter(id__in=Subquery(subquery_ultimo_mensaje))
 
-    # Construimos el diccionario
-    mensajes_agrupados = {
-        mensaje.usuario_que_envia if isinstance(mensaje.usuario_que_envia, str) else mensaje.usuario_que_envia.username: {
-            "avatar_url": getattr(
-                mensaje.usuario_que_envia.profile, 'avatar_url', '/media/avatares/logo.png'
-            ) if hasattr(mensaje.usuario_que_envia, 'profile') else '/media/avatares/logo.png',
-            "mensaje": {
-                "contenido": mensaje.mensaje,
-                "creado_el": (timezone.now() - mensaje.creado_el).days,
-                "leido": mensaje.leido
-            }
-        }
-        for mensaje in mensajes_x_usuario
-    }
+
 
 # ------------------- LISTA DE PLATOS COMPARTIDOS
 
@@ -2688,85 +2918,23 @@ def FiltroDePlatos(request):
         plato.id: plato for plato in Plato.objects.filter(id__in=ids_platos_compartidos)
     }
 
-    # Extraer los platos compartidos de los mensajes
-    platos_compartidos = [
-        {
-            "id_plato": msg.id_elemento,
-            "mensaje_id": msg.id, # Agregar el ID del mensaje del cual proviene
-            "mensaje": msg.mensaje,
-            "nombre_plato": msg.nombre_elemento_compartido,
-            "quien_comparte": msg.usuario_que_envia,
-            "receta": los_platos_compartidos[msg.id_elemento].receta if msg.id_elemento in los_platos_compartidos else "",
-            # "descripcion": los_platos_compartidos[msg.id_elemento].descripcion_plato if msg.id_elemento in los_platos_compartidos else "",
-            "ingredientes": los_platos_compartidos[msg.id_elemento].ingredientes if msg.id_elemento in los_platos_compartidos else "",
-            # "tipo": los_platos_compartidos[msg.id_elemento].tipo if msg.id_elemento in los_platos_compartidos else "",
-            "image_url": los_platos_compartidos[msg.id_elemento].image_url if msg.id_elemento in los_platos_compartidos else ""
-        }
-        for msg in mensajes_platos_compartidos if msg.nombre_elemento_compartido
-    ]
-
-# ---------------------
+    platos_compartidos = obtener_platos_compartidos_pendientes(usuario)
 
 
-    # dia_activo = request.session.get('dia_activo', None)  # 🟢 Recuperamos la fecha activa
 
-    dia_activo = request.session.get('dia_activo', None)  # sigue siendo string "YYYY-MM-DD"
-    dia_activo_obj = None
-    if dia_activo:
-        dia_activo_obj = datetime.datetime.strptime(dia_activo, "%Y-%m-%d").date()
 
-    # Inicializar un diccionario donde cada fecha tendrá listas separadas para cada tipo de comida
-    platos_dia_x_dia = defaultdict(lambda: {"desayuno": [], "almuerzo": [], "merienda": [], "cena": []})
-
-    items = (
-        MenuItem.objects
-        .filter(
-            menu__propietario=request.user,
-            menu__fecha__in=fechas_existentes
-        )
-        .select_related("menu", "plato", "lugar")
+    platos_dia_x_dia, dias_programados = obtener_platos_dia_x_dia(
+        usuario,
+        fechas_existentes,
+        habitos_set
     )
 
-    for item in items:
-        fec = item.menu.fecha
-        dias_programados.add(fec)
 
-        dia_semana = fec.weekday()
 
-        # Verificación para agregar solo platos válidos
-        if item.plato:
-            # si item.plato
-            fijo = ("plato", item.plato.id, dia_semana, item.momento) in habitos_set
+    habitos_lookup = obtener_habitos_lookup(habitos)
 
-            platos_dia_x_dia[fec][item.momento].append({
-                "menuitem_id": item.id,                 # ✅ este es el que necesitamos para extras
-                "objeto_id": item.plato.id,              # ✅ para seguir yendo a videos-update
-                "nombre": item.plato.nombre_plato,
-                "fijo": fijo,
-                "tipo": item.plato.tipos,
-                "es_lugar": False
-                # "dia_semana": dia_semana,
-            })
 
-        # Verificación para agregar solo lugares válidos
-        elif item.lugar:
-            fijo = ("lugar", item.lugar.id, dia_semana, item.momento) in habitos_set
-
-            platos_dia_x_dia[fec][item.momento].append({
-                "menuitem_id": item.id,   # ✅ también existe el MenuItem aunque sea lugar
-                "objeto_id": item.lugar.id, # NO DEBE SER BUENA PRACTICA PONER AL LUGAR EL ID PLATO_ID, GPT SE CONFUNDIO Y YO TAMBIÉN, DOS D
-                "nombre": item.lugar.nombre,
-                "tipo": "",
-                "fijo": fijo,
-                "es_lugar": True
-            })
-
-    # Convertir defaultdict a dict antes de pasarlo a la plantilla
-    platos_dia_x_dia = dict(platos_dia_x_dia)
-
-    habitos_lookup = {
-    (h.dia_semana, h.momento, h.plato_id): h.id
-    for h in habitos}
+    guarniciones, salsas = obtener_extras_platos(usuario)
 
     contexto = {
                 'formulario': form,
@@ -2781,7 +2949,8 @@ def FiltroDePlatos(request):
                 "mensajes": mensajes_agrupados,
                 'dia_activo': dia_activo,
                 'dia_activo_obj': dia_activo_obj, # solo para filtros |date en el template/modal
-
+                "guarniciones": guarniciones,
+                "salsas": salsas,
                 "platos_dia_x_dia": platos_dia_x_dia,
                 # "idesplatos": ids_platos_importados,
                 # "ides_descartable": ids_platos_compartidos,
@@ -2795,20 +2964,52 @@ def FiltroDePlatos(request):
     # tipopag = (request.GET.get("tipopag") or "Principal").strip()
     contexto["tipopag"] = tipopag
 
-    
-    contexto["guarniciones"] = Plato.objects.filter(
-                propietario=request.user
-            ).filter(
-                Q(tipos__icontains="Guarnicion") | Q(tipos__icontains="Guarnición")
-            ).order_by("nombre_plato")
-
-    contexto["salsas"] = Plato.objects.filter(
-                propietario=request.user,
-                tipos__icontains="Salsa"
-            ).order_by("nombre_plato")
-
     return render(request, 'AdminVideos/lista_filtrada.html', contexto)
 
+@login_required(login_url=reverse_lazy('login'), redirect_field_name=None)
+def ajax_listado_platos(request):
+    usuario = request.user
+
+    perfil = obtener_perfil_usuario(usuario)
+    if perfil is None:
+        return redirect("profile-create")
+
+    fecha_actual, dias_desde_hoy = obtener_dias_desde_hoy()
+    dia_activo, dia_activo_obj = obtener_dia_activo(request, dias_desde_hoy)
+
+    estado_filtros = obtener_estado_filtros(request, dia_activo)
+
+    tipo_parametro = estado_filtros["tipo_parametro"]
+    tipopag = estado_filtros["tipopag"]
+    quecomemos = estado_filtros["quecomemos"]
+    misplatos = estado_filtros["misplatos"]
+    medios = estado_filtros["medios"]
+    categoria = estado_filtros["categoria"]
+    dificultad = estado_filtros["dificultad"]
+    palabra_clave = estado_filtros["palabra_clave"]
+
+    lugares, platos, platos_carousel, platos_listado = obtener_resultados_principales(
+        usuario=usuario,
+        tipo_parametro=tipo_parametro,
+        quecomemos=quecomemos,
+        misplatos=misplatos,
+        medios=medios,
+        categoria=categoria,
+        dificultad=dificultad,
+        palabra_clave=palabra_clave,
+    )
+
+    contexto = {
+        "platos": platos_listado,
+        "amigues": perfil.amigues,
+        "tipopag": tipopag,
+    }
+
+    return render(
+        request,
+        "AdminVideos/partials/_listado_platos.html",
+        contexto
+    )
 
 
 

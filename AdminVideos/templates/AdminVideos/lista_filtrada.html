@@ -4,8 +4,11 @@
 
 {% block filtro %}
 
-<form method="POST">
-  <div class="d-flex justify-content-start mx-1 gap-4 flex-wrap">
+<form 
+  method="POST" 
+  id="form-filtros-platos"
+  data-listado-url="{% url 'ajax_listado_platos' %}">
+    <div class="d-flex justify-content-start mx-1 gap-4 flex-wrap">
 
     {% csrf_token %}
 
@@ -41,6 +44,71 @@
 
   </div>
 </form>
+
+<!-- =========================================================
+     FILTROS DE PLATOS - ACTUALIZACIÓN AJAX DEL LISTADO
+     ---------------------------------------------------------
+     Qué hace:
+     - Intercepta el submit del formulario de filtros.
+     - Envía los datos por POST usando fetch().
+     - Recibe HTML renderizado desde Django.
+     - Reemplaza solo #contenedor-listado-platos.
+     - Evita refrescar toda la página.
+     - Reinicializa la selección masiva después de insertar HTML nuevo.
+========================================================= -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.getElementById("form-filtros-platos");
+  const contenedor = document.getElementById("contenedor-listado-platos");
+
+  if (!form || !contenedor) return;
+
+  
+  function actualizarListadoPlatos() {
+    const url = form.dataset.listadoUrl;
+    const formData = new FormData(form);
+
+    fetch(url, {
+      method: "POST",
+      body: formData,
+      headers: {
+        "X-Requested-With": "XMLHttpRequest"
+      }
+    })
+    .then(function (response) {
+      if (!response.ok) {
+        throw new Error("Error al cargar el listado");
+      }
+
+      return response.text();
+    })
+    .then(function (html) {
+      contenedor.innerHTML = html;
+
+      if (typeof initListadoPlatos === "function") {
+        initListadoPlatos();
+      }
+    })
+    .catch(function (error) {
+      console.error(error);
+    });
+  }
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    actualizarListadoPlatos();
+  });
+
+  form.querySelectorAll("input[type='checkbox']").forEach(function (checkbox) {
+    checkbox.addEventListener("change", function () {
+      actualizarListadoPlatos();
+    });
+  });
+
+});
+</script>
+
+
 
 {% endblock %}
 <!--
