@@ -55,8 +55,17 @@
 
                 {# Eliminar: manda es_lugar (1/0) + objeto_id #}
                 <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'desayuno' dia %}"
-                   class="btn btn-sm p-0 ms-2" title="Eliminar">
-                  <i class="fa-solid fa-trash-can"></i>
+
+                    class="btn btn-sm p-0 ms-2 js-eliminar-programado"
+                    data-ajax-url="{% url 'ajax_eliminar_programado' %}"
+                    data-es-lugar="{{ plato.es_lugar|yesno:'1,0' }}"
+                    data-objeto-id="{{ plato.objeto_id }}"
+                    data-comida="desayuno"
+                    data-fecha="{{ dia|date:'Y-m-d' }}"
+                    title="Eliminar">
+
+
+                <i class="fa-solid fa-trash-can"></i>
                 </a>
               </div>
             </div>
@@ -115,8 +124,17 @@
                 
 
                 <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'almuerzo' dia %}"
-                   class="btn btn-sm p-0 ms-2" title="Eliminar">
-                  <i class="fa-solid fa-trash-can"></i>
+
+                    class="btn btn-sm p-0 ms-2 js-eliminar-programado"
+                    data-ajax-url="{% url 'ajax_eliminar_programado' %}"
+                    data-es-lugar="{{ plato.es_lugar|yesno:'1,0' }}"
+                    data-objeto-id="{{ plato.objeto_id }}"
+                    data-comida="almuerzo"
+                    data-fecha="{{ dia|date:'Y-m-d' }}"
+                    title="Eliminar">
+
+
+                <i class="fa-solid fa-trash-can"></i>
                 </a>
               </div>
             </div>
@@ -172,7 +190,13 @@
                   </a>
 
                 <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'merienda' dia %}"
-                   class="btn btn-sm p-0 ms-2" title="Eliminar">
+                   class="btn btn-sm p-0 ms-2 js-eliminar-programado"
+                   data-ajax-url="{% url 'ajax_eliminar_programado' %}"
+                   data-es-lugar="{{ plato.es_lugar|yesno:'1,0' }}"
+                   data-objeto-id="{{ plato.objeto_id }}"
+                   data-comida="merienda"
+                   data-fecha="{{ dia|date:'Y-m-d' }}"
+                   title="Eliminar">
                   <i class="fa-solid fa-trash-can"></i>
                 </a>
               </div>
@@ -229,8 +253,17 @@
                   </a>
 
                 <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'cena' dia %}"
-                   class="btn btn-sm p-0 ms-2" title="Eliminar">
-                  <i class="fa-solid fa-trash-can"></i>
+
+
+                        class="btn btn-sm p-0 ms-2 js-eliminar-programado"
+                        data-ajax-url="{% url 'ajax_eliminar_programado' %}"
+                        data-es-lugar="{{ plato.es_lugar|yesno:'1,0' }}"
+                        data-objeto-id="{{ plato.objeto_id }}"
+                        data-comida="cena"
+                        data-fecha="{{ dia|date:'Y-m-d' }}"
+                        title="Eliminar">
+
+                <i class="fa-solid fa-trash-can"></i>
                 </a>
               </div>
             </div>
@@ -309,8 +342,17 @@
 
                   <!-- Eliminar: manda es_lugar (1/0) + objeto_id -->
                   <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'desayuno' dia %}"
-                     class="btn btn-sm p-0 ms-2" title="Eliminar">
-                    <i class="fa-solid fa-trash-can"></i>
+
+                        class="btn btn-sm p-0 ms-2 js-eliminar-programado"
+                        data-ajax-url="{% url 'ajax_eliminar_programado' %}"
+                        data-es-lugar="{{ plato.es_lugar|yesno:'1,0' }}"
+                        data-objeto-id="{{ plato.objeto_id }}"
+                        data-comida="desayuno"
+                        data-fecha="{{ dia|date:'Y-m-d' }}"
+                        title="Eliminar">
+
+
+                  <i class="fa-solid fa-trash-can"></i>
                   </a>
 
                 </div>
@@ -366,8 +408,15 @@
                     </a>
 
                   <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'almuerzo' dia %}"
-                     class="btn btn-sm p-0 ms-2" title="Eliminar">
-                    <i class="fa-solid fa-trash-can"></i>
+
+                        class="btn btn-sm p-0 ms-2 js-eliminar-programado"
+                        data-ajax-url="{% url 'ajax_eliminar_programado' %}"
+                        data-es-lugar="{{ plato.es_lugar|yesno:'1,0' }}"
+                        data-objeto-id="{{ plato.objeto_id }}"
+                        data-comida="almuerzo"
+                        data-fecha="{{ dia|date:'Y-m-d' }}"
+                        title="Eliminar">
+                  <i class="fa-solid fa-trash-can"></i>
                   </a>
 
                 </div>
@@ -422,8 +471,15 @@
                     </a>
 
                   <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'merienda' dia %}"
-                     class="btn btn-sm p-0 ms-2" title="Eliminar">
-                    <i class="fa-solid fa-trash-can"></i>
+
+                        class="btn btn-sm p-0 ms-2 js-eliminar-programado"
+                        data-ajax-url="{% url 'ajax_eliminar_programado' %}"
+                        data-es-lugar="{{ plato.es_lugar|yesno:'1,0' }}"
+                        data-objeto-id="{{ plato.objeto_id }}"
+                        data-comida="merienda"
+                        data-fecha="{{ dia|date:'Y-m-d' }}"
+                        title="Eliminar">
+                  <i class="fa-solid fa-trash-can"></i>
                   </a>
 
                 </div>
@@ -478,7 +534,13 @@
                     </a>
 
                   <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'cena' dia %}"
-                     class="btn btn-sm p-0 ms-2" title="Eliminar">
+                     class="btn btn-sm p-0 ms-2 js-eliminar-programado"
+                     data-ajax-url="{% url 'ajax_eliminar_programado' %}"
+                     data-es-lugar="{{ plato.es_lugar|yesno:'1,0' }}"
+                     data-objeto-id="{{ plato.objeto_id }}"
+                     data-comida="cena"
+                     data-fecha="{{ dia|date:'Y-m-d' }}"
+                     title="Eliminar">
                     <i class="fa-solid fa-trash-can"></i>
                   </a>
 
