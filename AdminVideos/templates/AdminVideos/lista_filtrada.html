@@ -120,6 +120,80 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
+
+  document.addEventListener("click", function (event) {
+    const link = event.target.closest(".js-eliminar-programado");
+
+
+    if (!link) {
+      return;
+    }
+
+    const contenedorMenuProgramado = document.getElementById("contenedor-menu-programado-dias");
+    const ajaxUrl = link.dataset.ajaxUrl;
+
+    // Si falta algo, NO prevenimos el click:
+    // dejamos que funcione el href clásico.
+    if (!contenedorMenuProgramado || !ajaxUrl || !window.fetch) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const body = new URLSearchParams({
+      es_lugar: link.dataset.esLugar || "",
+      objeto_id: link.dataset.objetoId || "",
+      comida: link.dataset.comida || "",
+      fecha: link.dataset.fecha || ""
+    });
+
+    fetch(ajaxUrl, {
+      method: "POST",
+      body: body.toString(),
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+        "X-Requested-With": "XMLHttpRequest",
+        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+      }
+    })
+    .then(function (response) {
+      if (!response.ok) {
+        throw new Error("Error al eliminar programado");
+      }
+
+      return response.json();
+    })
+
+    .then(function (data) {
+      if (!data.ok) {
+        throw new Error("Respuesta inválida al eliminar programado");
+      }
+
+      const itemProgramado = link.closest(".mb-1");
+
+      if (itemProgramado) {
+        const extrasProgramado = itemProgramado.nextElementSibling;
+
+        if (
+          extrasProgramado &&
+          (
+            extrasProgramado.classList.contains("ms-5") ||
+            extrasProgramado.classList.contains("ms-4")
+          )
+        ) {
+          extrasProgramado.remove();
+        }
+
+        itemProgramado.remove();
+      }
+    })
+
+
+    .catch(function (error) {
+        console.error(error);
+    });
+  }, true);
+
 });
 </script>
 
