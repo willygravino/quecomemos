@@ -120,6 +120,28 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
+  function quitarItemProgramadoDelDOM(link) {
+    const itemProgramado = link.closest(".mb-1");
+
+    if (!itemProgramado) {
+      return;
+    }
+
+    const extrasProgramado = itemProgramado.nextElementSibling;
+
+    if (
+      extrasProgramado &&
+      (
+        extrasProgramado.classList.contains("ms-5") ||
+        extrasProgramado.classList.contains("ms-4")
+      )
+    ) {
+      extrasProgramado.remove();
+    }
+
+    itemProgramado.remove();
+  }
+
 
   document.addEventListener("click", function (event) {
     const link = event.target.closest(".js-eliminar-programado");
@@ -169,28 +191,10 @@ document.addEventListener("DOMContentLoaded", function () {
         throw new Error("Respuesta inválida al eliminar programado");
       }
 
-      const itemProgramado = link.closest(".mb-1");
-
-      if (itemProgramado) {
-        const extrasProgramado = itemProgramado.nextElementSibling;
-
-        if (
-          extrasProgramado &&
-          (
-            extrasProgramado.classList.contains("ms-5") ||
-            extrasProgramado.classList.contains("ms-4")
-          )
-        ) {
-          extrasProgramado.remove();
-        }
-
-        itemProgramado.remove();
-      }
+      quitarItemProgramadoDelDOM(link);
     })
-
-
     .catch(function (error) {
-        console.error(error);
+      console.error(error);
     });
   }, true);
 
