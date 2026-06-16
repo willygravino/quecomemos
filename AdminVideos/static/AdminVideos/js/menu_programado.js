@@ -51,6 +51,84 @@
 
   window.refrescarMenuProgramado = refrescarMenuProgramado;
 
+    /* ============================================================
+     CSRF PARA REQUESTS POST
+     ============================================================ */
+  function getCookie(nombre) {
+    const cookies = document.cookie ? document.cookie.split(";") : [];
+
+    for (const cookie of cookies) {
+      const cookieLimpia = cookie.trim();
+
+      if (cookieLimpia.startsWith(nombre + "=")) {
+        return decodeURIComponent(cookieLimpia.slice(nombre.length + 1));
+      }
+    }
+
+    return "";
+  }
+
+  function getCSRFToken() {
+    return getCookie("csrftoken");
+  }
+
+
+    /* ============================================================
+        QUITAR ITEM PROGRAMADO POR AJAX
+        ============================================================ */
+    document.addEventListener("click", function (event) {
+        const link = event.target.closest(".js-eliminar-programado");
+
+        if (!link) {
+        return;
+        }
+
+        const contenedorMenuProgramado = document.getElementById("contenedor-menu-programado-dias");
+        const ajaxUrl = link.dataset.ajaxUrl;
+
+        // Fallback seguro: si falta algo esencial, dejamos el link clásico.
+        if (!contenedorMenuProgramado || !ajaxUrl || !window.fetch) {
+        return;
+        }
+
+        event.preventDefault();
+
+        const body = new URLSearchParams({
+        es_lugar: link.dataset.esLugar || "",
+        objeto_id: link.dataset.objetoId || "",
+        comida: link.dataset.comida || "",
+        fecha: link.dataset.fecha || ""
+        });
+
+        fetch(ajaxUrl, {
+        method: "POST",
+        body: body.toString(),
+        headers: {
+            "X-CSRFToken": getCSRFToken(),
+            "X-Requested-With": "XMLHttpRequest",
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+        },
+        credentials: "same-origin"
+        })
+        .then(function (response) {
+        if (!response.ok) {
+            throw new Error("Error al quitar item programado");
+        }
+
+        return response.json();
+        })
+        .then(function (data) {
+        if (!data.ok) {
+            throw new Error("Respuesta inválida al quitar item programado");
+        }
+
+        return refrescarMenuProgramado();
+        })
+        .catch(function (error) {
+        console.error(error);
+        });
+    }, true);
+
 
   /* ============================================================
      ASIGNAR PLATO / LUGAR POR AJAX
