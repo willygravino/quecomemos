@@ -25,273 +25,30 @@
 <div class="d-none d-md-block">
   <div class="row gx-0">
 
+    
     <!-- Desayuno -->
     <div class="col-md-3">
-      <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Desayuno</h6>
-
-      {% if dia_plato.1.desayuno %}
-        {% for plato in dia_plato.1.desayuno %}
-
-          {% if plato.objeto_id %}
-
-            <div class="mb-1 ms-1 d-flex align-items-center text-primary justify-content-between">
-              <!-- Nombre (link solo si NO es lugar) -->
-              {% if not plato.es_lugar %}
-                <a href="{% url 'videos-update' plato.objeto_id %}" class="text-decoration-none me-2 w-75">
-                  &nbsp; {{ plato.nombre }}
-                </a>
-              {% else %}
-                <span class="me-2 w-75">&nbsp; {{ plato.nombre }}</span>
-              {% endif %}
-
-              <!-- Íconos -->
-              <div class="d-flex">
-                
-                  <a href="{% url 'fijar-o-eliminar-habito' plato.es_lugar|yesno:'1,0' plato.objeto_id 'desayuno' %}"
-                    title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}"
-                    class="ms-2">
-                    <i class="bi bi-pin-angle-fill fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
-                  </a>
-
-                {# Eliminar: manda es_lugar (1/0) + objeto_id #}
-                <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'desayuno' dia %}"
-
-                    class="btn btn-sm p-0 ms-2 js-eliminar-programado"
-                    data-ajax-url="{% url 'ajax_eliminar_programado' %}"
-                    data-es-lugar="{{ plato.es_lugar|yesno:'1,0' }}"
-                    data-objeto-id="{{ plato.objeto_id }}"
-                    data-comida="desayuno"
-                    data-fecha="{{ dia|date:'Y-m-d' }}"
-                    title="Eliminar">
-
-
-                <i class="fa-solid fa-trash-can"></i>
-                </a>
-              </div>
-            </div>
-
-            <!-- Extras solo si NO es lugar y es Principal -->
-            {% if not plato.es_lugar and 'Principal' in plato.tipo %}
-              <div class="ms-5">
-                <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
-                        id="agregar-salsa-{{ plato.objeto_id }}">
-                  + Salsa
-                </button>
-                <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
-                        id="agregar-guarnicion-{{ plato.objeto_id }}">
-                  + Guarnición
-                </button>
-              </div>
-            {% endif %}
-
-          {% else %}
-            <p class="mb-1 ms-1 d-flex align-items-center text-danger">
-              Este objeto no tiene ID válido.
-            </p>
-          {% endif %}
-
-        {% endfor %}
-      {% else %}
-        <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
-      {% endif %}
+      {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Desayuno" platos=dia_plato.1.desayuno comida="desayuno" modo="desktop" %}
     </div>
+
+
 
     <!-- Almuerzo -->
     <div class="col-md-3">
-      <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Almuerzo</h6>
-
-      {% if dia_plato.1.almuerzo %}
-        {% for plato in dia_plato.1.almuerzo %}
-
-          {% if plato.objeto_id %}
-
-            <div class="mb-1 ms-1 d-flex align-items-center text-primary justify-content-between">
-              {% if not plato.es_lugar %}
-                <a href="{% url 'videos-update' plato.objeto_id %}" class="text-decoration-none me-2 w-75">
-                  &nbsp; {{ plato.nombre }}
-                </a>
-              {% else %}
-                <span class="me-2 w-75">&nbsp; {{ plato.nombre }}</span>
-              {% endif %}
-
-              <div class="d-flex">
-                  <a href="{% url 'fijar-o-eliminar-habito' plato.es_lugar|yesno:'1,0' plato.objeto_id 'almuerzo' %}"
-                  
-                    title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}"
-                    class="ms-2">
-                    <i class="bi bi-pin-angle-fill fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
-                  </a>
-                
-
-                <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'almuerzo' dia %}"
-
-                    class="btn btn-sm p-0 ms-2 js-eliminar-programado"
-                    data-ajax-url="{% url 'ajax_eliminar_programado' %}"
-                    data-es-lugar="{{ plato.es_lugar|yesno:'1,0' }}"
-                    data-objeto-id="{{ plato.objeto_id }}"
-                    data-comida="almuerzo"
-                    data-fecha="{{ dia|date:'Y-m-d' }}"
-                    title="Eliminar">
-
-
-                <i class="fa-solid fa-trash-can"></i>
-                </a>
-              </div>
-            </div>
-
-            {% if not plato.es_lugar and 'Principal' in plato.tipo %}
-              <div class="ms-5">
-                <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
-                        id="agregar-salsa-{{ plato.objeto_id }}">
-                  + Salsa
-                </button>
-                <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
-                        id="agregar-guarnicion-{{ plato.objeto_id }}">
-                  + Guarnición
-                </button>
-              </div>
-            {% endif %}
-
-          {% else %}
-            <p class="mb-1 ms-1 d-flex align-items-center text-danger">
-              Este objeto no tiene ID válido.
-            </p>
-          {% endif %}
-
-        {% endfor %}
-      {% else %}
-        <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
-      {% endif %}
+      {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Almuerzo" platos=dia_plato.1.almuerzo comida="almuerzo" modo="desktop" %}
     </div>
+
 
     <!-- Merienda -->
     <div class="col-md-3">
-      <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Merienda</h6>
-
-      {% if dia_plato.1.merienda %}
-        {% for plato in dia_plato.1.merienda %}
-
-          {% if plato.objeto_id %}
-
-            <div class="mb-1 ms-1 d-flex align-items-center text-primary justify-content-between">
-              {% if not plato.es_lugar %}
-                <a href="{% url 'videos-update' plato.objeto_id %}" class="text-decoration-none me-2 w-75">
-                  &nbsp; {{ plato.nombre }}
-                </a>
-              {% else %}
-                <span class="me-2 w-75">&nbsp; {{ plato.nombre }}</span>
-              {% endif %}
-
-              <div class="d-flex">
-                  <a href="{% url 'fijar-o-eliminar-habito' plato.es_lugar|yesno:'1,0' plato.objeto_id 'merienda' %}"
-                    title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}"
-                    class="ms-2">
-                    <i class="bi bi-pin-angle-fill fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
-                  </a>
-
-                <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'merienda' dia %}"
-                   class="btn btn-sm p-0 ms-2 js-eliminar-programado"
-                   data-ajax-url="{% url 'ajax_eliminar_programado' %}"
-                   data-es-lugar="{{ plato.es_lugar|yesno:'1,0' }}"
-                   data-objeto-id="{{ plato.objeto_id }}"
-                   data-comida="merienda"
-                   data-fecha="{{ dia|date:'Y-m-d' }}"
-                   title="Eliminar">
-                  <i class="fa-solid fa-trash-can"></i>
-                </a>
-              </div>
-            </div>
-
-            {% if not plato.es_lugar and 'Principal' in plato.tipo %}
-              <div class="ms-5">
-                <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
-                        id="agregar-salsa-{{ plato.objeto_id }}">
-                  + Salsa
-                </button>
-                <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
-                        id="agregar-guarnicion-{{ plato.objeto_id }}">
-                  + Guarnición
-                </button>
-              </div>
-            {% endif %}
-
-          {% else %}
-            <p class="mb-1 ms-1 d-flex align-items-center text-danger">
-              Este objeto no tiene ID válido.
-            </p>
-          {% endif %}
-
-        {% endfor %}
-      {% else %}
-        <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
-      {% endif %}
+      {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Merienda" platos=dia_plato.1.merienda comida="merienda" modo="desktop" %}
     </div>
 
     <!-- Cena -->
     <div class="col-md-3">
-      <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Cena</h6>
-
-      {% if dia_plato.1.cena %}
-        {% for plato in dia_plato.1.cena %}
-
-          {% if plato.objeto_id %}
-
-            <div class="mb-1 ms-1 d-flex align-items-center text-primary justify-content-between">
-              {% if not plato.es_lugar %}
-                <a href="{% url 'videos-update' plato.objeto_id %}" class="text-decoration-none me-2 w-75">
-                  &nbsp; {{ plato.nombre }}
-                </a>
-              {% else %}
-                <span class="me-2 w-75">&nbsp; {{ plato.nombre }}</span>
-              {% endif %}
-
-              <div class="d-flex">
-                  <a href="{% url 'fijar-o-eliminar-habito' plato.es_lugar|yesno:'1,0' plato.objeto_id 'cena' %}"
-                    title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}"
-                    class="ms-2">
-                    <i class="bi bi-pin-angle-fill fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
-                  </a>
-
-                <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'cena' dia %}"
-
-
-                        class="btn btn-sm p-0 ms-2 js-eliminar-programado"
-                        data-ajax-url="{% url 'ajax_eliminar_programado' %}"
-                        data-es-lugar="{{ plato.es_lugar|yesno:'1,0' }}"
-                        data-objeto-id="{{ plato.objeto_id }}"
-                        data-comida="cena"
-                        data-fecha="{{ dia|date:'Y-m-d' }}"
-                        title="Eliminar">
-
-                <i class="fa-solid fa-trash-can"></i>
-                </a>
-              </div>
-            </div>
-
-            {% if not plato.es_lugar and 'Principal' in plato.tipo %}
-              <div class="ms-5">
-                <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
-                        id="agregar-salsa-{{ plato.objeto_id }}">
-                  + Salsa
-                </button>
-                <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
-                        id="agregar-guarnicion-{{ plato.objeto_id }}">
-                  + Guarnición
-                </button>
-              </div>
-            {% endif %}
-
-          {% else %}
-            <p class="mb-1 ms-1 d-flex align-items-center text-danger">
-              Este objeto no tiene ID válido.
-            </p>
-          {% endif %}
-
-        {% endfor %}
-      {% else %}
-        <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
-      {% endif %}
+      {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Cena" platos=dia_plato.1.cena comida="cena" modo="desktop" %}
     </div>
+
 
   </div>
 </div>
@@ -313,265 +70,36 @@
 
     <div class="carousel-inner">
 
-      <!-- Slide 1: Desayuno -->
+      <!-- Slide 1: Desayuno-->
       <div class="carousel-item">
         <div class="p-1">
-          <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Desayuno</h6>
-
-          {% if dia_plato.1.desayuno %}
-            {% for plato in dia_plato.1.desayuno %}
-              {% if plato.objeto_id %}
-
-                <div class="mb-1 ms-1 d-flex align-items-center text-primary">
-
-                  <!-- Nombre (link solo si NO es lugar) -->
-                  {% if not plato.es_lugar %}
-                    <a href="{% url 'videos-update' plato.objeto_id %}"
-                       class="text-decoration-none me-2">
-                      &nbsp; {{ plato.nombre }}
-                    </a>
-                  {% else %}
-                    <span class="me-2">&nbsp; {{ plato.nombre }}</span>
-                  {% endif %}
-
-                  <!-- Pin solo si NO es lugar -->
-                    <a href="{% url 'fijar-o-eliminar-habito' plato.es_lugar|yesno:'1,0' plato.objeto_id 'desayuno' %}">
-
-                      <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
-                    </a>
-
-                  <!-- Eliminar: manda es_lugar (1/0) + objeto_id -->
-                  <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'desayuno' dia %}"
-
-                        class="btn btn-sm p-0 ms-2 js-eliminar-programado"
-                        data-ajax-url="{% url 'ajax_eliminar_programado' %}"
-                        data-es-lugar="{{ plato.es_lugar|yesno:'1,0' }}"
-                        data-objeto-id="{{ plato.objeto_id }}"
-                        data-comida="desayuno"
-                        data-fecha="{{ dia|date:'Y-m-d' }}"
-                        title="Eliminar">
-
-
-                  <i class="fa-solid fa-trash-can"></i>
-                  </a>
-
-                </div>
-
-                <!-- Extras SOLO si NO es lugar y es Principal -->
-                {% if not plato.es_lugar and 'Principal' in plato.tipo %}
-                  <div class="ms-4">
-                    <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
-                            id="agregar-salsa-{{ plato.objeto_id }}">
-                      + Salsa
-                    </button>
-                    <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
-                            id="agregar-guarnicion-{{ plato.objeto_id }}">
-                      + Guarnición
-                    </button>
-                  </div>
-                {% endif %}
-
-              {% else %}
-                <p class="mb-1 ms-1 d-flex align-items-center text-danger">
-                  Este objeto no tiene ID válido.
-                </p>
-              {% endif %}
-            {% endfor %}
-          {% else %}
-            <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
-          {% endif %}
+          {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Desayuno" platos=dia_plato.1.desayuno comida="desayuno" modo="mobile" %}
         </div>
       </div>
 
       <!-- Slide 2: Almuerzo -->
       <div class="carousel-item active">
         <div class="p-1">
-          <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Almuerzo</h6>
-
-          {% if dia_plato.1.almuerzo %}
-            {% for plato in dia_plato.1.almuerzo %}
-              {% if plato.objeto_id %}
-
-                <div class="mb-1 ms-1 d-flex align-items-center text-primary">
-
-                  {% if not plato.es_lugar %}
-                    <a href="{% url 'videos-update' plato.objeto_id %}"
-                       class="text-decoration-none me-2">
-                      &nbsp; {{ plato.nombre }}
-                    </a>
-                  {% else %}
-                    <span class="me-2">&nbsp; {{ plato.nombre }}</span>
-                  {% endif %}
-
-                    <a href="{% url 'fijar-o-eliminar-habito' plato.es_lugar|yesno:'1,0' plato.objeto_id 'almuerzo' %}">
-                      <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
-                    </a>
-
-                  <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'almuerzo' dia %}"
-
-                        class="btn btn-sm p-0 ms-2 js-eliminar-programado"
-                        data-ajax-url="{% url 'ajax_eliminar_programado' %}"
-                        data-es-lugar="{{ plato.es_lugar|yesno:'1,0' }}"
-                        data-objeto-id="{{ plato.objeto_id }}"
-                        data-comida="almuerzo"
-                        data-fecha="{{ dia|date:'Y-m-d' }}"
-                        title="Eliminar">
-                  <i class="fa-solid fa-trash-can"></i>
-                  </a>
-
-                </div>
-
-                {% if not plato.es_lugar and 'Principal' in plato.tipo %}
-                  <div class="ms-4">
-                    <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
-                            id="agregar-salsa-{{ plato.objeto_id }}">
-                      + Salsa
-                    </button>
-                    <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
-                            id="agregar-guarnicion-{{ plato.objeto_id }}">
-                      + Guarnición
-                    </button>
-                  </div>
-                {% endif %}
-
-              {% else %}
-                <p class="mb-1 ms-1 d-flex align-items-center text-danger">
-                  Este objeto no tiene ID válido.
-                </p>
-              {% endif %}
-            {% endfor %}
-          {% else %}
-            <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
-          {% endif %}
+          {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Almuerzo" platos=dia_plato.1.almuerzo comida="almuerzo" modo="mobile" %}
         </div>
       </div>
 
       <!-- Slide 3: Merienda -->
       <div class="carousel-item">
         <div class="p-1">
-          <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Merienda</h6>
-
-          {% if dia_plato.1.merienda %}
-            {% for plato in dia_plato.1.merienda %}
-              {% if plato.objeto_id %}
-
-                <div class="mb-1 ms-1 d-flex align-items-center text-primary">
-
-                  {% if not plato.es_lugar %}
-                    <a href="{% url 'videos-update' plato.objeto_id %}"
-                       class="text-decoration-none me-2">
-                      &nbsp; {{ plato.nombre }}
-                    </a>
-                  {% else %}
-                    <span class="me-2">&nbsp; {{ plato.nombre }}</span>
-                  {% endif %}
-
-                    <a href="{% url 'fijar-o-eliminar-habito' plato.es_lugar|yesno:'1,0' plato.objeto_id 'merienda' %}">
-                      <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
-                    </a>
-
-                  <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'merienda' dia %}"
-
-                        class="btn btn-sm p-0 ms-2 js-eliminar-programado"
-                        data-ajax-url="{% url 'ajax_eliminar_programado' %}"
-                        data-es-lugar="{{ plato.es_lugar|yesno:'1,0' }}"
-                        data-objeto-id="{{ plato.objeto_id }}"
-                        data-comida="merienda"
-                        data-fecha="{{ dia|date:'Y-m-d' }}"
-                        title="Eliminar">
-                  <i class="fa-solid fa-trash-can"></i>
-                  </a>
-
-                </div>
-
-                {% if not plato.es_lugar and 'Principal' in plato.tipo %}
-                  <div class="ms-4">
-                    <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
-                            id="agregar-salsa-{{ plato.objeto_id }}">
-                      + Salsa
-                    </button>
-                    <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
-                            id="agregar-guarnicion-{{ plato.objeto_id }}">
-                      + Guarnición
-                    </button>
-                  </div>
-                {% endif %}
-
-              {% else %}
-                <p class="mb-1 ms-1 d-flex align-items-center text-danger">
-                  Este objeto no tiene ID válido.
-                </p>
-              {% endif %}
-            {% endfor %}
-          {% else %}
-            <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
-          {% endif %}
+          {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Merienda" platos=dia_plato.1.merienda comida="merienda" modo="mobile" %}
         </div>
       </div>
 
       <!-- Slide 4: Cena -->
       <div class="carousel-item">
         <div class="p-1">
-          <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">Cena</h6>
-
-          {% if dia_plato.1.cena %}
-            {% for plato in dia_plato.1.cena %}
-              {% if plato.objeto_id %}
-
-                <div class="mb-1 ms-1 d-flex align-items-center text-primary">
-
-                  {% if not plato.es_lugar %}
-                    <a href="{% url 'videos-update' plato.objeto_id %}"
-                       class="text-decoration-none me-2">
-                      &nbsp; {{ plato.nombre }}
-                    </a>
-                  {% else %}
-                    <span class="me-2">&nbsp; {{ plato.nombre }}</span>
-                  {% endif %}
-                    <a href="{% url 'fijar-o-eliminar-habito' plato.es_lugar|yesno:'1,0' plato.objeto_id 'cena' %}">
-
-                      <i class="bi bi-pin-angle-fill ms-2 fa-lg {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
-                    </a>
-
-                  <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id 'cena' dia %}"
-                     class="btn btn-sm p-0 ms-2 js-eliminar-programado"
-                     data-ajax-url="{% url 'ajax_eliminar_programado' %}"
-                     data-es-lugar="{{ plato.es_lugar|yesno:'1,0' }}"
-                     data-objeto-id="{{ plato.objeto_id }}"
-                     data-comida="cena"
-                     data-fecha="{{ dia|date:'Y-m-d' }}"
-                     title="Eliminar">
-                    <i class="fa-solid fa-trash-can"></i>
-                  </a>
-
-                </div>
-
-                {% if not plato.es_lugar and 'Principal' in plato.tipo %}
-                  <div class="ms-4">
-                    <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
-                            id="agregar-salsa-{{ plato.objeto_id }}">
-                      + Salsa
-                    </button>
-                    <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
-                            id="agregar-guarnicion-{{ plato.objeto_id }}">
-                      + Guarnición
-                    </button>
-                  </div>
-                {% endif %}
-
-              {% else %}
-                <p class="mb-1 ms-1 d-flex align-items-center text-danger">
-                  Este objeto no tiene ID válido.
-                </p>
-              {% endif %}
-            {% endfor %}
-          {% else %}
-            <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
-          {% endif %}
+          {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Cena" platos=dia_plato.1.cena comida="cena" modo="mobile" %}
         </div>
       </div>
 
     </div>
+
 
     <!-- Controles -->
     <button class="carousel-control-prev" type="button"

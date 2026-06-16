@@ -1,0 +1,54 @@
+{% if plato.objeto_id %}
+
+  <div class="{{ item_class }}">
+    <!-- Nombre (link solo si NO es lugar) -->
+    {% if not plato.es_lugar %}
+      <a href="{% url 'videos-update' plato.objeto_id %}" class="{{ nombre_class }}">
+        &nbsp; {{ plato.nombre }}
+      </a>
+    {% else %}
+      <span class="{{ span_class }}">&nbsp; {{ plato.nombre }}</span>
+    {% endif %}
+
+    <!-- Íconos -->
+    <div class="{{ iconos_class }}">
+      <a href="{% url 'fijar-o-eliminar-habito' plato.es_lugar|yesno:'1,0' plato.objeto_id comida %}"
+         title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}"
+         class="{{ pin_link_class }}">
+        <i class="bi bi-pin-angle-fill fa-lg {{ pin_icon_extra_class }} {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
+      </a>
+
+      <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id comida dia %}"
+         class="btn btn-sm p-0 ms-2 js-eliminar-programado"
+         data-ajax-url="{% url 'ajax_eliminar_programado' %}"
+         data-es-lugar="{{ plato.es_lugar|yesno:'1,0' }}"
+         data-objeto-id="{{ plato.objeto_id }}"
+         data-comida="{{ comida }}"
+         data-fecha="{{ dia|date:'Y-m-d' }}"
+         title="Eliminar">
+        <i class="fa-solid fa-trash-can"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- Extras solo si NO es lugar y es Principal -->
+  {% if not plato.es_lugar and 'Principal' in plato.tipo %}
+    <div class="{{ extras_class }}">
+      <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
+              id="agregar-salsa-{{ plato.objeto_id }}">
+        + Salsa
+      </button>
+      <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
+              id="agregar-guarnicion-{{ plato.objeto_id }}">
+        + Guarnición
+      </button>
+    </div>
+  {% endif %}
+
+{% else %}
+
+  <p class="mb-1 ms-1 d-flex align-items-center text-danger">
+    Este objeto no tiene ID válido.
+  </p>
+
+{% endif %}

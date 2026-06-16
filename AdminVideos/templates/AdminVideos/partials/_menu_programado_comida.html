@@ -1,0 +1,17 @@
+{# Renderiza una comida del menú programado: título, items y estado vacío #}
+
+<h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">{{ titulo }}</h6>
+
+<div data-menu-dia="{{ dia|date:'Y-m-d' }}" data-menu-comida="{{ comida }}">
+  {% if platos %}
+    {% for plato in platos %}
+      {% if modo == "desktop" %}
+        {% include "AdminVideos/partials/_menu_programado_item.html" with comida=comida item_class="mb-1 ms-1 d-flex align-items-center text-primary justify-content-between" nombre_class="text-decoration-none me-2 w-75" span_class="me-2 w-75" iconos_class="d-flex" pin_link_class="ms-2" pin_icon_extra_class="" extras_class="ms-5" %}
+      {% else %}
+        {% include "AdminVideos/partials/_menu_programado_item.html" with comida=comida item_class="mb-1 ms-1 d-flex align-items-center text-primary" nombre_class="text-decoration-none me-2" span_class="me-2" iconos_class="d-flex" pin_link_class="" pin_icon_extra_class="ms-2" extras_class="ms-4" %}
+      {% endif %}
+    {% endfor %}
+  {% else %}
+    <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
+  {% endif %}
+</div>
