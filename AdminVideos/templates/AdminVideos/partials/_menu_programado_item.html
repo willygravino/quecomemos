@@ -12,11 +12,15 @@
 
     <!-- Íconos -->
     <div class="{{ iconos_class }}">
-      <a href="{% url 'fijar-o-eliminar-habito' plato.es_lugar|yesno:'1,0' plato.objeto_id comida %}"
-         title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}"
-         class="{{ pin_link_class }}">
-        <i class="bi bi-pin-angle-fill fa-lg {{ pin_icon_extra_class }} {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
-      </a>
+
+        {# Pin de hábito: fija o elimina el hábito semanal del item programado #}
+        <a href="{% url 'fijar-o-eliminar-habito' plato.es_lugar|yesno:'1,0' plato.objeto_id comida %}"
+            title="{% if plato.fijo %}Eliminar hábito{% else %}Fijar hábito{% endif %}"
+            class="{{ pin_link_class }} js-toggle-habito"
+            data-ajax-url="{% url 'fijar-o-eliminar-habito' plato.es_lugar|yesno:'1,0' plato.objeto_id comida %}">
+            <i class="bi bi-pin-angle-fill fa-lg {{ pin_icon_extra_class }} {% if plato.fijo %}text-success{% else %}text-secondary{% endif %}"></i>
+        </a>
+      
 
       <a href="{% url 'eliminar-programado' plato.es_lugar|yesno:'1,0' plato.objeto_id comida dia %}"
          class="btn btn-sm p-0 ms-2 js-eliminar-programado"

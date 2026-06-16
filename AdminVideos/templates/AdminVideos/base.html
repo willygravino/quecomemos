@@ -1223,7 +1223,55 @@ document.addEventListener("click", function (e) {
     });
   }
 
+  /* ============================================================
+    AJAX PARA FIJAR / DESFIJAR HÁBITO DESDE EL PIN
+    ============================================================ */
+  document.addEventListener("click", function (e) {
+    const link = e.target.closest(".js-toggle-habito");
 
+    if (!link) {
+      return;
+    }
+
+    const ajaxUrl = link.dataset.ajaxUrl || link.href;
+
+    // Fallback seguro: si falta algo esencial, dejamos el link clásico.
+    if (!ajaxUrl || !window.fetch) {
+      return;
+    }
+
+    e.preventDefault();
+
+    link.classList.add("pe-none");
+
+    fetch(ajaxUrl, {
+      method: "GET",
+      headers: {
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      credentials: "same-origin"
+    })
+    .then(function (response) {
+      if (!response.ok) {
+        throw new Error("Error al fijar o eliminar hábito");
+      }
+
+      return response.json();
+    })
+    .then(function (data) {
+      if (!data.ok) {
+        throw new Error("Respuesta inválida al fijar o eliminar hábito");
+      }
+
+      return refrescarMenuProgramado();
+    })
+    .catch(function (error) {
+      console.error(error);
+    })
+    .finally(function () {
+      link.classList.remove("pe-none");
+    });
+  }, true);
 
 
 </script>

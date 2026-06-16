@@ -85,14 +85,22 @@ def eliminar_platos_masivo(request):
     return redirect("filtro-de-platos")
 
     
-
 @login_required
 def fijar_o_eliminar_habito(request, es_lugar, objeto_id, comida):
     usuario = request.user
+    es_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
 
     dia_str = request.session.get("dia_activo")
     if not dia_str:
-        messages.error(request, "No hay día activo seleccionado.")
+        message = "No hay día activo seleccionado."
+
+        if es_ajax:
+            return JsonResponse({
+                "ok": False,
+                "message": message,
+            }, status=400)
+
+        messages.error(request, message)
         return redirect("filtro-de-platos")
 
     dia = datetime.datetime.strptime(dia_str, "%Y-%m-%d").date()
@@ -113,7 +121,9 @@ def fijar_o_eliminar_habito(request, es_lugar, objeto_id, comida):
 
         if habito:
             habito.delete()
-            messages.success(request, f"Se eliminó el hábito de {lugar.nombre} para {comida}.")
+            fijado = False
+            nombre = lugar.nombre
+            message = f"Se eliminó el hábito de {nombre} para {comida}."
         else:
             HabitoSemanal.objects.create(
                 perfil=perfil,
@@ -121,7 +131,9 @@ def fijar_o_eliminar_habito(request, es_lugar, objeto_id, comida):
                 momento=comida,
                 lugar=lugar
             )
-            messages.success(request, f"Se fijó el hábito de {lugar.nombre} para {comida}.")
+            fijado = True
+            nombre = lugar.nombre
+            message = f"Se fijó el hábito de {nombre} para {comida}."
 
     else:
         plato = get_object_or_404(Plato, id=objeto_id, propietario=usuario)
@@ -137,7 +149,8 @@ def fijar_o_eliminar_habito(request, es_lugar, objeto_id, comida):
 
         if habito:
             habito.delete()
-            messages.success(request, f"Se eliminó el hábito de {nombre} para {comida}.")
+            fijado = False
+            message = f"Se eliminó el hábito de {nombre} para {comida}."
         else:
             HabitoSemanal.objects.create(
                 perfil=perfil,
@@ -145,10 +158,18 @@ def fijar_o_eliminar_habito(request, es_lugar, objeto_id, comida):
                 momento=comida,
                 plato=plato
             )
-            messages.success(request, f"Se fijó el hábito de {nombre} para {comida}.")
+            fijado = True
+            message = f"Se fijó el hábito de {nombre} para {comida}."
 
+    if es_ajax:
+        return JsonResponse({
+            "ok": True,
+            "fijado": fijado,
+            "message": message,
+        })
+
+    messages.success(request, message)
     return redirect("filtro-de-platos")
-
 
 
 
