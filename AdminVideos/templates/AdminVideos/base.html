@@ -634,8 +634,18 @@
                 let tabActivo = document.querySelector(".nav-link.active");
                 if (tabActivo) {
                     let diaActivo = tabActivo.id.replace("tab-", "");
-                    document.getElementById("diaSeleccionado").value = diaActivo;
-                    document.getElementById("diaActivoTexto").textContent = diaActivo;
+                    
+                    const diaSeleccionadoInput = document.getElementById("diaSeleccionado");
+                    const diaActivoTexto = document.getElementById("diaActivoTexto");
+
+                    if (diaSeleccionadoInput) {
+                      diaSeleccionadoInput.value = diaActivo;
+                    }
+
+                    if (diaActivoTexto) {
+                      diaActivoTexto.textContent = diaActivo;
+                    }
+
                 }
             }
 
@@ -1107,7 +1117,122 @@ document.addEventListener("click", function (e) {
   e.preventDefault();
   addExtraRow(btn.getAttribute("data-tipo"));
 });
+
+  /* ============================================================
+    REFRESCAR MENÚ PROGRAMADO DESPUÉS DE ASIGNAR
+    ============================================================ */
+  function refrescarMenuProgramado() {
+    const contenedor = document.getElementById("contenedor-menu-programado-dias");
+
+    if (!contenedor || !window.fetch || !window.DOMParser) {
+      return Promise.resolve();
+    }
+
+    const url = new URL(window.location.href);
+    const diaSeleccionado = document.getElementById("diaSeleccionado");
+
+    if (diaSeleccionado && diaSeleccionado.value) {
+      url.searchParams.set("dia_activo", diaSeleccionado.value);
+    }
+
+    return fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      credentials: "same-origin"
+    })
+    .then(function (response) {
+      if (!response.ok) {
+        throw new Error("Error al refrescar menú programado");
+      }
+
+      return response.text();
+    })
+    .then(function (html) {
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      const nuevoContenedor = doc.getElementById("contenedor-menu-programado-dias");
+
+      if (!nuevoContenedor) {
+        throw new Error("No se encontró el menú programado actualizado");
+      }
+
+      contenedor.innerHTML = nuevoContenedor.innerHTML;
+    });
+  }
+
+
+  /* ============================================================
+    SUBMIT AJAX DEL MODAL ASIGNAR PLATO
+    ============================================================ */
+  const asignarPlatoForm = document.getElementById("asignarPlatoForm");
+
+  if (asignarPlatoForm) {
+    asignarPlatoForm.addEventListener("submit", function (e) {
+      const url = asignarPlatoForm.action;
+
+      // Fallback seguro: si falta algo esencial, dejamos el submit clásico.
+      if (!url || !window.fetch) {
+        return;
+      }
+
+      e.preventDefault();
+
+      const submitBtn = asignarPlatoForm.querySelector("button[type='submit']");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+      }
+
+      fetch(url, {
+        method: "POST",
+        body: new FormData(asignarPlatoForm),
+        headers: {
+          "X-Requested-With": "XMLHttpRequest"
+        },
+        credentials: "same-origin"
+      })
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error("Error al asignar plato");
+        }
+
+        return response.json();
+      })
+      .then(function (data) {
+        if (!data.ok) {
+          throw new Error("Respuesta inválida al asignar plato");
+        }
+
+        const modalEl = document.getElementById("asignarPlatoModal");
+
+        if (modalEl && window.bootstrap) {
+          const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+          modal.hide();
+        }
+
+        return refrescarMenuProgramado();
+      })
+      .catch(function (error) {
+        console.error(error);
+      })
+      .finally(function () {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+        }
+      });
+    });
+  }
+
+
+
+
 </script>
+
+
+
+
+
+
 
 <!-- INCLUYE EL MODAL GENERICO DE CONFIRMACIÓN -->
  <!-- ESTO PODRÍA CARGARSE SOLO CUANDO SE NECESITA, CON UN SISTEMA DE BLOCK-ENDBLOCK -->

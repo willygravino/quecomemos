@@ -3463,6 +3463,7 @@ class AsignarPlato(View):
         objeto_id = request.POST.get("plato_id")
         dia = request.POST.get("dia") or request.session.get("dia_activo")
         momento = request.POST.get("comida")
+        es_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
 
         if not dia:
             messages.error(request, "No hay día activo seleccionado.")
@@ -3587,10 +3588,22 @@ class AsignarPlato(View):
                 
                 messages.success(request, f"Lugar {lugar.nombre} (ID: {lugar.id}) asignado correctamente a {momento}.")
 
-           
 
-        except Exception:
+        except Exception as e:
             messages.warning(request, "Ese elemento ya estaba asignado a esa comida en ese día.")
+
+            if es_ajax:
+                return JsonResponse({
+                    "ok": False,
+                    "message": "Ese elemento ya estaba asignado o no se pudo asignar.",
+                    "error": str(e),
+                }, status=400)
+
+        if es_ajax:
+            return JsonResponse({
+                "ok": True,
+                "message": "Elemento asignado correctamente.",
+            })
 
         return redirect("filtro-de-platos")
 
