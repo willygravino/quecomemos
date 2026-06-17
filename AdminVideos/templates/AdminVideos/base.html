@@ -977,20 +977,26 @@ Root globl para modales cargados dinámicamente (AJAX)
 async function setPlatoInfo(platoId, tipo, nombrePlato) {
   const idAsignar   = document.getElementById("platoIdInputAsignar");
   const tipoAsignar = document.getElementById("tipoObjetoAsignar");
-  const titulo      = document.getElementById("modalTitulo");
+  const titulo = document.getElementById("modalTitulo");
+
+  const idCompartir = document.getElementById("platoIdInputCompartir");
+  const tipoCompartir = document.getElementById("tipoObjetoCompartir");
 
   const bloqueVar = document.getElementById("bloque-platos-para-asignar");
-  const listaVar  = document.getElementById("lista-platos-para-asignar");
+  const listaVar = document.getElementById("lista-platos-para-asignar");
 
   const bloqueExtras = document.getElementById("bloqueExtras");
-  const extrasRows   = document.getElementById("extrasRows");
+  const extrasRows = document.getElementById("extrasRows");
 
   // Setear hidden inputs base
   if (idAsignar)   idAsignar.value = platoId;
   if (tipoAsignar) tipoAsignar.value = tipo;
 
+  if (idCompartir) idCompartir.value = platoId;
+  if (tipoCompartir) tipoCompartir.value = tipo;
+
   // Limpiar SIEMPRE estado previo
-  if (listaVar)  listaVar.innerHTML = "";
+  if (listaVar) listaVar.innerHTML = "";
   if (bloqueVar) bloqueVar.classList.add("d-none");
 
   if (extrasRows)  extrasRows.innerHTML = "";

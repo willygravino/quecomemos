@@ -2919,6 +2919,20 @@ def obtener_habitos_lookup(habitos):
         for h in habitos
     }
 
+def obtener_contexto_mensajes_y_compartidos(usuario):
+    """
+    Devuelve datos laterales de la pantalla de platos.
+
+    No participa del filtrado principal de platos:
+    - mensajes agrupados
+    - platos compartidos pendientes de importar
+    """
+    return {
+        "mensajes": obtener_mensajes_agrupados(usuario),
+        "platos_compartidos": obtener_platos_compartidos_pendientes(usuario),
+    }
+
+
 @login_required(login_url=reverse_lazy('login'), redirect_field_name=None)
 def FiltroDePlatos(request):
 
@@ -2969,25 +2983,7 @@ def FiltroDePlatos(request):
     # el avatar
     avatar = perfil.avatar_url
 
-    mensajes_agrupados = obtener_mensajes_agrupados(usuario)
-
-
-
-
-# ------------------- LISTA DE PLATOS COMPARTIDOS
-
-    # MENSAJES CON PLATOS COMPARTIDOS QUE AÚN NO FUERON IMPORTADOS
-    mensajes_platos_compartidos = Mensaje.objects.filter(destinatario=usuario, importado=False).exclude(tipo_mensaje__in=["mensaje", "solicitar"])
-
-    # Obtener los IDs de los platos compartidos junto con el ID del mensaje
-    ids_platos_compartidos = {msg.id_elemento: msg.id for msg in mensajes_platos_compartidos if msg.id_elemento}
-
-    los_platos_compartidos = {
-        plato.id: plato for plato in Plato.objects.filter(id__in=ids_platos_compartidos)
-    }
-
-    platos_compartidos = obtener_platos_compartidos_pendientes(usuario)
-
+    contexto_mensajes = obtener_contexto_mensajes_y_compartidos(usuario)
 
 
 
@@ -3012,22 +3008,18 @@ def FiltroDePlatos(request):
                 "dias_programados": dias_programados,
                 "quecomemos_ck": quecomemos,
                 "misplatos_ck": misplatos,
-                "amigues" : amigues,
+                "amigues": amigues,
                 "parametro_activo": tipo_parametro,
-                "mensajes": mensajes_agrupados,
+                **contexto_mensajes,
                 'dia_activo': dia_activo,
-                'dia_activo_obj': dia_activo_obj, # solo para filtros |date en el template/modal
+                'dia_activo_obj': dia_activo_obj,
                 "guarniciones": guarniciones,
                 "salsas": salsas,
                 "platos_dia_x_dia": platos_dia_x_dia,
-                # "idesplatos": ids_platos_importados,
-                # "ides_descartable": ids_platos_compartidos,
-                "platos_compartidos": platos_compartidos,
                 "lugares": lugares,
                 "habitos_lookup": habitos_lookup,
+            }
 
-
-               }
     
     # tipopag = (request.GET.get("tipopag") or "Principal").strip()
     contexto["tipopag"] = tipopag
@@ -3178,23 +3170,26 @@ class EnviarMensaje(LoginRequiredMixin, CreateView):
 # from .models import IngredienteEnPlato, Plato, Lugar, Mensaje, TipoPlato  # Asegúrate de importar los modelos necesarios
 
 
+
 class compartir_elemento(CreateView):
     model = Mensaje
     template_name = 'AdminVideos/compartir_elemento.html'
     success_url = reverse_lazy('filtro-de-platos')
 
-    fields = ['mensaje']  # Solo incluimos el campo del mensaje, ya que otros se asignarán automáticamente
+    # Solo incluimos el campo del mensaje.
+    # El elemento compartido, destinatario y tipo se asignan manualmente.
+    fields = ['mensaje']
 
     def get_context_data(self, **kwargs):
-        # Obtén el contexto base de la vista
+        # =====================================================
+        # Contexto para confirmar el elemento que se va a compartir
+        # =====================================================
         context = super().get_context_data(**kwargs)
 
-        # Recupera el elemento_id y el amigue del request POST
-        id_elemento = self.request.POST.get('id_elemento')
-        amigue = self.request.POST.get('amigue')
-        tipo_elemento = self.request.POST.get('tipo_elemento')
+        id_elemento = self.request.POST.get('id_elemento', '').strip()
+        amigue = self.request.POST.get('amigue', '').strip()
+        tipo_elemento = self.request.POST.get('tipo_elemento', '').strip()
 
-        # Agrega plato y amigue al contexto
         context['id_elemento'] = id_elemento
         context['amigue'] = amigue
         context['tipo_elemento'] = tipo_elemento
@@ -3202,22 +3197,43 @@ class compartir_elemento(CreateView):
         return context
 
     def form_valid(self, form):
-        # Obtén los datos necesarios del request
-        id_elemento = self.request.POST.get('id_elemento')
-        amigue_username = self.request.POST.get('amigue')  # Supone que el valor es el nombre de usuario
-
-        # Obtén el mensaje que el usuario escribió en el formulario
+        # =====================================================
+        # Datos enviados desde el formulario de compartir
+        # =====================================================
+        id_elemento = self.request.POST.get('id_elemento', '').strip()
+        amigue_username = self.request.POST.get('amigue', '').strip()
+        tipo_mensaje = self.request.POST.get('tipo_mensaje', '').strip()
         mensaje_usuario = form.cleaned_data.get('mensaje')
-        tipo_mensaje = self.request.POST.get('tipo_mensaje')
 
+        # =====================================================
+        # Validaciones mínimas para evitar ValueError con IDs vacíos
+        # =====================================================
+        if not id_elemento or not id_elemento.isdigit():
+            messages.error(self.request, "No se pudo compartir: falta el elemento.")
+            return redirect(self.success_url)
+
+        if not amigue_username:
+            messages.error(self.request, "No se pudo compartir: falta seleccionar un amigue.")
+            return redirect(self.success_url)
+
+        if tipo_mensaje not in ("plato", "lugar"):
+            messages.error(self.request, "No se pudo compartir: tipo de elemento inválido.")
+            return redirect(self.success_url)
+
+        id_elemento = int(id_elemento)
+
+        # =====================================================
+        # Completar datos según el tipo de elemento compartido
+        # =====================================================
         if tipo_mensaje == "plato":
-            # Busca el plato y el destinatario
             plato = get_object_or_404(Plato, id=id_elemento)
-            # plato = Plato.objects.get(id=id_elemento)
+
             form.instance.nombre_elemento_compartido = plato.nombre_plato
             form.instance.tipo_mensaje = "plato"
+
         elif tipo_mensaje == "lugar":
-            lugar = Lugar.objects.get(id=id_elemento)
+            lugar = get_object_or_404(Lugar, id=id_elemento)
+
             form.instance.nombre_elemento_compartido = lugar.nombre
 
             if lugar.delivery:
@@ -3225,12 +3241,14 @@ class compartir_elemento(CreateView):
             else:
                 form.instance.tipo_mensaje = "comerafuera"
 
+        # =====================================================
+        # Destinatario y datos comunes del mensaje
+        # =====================================================
         destinatario = get_object_or_404(User, username=amigue_username)
 
-        # Completa los datos automáticos del mensaje
         form.instance.usuario_que_envia = self.request.user.username
         form.instance.destinatario = destinatario
-        form.instance.id_elemento = id_elemento  # aqui mando el ID DEL ELEMENTO que se comparte
+        form.instance.id_elemento = id_elemento
         form.instance.mensaje = mensaje_usuario
 
         return super().form_valid(form)
@@ -3367,41 +3385,56 @@ def amigue_borrar(request, pk):
     }
     return render(request, "AdminVideos/amigues.html", contexto)
 
+
+
 @login_required
 def agregar_plato_compartido(request, pk, mensaje_id):
-    # Recuperar el plato original
+    # =====================================================
+    # 1. Recuperar plato original y mensaje
+    # =====================================================
     plato_original = get_object_or_404(Plato, pk=pk)
+    mensaje = get_object_or_404(Mensaje, pk=mensaje_id, destinatario=request.user)
 
-    # Crear un nuevo plato para el usuario logueado
+    # =====================================================
+    # 2. Crear copia del plato para el usuario logueado
+    # =====================================================
     nuevo_plato = Plato.objects.create(
         nombre_plato=plato_original.nombre_plato,
+        nombre_grupo=plato_original.nombre_grupo,
         receta=plato_original.receta,
-        # descripcion_plato=plato_original.descripcion_plato,
         ingredientes=plato_original.ingredientes,
         medios=plato_original.medios,
         categoria=plato_original.categoria,
-        dificultad=plato_original.dificultad,
-        tipo=plato_original.tipo,
-        calorias=plato_original.calorias,
+        elaboracion=plato_original.elaboracion,
+        coccion=plato_original.coccion,
+        tipos=plato_original.tipos,
+        estacionalidad=plato_original.estacionalidad,
+        porciones=plato_original.porciones,
+        enlace=plato_original.enlace,
         propietario=request.user,
         image=plato_original.image,
-        variedades=plato_original.variedades,
-        proviene_de=plato_original.propietario,
-        id_original=plato_original.id
+        proviene_de=plato_original.propietario.username,
+        id_original=plato_original.id,
     )
 
-    # Recuperar el mensaje por su ID
-    mensaje = get_object_or_404(Mensaje, pk=mensaje_id)
+    # =====================================================
+    # 3. Copiar relaciones ManyToMany
+    # =====================================================
+    nuevo_plato.componentes.set(plato_original.componentes.all())
 
-    # Marcar el mensaje como importado
+    # =====================================================
+    # 4. Marcar mensaje como importado
+    # =====================================================
     mensaje.importado = True
-    mensaje.save()
+    mensaje.save(update_fields=["importado"])
 
-    # Mostrar un mensaje de éxito
     messages.success(request, "El plato se agregó exitosamente y el mensaje ha sido actualizado.")
-
-    # Redirigir a la página de filtro de platos
     return redirect('filtro-de-platos')
+
+
+
+
+
 
 
 def descartar_sugerido(request, plato_id):
