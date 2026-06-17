@@ -36,6 +36,19 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 
+# =====================================================
+# Sesiones de usuario
+# =====================================================
+
+# La sesión NO se cierra al cerrar el navegador.
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# Duración de la sesión: 30 días.
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
+
+# Renueva la expiración de sesión cada vez que se usa la app.
+SESSION_SAVE_EVERY_REQUEST = True
+
 # SESSION_COOKIE_SECURE = not DEBUG
 # CSRF_COOKIE_SECURE = not DEBUG
 
