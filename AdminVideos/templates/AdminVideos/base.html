@@ -70,18 +70,24 @@
     Carta de platos
   </div>
   <hr class="my-2 border border-white opacity-100">
+
+
+
+  
 <!-- 
 {# ============================
    MENÚ LATERAL POR TIPOS
    - Usa SOLO tipopag para activo
    - Lista de Compras activa por url_name
    ============================ #}
+-->
 
-{# 1) PRINCIPAL #} -->
+<!-- {# 1) PRINCIPAL #} -->
 <li class="nav-item {% if tipopag == 'Principal' %}active{% endif %}">
-  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
             {% if tipopag == 'Principal' %}is-active{% endif %}"
-     href="{% url 'filtro-de-platos' %}?tipopag=Principal">
+     href="{% url 'filtro-de-platos' %}?tipopag=Principal"
+     data-tipopag="Principal">
 
     <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
           style="width: 38px; height: 38px;">
@@ -97,12 +103,12 @@
 
 <hr class="sidebar-divider">
 
-
 <!-- {# 2) ENTRADA #} -->
 <li class="nav-item {% if tipopag == 'Entrada' %}active{% endif %}">
-  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
             {% if tipopag == 'Entrada' %}is-active{% endif %}"
-     href="{% url 'filtro-de-platos' %}?tipopag=Entrada{% if dia_activo %}&dia_activo={{ dia_activo }}{% endif %}">
+     href="{% url 'filtro-de-platos' %}?tipopag=Entrada{% if dia_activo %}&dia_activo={{ dia_activo }}{% endif %}"
+     data-tipopag="Entrada">
 
     <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
           style="width: 38px; height: 38px;">
@@ -135,12 +141,12 @@
   </a>
 </li>
 
-
 <!-- {# 4) GUARNICION #} -->
 <li class="nav-item {% if tipopag == 'Guarnicion' %}active{% endif %}">
-  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
             {% if tipopag == 'Guarnicion' %}is-active{% endif %}"
-     href="{% url 'filtro-de-platos' %}?tipopag=Guarnicion">
+     href="{% url 'filtro-de-platos' %}?tipopag=Guarnicion"
+     data-tipopag="Guarnicion">
 
     <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
           style="width: 38px; height: 38px;">
@@ -154,12 +160,12 @@
   </a>
 </li>
 
-
 <!-- {# 4.2) PICADAS #} -->
 <li class="nav-item {% if tipopag == 'Picada' %}active{% endif %}">
-  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
             {% if tipopag == 'Picada' %}is-active{% endif %}"
-     href="{% url 'filtro-de-platos' %}?tipopag=Picada">
+     href="{% url 'filtro-de-platos' %}?tipopag=Picada"
+     data-tipopag="Picada">
 
     <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
           style="width: 38px; height: 38px;">
@@ -173,12 +179,12 @@
   </a>
 </li>
 
-
 <!-- {# 5) POSTRE #} -->
 <li class="nav-item {% if tipopag == 'Postre' %}active{% endif %}">
-  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
             {% if tipopag == 'Postre' %}is-active{% endif %}"
-     href="{% url 'filtro-de-platos' %}?tipopag=Postre">
+     href="{% url 'filtro-de-platos' %}?tipopag=Postre"
+     data-tipopag="Postre">
 
     <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
           style="width: 38px; height: 38px;">
@@ -193,12 +199,12 @@
   </a>
 </li>
 
-
 <!-- {# 6) TRAGO #} -->
 <li class="nav-item {% if tipopag == 'Trago' %}active{% endif %}">
-  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
             {% if tipopag == 'Trago' %}is-active{% endif %}"
-     href="{% url 'filtro-de-platos' %}?tipopag=Trago">
+     href="{% url 'filtro-de-platos' %}?tipopag=Trago"
+     data-tipopag="Trago">
 
     <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
           style="width: 38px; height: 38px;">
@@ -213,18 +219,16 @@
   </a>
 </li>
 
-<hr class="sidebar-divider d-none d-md-block">
-
-
 <!-- {# 7) DELIVERY #} -->
 <li class="nav-item {% if tipopag == 'Delivery' %}active{% endif %}">
-  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
             {% if tipopag == 'Delivery' %}is-active{% endif %}"
-     href="{% url 'filtro-de-platos' %}?tipopag=Delivery">
+     href="{% url 'filtro-de-platos' %}?tipopag=Delivery"
+     data-tipopag="Delivery">
 
     <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
           style="width: 38px; height: 38px;">
-      <i class="fa-solid fa-mobile-screen-button {% if tipopag != 'Delivery' %}text-white-50{% endif %}"
+      <i class="fa-solid fa-motorcycle {% if tipopag != 'Delivery' %}text-white-50{% endif %}"
          style="font-size: 1.1rem;"></i>
     </span>
 
@@ -234,16 +238,16 @@
   </a>
 </li>
 
-
 <!-- {# 8) COMER AFUERA #} -->
 <li class="nav-item {% if tipopag == 'Comerafuera' %}active{% endif %}">
-  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
             {% if tipopag == 'Comerafuera' %}is-active{% endif %}"
-     href="{% url 'filtro-de-platos' %}?tipopag=Comerafuera">
+     href="{% url 'filtro-de-platos' %}?tipopag=Comerafuera"
+     data-tipopag="Comerafuera">
 
     <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
           style="width: 38px; height: 38px;">
-      <i class="fa-solid fa-person-walking-dashed-line-arrow-right {% if tipopag != 'Comerafuera' %}text-white-50{% endif %}"
+      <i class="fa-solid fa-location-dot {% if tipopag != 'Comerafuera' %}text-white-50{% endif %}"
          style="font-size: 1.1rem;"></i>
     </span>
 
@@ -252,6 +256,9 @@
     </span>
   </a>
 </li>
+
+
+
 
 <hr class="sidebar-divider d-none d-md-block">
 
