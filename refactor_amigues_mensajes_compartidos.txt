@@ -1,0 +1,145 @@
+AdminVideos/models.py:544:    amigues = models.JSONField(default=list, blank=True)
+AdminVideos/models.py:549:    # Para compartir la lista
+AdminVideos/models.py:635:class Mensaje(models.Model):
+AdminVideos/models.py:646:    tipo_mensaje_CHOICES = [
+AdminVideos/models.py:653:    tipo_mensaje = models.CharField(max_length=20, choices=tipo_mensaje_CHOICES, default=TEXTO, null=True)
+AdminVideos/models.py:655:    # tipo_mensaje = models.CharField(max_length=9, null=True, blank=True)
+AdminVideos/models.py:656:    id_elemento = models.IntegerField(null=True, blank=True)
+AdminVideos/models.py:673:        return f"{self.id} - Mensaje de {self.usuario_que_envia} a {self.destinatario.username}"
+AdminVideos/views.py:12:from AdminVideos.models import ProfilePlatoCompra, HabitoSemanal, Ingrediente, IngredienteEnPlato, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente
+AdminVideos/views.py:517:            reverse("compartir-plato", args=[perfil.share_token, plato.pk])
+AdminVideos/views.py:525:def compartir_ing_plato(request, token, pk: int):
+AdminVideos/views.py:565:        return render(request, "AdminVideos/compartir_lista.html", {
+AdminVideos/views.py:591:            # Solo mostrar si es "recién comprado" (mismo criterio que compartir_lista)
+AdminVideos/views.py:611:    return render(request, "AdminVideos/compartir_lista.html", {
+AdminVideos/views.py:797:        share_url = request.build_absolute_uri(reverse("compartir-lista", args=[token]))
+AdminVideos/views.py:920:    share_url = request.build_absolute_uri(reverse("compartir-lista", args=[token]))
+AdminVideos/views.py:982:def compartir_lista(request, token):
+AdminVideos/views.py:1007:        return render(request, "AdminVideos/compartir_lista.html", {
+AdminVideos/views.py:1142:    return render(request, "AdminVideos/compartir_lista.html", {
+AdminVideos/views.py:1147:        "DEBUG_VISTA": f"compartir_lista items={len(items)}",
+AdminVideos/views.py:1365:        # Pasar la lista de amigues al contexto
+AdminVideos/views.py:1366:        context["amigues"] = perfil.amigues  # Lista JSONField desde Profile
+AdminVideos/views.py:2581:        Mensaje.objects
+AdminVideos/views.py:2590:    mensajes_x_usuario = Mensaje.objects.filter(
+AdminVideos/views.py:2615:        Mensaje.objects
+AdminVideos/views.py:2617:        .exclude(tipo_mensaje__in=["mensaje", "solicitar"])
+AdminVideos/views.py:2621:        msg.id_elemento: msg.id
+AdminVideos/views.py:2623:        if msg.id_elemento
+AdminVideos/views.py:2633:            "id_plato": msg.id_elemento,
+AdminVideos/views.py:2638:            "receta": los_platos_compartidos[msg.id_elemento].receta
+AdminVideos/views.py:2639:                if msg.id_elemento in los_platos_compartidos else "",
+AdminVideos/views.py:2640:            "ingredientes": los_platos_compartidos[msg.id_elemento].ingredientes
+AdminVideos/views.py:2641:                if msg.id_elemento in los_platos_compartidos else "",
+AdminVideos/views.py:2642:            "image_url": los_platos_compartidos[msg.id_elemento].image_url
+AdminVideos/views.py:2643:                if msg.id_elemento in los_platos_compartidos else "",
+AdminVideos/views.py:2980:    # Accede al atributo `amigues` desde la instancia
+AdminVideos/views.py:2981:    amigues = perfil.amigues  # Esto cargará la lista almacenada en JSONField
+AdminVideos/views.py:3011:                "amigues": amigues,
+AdminVideos/views.py:3066:        "amigues": perfil.amigues,
+AdminVideos/views.py:3098:   model = Mensaje
+AdminVideos/views.py:3101:   template_name = 'AdminVideos/solicitar_amistad.html'
+AdminVideos/views.py:3105:        form.instance.tipo_mensaje = "amistad"
+AdminVideos/views.py:3115:        # Obtener la lista de amigos (amigues) del usuario actual (en base al nombre de usuario)
+AdminVideos/views.py:3116:        amigos = perfil_usuario.amigues
+AdminVideos/views.py:3127:class EnviarMensaje(LoginRequiredMixin, CreateView):
+AdminVideos/views.py:3128:    model = Mensaje
+AdminVideos/views.py:3138:        form.instance.tipo_mensaje = "texto"
+AdminVideos/views.py:3155:        mensajes = Mensaje.objects.filter(
+AdminVideos/views.py:3165:        # Pasar la lista de amigues al contexto
+AdminVideos/views.py:3166:        context["amigues"] = perfil.amigues  # Lista JSONField desde Profile
+AdminVideos/views.py:3170:# from .models import IngredienteEnPlato, Plato, Lugar, Mensaje, TipoPlato  # Asegúrate de importar los modelos necesarios
+AdminVideos/views.py:3174:class compartir_elemento(CreateView):
+AdminVideos/views.py:3175:    model = Mensaje
+AdminVideos/views.py:3176:    template_name = 'AdminVideos/compartir_elemento.html'
+AdminVideos/views.py:3185:        # Contexto para confirmar el elemento que se va a compartir
+AdminVideos/views.py:3189:        id_elemento = self.request.POST.get('id_elemento', '').strip()
+AdminVideos/views.py:3193:        context['id_elemento'] = id_elemento
+AdminVideos/views.py:3201:        # Datos enviados desde el formulario de compartir
+AdminVideos/views.py:3203:        id_elemento = self.request.POST.get('id_elemento', '').strip()
+AdminVideos/views.py:3205:        tipo_mensaje = self.request.POST.get('tipo_mensaje', '').strip()
+AdminVideos/views.py:3211:        if not id_elemento or not id_elemento.isdigit():
+AdminVideos/views.py:3212:            messages.error(self.request, "No se pudo compartir: falta el elemento.")
+AdminVideos/views.py:3216:            messages.error(self.request, "No se pudo compartir: falta seleccionar un amigue.")
+AdminVideos/views.py:3219:        if tipo_mensaje not in ("plato", "lugar"):
+AdminVideos/views.py:3220:            messages.error(self.request, "No se pudo compartir: tipo de elemento inválido.")
+AdminVideos/views.py:3223:        id_elemento = int(id_elemento)
+AdminVideos/views.py:3228:        if tipo_mensaje == "plato":
+AdminVideos/views.py:3229:            plato = get_object_or_404(Plato, id=id_elemento)
+AdminVideos/views.py:3232:            form.instance.tipo_mensaje = "plato"
+AdminVideos/views.py:3234:        elif tipo_mensaje == "lugar":
+AdminVideos/views.py:3235:            lugar = get_object_or_404(Lugar, id=id_elemento)
+AdminVideos/views.py:3240:                form.instance.tipo_mensaje = "delivery"
+AdminVideos/views.py:3242:                form.instance.tipo_mensaje = "comerafuera"
+AdminVideos/views.py:3251:        form.instance.id_elemento = id_elemento
+AdminVideos/views.py:3257:class MensajeDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+AdminVideos/views.py:3258:   model = Mensaje
+AdminVideos/views.py:3263:       return Mensaje.objects.filter(destinatario=self.request.user).exists()
+AdminVideos/views.py:3269:def amigues(request):
+AdminVideos/views.py:3273:    # Obtén la lista de "amigues" desde el perfil
+AdminVideos/views.py:3274:    lista_amigues = profile.amigues  # Esto será una lista (por el default=list en JSONField)
+AdminVideos/views.py:3278:        "amigues": lista_amigues,
+AdminVideos/views.py:3279:        "parametro" : "amigues"
+AdminVideos/views.py:3281:    return render(request, "AdminVideos/amigues.html", context)
+AdminVideos/views.py:3292:    # mensajes = Mensaje.objects.filter(destinatario=request.user).order_by("-creado_el")
+AdminVideos/views.py:3295:    mensajes = Mensaje.objects.filter(
+AdminVideos/views.py:3332:        if amigue_usuario not in perfil.amigues:
+AdminVideos/views.py:3334:            perfil.amigues.append(amigue_usuario)
+AdminVideos/views.py:3341:        if perfil.user.username not in aceptado.amigues:
+AdminVideos/views.py:3343:            aceptado.amigues.append(perfil.user.username)
+AdminVideos/views.py:3348:            mensaje = get_object_or_404(Mensaje, id=mensaje_id)
+AdminVideos/views.py:3354:        "amigues": perfil.amigues,  # Lista de amigues actualizada
+AdminVideos/views.py:3355:        "aceptado": aceptado,  # Lista de amigues actualizada
+AdminVideos/views.py:3360:    return render(request, "AdminVideos/amigues.html", contexto)
+AdminVideos/views.py:3368:    # Verificar si el ID del amigue existe en la lista de amigues
+AdminVideos/views.py:3369:    if pk in perfil.amigues:
+AdminVideos/views.py:3370:        perfil.amigues.remove(pk)
+AdminVideos/views.py:3378:    if perfil.user.username in eliminame.amigues:
+AdminVideos/views.py:3380:        eliminame.amigues.remove(perfil.user.username)
+AdminVideos/views.py:3384:        "amigues": perfil.amigues,  # Lista de amigues actualizada
+AdminVideos/views.py:3386:    return render(request, "AdminVideos/amigues.html", contexto)
+AdminVideos/views.py:3396:    mensaje = get_object_or_404(Mensaje, pk=mensaje_id, destinatario=request.user)
+AdminVideos/templates/AdminVideos/compartir_elemento.html:23:          <input type="hidden" name="id_elemento" value="{{ id_elemento }}">
+AdminVideos/templates/AdminVideos/compartir_elemento.html:29:          <input type="hidden" name="tipo_mensaje" value="{{ tipo_elemento }}">
+AdminVideos/templates/AdminVideos/compartir_elemento.html:30:          <!-- <p>tipo mensaje:{{tipo_mensaje}}</p> -->
+AdminVideos/templates/AdminVideos/compartir_elemento.html:33:          <p>Compartiendo el {{ tipo_elemento }}: {{id_elemento}}</p>
+AdminVideos/templates/AdminVideos/compartir_elemento.html:40:            <label for="id_mensaje">Mensaje:</label>
+AdminVideos/templates/AdminVideos/solicitar_amistad.html:59:          <input type="hidden" name="tipo_mensaje" value="amistad">
+AdminVideos/templates/AdminVideos/base.html:288:  {% if parametro == "amigues" %}
+AdminVideos/templates/AdminVideos/base.html:294:                {% if parametro == 'amigues' %}is-active{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:295:         href="{% url 'amigues' %}">
+AdminVideos/templates/AdminVideos/base.html:299:          <i class="fa-regular fa-address-book {% if parametro != 'amigues' %}text-white-50{% endif %}" style="font-size: 1.1rem;"></i>
+AdminVideos/templates/AdminVideos/base.html:302:        <span class="item-text mt-2 small {% if parametro == 'amigues' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+AdminVideos/templates/AdminVideos/base.html:420:                                Centro de Mensajes
+AdminVideos/templates/AdminVideos/base.html:441:                                        <!-- Mensaje -->
+AdminVideos/templates/AdminVideos/base.html:459:                            <a href="{% url 'solicitar-amistad' %}" class="dropdown-item text-center small ">
+AdminVideos/templates/AdminVideos/base.html:842:     (plato ingredientes, compartir, etc.)
+AdminVideos/templates/AdminVideos/base.html:844: Contenedor único para modales dinámicos (ingredientes, compartir, etc.) -->
+AdminVideos/templates/AdminVideos/historial.html:7:<h2>Historial de Mensajes</h2>
+AdminVideos/templates/AdminVideos/historial.html:9:<!-- Mensajes -->
+AdminVideos/templates/AdminVideos/historial.html:11:    <h3>Mensajes Recibidos</h3>
+AdminVideos/templates/AdminVideos/historial.html:15:            <th>Mensaje</th>
+AdminVideos/templates/AdminVideos/amigues.html:11:  {% for amigue in amigues %}
+AdminVideos/templates/AdminVideos/lugar_detail.html:68:            {% if amigues %}
+AdminVideos/templates/AdminVideos/lugar_detail.html:70:              <form method="post" action="{% url 'compartir-plato' %}">
+AdminVideos/templates/AdminVideos/lugar_detail.html:77:                          {% for amigue in amigues %}
+AdminVideos/templates/AdminVideos/mensaje_form.html:12:<h5>AMIGUES {{amigues}}</h5>
+AdminVideos/templates/AdminVideos/mensaje_form.html:16:    {% if mensaje.tipo_mensaje == "texto" %}
+AdminVideos/templates/AdminVideos/mensaje_form.html:32:      {% elif mensaje.tipo_mensaje == "amistad" %}
+AdminVideos/templates/AdminVideos/video_list_base.html:90:  <!-- Modal para compartir plato -->
+AdminVideos/templates/AdminVideos/video_list_base.html:91:  <div class="modal fade" id="compartirModal" tabindex="-1" aria-labelledby="compartirModalLabel" aria-hidden="true">
+AdminVideos/templates/AdminVideos/video_list_base.html:95:        <h5 class="modal-title" id="compartirModalLabel">Compartir plato</h5>
+AdminVideos/templates/AdminVideos/video_list_base.html:99:          <form method="post" action="{% url 'compartir-plato' %}">
+AdminVideos/templates/AdminVideos/video_list_base.html:105:                {% for amigue in amigues %}
+AdminVideos/templates/AdminVideos/video_list_base.html:110:              <input type="hidden" name="id_elemento" id="platoIdInputCompartir">
+AdminVideos/templates/AdminVideos/partials/menuitem_extras_modal.html:88:        <!-- Mensaje cuando no hay extras -->
+AdminVideos/templates/AdminVideos/partials/_listado_lugares.html:28:                    {% if amigues %}
+AdminVideos/templates/AdminVideos/partials/_listado_lugares.html:30:                        <a href="#" data-bs-toggle="modal" data-bs-target="#compartirModal"
+AdminVideos/templates/AdminVideos/partials/_carousel_platos.html:112:                    {% if amigues %}
+AdminVideos/templates/AdminVideos/partials/_carousel_platos.html:116:                       data-bs-target="#compartirModal"
+AdminVideos/templates/AdminVideos/partials/_listado_platos.html:43:      {% if amigues %}
+AdminVideos/templates/AdminVideos/partials/_listado_platos.html:136:            {% if amigues %}
+AdminVideos/templates/AdminVideos/partials/_listado_platos.html:139:                 data-bs-target="#compartirModal"
+AdminVideos/templates/AdminVideos/partials/_listado_platos.html:232:              {% if amigues %}
+AdminVideos/templates/AdminVideos/partials/_listado_platos.html:237:                     data-bs-target="#compartirModal"
+AdminVideos/templates/AdminVideos/lista_de_compras.html:224:        <!-- Botones: ir a la lista + compartir por WhatsApp -->
