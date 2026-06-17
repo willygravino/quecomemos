@@ -59,70 +59,102 @@
      - Reinicializa la selección masiva después de insertar HTML nuevo.
 ========================================================= -->
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-  const form = document.getElementById("form-filtros-platos");
-  const contenedor = document.getElementById("contenedor-listado-platos");
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("form-filtros-platos");
+    const contenedor = document.getElementById("contenedor-listado-platos");
 
-  if (!form || !contenedor) return;
+    if (!form || !contenedor) return;
 
-  
-  function actualizarListadoPlatos() {
-    const url = form.dataset.listadoUrl;
-    const formData = new FormData(form);
 
-    fetch(url, {
-      method: "POST",
-      body: formData,
-      headers: {
-        "X-Requested-With": "XMLHttpRequest"
-      }
-    })
-    .then(function (response) {
-      if (!response.ok) {
-        throw new Error("Error al cargar el listado");
-      }
+    function actualizarListadoPlatos() {
+      const url = form.dataset.listadoUrl;
+      const formData = new FormData(form);
 
-      return response.json();
-    })
-    
-  
-    .then(function (data) {
-      contenedor.innerHTML = data.html_listado;
+      fetch(url, {
+        method: "POST",
+        body: formData,
+        headers: {
+          "X-Requested-With": "XMLHttpRequest"
+        }
+      })
+        .then(function (response) {
+          if (!response.ok) {
+            throw new Error("Error al cargar el listado");
+          }
 
-      const contenedorCarousel = document.getElementById("contenedor-carousel-platos");
-      if (contenedorCarousel) {
-        contenedorCarousel.innerHTML = data.html_carousel;
-      }
+          return response.json();
+        })
 
-      const contenedorLugares = document.getElementById("contenedor-listado-lugares");
-      if (contenedorLugares) {
-        contenedorLugares.innerHTML = data.html_lugares;
-      }
 
-      if (typeof initListadoPlatos === "function") {
-        initListadoPlatos();
-      }
-    })
+        .then(function (data) {
+          contenedor.innerHTML = data.html_listado;
 
-    .catch(function (error) {
-      console.error(error);
-    });
-  }
+          const contenedorCarousel = document.getElementById("contenedor-carousel-platos");
+          if (contenedorCarousel) {
+            contenedorCarousel.innerHTML = data.html_carousel;
+          }
 
-  form.addEventListener("submit", function (event) {
-    event.preventDefault();
-    actualizarListadoPlatos();
-  });
+          const contenedorLugares = document.getElementById("contenedor-listado-lugares");
+          if (contenedorLugares) {
+            contenedorLugares.innerHTML = data.html_lugares;
+          }
 
-  form.querySelectorAll("input[type='checkbox']").forEach(function (checkbox) {
-    checkbox.addEventListener("change", function () {
+          if (typeof initListadoPlatos === "function") {
+            initListadoPlatos();
+          }
+        })
+
+        .catch(function (error) {
+          console.error(error);
+        });
+    }
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
       actualizarListadoPlatos();
     });
+
+    form.querySelectorAll("input[type='checkbox']").forEach(function (checkbox) {
+      checkbox.addEventListener("change", function () {
+        actualizarListadoPlatos();
+      });
+    });
+
+    /* ============================================================
+     FILTRAR POR TIPO DESDE EL MENÚ LATERAL SIN RECARGAR
+     ============================================================ */
+    document.addEventListener("click", function (event) {
+      const link = event.target.closest(".js-filtro-tipopag");
+
+      if (!link) {
+        return;
+      }
+
+      const tipopag = link.dataset.tipopag;
+
+      // Fallback seguro: si falta algo, dejamos navegar normal.
+      if (!tipopag || !window.fetch) {
+        return;
+      }
+
+      const inputTipopag = form.querySelector('input[name="tipopag"]');
+
+      if (!inputTipopag) {
+        return;
+      }
+
+      event.preventDefault();
+
+      inputTipopag.value = tipopag;
+
+      const nuevaUrl = new URL(link.href);
+      window.history.pushState({}, "", nuevaUrl.toString());
+
+      actualizarListadoPlatos();
+    });
+
+
   });
-
-  
-
-});
 </script>
 
 
