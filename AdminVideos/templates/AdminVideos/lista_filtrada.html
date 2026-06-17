@@ -8,7 +8,7 @@
   method="POST" 
   id="form-filtros-platos"
   data-listado-url="{% url 'ajax_listado_platos' %}">
-    <div class="d-flex justify-content-start mx-1 gap-4 flex-wrap">
+  <div class="d-flex justify-content-start mx-1 gap-4 flex-wrap">
 
     {% csrf_token %}
 
@@ -28,24 +28,39 @@
     </div>
 
     <div class="form-check">
-      <input class="form-check-input" type="checkbox" name="quecomemos" value="quecomemos" id="quecomemos" {% if quecomemos_ck == "quecomemos" %} checked {% endif %}>
-        <label class="form-check-label small" for="quecomemos">
+      <input
+        class="form-check-input"
+        type="checkbox"
+        name="quecomemos"
+        value="quecomemos"
+        id="quecomemos"
+        {% if quecomemos_ck == "quecomemos" %}checked{% endif %}
+      >
+      <label class="form-check-label small" for="quecomemos">
         Sugerencia <br> quecomemos
       </label>
     </div>
 
     <div class="form-check">
-      <input class="form-check-input" type="checkbox" name="misplatos" value="misplatos" id="misplatos" {% if misplatos_ck == "misplatos" %} checked {% endif %}>
+      <input
+        class="form-check-input"
+        type="checkbox"
+        name="misplatos"
+        value="misplatos"
+        id="misplatos"
+        {% if misplatos_ck == "misplatos" %}checked{% endif %}
+      >
       <label class="form-check-label small" for="misplatos">
         Mis platos
       </label>
     </div>
-
-        <!-- Campo oculto -->
-       <!-- <input type="hidden" name="misplatos" value="misplatos">  -->
-
   </div>
 </form>
+
+
+
+
+
 
 <!-- =========================================================
      FILTROS DE PLATOS - ACTUALIZACIÓN AJAX DEL LISTADO
@@ -109,6 +124,31 @@
         });
     }
 
+    function actualizarMenuLateralActivo(tipopag) {
+      document.querySelectorAll(".js-filtro-tipopag").forEach(function (link) {
+        const activo = link.dataset.tipopag === tipopag;
+
+        link.classList.toggle("is-active", activo);
+
+        const item = link.closest(".nav-item");
+        if (item) {
+          item.classList.toggle("active", activo);
+        }
+
+        const texto = link.querySelector(".item-text");
+        if (texto) {
+          texto.classList.toggle("text-white", activo);
+          texto.classList.toggle("fw-bold", activo);
+          texto.classList.toggle("text-white-50", !activo);
+        }
+
+        const icono = link.querySelector(".icon-wrap i");
+        if (icono) {
+          icono.classList.toggle("text-white-50", !activo);
+        }
+      });
+    }
+
     form.addEventListener("submit", function (event) {
       event.preventDefault();
       actualizarListadoPlatos();
@@ -118,6 +158,25 @@
       checkbox.addEventListener("change", function () {
         actualizarListadoPlatos();
       });
+    });
+
+    window.addEventListener("popstate", function () {
+      const params = new URLSearchParams(window.location.search);
+      const tipopag = params.get("tipopag");
+
+      if (!tipopag) {
+        return;
+      }
+
+      const inputTipopag = form.querySelector('input[name="tipopag"]');
+
+      if (!inputTipopag) {
+        return;
+      }
+
+      inputTipopag.value = tipopag;
+      actualizarMenuLateralActivo(tipopag);
+      actualizarListadoPlatos();
     });
 
     /* ============================================================
@@ -145,12 +204,16 @@
 
       event.preventDefault();
 
+
       inputTipopag.value = tipopag;
 
+      actualizarMenuLateralActivo(tipopag);
+
       const nuevaUrl = new URL(link.href);
-      window.history.pushState({}, "", nuevaUrl.toString());
+      window.history.pushState({ tipopag: tipopag }, "", nuevaUrl.toString());
 
       actualizarListadoPlatos();
+
     });
 
 
