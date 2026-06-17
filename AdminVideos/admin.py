@@ -6,7 +6,8 @@ from .models import (
     MenuItemExtra,
     Plato, Profile, Mensaje, Lugar,
     ProfileIngrediente,
-    ProfilePlatoCompra
+    ProfilePlatoCompra,
+    ElementoCompartido,
 )
 
 # =====================================================
@@ -124,3 +125,23 @@ class ProfilePlatoCompraAdmin(admin.ModelAdmin):
         "perfil__user__email",
         "plato__nombre_plato",
     )
+
+@admin.register(ElementoCompartido)
+class ElementoCompartidoAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "usuario_que_envia",
+        "destinatario",
+        "tipo",
+        "estado",
+        "creado_el",
+    )
+    list_filter = ("tipo", "estado", "creado_el")
+    search_fields = (
+        "usuario_que_envia__username",
+        "destinatario__username",
+        "plato__nombre_plato",
+        "lugar__nombre",
+        "mensaje",
+    )
+    readonly_fields = ("creado_el", "actualizado_el")

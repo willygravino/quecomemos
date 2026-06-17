@@ -5,6 +5,114 @@ import uuid
 from django.conf import settings
 from django.db.models import Q
 
+
+class ElementoCompartido(models.Model):
+    # =====================================================
+    # Tipos de elementos compartibles
+    # =====================================================
+    PLATO = "plato"
+    LUGAR = "lugar"
+
+    TIPOS = [
+        (PLATO, "Plato"),
+        (LUGAR, "Lugar"),
+    ]
+
+    # =====================================================
+    # Estados del compartido
+    # =====================================================
+    PENDIENTE = "pendiente"
+    IMPORTADO = "importado"
+    DESCARTADO = "descartado"
+
+    ESTADOS = [
+        (PENDIENTE, "Pendiente"),
+        (IMPORTADO, "Importado"),
+        (DESCARTADO, "Descartado"),
+    ]
+
+    # =====================================================
+    # Participantes
+    # =====================================================
+    usuario_que_envia = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="elementos_compartidos_enviados",
+    )
+
+    destinatario = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="elementos_compartidos_recibidos",
+    )
+
+    # =====================================================
+    # Elemento compartido
+    # =====================================================
+    tipo = models.CharField(max_length=20, choices=TIPOS)
+
+    plato = models.ForeignKey(
+        "Plato",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="compartidos_recibidos_como_plato",
+    )
+
+    lugar = models.ForeignKey(
+        "Lugar",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="compartidos_recibidos_como_lugar",
+    )
+
+    # =====================================================
+    # Contenido y estado
+    # =====================================================
+    mensaje = models.TextField(blank=True)
+    estado = models.CharField(max_length=20, choices=ESTADOS, default=PENDIENTE)
+
+    plato_importado = models.ForeignKey(
+        "Plato",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="compartidos_importados_desde",
+    )
+
+    creado_el = models.DateTimeField(auto_now_add=True)
+    actualizado_el = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                name="elemento_compartido_tiene_un_solo_objeto",
+                check=(
+                    models.Q(tipo="plato", plato__isnull=False, lugar__isnull=True)
+                    | models.Q(tipo="lugar", lugar__isnull=False, plato__isnull=True)
+                ),
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.usuario_que_envia} compartió {self.tipo} con {self.destinatario}"
+
+    @property
+    def elemento(self):
+        return self.plato or self.lugar
+
+    @property
+    def nombre_elemento(self):
+        if self.plato:
+            return self.plato.nombre_plato
+
+        if self.lugar:
+            return self.lugar.nombre
+
+        return ""
+
+        
 # Estado persistente de selección de platos para lista de compras
 class ProfilePlatoCompra(models.Model):
     perfil = models.ForeignKey(
