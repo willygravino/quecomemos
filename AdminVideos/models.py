@@ -5,6 +5,31 @@ import uuid
 from django.conf import settings
 from django.db.models import Q
 
+# Estado persistente de selección de platos para lista de compras
+class ProfilePlatoCompra(models.Model):
+    perfil = models.ForeignKey(
+        "Profile",
+        on_delete=models.CASCADE,
+        related_name="platos_compra",
+    )
+    plato = models.ForeignKey(
+        "Plato",
+        on_delete=models.CASCADE,
+        related_name="estados_compra",
+    )
+    elegido = models.BooleanField(default=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["perfil", "plato"],
+                name="uq_profile_plato_compra",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.perfil} - {self.plato} - elegido={self.elegido}"
+
 class Lugar(models.Model):
     nombre = models.CharField(max_length=100)
     direccion = models.CharField(max_length=255, blank=True, null=True)

@@ -9,7 +9,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
-from AdminVideos.models import HabitoSemanal, Ingrediente, IngredienteEnPlato, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente
+from AdminVideos.models import ProfilePlatoCompra, HabitoSemanal, Ingrediente, IngredienteEnPlato, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string   # ✅ ← ESTA ES LA CLAVE
 from django.http import Http404, HttpRequest, HttpResponseNotAllowed, JsonResponse
@@ -664,64 +664,36 @@ def lista_de_compras(request):
     # =====================================================
     post_origen = request.POST.get("post_origen", "") if request.method == "POST" else ""
 
-    # =====================================================
-    # POST: guardar ingredientes SOLO si origen == "ingredientes"
-    # =====================================================
+    
+    
+    # Guarda selección persistente de plato para lista de compras
     if request.method == "POST" and post_origen == "menu":
         plato_id = request.POST.get("toggle_plato_id")
         checked = request.POST.get("toggle_plato_checked") == "1"
 
         if plato_id and plato_id.isdigit():
-            plato_id = int(plato_id)
+            plato = get_object_or_404(
+                Plato,
+                id=int(plato_id),
+                propietario=request.user,
+            )
 
-            # aplicar a TODOS los días futuros donde aparezca ese plato
+            ProfilePlatoCompra.objects.update_or_create(
+                perfil=perfil,
+                plato=plato,
+                defaults={"elegido": checked},
+            )
+
+            # Mantiene sincronizados los MenuItem reales de ese plato.
             MenuItem.objects.filter(
                 menu__propietario=request.user,
                 menu__fecha__gte=today,
-                plato_id=plato_id,
+                plato_id=plato.id,
             ).update(elegido=checked)
 
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return JsonResponse({"success": True})
 
-    if request.method == "POST" and post_origen == "componente":
-        menuitem_id = request.POST.get("toggle_componente_menuitem_id")
-        componente_plato_id = request.POST.get("toggle_componente_plato_id")
-        checked = request.POST.get("toggle_componente_checked") == "1"
-
-        if (
-            menuitem_id and menuitem_id.isdigit()
-            and componente_plato_id and componente_plato_id.isdigit()
-        ):
-            menuitem_padre = get_object_or_404(
-                MenuItem,
-                id=int(menuitem_id),
-                menu__propietario=request.user,
-                menu__fecha__gte=today,
-                plato__isnull=False,
-            )
-
-            componente = get_object_or_404(
-                Plato,
-                id=int(componente_plato_id),
-            )
-
-            if checked:
-                MenuItem.objects.update_or_create(
-                    menu=menuitem_padre.menu,
-                    momento=menuitem_padre.momento,
-                    plato=componente,
-                    defaults={"elegido": True},
-                )
-            else:
-                MenuItem.objects.filter(
-                    menu=menuitem_padre.menu,
-                    momento=menuitem_padre.momento,
-                    plato=componente,
-                ).update(elegido=False)
-
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return JsonResponse({"success": True})
 
     # ✅ REFACTORIZADO: POST ingredientes usa helper (sin tocar el resto)
     if request.method == "POST" and post_origen == "ingredientes":
@@ -775,20 +747,49 @@ def lista_de_compras(request):
         .select_related("menu", "plato")
     )
 
-    plato_ids = list(items_elegidos.values_list("plato_id", flat=True))
+    # Platos programados como items reales del menú
+    plato_ids_programados = set(
+        MenuItem.objects
+        .filter(menu__in=menues, plato__isnull=False)
+        .values_list("plato_id", flat=True)
+    )
 
-    platos_elegidos_ids = set(plato_ids)
-
-    componentes_ids = list(
+    # Componentes asociados a esos platos programados
+    componente_ids_programados = set(
         Plato.objects
-        .filter(
-            forma_parte_de__id__in=plato_ids,
-            id__in=platos_elegidos_ids,   # 👈 solo componentes elegidos
-        )
+        .filter(forma_parte_de__id__in=plato_ids_programados)
         .values_list("id", flat=True)
     )
 
-    plato_ids_con_componentes = list(set(plato_ids + componentes_ids))
+    # Todos los platos que pueden aportar ingredientes:
+    # platos principales + componentes
+    plato_ids_disponibles = plato_ids_programados | componente_ids_programados
+
+    # Estados persistentes por usuario/perfil.
+    # Si no existe registro todavía, usamos como fallback el estado de MenuItem.elegido.
+    estados_compra = {
+        estado.plato_id: estado.elegido
+        for estado in ProfilePlatoCompra.objects.filter(
+            perfil=perfil,
+            plato_id__in=plato_ids_disponibles,
+        )
+    }
+
+    menuitem_elegidos_ids = set(
+        MenuItem.objects
+        .filter(menu__in=menues, plato__isnull=False, elegido=True)
+        .values_list("plato_id", flat=True)
+    )
+
+    platos_elegidos_ids = {
+        plato_id
+        for plato_id in plato_ids_disponibles
+        if estados_compra.get(plato_id, plato_id in menuitem_elegidos_ids)
+    }
+
+    plato_ids = list(platos_elegidos_ids)
+    plato_ids_con_componentes = list(platos_elegidos_ids)
+
 
     # si no hay platos elegidos
     if not plato_ids:
@@ -962,6 +963,7 @@ def lista_de_compras(request):
         "parametro": "lista-compras",
         "componentes_elegidos_keys": componentes_elegidos_keys,
         "shopping_por_rubro": items_por_rubro, 
+        "platos_elegidos_ids": platos_elegidos_ids,
            }
 
     return render(request, "AdminVideos/lista_de_compras.html", context)

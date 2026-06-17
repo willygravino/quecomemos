@@ -76,7 +76,7 @@
           type="checkbox"
           name="componente_seleccionado"
           value="{{ item.id }}_{{ componente.id }}"
-          {% if key in componentes_elegidos_keys %}checked{% endif %}
+          {% if componente.id in platos_elegidos_ids %}checked{% endif %}
         >
         <label class="form-check-label">
           {{ componente.nombre_plato }}

@@ -5,7 +5,8 @@ from .models import (
     MenuDia, MenuItem,
     MenuItemExtra,
     Plato, Profile, Mensaje, Lugar,
-    ProfileIngrediente
+    ProfileIngrediente,
+    ProfilePlatoCompra
 )
 
 # =====================================================
@@ -112,3 +113,14 @@ class MenuItemExtraAdmin(admin.ModelAdmin):
     search_fields = ("nombre",)
 
 admin.site.register(ProfileIngrediente)
+
+# Estado de selección de platos para lista de compras
+@admin.register(ProfilePlatoCompra)
+class ProfilePlatoCompraAdmin(admin.ModelAdmin):
+    list_display = ("perfil", "plato", "elegido")
+    list_filter = ("elegido",)
+    search_fields = (
+        "perfil__user__username",
+        "perfil__user__email",
+        "plato__nombre_plato",
+    )
