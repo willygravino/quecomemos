@@ -9,7 +9,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
-from AdminVideos.models import ProfilePlatoCompra, HabitoSemanal, Ingrediente, IngredienteEnPlato, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente
+from AdminVideos.models import ElementoCompartido, ProfilePlatoCompra, HabitoSemanal, Ingrediente, IngredienteEnPlato, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string   # ✅ ← ESTA ES LA CLAVE
 from django.http import Http404, HttpRequest, HttpResponseNotAllowed, JsonResponse
@@ -2610,43 +2610,46 @@ def obtener_mensajes_agrupados(usuario):
     return mensajes_agrupados
 
 
+
 def obtener_platos_compartidos_pendientes(usuario):
-    mensajes_platos_compartidos = (
-        Mensaje.objects
-        .filter(destinatario=usuario, importado=False)
-        .exclude(tipo_mensaje__in=["mensaje", "solicitar"])
+    """
+    Devuelve los platos compartidos pendientes para mostrar en la pantalla de platos.
+
+    Mantiene nombres de claves compatibles con el template actual:
+    - mensaje_id ahora representa el id de ElementoCompartido
+    - id_plato sigue siendo el id del plato original
+    """
+    compartidos = (
+        ElementoCompartido.objects
+        .filter(
+            destinatario=usuario,
+            tipo=ElementoCompartido.PLATO,
+            estado=ElementoCompartido.PENDIENTE,
+            plato__isnull=False,
+        )
+        .select_related("usuario_que_envia", "plato")
+        .order_by("-creado_el")
     )
 
-    ids_platos_compartidos = {
-        msg.id_elemento: msg.id
-        for msg in mensajes_platos_compartidos
-        if msg.id_elemento
-    }
+    platos_compartidos = []
 
-    los_platos_compartidos = {
-        plato.id: plato
-        for plato in Plato.objects.filter(id__in=ids_platos_compartidos)
-    }
+    for compartido in compartidos:
+        plato = compartido.plato
 
-    platos_compartidos = [
-        {
-            "id_plato": msg.id_elemento,
-            "mensaje_id": msg.id,
-            "mensaje": msg.mensaje,
-            "nombre_plato": msg.nombre_elemento_compartido,
-            "quien_comparte": msg.usuario_que_envia,
-            "receta": los_platos_compartidos[msg.id_elemento].receta
-                if msg.id_elemento in los_platos_compartidos else "",
-            "ingredientes": los_platos_compartidos[msg.id_elemento].ingredientes
-                if msg.id_elemento in los_platos_compartidos else "",
-            "image_url": los_platos_compartidos[msg.id_elemento].image_url
-                if msg.id_elemento in los_platos_compartidos else "",
-        }
-        for msg in mensajes_platos_compartidos
-        if msg.nombre_elemento_compartido
-    ]
+        platos_compartidos.append({
+            "mensaje_id": compartido.id,
+            "id_plato": plato.id,
+            "nombre_plato": plato.nombre_plato,
+            "usuario_que_envia": compartido.usuario_que_envia.username,
+            "mensaje": compartido.mensaje,
+            "receta": plato.receta,
+            "ingredientes": plato.ingredientes,
+            "image_url": plato.image_url,
+        })
 
     return platos_compartidos
+
+
 
 
 def obtener_platos_dia_x_dia(usuario, fechas_existentes, habitos_set):
@@ -3167,18 +3170,21 @@ class EnviarMensaje(LoginRequiredMixin, CreateView):
 
         return context
 
-# from .models import IngredienteEnPlato, Plato, Lugar, Mensaje, TipoPlato  # Asegúrate de importar los modelos necesarios
-
 
 
 class compartir_elemento(CreateView):
-    model = Mensaje
+    model = ElementoCompartido
     template_name = 'AdminVideos/compartir_elemento.html'
     success_url = reverse_lazy('filtro-de-platos')
 
     # Solo incluimos el campo del mensaje.
     # El elemento compartido, destinatario y tipo se asignan manualmente.
     fields = ['mensaje']
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields["mensaje"].required = True
+        return form
 
     def get_context_data(self, **kwargs):
         # =====================================================
@@ -3202,11 +3208,13 @@ class compartir_elemento(CreateView):
         # =====================================================
         id_elemento = self.request.POST.get('id_elemento', '').strip()
         amigue_username = self.request.POST.get('amigue', '').strip()
-        tipo_mensaje = self.request.POST.get('tipo_mensaje', '').strip()
-        mensaje_usuario = form.cleaned_data.get('mensaje')
-
+        tipo_elemento = (
+            self.request.POST.get('tipo_mensaje')
+            or self.request.POST.get('tipo_elemento')
+            or ''
+        ).strip()
         # =====================================================
-        # Validaciones mínimas para evitar ValueError con IDs vacíos
+        # Validaciones mínimas
         # =====================================================
         if not id_elemento or not id_elemento.isdigit():
             messages.error(self.request, "No se pudo compartir: falta el elemento.")
@@ -3216,42 +3224,37 @@ class compartir_elemento(CreateView):
             messages.error(self.request, "No se pudo compartir: falta seleccionar un amigue.")
             return redirect(self.success_url)
 
-        if tipo_mensaje not in ("plato", "lugar"):
+        if tipo_elemento not in (ElementoCompartido.PLATO, ElementoCompartido.LUGAR):
             messages.error(self.request, "No se pudo compartir: tipo de elemento inválido.")
             return redirect(self.success_url)
 
         id_elemento = int(id_elemento)
-
-        # =====================================================
-        # Completar datos según el tipo de elemento compartido
-        # =====================================================
-        if tipo_mensaje == "plato":
-            plato = get_object_or_404(Plato, id=id_elemento)
-
-            form.instance.nombre_elemento_compartido = plato.nombre_plato
-            form.instance.tipo_mensaje = "plato"
-
-        elif tipo_mensaje == "lugar":
-            lugar = get_object_or_404(Lugar, id=id_elemento)
-
-            form.instance.nombre_elemento_compartido = lugar.nombre
-
-            if lugar.delivery:
-                form.instance.tipo_mensaje = "delivery"
-            else:
-                form.instance.tipo_mensaje = "comerafuera"
-
-        # =====================================================
-        # Destinatario y datos comunes del mensaje
-        # =====================================================
         destinatario = get_object_or_404(User, username=amigue_username)
 
-        form.instance.usuario_que_envia = self.request.user.username
+        # =====================================================
+        # Datos comunes del compartido
+        # =====================================================
+        form.instance.usuario_que_envia = self.request.user
         form.instance.destinatario = destinatario
-        form.instance.id_elemento = id_elemento
-        form.instance.mensaje = mensaje_usuario
+        form.instance.tipo = tipo_elemento
+        form.instance.estado = ElementoCompartido.PENDIENTE
 
+        # =====================================================
+        # Elemento compartido
+        # =====================================================
+        if tipo_elemento == ElementoCompartido.PLATO:
+            form.instance.plato = get_object_or_404(Plato, id=id_elemento)
+
+        elif tipo_elemento == ElementoCompartido.LUGAR:
+            form.instance.lugar = get_object_or_404(Lugar, id=id_elemento)
+
+        messages.success(self.request, "Elemento compartido correctamente.")
         return super().form_valid(form)
+
+
+
+
+
 
 
 class MensajeDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -3386,18 +3389,15 @@ def amigue_borrar(request, pk):
     return render(request, "AdminVideos/amigues.html", contexto)
 
 
+def copiar_plato_para_usuario(plato_original, usuario):
+    """
+    Crea una copia de un plato para otro usuario.
 
-@login_required
-def agregar_plato_compartido(request, pk, mensaje_id):
-    # =====================================================
-    # 1. Recuperar plato original y mensaje
-    # =====================================================
-    plato_original = get_object_or_404(Plato, pk=pk)
-    mensaje = get_object_or_404(Mensaje, pk=mensaje_id, destinatario=request.user)
-
-    # =====================================================
-    # 2. Crear copia del plato para el usuario logueado
-    # =====================================================
+    Copia:
+    - campos principales del plato
+    - componentes
+    - ingredientes detallados
+    """
     nuevo_plato = Plato.objects.create(
         nombre_plato=plato_original.nombre_plato,
         nombre_grupo=plato_original.nombre_grupo,
@@ -3411,27 +3411,61 @@ def agregar_plato_compartido(request, pk, mensaje_id):
         estacionalidad=plato_original.estacionalidad,
         porciones=plato_original.porciones,
         enlace=plato_original.enlace,
-        propietario=request.user,
+        propietario=usuario,
         image=plato_original.image,
         proviene_de=plato_original.propietario.username,
         id_original=plato_original.id,
     )
 
-    # =====================================================
-    # 3. Copiar relaciones ManyToMany
-    # =====================================================
+    # Copiar componentes
     nuevo_plato.componentes.set(plato_original.componentes.all())
 
-    # =====================================================
-    # 4. Marcar mensaje como importado
-    # =====================================================
-    mensaje.importado = True
-    mensaje.save(update_fields=["importado"])
+    # Copiar ingredientes detallados sin depender de una lista fija de campos
+    for ingrediente_en_plato in plato_original.ingredientes_en_plato.all():
+        datos_ingrediente = {
+            field.name: getattr(ingrediente_en_plato, field.name)
+            for field in IngredienteEnPlato._meta.fields
+            if field.name not in ("id", "plato")
+        }
 
-    messages.success(request, "El plato se agregó exitosamente y el mensaje ha sido actualizado.")
+        IngredienteEnPlato.objects.create(
+            plato=nuevo_plato,
+            **datos_ingrediente,
+        )
+
+    return nuevo_plato
+
+
+
+
+@login_required
+def agregar_plato_compartido(request, pk, mensaje_id):
+    """
+    Importa un plato compartido al usuario logueado.
+
+    Nota:
+    - mensaje_id queda como nombre de parámetro por compatibilidad con la URL actual.
+    - Internamente ahora representa el id de ElementoCompartido.
+    """
+    with transaction.atomic():
+        compartido = get_object_or_404(
+            ElementoCompartido,
+            pk=mensaje_id,
+            destinatario=request.user,
+            tipo=ElementoCompartido.PLATO,
+            estado=ElementoCompartido.PENDIENTE,
+            plato_id=pk,
+        )
+
+        plato_original = compartido.plato
+        nuevo_plato = copiar_plato_para_usuario(plato_original, request.user)
+
+        compartido.estado = ElementoCompartido.IMPORTADO
+        compartido.plato_importado = nuevo_plato
+        compartido.save(update_fields=["estado", "plato_importado", "actualizado_el"])
+
+    messages.success(request, "El plato se agregó exitosamente.")
     return redirect('filtro-de-platos')
-
-
 
 
 
