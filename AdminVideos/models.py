@@ -825,43 +825,22 @@ class Amistad(models.Model):
         return None
 
 
-
 class Mensaje(models.Model):
     usuario_que_envia = models.CharField(max_length=15, null=True, blank=True)
-    
+
     mensaje = models.TextField(max_length=1000)
 
-    AMISTAD = 'amistad'
-    COMERAFUERA = 'comerafuera'
-    DELIVERY = 'delivery'
-    PLATO = 'plato'
-    TEXTO = "texto"
-        
-    tipo_mensaje_CHOICES = [
-        (AMISTAD, 'amistad'),
-        (COMERAFUERA, 'comerafuera'),
-        (DELIVERY, 'delivery'),
-        (PLATO, 'plato'),
-        (TEXTO,'texto')        
-    ]
-    tipo_mensaje = models.CharField(max_length=20, choices=tipo_mensaje_CHOICES, default=TEXTO, null=True)
+    creado_el = models.DateTimeField(auto_now_add=True)
 
-    # tipo_mensaje = models.CharField(max_length=9, null=True, blank=True)
-    id_elemento = models.IntegerField(null=True, blank=True)
+    destinatario = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="mensajes",
+    )
 
-    nombre_elemento_compartido =  models.CharField(max_length=30, null=True, blank=True)
+    leido = models.BooleanField(default=False)
 
-    creado_el = models.DateTimeField(auto_now_add=True) 
+    borrado_antes = models.BooleanField(default=False)
 
-    destinatario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="mensajes")
-  
-    # Nuevo campo para el estado de leído
-    leido = models.BooleanField(default=False)  # Se marca como no leído por defecto
-
-    importado = models.BooleanField(default=False)  # Se marca como no leído por defecto /// POR AHORA se marca TRUE cuando la amistad fue aceptada!!!
-
-    # importado = models.BooleanField(default=False)  # Se marca como no leído por defecto
-    borrado_antes = models.BooleanField(default=False)  # Se marca como no leído por defecto
-       
     def __str__(self):
         return f"{self.id} - Mensaje de {self.usuario_que_envia} a {self.destinatario.username}"

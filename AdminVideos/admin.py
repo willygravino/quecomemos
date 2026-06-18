@@ -22,10 +22,10 @@ class ProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Mensaje)
 class MensajeAdmin(admin.ModelAdmin):
-    list_display = ("id", "destinatario", "tipo_mensaje", "usuario_que_envia", "leido", "importado", "creado_el")
-    list_filter = ("tipo_mensaje", "leido", "importado", "creado_el")
-    search_fields = ("destinatario__username", "usuario_que_envia", "mensaje", "nombre_elemento_compartido")
-    date_hierarchy = "creado_el"
+    list_display = ("id", "destinatario", "usuario_que_envia", "leido", "creado_el")
+    list_filter = ("leido", "creado_el")
+    search_fields = ("destinatario__username", "usuario_que_envia", "mensaje")
+
 
 
 @admin.register(Lugar)

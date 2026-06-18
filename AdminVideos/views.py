@@ -2658,22 +2658,13 @@ def obtener_ids_usuarios_con_amistad_activa(usuario):
 
 def obtener_mensajes_agrupados(usuario):
     """
-    Devuelve el último mensaje visible por usuario para el centro de mensajes.
-
-    Mensaje queda reservado para:
-    - texto
-    - amistad
-
-    Los compartidos de platos/lugares ahora viven en ElementoCompartido.
+    Devuelve el último mensaje de texto visible por usuario.
     """
-    tipos_visibles = ["texto", "amistad"]
-
     subquery_ultimo_mensaje = (
         Mensaje.objects
         .filter(
             usuario_que_envia=OuterRef("usuario_que_envia"),
             destinatario=usuario,
-            tipo_mensaje__in=tipos_visibles,
         )
         .order_by("-creado_el")
         .values("id")[:1]
@@ -2681,10 +2672,7 @@ def obtener_mensajes_agrupados(usuario):
 
     mensajes_x_usuario = (
         Mensaje.objects
-        .filter(
-            id__in=Subquery(subquery_ultimo_mensaje),
-            tipo_mensaje__in=tipos_visibles,
-        )
+        .filter(id__in=Subquery(subquery_ultimo_mensaje))
         .order_by("-creado_el")
     )
 
@@ -2699,13 +2687,13 @@ def obtener_mensajes_agrupados(usuario):
                 "contenido": mensaje.mensaje,
                 "creado_el": (timezone.now() - mensaje.creado_el).days,
                 "leido": mensaje.leido,
-                "tipo_mensaje": mensaje.tipo_mensaje,
             }
         }
         for mensaje in mensajes_x_usuario
     }
 
     return mensajes_agrupados
+
 
 
 
@@ -3304,7 +3292,6 @@ class EnviarMensaje(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.usuario_que_envia = self.request.user.username
-        form.instance.tipo_mensaje = "texto"
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -3374,11 +3361,8 @@ class compartir_elemento(CreateView):
         # =====================================================
         id_elemento = self.request.POST.get('id_elemento', '').strip()
         amigue_username = self.request.POST.get('amigue', '').strip()
-        tipo_elemento = (
-            self.request.POST.get('tipo_mensaje')
-            or self.request.POST.get('tipo_elemento')
-            or ''
-        ).strip()
+        tipo_elemento = self.request.POST.get('tipo_elemento', '').strip()
+
         # =====================================================
         # Validaciones mínimas
         # =====================================================
