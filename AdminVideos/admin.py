@@ -22,9 +22,8 @@ class ProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Mensaje)
 class MensajeAdmin(admin.ModelAdmin):
-    list_display = ("id", "destinatario", "usuario_que_envia", "leido", "creado_el")
-    list_filter = ("leido", "creado_el")
-    search_fields = ("destinatario__username", "usuario_que_envia", "mensaje")
+    list_display = ("id", "destinatario", "usuario_que_envia_fk", "leido", "creado_el")
+    search_fields = ("destinatario__username", "usuario_que_envia_fk__username", "mensaje")
 
 
 

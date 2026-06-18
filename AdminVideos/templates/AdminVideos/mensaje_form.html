@@ -14,11 +14,11 @@
 {% if mensajes %}
   {% for mensaje in mensajes %}
 
-    <div class="d-flex {% if mensaje.usuario_que_envia == user.username %}justify-content-end{% else %}justify-content-start{% endif %} mb-0">
+    <div class="d-flex {% if mensaje.usuario_que_envia_fk == user %}justify-content-end{% else %}justify-content-start{% endif %} mb-0">
       <div
-        class="p-1 rounded-3 shadow-sm {% if mensaje.usuario_que_envia == user.username %}text-dark{% else %}text-white{% endif %}"
+        class="p-1 rounded-3 shadow-sm {% if mensaje.usuario_que_envia_fk == user %}text-dark{% else %}text-white{% endif %}"
         style="max-width: 75%; background-color:
-        {% if mensaje.usuario_que_envia == user.username %}
+        {% if mensaje.usuario_que_envia_fk == user %}
           rgb(163, 198, 255, 0.25)
         {% else %}
           rgba(0, 98, 255, 0.75)
@@ -46,7 +46,6 @@
     <p>Enviar mensaje a {{ form.initial.destinatario }}</p>
 
     <input type="hidden" name="destinatario" value="{{ form.initial.destinatario.id }}">
-    <input type="hidden" name="usuario_que_envia" value="{{ user.username }}">
 
     <textarea name="mensaje" cols="40" rows="3" maxlength="1000" required aria-invalid="true" id="id_mensaje"></textarea>
 

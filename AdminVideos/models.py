@@ -825,7 +825,13 @@ class Amistad(models.Model):
 
 
 class Mensaje(models.Model):
-    usuario_que_envia = models.CharField(max_length=15, null=True, blank=True)
+    usuario_que_envia_fk = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="mensajes_enviados",
+    )
 
     mensaje = models.TextField(max_length=1000)
 

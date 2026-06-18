@@ -18,7 +18,7 @@
         </tr>
         {% for mensaje in mensajes %}
         <tr>
-            <td>{{ mensaje.usuario_que_envia }}</td>
+            <td>{{ mensaje.usuario_que_envia_fk.username }}</td>
             <td>{{ mensaje.mensaje }}</td>
             <td>{{ mensaje.creado_el }}</td>
             <td>{{ mensaje.leido|yesno:"Sí,No" }}</td>

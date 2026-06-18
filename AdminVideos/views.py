@@ -2656,6 +2656,8 @@ def obtener_ids_usuarios_con_amistad_activa(usuario):
 
 
 
+
+
 def obtener_mensajes_agrupados(usuario):
     """
     Devuelve el último mensaje de texto visible por usuario.
@@ -2663,8 +2665,9 @@ def obtener_mensajes_agrupados(usuario):
     subquery_ultimo_mensaje = (
         Mensaje.objects
         .filter(
-            usuario_que_envia=OuterRef("usuario_que_envia"),
+            usuario_que_envia_fk=OuterRef("usuario_que_envia_fk"),
             destinatario=usuario,
+            usuario_que_envia_fk__isnull=False,
         )
         .order_by("-creado_el")
         .values("id")[:1]
@@ -2672,22 +2675,26 @@ def obtener_mensajes_agrupados(usuario):
 
     mensajes_x_usuario = (
         Mensaje.objects
-        .filter(id__in=Subquery(subquery_ultimo_mensaje))
+        .filter(
+            id__in=Subquery(subquery_ultimo_mensaje),
+            usuario_que_envia_fk__isnull=False,
+        )
+        .select_related("usuario_que_envia_fk__profile")
         .order_by("-creado_el")
     )
 
     mensajes_agrupados = {
-        mensaje.usuario_que_envia if isinstance(mensaje.usuario_que_envia, str) else mensaje.usuario_que_envia.username: {
+        mensaje.usuario_que_envia_fk.username: {
             "avatar_url": getattr(
-                mensaje.usuario_que_envia.profile,
+                mensaje.usuario_que_envia_fk.profile,
                 "avatar_url",
-                "/media/avatares/logo.png"
-            ) if hasattr(mensaje.usuario_que_envia, "profile") else "/media/avatares/logo.png",
+                "/media/avatares/logo.png",
+            ) if hasattr(mensaje.usuario_que_envia_fk, "profile") else "/media/avatares/logo.png",
             "mensaje": {
                 "contenido": mensaje.mensaje,
                 "creado_el": (timezone.now() - mensaje.creado_el).days,
                 "leido": mensaje.leido,
-            }
+            },
         }
         for mensaje in mensajes_x_usuario
     }
@@ -3291,7 +3298,8 @@ class EnviarMensaje(LoginRequiredMixin, CreateView):
         return get_object_or_404(User, username=self.kwargs.get("usuario"))
 
     def form_valid(self, form):
-        form.instance.usuario_que_envia = self.request.user.username
+        form.instance.usuario_que_envia_fk = self.request.user
+
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -3309,9 +3317,10 @@ class EnviarMensaje(LoginRequiredMixin, CreateView):
         destinatario = self.get_destinatario()
 
         mensajes = Mensaje.objects.filter(
-            Q(usuario_que_envia=self.request.user.username, destinatario__username=destinatario.username) |
-            Q(usuario_que_envia=destinatario.username, destinatario=self.request.user)
-        ).order_by('creado_el')
+        Q(usuario_que_envia_fk=self.request.user, destinatario=destinatario) |
+        Q(usuario_que_envia_fk=destinatario, destinatario=self.request.user)
+        ).order_by("-creado_el")
+
 
         context["mensajes"] = mensajes
 
@@ -3442,7 +3451,7 @@ def historial(request):
 
     # Obtener todos los mensajes donde el usuario es el destinatario o el que los envió, ordenados por fecha de creación
     mensajes = Mensaje.objects.filter(
-        Q(destinatario=request.user) | Q(usuario_que_envia=request.user.username)
+        Q(destinatario=request.user) | Q(usuario_que_envia_fk=request.user)
     ).order_by("-creado_el")
 
     # Formatear los platos descartados e importados
