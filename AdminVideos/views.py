@@ -9,7 +9,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
-from AdminVideos.models import ElementoCompartido, ProfilePlatoCompra, HabitoSemanal, Ingrediente, IngredienteEnPlato, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente
+from AdminVideos.models import ElementoCompartido, Amistad, ProfilePlatoCompra, HabitoSemanal, Ingrediente, IngredienteEnPlato, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string   # ✅ ← ESTA ES LA CLAVE
 from django.http import Http404, HttpRequest, HttpResponseNotAllowed, JsonResponse
@@ -3150,35 +3150,77 @@ def ajax_listado_platos(request):
 
 
 
-class SolicitarAmistad(CreateView):
-   model = Mensaje
-   success_url = reverse_lazy('filtro-de-platos')
-   fields = '__all__'
-   template_name = 'AdminVideos/solicitar_amistad.html'
 
-   def form_valid(self, form):
-        # Asigna el valor predeterminado al campo 'amistad'
+class SolicitarAmistad(CreateView):
+    model = Mensaje
+    success_url = reverse_lazy('filtro-de-platos')
+    fields = ['destinatario', 'mensaje']
+    template_name = 'AdminVideos/solicitar_amistad.html'
+
+    def form_valid(self, form):
+        # =====================================================
+        # 1. Datos base de la solicitud
+        # =====================================================
+        solicitante = self.request.user
+        destinatario = form.cleaned_data.get("destinatario")
+
+        if destinatario == solicitante:
+            messages.error(self.request, "No podés enviarte una solicitud a vos mismo.")
+            return redirect(self.success_url)
+
+        usuario_1, usuario_2 = Amistad.normalizar_usuarios(solicitante, destinatario)
+
+        # =====================================================
+        # 2. Crear o recuperar relación de amistad
+        # =====================================================
+        amistad, creada = Amistad.objects.get_or_create(
+            usuario_1=usuario_1,
+            usuario_2=usuario_2,
+            defaults={
+                "solicitada_por": solicitante,
+                "estado": Amistad.PENDIENTE,
+            },
+        )
+
+        if not creada:
+            if amistad.estado == Amistad.ACEPTADA:
+                messages.info(self.request, "Ya son amigues.")
+                return redirect(self.success_url)
+
+            if amistad.estado == Amistad.PENDIENTE:
+                messages.info(self.request, "Ya hay una solicitud de amistad pendiente.")
+                return redirect(self.success_url)
+
+            if amistad.estado == Amistad.RECHAZADA:
+                amistad.estado = Amistad.PENDIENTE
+                amistad.solicitada_por = solicitante
+                amistad.save(update_fields=["estado", "solicitada_por", "actualizada_el"])
+
+        # =====================================================
+        # 3. Mantener notificación vieja hasta migrar la UI
+        # =====================================================
         form.instance.tipo_mensaje = "amistad"
+        form.instance.usuario_que_envia = solicitante.username
+        form.instance.destinatario = destinatario
+        form.instance.importado = False
+
         return super().form_valid(form)
 
-
-   def get_form(self, form_class=None):
+    def get_form(self, form_class=None):
         form = super().get_form(form_class)
 
-        # Obtener el perfil del usuario autenticado
         perfil_usuario = self.request.user.profile
-
-        # Obtener la lista de amigos (amigues) del usuario actual (en base al nombre de usuario)
         amigos = perfil_usuario.amigues
 
-        # Obtener los usuarios que no son amigos, excluyendo al usuario actual
-        usuarios_no_amigos = User.objects.exclude(id=self.request.user.id)  # Excluir al usuario actual
-
-        # Filtrar usuarios que no estén en la lista de amigos (compara nombre de usuario)
+        usuarios_no_amigos = User.objects.exclude(id=self.request.user.id)
         usuarios_no_amigos = usuarios_no_amigos.exclude(username__in=amigos)
 
         form.fields['destinatario'].queryset = usuarios_no_amigos
         return form
+
+
+
+
 
 class EnviarMensaje(LoginRequiredMixin, CreateView):
     model = Mensaje
