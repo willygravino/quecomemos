@@ -2576,19 +2576,38 @@ def obtener_fechas_existentes_menu(usuario, fecha_actual):
         ).values_list("fecha", flat=True)
     )
 
+
+
 def obtener_mensajes_agrupados(usuario):
+    """
+    Devuelve el último mensaje visible por usuario para el centro de mensajes.
+
+    Mensaje queda reservado para:
+    - texto
+    - amistad
+
+    Los compartidos de platos/lugares ahora viven en ElementoCompartido.
+    """
+    tipos_visibles = ["texto", "amistad"]
+
     subquery_ultimo_mensaje = (
         Mensaje.objects
         .filter(
             usuario_que_envia=OuterRef("usuario_que_envia"),
-            destinatario=usuario
+            destinatario=usuario,
+            tipo_mensaje__in=tipos_visibles,
         )
         .order_by("-creado_el")
         .values("id")[:1]
     )
 
-    mensajes_x_usuario = Mensaje.objects.filter(
-        id__in=Subquery(subquery_ultimo_mensaje)
+    mensajes_x_usuario = (
+        Mensaje.objects
+        .filter(
+            id__in=Subquery(subquery_ultimo_mensaje),
+            tipo_mensaje__in=tipos_visibles,
+        )
+        .order_by("-creado_el")
     )
 
     mensajes_agrupados = {
@@ -2602,12 +2621,15 @@ def obtener_mensajes_agrupados(usuario):
                 "contenido": mensaje.mensaje,
                 "creado_el": (timezone.now() - mensaje.creado_el).days,
                 "leido": mensaje.leido,
+                "tipo_mensaje": mensaje.tipo_mensaje,
             }
         }
         for mensaje in mensajes_x_usuario
     }
 
     return mensajes_agrupados
+
+
 
 
 

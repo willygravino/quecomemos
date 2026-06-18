@@ -411,8 +411,12 @@
                             data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <i class="fa-solid fa-comments"></i>
                             <!-- Counter - Messages -->
-                            <span class="badge badge-danger badge-counter">7</span>
-                        </a>
+
+                            {% if mensajes %}
+                              <span class="badge badge-danger badge-counter">{{ mensajes|length }}</span>
+                            {% endif %}
+
+                          </a>
                         <!-- Dropdown - Messages -->
                         <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in overflow-auto"
                             style="max-height: 600px;" aria-labelledby="messagesDropdown">
