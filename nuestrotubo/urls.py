@@ -35,7 +35,7 @@ urlpatterns = [
     path('menu/historial',historial, name="historial"),
     path('menu/amigues/sumar',sumar_amigue, name="sumar-amigue"),
     path('compartir/',  compartir_elemento.as_view(), name="compartir-plato"),
-    # path('compartir/lugar',  compartir_lugar.as_view(), name="compartir-lugar"),
+
 
     path('agregar-a-mi-lista/<int:plato_id>/', agregar_a_mi_lista, name='agregar-a-mi-lista'),
     # path('descartar-sugerido/<str:nombre_plato>/', descartar_sugerido, name='descartar-sugerido'),
