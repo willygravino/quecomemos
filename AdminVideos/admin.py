@@ -8,6 +8,7 @@ from .models import (
     ProfileIngrediente,
     ProfilePlatoCompra,
     ElementoCompartido,
+    Amistad,
 )
 
 # =====================================================
@@ -145,3 +146,21 @@ class ElementoCompartidoAdmin(admin.ModelAdmin):
         "mensaje",
     )
     readonly_fields = ("creado_el", "actualizado_el")
+
+@admin.register(Amistad)
+class AmistadAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "usuario_1",
+        "usuario_2",
+        "solicitada_por",
+        "estado",
+        "creada_el",
+    )
+    list_filter = ("estado", "creada_el")
+    search_fields = (
+        "usuario_1__username",
+        "usuario_2__username",
+        "solicitada_por__username",
+    )
+    readonly_fields = ("creada_el", "actualizada_el")

@@ -112,7 +112,7 @@ class ElementoCompartido(models.Model):
 
         return ""
 
-        
+
 # Estado persistente de selección de platos para lista de compras
 class ProfilePlatoCompra(models.Model):
     perfil = models.ForeignKey(
@@ -738,6 +738,92 @@ class HabitoSemanal(models.Model):
     def __str__(self):
         obj = self.plato if self.plato_id else self.lugar
         return f"{self.get_dia_semana_display()} - {self.momento} - {obj}"
+
+
+
+class Amistad(models.Model):
+    # =====================================================
+    # Estados de la relación
+    # =====================================================
+    PENDIENTE = "pendiente"
+    ACEPTADA = "aceptada"
+    RECHAZADA = "rechazada"
+
+    ESTADOS = [
+        (PENDIENTE, "Pendiente"),
+        (ACEPTADA, "Aceptada"),
+        (RECHAZADA, "Rechazada"),
+    ]
+
+    # =====================================================
+    # Usuarios involucrados
+    # =====================================================
+    usuario_1 = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="amistades_como_usuario_1",
+    )
+
+    usuario_2 = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="amistades_como_usuario_2",
+    )
+
+    solicitada_por = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="amistades_solicitadas",
+    )
+
+    # =====================================================
+    # Estado
+    # =====================================================
+    estado = models.CharField(max_length=20, choices=ESTADOS, default=PENDIENTE)
+
+    creada_el = models.DateTimeField(auto_now_add=True)
+    actualizada_el = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["usuario_1", "usuario_2"],
+                name="uq_amistad_usuarios",
+            ),
+            models.CheckConstraint(
+                name="amistad_usuarios_distintos",
+                check=~models.Q(usuario_1=models.F("usuario_2")),
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.usuario_1} - {self.usuario_2} ({self.estado})"
+
+    @classmethod
+    def normalizar_usuarios(cls, usuario_a, usuario_b):
+        """
+        Devuelve los usuarios siempre en el mismo orden.
+        Esto evita duplicados tipo:
+        - guillermo/felipillo
+        - felipillo/guillermo
+        """
+        if usuario_a.id < usuario_b.id:
+            return usuario_a, usuario_b
+
+        return usuario_b, usuario_a
+
+    def involucra_a(self, usuario):
+        return self.usuario_1_id == usuario.id or self.usuario_2_id == usuario.id
+
+    def otro_usuario(self, usuario):
+        if self.usuario_1_id == usuario.id:
+            return self.usuario_2
+
+        if self.usuario_2_id == usuario.id:
+            return self.usuario_1
+
+        return None
+
 
 
 class Mensaje(models.Model):
