@@ -2611,6 +2611,35 @@ def obtener_mensajes_agrupados(usuario):
 
 
 
+def obtener_lugares_compartidos_pendientes(usuario):
+    """
+    Devuelve lugares compartidos pendientes.
+    """
+    compartidos = (
+        ElementoCompartido.objects
+        .filter(
+            destinatario=usuario,
+            tipo=ElementoCompartido.LUGAR,
+            estado=ElementoCompartido.PENDIENTE,
+            lugar__isnull=False,
+        )
+        .select_related("usuario_que_envia", "lugar")
+        .order_by("-creado_el")
+    )
+
+    return [
+        {
+            "compartido_id": compartido.id,
+            "id_lugar": compartido.lugar.id,
+            "nombre": compartido.lugar.nombre,
+            "usuario_que_envia": compartido.usuario_que_envia.username,
+            "mensaje": compartido.mensaje,
+        }
+        for compartido in compartidos
+    ]
+
+
+
 def obtener_platos_compartidos_pendientes(usuario):
     """
     Devuelve los platos compartidos pendientes para mostrar en la pantalla de platos.
@@ -2933,6 +2962,8 @@ def obtener_contexto_mensajes_y_compartidos(usuario):
     return {
         "mensajes": obtener_mensajes_agrupados(usuario),
         "platos_compartidos": obtener_platos_compartidos_pendientes(usuario),
+        "lugares_compartidos": obtener_lugares_compartidos_pendientes(usuario),
+
     }
 
 
@@ -3389,6 +3420,22 @@ def amigue_borrar(request, pk):
     return render(request, "AdminVideos/amigues.html", contexto)
 
 
+def copiar_lugar_para_usuario(lugar_original, usuario):
+    """
+    Crea una copia simple de un lugar para otro usuario.
+    """
+    return Lugar.objects.create(
+        nombre=lugar_original.nombre,
+        direccion=lugar_original.direccion,
+        telefono=lugar_original.telefono,
+        enlace=lugar_original.enlace,
+        dias_horarios=lugar_original.dias_horarios,
+        image=lugar_original.image,
+        delivery=lugar_original.delivery,
+        propietario=usuario,
+    )
+
+
 def copiar_plato_para_usuario(plato_original, usuario):
     """
     Crea una copia de un plato para otro usuario.
@@ -3436,6 +3483,28 @@ def copiar_plato_para_usuario(plato_original, usuario):
     return nuevo_plato
 
 
+@login_required
+def agregar_lugar_compartido(request, pk, compartido_id):
+    """
+    Importa un lugar compartido al usuario logueado.
+    """
+    with transaction.atomic():
+        compartido = get_object_or_404(
+            ElementoCompartido,
+            pk=compartido_id,
+            destinatario=request.user,
+            tipo=ElementoCompartido.LUGAR,
+            estado=ElementoCompartido.PENDIENTE,
+            lugar_id=pk,
+        )
+
+        copiar_lugar_para_usuario(compartido.lugar, request.user)
+
+        compartido.estado = ElementoCompartido.IMPORTADO
+        compartido.save(update_fields=["estado", "actualizado_el"])
+
+    messages.success(request, "El lugar se agregó exitosamente.")
+    return redirect("filtro-de-platos")
 
 
 @login_required
