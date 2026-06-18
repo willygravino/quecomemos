@@ -20,7 +20,7 @@
       <p>    
            {% csrf_token %}
             <!-- Campo oculto para enviar plato id o lugar id-->
-          <input type="hidden" name="id_elemento" value="{{ id_elemento }}">
+            <input type="hidden" name="elemento_id" value="{{ elemento_id }}">
 
           <!-- Campo oculto para enviar el nombre del amigue -->
           <input type="hidden" name="amigue" value="{{ amigue }}">
@@ -29,7 +29,7 @@
         <input type="hidden" name="tipo_elemento" value="{{ tipo_elemento }}">
         
           
-          <p>Compartiendo el {{ tipo_elemento }}: {{id_elemento}}</p>
+          <p>Compartiendo el {{ tipo_elemento }}: {{elemento_id }}</p>
 
           <p>Con: {{ amigue }}</p>
           <p>Tipo elemento: {{ tipo_elemento }}</p>

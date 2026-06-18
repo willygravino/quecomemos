@@ -3345,11 +3345,11 @@ class compartir_elemento(CreateView):
         # =====================================================
         context = super().get_context_data(**kwargs)
 
-        id_elemento = self.request.POST.get('id_elemento', '').strip()
+        elemento_id = self.request.POST.get('elemento_id', '').strip()
         amigue = self.request.POST.get('amigue', '').strip()
         tipo_elemento = self.request.POST.get('tipo_elemento', '').strip()
 
-        context['id_elemento'] = id_elemento
+        context['elemento_id'] = elemento_id
         context['amigue'] = amigue
         context['tipo_elemento'] = tipo_elemento
 
@@ -3359,14 +3359,14 @@ class compartir_elemento(CreateView):
         # =====================================================
         # Datos enviados desde el formulario de compartir
         # =====================================================
-        id_elemento = self.request.POST.get('id_elemento', '').strip()
+        elemento_id = self.request.POST.get('elemento_id', '').strip()
         amigue_username = self.request.POST.get('amigue', '').strip()
         tipo_elemento = self.request.POST.get('tipo_elemento', '').strip()
 
         # =====================================================
         # Validaciones mínimas
         # =====================================================
-        if not id_elemento or not id_elemento.isdigit():
+        if not elemento_id or not elemento_id.isdigit():
             messages.error(self.request, "No se pudo compartir: falta el elemento.")
             return redirect(self.success_url)
 
@@ -3378,7 +3378,7 @@ class compartir_elemento(CreateView):
             messages.error(self.request, "No se pudo compartir: tipo de elemento inválido.")
             return redirect(self.success_url)
 
-        id_elemento = int(id_elemento)
+        elemento_id = int(elemento_id)
         destinatario = get_object_or_404(User, username=amigue_username)
 
         # =====================================================
@@ -3393,10 +3393,10 @@ class compartir_elemento(CreateView):
         # Elemento compartido
         # =====================================================
         if tipo_elemento == ElementoCompartido.PLATO:
-            form.instance.plato = get_object_or_404(Plato, id=id_elemento)
+            form.instance.plato = get_object_or_404(Plato, id=elemento_id)
 
         elif tipo_elemento == ElementoCompartido.LUGAR:
-            form.instance.lugar = get_object_or_404(Lugar, id=id_elemento)
+            form.instance.lugar = get_object_or_404(Lugar, id=elemento_id)
 
         messages.success(self.request, "Elemento compartido correctamente.")
         return super().form_valid(form)
