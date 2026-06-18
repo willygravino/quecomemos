@@ -42,6 +42,7 @@ from AdminVideos.services.pantry import (
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.db.models.expressions import OrderBy
 from django.db.models import Case, When, IntegerField
+from django.views.generic.edit import FormView
 
 
 # Paso 8.1: eliminar varios platos seleccionados con la misma lógica que eliminar_plato
@@ -1363,7 +1364,7 @@ class LugarDetail(DetailView):
         perfil = get_object_or_404(Profile, user=self.request.user)
 
         # Pasar la lista de amigues al contexto
-        context["amigues"] = perfil.amigues  # Lista JSONField desde Profile
+        context["amigues"] = obtener_usernames_amigues(self.request.user)        
 
         return context
 
@@ -2578,6 +2579,83 @@ def obtener_fechas_existentes_menu(usuario, fecha_actual):
 
 
 
+def obtener_amistades_usuario(usuario, estado=Amistad.ACEPTADA):
+    """
+    Devuelve relaciones de amistad del usuario en el estado pedido.
+    """
+    return (
+        Amistad.objects
+        .filter(
+            Q(usuario_1=usuario) | Q(usuario_2=usuario),
+            estado=estado,
+        )
+        .select_related("usuario_1", "usuario_2", "solicitada_por")
+        .order_by("-actualizada_el")
+    )
+
+
+def obtener_usuarios_amigues(usuario):
+    """
+    Devuelve objetos User que son amigues aceptados del usuario.
+    """
+    usuarios = []
+
+    for amistad in obtener_amistades_usuario(usuario, estado=Amistad.ACEPTADA):
+        otro = amistad.otro_usuario(usuario)
+
+        if otro:
+            usuarios.append(otro)
+
+    return usuarios
+
+
+def obtener_usernames_amigues(usuario):
+    """
+    Devuelve usernames de amigues aceptados.
+
+    Mantiene compatibilidad con templates que esperan una lista simple.
+    """
+    return [
+        usuario_amigue.username
+        for usuario_amigue in obtener_usuarios_amigues(usuario)
+    ]
+
+
+def obtener_solicitudes_amistad_pendientes(usuario):
+    """
+    Devuelve solicitudes pendientes recibidas por el usuario.
+    """
+    return (
+        obtener_amistades_usuario(usuario, estado=Amistad.PENDIENTE)
+        .exclude(solicitada_por=usuario)
+    )
+
+
+def obtener_ids_usuarios_con_amistad_activa(usuario):
+    """
+    Devuelve IDs de usuarios que ya tienen relación pendiente o aceptada.
+
+    Se usa para no ofrecerlos otra vez en el formulario de solicitud.
+    """
+    ids = []
+
+    amistades = (
+        Amistad.objects
+        .filter(Q(usuario_1=usuario) | Q(usuario_2=usuario))
+        .exclude(estado=Amistad.RECHAZADA)
+    )
+
+    for amistad in amistades:
+        otro = amistad.otro_usuario(usuario)
+
+        if otro:
+            ids.append(otro.id)
+
+    return ids
+
+
+
+
 def obtener_mensajes_agrupados(usuario):
     """
     Devuelve el último mensaje visible por usuario para el centro de mensajes.
@@ -3034,7 +3112,7 @@ def FiltroDePlatos(request):
     fechas_existentes = obtener_fechas_existentes_menu(usuario, fecha_actual)
 
     # Accede al atributo `amigues` desde la instancia
-    amigues = perfil.amigues  # Esto cargará la lista almacenada en JSONField
+    amigues = obtener_usernames_amigues(request.user)
 
     # el avatar
     avatar = perfil.avatar_url
@@ -3119,7 +3197,7 @@ def ajax_listado_platos(request):
         "platos": platos_listado,
         "carousel_items": platos_carousel,
         "lugares": lugares,
-        "amigues": perfil.amigues,
+        "amigues": obtener_usernames_amigues(request.user),
         "tipopag": tipopag,
     }
 
@@ -3148,31 +3226,44 @@ def ajax_listado_platos(request):
     })
 
 
+class SolicitarAmistadForm(forms.Form):
+    destinatario = forms.ModelChoiceField(
+        queryset=User.objects.none(),
+        label="Usuario",
+    )
+    mensaje = forms.CharField(
+        required=False,
+        max_length=1000,
+        widget=forms.Textarea(attrs={"rows": 3}),
+        label="Mensaje",
+    )
 
 
+class SolicitarAmistad(LoginRequiredMixin, FormView):
+    template_name = "AdminVideos/solicitar_amistad.html"
+    success_url = reverse_lazy("amigues")
+    form_class = SolicitarAmistadForm
 
-class SolicitarAmistad(CreateView):
-    model = Mensaje
-    success_url = reverse_lazy('filtro-de-platos')
-    fields = ['destinatario', 'mensaje']
-    template_name = 'AdminVideos/solicitar_amistad.html'
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+
+        usuarios_excluidos = obtener_ids_usuarios_con_amistad_activa(self.request.user)
+        usuarios_excluidos.append(self.request.user.id)
+
+        form.fields["destinatario"].queryset = (
+            User.objects
+            .exclude(id__in=usuarios_excluidos)
+            .order_by("username")
+        )
+
+        return form
 
     def form_valid(self, form):
-        # =====================================================
-        # 1. Datos base de la solicitud
-        # =====================================================
         solicitante = self.request.user
-        destinatario = form.cleaned_data.get("destinatario")
-
-        if destinatario == solicitante:
-            messages.error(self.request, "No podés enviarte una solicitud a vos mismo.")
-            return redirect(self.success_url)
+        destinatario = form.cleaned_data["destinatario"]
 
         usuario_1, usuario_2 = Amistad.normalizar_usuarios(solicitante, destinatario)
 
-        # =====================================================
-        # 2. Crear o recuperar relación de amistad
-        # =====================================================
         amistad, creada = Amistad.objects.get_or_create(
             usuario_1=usuario_1,
             usuario_2=usuario_2,
@@ -3191,32 +3282,12 @@ class SolicitarAmistad(CreateView):
                 messages.info(self.request, "Ya hay una solicitud de amistad pendiente.")
                 return redirect(self.success_url)
 
-            if amistad.estado == Amistad.RECHAZADA:
-                amistad.estado = Amistad.PENDIENTE
-                amistad.solicitada_por = solicitante
-                amistad.save(update_fields=["estado", "solicitada_por", "actualizada_el"])
+            amistad.estado = Amistad.PENDIENTE
+            amistad.solicitada_por = solicitante
+            amistad.save(update_fields=["estado", "solicitada_por", "actualizada_el"])
 
-        # =====================================================
-        # 3. Mantener notificación vieja hasta migrar la UI
-        # =====================================================
-        form.instance.tipo_mensaje = "amistad"
-        form.instance.usuario_que_envia = solicitante.username
-        form.instance.destinatario = destinatario
-        form.instance.importado = False
-
-        return super().form_valid(form)
-
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-
-        perfil_usuario = self.request.user.profile
-        amigos = perfil_usuario.amigues
-
-        usuarios_no_amigos = User.objects.exclude(id=self.request.user.id)
-        usuarios_no_amigos = usuarios_no_amigos.exclude(username__in=amigos)
-
-        form.fields['destinatario'].queryset = usuarios_no_amigos
-        return form
+        messages.success(self.request, "Solicitud de amistad enviada.")
+        return redirect(self.success_url)
 
 
 
@@ -3261,7 +3332,7 @@ class EnviarMensaje(LoginRequiredMixin, CreateView):
         perfil = get_object_or_404(Profile, user=self.request.user)
 
         # Pasar la lista de amigues al contexto
-        context["amigues"] = perfil.amigues  # Lista JSONField desde Profile
+        context["amigues"] = obtener_usernames_amigues(self.request.user)
 
         return context
 
@@ -3362,22 +3433,18 @@ class MensajeDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 
 
-
 @login_required
 def amigues(request):
-    # Obtén el perfil del usuario autenticado
-    profile = request.user.profile
+    amigues_aceptados = obtener_usernames_amigues(request.user)
+    solicitudes_pendientes = obtener_solicitudes_amistad_pendientes(request.user)
 
-    # Obtén la lista de "amigues" desde el perfil
-    lista_amigues = profile.amigues  # Esto será una lista (por el default=list en JSONField)
-
-    # Pasa la lista como contexto a la plantilla
     context = {
-        "amigues": lista_amigues,
-        "parametro" : "amigues"
+        "amigues": amigues_aceptados,
+        "solicitudes_pendientes": solicitudes_pendientes,
+        "parametro": "amigues",
     }
-    return render(request, "AdminVideos/amigues.html", context)
 
+    return render(request, "AdminVideos/amigues.html", context)
 
 
 
@@ -3408,80 +3475,52 @@ def historial(request):
     return render(request, "AdminVideos/historial.html", context)
 
 
+
 @login_required
 def sumar_amigue(request):
-    if request.method == "POST":
-        # Obtén el ID del "amigue" enviado desde el formulario
-        amigue_usuario = request.POST.get("amigue_usuario")
-        mensaje_id = request.POST.get("mensaje_id")
+    if request.method != "POST":
+        return redirect("amigues")
+
+    amistad_id = request.POST.get("amistad_id")
+
+    amistad = get_object_or_404(
+        Amistad,
+        id=amistad_id,
+        estado=Amistad.PENDIENTE,
+    )
+
+    if not amistad.involucra_a(request.user):
+        messages.error(request, "No podés aceptar esta solicitud.")
+        return redirect("amigues")
+
+    if amistad.solicitada_por_id == request.user.id:
+        messages.error(request, "No podés aceptar una solicitud enviada por vos.")
+        return redirect("amigues")
+
+    amistad.estado = Amistad.ACEPTADA
+    amistad.save(update_fields=["estado", "actualizada_el"])
+
+    messages.success(request, "Solicitud de amistad aceptada.")
+    return redirect("amigues")
 
 
-        # Verifica que se haya enviado un ID válido
-        # if not amigue_usuario:
-        #     return HttpResponseForbidden("Solicitud inválida.")
 
-        # Obtén el perfil del usuario autenticado
-        # user_profile = request.user.profile
-
-        # Obtener el perfil del usuario actual
-        perfil = get_object_or_404(Profile, user=request.user)
-
-        # Asegúrate de que no se repita en la lista
-        if amigue_usuario not in perfil.amigues:
-            # Agrega el nombre del "amigue" a la lista
-            perfil.amigues.append(amigue_usuario)
-            perfil.save()
-
-        # Busca el usuario asociado al ID recibido
-        aceptado = get_object_or_404(Profile, user__username=amigue_usuario)
-
-        # Asegúrate de que el username no se repita en la lista
-        if perfil.user.username not in aceptado.amigues:
-            # Agrega el nombre del usuario a la lista
-            aceptado.amigues.append(perfil.user.username)
-            aceptado.save()
-
-        # Marcar el mensaje como "importado" si el mensaje ID es válido
-        if mensaje_id:
-            mensaje = get_object_or_404(Mensaje, id=mensaje_id)
-            mensaje.importado = True
-            mensaje.save()
-
-         # Construye un diccionario con las variables de contexto
-    contexto = {
-        "amigues": perfil.amigues,  # Lista de amigues actualizada
-        "aceptado": aceptado,  # Lista de amigues actualizada
-
-    }
-
-    # Redirige a una página de confirmación o muestra la lista actualizada
-    return render(request, "AdminVideos/amigues.html", contexto)
 
 
 @login_required
 def amigue_borrar(request, pk):
-    # Obtener el perfil del usuario autenticado
-    perfil = request.user.profile
+    amigue = get_object_or_404(User, username=pk)
 
-    # Verificar si el ID del amigue existe en la lista de amigues
-    if pk in perfil.amigues:
-        perfil.amigues.remove(pk)
-        perfil.save()  # Guardar los cambios en el perfil
+    usuario_1, usuario_2 = Amistad.normalizar_usuarios(request.user, amigue)
 
+    Amistad.objects.filter(
+        usuario_1=usuario_1,
+        usuario_2=usuario_2,
+    ).delete()
 
-    # Borrar en el registro del amigo también (no será más mi amigo)
-    eliminame = get_object_or_404(Profile, user__username=pk)
+    messages.success(request, "Amigue eliminado.")
+    return redirect("amigues")
 
-    # Asegúrate de que el username tuyo este en la lista de tu amigo
-    if perfil.user.username in eliminame.amigues:
-        # Agrega el nombre del usuario a la lista
-        eliminame.amigues.remove(perfil.user.username)
-        eliminame.save()
-
-    contexto = {
-        "amigues": perfil.amigues,  # Lista de amigues actualizada
-    }
-    return render(request, "AdminVideos/amigues.html", contexto)
 
 
 def copiar_lugar_para_usuario(lugar_original, usuario):
