@@ -2312,9 +2312,22 @@ class PlatoVariedadDelete(LoginRequiredMixin, DeleteView):
         return redirect(reverse("videos-update", kwargs={"pk": self.padre.id}))
 
 
+
 class Login(LoginView):
     authentication_form = CustomAuthenticationForm
     next_page = reverse_lazy("filtro-de-platos")
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+
+        recordar = self.request.POST.get("recordar")
+
+        if recordar:
+            self.request.session.set_expiry(60 * 60 * 24 * 30)
+        else:
+            self.request.session.set_expiry(0)
+
+        return response
 
 
 class SignUp(CreateView):
