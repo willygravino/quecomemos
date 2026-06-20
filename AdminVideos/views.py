@@ -45,19 +45,6 @@ from django.db.models import Case, When, IntegerField
 from django.views.generic.edit import FormView
 
 
-@login_required
-def debug_sesion(request):
-    return JsonResponse({
-        "is_authenticated": request.user.is_authenticated,
-        "username": request.user.username,
-        "session_key": request.session.session_key,
-        "session_expiry_age": request.session.get_expiry_age(),
-        "session_expiry_date": request.session.get_expiry_date().isoformat(),
-        "session_expire_at_browser_close": request.session.get_expire_at_browser_close(),
-    })
-
-
-
 # Paso 8.1: eliminar varios platos seleccionados con la misma lógica que eliminar_plato
 @login_required
 def eliminar_platos_masivo(request):
