@@ -2311,6 +2311,7 @@ class PlatoVariedadDelete(LoginRequiredMixin, DeleteView):
         # pantalla completa: volver al padre
         return redirect(reverse("videos-update", kwargs={"pk": self.padre.id}))
 
+
 class Login(LoginView):
     authentication_form = CustomAuthenticationForm
     next_page = reverse_lazy("filtro-de-platos")
