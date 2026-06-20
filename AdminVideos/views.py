@@ -19,6 +19,8 @@ from django.views.generic import CreateView, UpdateView, DeleteView, DetailView
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from datetime import datetime, timedelta
+
+from nuestrotubo import settings
 from .forms import IngredienteEnPlatoFormSet, LugarForm, PlatoFilterForm, PlatoForm, CustomAuthenticationForm
 from datetime import date, datetime
 from django.contrib.auth.models import User  # Asegúrate de importar el modelo User
@@ -2563,11 +2565,24 @@ def asegurar_menus_desde_habitos(request, usuario, dias_desde_hoy, habitos):
                             f"Se asignó el lugar {lugar.nombre} al menú de {fecha} en {momento}."
                         )
 
-def obtener_dia_activo(request, dias_desde_hoy):
-    primer_dia = dias_desde_hoy[0].isoformat()
 
-    dia_activo = request.session.get("dia_activo") or primer_dia
-    request.session["dia_activo"] = dia_activo
+
+def obtener_dia_activo(request, dias_desde_hoy):
+    """
+    Devuelve un día activo válido para las pestañas.
+
+    Si la sesión no tiene día activo, o tiene un día viejo que ya no está
+    dentro del rango visible, usa el primer día disponible.
+    """
+    dias_validos = [dia.isoformat() for dia in dias_desde_hoy]
+    primer_dia = dias_validos[0]
+
+    dia_activo = request.session.get("dia_activo")
+
+    if dia_activo not in dias_validos:
+        dia_activo = primer_dia
+        request.session["dia_activo"] = dia_activo
+        request.session.modified = True
 
     dia_activo_obj = datetime.datetime.strptime(
         dia_activo,
@@ -2575,6 +2590,11 @@ def obtener_dia_activo(request, dias_desde_hoy):
     ).date()
 
     return dia_activo, dia_activo_obj
+
+
+
+
+
 
 def obtener_fechas_existentes_menu(usuario, fecha_actual):
     return list(
