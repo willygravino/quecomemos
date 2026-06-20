@@ -87,6 +87,22 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // ============================================================
+  // 4.b Buscar por palabra clave mientras se escribe
+  // ============================================================
+  const inputPalabraClave = form.querySelector('input[name="palabra_clave"]');
+  let timeoutBusquedaPalabraClave = null;
+
+  if (inputPalabraClave) {
+    inputPalabraClave.addEventListener("input", function () {
+      clearTimeout(timeoutBusquedaPalabraClave);
+
+      timeoutBusquedaPalabraClave = setTimeout(function () {
+        actualizarListadoPlatos();
+      }, 400);
+    });
+  }
+
+  // ============================================================
   // 5. Filtrar por checkboxes sin recargar
   // ============================================================
   form.querySelectorAll("input[type='checkbox']").forEach(function (checkbox) {
