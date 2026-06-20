@@ -1065,11 +1065,25 @@ function addExtraRow(tipo) {
   const rows = document.getElementById("extrasRows");
   if (!rows) return;
 
+  // Si ya existe una fila vacía de este tipo, no crear otra.
+  const filaVaciaExistente = Array.from(rows.querySelectorAll(".extra-row-dinamica")).find((row) => {
+    const tipoInput = row.querySelector('input[name="extra_tipo"]');
+    const select = row.querySelector('select[name="extra_id"]');
+
+    return tipoInput?.value === tipo && !select?.value;
+  });
+
+  if (filaVaciaExistente) {
+    const select = filaVaciaExistente.querySelector('select[name="extra_id"]');
+    select?.focus();
+    return;
+  }
+
   const tpl = getTplSelectByTipo(tipo);
   if (!tpl) return;
 
   const row = document.createElement("div");
-  row.className = "d-flex gap-2 align-items-center";
+  row.className = "extra-row-dinamica d-flex gap-2 align-items-center";
 
   // hidden: tipo del extra
   const tipoInput = document.createElement("input");
