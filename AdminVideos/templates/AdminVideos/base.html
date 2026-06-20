@@ -280,37 +280,6 @@
   </a>
 </li>
 
-  <!-- Divider -->
-  <hr class="sidebar-divider d-none d-md-block">
-
-
-  <!-- Amigues -->
-  {% if parametro == "amigues" %}
-    <li class="nav-item active">
-  {% else %}
-    <li class="nav-item">
-  {% endif %}
-      <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2
-                {% if parametro == 'amigues' %}is-active{% endif %}"
-         href="{% url 'amigues' %}">
-
-       
-         <span class="icon-wrap position-relative d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
-              style="width: 38px; height: 38px;">
-          <i class="fa-regular fa-address-book {% if parametro != 'amigues' %}text-white-50{% endif %}" style="font-size: 1.1rem;"></i>
-
-          <span id="amiguesBadge"
-                class="badge badge-danger badge-counter d-none"
-                data-url="{% url 'ajax-solicitudes-amistad' %}">
-          </span>
-        </span>
-
-
-        <span class="item-text mt-2 small {% if parametro == 'amigues' %}text-white fw-bold{% else %}text-white-50{% endif %}">
-          Amigues
-        </span>
-      </a>
-    </li>
 
 
   <!-- Divider -->
@@ -409,9 +378,24 @@
                         </div>
                     </li>
 
+                
+                    {# Navbar: acceso a Amigues y solicitudes pendientes #}
+                    <li class="nav-item no-arrow mx-1">
+                      <a class="nav-link position-relative"
+                        href="{% url 'amigues' %}"
+                        title="Amigues"
+                        aria-label="Amigues">
+
+                        <i class="fa-regular fa-address-book"></i>
+
+                        <span id="amiguesBadge"
+                              class="badge badge-danger badge-counter d-none"
+                              data-url="{% url 'ajax-solicitudes-amistad' %}">
+                        </span>
+                      </a>
+                    </li>
+                
                     <!-- Nav Item - CHAT -->
-
-
 
                     <li class="nav-item dropdown no-arrow">
                         <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button"
