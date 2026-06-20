@@ -294,10 +294,17 @@
                 {% if parametro == 'amigues' %}is-active{% endif %}"
          href="{% url 'amigues' %}">
 
-        <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
+       
+         <span class="icon-wrap position-relative d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
               style="width: 38px; height: 38px;">
           <i class="fa-regular fa-address-book {% if parametro != 'amigues' %}text-white-50{% endif %}" style="font-size: 1.1rem;"></i>
+
+          <span id="amiguesBadge"
+                class="badge badge-danger badge-counter d-none"
+                data-url="{% url 'ajax-solicitudes-amistad' %}">
+          </span>
         </span>
+
 
         <span class="item-text mt-2 small {% if parametro == 'amigues' %}text-white fw-bold{% else %}text-white-50{% endif %}">
           Amigues
@@ -1200,6 +1207,47 @@ document.addEventListener("DOMContentLoaded", function () {
   actualizarMensajes();
 
   document.getElementById("messagesDropdown")?.addEventListener("click", actualizarMensajes);
+});
+</script>
+
+<!-- AJAX: actualiza el índice de solicitudes de amistad pendientes -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const amiguesBadge = document.getElementById("amiguesBadge");
+
+  if (!amiguesBadge) {
+    return;
+  }
+
+  const urlSolicitudes = amiguesBadge.dataset.url;
+
+  function actualizarSolicitudesAmistad() {
+    fetch(urlSolicitudes, {
+      headers: {
+        "X-Requested-With": "XMLHttpRequest"
+      }
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("No se pudieron cargar las solicitudes de amistad.");
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.cantidad > 0) {
+          amiguesBadge.textContent = data.cantidad;
+          amiguesBadge.classList.remove("d-none");
+        } else {
+          amiguesBadge.textContent = "";
+          amiguesBadge.classList.add("d-none");
+        }
+      })
+      .catch(error => {
+        console.warn(error);
+      });
+  }
+
+  actualizarSolicitudesAmistad();
 });
 </script>
 

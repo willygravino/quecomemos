@@ -8,26 +8,46 @@
 
   <h1>Amigues</h1>
 
-  {% if solicitudes_pendientes %}
+    {% if solicitudes_pendientes %}
+      <section class="my-4">
+        <h3>Solicitudes pendientes</h3>
+
+        <ul class="list-group">
+          {% for solicitud in solicitudes_pendientes %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>
+                {{ solicitud.solicitada_por.username }} quiere ser tu amigue
+              </span>
+
+              <form action="{% url 'sumar-amigue' %}" method="POST" class="m-0">
+                {% csrf_token %}
+
+                <input type="hidden" name="amistad_id" value="{{ solicitud.id }}">
+
+                <button type="submit" class="btn btn-primary btn-sm">
+                  Aceptar
+                </button>
+              </form>
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+
+    {% if solicitudes_enviadas %}
     <section class="my-4">
-      <h3>Solicitudes pendientes</h3>
+      <h3>Solicitudes enviadas</h3>
 
       <ul class="list-group">
-        {% for solicitud in solicitudes_pendientes %}
+        {% for usuario in solicitudes_enviadas %}
           <li class="list-group-item d-flex justify-content-between align-items-center">
             <span>
-              {{ solicitud.solicitada_por.username }} quiere ser tu amigue
+              Solicitud enviada a {{ usuario }}
             </span>
 
-            <form action="{% url 'sumar-amigue' %}" method="POST" class="m-0">
-              {% csrf_token %}
-
-              <input type="hidden" name="amistad_id" value="{{ solicitud.id }}">
-
-              <button type="submit" class="btn btn-primary btn-sm">
-                Aceptar
-              </button>
-            </form>
+            <span class="badge bg-secondary">
+              Pendiente
+            </span>
           </li>
         {% endfor %}
       </ul>

@@ -2648,6 +2648,17 @@ def obtener_usernames_amigues(usuario):
     ]
 
 
+
+@login_required
+def ajax_solicitudes_amistad(request):
+    cantidad = obtener_solicitudes_amistad_pendientes(request.user).count()
+
+    return JsonResponse({
+        "cantidad": cantidad,
+    })
+
+
+
 def obtener_solicitudes_amistad_pendientes(usuario):
     """
     Devuelve solicitudes pendientes recibidas por el usuario.
@@ -2656,6 +2667,23 @@ def obtener_solicitudes_amistad_pendientes(usuario):
         obtener_amistades_usuario(usuario, estado=Amistad.PENDIENTE)
         .exclude(solicitada_por=usuario)
     )
+
+
+def obtener_solicitudes_amistad_enviadas(usuario):
+    """
+    Devuelve usernames de usuarios a quienes se les envió solicitud pendiente.
+    """
+    solicitudes = (
+        obtener_amistades_usuario(usuario, estado=Amistad.PENDIENTE)
+        .filter(solicitada_por=usuario)
+    )
+
+    return [
+        amistad.otro_usuario(usuario).username
+        for amistad in solicitudes
+        if amistad.otro_usuario(usuario)
+    ]
+
 
 
 def obtener_ids_usuarios_con_amistad_activa(usuario):
@@ -2734,6 +2762,19 @@ def obtener_mensajes_agrupados(usuario):
 def ajax_mensajes_usuario(request):
     mensajes = obtener_mensajes_agrupados(request.user)
 
+    
+    cantidad_no_leidos = (
+        Mensaje.objects
+        .filter(
+            destinatario=request.user,
+            leido=False,
+            usuario_que_envia_fk__isnull=False,
+        )
+        .values("usuario_que_envia_fk")
+        .distinct()
+        .count()
+    )
+
     html = render_to_string(
         "AdminVideos/partials/_dropdown_mensajes.html",
         {"mensajes": mensajes},
@@ -2742,8 +2783,10 @@ def ajax_mensajes_usuario(request):
 
     return JsonResponse({
         "html": html,
-        "cantidad": len(mensajes),
+        "cantidad": cantidad_no_leidos,
     })
+
+
 
 
 
@@ -3351,13 +3394,20 @@ class EnviarMensaje(LoginRequiredMixin, CreateView):
         form.initial['destinatario'] = destinatario
         return form
 
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         destinatario = self.get_destinatario()
 
+        Mensaje.objects.filter(
+            usuario_que_envia_fk=destinatario,
+            destinatario=self.request.user,
+            leido=False,
+        ).update(leido=True)
+
         mensajes = Mensaje.objects.filter(
-        Q(usuario_que_envia_fk=self.request.user, destinatario=destinatario) |
-        Q(usuario_que_envia_fk=destinatario, destinatario=self.request.user)
+            Q(usuario_que_envia_fk=self.request.user, destinatario=destinatario) |
+            Q(usuario_que_envia_fk=destinatario, destinatario=self.request.user)
         ).order_by("-creado_el")
 
 
@@ -3465,19 +3515,19 @@ class MensajeDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 
 
-@login_required
 def amigues(request):
     amigues_aceptados = obtener_usernames_amigues(request.user)
     solicitudes_pendientes = obtener_solicitudes_amistad_pendientes(request.user)
+    solicitudes_enviadas = obtener_solicitudes_amistad_enviadas(request.user)
 
     context = {
         "amigues": amigues_aceptados,
         "solicitudes_pendientes": solicitudes_pendientes,
+        "solicitudes_enviadas": solicitudes_enviadas,
         "parametro": "amigues",
     }
 
     return render(request, "AdminVideos/amigues.html", context)
-
 
 
 @login_required

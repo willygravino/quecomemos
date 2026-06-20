@@ -848,4 +848,7 @@ class Mensaje(models.Model):
     borrado_antes = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.id} - Mensaje de {self.usuario_que_envia} a {self.destinatario.username}"
+        remitente = self.usuario_que_envia_fk.username if self.usuario_que_envia_fk else "Sin remitente"
+        destinatario = self.destinatario.username if self.destinatario else "Sin destinatario"
+
+        return f"{self.id} - Mensaje de {remitente} a {destinatario}"
