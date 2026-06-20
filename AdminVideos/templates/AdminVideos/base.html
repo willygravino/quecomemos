@@ -924,6 +924,17 @@ Root globl para modales cargados dinámicamente (AJAX)
   </div>
 </div>
 
+{# Botón flotante: acceso rápido a la lista de compras #}
+{% if user.is_authenticated %}
+  <a href="{% url 'menu-elegido' %}"
+     class="btn btn-primary rounded-circle shadow position-fixed d-flex align-items-center justify-content-center"
+     style="right: 1rem; bottom: 1rem; width: 56px; height: 56px; z-index: 1050;"
+     title="Lista de compras"
+     aria-label="Lista de compras">
+    <i class="fa-solid fa-cart-shopping"></i>
+  </a>
+{% endif %}
+
 
 <script>
 /**
