@@ -1,0 +1,43 @@
+<h6 class="dropdown-header">
+  Centro de Mensajes
+</h6>
+
+{% for usuario, mensaje in mensajes.items %}
+  <a class="dropdown-item d-flex align-items-center"
+     href="{% url 'enviar-mensaje' usuario %}">
+
+    <div class="dropdown-list-image mr-3">
+      <img class="rounded-circle" src="{{ mensaje.avatar_url }}" alt="{{ usuario }}">
+
+      {% if not mensaje.mensaje.leido %}
+        <div class="status-indicator bg-success"></div>
+      {% endif %}
+    </div>
+
+    <div class="font-weight-bold">
+      <div class="text-truncate">{{ usuario }}</div>
+
+      <div class="d-flex justify-content-between">
+        <div class="small text-truncate">
+          {{ mensaje.mensaje.contenido }}
+        </div>
+
+        <div class="small text-gray-600">
+          {% if mensaje.mensaje.creado_el == 0 %}
+            Hoy
+          {% else %}
+            &nbsp;·&nbsp;{{ mensaje.mensaje.creado_el }} días
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </a>
+{% empty %}
+  <p class="dropdown-item text-center small text-gray-500 mb-0">
+    No tienes mensajes.
+  </p>
+{% endfor %}
+
+<a href="{% url 'solicitar-amistad' %}" class="dropdown-item text-center small">
+  <strong>Solicitar amistad</strong>
+</a>

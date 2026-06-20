@@ -2730,6 +2730,20 @@ def obtener_mensajes_agrupados(usuario):
 
 
 
+@login_required
+def ajax_mensajes_usuario(request):
+    mensajes = obtener_mensajes_agrupados(request.user)
+
+    html = render_to_string(
+        "AdminVideos/partials/_dropdown_mensajes.html",
+        {"mensajes": mensajes},
+        request=request,
+    )
+
+    return JsonResponse({
+        "html": html,
+        "cantidad": len(mensajes),
+    })
 
 
 
@@ -3073,7 +3087,7 @@ def obtener_habitos_lookup(habitos):
         for h in habitos
     }
 
-def obtener_contexto_mensajes_y_compartidos(usuario):
+def obtener_contexto_compartidos(usuario):
     """
     Devuelve datos laterales de la pantalla de platos.
 
@@ -3082,7 +3096,6 @@ def obtener_contexto_mensajes_y_compartidos(usuario):
     - platos compartidos pendientes de importar
     """
     return {
-        "mensajes": obtener_mensajes_agrupados(usuario),
         "platos_compartidos": obtener_platos_compartidos_pendientes(usuario),
         "lugares_compartidos": obtener_lugares_compartidos_pendientes(usuario),
 
@@ -3139,9 +3152,8 @@ def FiltroDePlatos(request):
     # el avatar
     avatar = perfil.avatar_url
 
-    contexto_mensajes = obtener_contexto_mensajes_y_compartidos(usuario)
-
-
+    contexto_compartidos = obtener_contexto_compartidos(usuario)
+    
 
     platos_dia_x_dia, dias_programados = obtener_platos_dia_x_dia(
         usuario,
@@ -3166,7 +3178,7 @@ def FiltroDePlatos(request):
                 "misplatos_ck": misplatos,
                 "amigues": amigues,
                 "parametro_activo": tipo_parametro,
-                **contexto_mensajes,
+                **contexto_compartidos,
                 'dia_activo': dia_activo,
                 'dia_activo_obj': dia_activo_obj,
                 "guarniciones": guarniciones,

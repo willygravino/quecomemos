@@ -412,60 +412,30 @@
                             <i class="fa-solid fa-comments"></i>
                             <!-- Counter - Messages -->
 
-                            {% if mensajes %}
-                              <span class="badge badge-danger badge-counter">{{ mensajes|length }}</span>
-                            {% endif %}
+                      
+                            <span id="mensajesBadge"
+                                  class="badge badge-danger badge-counter {% if not mensajes %}d-none{% endif %}">
+                              {% if mensajes %}{{ mensajes|length }}{% endif %}
+                            </span>
 
                           </a>
                         <!-- Dropdown - Messages -->
-                        <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in overflow-auto"
-                            style="max-height: 600px;" aria-labelledby="messagesDropdown">
-                            <h6 class="dropdown-header">
-                                Centro de Mensajes
-                            </h6>
+                        <div id="mensajesDropdownContenido"
+                            class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in overflow-auto"
+                            style="max-height: 600px;"
+                            aria-labelledby="messagesDropdown"
+                            data-url="{% url 'ajax-mensajes-usuario' %}">
 
-
-
-                            <!-- cada una  -->
-
-                            {% for usuario, mensaje in mensajes.items %}
-                            <a class="dropdown-item d-flex align-items-center"
-                                href="{% url 'enviar-mensaje' usuario %}">
-                                <div class="dropdown-list-image mr-3">
-                                    <img class="rounded-circle" src="{{ mensaje.avatar_url }}" alt="{{ usuario }}">
-
-                                    {% if not mensaje.mensaje.leido %}
-                                    <div class="status-indicator bg-success"></div>
-                                    {% endif %}
-                                </div>
-                                <div class="font-weight-bold">
-                                    <div class="text-truncate">{{ usuario }}</div>
-
-                                    <div class="d-flex justify-content-between">
-                                        <!-- Mensaje -->
-                                        <div class="small text-truncate"> {{ mensaje.mensaje.contenido }} </div>
-
-                                        <!-- Fecha de creación -->
-                                        <div class="small text-gray-600">
-                                            {% if mensaje.mensaje.creado_el == 0 %}
-                                            Hoy
-                                            {% else %}
-                                            &nbsp;·&nbsp;{{ mensaje.mensaje.creado_el }} días
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                            {% empty %}
-                            <p>No tienes mensajes.</p>
-                            {% endfor %}
-
-                            <a href="{% url 'solicitar-amistad' %}" class="dropdown-item text-center small ">
-                                <strong>Solicitar amistad</strong>
-                            </a>
-
+                          {% include "AdminVideos/partials/_dropdown_mensajes.html" %}
 
                         </div>
+
+
+
+
+
+
+
                     </li>
 
                     <div class="topbar-divider d-none d-sm-block"></div>
@@ -1184,6 +1154,53 @@ document.addEventListener("click", function (e) {
     const swUrl = "{% static 'AdminVideos/lista_super/sw_lista_super.js' %}?v=3";
     navigator.serviceWorker.register(swUrl).catch(console.error);
   })();
+</script>
+
+
+<!-- AJAX: mantiene actualizado el dropdown de mensajes en cualquier pantalla -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const contenedorMensajes = document.getElementById("mensajesDropdownContenido");
+  const badgeMensajes = document.getElementById("mensajesBadge");
+
+  if (!contenedorMensajes || !badgeMensajes) {
+    return;
+  }
+
+  const urlMensajes = contenedorMensajes.dataset.url;
+
+  function actualizarMensajes() {
+    fetch(urlMensajes, {
+      headers: {
+        "X-Requested-With": "XMLHttpRequest"
+      }
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("No se pudieron cargar los mensajes.");
+        }
+        return response.json();
+      })
+      .then(data => {
+        contenedorMensajes.innerHTML = data.html;
+
+        if (data.cantidad > 0) {
+          badgeMensajes.textContent = data.cantidad;
+          badgeMensajes.classList.remove("d-none");
+        } else {
+          badgeMensajes.textContent = "";
+          badgeMensajes.classList.add("d-none");
+        }
+      })
+      .catch(error => {
+        console.warn(error);
+      });
+  }
+
+  actualizarMensajes();
+
+  document.getElementById("messagesDropdown")?.addEventListener("click", actualizarMensajes);
+});
 </script>
 
 
