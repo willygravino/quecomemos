@@ -2658,7 +2658,6 @@ def ajax_solicitudes_amistad(request):
     })
 
 
-
 def obtener_solicitudes_amistad_pendientes(usuario):
     """
     Devuelve solicitudes pendientes recibidas por el usuario.
