@@ -893,6 +893,18 @@ Root globl para modales cargados dinámicamente (AJAX)
 </div>
 
 
+{# Botón flotante: crear plato rápido #}
+{% if user.is_authenticated %}
+  <a href="{% url 'videos-create' %}"
+     class="btn btn-success rounded-circle shadow position-fixed d-flex align-items-center justify-content-center"
+     style="right: 1rem; bottom: 9rem; width: 56px; height: 56px; z-index: 1050;"
+     title="Agregar plato"
+     aria-label="Agregar plato">
+    <i class="fa-solid fa-plus"></i>
+  </a>
+{% endif %}
+
+
 {# Botón flotante: acceso rápido a la lista de compras #}
 {% if user.is_authenticated %}
   {% if hay_lista_de_compras %}
