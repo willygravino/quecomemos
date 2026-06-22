@@ -4,53 +4,6 @@
 
 {% block lista_platos %}
 
-{% comment %}
-
-<!-- ESTE ES EL BOTÓN DE AGREGAR -->
-<section class="w-100 text-white">
-  <div class="container">
-    <div class="d-flex justify-content-center flex-wrap gap-3">
-
-      <!-- COMENTO POR AHORA PERO CUANDO LO SAQUE, SACAR TODA LA LOGICA QUE CARGA FORMULARIO EN MODAL -->
-       <!-- <button class="btn btn-primary" id="btnNuevoPrincipal">
-        Nuevo Plato Principal
-      </button>  -->
-
-      <!-- % with tipopag=request.GET.tipopag %} -->
-      {% if tipopag == "Delivery" or tipopag == "Comerafuera" %}
-        <a class="btn btn-outline-primary w-100 rounded text-center fw-semibold py-2"
-
-          href="{% url 'crear-lugar' %}?tipopag={{ tipopag|default:'Dash' }}">
-          {% if tipopag and tipopag != "Dash" %}
-            + AGREGAR {{ tipopag|upper}}
-          {% else %}
-            + AGREGAR PLATO PRINCIPAL
-          {% endif %}
-        </a>
-
-      
-      {% else %}
-        <a class="btn btn-outline-primary w-100 rounded text-center fw-semibold py-2"
-          href="{% url 'videos-create' %}?tipopag={{ tipopag|default:''|urlencode }}&return_to={{ request.get_full_path|urlencode }}">
-          
-
-      {% if tipopag and tipopag != "Dash" %}
-            + AGREGAR RECETA nbbnnn DE {{ tipopag|upper }}
-
-          {% else %}
-            + AGREGAR RECETA njjhjhjh DE PLATO PRINCIPAL
-          {% endif %}
-        </a>
-
-      {% endif %}
-    </div>
-  </div>
-</section>
-
-{% endcomment %}
-
-<!-- <H5>{{platos_compartidos}}  </H5> -->
-
 
 
 <div id="contenedor-platos-compartidos">
@@ -125,85 +78,6 @@
     </div>
   </div>
 
-
-{% comment %}
- Modal para cargar el formulario dinámicamente 
- <div class="modal fade" id="modalPlato" tabindex="-1" aria-labelledby="modalPlatoLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalPlatoLabel">Nuevo Plato</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-
-      <div class="modal-body" id="modalPlatoBody">
-        Aquí se cargará el formulario dinámicamente 
-      </div>
-    </div>
-  </div>
-</div> 
-
- 
-TODO: reactivar modalPlato cuando volvamos a cargar el form en modal (btnNuevoPrincipal / btn-editar-plato)
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-  const modalEl = document.getElementById("modalPlato");
-  const modalBody = document.getElementById("modalPlatoBody");
-  const modal = new bootstrap.Modal(modalEl);
-
-  const btnNuevo = document.getElementById("btnNuevoPrincipal");
-  if (!btnNuevo) return;
-
-  btnNuevo.addEventListener("click", function() {
-    fetch("{% url 'videos-create' %}?tipopag=Principal", {
-      headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    })
-    .then(r => r.json())
-    .then(data => {
-      modalBody.innerHTML = data.html;
-      // 👇 Nueva línea clave: inicializa todas las funciones JS del form
-      initPlatoForm(modalBody);
-      modal.show();
-    })
-    .catch(err => console.error("Error cargando formulario:", err));
-  });
-});
-</script> 
-
-
-TODO: modalPlato desactivado por ahora (se reactivará cuando usemos btnNuevoPrincipal / btn-editar-plato)
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  const modal = new bootstrap.Modal(document.getElementById("modalPlato"));
-  const modalBody = document.getElementById("modalPlatoBody");
-  const modalTitle = document.getElementById("modalPlatoLabel");
-
-  // 👉 Botón "Editar"
-  document.querySelectorAll(".btn-editar-plato").forEach(btn => {
-    btn.addEventListener("click", function (e) {
-      e.preventDefault();
-      const url = this.getAttribute("data-url");
-      const nombre = this.getAttribute("data-nombre");
-
-      fetch(url, {
-        headers: { "X-Requested-With": "XMLHttpRequest" }
-      })
-        .then(response => response.json())
-        .then(data => {
-          modalBody.innerHTML = data.html;
-          modalTitle.textContent = "Editar: " + nombre;
-          initPlatoForm(modalBody);
-          modal.show();
-        })
-        .catch(err => {
-          console.error("Error cargando formulario de edición:", err);
-        });
-    });
-  });
-});
-</script>
-{% endcomment %}
 
 <script>
 // ==========================================

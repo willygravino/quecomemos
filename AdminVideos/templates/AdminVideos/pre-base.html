@@ -12,49 +12,6 @@
 </div>
 
 
-
-  <!-- ESTE ES EL BOTÓN DE AGREGAR -->
-<section class="w-100 text-white mt-1">
-  <div class="container">
-
-    <div class="d-flex justify-content-center flex-wrap {% if tipopag == 'Picada' %}gap-2{% else %}gap-0{% endif %}">
-
-      {% if tipopag == "Delivery" or tipopag == "Comerafuera" %}
-
-        <a class="btn btn-outline-primary w-100 rounded text-center fw-semibold py-0"
-           href="{% url 'crear-lugar' %}?tipopag={{ tipopag|default:'Principal'|urlencode }}">
-          + AGREGAR {{ tipopag|upper }}
-        </a>
-
-      {% elif tipopag == "Picada" %}
-
-        <a class="btn btn-outline-primary rounded text-center fw-semibold py-2 flex-grow-1"
-           href="{% url 'videos-create' %}?tipopag=Picada&return_to={{ request.get_full_path|urlencode }}">
-          Armar picada
-        </a>
-
-        <a class="btn btn-outline-primary rounded text-center fw-semibold py-2 flex-grow-1"
-           href="{% url 'videos-create' %}?tipopag={{ 'Ingrediente de picada'|urlencode }}&return_to={{ request.get_full_path|urlencode }}">
-          Agregar receta de ingrediente de picada
-        </a>
-
-      {% else %}
-
-        <a class="btn btn-outline-primary rounded text-center fw-semibold py-2 w-100"
-           href="{% url 'videos-create' %}?tipopag={{ tipopag|default:''|urlencode }}&return_to={{ request.get_full_path|urlencode }}">
-          {% if tipopag %}
-            + AGREGAR RECETA DE {{ tipopag|upper }}
-          {% else %}
-            + AGREGAR RECETA DE PLATO PRINCIPAL
-          {% endif %}
-        </a>
-
-      {% endif %}
-
-    </div>
-
-  </div>
-</section>
   
 
 

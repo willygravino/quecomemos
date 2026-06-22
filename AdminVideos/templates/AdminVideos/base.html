@@ -893,9 +893,13 @@ Root globl para modales cargados dinámicamente (AJAX)
 </div>
 
 
-{# Botón flotante: crear plato rápido #}
+
+{# Botón flotante: crear plato rápido según la sección actual #}
 {% if user.is_authenticated %}
-  <a href="{% url 'videos-create' %}"
+  <a id="botonCrearPlatoFlotante"
+     href="{% url 'videos-create' %}?tipopag={{ tipopag|default:''|urlencode }}&return_to={{ request.get_full_path|urlencode }}"
+     data-url-crear-plato="{% url 'videos-create' %}"
+     data-url-crear-lugar="{% url 'crear-lugar' %}"
      class="btn btn-success rounded-circle shadow position-fixed d-flex align-items-center justify-content-center"
      style="right: 1rem; bottom: 9rem; width: 56px; height: 56px; z-index: 1050;"
      title="Agregar plato"

@@ -79,6 +79,43 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // ============================================================
+  // 3.b Actualizar botón flotante de crear según tipopag actual
+  // ============================================================
+  function actualizarBotonCrearPlato(tipopag) {
+    const boton = document.getElementById("botonCrearPlatoFlotante");
+
+    if (!boton) {
+      return;
+    }
+
+    const esLugar = tipopag === "Delivery" || tipopag === "Comerafuera";
+    const urlBase = esLugar ? boton.dataset.urlCrearLugar : boton.dataset.urlCrearPlato;
+
+    if (!urlBase) {
+      return;
+    }
+
+    const params = new URLSearchParams();
+
+    if (tipopag) {
+      params.set("tipopag", tipopag);
+    }
+
+    params.set("return_to", window.location.pathname + window.location.search);
+
+    boton.href = `${urlBase}?${params.toString()}`;
+
+    const titulo = esLugar
+      ? `Agregar ${tipopag}`
+      : tipopag && tipopag !== "Dash"
+        ? `Agregar receta de ${tipopag}`
+        : "Agregar receta de plato principal";
+
+    boton.title = titulo;
+    boton.setAttribute("aria-label", titulo);
+  }
+
+  // ============================================================
   // 4. Buscar por palabra clave sin recargar
   // ============================================================
   form.addEventListener("submit", function (event) {
@@ -142,7 +179,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const nuevaUrl = new URL(link.href);
     window.history.pushState({ tipopag: tipopag }, "", nuevaUrl.toString());
 
-    actualizarListadoPlatos();
+    actualizarBotonCrearPlato(tipopag);
+    actualizarListadoPlatos();  
   });
 
   // ============================================================
@@ -161,9 +199,10 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!inputTipopag) {
       return;
     }
-
     inputTipopag.value = tipopag;
     actualizarMenuLateralActivo(tipopag);
+    actualizarBotonCrearPlato(tipopag);
     actualizarListadoPlatos();
+
   });
 });
