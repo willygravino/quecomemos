@@ -105,11 +105,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     boton.href = `${urlBase}?${params.toString()}`;
 
-    const titulo = esLugar
-      ? `Agregar ${tipopag}`
-      : tipopag && tipopag !== "Dash"
-        ? `Agregar receta de ${tipopag}`
-        : "Agregar receta de plato principal";
+    
+    let titulo = "Agregar receta de plato principal";
+    if (tipopag === "Guarnicion") {
+      titulo = "Agregar receta de guarnición";
+    } else if (tipopag === "Comerafuera") {
+      titulo = "Agregar lugar para comer afuera";
+    } else if (tipopag === "Delivery") {
+      titulo = "Agregar delivery";
+    } else if (tipopag && tipopag !== "Principal" && tipopag !== "Dash") {
+      titulo = `Agregar receta de ${tipopag.toLowerCase()}`;
+    }
 
     boton.title = titulo;
     boton.setAttribute("aria-label", titulo);
