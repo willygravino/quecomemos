@@ -5,9 +5,9 @@
   "use strict";
 
   // AUTO-REFRESH AL VOLVER DESDE LISTA COMPARTIDA
-  
+
   // Este snippet refresca la página al volver desde la lista compartida.
-// Aplica a cualquier página que cargue form_init.js (por ejemplo: lista_de_compras, pantallas con modal, etc.)
+  // Aplica a cualquier página que cargue form_init.js (por ejemplo: lista_de_compras, pantallas con modal, etc.)
 
   (function () {
     if (window.__shareBackRefreshBound) return;
@@ -34,27 +34,27 @@
 
   })();
 
-
   // ===========================
   // PLATO: Ver / compartir ingredientes (modal)
-  // Apila modales (no oculta modalPlato)
+  // Apila modales y evita reutilizar modales viejos
   // ===========================
   if (!document.__platoIngredientesBound) {
 
     // ---- Helper: stack de modales (Bootstrap 5)
     // Hace que cada modal nuevo quede arriba del anterior, con backdrop correcto.
     function stackModal(modalEl) {
-      const openModals = document.querySelectorAll(".modal.show").length; // cuántos ya están abiertos
-      const baseZ = 1055;                 // Bootstrap modal z-index base
-      const step = 20;                    // separación segura
+      const openModals = document.querySelectorAll(".modal.show").length;
+      const baseZ = 1055;
+      const step = 20;
       const z = baseZ + (openModals * step);
 
       modalEl.style.zIndex = z;
 
-      // Cuando Bootstrap cree el backdrop, lo ajustamos también
+      // Cuando Bootstrap cree el backdrop, lo ajustamos también.
       setTimeout(() => {
         const backdrops = document.querySelectorAll(".modal-backdrop");
         const backdrop = backdrops[backdrops.length - 1];
+
         if (backdrop) {
           backdrop.style.zIndex = z - 1;
         }
@@ -75,39 +75,53 @@
         return;
       }
 
-
       const root = document.getElementById("modal-root");
       if (!root) {
         console.error("Falta #modal-root en el HTML base");
         return;
       }
 
+      // Evita reutilizar un modal viejo que haya quedado movido dentro de <body>.
+      const modalAnterior = document.getElementById("platoIngredientesModal");
+      if (modalAnterior) {
+        const instanciaAnterior = bootstrap.Modal.getInstance(modalAnterior);
+
+        if (instanciaAnterior) {
+          instanciaAnterior.dispose();
+        }
+
+        modalAnterior.remove();
+      }
+
       root.innerHTML = html;
 
-      const modalEl = document.getElementById("platoIngredientesModal");
+      // Buscar el modal nuevo dentro del HTML recién insertado.
+      const modalEl = root.querySelector("#platoIngredientesModal");
       if (!modalEl) {
         console.error("No llegó #platoIngredientesModal en el HTML del endpoint");
         return;
       }
 
-      // que viva en body para z-index correcto
-      if (modalEl.parentElement !== document.body) {
-        document.body.appendChild(modalEl);
-      }
+      // Que viva en body para z-index correcto.
+      document.body.appendChild(modalEl);
 
-      // IMPORTANTE: al apilar, conviene desactivar el "focus trap" del modal superior
-      // para que no rompa interacción con el de abajo (Bootstrap 5 soporta focus:false)
       const modal =
         bootstrap.Modal.getInstance(modalEl) ||
         new bootstrap.Modal(modalEl, { focus: false });
 
-      // antes de mostrar, ajustamos stack
       stackModal(modalEl);
       modal.show();
 
       modalEl.addEventListener(
         "hidden.bs.modal",
         () => {
+          const instancia = bootstrap.Modal.getInstance(modalEl);
+
+          if (instancia) {
+            instancia.dispose();
+          }
+
+          modalEl.remove();
           root.innerHTML = "";
         },
         { once: true }
@@ -116,42 +130,44 @@
 
     document.addEventListener("click", (e) => {
       const btn = e.target.closest(".js-plato-ingredientes");
-      if (!btn) return;
+
+      if (!btn) {
+        return;
+      }
 
       e.preventDefault();
 
       const url = btn.dataset.url;
+
       if (!url) {
         console.error("Falta data-url en .js-plato-ingredientes");
         return;
       }
 
-      openPlatoIngredientesModal(url).catch((err) =>
-        console.error("Error abriendo ingredientes:", err)
-      );
+      openPlatoIngredientesModal(url).catch((err) => {
+        console.error("Error abriendo ingredientes:", err);
+      });
     });
 
     document.__platoIngredientesBound = true;
   }
 
-
-  
   // ===========================
-// FIX BOOTSTRAP MODALS STACKING
-// ===========================
-// Cuando se abre un modal (ej: Variedad) y desde ahí se abre otro
-// (ej: Ingrediente), Bootstrap deja ambos con el mismo z-index (1050)
-// y el segundo queda visualmente "detrás".
-//
-// La causa es que algunos modales se renderizan dentro de otros
-// contenedores (por ejemplo, dentro del modal de variedad).
-//
-// Solución:
-// - Forzar que ciertos modales vivan directamente en <body>
-// - Bootstrap calcula correctamente z-index y backdrop desde ahí
-//
-// ⚠️ Esto se ejecuta UNA SOLA VEZ al cargar el script
-// ===========================
+  // FIX BOOTSTRAP MODALS STACKING
+  // ===========================
+  // Cuando se abre un modal (ej: Variedad) y desde ahí se abre otro
+  // (ej: Ingrediente), Bootstrap deja ambos con el mismo z-index (1050)
+  // y el segundo queda visualmente "detrás".
+  //
+  // La causa es que algunos modales se renderizan dentro de otros
+  // contenedores (por ejemplo, dentro del modal de variedad).
+  //
+  // Solución:
+  // - Forzar que ciertos modales vivan directamente en <body>
+  // - Bootstrap calcula correctamente z-index y backdrop desde ahí
+  //
+  // ⚠️ Esto se ejecuta UNA SOLA VEZ al cargar el script
+  // ===========================
 
   function ensureModalAtBody(id) {
     const el = document.getElementById(id);
@@ -166,7 +182,7 @@
   ensureModalAtBody("confirmDeleteVariedadModal");
   ensureModalAtBody("successModal");
 
-  
+
 
 
   // Evita redefinir si el archivo se carga más de una vez
@@ -185,7 +201,7 @@
   const CSRF_TOKEN = getCookie("csrftoken");
   window.__PLATO_FORM_INIT_LOADED__ = true;
 
-    
+
 
 
   // ===== Utils =====
@@ -208,7 +224,7 @@
 
 
 
-        
+
 
         processResults: (data) => {
           // Caso 1: API estilo Select2 => { results: [{id, text}, ...] }
@@ -249,7 +265,7 @@
     // Idempotencia: si ya tiene Select2, no reiniciar
     if ($select.data("select2")) return;
 
-   // ✅ Pre-cargar valor inicial (data-attributes o fallback desde hidden)
+    // ✅ Pre-cargar valor inicial (data-attributes o fallback desde hidden)
     let initId = $select.data("initial-id");
     let initText = $select.data("initial-text");
 
@@ -265,7 +281,7 @@
       }
     }
 
-    
+
     if (initId && initText) {
       const option = new Option(initText, initId, true, true);
       $select.append(option).trigger("change");
@@ -512,22 +528,22 @@
   function initPlatoForm(context) {
     if (!context) context = document;
 
-    
-  // Evita doble init SOLO en página completa.
-  // En modal se reemplaza HTML (AJAX), así que necesitamos re-init siempre.
-  const isModalContext = !!(
-    context.closest &&
-    (context.closest("#modalPlato") || context.closest("#variedadModal"))
-  );
+
+    // Evita doble init SOLO en página completa.
+    // En modal se reemplaza HTML (AJAX), así que necesitamos re-init siempre.
+    const isModalContext = !!(
+      context.closest &&
+      (context.closest("#modalPlato") || context.closest("#variedadModal"))
+    );
 
 
-  if (!isModalContext) {
-    if (context.__platoFormInitialized) {
-      log("ℹ️ initPlatoForm: ya estaba inicializado para este context");
-      return;
+    if (!isModalContext) {
+      if (context.__platoFormInitialized) {
+        log("ℹ️ initPlatoForm: ya estaba inicializado para este context");
+        return;
+      }
+      context.__platoFormInitialized = true;
     }
-    context.__platoFormInitialized = true;
-  }
 
 
 
@@ -588,7 +604,7 @@
 
 
 
-     // ===== Botón "Guardar" del modal ingredientes
+    // ===== Botón "Guardar" del modal ingredientes
     const guardarBtn = context.querySelector("#guardarIngrediente");
     if (guardarBtn && !guardarBtn.__bound) {
       guardarBtn.addEventListener("click", async function () {
@@ -605,7 +621,7 @@
       });
       guardarBtn.__bound = true;
     }
- 
+
     // ===== Botón "Asociar" del modal componentes/platos asociados
     const guardarComponenteBtn =
       context.querySelector("#guardarComponente") ||
@@ -747,14 +763,14 @@
 
 
 
-        // ===== Guardado AJAX dentro del modal principal =====
+    // ===== Guardado AJAX dentro del modal principal =====
     function setupAjaxSave(modalBody) {
       const form = modalBody.querySelector("form");
       if (!form) return;
 
       form.addEventListener("submit", function (e) {
         // Solo interceptar si el form está dentro del modal
-      if (!form.closest("#modalPlato")) return;
+        if (!form.closest("#modalPlato")) return;
 
         e.preventDefault();
 
@@ -767,69 +783,69 @@
         //     formData.append(el.name, el.value);
         //   }
         // });
-          modalBody.querySelectorAll("[name^='ingredientes_en_plato-'], #id_ingredientes_en_plato-TOTAL_FORMS, #id_ingredientes_en_plato-INITIAL_FORMS, #id_ingredientes_en_plato-MIN_NUM_FORMS, #id_ingredientes_en_plato-MAX_NUM_FORMS")
-        .forEach(el => {
-          if (el.type === "checkbox") {
-            if (el.checked) formData.set(el.name, el.value || "on");
-            else formData.delete(el.name);
-          } else {
-            formData.set(el.name, el.value);
-          }
-        });
-
-
-
-    fetch(form.action, {
-        method: "POST",
-        body: formData,
-        headers: {
-          "X-Requested-With": "XMLHttpRequest",
-          "X-CSRFToken": CSRF_TOKEN || ""
-        },
-      })
-      .then(async response => {
-        const contentType = response.headers.get("content-type") || "";
-
-        if (contentType.includes("application/json")) {
-          const data = await response.json();
-
-          console.log("AJAX save response:", data);
-          console.log("toast msg redirect:", data.redirect_url);
-
-
-          if (data.success) {
-            const modal = bootstrap.Modal.getInstance(form.closest("#modalPlato"));
-            if (modal) modal.hide();
-
-            // ✅ volver a la página origen (lo manda el backend)
-            if (data.redirect_url) {
-              window.location.assign(data.redirect_url);
-              return;
+        modalBody.querySelectorAll("[name^='ingredientes_en_plato-'], #id_ingredientes_en_plato-TOTAL_FORMS, #id_ingredientes_en_plato-INITIAL_FORMS, #id_ingredientes_en_plato-MIN_NUM_FORMS, #id_ingredientes_en_plato-MAX_NUM_FORMS")
+          .forEach(el => {
+            if (el.type === "checkbox") {
+              if (el.checked) formData.set(el.name, el.value || "on");
+              else formData.delete(el.name);
+            } else {
+              formData.set(el.name, el.value);
             }
+          });
 
-            // fallback si no vino redirect_url
-            location.reload();
 
-          } else if (data.html) {
-            modalBody.innerHTML = data.html;
-            initPlatoForm(modalBody);
 
-          } else {
-            console.error("⚠️ Respuesta JSON inesperada:", data);
-          }
+        fetch(form.action, {
+          method: "POST",
+          body: formData,
+          headers: {
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRFToken": CSRF_TOKEN || ""
+          },
+        })
+          .then(async response => {
+            const contentType = response.headers.get("content-type") || "";
 
-        } else {
-          const text = await response.text();
-          console.error("❌ La respuesta no es JSON. Posible error en el backend:");
-          console.error(text); // Mostramos el HTML que causó el fallo
-          alert("Error inesperado del servidor. Revisa la consola para más información.");
-        }
-      })
-      .catch(err => {
-        console.error("❌ Error en el fetch:", err);
-        alert("Ocurrió un error al intentar guardar. Revisá la consola para más detalles.");
-      });
-          
+            if (contentType.includes("application/json")) {
+              const data = await response.json();
+
+              console.log("AJAX save response:", data);
+              console.log("toast msg redirect:", data.redirect_url);
+
+
+              if (data.success) {
+                const modal = bootstrap.Modal.getInstance(form.closest("#modalPlato"));
+                if (modal) modal.hide();
+
+                // ✅ volver a la página origen (lo manda el backend)
+                if (data.redirect_url) {
+                  window.location.assign(data.redirect_url);
+                  return;
+                }
+
+                // fallback si no vino redirect_url
+                location.reload();
+
+              } else if (data.html) {
+                modalBody.innerHTML = data.html;
+                initPlatoForm(modalBody);
+
+              } else {
+                console.error("⚠️ Respuesta JSON inesperada:", data);
+              }
+
+            } else {
+              const text = await response.text();
+              console.error("❌ La respuesta no es JSON. Posible error en el backend:");
+              console.error(text); // Mostramos el HTML que causó el fallo
+              alert("Error inesperado del servidor. Revisa la consola para más información.");
+            }
+          })
+          .catch(err => {
+            console.error("❌ Error en el fetch:", err);
+            alert("Ocurrió un error al intentar guardar. Revisá la consola para más detalles.");
+          });
+
 
 
 
@@ -845,7 +861,7 @@
   window.initPlatoForm = initPlatoForm;
 
 
-    // ===========================
+  // ===========================
   // VARIEDADES: modal siempre (create/update)
   // ===========================
   if (!document.__variedadModalBound) {
@@ -980,6 +996,14 @@
 
       const url = btn.getAttribute("data-url") || btn.getAttribute("href");
       if (!url) return;
+
+      console.log("Click ingredientes:", btn);
+      console.log("URL ingredientes:", url);
+
+      if (!url) {
+        console.error("Falta data-url en .js-plato-ingredientes");
+        return;
+      }
 
       openVariedadModal(url).catch((err) => {
         console.error("❌ Error abriendo modal variedad:", err);

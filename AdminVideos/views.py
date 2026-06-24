@@ -343,22 +343,30 @@ def plato_ingredientes(request: HttpRequest, pk: int):
     # )
 
     # Ingredientes directos del plato
-    ingredientes_directos_qs = (
+    ingredientes_directos = list(
         plato.ingredientes_en_plato
         .select_related("ingrediente")
+        .all()
+    )
+
+    # Platos asociados/componentes
+    componentes = list(
+        plato.componentes
+        .prefetch_related("ingredientes_en_plato__ingrediente")
         .all()
     )
 
     # Ingredientes de los platos asociados
     ingredientes_componentes = []
 
-    for componente in plato.componentes.prefetch_related("ingredientes_en_plato__ingrediente").all():
+    for componente in componentes:
         ingredientes_componentes.extend(
             componente.ingredientes_en_plato.all()
         )
 
-    # Ingredientes finales
-    ingredientes_qs = list(ingredientes_directos_qs) + ingredientes_componentes
+    # Ingredientes usados para guardar y leer estado de despensa
+    ingredientes_para_guardar = ingredientes_directos + ingredientes_componentes
+
 
     # ======================================================
     # 2) POST: guardar cambios (modo nuevo AJAX o masivo form)
@@ -388,7 +396,7 @@ def plato_ingredientes(request: HttpRequest, pk: int):
                 int(x) for x in request.POST.getlist("ingrediente_a_comprar_id") if x.isdigit()
             )
 
-            for iep in ingredientes_qs:
+            for iep in ingredientes_directos:
                 ing = iep.ingrediente
                 if not ing:
                     continue
@@ -427,8 +435,13 @@ def plato_ingredientes(request: HttpRequest, pk: int):
     # 3) GET: preparar items para renderizar el modal
     #    - lee el estado por ingrediente_id desde ProfileIngrediente
     # ======================================================
-    ing_ids = [iep.ingrediente_id for iep in ingredientes_qs if iep.ingrediente_id]
 
+    ing_ids = list({
+        iep.ingrediente_id
+        for iep in ingredientes_para_guardar
+        if iep.ingrediente_id
+    })
+    
     pantry_map = get_pantry_map(
     perfil=perfil,
     ing_ids=ing_ids,
@@ -436,7 +449,7 @@ def plato_ingredientes(request: HttpRequest, pk: int):
             )
 
     items = []
-    for iep in ingredientes_qs:
+    for iep in ingredientes_directos:
         ing = iep.ingrediente
         if not ing:
             continue
@@ -445,6 +458,9 @@ def plato_ingredientes(request: HttpRequest, pk: int):
         if not ing_id:
             continue
 
+        # Si este ingrediente también viene de un plato asociado,
+        # se muestra solo dentro del bloque del plato asociado.
+       
         p = pantry_map.get(ing_id)
 
         # Si no hay registro, asumimos que NO lo tiene (=> hay que comprar)
@@ -465,7 +481,7 @@ def plato_ingredientes(request: HttpRequest, pk: int):
 
     componentes_items = []
 
-    for componente in plato.componentes.prefetch_related("ingredientes_en_plato__ingrediente").all():
+    for componente in componentes:  
         subitems = []
 
         for iep in componente.ingredientes_en_plato.all():
@@ -528,13 +544,6 @@ def plato_ingredientes(request: HttpRequest, pk: int):
 def compartir_ing_plato(request, token, pk: int):
     share_user, perfil = _get_user_by_token_or_404(token)
     plato = get_object_or_404(Plato, pk=pk)
-
-    # Ingredientes del plato
-    # ingredientes_qs = (
-    #     plato.ingredientes_en_plato
-    #     .select_related("ingrediente")
-    #     .all()
-    # )
 
     # Ingredientes directos del plato
     ingredientes_directos_qs = (
