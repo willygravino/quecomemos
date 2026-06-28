@@ -996,11 +996,6 @@
       if (!url) return;
 
 
-      if (!url) {
-        console.error("Falta data-url en .js-plato-ingredientes");
-        return;
-      }
-
       openVariedadModal(url).catch((err) => {
         console.error("❌ Error abriendo modal variedad:", err);
         alert("No se pudo cargar el formulario de variedad. Revisá la consola.");

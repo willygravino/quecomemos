@@ -1908,10 +1908,8 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
 
 
 
-
 class PlatoDetail(DetailView):
     model = Plato
-    template_name = "AdminVideos/plato_detail.html"  # fallback normal
     context_object_name = "plato"
 
     def get_context_data(self, **kwargs):
@@ -1924,11 +1922,11 @@ class PlatoDetail(DetailView):
         else:
             context["tipos_lista"] = []
 
-        # ✅ Variedades hijas (usa related_name="variedades_hijas")
+        # Variedades hijas
         context["variedades"] = plato.variedades_hijas.all().order_by("nombre_plato")
 
-        # ✅ Padre (si este plato es una variedad)
-        context["plato_padre"] = plato.plato_padre  # puede ser None
+        # Padre, si este plato es una variedad
+        context["plato_padre"] = plato.plato_padre
 
         return context
 
@@ -1936,17 +1934,19 @@ class PlatoDetail(DetailView):
         self.object = self.get_object()
         context = self.get_context_data()
 
-        # AJAX: devolver parcial como JSON
-        if request.headers.get("x-requested-with") == "XMLHttpRequest":
-            html = render_to_string(
-                "AdminVideos/plato_detail_content.html",
-                context,
-                request=request
-            )
-            return JsonResponse({"html": html})
+        html = render_to_string(
+            "AdminVideos/plato_detail_content.html",
+            context,
+            request=request,
+        )
 
-        return super().get(request, *args, **kwargs)
-    
+        return JsonResponse({
+            "html": html,
+        })
+
+
+
+
 
 class PlatoVariedadCreate(PlatoCreate):
     
