@@ -809,8 +809,6 @@
             if (contentType.includes("application/json")) {
               const data = await response.json();
 
-              console.log("AJAX save response:", data);
-              console.log("toast msg redirect:", data.redirect_url);
 
 
               if (data.success) {
@@ -997,8 +995,6 @@
       const url = btn.getAttribute("data-url") || btn.getAttribute("href");
       if (!url) return;
 
-      console.log("Click ingredientes:", btn);
-      console.log("URL ingredientes:", url);
 
       if (!url) {
         console.error("Falta data-url en .js-plato-ingredientes");
