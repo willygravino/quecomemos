@@ -3496,13 +3496,6 @@ class compartir_elemento(CreateView):
 
 
 
-class MensajeDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
-   model = Mensaje
-   context_object_name = "mensaje"
-   success_url = reverse_lazy("filtro-de-platos")
-
-   def test_func(self):
-       return Mensaje.objects.filter(destinatario=self.request.user).exists()
 
 def obtener_contexto_amigues(usuario):
     """

@@ -17,7 +17,7 @@ from django import views
 from django.contrib import admin
 from django.urls import path
 
-from AdminVideos.views import ajax_mensajes_usuario, agregar_lugar_compartido, ajax_eliminar_programado, ajax_listado_platos, CrearLugar, EnviarMensaje, LugarDetail, LugarUpdate, PlatoDetail, PlatoVariedadCreate, PlatoVariedadDelete, PlatoVariedadUpdate,  agregar_a_mi_lista, agregar_plato_compartido, ajax_panel_amigues, ajax_solicitudes_amistad, amigue_borrar, api_ingredientes, api_toggle_item, compartir_elemento, compartir_ing_plato, descartar_sugerido, eliminar_lugar, eliminar_menu_programado, eliminar_plato, eliminar_platos_masivo, eliminar_programado, fijar_o_eliminar_habito, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, lista_de_compras, FiltroDePlatos, plato_ingredientes, plato_opciones_asignar, random_dia, set_dia_activo, sumar_amigue, user_logout, SolicitarAmistad, MensajeDelete, AsignarPlato, compartir_lista
+from AdminVideos.views import ajax_mensajes_usuario, agregar_lugar_compartido, ajax_eliminar_programado, ajax_listado_platos, CrearLugar, EnviarMensaje, LugarDetail, LugarUpdate, PlatoDetail, PlatoVariedadCreate, PlatoVariedadDelete, PlatoVariedadUpdate,  agregar_a_mi_lista, agregar_plato_compartido, ajax_panel_amigues, ajax_solicitudes_amistad, amigue_borrar, api_ingredientes, api_toggle_item, compartir_elemento, compartir_ing_plato, descartar_sugerido, eliminar_lugar, eliminar_menu_programado, eliminar_plato, eliminar_platos_masivo, eliminar_programado, fijar_o_eliminar_habito, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, lista_de_compras, FiltroDePlatos, plato_ingredientes, plato_opciones_asignar, random_dia, set_dia_activo, sumar_amigue, user_logout, SolicitarAmistad, AsignarPlato, compartir_lista
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -75,7 +75,6 @@ urlpatterns = [
     path('about', about, name="about"),
     path('solicitar/amistad', SolicitarAmistad.as_view(), name="solicitar-amistad" ),
     path('mensaje/<str:usuario>/enviar', EnviarMensaje.as_view(), name="enviar-mensaje" ),
-    path('mensaje/<pk>/delete', MensajeDelete.as_view(), name="mensaje-delete"),
     path('menu/amigue/<pk>/borrar', amigue_borrar, name="amigue-borrar"),
     path('asignar/plato', AsignarPlato.as_view(), name="asignar-plato"), # type: ignore
     path("set-dia-activo/", set_dia_activo, name="set-dia-activo"),
