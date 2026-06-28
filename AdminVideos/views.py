@@ -1505,16 +1505,12 @@ class CrearLugar(LoginRequiredMixin, CreateView):
 
 
     def form_invalid(self, form):
-        print("Errores en el formulario:", form.errors)
         return super().form_invalid(form)
 
     def form_valid(self, form):
         lugar = form.save(commit=False)
         lugar.propietario = self.request.user
 
-        print("GET tipopag:", self.request.GET.get("tipopag"))
-        print("POST tipopag:", self.request.POST.get("tipopag"))
-        print("PATH:", self.request.get_full_path())
 
         # Obtener el valor del parámetro 'template' desde la URL
         template_param = self.request.GET.get('tipopag')
@@ -1641,14 +1637,6 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         context = self.get_context_data()
         ingrediente_formset = context['ingrediente_formset']
 
-        print("🔹 Headers:", dict(self.request.headers))
-        print("🔹 User:", self.request.user)
-
-        print("== POST RECEIVED ==")
-        for key in self.request.POST:
-            print(key, "=>", self.request.POST.get(key))
-
-       
         # ✅ Unificamos detección AJAX (así no te quedan 2 returns distintos)
         is_ajax = self.request.headers.get("X-Requested-With") == "XMLHttpRequest"
 
@@ -1897,12 +1885,6 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
 
     def form_invalid(self, form):
         context = self.get_context_data(form=form)
-        print("Errores al editar plato:", form.errors)
-        ingrediente_formset = context.get("ingrediente_formset")
-        if ingrediente_formset:
-            for i, f in enumerate(ingrediente_formset.forms):
-                if f.errors:
-                    print(f"Errores en ingrediente #{i}: {f.errors}")
         return self.render_to_response(context)
 
 
@@ -1988,10 +1970,6 @@ class PlatoVariedadCreate(PlatoCreate):
 
     def dispatch(self, request, *args, **kwargs):
 
-        print("VARIEDAD DISPATCH view=", self.__class__.__name__)
-        print("VARIEDAD DISPATCH path=", request.path)
-        print("VARIEDAD DISPATCH kwargs=", kwargs)
-        print(">>> HIT PlatoVariedadCreate", request.method, request.path, kwargs)
 
 
         self.padre = get_object_or_404(Plato, pk=kwargs["padre_id"])
@@ -2068,9 +2046,6 @@ class PlatoVariedadCreate(PlatoCreate):
         context = self.get_context_data()
         ingrediente_formset = context["ingrediente_formset"]
 
-        print("=== VARIEDAD CREATE POST CHECK ===")
-        print("keys TOTAL_FORMS:", [k for k in self.request.POST.keys() if "TOTAL_FORMS" in k])
-        print("keys INITIAL_FORMS:", [k for k in self.request.POST.keys() if "INITIAL_FORMS" in k])
 
         # --- Validación del formset ---
         if not ingrediente_formset.is_valid():
@@ -2196,44 +2171,6 @@ class PlatoVariedadCreate(PlatoCreate):
 
         # No-AJAX: comportamiento normal
         return super().form_invalid(form)
-
-
-
-# class PlatoVariedadUpdate(PlatoUpdate):
-#     def dispatch(self, request, *args, **kwargs):
-#         self.object = self.get_object()
-
-#         if self.object.plato_padre_id is None:
-#             raise PermissionDenied("Este plato no es una variedad.")
-
-#         if self.object.propietario_id != request.user.id:
-#             raise PermissionDenied()
-        
-#         self.padre = self.object.plato_padre
-
-#         return super().dispatch(request, *args, **kwargs)
-    
-#     def get_success_url(self):
-#         # cuando se guarda una VARIEDAD, el "éxito" debe volver al PADRE
-#         url = reverse("videos-update", kwargs={"pk": self.padre.id})
-
-#         rt = self.request.GET.get("return_to")
-#         if rt:
-#             url += "?" + urlencode({"return_to": rt})
-
-#         return url
-    
-#     def form_valid(self, form):
-#         # usa la lógica de guardado del update normal
-#         resp = super().form_valid(form)
-
-#         # ✅ si es AJAX (modal), respetar JSON (tu JS ya cierra y recarga)
-#         if self.request.headers.get("x-requested-with") == "XMLHttpRequest":
-#             return resp
-
-#         # ✅ pantalla completa: volver al padre
-#         return redirect(reverse("videos-update", kwargs={"pk": self.padre.id}))
-
 
 class PlatoVariedadUpdate(PlatoUpdate):
     def dispatch(self, request, *args, **kwargs):
@@ -4035,7 +3972,6 @@ class AsignarPlato(View):
                 lugar = Lugar.objects.get(id=lugar_id)  # Buscar el lugar por el ID recibido
 
                 # Verifica que el objeto lugar está correcto
-                print(f"Lugar encontrado: {lugar.nombre} (ID: {lugar.id})")
 
                 # Asegúrate de que el objeto lugar se está pasando correctamente
                 menu_item = MenuItem.objects.create(

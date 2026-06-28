@@ -383,13 +383,6 @@
       + Agregar variedad
     </button>
 
-
-        <!-- POR AHORA COMENTO, SACAR TODO JS ETC CUANDO LO ELIMINE -->
-        <!-- <a class="btn btn-sm btn-primary"
-          href="% url 'plato_variedad_create' form.instance.pk %}?tipopag= tipopag }}">
-          + Agregar variedad pantalla completa
-        </a> -->
-
   {% endif %}
 </div>
 
@@ -415,13 +408,6 @@
               data-url="{% url 'plato_variedad_update' v.id %}?tipopag={{ tipopag }}&return_to={{ request.GET.return_to|urlencode }}">
               Editar
             </button>
-
-
-             <!-- POR AHORA COMENTO PERO CUANDO LO SAQUE, SACAR TODA LA LÓGICA DE JS -->
-                <!-- <a class="btn btn-sm btn-outline-secondary"
-                  href="% url 'plato_variedad_update' v.id %}">
-                  Editar
-                </a> -->
 
 
             <button type="button"
