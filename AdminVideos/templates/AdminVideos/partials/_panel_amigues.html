@@ -71,9 +71,21 @@
           <li class="list-group-item d-flex justify-content-between align-items-center px-2 py-2">
             <span class="small">{{ amigue }}</span>
 
-            <a href="{% url 'amigue-borrar' amigue %}" class="btn btn-outline-danger btn-sm">
-              Borrar
-            </a>
+            <button type="button"
+                    class="btn btn-outline-danger btn-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#confirmActionModal"
+                    data-confirm-title="Borrar amigue"
+                    data-confirm-body="¿Seguro que querés borrar a <strong>{{ amigue|escape }}</strong> de tus amigues?"
+                    data-confirm-hint="Esta acción eliminará la amistad entre ustedes. No borra al usuario."
+                    data-confirm-action="{% url 'amigue-borrar' amigue %}"
+                    data-confirm-btn="Sí, borrar"
+                    data-confirm-ajax="true"
+                    data-confirm-refresh-target="#amiguesDropdownContenido"
+                    data-confirm-reopen-dropdown="#amiguesDropdown">
+            Borrar
+            </button>
+
           </li>
         {% endfor %}
       </ul>

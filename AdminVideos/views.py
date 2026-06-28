@@ -3609,22 +3609,51 @@ def sumar_amigue(request):
     return redirect("amigues")
 
 
-
-
-
 @login_required
+@require_POST
 def amigue_borrar(request, pk):
+    es_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
+
     amigue = get_object_or_404(User, username=pk)
 
     usuario_1, usuario_2 = Amistad.normalizar_usuarios(request.user, amigue)
 
-    Amistad.objects.filter(
+    borradas, _ = Amistad.objects.filter(
         usuario_1=usuario_1,
         usuario_2=usuario_2,
     ).delete()
 
-    messages.success(request, "Amigue eliminado.")
+    if borradas:
+        mensaje = "Amigue eliminado."
+        nivel = "success"
+    else:
+        mensaje = "No se encontró esa amistad para borrar."
+        nivel = "warning"
+
+    if es_ajax:
+        context = obtener_contexto_amigues(request.user)
+
+        html = render_to_string(
+            "AdminVideos/partials/_panel_amigues.html",
+            context,
+            request=request,
+        )
+
+        return JsonResponse({
+            "ok": bool(borradas),
+            "message": mensaje,
+            "level": nivel,
+            "html": html,
+            "cantidad": context["solicitudes_pendientes"].count(),
+        })
+
+    if borradas:
+        messages.success(request, mensaje)
+    else:
+        messages.warning(request, mensaje)
+
     return redirect("amigues")
+
 
 
 

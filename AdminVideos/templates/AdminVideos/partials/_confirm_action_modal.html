@@ -40,8 +40,28 @@
     const bulkDeleteForm = document.getElementById("bulk-delete-form");
 
     let submitMode = "default";
+    let ajaxRefreshTarget = null;
+    let ajaxReopenDropdown = null;
 
     if (!modalEl || !titleEl || !bodyEl || !btnEl || !formEl) return;
+
+    function buildPanelMessage(message, level) {
+      if (!message) {
+        return "";
+      }
+
+      const safeLevel = ["success", "danger", "warning", "info"].includes(level)
+        ? level
+        : "info";
+
+      return `
+        <div class="px-3 pt-3">
+          <div class="alert alert-${safeLevel} py-2 px-3 mb-2 small" role="alert">
+            ${message}
+          </div>
+        </div>
+      `;
+    }
 
     modalEl.addEventListener("show.bs.modal", function (event) {
       const trigger = event.relatedTarget;
@@ -53,9 +73,13 @@
       const btnTxt     = trigger.getAttribute("data-confirm-btn") || "Sí, continuar";
       const hint       = trigger.getAttribute("data-confirm-hint");
       const submitForm = trigger.getAttribute("data-confirm-submit-form");
+      const ajax       = trigger.getAttribute("data-confirm-ajax") === "true";
+
+      ajaxRefreshTarget = trigger.getAttribute("data-confirm-refresh-target");
+      ajaxReopenDropdown = trigger.getAttribute("data-confirm-reopen-dropdown");
 
       titleEl.textContent = title;
-      bodyEl.innerHTML = body; // si no querés HTML, cambiá a textContent
+      bodyEl.innerHTML = body;
       btnEl.textContent = btnTxt;
 
       if (hint === null) {
@@ -68,7 +92,6 @@
         hintEl.classList.remove("d-none");
       }
 
-      // Nuevo: si el trigger indica un form específico para submit, usamos ese modo
       if (submitForm === "bulk-delete-form") {
         submitMode = "bulk-delete";
         btnEl.disabled = !bulkDeleteForm;
@@ -76,8 +99,11 @@
         return;
       }
 
-      // Lógica original para acciones individuales
-      submitMode = "default";
+      if (ajax) {
+        submitMode = "ajax";
+      } else {
+        submitMode = "default";
+      }
 
       if (!action) {
         btnEl.disabled = true;
@@ -89,15 +115,86 @@
     });
 
     btnEl.addEventListener("click", function () {
-      // Nuevo: submit del form masivo
       if (submitMode === "bulk-delete") {
         if (!bulkDeleteForm) return;
         bulkDeleteForm.submit();
         return;
       }
 
-      // Lógica original para acciones individuales
-      if (!formEl.getAttribute("action")) return;
+      const action = formEl.getAttribute("action");
+      if (!action) return;
+
+      if (submitMode === "ajax") {
+        btnEl.disabled = true;
+
+        fetch(action, {
+          method: "POST",
+          body: new FormData(formEl),
+          headers: {
+            "X-Requested-With": "XMLHttpRequest"
+          },
+          credentials: "same-origin"
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error("No se pudo completar la acción.");
+            }
+
+            return response.json();
+          })
+          .then(data => {
+            const target = ajaxRefreshTarget
+              ? document.querySelector(ajaxRefreshTarget)
+              : null;
+
+            if (target && data.html) {
+              target.innerHTML = buildPanelMessage(data.message, data.level) + data.html;
+            }
+
+            const badge = document.getElementById("amiguesBadge");
+            if (badge) {
+              const cantidad = data.cantidad || 0;
+
+              if (cantidad > 0) {
+                badge.textContent = cantidad;
+                badge.classList.remove("d-none");
+              } else {
+                badge.textContent = "";
+                badge.classList.add("d-none");
+              }
+            }
+
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) {
+              modal.hide();
+            }
+
+            if (ajaxReopenDropdown) {
+              modalEl.addEventListener(
+                "hidden.bs.modal",
+                function () {
+                  const dropdownEl = document.querySelector(ajaxReopenDropdown);
+
+                  if (dropdownEl && bootstrap.Dropdown) {
+                    const dropdown = bootstrap.Dropdown.getOrCreateInstance(dropdownEl);
+                    dropdown.show();
+                  }
+                },
+                { once: true }
+              );
+            }
+          })
+          .catch(error => {
+            console.warn(error);
+            alert("No se pudo completar la acción. Revisá la consola.");
+          })
+          .finally(() => {
+            btnEl.disabled = false;
+          });
+
+        return;
+      }
+
       formEl.submit();
     });
   })();
