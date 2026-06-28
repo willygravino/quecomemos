@@ -5,9 +5,13 @@
       Amigues
     </h6>
 
-    <a href="{% url 'solicitar-amistad' %}" class="btn btn-primary btn-sm">
-      Solicitar
-    </a>
+    {# BOTÓN: abrir ventana emergente para solicitar amistad #}
+    {# No navega a otra página: el JS carga el formulario usando data-url. #}
+    <button type="button"
+            class="btn btn-primary btn-sm js-open-solicitar-amistad"
+            data-url="{% url 'solicitar-amistad' %}">
+    Solicitar
+    </button>
   </div>
 
   {% if solicitudes_pendientes %}

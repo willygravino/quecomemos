@@ -3329,6 +3329,9 @@ class SolicitarAmistad(LoginRequiredMixin, FormView):
     success_url = reverse_lazy("amigues")
     form_class = SolicitarAmistadForm
 
+    def es_ajax(self):
+        return self.request.headers.get("x-requested-with") == "XMLHttpRequest"
+
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
 
@@ -3342,6 +3345,58 @@ class SolicitarAmistad(LoginRequiredMixin, FormView):
         )
 
         return form
+
+    def render_form_ajax(self, form):
+        html = render_to_string(
+            "AdminVideos/partials/_form_solicitar_amistad.html",
+            {"form": form},
+            request=self.request,
+        )
+
+        return JsonResponse({
+            "ok": False,
+            "html": html,
+        })
+
+    def render_panel_amigues_ajax(self, mensaje, nivel="success"):
+        context = obtener_contexto_amigues(self.request.user)
+
+        html = render_to_string(
+            "AdminVideos/partials/_panel_amigues.html",
+            context,
+            request=self.request,
+        )
+
+        return JsonResponse({
+            "ok": True,
+            "message": mensaje,
+            "level": nivel,
+            "html": html,
+            "cantidad": context["solicitudes_pendientes"].count(),
+        })
+
+    def get(self, request, *args, **kwargs):
+        if self.es_ajax():
+            form = self.get_form()
+
+            html = render_to_string(
+                "AdminVideos/partials/_form_solicitar_amistad.html",
+                {"form": form},
+                request=request,
+            )
+
+            return JsonResponse({
+                "ok": True,
+                "html": html,
+            })
+
+        return super().get(request, *args, **kwargs)
+
+    def form_invalid(self, form):
+        if self.es_ajax():
+            return self.render_form_ajax(form)
+
+        return super().form_invalid(form)
 
     def form_valid(self, form):
         solicitante = self.request.user
@@ -3360,20 +3415,34 @@ class SolicitarAmistad(LoginRequiredMixin, FormView):
 
         if not creada:
             if amistad.estado == Amistad.ACEPTADA:
-                messages.info(self.request, "Ya son amigues.")
+                mensaje = "Ya son amigues."
+
+                if self.es_ajax():
+                    return self.render_panel_amigues_ajax(mensaje, "info")
+
+                messages.info(self.request, mensaje)
                 return redirect(self.success_url)
 
             if amistad.estado == Amistad.PENDIENTE:
-                messages.info(self.request, "Ya hay una solicitud de amistad pendiente.")
+                mensaje = "Ya hay una solicitud de amistad pendiente."
+
+                if self.es_ajax():
+                    return self.render_panel_amigues_ajax(mensaje, "info")
+
+                messages.info(self.request, mensaje)
                 return redirect(self.success_url)
 
             amistad.estado = Amistad.PENDIENTE
             amistad.solicitada_por = solicitante
             amistad.save(update_fields=["estado", "solicitada_por", "actualizada_el"])
 
-        messages.success(self.request, "Solicitud de amistad enviada.")
-        return redirect(self.success_url)
+        mensaje = "Solicitud de amistad enviada."
 
+        if self.es_ajax():
+            return self.render_panel_amigues_ajax(mensaje, "success")
+
+        messages.success(self.request, mensaje)
+        return redirect(self.success_url)
 
 
 
