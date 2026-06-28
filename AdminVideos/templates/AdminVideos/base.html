@@ -1720,6 +1720,7 @@ document.addEventListener("DOMContentLoaded", function () {
     content.innerHTML = data.html;
     actualizarBadgeMensajes(data.cantidad || 0);
     bindChatForm(content);
+    bindChatInlineDeletes(content);
     scrollChatToBottom();
   }
 
@@ -1759,6 +1760,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         actualizarBadgeMensajes(data.cantidad || 0);
         bindChatForm(content);
+        bindChatInlineDeletes(content);
         scrollChatToBottom();
       } catch (error) {
         console.warn(error);
@@ -1767,6 +1769,114 @@ document.addEventListener("DOMContentLoaded", function () {
           button.disabled = false;
         }
       }
+    });
+  }
+
+
+  function escapeHtml(value) {
+    return String(value || "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function bindChatInlineDeletes(context) {
+    context.querySelectorAll(".js-chat-inline-delete").forEach(function (button) {
+      if (button.__chatInlineDeleteBound) return;
+      button.__chatInlineDeleteBound = true;
+
+      button.addEventListener("click", function (event) {
+        event.preventDefault();
+
+        const content = document.getElementById("chatModalContent");
+        if (!content) return;
+
+        const action = button.getAttribute("data-confirm-action");
+        if (!action) return;
+
+        const title = button.getAttribute("data-confirm-title") || "Borrar mensaje";
+        const body = button.getAttribute("data-confirm-body") || "Este mensaje se borrará del chat de ambos.";
+        const btnText = button.getAttribute("data-confirm-btn") || "Borrar";
+
+        let slot = document.getElementById("chatInlineDeleteConfirm");
+
+        if (!slot) {
+          slot = document.createElement("div");
+          slot.id = "chatInlineDeleteConfirm";
+
+          const form = content.querySelector("#chatForm");
+          if (form) {
+            form.insertAdjacentElement("beforebegin", slot);
+          } else {
+            content.appendChild(slot);
+          }
+        }
+
+        slot.innerHTML = `
+          <div class="alert alert-warning py-2 px-3 mb-3" role="alert">
+            <div class="fw-semibold mb-1">${escapeHtml(title)}</div>
+            <div class="small mb-2">${escapeHtml(body)}</div>
+
+            <div class="d-flex justify-content-end gap-2">
+              <button type="button"
+                      class="btn btn-sm btn-outline-secondary js-chat-delete-cancel">
+                Cancelar
+              </button>
+
+              <button type="button"
+                      class="btn btn-sm btn-danger js-chat-delete-accept">
+                ${escapeHtml(btnText)}
+              </button>
+            </div>
+          </div>
+        `;
+
+        const cancelButton = slot.querySelector(".js-chat-delete-cancel");
+        const acceptButton = slot.querySelector(".js-chat-delete-accept");
+
+        if (cancelButton) {
+          cancelButton.addEventListener("click", function () {
+            slot.remove();
+          }, { once: true });
+        }
+
+        if (acceptButton) {
+          acceptButton.addEventListener("click", async function () {
+            acceptButton.disabled = true;
+
+            try {
+              const response = await fetch(action, {
+                method: "POST",
+                headers: {
+                  "X-Requested-With": "XMLHttpRequest",
+                  "X-CSRFToken": getCookie("csrftoken"),
+                },
+                credentials: "same-origin",
+              });
+
+              const data = await response.json();
+
+              if (!response.ok || !data.html) {
+                throw new Error(data.message || "No se pudo borrar el mensaje.");
+              }
+
+              content.innerHTML = data.html;
+
+              actualizarBadgeMensajes(data.cantidad || 0);
+              bindChatForm(content);
+              bindChatInlineDeletes(content);
+              scrollChatToBottom();
+            } catch (error) {
+              console.warn(error);
+              acceptButton.disabled = false;
+            }
+          }, { once: true });
+        }
+
+        slot.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      });
     });
   }
 

@@ -15,12 +15,25 @@
     {% if mensajes %}
       {% for mensaje in mensajes reversed %}
         <div class="d-flex {% if mensaje.usuario_que_envia_fk == request.user %}justify-content-end{% else %}justify-content-start{% endif %}">
-          <div class="px-3 py-2 rounded-3 shadow-sm {% if mensaje.usuario_que_envia_fk == request.user %}bg-primary text-white{% else %}bg-light text-dark{% endif %}"
+          <div class="px-3 py-2 rounded-3 shadow-sm position-relative {% if mensaje.usuario_que_envia_fk == request.user %}bg-primary text-white{% else %}bg-light text-dark{% endif %}"
                style="max-width: 78%;">
+
             <div style="white-space: pre-wrap;">{{ mensaje.mensaje }}</div>
-            <div class="small {% if mensaje.usuario_que_envia_fk == request.user %}text-white-50{% else %}text-muted{% endif %} text-end mt-1"
+
+            <div class="small {% if mensaje.usuario_que_envia_fk == request.user %}text-white-50{% else %}text-muted{% endif %} d-flex align-items-center justify-content-end gap-2 mt-1"
                  style="font-size: .68rem;">
-              {{ mensaje.creado_el|date:"d/m H:i" }}
+              <span>{{ mensaje.creado_el|date:"d/m H:i" }}</span>
+
+              <button type="button"
+                      class="btn btn-sm btn-link p-0 lh-1 text-decoration-none js-chat-inline-delete {% if mensaje.usuario_que_envia_fk == request.user %}text-white-50{% else %}text-muted{% endif %}"
+                      data-confirm-title="Borrar mensaje"
+                      data-confirm-body="Este mensaje se borrará del chat de ambos."
+                      data-confirm-btn="Borrar"
+                      data-confirm-action="{% url 'ajax-eliminar-mensaje-chat' mensaje.id %}"
+                      title="Borrar mensaje"
+                      aria-label="Borrar mensaje">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
             </div>
           </div>
         </div>

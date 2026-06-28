@@ -2534,6 +2534,83 @@ def ajax_mensajes_usuario(request):
 
 
 
+@login_required
+@require_POST
+def ajax_eliminar_mensaje_chat(request, pk):
+    mensaje = get_object_or_404(
+        Mensaje.objects.select_related("usuario_que_envia_fk", "destinatario"),
+        pk=pk,
+    )
+
+    # Seguridad: solo puede borrar quien participa en la conversación.
+    if (
+        mensaje.usuario_que_envia_fk_id != request.user.id
+        and mensaje.destinatario_id != request.user.id
+    ):
+        return JsonResponse({
+            "ok": False,
+            "message": "No podés borrar este mensaje.",
+        }, status=403)
+
+    # Necesitamos saber con quién era el chat antes de borrar.
+    destinatario = (
+        mensaje.destinatario
+        if mensaje.usuario_que_envia_fk_id == request.user.id
+        else mensaje.usuario_que_envia_fk
+    )
+
+    mensaje.delete()
+
+    Mensaje.objects.filter(
+        usuario_que_envia_fk=destinatario,
+        destinatario=request.user,
+        leido=False,
+    ).update(leido=True)
+
+    mensajes = Mensaje.objects.filter(
+        Q(usuario_que_envia_fk=request.user, destinatario=destinatario) |
+        Q(usuario_que_envia_fk=destinatario, destinatario=request.user)
+    ).order_by("-creado_el")
+
+    MensajeForm = forms.modelform_factory(
+        Mensaje,
+        fields=["mensaje", "destinatario"],
+    )
+
+    form = MensajeForm(initial={"destinatario": destinatario})
+    form.fields["destinatario"].queryset = User.objects.filter(pk=destinatario.pk)
+    form.fields["destinatario"].widget = forms.HiddenInput()
+
+    cantidad = (
+        Mensaje.objects
+        .filter(
+            destinatario=request.user,
+            leido=False,
+            usuario_que_envia_fk__isnull=False,
+        )
+        .values("usuario_que_envia_fk")
+        .distinct()
+        .count()
+    )
+
+    html = render_to_string(
+        "AdminVideos/partials/_chat_modal_content.html",
+        {
+            "form": form,
+            "mensajes": mensajes,
+            "destinatario": destinatario,
+            "amigues": obtener_usernames_amigues(request.user),
+        },
+        request=request,
+    )
+
+    return JsonResponse({
+        "ok": True,
+        "html": html,
+        "cantidad": cantidad,
+    })
+
+
 
 def obtener_lugares_compartidos_pendientes(usuario):
     """
