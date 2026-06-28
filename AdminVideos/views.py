@@ -18,17 +18,13 @@ from django.contrib.auth.forms import UserCreationForm
 from django.views.generic import CreateView, UpdateView, DeleteView, DetailView
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from datetime import datetime, timedelta
+from datetime import date, timedelta
 
 from nuestrotubo import settings
 from .forms import IngredienteEnPlatoFormSet, LugarForm, PlatoFilterForm, PlatoForm, CustomAuthenticationForm
-from datetime import date, datetime
 from django.contrib.auth.models import User  # Asegúrate de importar el modelo User
 from django.db.models import Q, Subquery, OuterRef, Prefetch, Min, Max, F
 import random
-from django.shortcuts import redirect, reverse
-from django.shortcuts import redirect
-from django.urls import reverse
 import datetime
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -217,15 +213,6 @@ def api_ingredientes(request):
             "results": [{"id": ing.id, "text": ing.nombre} for ing in ingredientes]
         })
 
-    # if request.method == "GET":
-    #     q = (request.GET.get('q') or '').strip()
-    #     qs = Ingrediente.objects.all()
-    #     if q:
-    #         qs = qs.filter(nombre__icontains=q)
-    #     ingredientes = qs.order_by('nombre')[:50]
-    #     data = [{"id": ing.id, "nombre": ing.nombre} for ing in ingredientes]
-    #     return JsonResponse(data, safe=False)
-
     # POST: crear si no existe; si existe, devolvés el existente (UX más amable)
     try:
         payload = json.loads(request.body.decode("utf-8"))
@@ -294,8 +281,6 @@ def obtener_parametros_sesion(request):
     # Devolver las variables por separado
     return tipo_parametro, quecomemos, misplatos, medios, categoria, dificultad, palabra_clave
 
-# class SugerenciasRandom(TemplateView):
-#     template_name = 'AdminVideos/random.html'
 
 def index(request):
     return redirect(reverse_lazy("filtro-de-platos"))
@@ -1227,138 +1212,6 @@ def api_toggle_item(request, token):
     })
 
 
-# @csrf_exempt
-# @require_POST
-# def api_toggle_item(request, token):
-#     user, perfil = _get_user_by_token_or_404(token)
-
-#     try:
-#         payload = json.loads(request.body.decode("utf-8"))
-#     except Exception:
-#         return JsonResponse({"ok": False, "error": "JSON inválido"}, status=400)
-
-#     ing_id = payload.get("ingrediente_id", None)
-#     checked = payload.get("checked", None)
-
-#     if ing_id is None or checked is None:
-#         return JsonResponse({"ok": False, "error": "ingrediente_id y checked requeridos"}, status=400)
-
-#     try:
-#         ing_id = int(ing_id)
-#     except Exception:
-#         return JsonResponse({"ok": False, "error": "ingrediente_id inválido"}, status=400)
-
-#     ing = Ingrediente.objects.filter(pk=ing_id).only("nombre").first()
-#     if not ing:
-#         return JsonResponse({"ok": False, "error": "Ingrediente no existe"}, status=404)
-
-#     nombre_norm = ing.nombre.casefold()
-#     checked = bool(checked)
-
-#     # En LISTA COMPARTIDA: checked=True => TENGO (comprado)
-#     if checked:
-#         obj, _created = IngredienteEstado.objects.update_or_create(
-#             user=user,
-#             nombre=nombre_norm,
-#             defaults={
-#                 "estado": IngredienteEstado.Estado.TENGO,
-#                 "last_bought_at": timezone.now(),
-#             },
-#         )
-#         return JsonResponse({
-#             "ok": True,
-#             "ingrediente_id": ing_id,
-#             "estado": obj.estado,
-#             "last_bought_at": obj.last_bought_at.isoformat() if obj.last_bought_at else None,
-#         })
-
-#     # checked=False => NO_TENGO
-#     existing = (
-#         IngredienteEstado.objects
-#         .filter(user=user, nombre=nombre_norm)
-#         .only("comentario")
-#         .first()
-#     )
-
-#     # Modelo A: NO_TENGO sin comentario => borrar registro
-#     if existing and (existing.comentario or "").strip():
-#         IngredienteEstado.objects.filter(user=user, nombre=nombre_norm).update(
-#             estado=IngredienteEstado.Estado.NO_TENGO
-#         )
-#     else:
-#         IngredienteEstado.objects.filter(user=user, nombre=nombre_norm).delete()
-
-#     return JsonResponse({
-#         "ok": True,
-#         "ingrediente_id": ing_id,
-#         "estado": IngredienteEstado.Estado.NO_TENGO,
-#         "last_bought_at": None,
-#     })
-
-
-
-# @csrf_exempt
-# @require_POST
-# def api_toggle_item(request, token):
-#     user, perfil = _get_user_by_token_or_404(token)
-
-#     try:
-#         payload = json.loads(request.body.decode("utf-8"))
-#     except Exception:
-#         return JsonResponse({"ok": False, "error": "JSON inválido"}, status=400)
-
-#     ing_id = payload.get("ingrediente_id", None)
-#     checked = payload.get("checked", None)
-
-#     if ing_id is None or checked is None:
-#         return JsonResponse({"ok": False, "error": "ingrediente_id y checked requeridos"}, status=400)
-
-#     try:
-#         ing_id = int(ing_id)
-#     except Exception:
-#         return JsonResponse({"ok": False, "error": "ingrediente_id inválido"}, status=400)
-
-#     # Validar que existe el ingrediente
-#     ing = Ingrediente.objects.filter(pk=ing_id).only("id").first()
-#     if not ing:
-#         return JsonResponse({"ok": False, "error": "Ingrediente no existe"}, status=404)
-
-#     checked = bool(checked)
-
-#     # checked=True => tengo (comprado)
-#     if checked:
-#         obj, _created = ProfileIngrediente.objects.update_or_create(
-#             profile=perfil,
-#             ingrediente_id=ing_id,
-#             defaults={
-#                 "tengo": True,
-#                 "last_bought_at": timezone.now(),
-#             },
-#         )
-#         return JsonResponse({
-#             "ok": True,
-#             "ingrediente_id": ing_id,
-#             "tengo": True,
-#             "last_bought_at": obj.last_bought_at.isoformat() if obj.last_bought_at else None,
-#         })
-
-#     # checked=False => no tengo (pero NO borramos el registro)
-#     obj, _created = ProfileIngrediente.objects.update_or_create(
-#         profile=perfil,
-#         ingrediente_id=ing_id,
-#         defaults={
-#             "tengo": False,
-#         },
-#     )
-#     return JsonResponse({
-#         "ok": True,
-#         "ingrediente_id": ing_id,
-#         "tengo": False,
-#         "last_bought_at": obj.last_bought_at.isoformat() if obj.last_bought_at else None,
-#     })
-
-
-
 
 
 
@@ -1407,36 +1260,6 @@ def eliminar_lugar(request, lugar_id):
     return redirect(url)
 
 
-# @login_required
-# def eliminar_plato(request, plato_id):
-#     # ✅ Seguridad: solo permite borrar platos del usuario logueado
-#     plato = get_object_or_404(Plato, id=plato_id, propietario=request.user)
-
-#     # ✅ Solo por POST
-#     if request.method != "POST":
-#         return HttpResponseNotAllowed(["POST"])
-
-#     with transaction.atomic():
-#         # Perfil (siempre del usuario logueado)
-#         perfil = get_object_or_404(Profile, user=request.user)
-
-#         # Limpieza de listas (si id_original es None, no hacemos nada)
-#         if plato.id_original and plato.id_original in perfil.sugeridos_descartados:
-#             perfil.sugeridos_descartados.remove(plato.id_original)
-
-#         if plato.id_original and plato.id_original in perfil.sugeridos_importados:
-#             perfil.sugeridos_importados.remove(plato.id_original)
-
-#         perfil.save()
-
-#         # ✅ Si es PLATO PADRE: borrar TODAS sus variedades hijas
-#         # (extra seguro: también filtramos por propietario=request.user)
-#         Plato.objects.filter(plato_padre=plato, propietario=request.user).delete()
-
-#         # ✅ Borrar el plato (padre o variedad)
-#         plato.delete()
-
-#     return redirect("filtro-de-platos")
 
 @login_required
 def eliminar_plato(request, plato_id):
@@ -1596,8 +1419,6 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         template_param = self.request.GET.get('tipopag')
-        # if template_param == "Dash":
-        #     template_param = "Principal"
 
         opciones = self.TIPOS_POR_TEMPLATE.get(template_param, [])
         if opciones:
@@ -1752,13 +1573,6 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
         # Mostrar todas las opciones
         form.fields["tipos"].choices = Plato.TIPOS_CHOICES
 
-        # Sugerir tipopag si no hay initial
-        # if not form.initial.get("tipos"):
-        #     tipopag = self.request.GET.get("tipopag")
-        #     valid_keys = {k for k, _ in Plato.TIPOS_CHOICES}
-        #     if tipopag in valid_keys:
-        #         form.fields["tipos"].initial = [tipopag]
-
         # Imagen no requerida
         if "image" in form.fields:
             form.fields["image"].required = False
@@ -1837,17 +1651,6 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
         with transaction.atomic():
             plato = form.save(commit=False)
             plato.propietario = self.request.user
-
-            # reconstruir string "ingredientes" desde el formset
-            # lista_ingredientes = []
-            # for ing_form in ingrediente_formset:
-            #     if ing_form.cleaned_data and not ing_form.cleaned_data.get("DELETE", False):
-            #         nombre = ing_form.cleaned_data.get("nombre_ingrediente")
-            #         texto = (nombre or "").strip()
-            #         if texto:
-            #             lista_ingredientes.append(texto)
-
-            # plato.ingredientes = ", ".join(lista_ingredientes)
 
             plato.save()
             form.save_m2m()
@@ -2280,7 +2083,6 @@ class SignUp(CreateView):
 @login_required
 def user_logout(request):
     logout(request)
-    # return render(request, 'registration/logout.html', {})
     return redirect(reverse_lazy("login"))
 
 
@@ -2345,8 +2147,6 @@ def filtrar_platos(
             platos_qs = platos_qs | qs_quecomemos
 
     # 🔹 Aplicar filtros adicionales
-    # if tipo_parametro:
-    #     platos_qs = platos_qs.filter(tipos__icontains=tipo_parametro)
     if tipo_parametro == "Picada":
         platos_qs = platos_qs.filter(
             Q(tipos__icontains="Picada") |
