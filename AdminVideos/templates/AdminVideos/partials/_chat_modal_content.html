@@ -1,0 +1,70 @@
+<div class="modal-header py-2">
+  <div>
+    <h5 class="modal-title mb-0">Chat con {{ destinatario.username }}</h5>
+    <small class="text-muted">Mensajes privados</small>
+  </div>
+
+  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+</div>
+
+<div class="modal-body">
+  <div id="chatMessages"
+       class="d-flex flex-column gap-2 mb-3"
+       style="max-height: 55vh; overflow-y: auto;">
+
+    {% if mensajes %}
+      {% for mensaje in mensajes reversed %}
+        <div class="d-flex {% if mensaje.usuario_que_envia_fk == request.user %}justify-content-end{% else %}justify-content-start{% endif %}">
+          <div class="px-3 py-2 rounded-3 shadow-sm {% if mensaje.usuario_que_envia_fk == request.user %}bg-primary text-white{% else %}bg-light text-dark{% endif %}"
+               style="max-width: 78%;">
+            <div style="white-space: pre-wrap;">{{ mensaje.mensaje }}</div>
+            <div class="small {% if mensaje.usuario_que_envia_fk == request.user %}text-white-50{% else %}text-muted{% endif %} text-end mt-1"
+                 style="font-size: .68rem;">
+              {{ mensaje.creado_el|date:"d/m H:i" }}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="text-center text-muted py-4">
+        Todavía no hay mensajes con {{ destinatario.username }}.
+      </div>
+    {% endif %}
+  </div>
+
+  <form id="chatForm"
+        method="post"
+        action="{% url 'enviar-mensaje' destinatario.username %}">
+    {% csrf_token %}
+    {{ form.destinatario.as_hidden }}
+
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger py-2">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    {% if form.mensaje.errors %}
+      <div class="text-danger small mb-1">
+        {{ form.mensaje.errors }}
+      </div>
+    {% endif %}
+
+    <textarea name="mensaje"
+              id="id_chat_mensaje"
+              rows="3"
+              maxlength="1000"
+              required
+              class="form-control"
+              placeholder="Escribí un mensaje...">{{ form.mensaje.value|default_if_none:"" }}</textarea>
+  </form>
+</div>
+
+<div class="modal-footer py-2">
+  <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+    Cerrar
+  </button>
+  <button type="submit" form="chatForm" class="btn btn-primary btn-sm">
+    Enviar
+  </button>
+</div>

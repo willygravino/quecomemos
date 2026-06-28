@@ -3161,30 +3161,34 @@ class SolicitarAmistad(LoginRequiredMixin, FormView):
 
 
 
+
 class EnviarMensaje(LoginRequiredMixin, CreateView):
     model = Mensaje
-    # success_url = reverse_lazy('enviar-mensaje')
-    template_name = 'AdminVideos/enviar_mensaje.html'
-    fields = ['mensaje', 'destinatario']
+    fields = ["mensaje", "destinatario"]
+
+    def es_ajax(self):
+        return self.request.headers.get("X-Requested-With") == "XMLHttpRequest"
 
     def get_destinatario(self):
         return get_object_or_404(User, username=self.kwargs.get("usuario"))
 
-    def form_valid(self, form):
-        form.instance.usuario_que_envia_fk = self.request.user
-
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse_lazy('enviar-mensaje', kwargs={'usuario': self.kwargs['usuario']})
+    def configurar_form_destinatario(self, form):
+        destinatario = self.get_destinatario()
+        form.fields["destinatario"].queryset = User.objects.filter(pk=destinatario.pk)
+        form.initial["destinatario"] = destinatario
+        return form
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        destinatario = self.get_destinatario()
-        form.fields['destinatario'].queryset = User.objects.filter(username=destinatario.username)
-        form.initial['destinatario'] = destinatario
-        return form
+        return self.configurar_form_destinatario(form)
 
+    def get_empty_form(self):
+        form_class = self.get_form_class()
+        form = form_class()
+        return self.configurar_form_destinatario(form)
+
+    def get_success_url(self):
+        return reverse_lazy("enviar-mensaje", kwargs={"usuario": self.kwargs["usuario"]})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -3201,16 +3205,70 @@ class EnviarMensaje(LoginRequiredMixin, CreateView):
             Q(usuario_que_envia_fk=destinatario, destinatario=self.request.user)
         ).order_by("-creado_el")
 
-
+        context["destinatario"] = destinatario
         context["mensajes"] = mensajes
-
-        # Obtener el perfil del usuario actual
-        perfil = get_object_or_404(Profile, user=self.request.user)
-
-        # Pasar la lista de amigues al contexto
         context["amigues"] = obtener_usernames_amigues(self.request.user)
 
         return context
+
+    def cantidad_no_leidos(self):
+        return (
+            Mensaje.objects
+            .filter(
+                destinatario=self.request.user,
+                leido=False,
+                usuario_que_envia_fk__isnull=False,
+            )
+            .values("usuario_que_envia_fk")
+            .distinct()
+            .count()
+        )
+
+
+    def render_chat_ajax(self, form=None, status=200):
+        if form is None:
+            form = self.get_empty_form()
+
+        context = self.get_context_data(form=form)
+
+        html = render_to_string(
+            "AdminVideos/partials/_chat_modal_content.html",
+            context,
+            request=self.request,
+        )
+
+        return JsonResponse({
+            "ok": status < 400,
+            "html": html,
+            "cantidad": self.cantidad_no_leidos(),
+        }, status=status)
+
+    def get(self, request, *args, **kwargs):
+        self.object = None
+
+        if self.es_ajax():
+            return self.render_chat_ajax()
+
+        return redirect("filtro-de-platos")
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.usuario_que_envia_fk = self.request.user
+        self.object.destinatario = self.get_destinatario()
+        self.object.save()
+
+        if self.es_ajax():
+            return self.render_chat_ajax(form=self.get_empty_form())
+
+        return redirect(self.get_success_url())
+
+    def form_invalid(self, form):
+        self.object = None
+
+        if self.es_ajax():
+            return self.render_chat_ajax(form=form, status=400)
+
+        return redirect("filtro-de-platos")
 
 
 

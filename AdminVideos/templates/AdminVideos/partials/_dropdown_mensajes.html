@@ -3,8 +3,9 @@
 </h6>
 
 {% for usuario, mensaje in mensajes.items %}
-  <a class="dropdown-item d-flex align-items-center"
-     href="{% url 'enviar-mensaje' usuario %}">
+  <a class="dropdown-item d-flex align-items-center js-open-chat-modal"
+     href="{% url 'enviar-mensaje' usuario %}"
+     data-chat-url="{% url 'enviar-mensaje' usuario %}">
 
     <div class="dropdown-list-image mr-3">
       <img class="rounded-circle" src="{{ mensaje.avatar_url }}" alt="{{ usuario }}">
