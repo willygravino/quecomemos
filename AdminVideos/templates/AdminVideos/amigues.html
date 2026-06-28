@@ -1,3 +1,4 @@
+
 {% extends "AdminVideos/index.html" %}
 
 {% load static %}
@@ -5,81 +6,7 @@
 {% block lista_platos %}
 
 <div class="container my-4">
-
-  <h1>Amigues</h1>
-
-  <div class="my-3">
-    <a href="{% url 'solicitar-amistad' %}" class="btn btn-primary btn-sm">
-      Solicitar amistad
-    </a>
-  </div>
-
-    {% if solicitudes_pendientes %}
-      <section class="my-4">
-        <h3>Solicitudes pendientes</h3>
-
-        <ul class="list-group">
-          {% for solicitud in solicitudes_pendientes %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              <span>
-                {{ solicitud.solicitada_por.username }} quiere ser tu amigue
-              </span>
-
-              <form action="{% url 'sumar-amigue' %}" method="POST" class="m-0">
-                {% csrf_token %}
-
-                <input type="hidden" name="amistad_id" value="{{ solicitud.id }}">
-
-                <button type="submit" class="btn btn-primary btn-sm">
-                  Aceptar
-                </button>
-              </form>
-            </li>
-          {% endfor %}
-        </ul>
-      </section>
-    {% endif %}
-
-    {% if solicitudes_enviadas %}
-    <section class="my-4">
-      <h3>Solicitudes enviadas</h3>
-
-      <ul class="list-group">
-        {% for usuario in solicitudes_enviadas %}
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            <span>
-              Solicitud enviada a {{ usuario }}
-            </span>
-
-            <span class="badge bg-secondary">
-              Pendiente
-            </span>
-          </li>
-        {% endfor %}
-      </ul>
-    </section>
-  {% endif %}
-
-  <section class="my-4">
-    <h3>Lista de amigues</h3>
-
-    {% if amigues %}
-      <ul class="list-group">
-        {% for amigue in amigues %}
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            <span>{{ amigue }}</span>
-
-            <a href="{% url 'amigue-borrar' amigue %}" class="btn btn-outline-danger btn-sm">
-              Borrar
-            </a>
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p>No tenés amigues todavía.</p>
-    {% endif %}
-  </section>
-
+  {% include "AdminVideos/partials/_panel_amigues.html" %}
 </div>
 
 {% endblock %}

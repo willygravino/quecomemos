@@ -3521,22 +3521,37 @@ class MensajeDelete(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
    def test_func(self):
        return Mensaje.objects.filter(destinatario=self.request.user).exists()
 
-
-
-def amigues(request):
-    amigues_aceptados = obtener_usernames_amigues(request.user)
-    solicitudes_pendientes = obtener_solicitudes_amistad_pendientes(request.user)
-    solicitudes_enviadas = obtener_solicitudes_amistad_enviadas(request.user)
-
-    context = {
-        "amigues": amigues_aceptados,
-        "solicitudes_pendientes": solicitudes_pendientes,
-        "solicitudes_enviadas": solicitudes_enviadas,
+def obtener_contexto_amigues(usuario):
+    """
+    Devuelve el contexto necesario para mostrar el panel de amigues.
+    """
+    return {
+        "amigues": obtener_usernames_amigues(usuario),
+        "solicitudes_pendientes": obtener_solicitudes_amistad_pendientes(usuario),
+        "solicitudes_enviadas": obtener_solicitudes_amistad_enviadas(usuario),
         "parametro": "amigues",
     }
 
+@login_required
+def amigues(request):
+    context = obtener_contexto_amigues(request.user)
+
     return render(request, "AdminVideos/amigues.html", context)
 
+@login_required
+def ajax_panel_amigues(request):
+    context = obtener_contexto_amigues(request.user)
+
+    html = render_to_string(
+        "AdminVideos/partials/_panel_amigues.html",
+        context,
+        request=request,
+    )
+
+    return JsonResponse({
+        "html": html,
+        "cantidad": context["solicitudes_pendientes"].count(),
+    })
 
 @login_required
 def historial(request):

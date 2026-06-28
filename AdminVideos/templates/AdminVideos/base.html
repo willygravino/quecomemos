@@ -364,9 +364,14 @@
 
                 
                     {# Navbar: acceso a Amigues y solicitudes pendientes #}
-                    <li class="nav-item no-arrow mx-1">
-                      <a class="nav-link position-relative"
-                        href="{% url 'amigues' %}"
+                    <li class="nav-item dropdown no-arrow mx-1">
+                      <a class="nav-link dropdown-toggle position-relative"
+                        href="#"
+                        id="amiguesDropdown"
+                        role="button"
+                        data-bs-toggle="dropdown"
+                        aria-haspopup="true"
+                        aria-expanded="false"
                         title="Amigues"
                         aria-label="Amigues">
 
@@ -377,6 +382,18 @@
                               data-url="{% url 'ajax-solicitudes-amistad' %}">
                         </span>
                       </a>
+
+                      <div id="amiguesDropdownContenido"
+                          class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in overflow-auto"
+                          style="max-height: 600px; min-width: 320px;"
+                          aria-labelledby="amiguesDropdown"
+                          data-url="{% url 'ajax-panel-amigues' %}">
+
+                        <div class="p-3 text-muted small">
+                          Cargando amigues…
+                        </div>
+
+                      </div>
                     </li>
                 
                     <!-- Nav Item - CHAT -->
@@ -1231,46 +1248,72 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
-<!-- AJAX: actualiza el índice de solicitudes de amistad pendientes -->
+<!-- AJAX: panel emergente de Amigues y solicitudes pendientes -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+  const amiguesDropdown = document.getElementById("amiguesDropdown");
   const amiguesBadge = document.getElementById("amiguesBadge");
+  const contenedorAmigues = document.getElementById("amiguesDropdownContenido");
 
-  if (!amiguesBadge) {
+  if (!amiguesBadge || !contenedorAmigues) {
     return;
   }
 
-  const urlSolicitudes = amiguesBadge.dataset.url;
+  const urlPanelAmigues = contenedorAmigues.dataset.url;
 
-  function actualizarSolicitudesAmistad() {
-    fetch(urlSolicitudes, {
+  if (!urlPanelAmigues) {
+    console.warn("Falta data-url en #amiguesDropdownContenido");
+    return;
+  }
+
+  function actualizarBadgeAmigues(cantidad) {
+    if (cantidad > 0) {
+      amiguesBadge.textContent = cantidad;
+      amiguesBadge.classList.remove("d-none");
+    } else {
+      amiguesBadge.textContent = "";
+      amiguesBadge.classList.add("d-none");
+    }
+  }
+
+  function actualizarPanelAmigues() {
+    fetch(urlPanelAmigues, {
       headers: {
         "X-Requested-With": "XMLHttpRequest"
-      }
+      },
+      credentials: "same-origin"
     })
       .then(response => {
         if (!response.ok) {
-          throw new Error("No se pudieron cargar las solicitudes de amistad.");
+          throw new Error("No se pudo cargar el panel de amigues.");
         }
+
         return response.json();
       })
       .then(data => {
-        if (data.cantidad > 0) {
-          amiguesBadge.textContent = data.cantidad;
-          amiguesBadge.classList.remove("d-none");
-        } else {
-          amiguesBadge.textContent = "";
-          amiguesBadge.classList.add("d-none");
-        }
+        contenedorAmigues.innerHTML = data.html;
+        actualizarBadgeAmigues(data.cantidad || 0);
       })
       .catch(error => {
         console.warn(error);
+
+        contenedorAmigues.innerHTML = `
+          <div class="p-3 text-muted small">
+            No se pudo cargar Amigues.
+          </div>
+        `;
       });
   }
 
-  actualizarSolicitudesAmistad();
+  actualizarPanelAmigues();
+
+  if (amiguesDropdown) {
+    amiguesDropdown.addEventListener("click", actualizarPanelAmigues);
+  }
 });
 </script>
+
+
 
 
 <!-- 
