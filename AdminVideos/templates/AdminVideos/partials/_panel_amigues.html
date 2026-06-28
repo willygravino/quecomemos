@@ -27,7 +27,11 @@
               {{ solicitud.solicitada_por.username }} quiere ser tu amigue
             </span>
 
-            <form action="{% url 'sumar-amigue' %}" method="POST" class="m-0">
+            <form action="{% url 'sumar-amigue' %}"
+                method="POST"
+                class="m-0 js-aceptar-amigue-form">
+
+
               {% csrf_token %}
 
               <input type="hidden" name="amistad_id" value="{{ solicitud.id }}">

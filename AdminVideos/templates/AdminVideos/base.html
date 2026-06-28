@@ -1265,94 +1265,39 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
-<!-- AJAX: panel emergente de Amigues y solicitudes pendientes -->
+
+
+<!-- AJAX: panel de Amigues, solicitar amistad y aceptar solicitudes -->
+<!--
+  Este script centraliza todo lo relacionado con el panel de Amigues:
+  - Carga el panel emergente.
+  - Actualiza el badge de solicitudes pendientes.
+  - Abre el modal para solicitar amistad.
+  - Envía el formulario de solicitud por AJAX.
+  - Acepta solicitudes pendientes por AJAX.
+  - Muestra mensajes arriba del panel sin navegar a otra página.
+-->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const amiguesDropdown = document.getElementById("amiguesDropdown");
   const amiguesBadge = document.getElementById("amiguesBadge");
-  const contenedorAmigues = document.getElementById("amiguesDropdownContenido");
+  const panelAmigues = document.getElementById("amiguesDropdownContenido");
 
-  if (!amiguesBadge || !contenedorAmigues) {
+  const solicitarModalEl = document.getElementById("solicitarAmistadModal");
+  const solicitarModalBody = document.getElementById("solicitarAmistadModalBody");
+
+  if (!panelAmigues) {
     return;
   }
 
-  const urlPanelAmigues = contenedorAmigues.dataset.url;
+  const urlPanelAmigues = panelAmigues.dataset.url;
 
   if (!urlPanelAmigues) {
     console.warn("Falta data-url en #amiguesDropdownContenido");
     return;
   }
 
-  function actualizarBadgeAmigues(cantidad) {
-    if (cantidad > 0) {
-      amiguesBadge.textContent = cantidad;
-      amiguesBadge.classList.remove("d-none");
-    } else {
-      amiguesBadge.textContent = "";
-      amiguesBadge.classList.add("d-none");
-    }
-  }
-
-  function actualizarPanelAmigues() {
-    fetch(urlPanelAmigues, {
-      headers: {
-        "X-Requested-With": "XMLHttpRequest"
-      },
-      credentials: "same-origin"
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error("No se pudo cargar el panel de amigues.");
-        }
-
-        return response.json();
-      })
-      .then(data => {
-        contenedorAmigues.innerHTML = data.html;
-        actualizarBadgeAmigues(data.cantidad || 0);
-      })
-      .catch(error => {
-        console.warn(error);
-
-        contenedorAmigues.innerHTML = `
-          <div class="p-3 text-muted small">
-            No se pudo cargar Amigues.
-          </div>
-        `;
-      });
-  }
-
-  actualizarPanelAmigues();
-
-  if (amiguesDropdown) {
-    amiguesDropdown.addEventListener("click", actualizarPanelAmigues);
-  }
-});
-</script>
-
-
-<!-- AJAX: solicitar amistad desde ventana emergente -->
-<!--
-  Flujo:
-  1. Click en "Solicitar" dentro del panel de Amigues.
-  2. Abre #solicitarAmistadModal.
-  3. Carga el formulario desde /solicitar/amistad por AJAX.
-  4. Envía el formulario por AJAX.
-  5. Si sale bien, refresca el panel de Amigues y muestra mensaje arriba.
--->
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  const modalEl = document.getElementById("solicitarAmistadModal");
-  const modalBody = document.getElementById("solicitarAmistadModalBody");
-  const panelAmigues = document.getElementById("amiguesDropdownContenido");
-  const amiguesBadge = document.getElementById("amiguesBadge");
-  const amiguesDropdown = document.getElementById("amiguesDropdown");
-
-  if (!modalEl || !modalBody) {
-    return;
-  }
-
-  // Construye el mensaje que se muestra arriba del panel de Amigues.
+  // Construye el mensaje que se muestra arriba del panel.
   function buildPanelMessage(message, level) {
     if (!message) {
       return "";
@@ -1371,7 +1316,7 @@ document.addEventListener("DOMContentLoaded", function () {
     `;
   }
 
-  // Actualiza el número rojo de solicitudes pendientes en el ícono de Amigues.
+  // Actualiza el número rojo del ícono de Amigues.
   function actualizarBadgeAmigues(cantidad) {
     if (!amiguesBadge) {
       return;
@@ -1386,7 +1331,46 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Vuelve a abrir el dropdown de Amigues después de cerrar el modal.
+  // Muestra HTML actualizado dentro del panel y opcionalmente un mensaje arriba.
+  function renderPanelAmigues(data) {
+    if (!data || !data.html) {
+      return;
+    }
+
+    panelAmigues.innerHTML = buildPanelMessage(data.message, data.level) + data.html;
+    actualizarBadgeAmigues(data.cantidad || 0);
+  }
+
+  // Carga/refresca el panel completo de Amigues.
+  function actualizarPanelAmigues() {
+    fetch(urlPanelAmigues, {
+      headers: {
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      credentials: "same-origin"
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("No se pudo cargar el panel de amigues.");
+        }
+
+        return response.json();
+      })
+      .then(data => {
+        renderPanelAmigues(data);
+      })
+      .catch(error => {
+        console.warn(error);
+
+        panelAmigues.innerHTML = `
+          <div class="p-3 text-muted small">
+            No se pudo cargar Amigues.
+          </div>
+        `;
+      });
+  }
+
+  // Vuelve a abrir el dropdown de Amigues.
   function mostrarPanelAmigues() {
     if (!amiguesDropdown || !bootstrap.Dropdown) {
       return;
@@ -1396,7 +1380,14 @@ document.addEventListener("DOMContentLoaded", function () {
     dropdown.show();
   }
 
-  // Click en el botón "Solicitar": abre modal y carga formulario.
+  // Carga inicial y refresco al abrir el dropdown.
+  actualizarPanelAmigues();
+
+  if (amiguesDropdown) {
+    amiguesDropdown.addEventListener("click", actualizarPanelAmigues);
+  }
+
+  // Abrir modal de "Solicitar amistad".
   document.addEventListener("click", function (e) {
     const btn = e.target.closest(".js-open-solicitar-amistad");
 
@@ -1406,6 +1397,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     e.preventDefault();
 
+    if (!solicitarModalEl || !solicitarModalBody) {
+      console.error("Falta #solicitarAmistadModal o #solicitarAmistadModalBody");
+      return;
+    }
+
     const url = btn.dataset.url;
 
     if (!url) {
@@ -1413,13 +1409,16 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    modalBody.innerHTML = `
+    solicitarModalBody.innerHTML = `
       <div class="text-muted small">
         Cargando…
       </div>
     `;
 
-    const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+    const modal =
+      bootstrap.Modal.getInstance(solicitarModalEl) ||
+      new bootstrap.Modal(solicitarModalEl);
+
     modal.show();
 
     fetch(url, {
@@ -1436,12 +1435,12 @@ document.addEventListener("DOMContentLoaded", function () {
         return response.json();
       })
       .then(data => {
-        modalBody.innerHTML = data.html;
+        solicitarModalBody.innerHTML = data.html;
       })
       .catch(error => {
         console.warn(error);
 
-        modalBody.innerHTML = `
+        solicitarModalBody.innerHTML = `
           <div class="alert alert-warning small mb-0">
             No se pudo cargar el formulario.
           </div>
@@ -1449,9 +1448,82 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   });
 
-  // Submit del formulario cargado dentro del modal.
-  modalBody.addEventListener("submit", function (e) {
-    const form = e.target.closest("#solicitarAmistadForm");
+  // Enviar formulario de "Solicitar amistad" dentro del modal.
+  if (solicitarModalBody) {
+    solicitarModalBody.addEventListener("submit", function (e) {
+      const form = e.target.closest("#solicitarAmistadForm");
+
+      if (!form) {
+        return;
+      }
+
+      e.preventDefault();
+
+      const submitBtn = form.querySelector('button[type="submit"]');
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+      }
+
+      fetch(form.action, {
+        method: "POST",
+        body: new FormData(form),
+        headers: {
+          "X-Requested-With": "XMLHttpRequest"
+        },
+        credentials: "same-origin"
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("No se pudo enviar la solicitud.");
+          }
+
+          return response.json();
+        })
+        .then(data => {
+          if (data.ok && data.html) {
+            renderPanelAmigues(data);
+
+            const modal = bootstrap.Modal.getInstance(solicitarModalEl);
+            if (modal) {
+              modal.hide();
+            }
+
+            solicitarModalEl.addEventListener(
+              "hidden.bs.modal",
+              function () {
+                mostrarPanelAmigues();
+              },
+              { once: true }
+            );
+
+            return;
+          }
+
+          if (data.html) {
+            solicitarModalBody.innerHTML = data.html;
+          }
+        })
+        .catch(error => {
+          console.warn(error);
+
+          solicitarModalBody.innerHTML = `
+            <div class="alert alert-warning small mb-0">
+              No se pudo enviar la solicitud.
+            </div>
+          `;
+        })
+        .finally(() => {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+          }
+        });
+    });
+  }
+
+  // Aceptar solicitud de amistad desde el panel.
+  panelAmigues.addEventListener("submit", function (e) {
+    const form = e.target.closest(".js-aceptar-amigue-form");
 
     if (!form) {
       return;
@@ -1460,6 +1532,7 @@ document.addEventListener("DOMContentLoaded", function () {
     e.preventDefault();
 
     const submitBtn = form.querySelector('button[type="submit"]');
+
     if (submitBtn) {
       submitBtn.disabled = true;
     }
@@ -1474,46 +1547,23 @@ document.addEventListener("DOMContentLoaded", function () {
     })
       .then(response => {
         if (!response.ok) {
-          throw new Error("No se pudo enviar la solicitud.");
+          throw new Error("No se pudo aceptar la solicitud.");
         }
 
         return response.json();
       })
       .then(data => {
-        // Si salió bien, refresca el panel de Amigues.
-        if (data.ok && data.html && panelAmigues) {
-          panelAmigues.innerHTML = buildPanelMessage(data.message, data.level) + data.html;
-          actualizarBadgeAmigues(data.cantidad || 0);
+        renderPanelAmigues(data);
+        mostrarPanelAmigues();
 
-          const modal = bootstrap.Modal.getInstance(modalEl);
-          if (modal) {
-            modal.hide();
-          }
-
-          modalEl.addEventListener(
-            "hidden.bs.modal",
-            function () {
-              mostrarPanelAmigues();
-            },
-            { once: true }
-          );
-
-          return;
-        }
-
-        // Si hubo errores de formulario, vuelve a mostrar el formulario con errores.
-        if (data.html) {
-          modalBody.innerHTML = data.html;
-        }
       })
       .catch(error => {
         console.warn(error);
 
-        modalBody.innerHTML = `
-          <div class="alert alert-warning small mb-0">
-            No se pudo enviar la solicitud.
-          </div>
-        `;
+        panelAmigues.insertAdjacentHTML(
+          "afterbegin",
+          buildPanelMessage("No se pudo aceptar la solicitud.", "warning")
+        );
       })
       .finally(() => {
         if (submitBtn) {
@@ -1523,8 +1573,6 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 </script>
-
-
 
 
 <!-- 

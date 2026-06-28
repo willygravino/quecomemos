@@ -3311,17 +3311,13 @@ def ajax_listado_platos(request):
     })
 
 
+
 class SolicitarAmistadForm(forms.Form):
     destinatario = forms.ModelChoiceField(
         queryset=User.objects.none(),
         label="Usuario",
     )
-    mensaje = forms.CharField(
-        required=False,
-        max_length=1000,
-        widget=forms.Textarea(attrs={"rows": 3}),
-        label="Mensaje",
-    )
+
 
 
 class SolicitarAmistad(LoginRequiredMixin, FormView):
@@ -3652,7 +3648,34 @@ def historial(request):
 
 @login_required
 def sumar_amigue(request):
+    es_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
+
+    def respuesta_ajax(mensaje, nivel="success", ok=True, status=200):
+        context = obtener_contexto_amigues(request.user)
+
+        html = render_to_string(
+            "AdminVideos/partials/_panel_amigues.html",
+            context,
+            request=request,
+        )
+
+        return JsonResponse({
+            "ok": ok,
+            "message": mensaje,
+            "level": nivel,
+            "html": html,
+            "cantidad": context["solicitudes_pendientes"].count(),
+        }, status=status)
+
     if request.method != "POST":
+        if es_ajax:
+            return respuesta_ajax(
+                "Método no permitido.",
+                nivel="warning",
+                ok=False,
+                status=405,
+            )
+
         return redirect("amigues")
 
     amistad_id = request.POST.get("amistad_id")
@@ -3664,18 +3687,35 @@ def sumar_amigue(request):
     )
 
     if not amistad.involucra_a(request.user):
-        messages.error(request, "No podés aceptar esta solicitud.")
+        mensaje = "No podés aceptar esta solicitud."
+
+        if es_ajax:
+            return respuesta_ajax(mensaje, nivel="danger", ok=False, status=403)
+
+        messages.error(request, mensaje)
         return redirect("amigues")
 
     if amistad.solicitada_por_id == request.user.id:
-        messages.error(request, "No podés aceptar una solicitud enviada por vos.")
+        mensaje = "No podés aceptar una solicitud enviada por vos."
+
+        if es_ajax:
+            return respuesta_ajax(mensaje, nivel="warning", ok=False, status=400)
+
+        messages.error(request, mensaje)
         return redirect("amigues")
 
     amistad.estado = Amistad.ACEPTADA
     amistad.save(update_fields=["estado", "actualizada_el"])
 
-    messages.success(request, "Solicitud de amistad aceptada.")
+    mensaje = "Solicitud de amistad aceptada."
+
+    if es_ajax:
+        return respuesta_ajax(mensaje, nivel="success")
+
+    messages.success(request, mensaje)
     return redirect("amigues")
+
+
 
 
 @login_required
