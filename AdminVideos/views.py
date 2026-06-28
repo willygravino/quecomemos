@@ -3319,10 +3319,7 @@ class SolicitarAmistadForm(forms.Form):
     )
 
 
-
 class SolicitarAmistad(LoginRequiredMixin, FormView):
-    template_name = "AdminVideos/solicitar_amistad.html"
-    success_url = reverse_lazy("amigues")
     form_class = SolicitarAmistadForm
 
     def es_ajax(self):
@@ -3342,7 +3339,7 @@ class SolicitarAmistad(LoginRequiredMixin, FormView):
 
         return form
 
-    def render_form_ajax(self, form):
+    def render_form_ajax(self, form, status=200):
         html = render_to_string(
             "AdminVideos/partials/_form_solicitar_amistad.html",
             {"form": form},
@@ -3352,7 +3349,7 @@ class SolicitarAmistad(LoginRequiredMixin, FormView):
         return JsonResponse({
             "ok": False,
             "html": html,
-        })
+        }, status=status)
 
     def render_panel_amigues_ajax(self, mensaje, nivel="success"):
         context = obtener_contexto_amigues(self.request.user)
@@ -3372,27 +3369,21 @@ class SolicitarAmistad(LoginRequiredMixin, FormView):
         })
 
     def get(self, request, *args, **kwargs):
-        if self.es_ajax():
-            form = self.get_form()
+        form = self.get_form()
 
-            html = render_to_string(
-                "AdminVideos/partials/_form_solicitar_amistad.html",
-                {"form": form},
-                request=request,
-            )
+        html = render_to_string(
+            "AdminVideos/partials/_form_solicitar_amistad.html",
+            {"form": form},
+            request=request,
+        )
 
-            return JsonResponse({
-                "ok": True,
-                "html": html,
-            })
-
-        return super().get(request, *args, **kwargs)
+        return JsonResponse({
+            "ok": True,
+            "html": html,
+        })
 
     def form_invalid(self, form):
-        if self.es_ajax():
-            return self.render_form_ajax(form)
-
-        return super().form_invalid(form)
+        return self.render_form_ajax(form, status=400)
 
     def form_valid(self, form):
         solicitante = self.request.user
@@ -3411,35 +3402,25 @@ class SolicitarAmistad(LoginRequiredMixin, FormView):
 
         if not creada:
             if amistad.estado == Amistad.ACEPTADA:
-                mensaje = "Ya son amigues."
-
-                if self.es_ajax():
-                    return self.render_panel_amigues_ajax(mensaje, "info")
-
-                messages.info(self.request, mensaje)
-                return redirect(self.success_url)
+                return self.render_panel_amigues_ajax(
+                    "Ya son amigues.",
+                    "info",
+                )
 
             if amistad.estado == Amistad.PENDIENTE:
-                mensaje = "Ya hay una solicitud de amistad pendiente."
-
-                if self.es_ajax():
-                    return self.render_panel_amigues_ajax(mensaje, "info")
-
-                messages.info(self.request, mensaje)
-                return redirect(self.success_url)
+                return self.render_panel_amigues_ajax(
+                    "Ya hay una solicitud de amistad pendiente.",
+                    "info",
+                )
 
             amistad.estado = Amistad.PENDIENTE
             amistad.solicitada_por = solicitante
             amistad.save(update_fields=["estado", "solicitada_por", "actualizada_el"])
 
-        mensaje = "Solicitud de amistad enviada."
-
-        if self.es_ajax():
-            return self.render_panel_amigues_ajax(mensaje, "success")
-
-        messages.success(self.request, mensaje)
-        return redirect(self.success_url)
-
+        return self.render_panel_amigues_ajax(
+            "Solicitud de amistad enviada.",
+            "success",
+        )
 
 
 
@@ -3598,12 +3579,6 @@ def obtener_contexto_amigues(usuario):
     }
 
 @login_required
-def amigues(request):
-    context = obtener_contexto_amigues(request.user)
-
-    return render(request, "AdminVideos/amigues.html", context)
-
-@login_required
 def ajax_panel_amigues(request):
     context = obtener_contexto_amigues(request.user)
 
@@ -3645,11 +3620,8 @@ def historial(request):
     return render(request, "AdminVideos/historial.html", context)
 
 
-
 @login_required
 def sumar_amigue(request):
-    es_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
-
     def respuesta_ajax(mensaje, nivel="success", ok=True, status=200):
         context = obtener_contexto_amigues(request.user)
 
@@ -3668,15 +3640,12 @@ def sumar_amigue(request):
         }, status=status)
 
     if request.method != "POST":
-        if es_ajax:
-            return respuesta_ajax(
-                "Método no permitido.",
-                nivel="warning",
-                ok=False,
-                status=405,
-            )
-
-        return redirect("amigues")
+        return respuesta_ajax(
+            "Método no permitido.",
+            nivel="warning",
+            ok=False,
+            status=405,
+        )
 
     amistad_id = request.POST.get("amistad_id")
 
@@ -3687,41 +3656,34 @@ def sumar_amigue(request):
     )
 
     if not amistad.involucra_a(request.user):
-        mensaje = "No podés aceptar esta solicitud."
-
-        if es_ajax:
-            return respuesta_ajax(mensaje, nivel="danger", ok=False, status=403)
-
-        messages.error(request, mensaje)
-        return redirect("amigues")
+        return respuesta_ajax(
+            "No podés aceptar esta solicitud.",
+            nivel="danger",
+            ok=False,
+            status=403,
+        )
 
     if amistad.solicitada_por_id == request.user.id:
-        mensaje = "No podés aceptar una solicitud enviada por vos."
-
-        if es_ajax:
-            return respuesta_ajax(mensaje, nivel="warning", ok=False, status=400)
-
-        messages.error(request, mensaje)
-        return redirect("amigues")
+        return respuesta_ajax(
+            "No podés aceptar una solicitud enviada por vos.",
+            nivel="warning",
+            ok=False,
+            status=400,
+        )
 
     amistad.estado = Amistad.ACEPTADA
     amistad.save(update_fields=["estado", "actualizada_el"])
 
-    mensaje = "Solicitud de amistad aceptada."
-
-    if es_ajax:
-        return respuesta_ajax(mensaje, nivel="success")
-
-    messages.success(request, mensaje)
-    return redirect("amigues")
-
+    return respuesta_ajax(
+        "Solicitud de amistad aceptada.",
+        nivel="success",
+    )
 
 
 
 @login_required
 @require_POST
 def amigue_borrar(request, pk):
-    es_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
 
     amigue = get_object_or_404(User, username=pk)
 
@@ -3739,30 +3701,21 @@ def amigue_borrar(request, pk):
         mensaje = "No se encontró esa amistad para borrar."
         nivel = "warning"
 
-    if es_ajax:
-        context = obtener_contexto_amigues(request.user)
+    context = obtener_contexto_amigues(request.user)
 
-        html = render_to_string(
-            "AdminVideos/partials/_panel_amigues.html",
-            context,
-            request=request,
-        )
+    html = render_to_string(
+        "AdminVideos/partials/_panel_amigues.html",
+        context,
+        request=request,
+    )
 
-        return JsonResponse({
-            "ok": bool(borradas),
-            "message": mensaje,
-            "level": nivel,
-            "html": html,
-            "cantidad": context["solicitudes_pendientes"].count(),
-        })
-
-    if borradas:
-        messages.success(request, mensaje)
-    else:
-        messages.warning(request, mensaje)
-
-    return redirect("amigues")
-
+    return JsonResponse({
+        "ok": bool(borradas),
+        "message": mensaje,
+        "level": nivel,
+        "html": html,
+        "cantidad": context["solicitudes_pendientes"].count(),
+    })
 
 
 
