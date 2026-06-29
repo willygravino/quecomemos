@@ -1,3 +1,20 @@
+
+function inicializarCarouselesPlatos(contexto) {
+  if (!window.bootstrap || !bootstrap.Carousel) return;
+
+  const root = contexto || document;
+
+  root.querySelectorAll(".carousel").forEach(function (carouselEl) {
+    carouselEl.setAttribute("data-bs-touch", "true");
+
+    bootstrap.Carousel.getOrCreateInstance(carouselEl, {
+      interval: false,
+      touch: true,
+      wrap: true,
+    });
+  });
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   // ============================================================
   // 1. Elementos base de la pantalla
@@ -34,6 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const contenedorCarousel = document.getElementById("contenedor-carousel-platos");
         if (contenedorCarousel) {
           contenedorCarousel.innerHTML = data.html_carousel;
+          inicializarCarouselesPlatos(contenedorCarousel);
         }
 
         const contenedorLugares = document.getElementById("contenedor-listado-lugares");
