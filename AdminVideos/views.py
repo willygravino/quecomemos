@@ -2506,8 +2506,14 @@ def obtener_mensajes_agrupados(usuario):
 @login_required
 def ajax_mensajes_usuario(request):
     mensajes = obtener_mensajes_agrupados(request.user)
+    amigues = obtener_usernames_amigues(request.user)
 
-    
+    usuarios_con_conversacion = set(mensajes.keys())
+    amigues_nuevo_mensaje = [
+        amigue for amigue in amigues
+        if amigue not in usuarios_con_conversacion
+    ]
+
     cantidad_no_leidos = (
         Mensaje.objects
         .filter(
@@ -2522,7 +2528,10 @@ def ajax_mensajes_usuario(request):
 
     html = render_to_string(
         "AdminVideos/partials/_dropdown_mensajes.html",
-        {"mensajes": mensajes},
+        {
+            "mensajes": mensajes,
+            "amigues_nuevo_mensaje": amigues_nuevo_mensaje,
+        },
         request=request,
     )
 

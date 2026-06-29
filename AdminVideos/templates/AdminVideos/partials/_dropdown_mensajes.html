@@ -15,19 +15,20 @@
       {% endif %}
     </div>
 
-    <div class="font-weight-bold">
+    <div class="font-weight-bold w-100" style="min-width: 0;">
       <div class="text-truncate">{{ usuario }}</div>
 
-      <div class="d-flex justify-content-between">
-        <div class="small text-truncate">
+      <div class="d-flex align-items-center small text-muted" style="min-width: 0;">
+        <div class="text-truncate" style="min-width: 0;">
           {{ mensaje.mensaje.contenido }}
         </div>
 
-        <div class="small text-gray-600">
+        <div class="flex-shrink-0 ms-1">
+          ·
           {% if mensaje.mensaje.creado_el == 0 %}
             Hoy
           {% else %}
-            &nbsp;·&nbsp;{{ mensaje.mensaje.creado_el }} días
+            {{ mensaje.mensaje.creado_el }} días
           {% endif %}
         </div>
       </div>
@@ -35,7 +36,25 @@
   </a>
 {% empty %}
   <p class="dropdown-item text-center small text-gray-500 mb-0">
-    No tienes mensajes.
+    No tienes conversaciones.
   </p>
 {% endfor %}
 
+
+<h6 class="dropdown-header">
+  Nuevo mensaje
+</h6>
+
+{% if amigues_nuevo_mensaje %}
+  {% for amigue in amigues_nuevo_mensaje %}
+    <a class="dropdown-item small js-open-chat-modal"
+       href="{% url 'enviar-mensaje' amigue %}"
+       data-chat-url="{% url 'enviar-mensaje' amigue %}">
+      Escribir a {{ amigue }}
+    </a>
+  {% endfor %}
+{% else %}
+  <p class="dropdown-item text-center small text-gray-500 mb-0">
+    No hay otros amigues para iniciar chat.
+  </p>
+{% endif %}
