@@ -5,7 +5,7 @@ from .models import (
     MenuDia, MenuItem,
     MenuItemExtra,
     Plato, Profile, Mensaje, Lugar,
-    ProfileIngrediente,
+    ProfileIngrediente, LoQueTengoPalabra,
     ProfilePlatoCompra,
     ElementoCompartido,
     Amistad,
@@ -163,3 +163,16 @@ class AmistadAdmin(admin.ModelAdmin):
         "solicitada_por__username",
     )
     readonly_fields = ("creada_el", "actualizada_el")
+
+
+@admin.register(LoQueTengoPalabra)
+class LoQueTengoPalabraAdmin(admin.ModelAdmin):
+    list_display = ("id", "profile", "usuario", "palabra")
+    search_fields = ("palabra", "profile__user__username", "profile__user__email")
+    list_filter = ("profile__user__username",)
+    ordering = ("profile__user__username", "palabra")
+
+    def usuario(self, obj):
+        return obj.profile.user.username
+    usuario.short_description = "Usuario"
+
