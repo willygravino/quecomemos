@@ -1,0 +1,954 @@
+---- rutas relacionadas con ingredientes / pantry / filtros ----
+nuestrotubo/urls.py:20:from AdminVideos.views import ajax_mensajes_usuario, ajax_eliminar_mensaje_chat, agregar_lugar_compartido, ajax_eliminar_programado, ajax_listado_platos, CrearLugar, EnviarMensaje, LugarDetail, LugarUpdate, PlatoDetail, PlatoVariedadCreate, PlatoVariedadDelete, PlatoVariedadUpdate,  agregar_a_mi_lista, agregar_plato_compartido, ajax_panel_amigues, ajax_solicitudes_amistad, amigue_borrar, api_ingredientes, api_toggle_item, compartir_elemento, compartir_ing_plato, descartar_sugerido, eliminar_lugar, eliminar_menu_programado, eliminar_plato, eliminar_platos_masivo, eliminar_programado, fijar_o_eliminar_habito, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, lista_de_compras, FiltroDePlatos, plato_ingredientes, plato_opciones_asignar, random_dia, set_dia_activo, sumar_amigue, user_logout, SolicitarAmistad, AsignarPlato, compartir_lista
+nuestrotubo/urls.py:30:    path('api/ingredientes/', api_ingredientes, name='api_ingredientes'),
+nuestrotubo/urls.py:33:    path('menu/elegido/',lista_de_compras, name="menu-elegido"),
+nuestrotubo/urls.py:51:    path("api/lista/<uuid:token>/toggle/", api_toggle_item, name="api-toggle-item"),
+nuestrotubo/urls.py:90:    path("ajax/listado-platos/", ajax_listado_platos, name="ajax_listado_platos"),
+AdminVideos/views.py:12:from AdminVideos.models import ElementoCompartido, Amistad, ProfilePlatoCompra, HabitoSemanal, Ingrediente, IngredienteEnPlato, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente
+AdminVideos/views.py:35:from AdminVideos.services.pantry import (
+AdminVideos/views.py:37:    get_pantry_map,
+AdminVideos/views.py:176:def api_ingredientes(request):
+AdminVideos/views.py:379:            # Los que vienen tildados son "a comprar" => tengo=False
+AdminVideos/views.py:393:                # Si está en to_buy => NO lo tengo
+AdminVideos/views.py:394:                tengo = (ing_id not in to_buy_ids)
+AdminVideos/views.py:396:                defaults = {"tengo": tengo}
+AdminVideos/views.py:398:                # Si lo tengo, registramos compra/actualización (opcional pero útil)
+AdminVideos/views.py:399:                if tengo:
+AdminVideos/views.py:407:                # Si NO lo tengo y no hay comentario, borramos el registro para no llenar la DB
+AdminVideos/views.py:408:                if (not tengo) and defaults.get("comentario", "") == "":
+AdminVideos/views.py:409:                    ProfileIngrediente.objects.filter(profile=perfil, ingrediente_id=ing_id).delete()
+AdminVideos/views.py:411:                    ProfileIngrediente.objects.update_or_create(
+AdminVideos/views.py:421:    #    - lee el estado por ingrediente_id desde ProfileIngrediente
+AdminVideos/views.py:430:    pantry_map = get_pantry_map(
+AdminVideos/views.py:433:    only_fields=("ingrediente_id", "tengo", "comentario", "updated_at"),
+AdminVideos/views.py:449:        p = pantry_map.get(ing_id)
+AdminVideos/views.py:452:        tengo = p.tengo if p else False
+AdminVideos/views.py:460:            "a_comprar": (not tengo),      # True => checkbox checked
+AdminVideos/views.py:481:            p = pantry_map.get(ing_id)
+AdminVideos/views.py:483:            tengo = p.tengo if p else False
+AdminVideos/views.py:491:                "a_comprar": (not tengo),
+AdminVideos/views.py:569:    pantry_qs = (
+AdminVideos/views.py:570:        ProfileIngrediente.objects
+AdminVideos/views.py:572:        .only("ingrediente_id", "tengo", "comentario", "last_bought_at")
+AdminVideos/views.py:574:    pantry_map = {pi.ingrediente_id: pi for pi in pantry_qs}
+AdminVideos/views.py:584:        pi = pantry_map.get(iep.ingrediente_id)
+AdminVideos/views.py:587:        if pi and pi.tengo:
+AdminVideos/views.py:592:                continue  # tengo normal -> no mostrar
+AdminVideos/views.py:594:            estado = "no-tengo"
+AdminVideos/views.py:617:def lista_de_compras(request):
+AdminVideos/views.py:797:            "AdminVideos/lista_de_compras.html",
+AdminVideos/views.py:866:    # Traer estados por ingrediente_id (ProfileIngrediente)
+AdminVideos/views.py:870:    pantry_map = get_pantry_map(
+AdminVideos/views.py:873:        only_fields=("ingrediente_id", "tengo", "comentario", "last_bought_at", "updated_at"),
+AdminVideos/views.py:881:        p = pantry_map.get(ing_id)
+AdminVideos/views.py:883:        # Default igual que hoy: si no hay registro => "no-tengo"
+AdminVideos/views.py:885:            estado = "no-tengo"
+AdminVideos/views.py:887:            if p.tengo is False:
+AdminVideos/views.py:888:                estado = "no-tengo"
+AdminVideos/views.py:892:                estado = "tengo"
+AdminVideos/views.py:921:        "to_buy": sum(i["estado"] == "no-tengo" for i in items),
+AdminVideos/views.py:923:        "have": sum(i["estado"] == "tengo" for i in items),
+AdminVideos/views.py:966:    return render(request, "AdminVideos/lista_de_compras.html", context)
+AdminVideos/views.py:1070:    # Estados guardados (tengo / comentario / last_bought_at)
+AdminVideos/views.py:1071:    # AHORA por ProfileIngrediente (NO por nombre)
+AdminVideos/views.py:1073:    pantry_qs = (
+AdminVideos/views.py:1074:        ProfileIngrediente.objects
+AdminVideos/views.py:1076:        .only("ingrediente_id", "tengo", "comentario", "last_bought_at")
+AdminVideos/views.py:1078:    pantry_map = {pi.ingrediente_id: pi for pi in pantry_qs}
+AdminVideos/views.py:1084:        pi = pantry_map.get(ing_id)
+AdminVideos/views.py:1088:        if pi and pi.tengo:
+AdminVideos/views.py:1095:            # NO hay registro, o tengo=False => por defecto: falta comprar
+AdminVideos/views.py:1096:            estado = "no-tengo"
+AdminVideos/views.py:1150:def api_toggle_item(request, token):
+AdminVideos/views.py:1175:        ProfileIngrediente.objects
+AdminVideos/views.py:1183:        obj, _ = ProfileIngrediente.objects.update_or_create(
+AdminVideos/views.py:1186:            defaults={"tengo": True, "last_bought_at": timezone.now()},
+AdminVideos/views.py:1191:            "tengo": True,
+AdminVideos/views.py:1195:    # checked=False => "no tengo"
+AdminVideos/views.py:1198:        ProfileIngrediente.objects.filter(profile=perfil, ingrediente_id=ing_id).delete()
+AdminVideos/views.py:1199:        return JsonResponse({"ok": True, "ingrediente_id": ing_id, "tengo": False, "last_bought_at": None})
+AdminVideos/views.py:1201:    # Si hay comentario, lo conservamos, pero marcamos tengo=False
+AdminVideos/views.py:1202:    obj, _ = ProfileIngrediente.objects.update_or_create(
+AdminVideos/views.py:1205:        defaults={"tengo": False},
+AdminVideos/views.py:1210:        "tengo": False,
+AdminVideos/views.py:3072:def ajax_listado_platos(request):
+AdminVideos/models.py:607:class ProfileIngrediente(models.Model):
+AdminVideos/models.py:611:        related_name="ingredientes_pantry",
+AdminVideos/models.py:616:        related_name="en_pantry_de",
+AdminVideos/models.py:619:    # True = lo tengo / False = no lo tengo (entonces lo compro)
+AdminVideos/models.py:620:    tengo = models.BooleanField(default=False)
+AdminVideos/models.py:634:        return f"{self.profile.user} - {self.ingrediente} - {self.comentario} ({'tengo' if self.tengo else 'no tengo'})" 
+AdminVideos/models.py:650:    # ingredientes_que_tengo = models.JSONField(default=list, blank=True)
+AdminVideos/templates/AdminVideos/base.html:963:  {% if hay_lista_de_compras %}
+AdminVideos/templates/AdminVideos/base.html:1240:<script src="{% static 'AdminVideos/js/pantry_bind.js' %}?v=3"></script>
+AdminVideos/templates/AdminVideos/lista_filtrada.html:10:  data-listado-url="{% url 'ajax_listado_platos' %}">
+AdminVideos/templates/AdminVideos/compartir_lista.html:47:            <!-- checked => tengo (o recien-comprado) -->
+AdminVideos/templates/AdminVideos/compartir_lista.html:52:                   {% if it.estado == "tengo" or it.estado == "recien-comprado" %}checked{% endif %}>
+AdminVideos/templates/AdminVideos/compartir_lista.html:171:  - La página anterior (lista_de_compras / pantalla que abre el modal) escucha esa bandera en "pageshow"
+AdminVideos/templates/AdminVideos/compartir_lista.html:182:    sessionStorage.setItem("pantry_should_refresh", "1");
+AdminVideos/templates/AdminVideos/lista_de_compras.html:157:                        - checked  => no-tengo (hay que comprar)
+AdminVideos/templates/AdminVideos/lista_de_compras.html:158:                        - unchecked => tengo / recién comprado -->
+AdminVideos/templates/AdminVideos/lista_de_compras.html:166:                        {% if item.estado == "no-tengo" %}checked{% endif %}
+AdminVideos/templates/AdminVideos/lista_de_compras.html:262: * - los maneja pantry_bind.js (reutilizable)
+AdminVideos/static/AdminVideos/js/pantry_bind.js:1:// static/js/pantry_bind.js
+AdminVideos/static/AdminVideos/js/pantry_bind.js:4:// Unifica la persistencia de "ingredientes del pantry" en:
+AdminVideos/static/AdminVideos/js/pantry_bind.js:10://   * checked   => "necesito comprar" => tengo=False
+AdminVideos/static/AdminVideos/js/pantry_bind.js:11://   * unchecked => "lo tengo"         => tengo=True
+AdminVideos/static/AdminVideos/js/pantry_bind.js:29:  if (document.__pantryBindLoaded) return;
+AdminVideos/static/AdminVideos/js/pantry_bind.js:30:  document.__pantryBindLoaded = true;
+AdminVideos/static/AdminVideos/js/pantry_bind.js:32:  console.log("🧺 pantry_bind.js cargado");
+AdminVideos/static/AdminVideos/js/pantry_bind.js:76:  // 1) Checkbox: "necesito comprar" (toggle tengo/no-tengo)
+AdminVideos/static/AdminVideos/js/pantry_bind.js:88:    // checked => "1" = necesito comprar (tengo=False)
+AdminVideos/static/AdminVideos/js/form_init.js:10:  // Aplica a cualquier página que cargue form_init.js (por ejemplo: lista_de_compras, pantallas con modal, etc.)
+AdminVideos/static/AdminVideos/js/form_init.js:19:      const shouldRefresh = sessionStorage.getItem("pantry_should_refresh") === "1";
+AdminVideos/static/AdminVideos/js/form_init.js:22:      sessionStorage.removeItem("pantry_should_refresh");
+
+---- lista_filtrada.html ----
+     1	{% extends "AdminVideos/video_list_base.html" %}
+     2	
+     3	{% load static %}
+     4	
+     5	{% block filtro %}
+     6	
+     7	<form 
+     8	  method="POST" 
+     9	  id="form-filtros-platos"
+    10	  data-listado-url="{% url 'ajax_listado_platos' %}">
+    11	  <div class="d-flex justify-content-start mx-1 gap-4 flex-wrap">
+    12	
+    13	    {% csrf_token %}
+    14	
+    15	    <input type="hidden" name="tipopag" value="{{ tipopag }}">
+    16	
+    17	    <div class="input-group w-auto">
+    18	      <input 
+    19	        type="search" 
+    20	        class="form-control {% if formulario.palabra_clave.value %} border-danger text-danger {% endif %}" 
+    21	        placeholder="Buscar por palabra clave" 
+    22	        name="palabra_clave" 
+    23	        value="{{ formulario.palabra_clave.value|default:'' }}">
+    24	      
+    25	   
+    26	    </div>
+    27	
+    28	    <div class="form-check">
+    29	      <input
+    30	        class="form-check-input"
+    31	        type="checkbox"
+    32	        name="quecomemos"
+    33	        value="quecomemos"
+    34	        id="quecomemos"
+    35	        {% if quecomemos_ck == "quecomemos" %}checked{% endif %}
+    36	      >
+    37	      <label class="form-check-label small" for="quecomemos">
+    38	        Sugerencia <br> quecomemos
+    39	      </label>
+    40	    </div>
+    41	
+    42	    <div class="form-check">
+    43	      <input
+    44	        class="form-check-input"
+    45	        type="checkbox"
+    46	        name="misplatos"
+    47	        value="misplatos"
+    48	        id="misplatos"
+    49	        {% if misplatos_ck == "misplatos" %}checked{% endif %}
+    50	      >
+    51	      <label class="form-check-label small" for="misplatos">
+    52	        Mis platos
+    53	      </label>
+    54	    </div>
+    55	  </div>
+    56	</form>
+    57	
+    58	
+    59	<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=6"></script>
+    60	
+    61	
+    62	{% endblock %}
+
+---- filtros_platos.js ----
+     1	
+     2	function inicializarCarouselesPlatos(contexto) {
+     3	  if (!window.bootstrap || !bootstrap.Carousel) return;
+     4	
+     5	  const root = contexto || document;
+     6	
+     7	  root.querySelectorAll(".carousel").forEach(function (carouselEl) {
+     8	    carouselEl.setAttribute("data-bs-touch", "true");
+     9	
+    10	    bootstrap.Carousel.getOrCreateInstance(carouselEl, {
+    11	      interval: false,
+    12	      touch: true,
+    13	      wrap: true,
+    14	    });
+    15	  });
+    16	}
+    17	
+    18	document.addEventListener("DOMContentLoaded", function () {
+    19	  // ============================================================
+    20	  // 1. Elementos base de la pantalla
+    21	  // ============================================================
+    22	  const form = document.getElementById("form-filtros-platos");
+    23	  const contenedor = document.getElementById("contenedor-listado-platos");
+    24	
+    25	  if (!form || !contenedor) return;
+    26	
+    27	  // ============================================================
+    28	  // 2. Refrescar listado, carousel y lugares por AJAX
+    29	  // ============================================================
+    30	  function actualizarListadoPlatos() {
+    31	    const url = form.dataset.listadoUrl;
+    32	    const formData = new FormData(form);
+    33	
+    34	    fetch(url, {
+    35	      method: "POST",
+    36	      body: formData,
+    37	      headers: {
+    38	        "X-Requested-With": "XMLHttpRequest"
+    39	      }
+    40	    })
+    41	      .then(function (response) {
+    42	        if (!response.ok) {
+    43	          throw new Error("Error al cargar el listado");
+    44	        }
+    45	
+    46	        return response.json();
+    47	      })
+    48	      .then(function (data) {
+    49	        contenedor.innerHTML = data.html_listado;
+    50	
+    51	        const contenedorCarousel = document.getElementById("contenedor-carousel-platos");
+    52	        if (contenedorCarousel) {
+    53	          contenedorCarousel.innerHTML = data.html_carousel;
+    54	          inicializarCarouselesPlatos(contenedorCarousel);
+    55	        }
+    56	
+    57	        const contenedorLugares = document.getElementById("contenedor-listado-lugares");
+    58	        if (contenedorLugares) {
+    59	          contenedorLugares.innerHTML = data.html_lugares;
+    60	        }
+    61	
+    62	        if (typeof initListadoPlatos === "function") {
+    63	          initListadoPlatos();
+    64	        }
+    65	      })
+    66	      .catch(function (error) {
+    67	        console.error(error);
+    68	      });
+    69	  }
+    70	
+    71	  // ============================================================
+    72	  // 3. Marcar activo el item actual del menú lateral
+    73	  // ============================================================
+    74	  function actualizarMenuLateralActivo(tipopag) {
+    75	    document.querySelectorAll(".js-filtro-tipopag").forEach(function (link) {
+    76	      const activo = link.dataset.tipopag === tipopag;
+    77	
+    78	      link.classList.toggle("is-active", activo);
+    79	
+    80	      const item = link.closest(".nav-item");
+    81	      if (item) {
+    82	        item.classList.toggle("active", activo);
+    83	      }
+    84	
+    85	      const texto = link.querySelector(".item-text");
+    86	      if (texto) {
+    87	        texto.classList.toggle("text-white", activo);
+    88	        texto.classList.toggle("fw-bold", activo);
+    89	        texto.classList.toggle("text-white-50", !activo);
+    90	      }
+    91	
+    92	      const icono = link.querySelector(".icon-wrap i");
+    93	      if (icono) {
+    94	        icono.classList.toggle("text-white-50", !activo);
+    95	      }
+    96	    });
+    97	  }
+    98	
+    99	  // ============================================================
+   100	  // 3.b Actualizar botón flotante de crear según tipopag actual
+   101	  // ============================================================
+   102	  function actualizarBotonCrearPlato(tipopag) {
+   103	    const boton = document.getElementById("botonCrearPlatoFlotante");
+   104	
+   105	    if (!boton) {
+   106	      return;
+   107	    }
+   108	
+   109	    const esLugar = tipopag === "Delivery" || tipopag === "Comerafuera";
+   110	    const urlBase = esLugar ? boton.dataset.urlCrearLugar : boton.dataset.urlCrearPlato;
+   111	
+   112	    if (!urlBase) {
+   113	      return;
+   114	    }
+   115	
+   116	    const params = new URLSearchParams();
+   117	
+   118	    if (tipopag) {
+   119	      params.set("tipopag", tipopag);
+   120	    }
+   121	
+   122	    params.set("return_to", window.location.pathname + window.location.search);
+   123	
+   124	    boton.href = `${urlBase}?${params.toString()}`;
+   125	
+   126	    
+   127	    let titulo = "Agregar receta de plato principal";
+   128	    if (tipopag === "Guarnicion") {
+   129	      titulo = "Agregar receta de guarnición";
+   130	    } else if (tipopag === "Comerafuera") {
+   131	      titulo = "Agregar lugar para comer afuera";
+   132	    } else if (tipopag === "Delivery") {
+   133	      titulo = "Agregar delivery";
+   134	    } else if (tipopag && tipopag !== "Principal" && tipopag !== "Dash") {
+   135	      titulo = `Agregar receta de ${tipopag.toLowerCase()}`;
+   136	    }
+   137	
+   138	    boton.title = titulo;
+   139	    boton.setAttribute("aria-label", titulo);
+   140	  }
+   141	
+   142	  // ============================================================
+   143	  // 4. Buscar por palabra clave sin recargar
+   144	  // ============================================================
+   145	  form.addEventListener("submit", function (event) {
+   146	    event.preventDefault();
+   147	    actualizarListadoPlatos();
+   148	  });
+   149	
+   150	  // ============================================================
+   151	  // 4.b Buscar por palabra clave mientras se escribe
+   152	  // ============================================================
+   153	  const inputPalabraClave = form.querySelector('input[name="palabra_clave"]');
+   154	  let timeoutBusquedaPalabraClave = null;
+   155	
+   156	  if (inputPalabraClave) {
+   157	    inputPalabraClave.addEventListener("input", function () {
+   158	      clearTimeout(timeoutBusquedaPalabraClave);
+   159	
+   160	      timeoutBusquedaPalabraClave = setTimeout(function () {
+   161	        actualizarListadoPlatos();
+   162	      }, 400);
+   163	    });
+   164	  }
+   165	
+   166	  // ============================================================
+   167	  // 5. Filtrar por checkboxes sin recargar
+   168	  // ============================================================
+   169	  form.querySelectorAll("input[type='checkbox']").forEach(function (checkbox) {
+   170	    checkbox.addEventListener("change", function () {
+   171	      actualizarListadoPlatos();
+   172	    });
+   173	  });
+   174	
+   175	  // ============================================================
+   176	  // 6. Filtrar desde el menú lateral sin recargar
+   177	  // ============================================================
+   178	  document.addEventListener("click", function (event) {
+   179	    const link = event.target.closest(".js-filtro-tipopag");
+   180	
+   181	    if (!link) {
+   182	      return;
+   183	    }
+   184	
+   185	    const tipopag = link.dataset.tipopag;
+   186	
+   187	    // Fallback seguro: si falta algo, dejamos navegar normal.
+   188	    if (!tipopag || !window.fetch) {
+   189	      return;
+   190	    }
+   191	
+   192	    const inputTipopag = form.querySelector('input[name="tipopag"]');
+   193	
+   194	    if (!inputTipopag) {
+   195	      return;
+   196	    }
+   197	
+   198	    event.preventDefault();
+   199	
+   200	    inputTipopag.value = tipopag;
+   201	    actualizarMenuLateralActivo(tipopag);
+   202	
+   203	    const nuevaUrl = new URL(link.href);
+   204	    window.history.pushState({ tipopag: tipopag }, "", nuevaUrl.toString());
+   205	
+   206	    actualizarBotonCrearPlato(tipopag);
+   207	    actualizarListadoPlatos();  
+   208	  });
+   209	
+   210	  // ============================================================
+   211	  // 7. Soportar botón atrás / adelante del navegador
+   212	  // ============================================================
+   213	  window.addEventListener("popstate", function () {
+   214	    const params = new URLSearchParams(window.location.search);
+   215	    const tipopag = params.get("tipopag");
+   216	
+   217	    if (!tipopag) {
+   218	      return;
+   219	    }
+   220	
+   221	    const inputTipopag = form.querySelector('input[name="tipopag"]');
+   222	
+   223	    if (!inputTipopag) {
+   224	      return;
+   225	    }
+   226	    inputTipopag.value = tipopag;
+   227	    actualizarMenuLateralActivo(tipopag);
+   228	    actualizarBotonCrearPlato(tipopag);
+   229	    actualizarListadoPlatos();
+   230	
+   231	  });
+   232	});
+---- pantry_bind.js ----
+     1	// static/js/pantry_bind.js
+     2	// ==========================================================
+     3	// PANTRY BIND (reutilizable)
+     4	// Unifica la persistencia de "ingredientes del pantry" en:
+     5	// - Lista de compras
+     6	// - Modal de ingredientes del plato
+     7	//
+     8	// Convención de inputs:
+     9	// - Checkbox:  name="ingrediente_a_comprar_id"  value="<ingrediente_id>"
+    10	//   * checked   => "necesito comprar" => tengo=False
+    11	//   * unchecked => "lo tengo"         => tengo=True
+    12	//
+    13	// - Comentario: name="comentario_<ingrediente_id>"
+    14	//
+    15	// Backend esperado (POST):
+    16	// - post_origen=ingredientes
+    17	// - toggle_ing_id / toggle_ing_checked / comentario_<id>  (para checkbox)
+    18	// - comment_ing_id / comentario_<id>                      (para comentario)
+    19	//
+    20	// Requisito:
+    21	// - El <form> contenedor debe tener action correcto (form.action)
+    22	// - Debe existir csrfmiddlewaretoken dentro del form
+    23	// ==========================================================
+    24	
+    25	(function () {
+    26	  "use strict";
+    27	
+    28	  // Evita doble carga del binder si el JS se incluye más de una vez
+    29	  if (document.__pantryBindLoaded) return;
+    30	  document.__pantryBindLoaded = true;
+    31	
+    32	  console.log("🧺 pantry_bind.js cargado");
+    33	
+    34	  // ----------------------------------------------------------
+    35	  // Helper: contexto del form (action + csrf)
+    36	  // ----------------------------------------------------------
+    37	  function getFormContext(el) {
+    38	    const form = el.closest("form");
+    39	    if (!form) return null;
+    40	
+    41	    const csrf = form.querySelector("input[name='csrfmiddlewaretoken']")?.value || "";
+    42	    const url = form.action;
+    43	    if (!url) return null;
+    44	
+    45	    return { form, csrf, url };
+    46	  }
+    47	
+    48	  // ----------------------------------------------------------
+    49	  // Helper: POST con FormData y validación de respuesta JSON
+    50	  // ----------------------------------------------------------
+    51	  async function postFormData({ url, csrf, fd }) {
+    52	    const res = await fetch(url, {
+    53	      method: "POST",
+    54	      headers: {
+    55	        "X-Requested-With": "XMLHttpRequest",
+    56	        "X-CSRFToken": csrf,
+    57	      },
+    58	      body: fd,
+    59	      credentials: "same-origin",
+    60	    });
+    61	
+    62	    const ct = res.headers.get("content-type") || "";
+    63	    if (!ct.includes("application/json")) {
+    64	      const text = await res.text();
+    65	      console.error("❌ Respuesta no JSON:", res.status, text.slice(0, 300));
+    66	      return;
+    67	    }
+    68	
+    69	    const data = await res.json().catch(() => ({}));
+    70	    if (!res.ok || data.success === false) {
+    71	      console.error("❌ POST error:", res.status, data);
+    72	    }
+    73	  }
+    74	
+    75	  // ==========================================================
+    76	  // 1) Checkbox: "necesito comprar" (toggle tengo/no-tengo)
+    77	  // ==========================================================
+    78	  document.addEventListener("change", async (ev) => {
+    79	    const chk = ev.target.closest("input[type='checkbox'][name='ingrediente_a_comprar_id']");
+    80	    if (!chk) return;
+    81	
+    82	    const ctx = getFormContext(chk);
+    83	    if (!ctx) return;
+    84	
+    85	    const ingId = chk.value;
+    86	    if (!ingId) return;
+    87	
+    88	    // checked => "1" = necesito comprar (tengo=False)
+    89	    const toggleChecked = chk.checked ? "1" : "0";
+    90	
+    91	    // comentario actual (si existe)
+    92	    const commentInput = ctx.form.querySelector(`input[name="comentario_${ingId}"]`);
+    93	    const comentario = commentInput ? (commentInput.value || "") : "";
+    94	
+    95	    const fd = new FormData();
+    96	    fd.append("post_origen", "ingredientes");
+    97	    fd.append("toggle_ing_id", ingId);
+    98	    fd.append("toggle_ing_checked", toggleChecked);
+    99	    fd.append(`comentario_${ingId}`, comentario);
+   100	
+   101	    try {
+   102	      await postFormData({ url: ctx.url, csrf: ctx.csrf, fd });
+   103	    } catch (e) {
+   104	      console.error("No se pudo persistir el toggle", e);
+   105	    }
+   106	  });
+   107	
+   108	  // ==========================================================
+   109	  // 2) Comentario: debounce mientras escribe
+   110	  // ==========================================================
+   111	  let t = null;
+   112	
+   113	  document.addEventListener("input", (ev) => {
+   114	    const inp = ev.target.closest("input[name^='comentario_']");
+   115	    if (!inp) return;
+   116	
+   117	    const ctx = getFormContext(inp);
+   118	    if (!ctx) return;
+   119	
+   120	    const m = inp.name.match(/^comentario_(\d+)$/);
+   121	    if (!m) return;
+   122	
+   123	    const ingId = m[1];
+   124	    const comentario = inp.value || "";
+   125	
+   126	    clearTimeout(t);
+   127	    t = setTimeout(async () => {
+   128	      const fd = new FormData();
+   129	      fd.append("post_origen", "ingredientes");
+   130	      fd.append("comment_ing_id", ingId);
+   131	      fd.append(`comentario_${ingId}`, comentario);
+   132	
+   133	      try {
+   134	        await postFormData({ url: ctx.url, csrf: ctx.csrf, fd });
+   135	      } catch (e) {
+   136	        console.error("No se pudo persistir el comentario", e);
+   137	      }
+   138	    }, 450);
+   139	  });
+   140	})();
+
+---- urls.py relevantes ----
+     1	"""nuestrotubo URL Configuration
+     2	
+     3	The `urlpatterns` list routes URLs to views. For more information please see:
+     4	    https://docs.djangoproject.com/en/4.1/topics/http/urls/
+     5	Examples:
+     6	Function views
+     7	    1. Add an import:  from my_app import views
+     8	    2. Add a URL to urlpatterns:  path('', views.home, name='home')
+     9	Class-based views
+    10	    1. Add an import:  from other_app.views import Home
+    11	    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
+    12	Including another URLconf
+    13	    1. Import the include() function: from django.urls import include, path
+    14	    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+    15	"""
+    16	from django import views
+    17	from django.contrib import admin
+    18	from django.urls import path
+    19	
+    20	from AdminVideos.views import ajax_mensajes_usuario, ajax_eliminar_mensaje_chat, agregar_lugar_compartido, ajax_eliminar_programado, ajax_listado_platos, CrearLugar, EnviarMensaje, LugarDetail, LugarUpdate, PlatoDetail, PlatoVariedadCreate, PlatoVariedadDelete, PlatoVariedadUpdate,  agregar_a_mi_lista, agregar_plato_compartido, ajax_panel_amigues, ajax_solicitudes_amistad, amigue_borrar, api_ingredientes, api_toggle_item, compartir_elemento, compartir_ing_plato, descartar_sugerido, eliminar_lugar, eliminar_menu_programado, eliminar_plato, eliminar_platos_masivo, eliminar_programado, fijar_o_eliminar_habito, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, lista_de_compras, FiltroDePlatos, plato_ingredientes, plato_opciones_asignar, random_dia, set_dia_activo, sumar_amigue, user_logout, SolicitarAmistad, AsignarPlato, compartir_lista
+    21	from django.conf.urls.static import static
+    22	from django.conf import settings
+    23	
+    24	
+    25	urlpatterns = [
+    26	    path('admin/', admin.site.urls),
+    27	    path('', index, name="index"),
+    28	    path('login', Login.as_view(), name="login"),
+    29	
+    30	    path('api/ingredientes/', api_ingredientes, name='api_ingredientes'),
+    31	
+    32	
+    33	    path('menu/elegido/',lista_de_compras, name="menu-elegido"),
+    34	    path('menu/historial',historial, name="historial"),
+    35	    path('menu/amigues/sumar',sumar_amigue, name="sumar-amigue"),
+    36	    path('compartir/',  compartir_elemento.as_view(), name="compartir-plato"),
+    37	
+    38	
+    39	    path('agregar-a-mi-lista/<int:plato_id>/', agregar_a_mi_lista, name='agregar-a-mi-lista'),
+    40	    # path('descartar-sugerido/<str:nombre_plato>/', descartar_sugerido, name='descartar-sugerido'),
+    41	    path('descartar-sugerido/<int:plato_id>/', descartar_sugerido, name='descartar-sugerido'),
+    42	    path('agregar-compartido/<int:pk>/<int:mensaje_id>/', agregar_plato_compartido, name='agregar-plato-compartido'),
+    43	    path('videos/list/filtro/', FiltroDePlatos, name="filtro-de-platos"),
+    44	    # path('lugares', Lugares, name="lugares"),
+    45	    # path('videos/reiniciar/sugeridos', reiniciar_sugeridos, name="reiniciar-sugeridos"),
+    46	    path('videos/<pk>/update', PlatoUpdate.as_view(), name="videos-update"),
+    47	    path('lugar/<pk>/update', LugarUpdate.as_view(), name="lugar-update"),
+    48	    # path("lista/compartir/", compartir_lista, name="compartir-lista"),
+    49	    # path("lista/compartir/<int:user_id>/", compartir_lista, name="compartir-lista"),
+    50	    path("lista/compartir/<uuid:token>/", compartir_lista, name="compartir-lista"),
+    51	    path("api/lista/<uuid:token>/toggle/", api_toggle_item, name="api-toggle-item"),
+    52	
+    53	
+    54	
+    55	    path('random-dia/<str:dia_nombre>/', random_dia, name='random_dia'),
+    56	
+    57	    path('eliminar-plato/<int:plato_id>/', eliminar_plato, name='eliminar-plato'),
+    58	    path('eliminar-lugar/<int:lugar_id>/', eliminar_lugar, name='eliminar-lugar'),
+    59	    # path('duplicar-plato/<int:plato_id>/', duplicar_plato, name='duplicar-plato'),
+    60	
+    61	    path("eliminar-programado/<int:es_lugar>/<int:objeto_id>/<str:comida>/<str:fecha>/",eliminar_programado,name="eliminar-programado"),
+    62	
+    63	    path('eliminar-menu', eliminar_menu_programado, name='eliminar-menu-programado'),
+    64	
+    65	
+    66	    path('plato/<int:pk>/detail/', PlatoDetail.as_view(), name="platos-detail"),
+    67	    path('lugar/<int:pk>/detail', LugarDetail.as_view(), name="lugar-detail"),
+    68	
+    69	    path('videos/create/', PlatoCreate.as_view(), name="videos-create"),
+    70	    path('lugar/crear', CrearLugar.as_view(), name="crear-lugar"),
+    71	    path('registration/logout/', user_logout, name='logout'),
+    72	    path('signup', SignUp.as_view(), name="signup"),
+    73	    path('perfil/crear', ProfileCreate.as_view(), name="profile-create"),
+    74	    path('profile/<pk>/update', ProfileUpdate.as_view(), name="profile-update"),
+    75	    path('about', about, name="about"),
+    76	    path('solicitar/amistad', SolicitarAmistad.as_view(), name="solicitar-amistad" ),
+    77	    path('mensaje/<str:usuario>/enviar', EnviarMensaje.as_view(), name="enviar-mensaje" ),
+    78	    path('menu/amigue/<pk>/borrar', amigue_borrar, name="amigue-borrar"),
+    79	    path('asignar/plato', AsignarPlato.as_view(), name="asignar-plato"), # type: ignore
+    80	    path("set-dia-activo/", set_dia_activo, name="set-dia-activo"),
+    81	    path("platos/<int:padre_id>/variedades/create/", PlatoVariedadCreate.as_view(), name="plato_variedad_create"),
+    82	    path("variedades/<int:pk>/edit/", PlatoVariedadUpdate.as_view(), name="plato_variedad_update"),
+    83	    path("variedades/<int:pk>/delete/", PlatoVariedadDelete.as_view(), name="plato_variedad_delete"),
+    84	    path("platos/<int:pk>/ingredientes/", plato_ingredientes, name="plato_ingredientes"),
+    85	    path("platos/<int:pk>/opciones-asignar/", plato_opciones_asignar, name="plato_opciones_asignar"),
+    86	    path("s/<str:token>/plato/<int:pk>/", compartir_ing_plato, name="compartir-plato"),
+    87	
+    88	    path('habito/<int:es_lugar>/<int:objeto_id>/<str:comida>/',fijar_o_eliminar_habito,name="fijar-o-eliminar-habito"),
+    89	    path('platos/eliminar-masivo/', eliminar_platos_masivo, name='eliminar-platos-masivo'),
+    90	    path("ajax/listado-platos/", ajax_listado_platos, name="ajax_listado_platos"),
+    91	    path("ajax/eliminar-programado/", ajax_eliminar_programado, name="ajax_eliminar_programado"),
+    92	    path("agregar-lugar-compartido/<int:pk>/<int:compartido_id>/", agregar_lugar_compartido, name="agregar-lugar-compartido"),
+    93	    path("ajax/mensajes/", ajax_mensajes_usuario, name="ajax-mensajes-usuario"),
+    94	    path("ajax/mensajes/<int:pk>/eliminar/", ajax_eliminar_mensaje_chat, name="ajax-eliminar-mensaje-chat"),
+    95	    path("ajax/solicitudes-amistad/", ajax_solicitudes_amistad, name="ajax-solicitudes-amistad"),
+    96	    path("ajax/panel-amigues/", ajax_panel_amigues, name="ajax-panel-amigues"),
+    97	
+    98	
+    99	]
+   100	
+   101	urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+   102	
+
+---- modelo ProfileIngrediente y relacionados ----
+   334	class Ingrediente(models.Model):
+   335	     # ===== Nivel 1: categoría (lugar de compra) =====
+   336	    VERDULERIA = "verduleria"
+   337	    FIAMBRERIA = "fiambreria"
+   338	    CARNICERIA = "carniceria"
+   339	    PESCADERIA = "pescaderia"
+   340	    PANADERIA = "panaderia"
+   341	    ALMACEN = "almacen"
+   342	    LACTEOS = "lacteos"
+   343	    BEBIDAS = "bebidas"
+   344	    OTRO = "otro"
+   345	
+   346	    TIPO_CHOICES = [
+   347	        (VERDULERIA, "Verdulería"),
+   348	        (FIAMBRERIA, "Fiambriería"),
+   349	        (CARNICERIA, "Carnicería"),
+   350	        (PESCADERIA, "Pescadería"),
+   351	        (PANADERIA, "Panadería"),
+   352	        (ALMACEN, "Almacén"),
+   353	        (LACTEOS, "Lácteos"),
+   354	        (BEBIDAS, "Bebidas"),
+   355	        (OTRO, "Otro"),
+   356	    ]
+   357	
+   358	    # ===== Nivel 2: detalle (subcategoría) =====
+   359	    VERDURA = "verdura"
+   360	    FRUTA = "fruta"
+   361	    TUBERCULO = "tuberculo"
+   362	    HIERBA_FRESCA = "hierba_fresca"
+   363	
+   364	    CARNE_ROJA = "carne_roja"
+   365	    AVE = "ave"
+   366	    CERDO = "cerdo"
+   367	    CORDERO = "cordero"
+   368	    ACHURAS = "achuras"
+   369	
+   370	    FIAMBRE = "fiambre"
+   371	    QUESO = "queso"
+   372	    EMBUTIDO = "embutido" 
+   373	
+   374	    PESCADO = "pescado"
+   375	    MARISCO = "marisco"
+   376	
+   377	    PAN = "pan"
+   378	
+   379	    LEGUMBRE = "legumbre"
+   380	    CEREAL = "cereal"
+   381	    HARINA_BLANCA = "harina_blanca"
+   382	    ACEITE = "aceite"
+   383	    CONSERVA = "conserva"
+   384	    AZUCAR = "azucar"
+   385	
+   386	    CONDIMENTO = "condimento"
+   387	    ESPECIA = "especia"
+   388	
+   389	    DETALLE_CHOICES_GROUPED = [
+   390	        ("Verdulería", [
+   391	            (VERDURA, "Verdura"),
+   392	            (FRUTA, "Fruta"),
+   393	            (TUBERCULO, "Tubérculo"),
+   394	            (HIERBA_FRESCA, "Hierba fresca"),
+   395	        ]),
+   396	        ("Carnicería", [
+   397	            (CARNE_ROJA, "Carne roja"),
+   398	            (AVE, "Ave"),
+   399	            (CERDO, "Cerdo"),
+   400	            (CORDERO, "Cordero"),
+   401	            (ACHURAS, "Achuras"),
+   402	        ]),
+   403	        ("Pescadería", [
+   404	            (PESCADO, "Pescado"),
+   405	            (MARISCO, "Marisco"),
+   406	        ]),
+   407	        ("Panadería", [
+   408	            (PAN, "Pan"),
+   409	        ]),
+   410	        ("Almacén", [
+   411	            (LEGUMBRE, "Legumbre"),
+   412	            (CEREAL, "Cereal"),
+   413	            (HARINA_BLANCA, "Harina Blanca"),
+   414	            (ACEITE, "Aceite"),
+   415	            (CONSERVA, "Conserva"),
+   416	            (AZUCAR, "Azúcar")
+   417	        ]),
+   418	     
+   419	        ("Condimentos", [
+   420	            (ESPECIA, "Especia"),
+   421	            (CONDIMENTO, "Condimento"),
+   422	        ]),
+   423	      
+   424	        ("Otro", [
+   425	            (OTRO, "Otro"),
+   426	        ]),
+   427	    ]
+   428	
+   429	    DETALLE_POR_TIPO = {
+   430	        VERDULERIA: {VERDURA, FRUTA, TUBERCULO, HIERBA_FRESCA},
+   431	        CARNICERIA: {CARNE_ROJA, AVE, CERDO, CORDERO, ACHURAS},
+   432	        PESCADERIA: {PESCADO, MARISCO},
+   433	        PANADERIA: {PAN},
+   434	        ALMACEN: {LEGUMBRE, CEREAL, HARINA_BLANCA, ACEITE, CONSERVA, AZUCAR, ESPECIA},
+   435	        FIAMBRERIA: {FIAMBRE, QUESO, EMBUTIDO},
+   436	        OTRO: {OTRO},
+   437	    }
+   438	    # ===== Campos =====
+   439	    nombre = models.CharField(
+   440	        max_length=100,
+   441	        unique=True,
+   442	        help_text="Nombre del ingrediente (p. ej., Zanahoria, Lentejas)."
+   443	    )
+   444	    tipo = models.CharField(
+   445	        max_length=20,
+   446	        choices=TIPO_CHOICES,
+   447	        default=OTRO,
+   448	        help_text="Lugar de compra / categoría general."
+   449	    )
+   450	    detalle = models.CharField(
+   451	        max_length=30,
+   452	        choices=DETALLE_CHOICES_GROUPED,
+   453	        blank=True,
+   454	        help_text="Subcategoría (p. ej., Verdura, Fruta, Legumbre…)."
+   455	    )
+   456	
+   457	    class Meta:
+   458	        ordering = ["nombre"]
+   459	        indexes = [
+   460	            models.Index(fields=["nombre"]),
+   461	        ]
+   462	
+   463	    def clean(self):
+   464	        """
+   465	        Asegura que 'detalle' pertenezca al grupo correcto según 'tipo'.
+   466	        Permite dejar 'detalle' vacío si no lo querés usar.
+   467	        """
+   468	        super().clean()
+   469	        if self.detalle:
+   470	            permitidos = self.DETALLE_POR_TIPO.get(self.tipo, set())
+   471	            if self.detalle not in permitidos:
+   472	                raise ValidationError({
+   473	                    "detalle": f"El detalle “{self.get_detalle_display()}” no corresponde al tipo “{self.get_tipo_display()}”."
+   474	                })
+   475	
+   476	    def __str__(self):
+   477	        det = f" – {self.get_detalle_display()}" if self.detalle else ""
+   478	        return f"{self.id} - {self.nombre} ({self.get_tipo_display()}{det})"
+   479	    
+   480	
+   481	class IngredienteEnPlato(models.Model):
+   482	    UNIDADES_CHOICES = [
+   483	        ('-', '-'),  # Por si no aplica o se cuenta de otra forma
+   484	        ('unidad', 'unidad'),
+   485	        ('gr', 'gramo'),
+   486	        ('kg', 'kilogramo'),
+   487	        ('mg', 'miligramo'),
+   488	        ('ml', 'mililitro'),
+   489	        ('l', 'litro'),
+   490	        ('cdita', 'cucharadita'),         # cucharadita de té
+   491	        ('cda', 'cucharada'),             # cucharada sopera
+   492	        ('taza', 'taza'),
+   493	        ('pizca', 'pizca'),]
+   494	
+   495	    plato = models.ForeignKey(Plato, on_delete=models.CASCADE, related_name='ingredientes_en_plato')
+   496	    ingrediente = models.ForeignKey(Ingrediente, on_delete=models.CASCADE,null=True, blank=True)
+   497	    cantidad = models.FloatField(null=True, blank=True)
+   498	    unidad = models.CharField(max_length=20, choices=UNIDADES_CHOICES, default='-', blank=True)
+   499	
+   500	    def __str__(self):
+   501	        return f"{self.cantidad or ''} {self.unidad} de {self.ingrediente} en {self.plato}"
+   502	
+   503	
+   504	class MenuDia(models.Model):
+   505	    propietario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="menus_dia")
+   506	    fecha = models.DateField()
+   507	
+   508	    # (opcional, si después querés marcar sugerencias)
+   509	    ya_sugerido = models.BooleanField(default=False)
+   510	
+   511	    class Meta:
+   512	        unique_together = ("propietario", "fecha")
+   513	        indexes = [models.Index(fields=["propietario", "fecha"])]
+   514	
+   515	    def __str__(self):
+   516	        return f"Menú {self.fecha} de {self.propietario}"
+   517	
+   518	
+   519	class MenuItem(models.Model):
+   520	    DESAYUNO = 'desayuno'
+   521	    ALMUERZO = 'almuerzo'
+   522	    MERIENDA = 'merienda'
+   523	    CENA = 'cena'
+   524	
+   525	    MOMENTO_CHOICES = [
+   526	        (DESAYUNO, 'Desayuno'),
+   527	        (ALMUERZO, 'Almuerzo'),
+   528	        (MERIENDA, 'Merienda'),
+   529	        (CENA, 'Cena'),
+   530	    ]
+   531	
+   532	    menu = models.ForeignKey(MenuDia, on_delete=models.CASCADE, related_name="items")
+   533	    momento = models.CharField(max_length=20, choices=MOMENTO_CHOICES)
+   534	
+   535	    # Uno u otro (plato o lugar)
+   536	    plato = models.ForeignKey("Plato", null=True, blank=True,
+   537	                            on_delete=models.CASCADE, related_name="en_menus")
+   538	    lugar = models.ForeignKey("Lugar", null=True, blank=True,
+   539	                          on_delete=models.CASCADE, related_name="en_menus")
+   540	
+   541	    # plato = models.ForeignKey("Plato", null=True, blank=True, on_delete=models.CASCADE, related_name="en_menus")
+   542	    # lugar = models.ForeignKey("Lugar", null=True, blank=True, on_delete=models.CASCADE, related_name="en_menus")
+   543	
+   544	    creado_el = models.DateTimeField(auto_now_add=True)
+   545	    elegido = models.BooleanField(default=True)
+   546	
+   547	    class Meta:
+   548	        indexes = [
+   549	            models.Index(fields=["menu", "momento"]),
+   550	            models.Index(fields=["plato"]),
+   551	            models.Index(fields=["lugar"]),
+   552	        ]
+   553	        constraints = [
+   554	            models.UniqueConstraint(
+   555	                fields=["menu", "momento", "plato"],
+   556	                name="uq_menu_momento_plato",
+   557	                condition=models.Q(plato__isnull=False),
+   558	            ),
+   559	            models.UniqueConstraint(
+   560	                fields=["menu", "momento", "lugar"],
+   561	                name="uq_menu_momento_lugar",
+   562	                condition=models.Q(lugar__isnull=False),
+   563	            ),
+   564	        ]
+   565	
+   566	    def clean(self):
+   567	        super().clean()
+   568	        # XOR: exactamente uno debe estar seteado
+   569	        if bool(self.plato) == bool(self.lugar):
+   570	            raise ValidationError("MenuItem debe tener plato XOR lugar (exactamente uno).")
+   571	
+   572	    def __str__(self):
+   573	        obj = self.plato or self.lugar
+   574	        return f"{self.menu.fecha} - {self.momento} - {obj}"
+   575	
+   576	
+   577	class MenuItemExtra(models.Model):
+   578	    TIPO_GUARNICION = "guarnicion"
+   579	    TIPO_SALSA = "salsa"
+   580	    TIPO_POSTRE = "postre"
+   581	
+   582	    TIPO_CHOICES = [
+   583	        (TIPO_GUARNICION, "Guarnición"),
+   584	        (TIPO_SALSA, "Salsa"),
+   585	        (TIPO_POSTRE, "Postre"),
+   586	    ]
+   587	
+   588	    menu_item = models.ForeignKey(
+   589	        "MenuItem",  # o MenuItem directo si está en el mismo archivo
+   590	        related_name="extras",
+   591	        on_delete=models.CASCADE,
+   592	    )
+   593	    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
+   594	    nombre = models.CharField(max_length=80)
+   595	
+   596	    orden = models.PositiveSmallIntegerField(default=0)  # opcional, para ordenar
+   597	    creado_en = models.DateTimeField(auto_now_add=True)  # opcional
+   598	
+   599	    class Meta:
+   600	        ordering = ["tipo", "orden", "id"]
+   601	
+   602	    def __str__(self):
+   603	        return f"{self.get_tipo_display()}: {self.nombre}"
+   604	
+   605	
+   606	
+   607	class ProfileIngrediente(models.Model):
+   608	    profile = models.ForeignKey(
+   609	        "Profile",
+   610	        on_delete=models.CASCADE,
+   611	        related_name="ingredientes_pantry",
+   612	    )
+   613	    ingrediente = models.ForeignKey(
+   614	        "AdminVideos.Ingrediente",   # <-- ajustá "AdminVideos" al app real donde está Ingrediente
+   615	        on_delete=models.CASCADE,
+   616	        related_name="en_pantry_de",
+   617	    )
+   618	
+   619	    # True = lo tengo / False = no lo tengo (entonces lo compro)
+   620	    tengo = models.BooleanField(default=False)
+   621	
+   622	    # comentario opcional (ej: “marca X”, “comprar si hay oferta”)
+   623	    comentario = models.CharField(max_length=120, blank=True, default="")
+   624	
+   625	    updated_at = models.DateTimeField(auto_now=True)
+   626	
+   627	    last_bought_at = models.DateTimeField(null=True, blank=True)  # 👈 NUEVO
+   628	
+   629	
+   630	    class Meta:
+   631	        unique_together = ("profile", "ingrediente")
+   632	
+   633	    def __str__(self):
+   634	        return f"{self.profile.user} - {self.ingrediente} - {self.comentario} ({'tengo' if self.tengo else 'no tengo'})" 
+   635	
+
+---- check ----
+System check identified no issues (0 silenced).

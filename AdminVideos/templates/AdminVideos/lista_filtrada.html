@@ -4,8 +4,8 @@
 
 {% block filtro %}
 
-<form 
-  method="POST" 
+<form
+  method="POST"
   id="form-filtros-platos"
   data-listado-url="{% url 'ajax_listado_platos' %}">
   <div class="d-flex justify-content-start mx-1 gap-4 flex-wrap">
@@ -15,14 +15,12 @@
     <input type="hidden" name="tipopag" value="{{ tipopag }}">
 
     <div class="input-group w-auto">
-      <input 
-        type="search" 
-        class="form-control {% if formulario.palabra_clave.value %} border-danger text-danger {% endif %}" 
-        placeholder="Buscar por palabra clave" 
-        name="palabra_clave" 
+      <input
+        type="search"
+        class="form-control {% if formulario.palabra_clave.value %} border-danger text-danger {% endif %}"
+        placeholder="Buscar por palabra clave"
+        name="palabra_clave"
         value="{{ formulario.palabra_clave.value|default:'' }}">
-      
-   
     </div>
 
     <div class="form-check">
@@ -52,11 +50,89 @@
         Mis platos
       </label>
     </div>
+
+    <div class="border rounded px-2 py-1 d-flex align-items-center gap-2 flex-wrap">
+      <button
+        type="button"
+        class="btn btn-sm btn-outline-success"
+        data-bs-toggle="modal"
+        data-bs-target="#loQueTengoModal">
+        Lo que tengo <span id="loQueTengoContador"></span>
+      </button>
+
+      <div class="form-check mb-0">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          name="usar_lo_que_tengo"
+          value="1"
+          id="usarLoQueTengo"
+          {% if usar_lo_que_tengo_ck == "1" %}checked{% endif %}
+        >
+        <label class="form-check-label small" for="usarLoQueTengo">
+          Usar para filtrar
+        </label>
+      </div>
+    </div>
+
   </div>
 </form>
 
 
-<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=6"></script>
+<div
+  class="modal fade"
+  id="loQueTengoModal"
+  tabindex="-1"
+  aria-labelledby="loQueTengoModalLabel"
+  aria-hidden="true"
+  data-palabras-url="{% url 'ajax-lo-que-tengo-palabras' %}"
+  data-agregar-url="{% url 'ajax-lo-que-tengo-agregar' %}"
+  data-sugerencias-url="{% url 'api_ingredientes' %}">
+  <div class="modal-dialog">
+    <div class="modal-content">
 
+      <div class="modal-header">
+        <h5 class="modal-title" id="loQueTengoModalLabel">
+          Lo que tengo
+        </h5>
+
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body">
+        <p class="small text-muted mb-2">
+          Agregá palabras clave para filtrar platos. Podés elegir ingredientes existentes o escribir texto libre.
+        </p>
+
+        <div class="input-group mb-2">
+          <select id="loQueTengoSelect" class="form-select" style="width: 100%;"></select>
+        </div>
+
+        <button type="button" class="btn btn-success btn-sm mb-3" id="loQueTengoAgregarBtn">
+          Agregar
+        </button>
+
+        <div class="alert alert-danger d-none small" id="loQueTengoError"></div>
+
+        <ul class="list-group" id="loQueTengoLista">
+          <li class="list-group-item text-muted small">
+            Cargando...
+          </li>
+        </ul>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+          Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=6"></script>
+<script src="{% static 'AdminVideos/js/lo_que_tengo.js' %}?v=1"></script>
 
 {% endblock %}

@@ -9,7 +9,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
-from AdminVideos.models import ElementoCompartido, Amistad, ProfilePlatoCompra, HabitoSemanal, Ingrediente, IngredienteEnPlato, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente
+from AdminVideos.models import ElementoCompartido, Amistad, ProfilePlatoCompra, HabitoSemanal, Ingrediente, IngredienteEnPlato, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente, LoQueTengoPalabra
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string   # ✅ ← ESTA ES LA CLAVE
 from django.http import Http404, HttpRequest, HttpResponseNotAllowed, JsonResponse
@@ -2798,6 +2798,7 @@ def obtener_estado_filtros_platos(request, dia_activo):
 
         quecomemos = request.POST.get("quecomemos")
         misplatos = request.POST.get("misplatos")
+        usar_lo_que_tengo = request.POST.get("usar_lo_que_tengo")
 
         request.session["medios_estable"] = medios
         request.session["categoria_estable"] = categoria
@@ -2805,6 +2806,7 @@ def obtener_estado_filtros_platos(request, dia_activo):
         request.session["palabra_clave"] = palabra_clave
         request.session["quecomemos"] = quecomemos
         request.session["misplatos"] = misplatos
+        request.session["usar_lo_que_tengo"] = usar_lo_que_tengo
         request.session["dia_activo"] = dia_activo
 
     else:
@@ -2815,6 +2817,7 @@ def obtener_estado_filtros_platos(request, dia_activo):
 
         quecomemos = quecomemos_sesion
         misplatos = misplatos_sesion
+        usar_lo_que_tengo = request.session.get("usar_lo_que_tengo")
 
         form = PlatoFilterForm(initial={
             "medios": medios,
@@ -2829,6 +2832,7 @@ def obtener_estado_filtros_platos(request, dia_activo):
         "tipopag": tipopag,
         "quecomemos": quecomemos,
         "misplatos": misplatos,
+        "usar_lo_que_tengo": usar_lo_que_tengo,
         "medios": medios,
         "categoria": categoria,
         "dificultad": dificultad,
@@ -2841,6 +2845,32 @@ def obtener_estado_filtros_platos(request, dia_activo):
 
 
 
+
+def filtrar_platos_por_lo_que_tengo(platos, usuario, usar_lo_que_tengo):
+    if usar_lo_que_tengo != "1":
+        return platos
+
+    palabras = [
+        palabra.strip()
+        for palabra in LoQueTengoPalabra.objects.filter(
+            profile__user=usuario
+        ).values_list("palabra", flat=True)
+        if palabra and palabra.strip()
+    ]
+
+    if not palabras:
+        return platos
+
+    condicion = Q()
+
+    for palabra in palabras:
+        condicion |= Q(nombre_plato__icontains=palabra)
+        condicion |= Q(ingredientes__icontains=palabra)
+        condicion |= Q(ingredientes_en_plato__ingrediente__nombre__icontains=palabra)
+
+    return platos.filter(condicion).distinct()
+
+
 def obtener_resultados_principales(
     usuario,
     tipo_parametro,
@@ -2849,7 +2879,8 @@ def obtener_resultados_principales(
     medios,
     categoria,
     dificultad,
-    palabra_clave
+    palabra_clave,
+    usar_lo_que_tengo=None
 ):
 
 
@@ -2902,6 +2933,16 @@ def obtener_resultados_principales(
     )
 
     platos = resultado_filtro["platos"]
+
+    platos = filtrar_platos_por_lo_que_tengo(
+
+        platos=platos,
+
+        usuario=usuario,
+
+        usar_lo_que_tengo=usar_lo_que_tengo,
+
+    )
 
     if tipo_parametro == "Picada":
         platos_carousel = platos.filter(
@@ -3004,6 +3045,7 @@ def FiltroDePlatos(request):
     categoria = estado_filtros["categoria"]
     dificultad = estado_filtros["dificultad"]
     palabra_clave = estado_filtros["palabra_clave"]
+    usar_lo_que_tengo = estado_filtros["usar_lo_que_tengo"]
 
     lugares, platos, platos_carousel, platos_listado = obtener_resultados_principales(
         usuario=usuario,
@@ -3014,6 +3056,7 @@ def FiltroDePlatos(request):
         categoria=categoria,
         dificultad=dificultad,
         palabra_clave=palabra_clave,
+        usar_lo_que_tengo=usar_lo_que_tengo,
     )
 
 
@@ -3050,6 +3093,7 @@ def FiltroDePlatos(request):
                 "dias_programados": dias_programados,
                 "quecomemos_ck": quecomemos,
                 "misplatos_ck": misplatos,
+                "usar_lo_que_tengo_ck": usar_lo_que_tengo,
                 "amigues": amigues,
                 "parametro_activo": tipo_parametro,
                 **contexto_compartidos,
@@ -3089,6 +3133,7 @@ def ajax_listado_platos(request):
     categoria = estado_filtros["categoria"]
     dificultad = estado_filtros["dificultad"]
     palabra_clave = estado_filtros["palabra_clave"]
+    usar_lo_que_tengo = estado_filtros["usar_lo_que_tengo"]
 
     lugares, platos, platos_carousel, platos_listado = obtener_resultados_principales(
         usuario=usuario,
@@ -3099,6 +3144,7 @@ def ajax_listado_platos(request):
         categoria=categoria,
         dificultad=dificultad,
         palabra_clave=palabra_clave,
+        usar_lo_que_tengo=usar_lo_que_tengo,
     )
 
     contexto = {
@@ -3131,6 +3177,92 @@ def ajax_listado_platos(request):
         "html_listado": html_listado,
         "html_carousel": html_carousel,
         "html_lugares": html_lugares,
+    })
+
+
+
+def _profile_usuario(usuario):
+    profile, _ = Profile.objects.get_or_create(user=usuario)
+    return profile
+
+
+def _serializar_palabras_lo_que_tengo(profile):
+    palabras = (
+        LoQueTengoPalabra.objects
+        .filter(profile=profile)
+        .order_by("palabra")
+    )
+
+    return [
+        {
+            "id": palabra.id,
+            "palabra": palabra.palabra,
+        }
+        for palabra in palabras
+    ]
+
+
+@login_required
+def ajax_lo_que_tengo_palabras(request):
+    profile = _profile_usuario(request.user)
+
+    return JsonResponse({
+        "ok": True,
+        "palabras": _serializar_palabras_lo_que_tengo(profile),
+    })
+
+
+@login_required
+@require_POST
+def ajax_lo_que_tengo_agregar(request):
+    profile = _profile_usuario(request.user)
+
+    palabra = (request.POST.get("palabra") or "").strip()
+
+    if not palabra:
+        return JsonResponse({
+            "ok": False,
+            "error": "Ingresá una palabra.",
+        }, status=400)
+
+    if len(palabra) > 60:
+        return JsonResponse({
+            "ok": False,
+            "error": "La palabra no puede superar los 60 caracteres.",
+        }, status=400)
+
+    existente = LoQueTengoPalabra.objects.filter(
+        profile=profile,
+        palabra__iexact=palabra,
+    ).first()
+
+    if not existente:
+        LoQueTengoPalabra.objects.create(
+            profile=profile,
+            palabra=palabra,
+        )
+
+    return JsonResponse({
+        "ok": True,
+        "palabras": _serializar_palabras_lo_que_tengo(profile),
+    })
+
+
+@login_required
+@require_POST
+def ajax_lo_que_tengo_eliminar(request, pk):
+    profile = _profile_usuario(request.user)
+
+    palabra = get_object_or_404(
+        LoQueTengoPalabra,
+        pk=pk,
+        profile=profile,
+    )
+    palabra.delete()
+
+    return JsonResponse({
+        "ok": True,
+        "palabras": _serializar_palabras_lo_que_tengo(profile),
     })
 
 

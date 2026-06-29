@@ -635,6 +635,25 @@ class ProfileIngrediente(models.Model):
 
 
 
+class LoQueTengoPalabra(models.Model):
+    profile = models.ForeignKey(
+        "Profile",
+        on_delete=models.CASCADE,
+        related_name="palabras_lo_que_tengo",
+    )
+    palabra = models.CharField(max_length=60)
+
+    class Meta:
+        ordering = ["palabra"]
+
+    def save(self, *args, **kwargs):
+        self.palabra = (self.palabra or "").strip()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.profile.user} - {self.palabra}"
+
+
 class Profile(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
