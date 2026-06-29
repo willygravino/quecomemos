@@ -11,12 +11,14 @@
      ============================================================ */
   function refrescarMenuProgramado() {
     const contenedor = document.getElementById("contenedor-menu-programado-dias");
+    const tabsDias = document.getElementById("diasTab");
 
     if (!contenedor || !window.fetch || !window.DOMParser) {
       return Promise.resolve();
     }
 
     const url = new URL(window.location.href);
+    url.searchParams.set("_menu_refresh", Date.now().toString());
     const diaSeleccionado = document.getElementById("diaSeleccionado");
 
     if (diaSeleccionado && diaSeleccionado.value) {
@@ -28,7 +30,8 @@
       headers: {
         "X-Requested-With": "XMLHttpRequest"
       },
-      credentials: "same-origin"
+      credentials: "same-origin",
+      cache: "no-store"
     })
     .then(function (response) {
       if (!response.ok) {
@@ -40,9 +43,14 @@
     .then(function (html) {
       const doc = new DOMParser().parseFromString(html, "text/html");
       const nuevoContenedor = doc.getElementById("contenedor-menu-programado-dias");
+      const nuevosTabsDias = doc.getElementById("diasTab");
 
       if (!nuevoContenedor) {
         throw new Error("No se encontró el menú programado actualizado");
+      }
+
+      if (tabsDias && nuevosTabsDias) {
+        tabsDias.innerHTML = nuevosTabsDias.innerHTML;
       }
 
       contenedor.innerHTML = nuevoContenedor.innerHTML;
