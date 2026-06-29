@@ -1,0 +1,124 @@
+---- archivos context processor existentes ----
+./.venv/lib/python3.12/site-packages/django/template/context_processors.py
+./.venv/lib/python3.12/site-packages/django/contrib/messages/context_processors.py
+./.venv/lib/python3.12/site-packages/django/contrib/auth/context_processors.py
+
+---- settings.py: TEMPLATES / context_processors ----
+79-    'django.middleware.common.CommonMiddleware',
+80-    'django.middleware.csrf.CsrfViewMiddleware',
+81-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+82-    'django.contrib.messages.middleware.MessageMiddleware',
+83-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+84-]
+85-# ⚠️ Elimina cualquier MIDDLEWARE.insert(...) extra
+86-
+87-ROOT_URLCONF = 'nuestrotubo.urls'
+88-
+89:TEMPLATES = [
+90-    {
+91-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+92-        # Si usás carpeta templates/ a nivel proyecto, descomentá:
+93-        # 'DIRS': [BASE_DIR / 'templates'],
+94-        'DIRS': [],
+95-        'APP_DIRS': True,
+96-        'OPTIONS': {
+97:            'context_processors': [
+98:                'django.template.context_processors.debug',
+99:                'django.template.context_processors.request',
+100:                'django.contrib.auth.context_processors.auth',
+101:                'django.contrib.messages.context_processors.messages',
+102-            ],
+103-        },
+104-    },
+105-]
+106-
+107-WSGI_APPLICATION = 'nuestrotubo.wsgi.application'
+108-
+109-# --- Base de datos ---
+110-# Producción: Railway pasa DATABASE_URL (suele incluir sslmode=require)
+111-# Local: podés usar ?sslmode=disable en tu DATABASE_URL local
+112-
+113-# DATABASES PARA PRODUCCIÓN MAC
+114-# DATABASES = {
+115-#     'default': dj_database_url.config(
+116-#         default=os.environ.get('DATABASE_URL', 'postgres://guillermo:@localhost:5432/quecomemos_local'),
+117-#         conn_max_age=600
+118-#         # sin ssl_require=True aquí, dejamos que lo decida la URL (Railway suele ponerlo)
+119-#     )
+120-# }
+121-
+122-# --------- TODO ESTO PARA WINDOWS ASUS VIVOBOX
+123-
+124-DATABASE_URL = os.getenv("DATABASE_URL")
+125-
+126-if DATABASE_URL:  # Railway / producción
+127-    DATABASES = {
+128-        "default": dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
+129-    }
+130-else:  # Local
+131-    DATABASES = {
+132-    "default": {
+133-        "ENGINE": "django.db.backends.postgresql",
+134-        "NAME": os.getenv("LOCAL_DB_NAME", "quecomemos_local"),
+135-        "USER": os.getenv("LOCAL_DB_USER", "guillermo"),
+136-        "PASSWORD": os.getenv("LOCAL_DB_PASSWORD", ""),
+
+---- usos de hay_lista_de_compras ----
+AdminVideos/templates/AdminVideos/base.html:963:  {% if hay_lista_de_compras %}
+
+---- posibles context processors propios ----
+AdminVideos/signals.py:13:    if MenuItem.objects.filter(menu_id=menu_id).exists():
+AdminVideos/models.py:116:# Estado persistente de selección de platos para lista de compras
+AdminVideos/admin.py:118:# Estado de selección de platos para lista de compras
+AdminVideos/views.py:464:    # ✅ Orden igual que lista de compras
+AdminVideos/views.py:617:def lista_de_compras(request):
+AdminVideos/views.py:632:                    MenuItem.objects
+AdminVideos/views.py:648:                #     MenuItem.objects
+AdminVideos/views.py:666:    # Guarda selección persistente de plato para lista de compras
+AdminVideos/views.py:685:            MenuItem.objects.filter(
+AdminVideos/views.py:687:                menu__fecha__gte=today,
+AdminVideos/views.py:714:                    MenuItem.objects
+AdminVideos/views.py:730:                #     MenuItem.objects
+AdminVideos/views.py:742:        MenuItem.objects
+AdminVideos/views.py:749:        MenuItem.objects
+AdminVideos/views.py:776:        MenuItem.objects
+AdminVideos/views.py:797:            "AdminVideos/lista_de_compras.html",
+AdminVideos/views.py:830:            .annotate(min_fecha=Min("menu__fecha"))
+AdminVideos/views.py:928:    for menu_id, momento, plato_id in MenuItem.objects
+AdminVideos/views.py:931:        menu__fecha__gte=today,
+AdminVideos/views.py:960:        "parametro": "lista-compras",
+AdminVideos/views.py:966:    return render(request, "AdminVideos/lista_de_compras.html", context)
+AdminVideos/views.py:988:        MenuItem.objects
+AdminVideos/views.py:991:            menu__fecha__gte=today,
+AdminVideos/views.py:1034:            .annotate(min_fecha=Min("menu__fecha"))
+AdminVideos/views.py:1223:    def get_context_data(self, **kwargs):
+AdminVideos/views.py:1246:    MenuItem.objects.filter(
+AdminVideos/views.py:1301:    def get_context_data(self, **kwargs):
+AdminVideos/views.py:1445:    def get_context_data(self, **kwargs):
+AdminVideos/views.py:1582:    def get_context_data(self, **kwargs):
+AdminVideos/views.py:1700:    def get_context_data(self, **kwargs):
+AdminVideos/views.py:1810:    def get_context_data(self, **kwargs):
+AdminVideos/views.py:2183:            "en_menus__menu__fecha",
+AdminVideos/views.py:2188:            "en_menus__menu__fecha",
+AdminVideos/views.py:2199:            "en_menus__menu__fecha",
+AdminVideos/views.py:2204:            "en_menus__menu__fecha",
+AdminVideos/views.py:2283:                        _, created = MenuItem.objects.get_or_create(
+AdminVideos/views.py:2301:                    _, created = MenuItem.objects.get_or_create(
+AdminVideos/views.py:2707:        MenuItem.objects
+AdminVideos/views.py:2710:            menu__fecha__in=fechas_existentes
+AdminVideos/views.py:3005:def obtener_contexto_compartidos(usuario):
+AdminVideos/views.py:3411:    def get_context_data(self, **kwargs):
+AdminVideos/views.py:3507:    def get_context_data(self, **kwargs):
+AdminVideos/views.py:3576:def obtener_contexto_amigues(usuario):
+AdminVideos/views.py:3970:                    _, created = MenuItem.objects.get_or_create(
+AdminVideos/views.py:4003:                    _, created = MenuItem.objects.get_or_create(
+AdminVideos/views.py:4046:                menu_item = MenuItem.objects.create(
+AdminVideos/views.py:4305:        MenuItem.objects
+AdminVideos/views.py:4308:            menu__fecha__week_day=(
+AdminVideos/views.py:4331:        MenuItem.objects.create(
+AdminVideos/views.py:4390:        items_qs = MenuItem.objects.filter(menu_id=menu_id)
+nuestrotubo/urls.py:20:from AdminVideos.views import ajax_mensajes_usuario, ajax_eliminar_mensaje_chat, agregar_lugar_compartido, ajax_eliminar_programado, ajax_listado_platos, ajax_lo_que_tengo_palabras, ajax_lo_que_tengo_agregar, ajax_lo_que_tengo_eliminar, CrearLugar, EnviarMensaje, LugarDetail, LugarUpdate, PlatoDetail, PlatoVariedadCreate, PlatoVariedadDelete, PlatoVariedadUpdate,  agregar_a_mi_lista, agregar_plato_compartido, ajax_panel_amigues, ajax_solicitudes_amistad, amigue_borrar, api_ingredientes, api_toggle_item, compartir_elemento, compartir_ing_plato, descartar_sugerido, eliminar_lugar, eliminar_menu_programado, eliminar_plato, eliminar_platos_masivo, eliminar_programado, fijar_o_eliminar_habito, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, lista_de_compras, FiltroDePlatos, plato_ingredientes, plato_opciones_asignar, random_dia, set_dia_activo, sumar_amigue, user_logout, SolicitarAmistad, AsignarPlato, compartir_lista
+nuestrotubo/urls.py:33:    path('menu/elegido/',lista_de_compras, name="menu-elegido"),
+
+---- check ----
+System check identified no issues (0 silenced).

@@ -958,26 +958,28 @@ Root globl para modales cargados dinámicamente (AJAX)
 {% endif %}
 
 
-{# Botón flotante: acceso rápido a la lista de compras #}
-{% if user.is_authenticated %}
-  {% if hay_lista_de_compras %}
-    <a href="{% url 'menu-elegido' %}"
-       class="btn btn-primary rounded-circle shadow position-fixed d-flex align-items-center justify-content-center"
-       style="right: 1rem; bottom: 5rem; width: 56px; height: 56px; z-index: 1050;"
-       title="Lista de compras"
-       aria-label="Lista de compras">
-      <i class="fa-solid fa-cart-shopping"></i>
-    </a>
+<div id="botonListaComprasFlotanteWrap">
+  {# Botón flotante: acceso rápido a la lista de compras #}
+  {% if user.is_authenticated %}
+    {% if hay_lista_de_compras %}
+      <a href="{% url 'menu-elegido' %}"
+         class="btn btn-primary rounded-circle shadow position-fixed d-flex align-items-center justify-content-center"
+         style="right: 1rem; bottom: 5rem; width: 56px; height: 56px; z-index: 1050;"
+         title="Lista de compras"
+         aria-label="Lista de compras">
+        <i class="fa-solid fa-cart-shopping"></i>
+      </a>
 
     {% else %}
-    <span class="btn btn-primary rounded-circle shadow position-fixed d-flex align-items-center justify-content-center"
-          style="right: 1rem; bottom: 5rem; width: 56px; height: 56px; z-index: 1050; opacity: 0.50; pointer-events: none;"
-          title="No hay platos programados para comprar"
-          aria-label="No hay platos programados para comprar">
-      <i class="fa-solid fa-cart-shopping"></i>
-    </span>
+      <span class="btn btn-primary rounded-circle shadow position-fixed d-flex align-items-center justify-content-center"
+            style="right: 1rem; bottom: 5rem; width: 56px; height: 56px; z-index: 1050; opacity: 0.50; pointer-events: none;"
+            title="No hay platos programados para comprar"
+            aria-label="No hay platos programados para comprar">
+        <i class="fa-solid fa-cart-shopping"></i>
+      </span>
+    {% endif %}
   {% endif %}
-{% endif %}
+</div>
 
 
 

@@ -44,6 +44,8 @@
       const doc = new DOMParser().parseFromString(html, "text/html");
       const nuevoContenedor = doc.getElementById("contenedor-menu-programado-dias");
       const nuevosTabsDias = doc.getElementById("diasTab");
+      const carritoListaCompras = document.getElementById("botonListaComprasFlotanteWrap");
+      const nuevoCarritoListaCompras = doc.getElementById("botonListaComprasFlotanteWrap");
 
       if (!nuevoContenedor) {
         throw new Error("No se encontró el menú programado actualizado");
@@ -51,6 +53,10 @@
 
       if (tabsDias && nuevosTabsDias) {
         tabsDias.innerHTML = nuevosTabsDias.innerHTML;
+      }
+
+      if (carritoListaCompras && nuevoCarritoListaCompras) {
+        carritoListaCompras.innerHTML = nuevoCarritoListaCompras.innerHTML;
       }
 
       contenedor.innerHTML = nuevoContenedor.innerHTML;
