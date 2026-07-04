@@ -73,6 +73,43 @@
   }
 </style>
 
+
+<style id="sidebar-dropdown-menu-fix">
+  #accordionSidebar .sidebar-dropdown-toggle {
+    position: relative;
+  }
+
+  #accordionSidebar .sidebar-dropdown-toggle.dropdown-toggle::after {
+    position: absolute;
+    top: 3.2rem;
+    right: 0.55rem;
+    margin-left: 0;
+  }
+
+  #accordionSidebar .sidebar-dropdown-menu {
+    background: #263445;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    min-width: 10rem;
+  }
+
+  #accordionSidebar .sidebar-dropdown-menu .dropdown-item {
+    color: rgba(255, 255, 255, 0.92);
+    font-weight: 600;
+  }
+
+  #accordionSidebar .sidebar-dropdown-menu .dropdown-item:hover,
+  #accordionSidebar .sidebar-dropdown-menu .dropdown-item:focus {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.16);
+  }
+
+  #accordionSidebar .sidebar-dropdown-menu .dropdown-item.active,
+  #accordionSidebar .sidebar-dropdown-menu .dropdown-item:active {
+    color: #ffffff;
+    background: #0d6efd;
+  }
+</style>
+
 </head>
 
 <body id="page-top" class="sidebar-toggled">
@@ -178,7 +215,7 @@
 
 <!-- {# 3) DIPS Y SALSAS #} -->
 <li class="nav-item dropdown {% if tipopag == 'Dip' or tipopag == 'Salsa' %}active{% endif %}">
-  <a class="nav-link menu-item dropdown-toggle d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag-grupo
+  <a class="nav-link menu-item dropdown-toggle sidebar-dropdown-toggle d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag-grupo
             {% if tipopag == 'Dip' or tipopag == 'Salsa' %}is-active{% endif %}"
      href="#"
      id="dipsSalsasDropdown"
@@ -200,7 +237,7 @@
     </span>
   </a>
 
-  <ul class="dropdown-menu dropdown-menu-dark text-small shadow"
+  <ul class="dropdown-menu dropdown-menu-dark sidebar-dropdown-menu text-small shadow"
       aria-labelledby="dipsSalsasDropdown">
     <li>
       <a class="dropdown-item js-filtro-tipopag {% if tipopag == 'Dip' %}active{% endif %}"
