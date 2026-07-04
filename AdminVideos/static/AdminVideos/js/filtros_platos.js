@@ -24,6 +24,51 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (!form || !contenedor) return;
 
+  let estadoAntesDeLoQueTengo = null;
+
+  function aplicarModoLoQueTengo(tipopag) {
+    const usarLoQueTengo = form.querySelector('input[name="usar_lo_que_tengo"]');
+    const quecomemos = form.querySelector('input[name="quecomemos"]');
+    const misplatos = form.querySelector('input[name="misplatos"]');
+
+    if (tipopag === "LoQueTengo") {
+      if (!estadoAntesDeLoQueTengo) {
+        estadoAntesDeLoQueTengo = {
+          usarLoQueTengo: usarLoQueTengo ? usarLoQueTengo.checked : false,
+          quecomemos: quecomemos ? quecomemos.checked : false,
+          misplatos: misplatos ? misplatos.checked : false,
+        };
+      }
+
+      if (usarLoQueTengo) {
+        usarLoQueTengo.checked = true;
+      }
+
+      if (quecomemos && misplatos && !quecomemos.checked && !misplatos.checked) {
+        quecomemos.checked = true;
+        misplatos.checked = true;
+      }
+
+      return;
+    }
+
+    if (estadoAntesDeLoQueTengo) {
+      if (usarLoQueTengo) {
+        usarLoQueTengo.checked = estadoAntesDeLoQueTengo.usarLoQueTengo;
+      }
+
+      if (quecomemos) {
+        quecomemos.checked = estadoAntesDeLoQueTengo.quecomemos;
+      }
+
+      if (misplatos) {
+        misplatos.checked = estadoAntesDeLoQueTengo.misplatos;
+      }
+
+      estadoAntesDeLoQueTengo = null;
+    }
+  }
+
   // ============================================================
   // 2. Refrescar listado, carousel y lugares por AJAX
   // ============================================================
@@ -198,6 +243,8 @@ document.addEventListener("DOMContentLoaded", function () {
     event.preventDefault();
 
     inputTipopag.value = tipopag;
+    aplicarModoLoQueTengo(tipopag);
+
     actualizarMenuLateralActivo(tipopag);
 
     const nuevaUrl = new URL(link.href);

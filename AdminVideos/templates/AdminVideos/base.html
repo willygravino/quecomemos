@@ -114,6 +114,28 @@
    ============================ #}
 -->
 
+<!-- {# 0) CON LO QUE TENGO #} -->
+<li class="nav-item {% if tipopag == 'LoQueTengo' %}active{% endif %}">
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
+            {% if tipopag == 'LoQueTengo' %}is-active{% endif %}"
+     href="{% url 'filtro-de-platos' %}?tipopag=LoQueTengo"
+     data-tipopag="LoQueTengo">
+
+    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
+          style="width: 38px; height: 38px;">
+      <i class="fa-solid fa-basket-shopping {% if tipopag != 'LoQueTengo' %}text-white-50{% endif %}"
+         style="font-size: 1.1rem;"></i>
+    </span>
+
+    <span class="item-text mt-2 small {% if tipopag == 'LoQueTengo' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+      <span class="d-block">Con lo que</span>
+      <span class="d-block">tengo</span>
+    </span>
+  </a>
+</li>
+
+<hr class="sidebar-divider">
+
 <!-- {# 1) PRINCIPAL #} -->
 <li class="nav-item {% if tipopag == 'Principal' %}active{% endif %}">
   <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag

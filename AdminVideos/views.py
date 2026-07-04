@@ -2800,13 +2800,23 @@ def obtener_estado_filtros_platos(request, dia_activo):
         misplatos = request.POST.get("misplatos")
         usar_lo_que_tengo = request.POST.get("usar_lo_que_tengo")
 
+        if tipopag == "LoQueTengo":
+            usar_lo_que_tengo = "1"
+
+            if not quecomemos and not misplatos:
+                quecomemos = "quecomemos"
+                misplatos = "misplatos"
+
         request.session["medios_estable"] = medios
         request.session["categoria_estable"] = categoria
         request.session["dificultad_estable"] = dificultad
         request.session["palabra_clave"] = palabra_clave
-        request.session["quecomemos"] = quecomemos
-        request.session["misplatos"] = misplatos
-        request.session["usar_lo_que_tengo"] = usar_lo_que_tengo
+
+        if tipopag != "LoQueTengo":
+            request.session["quecomemos"] = quecomemos
+            request.session["misplatos"] = misplatos
+            request.session["usar_lo_que_tengo"] = usar_lo_que_tengo
+
         request.session["dia_activo"] = dia_activo
 
     else:
@@ -2818,6 +2828,13 @@ def obtener_estado_filtros_platos(request, dia_activo):
         quecomemos = quecomemos_sesion
         misplatos = misplatos_sesion
         usar_lo_que_tengo = request.session.get("usar_lo_que_tengo")
+
+        if tipopag == "LoQueTengo":
+            usar_lo_que_tengo = "1"
+
+            if not quecomemos and not misplatos:
+                quecomemos = "quecomemos"
+                misplatos = "misplatos"
 
         form = PlatoFilterForm(initial={
             "medios": medios,
@@ -2921,9 +2938,11 @@ def obtener_resultados_principales(
 
     lugares = ""
 
+    tipo_parametro_filtro = None if tipo_parametro == "LoQueTengo" else tipo_parametro
+
     resultado_filtro = filtrar_platos(
         usuario=usuario,
-        tipo_parametro=tipo_parametro,
+        tipo_parametro=tipo_parametro_filtro,
         quecomemos=quecomemos,
         misplatos=misplatos,
         medios=medios,
