@@ -26,6 +26,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
   let estadoAntesDeLoQueTengo = null;
 
+  function actualizarVisualLoQueTengo(checkbox) {
+    const filtroBox = document.getElementById("loQueTengoFiltroBox");
+
+    if (!checkbox || !filtroBox) {
+      return;
+    }
+
+    filtroBox.classList.toggle("is-active", checkbox.checked);
+  }
+
   function aplicarModoLoQueTengo(tipopag) {
     const usarLoQueTengo = form.querySelector('input[name="usar_lo_que_tengo"]');
     const quecomemos = form.querySelector('input[name="quecomemos"]');
@@ -42,6 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (usarLoQueTengo) {
         usarLoQueTengo.checked = true;
+        actualizarVisualLoQueTengo(usarLoQueTengo);
       }
 
       if (quecomemos && misplatos && !quecomemos.checked && !misplatos.checked) {
@@ -55,6 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (estadoAntesDeLoQueTengo) {
       if (usarLoQueTengo) {
         usarLoQueTengo.checked = estadoAntesDeLoQueTengo.usarLoQueTengo;
+        actualizarVisualLoQueTengo(usarLoQueTengo);
       }
 
       if (quecomemos) {

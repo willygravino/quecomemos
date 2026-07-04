@@ -4,6 +4,31 @@
 
 {% block filtro %}
 
+<style id="lo-que-tengo-filtro-box-style">
+  .lo-que-tengo-filtro-box {
+    background: rgba(255, 255, 255, 0.65);
+    border-color: rgba(25, 135, 84, 0.35) !important;
+    transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
+  }
+
+  .lo-que-tengo-filtro-box.is-active {
+    background: rgba(220, 53, 69, 0.16);
+    border-color: rgba(220, 53, 69, 0.75) !important;
+    box-shadow: 0 0 0 .12rem rgba(220, 53, 69, 0.18);
+  }
+
+  .lo-que-tengo-filtro-box.is-active .btn {
+    border-color: rgba(220, 53, 69, 0.85);
+    color: #dc3545;
+  }
+
+  .lo-que-tengo-filtro-box.is-active .form-check-label {
+    color: #842029;
+    font-weight: 700;
+  }
+</style>
+
+
 <form
   method="POST"
   id="form-filtros-platos"
@@ -51,7 +76,9 @@
       </label>
     </div>
 
-    <div class="border rounded px-2 py-1 d-flex align-items-center gap-2 flex-wrap">
+    <div
+      id="loQueTengoFiltroBox"
+      class="lo-que-tengo-filtro-box border rounded px-2 py-1 d-flex align-items-center gap-2 flex-wrap {% if usar_lo_que_tengo_ck == "1" %}is-active{% endif %}">
       <button
         type="button"
         class="btn btn-sm btn-outline-success"
@@ -132,7 +159,7 @@
 </div>
 
 
-<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=10"></script>
-<script src="{% static 'AdminVideos/js/lo_que_tengo.js' %}?v=1"></script>
+<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=12"></script>
+<script src="{% static 'AdminVideos/js/lo_que_tengo.js' %}?v=2"></script>
 
 {% endblock %}
