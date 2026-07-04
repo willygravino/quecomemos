@@ -176,23 +176,47 @@
   </a>
 </li>
 
-<!-- {# 3) DIP #} -->
-<li class="nav-item {% if tipopag == 'Dip' %}active{% endif %}">
-  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
-            {% if tipopag == 'Dip' %}is-active{% endif %}"
-     href="{% url 'filtro-de-platos' %}?tipopag=Dip"
-     data-tipopag="Dip">
+<!-- {# 3) DIPS Y SALSAS #} -->
+<li class="nav-item dropdown {% if tipopag == 'Dip' or tipopag == 'Salsa' %}active{% endif %}">
+  <a class="nav-link menu-item dropdown-toggle d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag-grupo
+            {% if tipopag == 'Dip' or tipopag == 'Salsa' %}is-active{% endif %}"
+     href="#"
+     id="dipsSalsasDropdown"
+     role="button"
+     data-bs-toggle="dropdown"
+     data-bs-display="static"
+     aria-expanded="false"
+     data-tipopag-values="Dip,Salsa">
 
     <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
           style="width: 38px; height: 38px;">
-      <i class="fas fa-solid fa-bowl-rice {% if tipopag != 'Dip' %}text-white-50{% endif %}"
+      <i class="fas fa-solid fa-bowl-rice {% if tipopag != 'Dip' and tipopag != 'Salsa' %}text-white-50{% endif %}"
          style="font-size: 1.1rem;"></i>
     </span>
 
-    <span class="item-text mt-2 small {% if tipopag == 'Dip' %}text-white fw-bold{% else %}text-white-50{% endif %}">
-      Dips y Salsas
+    <span class="item-text mt-2 small {% if tipopag == 'Dip' or tipopag == 'Salsa' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+      <span class="d-block">Dips</span>
+      <span class="d-block">y Salsas</span>
     </span>
   </a>
+
+  <ul class="dropdown-menu dropdown-menu-dark text-small shadow"
+      aria-labelledby="dipsSalsasDropdown">
+    <li>
+      <a class="dropdown-item js-filtro-tipopag {% if tipopag == 'Dip' %}active{% endif %}"
+         href="{% url 'filtro-de-platos' %}?tipopag=Dip"
+         data-tipopag="Dip">
+        <i class="fa-solid fa-bowl-food me-2"></i>Dips
+      </a>
+    </li>
+    <li>
+      <a class="dropdown-item js-filtro-tipopag {% if tipopag == 'Salsa' %}active{% endif %}"
+         href="{% url 'filtro-de-platos' %}?tipopag=Salsa"
+         data-tipopag="Salsa">
+        <i class="fa-solid fa-droplet me-2"></i>Salsas
+      </a>
+    </li>
+  </ul>
 </li>
 
 <!-- {# 4) GUARNICION #} -->

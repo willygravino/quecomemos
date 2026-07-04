@@ -116,28 +116,59 @@ document.addEventListener("DOMContentLoaded", function () {
   // ============================================================
   // 3. Marcar activo el item actual del menú lateral
   // ============================================================
+  function marcarMenuItem(link, activo) {
+    link.classList.toggle("is-active", activo);
+
+    const item = link.closest(".nav-item");
+    if (item) {
+      item.classList.toggle("active", activo);
+    }
+
+    const texto = link.querySelector(".item-text");
+    if (texto) {
+      texto.classList.toggle("text-white", activo);
+      texto.classList.toggle("fw-bold", activo);
+      texto.classList.toggle("text-white-50", !activo);
+    }
+
+    const icono = link.querySelector(".icon-wrap i");
+    if (icono) {
+      icono.classList.toggle("text-white-50", !activo);
+    }
+  }
+
   function actualizarMenuLateralActivo(tipopag) {
+    document.querySelectorAll("#accordionSidebar .nav-item").forEach(function (item) {
+      item.classList.remove("active");
+    });
+
     document.querySelectorAll(".js-filtro-tipopag").forEach(function (link) {
       const activo = link.dataset.tipopag === tipopag;
 
       link.classList.toggle("is-active", activo);
+      link.classList.toggle("active", activo);
 
-      const item = link.closest(".nav-item");
-      if (item) {
-        item.classList.toggle("active", activo);
+      if (activo) {
+        const item = link.closest(".nav-item");
+        if (item) {
+          item.classList.add("active");
+        }
       }
+    });
 
-      const texto = link.querySelector(".item-text");
-      if (texto) {
-        texto.classList.toggle("text-white", activo);
-        texto.classList.toggle("fw-bold", activo);
-        texto.classList.toggle("text-white-50", !activo);
-      }
+    document.querySelectorAll(".js-filtro-tipopag-grupo").forEach(function (link) {
+      const valores = (link.dataset.tipopagValues || "")
+        .split(",")
+        .map(function (valor) {
+          return valor.trim();
+        })
+        .filter(Boolean);
 
-      const icono = link.querySelector(".icon-wrap i");
-      if (icono) {
-        icono.classList.toggle("text-white-50", !activo);
-      }
+      marcarMenuItem(link, valores.includes(tipopag));
+    });
+
+    document.querySelectorAll(".js-filtro-tipopag:not(.dropdown-item)").forEach(function (link) {
+      marcarMenuItem(link, link.dataset.tipopag === tipopag);
     });
   }
 
@@ -251,6 +282,14 @@ document.addEventListener("DOMContentLoaded", function () {
     window.history.pushState({ tipopag: tipopag }, "", nuevaUrl.toString());
 
     actualizarBotonCrearPlato(tipopag);
+
+    const dropdown = link.closest(".dropdown");
+    const dropdownToggle = dropdown ? dropdown.querySelector('[data-bs-toggle="dropdown"]') : null;
+
+    if (dropdownToggle && window.bootstrap && bootstrap.Dropdown) {
+      bootstrap.Dropdown.getOrCreateInstance(dropdownToggle).hide();
+    }
+
     actualizarListadoPlatos();  
   });
 
