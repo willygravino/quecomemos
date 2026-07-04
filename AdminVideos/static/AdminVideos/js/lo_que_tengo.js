@@ -315,22 +315,6 @@
         });
       }
     });
-  
-  const filtroBox = document.getElementById("loQueTengoFiltroBox");
-  const usarLoQueTengoCheckbox = document.getElementById("usarLoQueTengo");
-
-  function actualizarEstadoFiltroBox() {
-    if (!filtroBox || !usarLoQueTengoCheckbox) {
-      return;
-    }
-
-    filtroBox.classList.toggle("is-active", usarLoQueTengoCheckbox.checked);
-  }
-
-  if (usarLoQueTengoCheckbox) {
-    usarLoQueTengoCheckbox.addEventListener("change", actualizarEstadoFiltroBox);
-    actualizarEstadoFiltroBox();
-  }
 
 });
 })();

@@ -1,0 +1,1058 @@
+
+==========================================================================================
+AdminVideos/templates/AdminVideos/lista_filtrada.html
+==========================================================================================
+0001: {% extends "AdminVideos/video_list_base.html" %}
+0002: 
+0003: {% load static %}
+0004: 
+0005: {% block filtro %}
+0006: 
+0007: <style id="lo-que-tengo-filtro-box-style">
+0008:   .lo-que-tengo-filtro-box {
+0009:     background: rgba(255, 255, 255, 0.65);
+0010:     border-color: rgba(25, 135, 84, 0.35) !important;
+0011:     transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
+0012:   }
+0013: 
+0014:   .lo-que-tengo-filtro-box.is-active {
+0015:     background: rgba(220, 53, 69, 0.16);
+0016:     border-color: rgba(220, 53, 69, 0.75) !important;
+0017:     box-shadow: 0 0 0 .12rem rgba(220, 53, 69, 0.18);
+0018:   }
+0019: 
+0020:   .lo-que-tengo-filtro-box.is-active .btn {
+0021:     border-color: rgba(220, 53, 69, 0.85);
+0022:     color: #dc3545;
+0023:   }
+0024: 
+0025:   .lo-que-tengo-filtro-box.is-active .form-check-label {
+0026:     color: #842029;
+0027:     font-weight: 700;
+0028:   }
+0029: </style>
+0030: 
+0031: 
+0032: <form
+0033:   method="POST"
+0034:   id="form-filtros-platos"
+0035:   data-listado-url="{% url 'ajax_listado_platos' %}">
+0036:   <div class="d-flex justify-content-start mx-1 gap-4 flex-wrap">
+0037: 
+0038:     {% csrf_token %}
+0039: 
+0040:     <input type="hidden" name="tipopag" value="{{ tipopag }}">
+0041: 
+0042:     <div class="input-group w-auto">
+0043:       <input
+0044:         type="search"
+0045:         class="form-control {% if formulario.palabra_clave.value %} border-danger text-danger {% endif %}"
+0046:         placeholder="Buscar por palabra clave"
+0047:         name="palabra_clave"
+0048:         value="{{ formulario.palabra_clave.value|default:'' }}">
+0049:     </div>
+0050: 
+0051:     <div class="form-check">
+0052:       <input
+0053:         class="form-check-input"
+0054:         type="checkbox"
+0055:         name="quecomemos"
+0056:         value="quecomemos"
+0057:         id="quecomemos"
+0058:         {% if quecomemos_ck == "quecomemos" %}checked{% endif %}
+0059:       >
+0060:       <label class="form-check-label small" for="quecomemos">
+0061:         Sugerencia <br> quecomemos
+0062:       </label>
+0063:     </div>
+0064: 
+0065:     <div class="form-check">
+0066:       <input
+0067:         class="form-check-input"
+0068:         type="checkbox"
+0069:         name="misplatos"
+0070:         value="misplatos"
+0071:         id="misplatos"
+0072:         {% if misplatos_ck == "misplatos" %}checked{% endif %}
+0073:       >
+0074:       <label class="form-check-label small" for="misplatos">
+0075:         Mis platos
+0076:       </label>
+0077:     </div>
+0078: 
+0079:     <div
+0080:       id="loQueTengoFiltroBox"
+0081:       class="lo-que-tengo-filtro-box border rounded px-2 py-1 d-flex align-items-center gap-2 flex-wrap {% if usar_lo_que_tengo_ck == "1" %}is-active{% endif %}">
+0082:       <button
+0083:         type="button"
+0084:         class="btn btn-sm btn-outline-success"
+0085:         data-bs-toggle="modal"
+0086:         data-bs-target="#loQueTengoModal">
+0087:         Lo que tengo <span id="loQueTengoContador"></span>
+0088:       </button>
+0089: 
+0090:       <div class="form-check mb-0">
+0091:         <input
+0092:           class="form-check-input"
+0093:           type="checkbox"
+0094:           name="usar_lo_que_tengo"
+0095:           value="1"
+0096:           id="usarLoQueTengo"
+0097:           {% if usar_lo_que_tengo_ck == "1" %}checked{% endif %}
+0098:         >
+0099:         <label class="form-check-label small" for="usarLoQueTengo">
+0100:           Usar para filtrar
+0101:         </label>
+0102:       </div>
+0103:     </div>
+0104: 
+0105:   </div>
+0106: </form>
+0107: 
+0108: 
+0109: <div
+0110:   class="modal fade"
+0111:   id="loQueTengoModal"
+0112:   tabindex="-1"
+0113:   aria-labelledby="loQueTengoModalLabel"
+0114:   aria-hidden="true"
+0115:   data-palabras-url="{% url 'ajax-lo-que-tengo-palabras' %}"
+0116:   data-agregar-url="{% url 'ajax-lo-que-tengo-agregar' %}"
+0117:   data-sugerencias-url="{% url 'api_ingredientes' %}">
+0118:   <div class="modal-dialog">
+0119:     <div class="modal-content">
+0120: 
+0121:       <div class="modal-header">
+0122:         <h5 class="modal-title" id="loQueTengoModalLabel">
+0123:           Lo que tengo
+0124:         </h5>
+0125: 
+0126:         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+0127:       </div>
+0128: 
+0129:       <div class="modal-body">
+0130:         <p class="small text-muted mb-2">
+0131:           Agregá palabras clave para filtrar platos. Podés elegir ingredientes existentes o escribir texto libre.
+0132:         </p>
+0133: 
+0134:         <div class="input-group mb-2">
+0135:           <select id="loQueTengoSelect" class="form-select" style="width: 100%;"></select>
+0136:         </div>
+0137: 
+0138:         <button type="button" class="btn btn-success btn-sm mb-3" id="loQueTengoAgregarBtn">
+0139:           Agregar
+0140:         </button>
+0141: 
+0142:         <div class="alert alert-danger d-none small" id="loQueTengoError"></div>
+0143: 
+0144:         <ul class="list-group" id="loQueTengoLista">
+0145:           <li class="list-group-item text-muted small">
+0146:             Cargando...
+0147:           </li>
+0148:         </ul>
+0149:       </div>
+0150: 
+0151:       <div class="modal-footer">
+0152:         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+0153:           Cerrar
+0154:         </button>
+0155:       </div>
+0156: 
+0157:     </div>
+0158:   </div>
+0159: </div>
+0160: 
+0161: 
+0162: <script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=12"></script>
+0163: <script src="{% static 'AdminVideos/js/lo_que_tengo.js' %}?v=2"></script>
+0164: 
+0165: {% endblock %}
+
+==========================================================================================
+BÚSQUEDAS EN AdminVideos/templates/AdminVideos/video_list_base.html
+==========================================================================================
+
+--- patrón: block filtro ---
+
+--- patrón: contenedor-listado-platos ---
+0017: <div id="contenedor-carousel-platos">
+0018:   {% include "AdminVideos/partials/_carousel_platos.html" %}
+0019: </div>
+0020: 
+0021: 
+0022: 
+0023: 
+0024: 
+0025: <div id="contenedor-listado-platos">
+0026:   {% include "AdminVideos/partials/_listado_platos.html" %}
+0027: </div>
+0028: 
+0029: 
+0030: 
+0031: <div id="contenedor-listado-lugares">
+0032:   {% include "AdminVideos/partials/_listado_lugares.html" %}
+0033: </div>
+0034: 
+0035: 
+0036: 
+0037: {% comment %}
+0038: 
+0039: {% endwith %}
+------------------------------------------------------------
+0163:      - Actualiza el contador de platos seleccionados.
+0164:      - Habilita/deshabilita el botón de acciones masivas.
+0165:      - Prepara el formulario oculto para eliminación masiva.
+0166:      - Se puede volver a ejecutar después de actualizar la lista por AJAX.
+0167: 
+0168:      Importante:
+0169:      - Esta función debe llamarse al cargar la página.
+0170:      - También debe llamarse después de reemplazar
+0171:        #contenedor-listado-platos con HTML nuevo por AJAX.
+0172: ========================================================= -->
+0173: <script>
+0174: function initListadoPlatos() {
+0175:   const masterCheckbox = document.getElementById('chk-platos-all');
+0176:   const rowCheckboxes = document.querySelectorAll('.js-plato-select');
+0177:   const selectedCountBadge = document.getElementById('platos-selected-count');
+0178:   const bulkActionsBtn = document.getElementById('bulkPlatosActionsBtn');
+0179:   const bulkDeleteBtn = document.getElementById('bulk-delete');
+0180:   const bulkDeleteForm = document.getElementById('bulk-delete-form');
+0181:   const bulkDeleteInputs = document.getElementById('bulk-delete-inputs');
+0182: 
+0183:   function getSelectedIds() {
+0184:     return Array.from(rowCheckboxes)
+0185:       .filter(function (checkbox) {
+------------------------------------------------------------
+
+--- patrón: filtro ---
+
+--- patrón: card ---
+
+--- patrón: container ---
+
+==========================================================================================
+BÚSQUEDAS EN AdminVideos/static/AdminVideos/js/filtros_platos.js
+==========================================================================================
+
+--- patrón: form-filtros-platos ---
+0014:     });
+0015:   });
+0016: }
+0017: 
+0018: document.addEventListener("DOMContentLoaded", function () {
+0019:   // ============================================================
+0020:   // 1. Elementos base de la pantalla
+0021:   // ============================================================
+0022:   const form = document.getElementById("form-filtros-platos");
+0023:   const contenedor = document.getElementById("contenedor-listado-platos");
+0024: 
+0025:   if (!form || !contenedor) return;
+0026: 
+0027:   let estadoAntesDeLoQueTengo = null;
+0028: 
+0029:   function actualizarVisualLoQueTengo(checkbox) {
+0030:     const filtroBox = document.getElementById("loQueTengoFiltroBox");
+0031: 
+0032:     if (!checkbox || !filtroBox) {
+0033:       return;
+0034:     }
+0035: 
+0036:     filtroBox.classList.toggle("is-active", checkbox.checked);
+------------------------------------------------------------
+
+--- patrón: palabra_clave ---
+0235:   form.addEventListener("submit", function (event) {
+0236:     event.preventDefault();
+0237:     actualizarListadoPlatos();
+0238:   });
+0239: 
+0240:   // ============================================================
+0241:   // 4.b Buscar por palabra clave mientras se escribe
+0242:   // ============================================================
+0243:   const inputPalabraClave = form.querySelector('input[name="palabra_clave"]');
+0244:   let timeoutBusquedaPalabraClave = null;
+0245: 
+0246:   if (inputPalabraClave) {
+0247:     inputPalabraClave.addEventListener("input", function () {
+0248:       clearTimeout(timeoutBusquedaPalabraClave);
+0249: 
+0250:       timeoutBusquedaPalabraClave = setTimeout(function () {
+0251:         actualizarListadoPlatos();
+0252:       }, 400);
+0253:     });
+0254:   }
+0255: 
+0256:   // ============================================================
+0257:   // 5. Filtrar por checkboxes sin recargar
+------------------------------------------------------------
+
+--- patrón: quecomemos ---
+0033:       return;
+0034:     }
+0035: 
+0036:     filtroBox.classList.toggle("is-active", checkbox.checked);
+0037:   }
+0038: 
+0039:   function aplicarModoLoQueTengo(tipopag) {
+0040:     const usarLoQueTengo = form.querySelector('input[name="usar_lo_que_tengo"]');
+0041:     const quecomemos = form.querySelector('input[name="quecomemos"]');
+0042:     const misplatos = form.querySelector('input[name="misplatos"]');
+0043: 
+0044:     if (tipopag === "LoQueTengo") {
+0045:       if (!estadoAntesDeLoQueTengo) {
+0046:         estadoAntesDeLoQueTengo = {
+0047:           usarLoQueTengo: usarLoQueTengo ? usarLoQueTengo.checked : false,
+0048:           quecomemos: quecomemos ? quecomemos.checked : false,
+0049:           misplatos: misplatos ? misplatos.checked : false,
+0050:         };
+0051:       }
+0052: 
+0053:       if (usarLoQueTengo) {
+0054:         usarLoQueTengo.checked = true;
+0055:         actualizarVisualLoQueTengo(usarLoQueTengo);
+------------------------------------------------------------
+0040:     const usarLoQueTengo = form.querySelector('input[name="usar_lo_que_tengo"]');
+0041:     const quecomemos = form.querySelector('input[name="quecomemos"]');
+0042:     const misplatos = form.querySelector('input[name="misplatos"]');
+0043: 
+0044:     if (tipopag === "LoQueTengo") {
+0045:       if (!estadoAntesDeLoQueTengo) {
+0046:         estadoAntesDeLoQueTengo = {
+0047:           usarLoQueTengo: usarLoQueTengo ? usarLoQueTengo.checked : false,
+0048:           quecomemos: quecomemos ? quecomemos.checked : false,
+0049:           misplatos: misplatos ? misplatos.checked : false,
+0050:         };
+0051:       }
+0052: 
+0053:       if (usarLoQueTengo) {
+0054:         usarLoQueTengo.checked = true;
+0055:         actualizarVisualLoQueTengo(usarLoQueTengo);
+0056:       }
+0057: 
+0058:       if (quecomemos && misplatos && !quecomemos.checked && !misplatos.checked) {
+0059:         quecomemos.checked = true;
+0060:         misplatos.checked = true;
+0061:       }
+0062: 
+------------------------------------------------------------
+0050:         };
+0051:       }
+0052: 
+0053:       if (usarLoQueTengo) {
+0054:         usarLoQueTengo.checked = true;
+0055:         actualizarVisualLoQueTengo(usarLoQueTengo);
+0056:       }
+0057: 
+0058:       if (quecomemos && misplatos && !quecomemos.checked && !misplatos.checked) {
+0059:         quecomemos.checked = true;
+0060:         misplatos.checked = true;
+0061:       }
+0062: 
+0063:       return;
+0064:     }
+0065: 
+0066:     if (estadoAntesDeLoQueTengo) {
+0067:       if (usarLoQueTengo) {
+0068:         usarLoQueTengo.checked = estadoAntesDeLoQueTengo.usarLoQueTengo;
+0069:         actualizarVisualLoQueTengo(usarLoQueTengo);
+0070:       }
+0071: 
+0072:       if (quecomemos) {
+------------------------------------------------------------
+0051:       }
+0052: 
+0053:       if (usarLoQueTengo) {
+0054:         usarLoQueTengo.checked = true;
+0055:         actualizarVisualLoQueTengo(usarLoQueTengo);
+0056:       }
+0057: 
+0058:       if (quecomemos && misplatos && !quecomemos.checked && !misplatos.checked) {
+0059:         quecomemos.checked = true;
+0060:         misplatos.checked = true;
+0061:       }
+0062: 
+0063:       return;
+0064:     }
+0065: 
+0066:     if (estadoAntesDeLoQueTengo) {
+0067:       if (usarLoQueTengo) {
+0068:         usarLoQueTengo.checked = estadoAntesDeLoQueTengo.usarLoQueTengo;
+0069:         actualizarVisualLoQueTengo(usarLoQueTengo);
+0070:       }
+0071: 
+0072:       if (quecomemos) {
+0073:         quecomemos.checked = estadoAntesDeLoQueTengo.quecomemos;
+------------------------------------------------------------
+0064:     }
+0065: 
+0066:     if (estadoAntesDeLoQueTengo) {
+0067:       if (usarLoQueTengo) {
+0068:         usarLoQueTengo.checked = estadoAntesDeLoQueTengo.usarLoQueTengo;
+0069:         actualizarVisualLoQueTengo(usarLoQueTengo);
+0070:       }
+0071: 
+0072:       if (quecomemos) {
+0073:         quecomemos.checked = estadoAntesDeLoQueTengo.quecomemos;
+0074:       }
+0075: 
+0076:       if (misplatos) {
+0077:         misplatos.checked = estadoAntesDeLoQueTengo.misplatos;
+0078:       }
+0079: 
+0080:       estadoAntesDeLoQueTengo = null;
+0081:     }
+0082:   }
+0083: 
+0084:   // ============================================================
+0085:   // 2. Refrescar listado, carousel y lugares por AJAX
+0086:   // ============================================================
+------------------------------------------------------------
+0065: 
+0066:     if (estadoAntesDeLoQueTengo) {
+0067:       if (usarLoQueTengo) {
+0068:         usarLoQueTengo.checked = estadoAntesDeLoQueTengo.usarLoQueTengo;
+0069:         actualizarVisualLoQueTengo(usarLoQueTengo);
+0070:       }
+0071: 
+0072:       if (quecomemos) {
+0073:         quecomemos.checked = estadoAntesDeLoQueTengo.quecomemos;
+0074:       }
+0075: 
+0076:       if (misplatos) {
+0077:         misplatos.checked = estadoAntesDeLoQueTengo.misplatos;
+0078:       }
+0079: 
+0080:       estadoAntesDeLoQueTengo = null;
+0081:     }
+0082:   }
+0083: 
+0084:   // ============================================================
+0085:   // 2. Refrescar listado, carousel y lugares por AJAX
+0086:   // ============================================================
+0087:   function actualizarListadoPlatos() {
+------------------------------------------------------------
+
+--- patrón: misplatos ---
+0034:     }
+0035: 
+0036:     filtroBox.classList.toggle("is-active", checkbox.checked);
+0037:   }
+0038: 
+0039:   function aplicarModoLoQueTengo(tipopag) {
+0040:     const usarLoQueTengo = form.querySelector('input[name="usar_lo_que_tengo"]');
+0041:     const quecomemos = form.querySelector('input[name="quecomemos"]');
+0042:     const misplatos = form.querySelector('input[name="misplatos"]');
+0043: 
+0044:     if (tipopag === "LoQueTengo") {
+0045:       if (!estadoAntesDeLoQueTengo) {
+0046:         estadoAntesDeLoQueTengo = {
+0047:           usarLoQueTengo: usarLoQueTengo ? usarLoQueTengo.checked : false,
+0048:           quecomemos: quecomemos ? quecomemos.checked : false,
+0049:           misplatos: misplatos ? misplatos.checked : false,
+0050:         };
+0051:       }
+0052: 
+0053:       if (usarLoQueTengo) {
+0054:         usarLoQueTengo.checked = true;
+0055:         actualizarVisualLoQueTengo(usarLoQueTengo);
+0056:       }
+------------------------------------------------------------
+0041:     const quecomemos = form.querySelector('input[name="quecomemos"]');
+0042:     const misplatos = form.querySelector('input[name="misplatos"]');
+0043: 
+0044:     if (tipopag === "LoQueTengo") {
+0045:       if (!estadoAntesDeLoQueTengo) {
+0046:         estadoAntesDeLoQueTengo = {
+0047:           usarLoQueTengo: usarLoQueTengo ? usarLoQueTengo.checked : false,
+0048:           quecomemos: quecomemos ? quecomemos.checked : false,
+0049:           misplatos: misplatos ? misplatos.checked : false,
+0050:         };
+0051:       }
+0052: 
+0053:       if (usarLoQueTengo) {
+0054:         usarLoQueTengo.checked = true;
+0055:         actualizarVisualLoQueTengo(usarLoQueTengo);
+0056:       }
+0057: 
+0058:       if (quecomemos && misplatos && !quecomemos.checked && !misplatos.checked) {
+0059:         quecomemos.checked = true;
+0060:         misplatos.checked = true;
+0061:       }
+0062: 
+0063:       return;
+------------------------------------------------------------
+0050:         };
+0051:       }
+0052: 
+0053:       if (usarLoQueTengo) {
+0054:         usarLoQueTengo.checked = true;
+0055:         actualizarVisualLoQueTengo(usarLoQueTengo);
+0056:       }
+0057: 
+0058:       if (quecomemos && misplatos && !quecomemos.checked && !misplatos.checked) {
+0059:         quecomemos.checked = true;
+0060:         misplatos.checked = true;
+0061:       }
+0062: 
+0063:       return;
+0064:     }
+0065: 
+0066:     if (estadoAntesDeLoQueTengo) {
+0067:       if (usarLoQueTengo) {
+0068:         usarLoQueTengo.checked = estadoAntesDeLoQueTengo.usarLoQueTengo;
+0069:         actualizarVisualLoQueTengo(usarLoQueTengo);
+0070:       }
+0071: 
+0072:       if (quecomemos) {
+------------------------------------------------------------
+0052: 
+0053:       if (usarLoQueTengo) {
+0054:         usarLoQueTengo.checked = true;
+0055:         actualizarVisualLoQueTengo(usarLoQueTengo);
+0056:       }
+0057: 
+0058:       if (quecomemos && misplatos && !quecomemos.checked && !misplatos.checked) {
+0059:         quecomemos.checked = true;
+0060:         misplatos.checked = true;
+0061:       }
+0062: 
+0063:       return;
+0064:     }
+0065: 
+0066:     if (estadoAntesDeLoQueTengo) {
+0067:       if (usarLoQueTengo) {
+0068:         usarLoQueTengo.checked = estadoAntesDeLoQueTengo.usarLoQueTengo;
+0069:         actualizarVisualLoQueTengo(usarLoQueTengo);
+0070:       }
+0071: 
+0072:       if (quecomemos) {
+0073:         quecomemos.checked = estadoAntesDeLoQueTengo.quecomemos;
+0074:       }
+------------------------------------------------------------
+0068:         usarLoQueTengo.checked = estadoAntesDeLoQueTengo.usarLoQueTengo;
+0069:         actualizarVisualLoQueTengo(usarLoQueTengo);
+0070:       }
+0071: 
+0072:       if (quecomemos) {
+0073:         quecomemos.checked = estadoAntesDeLoQueTengo.quecomemos;
+0074:       }
+0075: 
+0076:       if (misplatos) {
+0077:         misplatos.checked = estadoAntesDeLoQueTengo.misplatos;
+0078:       }
+0079: 
+0080:       estadoAntesDeLoQueTengo = null;
+0081:     }
+0082:   }
+0083: 
+0084:   // ============================================================
+0085:   // 2. Refrescar listado, carousel y lugares por AJAX
+0086:   // ============================================================
+0087:   function actualizarListadoPlatos() {
+0088:     const url = form.dataset.listadoUrl;
+0089:     const formData = new FormData(form);
+0090: 
+------------------------------------------------------------
+0069:         actualizarVisualLoQueTengo(usarLoQueTengo);
+0070:       }
+0071: 
+0072:       if (quecomemos) {
+0073:         quecomemos.checked = estadoAntesDeLoQueTengo.quecomemos;
+0074:       }
+0075: 
+0076:       if (misplatos) {
+0077:         misplatos.checked = estadoAntesDeLoQueTengo.misplatos;
+0078:       }
+0079: 
+0080:       estadoAntesDeLoQueTengo = null;
+0081:     }
+0082:   }
+0083: 
+0084:   // ============================================================
+0085:   // 2. Refrescar listado, carousel y lugares por AJAX
+0086:   // ============================================================
+0087:   function actualizarListadoPlatos() {
+0088:     const url = form.dataset.listadoUrl;
+0089:     const formData = new FormData(form);
+0090: 
+0091:     formData.set("return_to", window.location.pathname + window.location.search);
+------------------------------------------------------------
+
+--- patrón: usar_lo_que_tengo ---
+0032:     if (!checkbox || !filtroBox) {
+0033:       return;
+0034:     }
+0035: 
+0036:     filtroBox.classList.toggle("is-active", checkbox.checked);
+0037:   }
+0038: 
+0039:   function aplicarModoLoQueTengo(tipopag) {
+0040:     const usarLoQueTengo = form.querySelector('input[name="usar_lo_que_tengo"]');
+0041:     const quecomemos = form.querySelector('input[name="quecomemos"]');
+0042:     const misplatos = form.querySelector('input[name="misplatos"]');
+0043: 
+0044:     if (tipopag === "LoQueTengo") {
+0045:       if (!estadoAntesDeLoQueTengo) {
+0046:         estadoAntesDeLoQueTengo = {
+0047:           usarLoQueTengo: usarLoQueTengo ? usarLoQueTengo.checked : false,
+0048:           quecomemos: quecomemos ? quecomemos.checked : false,
+0049:           misplatos: misplatos ? misplatos.checked : false,
+0050:         };
+0051:       }
+0052: 
+0053:       if (usarLoQueTengo) {
+0054:         usarLoQueTengo.checked = true;
+------------------------------------------------------------
+
+--- patrón: addEventListener("change" ---
+0252:       }, 400);
+0253:     });
+0254:   }
+0255: 
+0256:   // ============================================================
+0257:   // 5. Filtrar por checkboxes sin recargar
+0258:   // ============================================================
+0259:   form.querySelectorAll("input[type='checkbox']").forEach(function (checkbox) {
+0260:     checkbox.addEventListener("change", function () {
+0261:       actualizarListadoPlatos();
+0262:     });
+0263:   });
+0264: 
+0265:   // ============================================================
+0266:   // 6. Filtrar desde el menú lateral sin recargar
+0267:   // ============================================================
+0268:   document.addEventListener("click", function (event) {
+0269:     const link = event.target.closest(".js-filtro-tipopag");
+0270: 
+0271:     if (!link) {
+0272:       return;
+0273:     }
+0274: 
+------------------------------------------------------------
+
+--- patrón: actualizarListadoPlatos ---
+0079: 
+0080:       estadoAntesDeLoQueTengo = null;
+0081:     }
+0082:   }
+0083: 
+0084:   // ============================================================
+0085:   // 2. Refrescar listado, carousel y lugares por AJAX
+0086:   // ============================================================
+0087:   function actualizarListadoPlatos() {
+0088:     const url = form.dataset.listadoUrl;
+0089:     const formData = new FormData(form);
+0090: 
+0091:     formData.set("return_to", window.location.pathname + window.location.search);
+0092: 
+0093:     fetch(url, {
+0094:       method: "POST",
+0095:       body: formData,
+0096:       headers: {
+0097:         "X-Requested-With": "XMLHttpRequest"
+0098:       }
+0099:     })
+0100:       .then(function (response) {
+0101:         if (!response.ok) {
+------------------------------------------------------------
+0229:     boton.setAttribute("aria-label", titulo);
+0230:   }
+0231: 
+0232:   // ============================================================
+0233:   // 4. Buscar por palabra clave sin recargar
+0234:   // ============================================================
+0235:   form.addEventListener("submit", function (event) {
+0236:     event.preventDefault();
+0237:     actualizarListadoPlatos();
+0238:   });
+0239: 
+0240:   // ============================================================
+0241:   // 4.b Buscar por palabra clave mientras se escribe
+0242:   // ============================================================
+0243:   const inputPalabraClave = form.querySelector('input[name="palabra_clave"]');
+0244:   let timeoutBusquedaPalabraClave = null;
+0245: 
+0246:   if (inputPalabraClave) {
+0247:     inputPalabraClave.addEventListener("input", function () {
+0248:       clearTimeout(timeoutBusquedaPalabraClave);
+0249: 
+0250:       timeoutBusquedaPalabraClave = setTimeout(function () {
+0251:         actualizarListadoPlatos();
+------------------------------------------------------------
+0243:   const inputPalabraClave = form.querySelector('input[name="palabra_clave"]');
+0244:   let timeoutBusquedaPalabraClave = null;
+0245: 
+0246:   if (inputPalabraClave) {
+0247:     inputPalabraClave.addEventListener("input", function () {
+0248:       clearTimeout(timeoutBusquedaPalabraClave);
+0249: 
+0250:       timeoutBusquedaPalabraClave = setTimeout(function () {
+0251:         actualizarListadoPlatos();
+0252:       }, 400);
+0253:     });
+0254:   }
+0255: 
+0256:   // ============================================================
+0257:   // 5. Filtrar por checkboxes sin recargar
+0258:   // ============================================================
+0259:   form.querySelectorAll("input[type='checkbox']").forEach(function (checkbox) {
+0260:     checkbox.addEventListener("change", function () {
+0261:       actualizarListadoPlatos();
+0262:     });
+0263:   });
+0264: 
+0265:   // ============================================================
+------------------------------------------------------------
+0253:     });
+0254:   }
+0255: 
+0256:   // ============================================================
+0257:   // 5. Filtrar por checkboxes sin recargar
+0258:   // ============================================================
+0259:   form.querySelectorAll("input[type='checkbox']").forEach(function (checkbox) {
+0260:     checkbox.addEventListener("change", function () {
+0261:       actualizarListadoPlatos();
+0262:     });
+0263:   });
+0264: 
+0265:   // ============================================================
+0266:   // 6. Filtrar desde el menú lateral sin recargar
+0267:   // ============================================================
+0268:   document.addEventListener("click", function (event) {
+0269:     const link = event.target.closest(".js-filtro-tipopag");
+0270: 
+0271:     if (!link) {
+0272:       return;
+0273:     }
+0274: 
+0275:     const tipopag = link.dataset.tipopag;
+------------------------------------------------------------
+0299: 
+0300:     const dropdown = link.closest(".dropdown");
+0301:     const dropdownToggle = dropdown ? dropdown.querySelector('[data-bs-toggle="dropdown"]') : null;
+0302: 
+0303:     if (dropdownToggle && window.bootstrap && bootstrap.Dropdown) {
+0304:       bootstrap.Dropdown.getOrCreateInstance(dropdownToggle).hide();
+0305:     }
+0306: 
+0307:     actualizarListadoPlatos();  
+0308:   });
+0309: 
+0310:   // ============================================================
+0311:   // 7. Soportar botón atrás / adelante del navegador
+0312:   // ============================================================
+0313:   window.addEventListener("popstate", function () {
+0314:     const params = new URLSearchParams(window.location.search);
+0315:     const tipopag = params.get("tipopag");
+0316: 
+0317:     if (!tipopag) {
+0318:       return;
+0319:     }
+0320: 
+0321:     const inputTipopag = form.querySelector('input[name="tipopag"]');
+------------------------------------------------------------
+0321:     const inputTipopag = form.querySelector('input[name="tipopag"]');
+0322: 
+0323:     if (!inputTipopag) {
+0324:       return;
+0325:     }
+0326:     inputTipopag.value = tipopag;
+0327:     actualizarMenuLateralActivo(tipopag);
+0328:     actualizarBotonCrearPlato(tipopag);
+0329:     actualizarListadoPlatos();
+0330: 
+0331:   });
+0332: });
+------------------------------------------------------------
+
+--- patrón: aplicarModoLoQueTengo ---
+0031: 
+0032:     if (!checkbox || !filtroBox) {
+0033:       return;
+0034:     }
+0035: 
+0036:     filtroBox.classList.toggle("is-active", checkbox.checked);
+0037:   }
+0038: 
+0039:   function aplicarModoLoQueTengo(tipopag) {
+0040:     const usarLoQueTengo = form.querySelector('input[name="usar_lo_que_tengo"]');
+0041:     const quecomemos = form.querySelector('input[name="quecomemos"]');
+0042:     const misplatos = form.querySelector('input[name="misplatos"]');
+0043: 
+0044:     if (tipopag === "LoQueTengo") {
+0045:       if (!estadoAntesDeLoQueTengo) {
+0046:         estadoAntesDeLoQueTengo = {
+0047:           usarLoQueTengo: usarLoQueTengo ? usarLoQueTengo.checked : false,
+0048:           quecomemos: quecomemos ? quecomemos.checked : false,
+0049:           misplatos: misplatos ? misplatos.checked : false,
+0050:         };
+0051:       }
+0052: 
+0053:       if (usarLoQueTengo) {
+------------------------------------------------------------
+0283: 
+0284:     if (!inputTipopag) {
+0285:       return;
+0286:     }
+0287: 
+0288:     event.preventDefault();
+0289: 
+0290:     inputTipopag.value = tipopag;
+0291:     aplicarModoLoQueTengo(tipopag);
+0292: 
+0293:     actualizarMenuLateralActivo(tipopag);
+0294: 
+0295:     const nuevaUrl = new URL(link.href);
+0296:     window.history.pushState({ tipopag: tipopag }, "", nuevaUrl.toString());
+0297: 
+0298:     actualizarBotonCrearPlato(tipopag);
+0299: 
+0300:     const dropdown = link.closest(".dropdown");
+0301:     const dropdownToggle = dropdown ? dropdown.querySelector('[data-bs-toggle="dropdown"]') : null;
+0302: 
+0303:     if (dropdownToggle && window.bootstrap && bootstrap.Dropdown) {
+0304:       bootstrap.Dropdown.getOrCreateInstance(dropdownToggle).hide();
+0305:     }
+------------------------------------------------------------
+
+==========================================================================================
+BÚSQUEDAS EN AdminVideos/static/AdminVideos/js/lo_que_tengo.js
+==========================================================================================
+
+--- patrón: loQueTengoFiltroBox ---
+0311:         event.preventDefault();
+0312: 
+0313:         eliminarPalabra(eliminarBtn.dataset.id).catch(function (error) {
+0314:           console.error(error);
+0315:         });
+0316:       }
+0317:     });
+0318:   
+0319:   const filtroBox = document.getElementById("loQueTengoFiltroBox");
+0320:   const usarLoQueTengoCheckbox = document.getElementById("usarLoQueTengo");
+0321: 
+0322:   function actualizarEstadoFiltroBox() {
+0323:     if (!filtroBox || !usarLoQueTengoCheckbox) {
+0324:       return;
+0325:     }
+0326: 
+0327:     filtroBox.classList.toggle("is-active", usarLoQueTengoCheckbox.checked);
+0328:   }
+0329: 
+0330:   if (usarLoQueTengoCheckbox) {
+0331:     usarLoQueTengoCheckbox.addEventListener("change", actualizarEstadoFiltroBox);
+0332:     actualizarEstadoFiltroBox();
+0333:   }
+------------------------------------------------------------
+
+--- patrón: usarLoQueTengo ---
+0312: 
+0313:         eliminarPalabra(eliminarBtn.dataset.id).catch(function (error) {
+0314:           console.error(error);
+0315:         });
+0316:       }
+0317:     });
+0318:   
+0319:   const filtroBox = document.getElementById("loQueTengoFiltroBox");
+0320:   const usarLoQueTengoCheckbox = document.getElementById("usarLoQueTengo");
+0321: 
+0322:   function actualizarEstadoFiltroBox() {
+0323:     if (!filtroBox || !usarLoQueTengoCheckbox) {
+0324:       return;
+0325:     }
+0326: 
+0327:     filtroBox.classList.toggle("is-active", usarLoQueTengoCheckbox.checked);
+0328:   }
+0329: 
+0330:   if (usarLoQueTengoCheckbox) {
+0331:     usarLoQueTengoCheckbox.addEventListener("change", actualizarEstadoFiltroBox);
+0332:     actualizarEstadoFiltroBox();
+0333:   }
+0334: 
+------------------------------------------------------------
+0315:         });
+0316:       }
+0317:     });
+0318:   
+0319:   const filtroBox = document.getElementById("loQueTengoFiltroBox");
+0320:   const usarLoQueTengoCheckbox = document.getElementById("usarLoQueTengo");
+0321: 
+0322:   function actualizarEstadoFiltroBox() {
+0323:     if (!filtroBox || !usarLoQueTengoCheckbox) {
+0324:       return;
+0325:     }
+0326: 
+0327:     filtroBox.classList.toggle("is-active", usarLoQueTengoCheckbox.checked);
+0328:   }
+0329: 
+0330:   if (usarLoQueTengoCheckbox) {
+0331:     usarLoQueTengoCheckbox.addEventListener("change", actualizarEstadoFiltroBox);
+0332:     actualizarEstadoFiltroBox();
+0333:   }
+0334: 
+0335: });
+0336: })();
+------------------------------------------------------------
+0319:   const filtroBox = document.getElementById("loQueTengoFiltroBox");
+0320:   const usarLoQueTengoCheckbox = document.getElementById("usarLoQueTengo");
+0321: 
+0322:   function actualizarEstadoFiltroBox() {
+0323:     if (!filtroBox || !usarLoQueTengoCheckbox) {
+0324:       return;
+0325:     }
+0326: 
+0327:     filtroBox.classList.toggle("is-active", usarLoQueTengoCheckbox.checked);
+0328:   }
+0329: 
+0330:   if (usarLoQueTengoCheckbox) {
+0331:     usarLoQueTengoCheckbox.addEventListener("change", actualizarEstadoFiltroBox);
+0332:     actualizarEstadoFiltroBox();
+0333:   }
+0334: 
+0335: });
+0336: })();
+------------------------------------------------------------
+0322:   function actualizarEstadoFiltroBox() {
+0323:     if (!filtroBox || !usarLoQueTengoCheckbox) {
+0324:       return;
+0325:     }
+0326: 
+0327:     filtroBox.classList.toggle("is-active", usarLoQueTengoCheckbox.checked);
+0328:   }
+0329: 
+0330:   if (usarLoQueTengoCheckbox) {
+0331:     usarLoQueTengoCheckbox.addEventListener("change", actualizarEstadoFiltroBox);
+0332:     actualizarEstadoFiltroBox();
+0333:   }
+0334: 
+0335: });
+0336: })();
+------------------------------------------------------------
+0323:     if (!filtroBox || !usarLoQueTengoCheckbox) {
+0324:       return;
+0325:     }
+0326: 
+0327:     filtroBox.classList.toggle("is-active", usarLoQueTengoCheckbox.checked);
+0328:   }
+0329: 
+0330:   if (usarLoQueTengoCheckbox) {
+0331:     usarLoQueTengoCheckbox.addEventListener("change", actualizarEstadoFiltroBox);
+0332:     actualizarEstadoFiltroBox();
+0333:   }
+0334: 
+0335: });
+0336: })();
+------------------------------------------------------------
+
+--- patrón: actualizarEstadoFiltroBox ---
+0314:           console.error(error);
+0315:         });
+0316:       }
+0317:     });
+0318:   
+0319:   const filtroBox = document.getElementById("loQueTengoFiltroBox");
+0320:   const usarLoQueTengoCheckbox = document.getElementById("usarLoQueTengo");
+0321: 
+0322:   function actualizarEstadoFiltroBox() {
+0323:     if (!filtroBox || !usarLoQueTengoCheckbox) {
+0324:       return;
+0325:     }
+0326: 
+0327:     filtroBox.classList.toggle("is-active", usarLoQueTengoCheckbox.checked);
+0328:   }
+0329: 
+0330:   if (usarLoQueTengoCheckbox) {
+0331:     usarLoQueTengoCheckbox.addEventListener("change", actualizarEstadoFiltroBox);
+0332:     actualizarEstadoFiltroBox();
+0333:   }
+0334: 
+0335: });
+0336: })();
+------------------------------------------------------------
+0323:     if (!filtroBox || !usarLoQueTengoCheckbox) {
+0324:       return;
+0325:     }
+0326: 
+0327:     filtroBox.classList.toggle("is-active", usarLoQueTengoCheckbox.checked);
+0328:   }
+0329: 
+0330:   if (usarLoQueTengoCheckbox) {
+0331:     usarLoQueTengoCheckbox.addEventListener("change", actualizarEstadoFiltroBox);
+0332:     actualizarEstadoFiltroBox();
+0333:   }
+0334: 
+0335: });
+0336: })();
+------------------------------------------------------------
+0324:       return;
+0325:     }
+0326: 
+0327:     filtroBox.classList.toggle("is-active", usarLoQueTengoCheckbox.checked);
+0328:   }
+0329: 
+0330:   if (usarLoQueTengoCheckbox) {
+0331:     usarLoQueTengoCheckbox.addEventListener("change", actualizarEstadoFiltroBox);
+0332:     actualizarEstadoFiltroBox();
+0333:   }
+0334: 
+0335: });
+0336: })();
+------------------------------------------------------------
+
+==========================================================================================
+BÚSQUEDAS EN AdminVideos/templates/AdminVideos/base.html
+==========================================================================================
+
+--- patrón: lo-que-tengo-filtro-box ---
+
+--- patrón: sidebar-special-items-fix ---
+0106:   #accordionSidebar .sidebar-dropdown-menu .dropdown-item.active,
+0107:   #accordionSidebar .sidebar-dropdown-menu .dropdown-item:active {
+0108:     color: #ffffff;
+0109:     background: #0d6efd;
+0110:   }
+0111: </style>
+0112: 
+0113: 
+0114: <style id="sidebar-special-items-fix">
+0115:   #accordionSidebar .sidebar-special-item {
+0116:     width: calc(100% - 1rem);
+0117:     margin: 0.25rem auto;
+0118:     border-radius: 0.75rem;
+0119:     background: rgba(25, 135, 84, 0.22);
+0120:     border: 1px solid rgba(255, 255, 255, 0.22);
+0121:     box-sizing: border-box;
+0122:   }
+0123: 
+0124:   #accordionSidebar .sidebar-special-item .nav-link {
+0125:     width: 100% !important;
+0126:     border-radius: 0.75rem;
+0127:     box-sizing: border-box;
+0128:   }
+------------------------------------------------------------
+
+--- patrón: sidebar-dropdown-menu-fix ---
+0069:       min-width: 0 !important;
+0070:       max-width: none !important;
+0071:       max-height: calc(100vh - 5rem);
+0072:     }
+0073:   }
+0074: </style>
+0075: 
+0076: 
+0077: <style id="sidebar-dropdown-menu-fix">
+0078:   #accordionSidebar .sidebar-dropdown-toggle {
+0079:     position: relative;
+0080:   }
+0081: 
+0082:   #accordionSidebar .sidebar-dropdown-toggle.dropdown-toggle::after {
+0083:     position: absolute;
+0084:     top: 3.2rem;
+0085:     right: 0.55rem;
+0086:     margin-left: 0;
+0087:   }
+0088: 
+0089:   #accordionSidebar .sidebar-dropdown-menu {
+0090:     background: #263445;
+0091:     border: 1px solid rgba(255, 255, 255, 0.25);
+------------------------------------------------------------

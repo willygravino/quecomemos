@@ -4,27 +4,48 @@
 
 {% block filtro %}
 
-<style id="lo-que-tengo-filtro-box-style">
-  .lo-que-tengo-filtro-box {
-    background: rgba(255, 255, 255, 0.65);
-    border-color: rgba(25, 135, 84, 0.35) !important;
-    transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
+<style id="filtros-platos-visual-style">
+  .filtros-platos-card .btn-filtro-plato {
+    color: var(--bs-secondary-color, #6c757d);
+    background: var(--bs-white, #fff);
+    border-color: var(--bs-border-color, #dee2e6);
   }
 
-  .lo-que-tengo-filtro-box.is-active {
-    background: rgba(220, 53, 69, 0.16);
-    border-color: rgba(220, 53, 69, 0.75) !important;
-    box-shadow: 0 0 0 .12rem rgba(220, 53, 69, 0.18);
+  .filtros-platos-card .btn-filtro-plato:hover {
+    color: var(--bs-body-color, #212529);
+    background: var(--bs-light, #f8f9fa);
+    border-color: var(--bs-danger, #dc3545);
   }
 
-  .lo-que-tengo-filtro-box.is-active .btn {
-    border-color: rgba(220, 53, 69, 0.85);
-    color: #dc3545;
+  .filtros-platos-card .btn-check:checked + .btn-filtro-plato {
+    color: var(--bs-body-color, #212529);
+    background: var(--bs-white, #fff);
+    border-color: var(--bs-danger, #dc3545);
+    box-shadow: 0 0 0 .12rem rgba(var(--bs-danger-rgb, 220, 53, 69), .14);
+    font-weight: 600;
   }
 
-  .lo-que-tengo-filtro-box.is-active .form-check-label {
-    color: #842029;
-    font-weight: 700;
+  .filtros-platos-card .btn-check:checked + .btn-filtro-plato i {
+    color: var(--bs-danger, #dc3545);
+  }
+
+  .filtros-platos-card .filtro-keyword-box .input-group-text,
+  .filtros-platos-card .filtro-keyword-box .form-control {
+    background: var(--bs-white, #fff);
+  }
+
+  .filtros-platos-card .filtro-keyword-box.filtro-keyword-activo .input-group-text,
+  .filtros-platos-card .filtro-keyword-box.filtro-keyword-activo .form-control {
+    border-color: var(--bs-danger, #dc3545);
+  }
+
+  .filtros-platos-card .filtro-keyword-box.filtro-keyword-activo .input-group-text {
+    color: var(--bs-danger, #dc3545);
+  }
+
+  .filtros-platos-card .filtro-keyword-box.filtro-keyword-activo .form-control {
+    color: var(--bs-danger, #dc3545);
+    font-weight: 600;
   }
 </style>
 
@@ -32,76 +53,85 @@
 <form
   method="POST"
   id="form-filtros-platos"
+  class="mb-3"
   data-listado-url="{% url 'ajax_listado_platos' %}">
-  <div class="d-flex justify-content-start mx-1 gap-4 flex-wrap">
 
-    {% csrf_token %}
+  {% csrf_token %}
 
-    <input type="hidden" name="tipopag" value="{{ tipopag }}">
+  <input type="hidden" name="tipopag" value="{{ tipopag }}">
 
-    <div class="input-group w-auto">
-      <input
-        type="search"
-        class="form-control {% if formulario.palabra_clave.value %} border-danger text-danger {% endif %}"
-        placeholder="Buscar por palabra clave"
-        name="palabra_clave"
-        value="{{ formulario.palabra_clave.value|default:'' }}">
-    </div>
+  <div class="card border-0 shadow-sm rounded-3 bg-white filtros-platos-card">
+    <div class="card-body px-3 py-2">
+      <div class="d-flex align-items-center gap-2 flex-wrap">
 
-    <div class="form-check">
-      <input
-        class="form-check-input"
-        type="checkbox"
-        name="quecomemos"
-        value="quecomemos"
-        id="quecomemos"
-        {% if quecomemos_ck == "quecomemos" %}checked{% endif %}
-      >
-      <label class="form-check-label small" for="quecomemos">
-        Sugerencia <br> quecomemos
-      </label>
-    </div>
+        <div class="input-group input-group-sm w-auto flex-grow-1 filtro-keyword-box {% if formulario.palabra_clave.value %}filtro-keyword-activo{% endif %}" style="max-width: 360px;">
+          <span class="input-group-text">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </span>
 
-    <div class="form-check">
-      <input
-        class="form-check-input"
-        type="checkbox"
-        name="misplatos"
-        value="misplatos"
-        id="misplatos"
-        {% if misplatos_ck == "misplatos" %}checked{% endif %}
-      >
-      <label class="form-check-label small" for="misplatos">
-        Mis platos
-      </label>
-    </div>
+          <input
+            type="search"
+            class="form-control {% if formulario.palabra_clave.value %}text-danger fw-semibold{% endif %}"
+            placeholder="Buscar por palabra clave"
+            name="palabra_clave"
+            value="{{ formulario.palabra_clave.value|default:'' }}">
+        </div>
 
-    <div
-      id="loQueTengoFiltroBox"
-      class="lo-que-tengo-filtro-box border rounded px-2 py-1 d-flex align-items-center gap-2 flex-wrap {% if usar_lo_que_tengo_ck == "1" %}is-active{% endif %}">
-      <button
-        type="button"
-        class="btn btn-sm btn-outline-success"
-        data-bs-toggle="modal"
-        data-bs-target="#loQueTengoModal">
-        Lo que tengo <span id="loQueTengoContador"></span>
-      </button>
-
-      <div class="form-check mb-0">
         <input
-          class="form-check-input"
+          class="btn-check"
           type="checkbox"
-          name="usar_lo_que_tengo"
-          value="1"
-          id="usarLoQueTengo"
-          {% if usar_lo_que_tengo_ck == "1" %}checked{% endif %}
+          name="quecomemos"
+          value="quecomemos"
+          id="quecomemos"
+          autocomplete="off"
+          {% if quecomemos_ck == "quecomemos" %}checked{% endif %}
         >
-        <label class="form-check-label small" for="usarLoQueTengo">
-          Usar para filtrar
+        <label class="btn btn-sm btn-filtro-plato mb-0" for="quecomemos">
+          <i class="fa-solid fa-wand-magic-sparkles me-1"></i>
+          Sugerencia quecomemos
         </label>
+
+        <input
+          class="btn-check"
+          type="checkbox"
+          name="misplatos"
+          value="misplatos"
+          id="misplatos"
+          autocomplete="off"
+          {% if misplatos_ck == "misplatos" %}checked{% endif %}
+        >
+        <label class="btn btn-sm btn-filtro-plato mb-0" for="misplatos">
+          <i class="fa-solid fa-user me-1"></i>
+          Mis platos
+        </label>
+
+        <div class="input-group input-group-sm w-auto">
+
+          <button
+            type="button"
+            class="btn btn-primary fw-semibold"
+            data-bs-toggle="modal"
+            data-bs-target="#loQueTengoModal">
+            <i class="fa-solid fa-basket-shopping me-1"></i>
+            Lo que tengo <span id="loQueTengoContador"></span>
+          </button>
+
+          <input
+            class="btn-check"
+            type="checkbox"
+            name="usar_lo_que_tengo"
+            value="1"
+            id="usarLoQueTengo"
+            autocomplete="off"
+            {% if usar_lo_que_tengo_ck == "1" %}checked{% endif %}
+          >
+          <label class="btn btn-filtro-plato mb-0" for="usarLoQueTengo">
+            Usar para filtrar
+          </label>
+        </div>
+
       </div>
     </div>
-
   </div>
 </form>
 
@@ -159,7 +189,7 @@
 </div>
 
 
-<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=12"></script>
-<script src="{% static 'AdminVideos/js/lo_que_tengo.js' %}?v=2"></script>
+<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=15"></script>
+<script src="{% static 'AdminVideos/js/lo_que_tengo.js' %}?v=3"></script>
 
 {% endblock %}
