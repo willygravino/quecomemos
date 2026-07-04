@@ -1,0 +1,199 @@
+    <div class="list-group-item text-dark px-2 py-2 border-bottom border-secondary-subtle list-group-item-action plato-row"
+      data-row
+      data-plato-id="{{ plato.id }}">
+
+   
+        <div class="d-flex align-items-center gap-2">
+
+          <!-- Checkbox -->
+          <div class="form-check m-0">
+            <input class="form-check-input js-plato-select"
+              type="checkbox"
+              name="platos_selected"
+              value="{{ plato.id }}">
+
+          </div>
+
+
+          <!-- Thumb chico (abre asignarPlatoModal como antes) -->
+          <div class="flex-shrink-0">
+            <a href="#"
+               data-bs-toggle="modal"
+               data-bs-target="#asignarPlatoModal"
+               onclick="setPlatoInfo('{{ plato.id }}', 'plato', '{{ plato.nombre_plato }}')"
+               class="d-inline-block text-decoration-none">
+
+              <img src="{{ plato.image_url }}"
+                   style="width: 38px; height: 38px; object-fit: cover; border-radius: 8px;"
+                   class="
+                   {% if user.id == plato.propietario.id and not plato.proviene_de %}
+                     sombra-verde
+                   {% elif user.id == plato.propietario.id and plato.proviene_de %}
+                     sombra-naranja
+                   {% else %}
+                     sombra-violeta
+                   {% endif %}"
+                   alt="Imagen del Plato">
+            </a>
+          </div>
+
+          <!-- Centro: nombre + badge -->
+          <div class="flex-grow-1 min-w-0">
+
+            <div class="d-flex align-items-center gap-2 min-w-0">
+
+              <!-- Nombre (trunca como lista de mails) -->
+              <div class="fw-semibold text-truncate">
+                {% if plato.variedades_count > 0 %}
+                  {{ plato.nombre_para_front }}
+                {% else %}
+                  {{ plato.nombre_plato }}
+                {% endif %}
+              </div>
+
+              <!-- Badge variedades -->
+              {% if plato.variedades_count > 0 %}
+                <span class="badge rounded-pill bg-secondary-subtle text-dark flex-shrink-0">
+                  📁 {{ plato.variedades_count|add:"1" }}
+                </span>
+              {% endif %}
+
+            </div>
+
+            <!-- Sub-línea opcional (si querés meter meta info) -->
+            {# <div class="small text-muted text-truncate">Algún dato extra...</div> #}
+
+          </div>
+
+          <!-- Acciones (desktop) -->
+          <div class="d-none d-md-flex align-items-center gap-1 flex-shrink-0">
+
+            {% if amigues %}
+              <a href="#"
+                 data-bs-toggle="modal"
+                 data-bs-target="#compartirModal"
+                 onclick="setPlatoInfo('{{ plato.id }}', 'plato')"
+                 class="btn btn-sm btn-outline-primary"
+                 title="Compartir"
+                 aria-label="Compartir">
+                <i class="fa-solid fa-share-nodes"></i>
+              </a>
+            {% endif %}
+
+                {% if plato.id %}
+                  <a class="btn btn-sm btn-outline-primary js-plato-ingredientes"
+                    href="#"
+                    data-url="{% url 'plato_ingredientes' plato.id %}">
+                    <i class="fa-solid fa-list-check"></i>
+                  </a>
+                {% else %}
+                  <span class="dropdown-item text-muted">
+                    <i class="fa-solid fa-list-check me-2"></i> Ingredientes
+                  </span>
+                {% endif %}
+
+              {% if plato.propietario == request.user %}
+                <a href="{% url 'videos-update' plato.id %}?return_to={{ request.get_full_path|urlencode }}{% if tipopag %}&tipopag={{ tipopag|urlencode }}{% endif %}"
+                  class="btn btn-sm btn-outline-primary"
+                  title="Editar"
+                  aria-label="Editar">
+                  <i class="fa-regular fa-pen-to-square"></i>
+                </a>
+
+              {% else %}
+                <a href="#"
+                  class="btn btn-sm btn-outline-primary js-ver-detalle-plato"
+                  data-detail-url="{% url 'platos-detail' plato.id %}"
+                  title="Ver detalle"
+                  aria-label="Ver detalle">
+                  <i class="fa-regular fa-eye"></i>
+                </a>
+              {% endif %}
+
+              <a href="#"
+                data-bs-toggle="modal"
+                data-bs-target="#confirmActionModal"
+                data-confirm-title="Eliminar plato"
+                data-confirm-body="¿Seguro que querés borrar {{ plato.nombre_plato|escape }}?"
+                data-confirm-hint="También se borrarán las programaciones de este plato y sus variedades. Esta acción no se puede deshacer."
+                data-confirm-action="{% url 'eliminar-plato' plato.id %}?return_to={{ request.get_full_path|urlencode }}"
+                data-confirm-btn="Sí, borrar"
+                class="btn btn-sm btn-outline-primary"
+                title="Eliminar"
+                aria-label="Eliminar plato">
+                <i class="fa-solid fa-trash-can"></i>
+              </a>
+
+          </div>
+
+          <!-- Menú ⋯ (mobile / fallback) -->
+          <div class="dropdown d-md-none flex-shrink-0">
+            <button class="btn btn-sm btn-light py-0 px-3"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    title="Opciones"
+                    aria-label="Opciones">
+              <i class="fa-solid fa-ellipsis-vertical"></i>
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-end">
+
+              <li>
+                <a class="dropdown-item js-plato-ingredientes"
+                  href="#"
+                  data-url="{% url 'plato_ingredientes' plato.id %}">
+                  <i class="fa-solid fa-list-check me-2"></i> Ingredientes
+                </a>
+              </li>
+
+              {% if plato.propietario == request.user %}
+                <li>
+                  <a class="dropdown-item"
+                    href="{% url 'videos-update' plato.id %}?return_to={{ request.get_full_path|urlencode }}{% if tipopag %}&tipopag={{ tipopag|urlencode }}{% endif %}">
+                    <i class="fa-solid fa-pen-to-square me-2"></i> Editar
+                  </a>
+                </li>
+              {% else %}
+                <li>
+                  <a class="dropdown-item js-ver-detalle-plato"
+                    href="#"
+                    data-detail-url="{% url 'platos-detail' plato.id %}">
+                    <i class="fa-solid fa-eye me-2"></i> Ver detalle
+                  </a>
+                </li>
+              {% endif %}
+
+              {% if amigues %}
+                <li>
+                  <a class="dropdown-item"
+                     href="#"
+                     data-bs-toggle="modal"
+                     data-bs-target="#compartirModal"
+                     onclick="setPlatoInfo('{{ plato.id }}', 'plato')">
+                    <i class="fa-solid fa-share-nodes me-2"></i> Compartir
+                  </a>
+                </li>
+              {% endif %}
+
+              <li><hr class="dropdown-divider"></li>
+
+              <li>
+                <a class="dropdown-item text-danger"
+                  href="#"
+                  data-bs-toggle="modal"
+                  data-bs-target="#confirmActionModal"
+                  data-confirm-title="Eliminar plato"
+                  data-confirm-body="¿Seguro que querés borrar <strong>{{ plato.nombre_plato|escape }}</strong>?"
+                  data-confirm-hint="También se borrarán las programaciones de este plato y sus variedades. Esta acción no se puede deshacer."
+                  data-confirm-action="{% url 'eliminar-plato' plato.id %}"
+                  data-confirm-btn="Sí, borrar">
+                  <i class="fa-solid fa-trash-can me-2"></i> Eliminar
+                </a>
+              </li>
+
+            </ul>
+          </div>
+
+        </div>
+      </div>

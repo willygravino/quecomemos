@@ -2992,6 +2992,46 @@ def obtener_resultados_principales(
     return lugares, platos, platos_carousel, platos_listado
 
 
+
+ORDEN_GRUPOS_LO_QUE_TENGO = [
+    ("Principal", "Platos Principales", ("Principal",)),
+    ("Entrada", "Entradas", ("Entrada",)),
+    ("Dip", "Dips y Salsas", ("Dip", "Salsa")),
+    ("Guarnicion", "Guarniciones", ("Guarnicion", "Guarnición")),
+    ("Picada", "Picadas", ("Picada",)),
+    ("Postre", "Postres / Reposterías", ("Postre", "Torta")),
+    ("Trago", "Bebidas / Tragos", ("Trago",)),
+]
+
+
+def agrupar_platos_para_lo_que_tengo(platos):
+    platos_lista = list(platos)
+    usados = set()
+    grupos = []
+
+    for codigo, titulo, tipos_grupo in ORDEN_GRUPOS_LO_QUE_TENGO:
+        platos_grupo = []
+
+        for plato in platos_lista:
+            if plato.id in usados:
+                continue
+
+            tipos_plato = plato.tipos or ""
+
+            if any(tipo in tipos_plato for tipo in tipos_grupo):
+                platos_grupo.append(plato)
+                usados.add(plato.id)
+
+        if platos_grupo:
+            grupos.append({
+                "codigo": codigo,
+                "titulo": titulo,
+                "platos": platos_grupo,
+            })
+
+    return grupos
+
+
 def obtener_extras_platos(usuario):
     guarniciones = (
         Plato.objects
@@ -3104,9 +3144,16 @@ def FiltroDePlatos(request):
 
     guarniciones, salsas = obtener_extras_platos(usuario)
 
+    platos_agrupados_lo_que_tengo = (
+        agrupar_platos_para_lo_que_tengo(platos_listado)
+        if tipopag == "LoQueTengo"
+        else None
+    )
+
     contexto = {
                 'formulario': form,
                 'platos': platos_listado,
+                "platos_agrupados_lo_que_tengo": platos_agrupados_lo_que_tengo,
                 "carousel_items": platos_carousel,
                 "dias_desde_hoy": dias_desde_hoy,
                 "dias_programados": dias_programados,
@@ -3166,8 +3213,15 @@ def ajax_listado_platos(request):
         usar_lo_que_tengo=usar_lo_que_tengo,
     )
 
+    platos_agrupados_lo_que_tengo = (
+        agrupar_platos_para_lo_que_tengo(platos_listado)
+        if tipopag == "LoQueTengo"
+        else None
+    )
+
     contexto = {
         "platos": platos_listado,
+        "platos_agrupados_lo_que_tengo": platos_agrupados_lo_que_tengo,
         "carousel_items": platos_carousel,
         "lugares": lugares,
         "amigues": obtener_usernames_amigues(request.user),
