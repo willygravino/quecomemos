@@ -76,6 +76,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const url = form.dataset.listadoUrl;
     const formData = new FormData(form);
 
+    formData.set("return_to", window.location.pathname + window.location.search);
+
     fetch(url, {
       method: "POST",
       body: formData,

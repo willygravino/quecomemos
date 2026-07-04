@@ -93,7 +93,7 @@
                 {% endif %}
 
               {% if plato.propietario == request.user %}
-                <a href="{% url 'videos-update' plato.id %}?return_to={{ request.get_full_path|urlencode }}{% if tipopag %}&tipopag={{ tipopag|urlencode }}{% endif %}"
+                <a href="{% url 'videos-update' plato.id %}?return_to={{ return_to_url|urlencode }}{% if tipopag %}&tipopag={{ tipopag|urlencode }}{% endif %}"
                   class="btn btn-sm btn-outline-primary"
                   title="Editar"
                   aria-label="Editar">
@@ -116,7 +116,7 @@
                 data-confirm-title="Eliminar plato"
                 data-confirm-body="¿Seguro que querés borrar {{ plato.nombre_plato|escape }}?"
                 data-confirm-hint="También se borrarán las programaciones de este plato y sus variedades. Esta acción no se puede deshacer."
-                data-confirm-action="{% url 'eliminar-plato' plato.id %}?return_to={{ request.get_full_path|urlencode }}"
+                data-confirm-action="{% url 'eliminar-plato' plato.id %}?return_to={{ return_to_url|urlencode }}"
                 data-confirm-btn="Sí, borrar"
                 class="btn btn-sm btn-outline-primary"
                 title="Eliminar"
@@ -150,7 +150,7 @@
               {% if plato.propietario == request.user %}
                 <li>
                   <a class="dropdown-item"
-                    href="{% url 'videos-update' plato.id %}?return_to={{ request.get_full_path|urlencode }}{% if tipopag %}&tipopag={{ tipopag|urlencode }}{% endif %}">
+                    href="{% url 'videos-update' plato.id %}?return_to={{ return_to_url|urlencode }}{% if tipopag %}&tipopag={{ tipopag|urlencode }}{% endif %}">
                     <i class="fa-solid fa-pen-to-square me-2"></i> Editar
                   </a>
                 </li>

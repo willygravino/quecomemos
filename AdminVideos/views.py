@@ -3150,9 +3150,12 @@ def FiltroDePlatos(request):
         else None
     )
 
+    return_to_url = request.get_full_path()
+
     contexto = {
                 'formulario': form,
                 'platos': platos_listado,
+                "return_to_url": return_to_url,
                 "platos_agrupados_lo_que_tengo": platos_agrupados_lo_que_tengo,
                 "carousel_items": platos_carousel,
                 "dias_desde_hoy": dias_desde_hoy,
@@ -3219,8 +3222,11 @@ def ajax_listado_platos(request):
         else None
     )
 
+    return_to_url = request.POST.get("return_to") or reverse("filtro-de-platos")
+
     contexto = {
         "platos": platos_listado,
+        "return_to_url": return_to_url,
         "platos_agrupados_lo_que_tengo": platos_agrupados_lo_que_tengo,
         "carousel_items": platos_carousel,
         "lugares": lugares,

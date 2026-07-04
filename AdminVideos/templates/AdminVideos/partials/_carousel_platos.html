@@ -120,7 +120,7 @@
                     {% endif %}
 
                     {% if grupo.propietario == request.user %}
-                      <a href="{% url 'videos-update' grupo.id %}?return_to={{ request.get_full_path|urlencode }}"
+                      <a href="{% url 'videos-update' grupo.id %}?return_to={{ return_to_url|urlencode }}"
                         class="btn btn-sm btn-outline-dark">
                         <i class="fa-regular fa-pen-to-square me-1"></i> Editar
                       </a>
@@ -132,7 +132,7 @@
                         data-confirm-title="Eliminar plato"
                         data-confirm-body="¿Seguro que querés borrar {{ grupo.nombre_plato|escape }}?"
                         data-confirm-hint="También se borrarán las programaciones de este plato y sus variedades. Esta acción no se puede deshacer."
-                        data-confirm-action="{% url 'eliminar-plato' grupo.id %}?return_to={{ request.get_full_path|urlencode }}"
+                        data-confirm-action="{% url 'eliminar-plato' grupo.id %}?return_to={{ return_to_url|urlencode }}"
                         data-confirm-btn="Sí, borrar">
                         <i class="fa-solid fa-trash-can me-1"></i> Eliminar
                       </a>
@@ -193,7 +193,7 @@
 
                                   {% if grupo.propietario == request.user %}
 
-                                    <a href="{% url 'videos-update' v.id %}?return_to={{ request.get_full_path|urlencode }}
+                                    <a href="{% url 'videos-update' v.id %}?return_to={{ return_to_url|urlencode }}
 "
                                       class="btn btn-sm btn-outline-dark py-0 px-2"
                                       title="Editar">
