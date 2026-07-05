@@ -16,12 +16,9 @@
       $('.sidebar .collapse').collapse('hide');
     };
     
-    // Toggle the side navigation when window is resized below 480px
-    if ($(window).width() < 480 && !$(".sidebar").hasClass("toggled")) {
-      $("body").addClass("sidebar-toggled");
-      $(".sidebar").addClass("toggled");
-      $('.sidebar .collapse').collapse('hide');
-    };
+    // No cerramos automáticamente el sidebar bajo 480px.
+    // En mobile, scrollear puede disparar resize por la barra del navegador
+    // y eso cerraba la barra lateral mientras el usuario intentaba elegir.
   });
 
   // Prevent the content wrapper from scrolling when the fixed side navigation hovered over
