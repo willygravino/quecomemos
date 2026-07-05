@@ -1360,6 +1360,36 @@ def _add_qs(url, **params):
     return urlunparse(parts._replace(query=urlencode(q)))
 
 
+
+TITULOS_FORMULARIO_PLATO = {
+    "Principal": "Agregar un plato principal",
+    "Entrada": "Agregar una entrada",
+    "Guarnicion": "Agregar una guarnición",
+    "Dip": "Agregar un dip",
+    "Salsa": "Agregar una salsa",
+    "Picada": "Agregar una picada",
+    "Ingrediente de picada": "Agregar un ingrediente de picada",
+    "Postre": "Agregar un postre",
+    "Trago": "Agregar una bebida / trago",
+}
+
+
+def titulo_formulario_plato(tipopag, accion="Agregar"):
+    tipo = (tipopag or "Principal").strip()
+    titulo = TITULOS_FORMULARIO_PLATO.get(tipo)
+
+    if titulo and accion == "Agregar":
+        return titulo
+
+    if accion == "Editar":
+        return "Editar plato"
+
+    if accion == "Agregar variedad":
+        return "Agregar variedad"
+
+    return f"{accion} plato"
+
+
 class PlatoCreate(LoginRequiredMixin, CreateView):
     model = Plato
     form_class = PlatoForm
@@ -1447,6 +1477,7 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         template_param = self.request.GET.get('tipopag')
         context['items'] = [k for (k, _) in Plato.TIPOS_CHOICES]
         context['tipopag'] = template_param
+        context["titulo_formulario"] = titulo_formulario_plato(template_param, accion="Agregar")
 
         if self.request.method == 'POST':
             context['ingrediente_formset'] = IngredienteEnPlatoFormSet(self.request.POST)
@@ -1595,6 +1626,7 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
                 f.initial["nombre_ingrediente"] = getattr(ing, "nombre", "") if ing else ""
 
         context["ingrediente_formset"] = formset
+        context["titulo_formulario"] = "Editar plato"
 
         # 👉 TIPOS: enviar TODOS al template (para render del menú lateral)
         context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
@@ -1819,6 +1851,7 @@ class PlatoVariedadCreate(PlatoCreate):
         context["tipopag"] = tipopag
 
         context["plato_padre_obj"] = self.padre
+        context["titulo_formulario"] = f"Agregar variedad de {self.padre.nombre_plato}"
 
         if self.request.method == "POST":
             context["ingrediente_formset"] = IngredienteEnPlatoFormSet(self.request.POST)

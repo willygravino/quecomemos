@@ -7,7 +7,11 @@
     <section class="py-1 text-center text-white container">
         <div class="row py-lg-1">
             <div class="col-lg-8 col-md-8 mx-auto">
-                {% block tipo-de-formulario %}{% endblock %}
+                {% block tipo-de-formulario %}
+                  {% if titulo_formulario %}
+                    <h1 class="fw-light mb-0">{{ titulo_formulario }}</h1>
+                  {% endif %}
+                {% endblock %}
                 <!-- <h4 class="fw-light">PLATO PRINCIPAL.</h4> -->
                 <!-- <h5 class="fw-bold">FORMULARIO PARA REFACTORIZACIÓN.</h5> -->
             </div>
