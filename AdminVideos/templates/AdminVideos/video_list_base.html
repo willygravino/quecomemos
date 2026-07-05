@@ -40,21 +40,6 @@
 
 {% endcomment %}
 
-
-  
-<!-- Modal detalle de plato desde listado Gmail -->
-<div class="modal fade" id="platoDetalleModal" tabindex="-1" aria-labelledby="platoDetalleModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header py-2">
-        <h5 class="modal-title" id="platoDetalleModalLabel">Detalle del plato</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body" id="platoDetalleModalBody"></div>
-    </div>
-  </div>
-</div>
-
 <!-- Modal para compartir plato -->
   <div class="modal fade" id="compartirModal" tabindex="-1" aria-labelledby="compartirModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -93,44 +78,80 @@
   </div>
 
 
-
 <script>
-// MODAL DETALLE PLATO DESDE LISTADO GMAIL
+// LISTADO GMAIL COMO ÍNDICE DEL CAROUSEL
+// ----------------------------------------------------
+// - Click en una fila: mueve #platosCarousel al plato.
+// - Cambio de slide: marca la fila activa.
+// - NO toca los checkboxes .js-plato-select ni acciones masivas.
 (function () {
-  function abrirModalDetalle(trigger) {
-    const templateId = trigger.dataset.templateId;
-    const nombre = trigger.dataset.platoNombre || "Detalle del plato";
-    const template = templateId ? document.getElementById(templateId) : null;
-    const modalEl = document.getElementById("platoDetalleModal");
-    const modalBody = document.getElementById("platoDetalleModalBody");
-    const modalTitle = document.getElementById("platoDetalleModalLabel");
+  function getCarouselEl() {
+    return document.getElementById("platosCarousel");
+  }
 
-    if (!template || !modalEl || !modalBody) return;
+  function getRows() {
+    return Array.from(document.querySelectorAll("#contenedor-listado-platos .plato-row[data-plato-id]"));
+  }
 
-    modalBody.innerHTML = template.innerHTML;
+  function getSlides(carouselEl) {
+    if (!carouselEl) return [];
+    return Array.from(carouselEl.querySelectorAll(".carousel-item[data-plato-id]"));
+  }
 
-    if (modalTitle) {
-      modalTitle.textContent = nombre;
-    }
+  function setFilaActiva(platoId) {
+    getRows().forEach(function (row) {
+      const activa = row.dataset.platoId === platoId;
+      row.classList.toggle("is-carousel-active", activa);
 
-    if (window.bootstrap && bootstrap.Modal) {
-      bootstrap.Modal.getOrCreateInstance(modalEl).show(trigger);
-    }
+      if (activa) {
+        row.setAttribute("aria-current", "true");
+      } else {
+        row.removeAttribute("aria-current");
+      }
+    });
+  }
+
+  function syncDesdeCarousel() {
+    const carouselEl = getCarouselEl();
+    if (!carouselEl) return;
+
+    const activeSlide = carouselEl.querySelector(".carousel-item.active[data-plato-id]");
+    if (!activeSlide) return;
+
+    setFilaActiva(activeSlide.dataset.platoId);
+  }
+
+  function moverCarouselAPlato(platoId) {
+    const carouselEl = getCarouselEl();
+    if (!carouselEl || !window.bootstrap || !bootstrap.Carousel) return;
+
+    const slides = getSlides(carouselEl);
+    const index = slides.findIndex(function (slide) {
+      return slide.dataset.platoId === platoId;
+    });
+
+    if (index < 0) return;
+
+    const carousel = bootstrap.Carousel.getOrCreateInstance(carouselEl, {
+      interval: false,
+      ride: false
+    });
+
+    carousel.to(index);
+    setFilaActiva(platoId);
   }
 
   document.addEventListener("click", function (event) {
+    // Importante: el checkbox sigue siendo sólo para selección masiva.
     if (event.target.closest(".js-plato-select")) {
       return;
     }
 
-    const trigger = event.target.closest(".js-abrir-detalle-plato");
-
-    if (!trigger) {
-      return;
-    }
+    const row = event.target.closest(".js-plato-carousel-index[data-plato-id]");
+    if (!row) return;
 
     event.preventDefault();
-    abrirModalDetalle(trigger);
+    moverCarouselAPlato(row.dataset.platoId);
   });
 
   document.addEventListener("keydown", function (event) {
@@ -142,17 +163,37 @@
       return;
     }
 
-    const trigger = event.target.closest(".js-abrir-detalle-plato");
-
-    if (!trigger) {
-      return;
-    }
+    const row = event.target.closest(".js-plato-carousel-index[data-plato-id]");
+    if (!row) return;
 
     event.preventDefault();
-    abrirModalDetalle(trigger);
+    moverCarouselAPlato(row.dataset.platoId);
+  });
+
+  document.addEventListener("slid.bs.carousel", function (event) {
+    if (event.target && event.target.id === "platosCarousel") {
+      syncDesdeCarousel();
+    }
+  });
+
+  document.addEventListener("DOMContentLoaded", syncDesdeCarousel);
+
+  // Si el listado/carousel se reemplaza por AJAX, resincronizamos.
+  const observer = new MutationObserver(function () {
+    window.requestAnimationFrame(syncDesdeCarousel);
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    ["contenedor-carousel-platos", "contenedor-listado-platos"].forEach(function (id) {
+      const el = document.getElementById(id);
+      if (el) {
+        observer.observe(el, { childList: true, subtree: true });
+      }
+    });
   });
 })();
 </script>
+
 
 <script>
 // ==========================================

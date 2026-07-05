@@ -1,7 +1,6 @@
-<div class="list-group-item text-dark px-2 py-2 border-bottom border-secondary-subtle list-group-item-action plato-row js-abrir-detalle-plato"
+<div class="list-group-item text-dark px-2 py-2 border-bottom border-secondary-subtle list-group-item-action plato-row js-plato-carousel-index"
      data-row
      data-plato-id="{{ plato.id }}"
-     data-template-id="platoDetalleTemplate-{{ plato.id }}"
      data-plato-nombre="{% if plato.variedades_count > 0 %}{{ plato.nombre_para_front|escape }}{% else %}{{ plato.nombre_plato|escape }}{% endif %}"
      role="button"
      tabindex="0">
@@ -26,7 +25,3 @@
 
   </div>
 </div>
-
-<template id="platoDetalleTemplate-{{ plato.id }}">
-  {% include "AdminVideos/partials/_plato_card_detalle.html" with plato_detalle=plato %}
-</template>

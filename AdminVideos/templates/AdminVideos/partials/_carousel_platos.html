@@ -27,7 +27,8 @@
       <div class="carousel-inner">
 
         {% for grupo in carousel_items %}
-          <div class="carousel-item {% if forloop.first %}active{% endif %}">
+          <div class="carousel-item {% if forloop.first %}active{% endif %}"
+               data-plato-id="{{ grupo.id }}">
             <div class="d-flex justify-content-center py-2">
               <div class="w-100" style="max-width: 720px;">
                 {% include "AdminVideos/partials/_plato_card_detalle.html" with plato_detalle=grupo %}

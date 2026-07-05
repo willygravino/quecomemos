@@ -529,16 +529,17 @@ section > .d-flex {
   line-height: 1.2;
 }
 
-/* Modal detalle de plato desde listado Gmail */
-.plato-row.js-abrir-detalle-plato {
+/* Listado Gmail como índice del carousel */
+.plato-row.js-plato-carousel-index {
   cursor: pointer;
 }
 
-#platoDetalleModal .plato-detalle-card {
-  max-width: 720px;
-  margin: 0 auto;
+/* Fila Gmail que corresponde al slide visible del carousel */
+.plato-row.is-carousel-active {
+  border-left: 4px solid #4e73df;
+  background: rgba(78, 115, 223, .10);
 }
 
-#platoDetalleModal .modal-body {
-  background: #f8f9fc;
+.plato-row.is-selected.is-carousel-active {
+  background: rgba(13, 110, 253, .18);
 }
