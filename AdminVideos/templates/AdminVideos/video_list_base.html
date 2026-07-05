@@ -41,7 +41,21 @@
 {% endcomment %}
 
 
-  <!-- Modal para compartir plato -->
+  
+<!-- Modal detalle de plato desde listado Gmail -->
+<div class="modal fade" id="platoDetalleModal" tabindex="-1" aria-labelledby="platoDetalleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header py-2">
+        <h5 class="modal-title" id="platoDetalleModalLabel">Detalle del plato</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body" id="platoDetalleModalBody"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para compartir plato -->
   <div class="modal fade" id="compartirModal" tabindex="-1" aria-labelledby="compartirModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -78,6 +92,67 @@
     </div>
   </div>
 
+
+
+<script>
+// MODAL DETALLE PLATO DESDE LISTADO GMAIL
+(function () {
+  function abrirModalDetalle(trigger) {
+    const templateId = trigger.dataset.templateId;
+    const nombre = trigger.dataset.platoNombre || "Detalle del plato";
+    const template = templateId ? document.getElementById(templateId) : null;
+    const modalEl = document.getElementById("platoDetalleModal");
+    const modalBody = document.getElementById("platoDetalleModalBody");
+    const modalTitle = document.getElementById("platoDetalleModalLabel");
+
+    if (!template || !modalEl || !modalBody) return;
+
+    modalBody.innerHTML = template.innerHTML;
+
+    if (modalTitle) {
+      modalTitle.textContent = nombre;
+    }
+
+    if (window.bootstrap && bootstrap.Modal) {
+      bootstrap.Modal.getOrCreateInstance(modalEl).show(trigger);
+    }
+  }
+
+  document.addEventListener("click", function (event) {
+    if (event.target.closest(".js-plato-select")) {
+      return;
+    }
+
+    const trigger = event.target.closest(".js-abrir-detalle-plato");
+
+    if (!trigger) {
+      return;
+    }
+
+    event.preventDefault();
+    abrirModalDetalle(trigger);
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    if (event.target.closest(".js-plato-select")) {
+      return;
+    }
+
+    const trigger = event.target.closest(".js-abrir-detalle-plato");
+
+    if (!trigger) {
+      return;
+    }
+
+    event.preventDefault();
+    abrirModalDetalle(trigger);
+  });
+})();
+</script>
 
 <script>
 // ==========================================

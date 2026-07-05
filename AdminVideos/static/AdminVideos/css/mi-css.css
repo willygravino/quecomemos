@@ -528,3 +528,17 @@ section > .d-flex {
   font-size: clamp(0.95rem, 2.2vw, 1.15rem);
   line-height: 1.2;
 }
+
+/* Modal detalle de plato desde listado Gmail */
+.plato-row.js-abrir-detalle-plato {
+  cursor: pointer;
+}
+
+#platoDetalleModal .plato-detalle-card {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+#platoDetalleModal .modal-body {
+  background: #f8f9fc;
+}
