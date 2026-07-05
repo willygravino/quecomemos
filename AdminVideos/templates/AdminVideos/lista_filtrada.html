@@ -47,8 +47,121 @@
     color: var(--bs-danger, #dc3545);
     font-weight: 600;
   }
+
+  /* Filtro móvil: botón + resumen cuando el formulario vive en modal */
+  .filtro-platos-mobile-shell {
+    background: var(--bs-white, #fff);
+    border-radius: .5rem;
+    padding: .5rem;
+  }
+
+  .filtro-platos-mobile-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem;
+    line-height: 1.2;
+  }
+
+  .filtro-platos-mobile-summary .badge {
+    white-space: normal;
+    text-align: left;
+    border: 1px solid rgba(78, 115, 223, .22);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .06);
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+  }
+
+  .filtro-chip-remove {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    line-height: 1;
+    padding: 0 .1rem;
+    margin: 0;
+    cursor: pointer;
+    opacity: .8;
+  }
+
+  .filtro-chip-remove:hover,
+  .filtro-chip-remove:focus {
+    opacity: 1;
+    text-decoration: none;
+  }
+
+  .filtro-platos-mobile-summary .badge.text-bg-light {
+    background: #fff !important;
+    color: #2f3a4a !important;
+  }
+
+  .filtro-platos-mobile-summary .filtro-chip-light {
+    background: #fff !important;
+    color: #2f3a4a !important;
+    border-color: rgba(78, 115, 223, .22) !important;
+  }
+
+  .filtro-platos-mobile-summary .filtro-chip-success {
+    background: #198754 !important;
+    color: #fff !important;
+    border-color: #198754 !important;
+  }
+
+  .filtro-platos-mobile-summary:empty {
+    display: none;
+  }
+
+  .filtro-platos-mobile-summary.is-empty {
+    display: none;
+  }
+
+  #filtroPlatosModal .modal-body {
+    background: #f8f9fc;
+  }
+
+  #filtroPlatosModal #form-filtros-platos {
+    margin-bottom: 0 !important;
+  }
+
+  #filtroPlatosModal .filtros-platos-card {
+    box-shadow: none !important;
+  }
+
 </style>
 
+
+<div id="filtroPlatosMobileControls" class="filtro-platos-mobile-shell d-md-none mb-2">
+  <div class="d-flex align-items-stretch gap-2">
+
+    <div class="input-group input-group-sm flex-grow-1 filtro-mobile-keyword-box {% if formulario.palabra_clave.value %}filtro-keyword-activo{% endif %}">
+      <span class="input-group-text">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </span>
+
+      <input
+        type="text"
+        class="form-control {% if formulario.palabra_clave.value %}text-danger fw-semibold{% endif %}"
+        id="palabraClaveMobile"
+        value="{{ formulario.palabra_clave.value|default:'' }}"
+        placeholder="Buscar">
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-primary btn-sm fw-semibold flex-shrink-0"
+      data-bs-toggle="modal"
+      data-bs-target="#filtroPlatosModal">
+      <i class="fa-solid fa-sliders me-1"></i>
+      Filtros
+    </button>
+
+  </div>
+
+  <div id="filtroPlatosMobileSummary" class="filtro-platos-mobile-summary mt-2 d-none"></div>
+</div>
+
+<div id="filtroPlatosInlineHome" class="d-none d-md-block">
 
 <form
   method="POST"
@@ -135,6 +248,42 @@
   </div>
 </form>
 
+</div>
+
+
+
+
+<!-- Modal móvil para el filtro de platos.
+     Importante: no duplica el form; JS mueve #form-filtros-platos acá sólo en celular. -->
+<div
+  class="modal fade"
+  id="filtroPlatosModal"
+  tabindex="-1"
+  aria-labelledby="filtroPlatosModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-fullscreen-sm-down modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header py-2">
+        <h5 class="modal-title" id="filtroPlatosModalLabel">
+          <i class="fa-solid fa-sliders me-1"></i>
+          Filtros
+        </h5>
+
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body" id="filtroPlatosModalBody"></div>
+
+      <div class="modal-footer py-2">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+          Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
 
 <div
   class="modal fade"
@@ -189,7 +338,292 @@
 </div>
 
 
-<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=15"></script>
+
+<script>
+// FILTRO RESPONSIVE: INLINE EN DESKTOP, MODAL EN MÓVIL
+// ----------------------------------------------------
+// No se clona el formulario. Se mueve el mismo #form-filtros-platos
+// para no duplicar IDs, eventos ni comportamiento AJAX.
+(function () {
+  const media = window.matchMedia("(max-width: 767.98px)");
+
+  function getForm() {
+    return document.getElementById("form-filtros-platos");
+  }
+
+  function getHome() {
+    return document.getElementById("filtroPlatosInlineHome");
+  }
+
+  function getModalBody() {
+    return document.getElementById("filtroPlatosModalBody");
+  }
+
+  function escapeHTML(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+
+  function badge(texto, clase, filtro) {
+    const label = escapeHTML(texto);
+    const key = escapeHTML(filtro || "");
+
+    return ''
+      + '<span class="badge rounded-pill ' + clase + '">'
+      + '<span>' + label + '</span>'
+      + '<button type="button" class="filtro-chip-remove" '
+      + 'data-filtro-chip-remove="' + key + '" '
+      + 'aria-label="Quitar filtro ' + label + '">'
+      + '&times;'
+      + '</button>'
+      + '</span>';
+  }
+
+  function dispararCambioFiltro(input) {
+    if (!input) return;
+
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  function desactivarFiltroMobile(filtro) {
+    const form = getForm();
+    if (!form) return;
+
+    let input = null;
+
+    if (filtro === "quecomemos") {
+      input = form.querySelector('input[name="quecomemos"]');
+    }
+
+    if (filtro === "misplatos") {
+      input = form.querySelector('input[name="misplatos"]');
+    }
+
+    if (filtro === "loquetengo") {
+      input =
+        form.querySelector('input[name="usar_lo_que_tengo"]') ||
+        form.querySelector('input[name="usarLoQueTengo"]') ||
+        form.querySelector('#usarLoQueTengo');
+    }
+
+    if (!input) return;
+
+    input.checked = false;
+    dispararCambioFiltro(input);
+    actualizarResumenMobile();
+  }
+
+  function actualizarResumenMobile() {
+    const form = getForm();
+    const summary = document.getElementById("filtroPlatosMobileSummary");
+
+    if (!form || !summary) return;
+
+    const chips = [];
+
+    const tipopag = form.querySelector('input[name="tipopag"]')?.value || "";
+    const quecomemos = form.querySelector('input[name="quecomemos"]')?.checked;
+    const misplatos = form.querySelector('input[name="misplatos"]')?.checked;
+    const usarLoQueTengo = (
+      tipopag === "LoQueTengo" ||
+      form.querySelector('input[name="usar_lo_que_tengo"]')?.checked ||
+      form.querySelector('input[name="usarLoQueTengo"]')?.checked ||
+      form.querySelector('#usarLoQueTengo')?.checked
+    );
+
+    if (quecomemos) {
+      chips.push(badge("Quecomemos", "filtro-chip-light", "quecomemos"));
+    }
+
+    if (misplatos) {
+      chips.push(badge("Mis platos", "filtro-chip-light", "misplatos"));
+    }
+
+    if (usarLoQueTengo) {
+      chips.push(badge("Lo que tengo", "filtro-chip-success", "loquetengo"));
+    }
+
+    summary.innerHTML = chips.join(" ");
+    summary.classList.toggle("is-empty", chips.length === 0);
+    summary.classList.toggle("d-none", chips.length === 0);
+  }
+
+  function ocultarModalFiltroSiHaceFalta() {
+    const modalEl = document.getElementById("filtroPlatosModal");
+
+    if (!modalEl || !window.bootstrap || !bootstrap.Modal) return;
+
+    const instance = bootstrap.Modal.getInstance(modalEl);
+
+    if (instance && modalEl.classList.contains("show")) {
+      instance.hide();
+    }
+  }
+
+  function moverFormSegunPantalla() {
+    const form = getForm();
+    const home = getHome();
+    const modalBody = getModalBody();
+
+    if (!form || !home || !modalBody) return;
+
+    if (media.matches) {
+      if (form.parentElement !== modalBody) {
+        modalBody.appendChild(form);
+      }
+
+      form.classList.remove("mb-3");
+      form.classList.add("mb-0");
+    } else {
+      if (form.parentElement !== home) {
+        home.appendChild(form);
+      }
+
+      form.classList.add("mb-3");
+      form.classList.remove("mb-0");
+      ocultarModalFiltroSiHaceFalta();
+    }
+
+    actualizarResumenMobile();
+  }
+
+  function syncKeywordMobileDesdeReal() {
+    const form = getForm();
+    const mobile = document.getElementById("palabraClaveMobile");
+    const real = form ? form.querySelector('input[name="palabra_clave"]') : null;
+
+    if (!mobile || !real) return;
+
+    if (mobile.value !== real.value) {
+      mobile.value = real.value || "";
+    }
+
+    mobile.classList.toggle("text-danger", !!mobile.value.trim());
+    mobile.classList.toggle("fw-semibold", !!mobile.value.trim());
+
+    const box = mobile.closest(".filtro-mobile-keyword-box");
+    if (box) {
+      box.classList.toggle("filtro-keyword-activo", !!mobile.value.trim());
+    }
+  }
+
+  function syncKeywordRealDesdeMobile() {
+    const form = getForm();
+    const mobile = document.getElementById("palabraClaveMobile");
+    const real = form ? form.querySelector('input[name="palabra_clave"]') : null;
+
+    if (!mobile || !real) return;
+
+    real.value = mobile.value;
+    real.dispatchEvent(new Event("input", { bubbles: true }));
+    real.dispatchEvent(new Event("change", { bubbles: true }));
+
+    syncKeywordMobileDesdeReal();
+  }
+
+  function initFiltroResponsiveMobile() {
+    moverFormSegunPantalla();
+
+    const form = getForm();
+    const mobileKeyword = document.getElementById("palabraClaveMobile");
+
+    if (form && !form.dataset.resumenMobileBound) {
+      form.dataset.resumenMobileBound = "1";
+      form.addEventListener("change", function () {
+        syncKeywordMobileDesdeReal();
+        actualizarResumenMobile();
+      });
+      form.addEventListener("input", function () {
+        syncKeywordMobileDesdeReal();
+        actualizarResumenMobile();
+      });
+      form.addEventListener("submit", function () {
+        window.setTimeout(function () {
+          syncKeywordMobileDesdeReal();
+          actualizarResumenMobile();
+        }, 0);
+      });
+    }
+
+    if (mobileKeyword && !mobileKeyword.dataset.keywordMobileBound) {
+      mobileKeyword.dataset.keywordMobileBound = "1";
+
+      mobileKeyword.addEventListener("input", syncKeywordRealDesdeMobile);
+      mobileKeyword.addEventListener("change", syncKeywordRealDesdeMobile);
+
+      mobileKeyword.addEventListener("keydown", function (event) {
+        if (event.key !== "Enter") return;
+
+        event.preventDefault();
+        syncKeywordRealDesdeMobile();
+
+        const form = getForm();
+        if (form) {
+          form.requestSubmit ? form.requestSubmit() : form.submit();
+        }
+      });
+    }
+
+    syncKeywordMobileDesdeReal();
+    actualizarResumenMobile();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initFiltroResponsiveMobile);
+  } else {
+    initFiltroResponsiveMobile();
+  }
+
+  if (media.addEventListener) {
+    media.addEventListener("change", moverFormSegunPantalla);
+  } else if (media.addListener) {
+    media.addListener(moverFormSegunPantalla);
+  }
+
+  document.addEventListener("shown.bs.modal", function (event) {
+    if (event.target && event.target.id === "filtroPlatosModal") {
+      actualizarResumenMobile();
+    }
+  });
+
+  document.addEventListener("hidden.bs.modal", function (event) {
+    if (event.target && event.target.id === "filtroPlatosModal") {
+      actualizarResumenMobile();
+    }
+  });
+
+  document.addEventListener("click", function (event) {
+    const removeBtn = event.target.closest("[data-filtro-chip-remove]");
+    if (!removeBtn) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    desactivarFiltroMobile(removeBtn.dataset.filtroChipRemove);
+  });
+
+  // Si desde el modal de filtros se abre "Lo que tengo", cerramos primero filtros.
+  document.addEventListener("click", function (event) {
+    const triggerLoQueTengo = event.target.closest('[data-bs-target="#loQueTengoModal"]');
+
+    if (!triggerLoQueTengo) return;
+
+    const filtroModal = document.getElementById("filtroPlatosModal");
+
+    if (filtroModal && filtroModal.classList.contains("show")) {
+      window.setTimeout(ocultarModalFiltroSiHaceFalta, 0);
+    }
+  });
+})();
+</script>
+
+<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=19"></script>
 <script src="{% static 'AdminVideos/js/lo_que_tengo.js' %}?v=3"></script>
 
 {% endblock %}
