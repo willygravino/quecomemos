@@ -514,3 +514,17 @@ section > .d-flex {
 
 /* FILA SELECCIONADA DE PLATO */
 .plato-row.is-selected { background: rgba(13,110,253,.12); }
+
+/* Título de sugerencias de platos */
+.sugerencias-platos-titulo-bar {
+  width: 100%;
+  background: #4e73df;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid #4e73df;
+  border-radius: 0.35rem;
+}
+
+.sugerencias-platos-titulo-bar h5 {
+  font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+  line-height: 1.2;
+}

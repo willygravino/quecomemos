@@ -1390,6 +1390,7 @@ def titulo_formulario_plato(tipopag, accion="Agregar"):
     return f"{accion} plato"
 
 
+
 class PlatoCreate(LoginRequiredMixin, CreateView):
     model = Plato
     form_class = PlatoForm

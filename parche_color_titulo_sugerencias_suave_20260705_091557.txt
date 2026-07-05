@@ -1,0 +1,103 @@
+==================================================
+Parche: suavizar color del título Sugerencias
+Fecha: Sun Jul  5 09:15:57 -03 2026
+Directorio: /Users/guillermogravino/quecomemos
+==================================================
+OK: texto del título cambiado de blanco a primary en AdminVideos/templates/AdminVideos/pre-base.html
+OK: fondo cambiado a var(--bs-info-bg-subtle) en AdminVideos/static/AdminVideos/css/mi-css.css
+
+---- grep título sugerencias ----
+AdminVideos/templates/AdminVideos/pre-base.html:20:  <div class="sugerencias-platos-titulo-bar text-center mb-2">
+AdminVideos/templates/AdminVideos/pre-base.html:21:    <h4 class="mb-0 fw-semibold text-primary">
+AdminVideos/templates/AdminVideos/pre-base.html:22:      Sugerencias de
+AdminVideos/static/AdminVideos/css/mi-css.css:35:  background: transparent;
+AdminVideos/static/AdminVideos/css/mi-css.css:58:  /* background: rgb(182, 50, 89);  */
+AdminVideos/static/AdminVideos/css/mi-css.css:101:  background: rgba(20, 205, 119, 0.9); /* verde bootstrap */
+AdminVideos/static/AdminVideos/css/mi-css.css:126:  background: rgba(0,0,0,0.4);
+AdminVideos/static/AdminVideos/css/mi-css.css:161:  background: rgba(255,255,255,0.92);
+AdminVideos/static/AdminVideos/css/mi-css.css:252:  background: none;
+AdminVideos/static/AdminVideos/css/mi-css.css:409:    background: #ffffff;
+AdminVideos/static/AdminVideos/css/mi-css.css:434:  background: transparent;
+AdminVideos/static/AdminVideos/css/mi-css.css:446:  background: #d0d8f8; /* light */
+AdminVideos/static/AdminVideos/css/mi-css.css:456:  background: #f8f9faea;
+AdminVideos/static/AdminVideos/css/mi-css.css:466:  background: #f2f4fc; /* primary */
+AdminVideos/static/AdminVideos/css/mi-css.css:496:  background: #fff;
+AdminVideos/static/AdminVideos/css/mi-css.css:516:.plato-row.is-selected { background: rgba(13,110,253,.12); }
+AdminVideos/static/AdminVideos/css/mi-css.css:519:.sugerencias-platos-titulo-bar {
+AdminVideos/static/AdminVideos/css/mi-css.css:521:  background: var(--bs-info-bg-subtle);
+AdminVideos/static/AdminVideos/css/mi-css.css:527:.sugerencias-platos-titulo-bar h4 {
+
+---- contexto encabezados menú programado ----
+AdminVideos/templates/AdminVideos/partials/_menu_programado_comida.html:3:<h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">{{ titulo }}</h6>
+AdminVideos/static/AdminVideos/css/mi-css.css:521:  background: var(--bs-info-bg-subtle);
+
+---- git diff pre-base.html ----
+diff --git a/AdminVideos/templates/AdminVideos/pre-base.html b/AdminVideos/templates/AdminVideos/pre-base.html
+index 7f0c997..22a08ac 100644
+--- a/AdminVideos/templates/AdminVideos/pre-base.html
++++ b/AdminVideos/templates/AdminVideos/pre-base.html
+@@ -15,20 +15,19 @@
+   
+ 
+ 
+-  <div class="border border-primary rounded p-2 position-relative m-2">
+-   
+-<span class="position-absolute top-0 start-50 translate-middle bg-info px-2 py-0
+-                d-inline-block text-center rounded-pill"
+-          style="transform: translate(-50%, -50%); max-width: 92%; line-height: 1.15;">
+-      <span class="menu-programado-text text-primary">
+-        Sugerencias de
+-        {% if tipopag == "Principal" %}
+-          Plato principal
+-        {% else %}
+-          {{ tipopag }}
+-        {% endif %}
+-      </span>
+-    </span>
++
++<div class="border border-primary rounded p-2 position-relative m-2">
++  <div class="sugerencias-platos-titulo-bar text-center mb-2">
++    <h4 class="mb-0 fw-semibold text-primary">
++      Sugerencias de
++      {% if tipopag == "Principal" %}
++        Plato principal
++      {% else %}
++        {{ tipopag }}
++      {% endif %}
++    </h4>
++  </div>
++
+ 
+     <div class="shadow bg-dark p-1">
+       {% block filtro %}{% endblock %}
+
+---- git diff mi-css.css ----
+diff --git a/AdminVideos/static/AdminVideos/css/mi-css.css b/AdminVideos/static/AdminVideos/css/mi-css.css
+index 2f407ba..e0e838a 100644
+--- a/AdminVideos/static/AdminVideos/css/mi-css.css
++++ b/AdminVideos/static/AdminVideos/css/mi-css.css
+@@ -514,3 +514,17 @@ section > .d-flex {
+ 
+ /* FILA SELECCIONADA DE PLATO */
+ .plato-row.is-selected { background: rgba(13,110,253,.12); }
++
++/* Título de sugerencias de platos */
++.sugerencias-platos-titulo-bar {
++  width: 100%;
++  background: var(--bs-info-bg-subtle);
++  padding: 0.6rem 1rem;
++  border-radius: 0.35rem;
++  box-shadow: 0 0.2rem 0.55rem rgba(0, 0, 0, 0.12);
++}
++
++.sugerencias-platos-titulo-bar h4 {
++  font-size: clamp(1.05rem, 2.5vw, 1.35rem);
++  line-height: 1.2;
++}
+
+---- django check ----
+System check identified no issues (0 silenced).
+
+==================================================
+Archivo generado: parche_color_titulo_sugerencias_suave_20260705_091557.txt
+==================================================

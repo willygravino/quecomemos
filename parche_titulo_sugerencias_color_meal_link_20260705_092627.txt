@@ -1,0 +1,136 @@
+==================================================
+Parche: usar color exacto de meal-link.has-plato
+Fecha: Sun Jul  5 09:26:27 -03 2026
+Directorio: /Users/guillermogravino/quecomemos
+==================================================
+ERROR: no encontré una regla con meal-link + has-plato que tenga background/background-color.
+
+Diagnóstico meal-link:
+
+--- AdminVideos/static/AdminVideos/css/mi-css.css ---
+35:   background: transparent;
+58:   /* background: rgb(182, 50, 89);  */
+101:   background: rgba(20, 205, 119, 0.9); /* verde bootstrap */
+126:   background: rgba(0,0,0,0.4);
+161:   background: rgba(255,255,255,0.92);
+252:   background: none;
+377:   background-color: transparent;
+403:   background-color: #f8f9fa;
+409:     background: #ffffff;
+429:   transition: background-color .12s ease, color .12s ease, text-shadow .12s ease;
+434:   background: transparent;
+446:   background: #d0d8f8; /* light */
+456:   background: #f8f9faea;
+466:   background: #f2f4fc; /* primary */
+478: /* Zócalo del carousel: muestra un tilde verde minimalista al lado del link cuando tiene plato (.has-plato) */
+480: .meal-link.has-plato::after{
+496:   background: #fff;
+516: .plato-row.is-selected { background: rgba(13,110,253,.12); }
+521:   background: #d0d8f8;
+
+---- reglas meal-link / has-plato ----
+AdminVideos/static/AdminVideos/css/mi-css.css:478:/* Zócalo del carousel: muestra un tilde verde minimalista al lado del link cuando tiene plato (.has-plato) */
+AdminVideos/static/AdminVideos/css/mi-css.css:480:.meal-link.has-plato::after{
+AdminVideos/templates/AdminVideos/partials/_menu_programado_dias.html:122:     class="text-muted mx-1 meal-link {% if dia_plato.1.desayuno %}has-plato{% endif %}"
+AdminVideos/templates/AdminVideos/partials/_menu_programado_dias.html:129:     class="text-muted mx-1 meal-link {% if dia_plato.1.almuerzo %}has-plato{% endif %}"
+AdminVideos/templates/AdminVideos/partials/_menu_programado_dias.html:136:     class="text-muted mx-1 meal-link {% if dia_plato.1.merienda %}has-plato{% endif %}"
+AdminVideos/templates/AdminVideos/partials/_menu_programado_dias.html:143:     class="text-muted mx-1 meal-link {% if dia_plato.1.cena %}has-plato{% endif %}"
+
+---- grep título sugerencias ----
+AdminVideos/templates/AdminVideos/pre-base.html:20:  <div class="sugerencias-platos-titulo-bar text-center mb-2">
+AdminVideos/templates/AdminVideos/pre-base.html:22:      Sugerencias de
+AdminVideos/static/AdminVideos/css/mi-css.css:519:.sugerencias-platos-titulo-bar {
+AdminVideos/static/AdminVideos/css/mi-css.css:527:.sugerencias-platos-titulo-bar h5 {
+AdminVideos/templates/AdminVideos/base.html:22:    <!-- <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260705092218" rel="stylesheet"> -->
+AdminVideos/templates/AdminVideos/base.html:35:    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260705092218" rel="stylesheet">  <!-- al final + bust de caché -->
+
+---- git diff relevantes ----
+diff --git a/AdminVideos/static/AdminVideos/css/mi-css.css b/AdminVideos/static/AdminVideos/css/mi-css.css
+index 2f407ba..fe7f516 100644
+--- a/AdminVideos/static/AdminVideos/css/mi-css.css
++++ b/AdminVideos/static/AdminVideos/css/mi-css.css
+@@ -514,3 +514,17 @@ section > .d-flex {
+ 
+ /* FILA SELECCIONADA DE PLATO */
+ .plato-row.is-selected { background: rgba(13,110,253,.12); }
++
++/* Título de sugerencias de platos */
++.sugerencias-platos-titulo-bar {
++  width: 100%;
++  background: #d0d8f8;
++  padding: 0.35rem 0.75rem;
++  border: 1px solid #b7c3f3;
++  border-radius: 0.35rem;
++}
++
++.sugerencias-platos-titulo-bar h5 {
++  font-size: clamp(0.95rem, 2.2vw, 1.15rem);
++  line-height: 1.2;
++}
+diff --git a/AdminVideos/templates/AdminVideos/base.html b/AdminVideos/templates/AdminVideos/base.html
+index e02d316..3e2b992 100644
+--- a/AdminVideos/templates/AdminVideos/base.html
++++ b/AdminVideos/templates/AdminVideos/base.html
+@@ -19,7 +19,7 @@
+         rel="stylesheet">
+ 
+     <!-- mi css -->
+-    <!-- <link href="{% static 'AdminVideos/css/mi-css.css' %}" rel="stylesheet"> -->
++    <!-- <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260705092218" rel="stylesheet"> -->
+ 
+     <link href="{% static 'AdminVideos/css/sb-admin-2.min.css' %}" rel="stylesheet">
+ 
+@@ -32,7 +32,7 @@
+     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+ 
+     <!-- mi css -->
+-    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=65" rel="stylesheet">  <!-- al final + bust de caché -->
++    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260705092218" rel="stylesheet">  <!-- al final + bust de caché -->
+ 
+     <link rel="manifest" href="{% static 'AdminVideos/lista_super/manifest_lista_super.json' %}?v=1">
+ 
+diff --git a/AdminVideos/templates/AdminVideos/pre-base.html b/AdminVideos/templates/AdminVideos/pre-base.html
+index 7f0c997..04a1b1a 100644
+--- a/AdminVideos/templates/AdminVideos/pre-base.html
++++ b/AdminVideos/templates/AdminVideos/pre-base.html
+@@ -15,20 +15,19 @@
+   
+ 
+ 
+-  <div class="border border-primary rounded p-2 position-relative m-2">
+-   
+-<span class="position-absolute top-0 start-50 translate-middle bg-info px-2 py-0
+-                d-inline-block text-center rounded-pill"
+-          style="transform: translate(-50%, -50%); max-width: 92%; line-height: 1.15;">
+-      <span class="menu-programado-text text-primary">
+-        Sugerencias de
+-        {% if tipopag == "Principal" %}
+-          Plato principal
+-        {% else %}
+-          {{ tipopag }}
+-        {% endif %}
+-      </span>
+-    </span>
++
++<div class="border border-primary rounded p-2 position-relative m-2">
++  <div class="sugerencias-platos-titulo-bar text-center mb-2">
++    <h5 class="mb-0 fw-bold text-white">
++      Sugerencias de
++      {% if tipopag == "Principal" %}
++        Plato principal
++      {% else %}
++        {{ tipopag }}
++      {% endif %}
++    </h5>
++  </div>
++
+ 
+     <div class="shadow bg-dark p-1">
+       {% block filtro %}{% endblock %}
+
+---- django check ----
+System check identified no issues (0 silenced).
+
+==================================================
+Archivo generado: parche_titulo_sugerencias_color_meal_link_20260705_092627.txt
+==================================================

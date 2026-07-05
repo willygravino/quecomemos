@@ -1,0 +1,4869 @@
+
+==========================================================================================
+AdminVideos/templates/AdminVideos/video_list_base.html
+==========================================================================================
+
+--- patrón: Sugerencias ---
+
+--- patrón: sugerencias ---
+
+--- patrón: Plato principal ---
+
+--- patrón: Principal ---
+
+--- patrón: tipopag ---
+
+--- patrón: contenedor-carousel-platos ---
+0005: {% block lista_platos %}
+0006: 
+0007: 
+0008: 
+0009: <div id="contenedor-platos-compartidos">
+0010:   {% include "AdminVideos/partials/_platos_compartidos.html" %}
+0011:   {% include "AdminVideos/partials/_lugares_compartidos.html" %}
+0012: </div>
+0013: 
+0014: 
+0015: 
+0016: 
+0017: <div id="contenedor-carousel-platos">
+0018:   {% include "AdminVideos/partials/_carousel_platos.html" %}
+0019: </div>
+0020: 
+0021: 
+0022: 
+0023: 
+0024: 
+0025: <div id="contenedor-listado-platos">
+0026:   {% include "AdminVideos/partials/_listado_platos.html" %}
+0027: </div>
+0028: 
+0029: 
+0030: 
+0031: <div id="contenedor-listado-lugares">
+0032:   {% include "AdminVideos/partials/_listado_lugares.html" %}
+0033: </div>
+0034: 
+0035: 
+0036: 
+0037: {% comment %}
+------------------------------------------------------------
+
+--- patrón: contenedor-listado-platos ---
+0013: 
+0014: 
+0015: 
+0016: 
+0017: <div id="contenedor-carousel-platos">
+0018:   {% include "AdminVideos/partials/_carousel_platos.html" %}
+0019: </div>
+0020: 
+0021: 
+0022: 
+0023: 
+0024: 
+0025: <div id="contenedor-listado-platos">
+0026:   {% include "AdminVideos/partials/_listado_platos.html" %}
+0027: </div>
+0028: 
+0029: 
+0030: 
+0031: <div id="contenedor-listado-lugares">
+0032:   {% include "AdminVideos/partials/_listado_lugares.html" %}
+0033: </div>
+0034: 
+0035: 
+0036: 
+0037: {% comment %}
+0038: 
+0039: {% endwith %}
+0040: 
+0041: {% endcomment %}
+0042: 
+0043: 
+0044:   <!-- Modal para compartir plato -->
+0045:   <div class="modal fade" id="compartirModal" tabindex="-1" aria-labelledby="compartirModalLabel" aria-hidden="true">
+------------------------------------------------------------
+0159:      ---------------------------------------------------------
+0160:      Qué hace:
+0161:      - Inicializa los checkboxes del listado tipo Gmail.
+0162:      - Marca visualmente las filas seleccionadas.
+0163:      - Actualiza el contador de platos seleccionados.
+0164:      - Habilita/deshabilita el botón de acciones masivas.
+0165:      - Prepara el formulario oculto para eliminación masiva.
+0166:      - Se puede volver a ejecutar después de actualizar la lista por AJAX.
+0167: 
+0168:      Importante:
+0169:      - Esta función debe llamarse al cargar la página.
+0170:      - También debe llamarse después de reemplazar
+0171:        #contenedor-listado-platos con HTML nuevo por AJAX.
+0172: ========================================================= -->
+0173: <script>
+0174: function initListadoPlatos() {
+0175:   const masterCheckbox = document.getElementById('chk-platos-all');
+0176:   const rowCheckboxes = document.querySelectorAll('.js-plato-select');
+0177:   const selectedCountBadge = document.getElementById('platos-selected-count');
+0178:   const bulkActionsBtn = document.getElementById('bulkPlatosActionsBtn');
+0179:   const bulkDeleteBtn = document.getElementById('bulk-delete');
+0180:   const bulkDeleteForm = document.getElementById('bulk-delete-form');
+0181:   const bulkDeleteInputs = document.getElementById('bulk-delete-inputs');
+0182: 
+0183:   function getSelectedIds() {
+0184:     return Array.from(rowCheckboxes)
+0185:       .filter(function (checkbox) {
+0186:         return checkbox.checked;
+0187:       })
+0188:       .map(function (checkbox) {
+0189:         return checkbox.value;
+0190:       });
+0191:   }
+------------------------------------------------------------
+
+--- patrón: html_carousel ---
+
+--- patrón: html_listado ---
+
+==========================================================================================
+AdminVideos/templates/AdminVideos/lista_filtrada.html
+==========================================================================================
+
+--- patrón: Sugerencias ---
+0135:   </div>
+0136: </form>
+0137: 
+0138: 
+0139: <div
+0140:   class="modal fade"
+0141:   id="loQueTengoModal"
+0142:   tabindex="-1"
+0143:   aria-labelledby="loQueTengoModalLabel"
+0144:   aria-hidden="true"
+0145:   data-palabras-url="{% url 'ajax-lo-que-tengo-palabras' %}"
+0146:   data-agregar-url="{% url 'ajax-lo-que-tengo-agregar' %}"
+0147:   data-sugerencias-url="{% url 'api_ingredientes' %}">
+0148:   <div class="modal-dialog">
+0149:     <div class="modal-content">
+0150: 
+0151:       <div class="modal-header">
+0152:         <h5 class="modal-title" id="loQueTengoModalLabel">
+0153:           Lo que tengo
+0154:         </h5>
+0155: 
+0156:         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+0157:       </div>
+0158: 
+0159:       <div class="modal-body">
+0160:         <p class="small text-muted mb-2">
+0161:           Agregá palabras clave para filtrar platos. Podés elegir ingredientes existentes o escribir texto libre.
+0162:         </p>
+0163: 
+0164:         <div class="input-group mb-2">
+0165:           <select id="loQueTengoSelect" class="form-select" style="width: 100%;"></select>
+0166:         </div>
+0167: 
+------------------------------------------------------------
+
+--- patrón: sugerencias ---
+0135:   </div>
+0136: </form>
+0137: 
+0138: 
+0139: <div
+0140:   class="modal fade"
+0141:   id="loQueTengoModal"
+0142:   tabindex="-1"
+0143:   aria-labelledby="loQueTengoModalLabel"
+0144:   aria-hidden="true"
+0145:   data-palabras-url="{% url 'ajax-lo-que-tengo-palabras' %}"
+0146:   data-agregar-url="{% url 'ajax-lo-que-tengo-agregar' %}"
+0147:   data-sugerencias-url="{% url 'api_ingredientes' %}">
+0148:   <div class="modal-dialog">
+0149:     <div class="modal-content">
+0150: 
+0151:       <div class="modal-header">
+0152:         <h5 class="modal-title" id="loQueTengoModalLabel">
+0153:           Lo que tengo
+0154:         </h5>
+0155: 
+0156:         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+0157:       </div>
+0158: 
+0159:       <div class="modal-body">
+0160:         <p class="small text-muted mb-2">
+0161:           Agregá palabras clave para filtrar platos. Podés elegir ingredientes existentes o escribir texto libre.
+0162:         </p>
+0163: 
+0164:         <div class="input-group mb-2">
+0165:           <select id="loQueTengoSelect" class="form-select" style="width: 100%;"></select>
+0166:         </div>
+0167: 
+------------------------------------------------------------
+
+--- patrón: Plato principal ---
+
+--- patrón: Principal ---
+
+--- patrón: tipopag ---
+0049:   }
+0050: </style>
+0051: 
+0052: 
+0053: <form
+0054:   method="POST"
+0055:   id="form-filtros-platos"
+0056:   class="mb-3"
+0057:   data-listado-url="{% url 'ajax_listado_platos' %}">
+0058: 
+0059:   {% csrf_token %}
+0060: 
+0061:   <input type="hidden" name="tipopag" value="{{ tipopag }}">
+0062: 
+0063:   <div class="card border-0 shadow-sm rounded-3 bg-white filtros-platos-card">
+0064:     <div class="card-body px-3 py-2">
+0065:       <div class="d-flex align-items-center gap-2 flex-wrap">
+0066: 
+0067:         <div class="input-group input-group-sm w-auto flex-grow-1 filtro-keyword-box {% if formulario.palabra_clave.value %}filtro-keyword-activo{% endif %}" style="max-width: 360px;">
+0068:           <span class="input-group-text">
+0069:             <i class="fa-solid fa-magnifying-glass"></i>
+0070:           </span>
+0071: 
+0072:           <input
+0073:             type="search"
+0074:             class="form-control {% if formulario.palabra_clave.value %}text-danger fw-semibold{% endif %}"
+0075:             placeholder="Buscar por palabra clave"
+0076:             name="palabra_clave"
+0077:             value="{{ formulario.palabra_clave.value|default:'' }}">
+0078:         </div>
+0079: 
+0080:         <input
+0081:           class="btn-check"
+------------------------------------------------------------
+
+--- patrón: contenedor-carousel-platos ---
+
+--- patrón: contenedor-listado-platos ---
+
+--- patrón: html_carousel ---
+
+--- patrón: html_listado ---
+
+==========================================================================================
+AdminVideos/templates/AdminVideos/partials/_carousel_platos.html
+==========================================================================================
+
+--- patrón: Sugerencias ---
+
+--- patrón: sugerencias ---
+
+--- patrón: Plato principal ---
+
+--- patrón: Principal ---
+0001: 
+0002: <!-- ===========================
+0003:      SECCIÓN: PLATOS EN CAROUSEL (PADRE + VARIEDADES ANIDADAS)
+0004:      - Sin scroll horizontal
+0005:      - Padre en card principal
+0006:      - Variedades en mini-grilla debajo
+0007: =========================== -->
+0008: 
+0009: {% if carousel_items %}
+0010:  <section class="w-100 bg-warning rounded shadow-sm p-3 mb-3">
+0011: 
+0012:   <div id="platosCarousel" class="carousel slide comidas-carousel" data-bs-ride="false" data-bs-interval="false">
+0013: 
+0014:     <!-- Indicadores (1 por grupo/padre) -->
+0015:     <div class="carousel-indicators">
+0016:       {% for grupo in carousel_items %}
+0017: 
+0018:         <button type="button"
+0019:                 data-bs-target="#platosCarousel"
+0020:                 data-bs-slide-to="{{ forloop.counter0 }}"
+0021:                 class="{% if forloop.first %}active{% endif %}"
+0022:                 aria-current="{% if forloop.first %}true{% endif %}"
+0023:                 aria-label="Grupo {{ forloop.counter }}">
+0024:         </button>
+0025:       {% endfor %}
+------------------------------------------------------------
+0025:       {% endfor %}
+0026:     </div>
+0027: 
+0028:     <div class="carousel-inner">
+0029: 
+0030:       {% for grupo in carousel_items %}
+0031: 
+0032:         <div class="carousel-item {% if forloop.first %}active{% endif %}">
+0033:           <div class="d-flex justify-content-center py-2">
+0034: 
+0035:             <div class="w-100" style="max-width: 720px;">
+0036: 
+0037:               {# ===== CARD PRINCIPAL (PADRE o plato único) ===== #}
+0038:               <div class="card position-relative">
+0039: 
+0040:                 <a href="#"
+0041:                    data-bs-toggle="modal"
+0042:                    data-bs-target="#asignarPlatoModal"
+0043:                    onclick="setPlatoInfo('{{ grupo.id }}', 'plato', '{{ grupo.nombre_plato }}')"
+0044:                    class="text-decoration-none plato-carousel-thumb">
+0045: 
+0046:                   <img src="{{ grupo.image_url }}"
+0047:                        class="
+0048:                        {% if user.id == grupo.propietario.id and not grupo.proviene_de %}
+0049:                          sombra-verde
+0050:                        {% elif user.id == grupo.propietario.id and grupo.proviene_de %}
+0051:                          sombra-naranja
+0052:                        {% else %}
+0053:                          sombra-violeta
+0054:                        {% endif %}"
+0055:                        alt="Imagen del Plato">
+0056: 
+0057:                   <!-- + central -->
+------------------------------------------------------------
+
+--- patrón: tipopag ---
+0258:       <span class="carousel-control-prev-icon"></span>
+0259:       <span class="visually-hidden">Anterior</span>
+0260:     </button>
+0261: 
+0262:     <button class="carousel-control-next" type="button"
+0263:             data-bs-target="#platosCarousel" data-bs-slide="next">
+0264:       <span class="carousel-control-next-icon"></span>
+0265:       <span class="visually-hidden">Siguiente</span>
+0266:     </button>
+0267: 
+0268:   </div>
+0269: </section>              
+0270: {% elif tipopag != "Delivery" and tipopag != "Comerafuera"%}
+0271:   <div class="alert alert-info text-center" role="alert">
+0272:         <i class="bi bi-geo-alt-fill"></i> No hay {{tipopag}} ingresados para mostrar.
+0273:   </div>
+0274: {% endif %}
+0275: 
+------------------------------------------------------------
+0260:     </button>
+0261: 
+0262:     <button class="carousel-control-next" type="button"
+0263:             data-bs-target="#platosCarousel" data-bs-slide="next">
+0264:       <span class="carousel-control-next-icon"></span>
+0265:       <span class="visually-hidden">Siguiente</span>
+0266:     </button>
+0267: 
+0268:   </div>
+0269: </section>              
+0270: {% elif tipopag != "Delivery" and tipopag != "Comerafuera"%}
+0271:   <div class="alert alert-info text-center" role="alert">
+0272:         <i class="bi bi-geo-alt-fill"></i> No hay {{tipopag}} ingresados para mostrar.
+0273:   </div>
+0274: {% endif %}
+0275: 
+------------------------------------------------------------
+
+--- patrón: contenedor-carousel-platos ---
+
+--- patrón: contenedor-listado-platos ---
+
+--- patrón: html_carousel ---
+
+--- patrón: html_listado ---
+
+==========================================================================================
+AdminVideos/templates/AdminVideos/partials/_listado_platos.html
+==========================================================================================
+
+--- patrón: Sugerencias ---
+
+--- patrón: sugerencias ---
+
+--- patrón: Plato principal ---
+
+--- patrón: Principal ---
+
+--- patrón: tipopag ---
+
+--- patrón: contenedor-carousel-platos ---
+
+--- patrón: contenedor-listado-platos ---
+
+--- patrón: html_carousel ---
+
+--- patrón: html_listado ---
+
+==========================================================================================
+AdminVideos/templates/AdminVideos/partials/_plato_row_gmail.html
+==========================================================================================
+
+--- patrón: Sugerencias ---
+
+--- patrón: sugerencias ---
+
+--- patrón: Plato principal ---
+
+--- patrón: Principal ---
+
+--- patrón: tipopag ---
+0084:                   <a class="btn btn-sm btn-outline-primary js-plato-ingredientes"
+0085:                     href="#"
+0086:                     data-url="{% url 'plato_ingredientes' plato.id %}">
+0087:                     <i class="fa-solid fa-list-check"></i>
+0088:                   </a>
+0089:                 {% else %}
+0090:                   <span class="dropdown-item text-muted">
+0091:                     <i class="fa-solid fa-list-check me-2"></i> Ingredientes
+0092:                   </span>
+0093:                 {% endif %}
+0094: 
+0095:               {% if plato.propietario == request.user %}
+0096:                 <a href="{% url 'videos-update' plato.id %}?return_to={{ return_to_url|urlencode }}{% if tipopag %}&tipopag={{ tipopag|urlencode }}{% endif %}"
+0097:                   class="btn btn-sm btn-outline-primary"
+0098:                   title="Editar"
+0099:                   aria-label="Editar">
+0100:                   <i class="fa-regular fa-pen-to-square"></i>
+0101:                 </a>
+0102: 
+0103:               {% else %}
+0104:                 <a href="#"
+0105:                   class="btn btn-sm btn-outline-primary js-ver-detalle-plato"
+0106:                   data-detail-url="{% url 'platos-detail' plato.id %}"
+0107:                   title="Ver detalle"
+0108:                   aria-label="Ver detalle">
+0109:                   <i class="fa-regular fa-eye"></i>
+0110:                 </a>
+0111:               {% endif %}
+0112: 
+0113:               <a href="#"
+0114:                 data-bs-toggle="modal"
+0115:                 data-bs-target="#confirmActionModal"
+0116:                 data-confirm-title="Eliminar plato"
+------------------------------------------------------------
+0141: 
+0142:               <li>
+0143:                 <a class="dropdown-item js-plato-ingredientes"
+0144:                   href="#"
+0145:                   data-url="{% url 'plato_ingredientes' plato.id %}">
+0146:                   <i class="fa-solid fa-list-check me-2"></i> Ingredientes
+0147:                 </a>
+0148:               </li>
+0149: 
+0150:               {% if plato.propietario == request.user %}
+0151:                 <li>
+0152:                   <a class="dropdown-item"
+0153:                     href="{% url 'videos-update' plato.id %}?return_to={{ return_to_url|urlencode }}{% if tipopag %}&tipopag={{ tipopag|urlencode }}{% endif %}">
+0154:                     <i class="fa-solid fa-pen-to-square me-2"></i> Editar
+0155:                   </a>
+0156:                 </li>
+0157:               {% else %}
+0158:                 <li>
+0159:                   <a class="dropdown-item js-ver-detalle-plato"
+0160:                     href="#"
+0161:                     data-detail-url="{% url 'platos-detail' plato.id %}">
+0162:                     <i class="fa-solid fa-eye me-2"></i> Ver detalle
+0163:                   </a>
+0164:                 </li>
+0165:               {% endif %}
+0166: 
+0167:               {% if amigues %}
+0168:                 <li>
+0169:                   <a class="dropdown-item"
+0170:                      href="#"
+0171:                      data-bs-toggle="modal"
+0172:                      data-bs-target="#compartirModal"
+0173:                      onclick="setPlatoInfo('{{ plato.id }}', 'plato')">
+------------------------------------------------------------
+
+--- patrón: contenedor-carousel-platos ---
+
+--- patrón: contenedor-listado-platos ---
+
+--- patrón: html_carousel ---
+
+--- patrón: html_listado ---
+
+==========================================================================================
+AdminVideos/views.py
+==========================================================================================
+
+--- patrón: Sugerencias ---
+
+--- patrón: sugerencias ---
+
+--- patrón: Plato principal ---
+1353: # ==========================================
+1354: # Helper: agregar params a una URL (sin romper querystring)
+1355: # ==========================================
+1356: def _add_qs(url, **params):
+1357:     parts = urlparse(url)
+1358:     q = dict(parse_qsl(parts.query))
+1359:     q.update({k: v for k, v in params.items() if v is not None})
+1360:     return urlunparse(parts._replace(query=urlencode(q)))
+1361: 
+1362: 
+1363: 
+1364: TITULOS_FORMULARIO_PLATO = {
+1365:     "Principal": "Agregar un plato principal",
+1366:     "Entrada": "Agregar una entrada",
+1367:     "Guarnicion": "Agregar una guarnición",
+1368:     "Dip": "Agregar un dip",
+1369:     "Salsa": "Agregar una salsa",
+1370:     "Picada": "Agregar una picada",
+1371:     "Ingrediente de picada": "Agregar un ingrediente de picada",
+1372:     "Postre": "Agregar un postre",
+1373:     "Trago": "Agregar una bebida / trago",
+1374: }
+1375: 
+1376: 
+1377: def titulo_formulario_plato(tipopag, accion="Agregar"):
+1378:     tipo = (tipopag or "Principal").strip()
+1379:     titulo = TITULOS_FORMULARIO_PLATO.get(tipo)
+1380: 
+1381:     if titulo and accion == "Agregar":
+1382:         return titulo
+1383: 
+1384:     if accion == "Editar":
+1385:         return "Editar plato"
+------------------------------------------------------------
+4429:         messages.warning(request, "No hay platos históricos para ese día.")
+4430:         return redirect("filtro-de-platos")
+4431: 
+4432:     # 3️⃣ Elegir un plato al azar
+4433:     plato_random = random.choice([i.plato for i in items])
+4434: 
+4435:     # 4️⃣ Crear (o traer) el menú del día activo
+4436:     menu_dia, _ = MenuDia.objects.get_or_create(
+4437:         propietario=usuario,
+4438:         fecha=fecha_activa
+4439:     )
+4440: 
+4441:     # 5️⃣ Asignar como plato principal (simple)
+4442:     try:
+4443:         MenuItem.objects.create(
+4444:             menu=menu_dia,
+4445:             momento="almuerzo",  # o el que vos definas
+4446:             plato=plato_random
+4447:         )
+4448:         messages.success(
+4449:             request,
+4450:             f"Se asignó aleatoriamente: {plato_random.nombre_plato}"
+4451:         )
+4452:     except Exception:
+4453:         messages.warning(
+4454:             request,
+4455:             "Ese plato ya estaba asignado en ese día."
+4456:         )
+4457: 
+4458:     return redirect("filtro-de-platos")
+4459: 
+4460: 
+4461: 
+------------------------------------------------------------
+
+--- patrón: Principal ---
+0263: 
+0264:     # Recuperar parámetros de sesión
+0265:     medios = request.session.get('medios_estable', None)
+0266:     categoria = request.session.get('categoria_estable', None)
+0267:     dificultad = request.session.get('dificultad_estable', None)
+0268:     palabra_clave = (request.POST.get("palabra_clave") or "").strip()
+0269: 
+0270:     quecomemos = request.session.get('quecomemos', None)
+0271:     misplatos = request.session.get('misplatos', "misplatos")
+0272:     # preseleccionados = request.session.get('preseleccionados', None)
+0273: 
+0274:     # Obtener el valor del parámetro 'tipo' desde la URL
+0275:     tipo_parametro = (request.GET.get("tipopag") or "Principal").strip()
+0276: 
+0277: 
+0278:     # # Obtener el usuario actual
+0279:     # usuario = request.user
+0280: 
+0281:     # Devolver las variables por separado
+0282:     return tipo_parametro, quecomemos, misplatos, medios, categoria, dificultad, palabra_clave
+0283: 
+0284: 
+0285: def index(request):
+0286:     return redirect(reverse_lazy("filtro-de-platos"))
+0287: 
+0288: def about(request):
+0289:     return render(request, "AdminVideos/about.html")
+0290: 
+0291: 
+0292: 
+0293: def limpiar_none(value):
+0294:     return None if value == 'None' or value == '' else value
+0295: 
+------------------------------------------------------------
+0750:         .filter(menu__in=menues, plato__isnull=False)
+0751:         .values_list("plato_id", flat=True)
+0752:     )
+0753: 
+0754:     # Componentes asociados a esos platos programados
+0755:     componente_ids_programados = set(
+0756:         Plato.objects
+0757:         .filter(forma_parte_de__id__in=plato_ids_programados)
+0758:         .values_list("id", flat=True)
+0759:     )
+0760: 
+0761:     # Todos los platos que pueden aportar ingredientes:
+0762:     # platos principales + componentes
+0763:     plato_ids_disponibles = plato_ids_programados | componente_ids_programados
+0764: 
+0765:     # Estados persistentes por usuario/perfil.
+0766:     # Si no existe registro todavía, usamos como fallback el estado de MenuItem.elegido.
+0767:     estados_compra = {
+0768:         estado.plato_id: estado.elegido
+0769:         for estado in ProfilePlatoCompra.objects.filter(
+0770:             perfil=perfil,
+0771:             plato_id__in=plato_ids_disponibles,
+0772:         )
+0773:     }
+0774: 
+0775:     menuitem_elegidos_ids = set(
+0776:         MenuItem.objects
+0777:         .filter(menu__in=menues, plato__isnull=False, elegido=True)
+0778:         .values_list("plato_id", flat=True)
+0779:     )
+0780: 
+0781:     platos_elegidos_ids = {
+0782:         plato_id
+------------------------------------------------------------
+1353: # ==========================================
+1354: # Helper: agregar params a una URL (sin romper querystring)
+1355: # ==========================================
+1356: def _add_qs(url, **params):
+1357:     parts = urlparse(url)
+1358:     q = dict(parse_qsl(parts.query))
+1359:     q.update({k: v for k, v in params.items() if v is not None})
+1360:     return urlunparse(parts._replace(query=urlencode(q)))
+1361: 
+1362: 
+1363: 
+1364: TITULOS_FORMULARIO_PLATO = {
+1365:     "Principal": "Agregar un plato principal",
+1366:     "Entrada": "Agregar una entrada",
+1367:     "Guarnicion": "Agregar una guarnición",
+1368:     "Dip": "Agregar un dip",
+1369:     "Salsa": "Agregar una salsa",
+1370:     "Picada": "Agregar una picada",
+1371:     "Ingrediente de picada": "Agregar un ingrediente de picada",
+1372:     "Postre": "Agregar un postre",
+1373:     "Trago": "Agregar una bebida / trago",
+1374: }
+1375: 
+1376: 
+1377: def titulo_formulario_plato(tipopag, accion="Agregar"):
+1378:     tipo = (tipopag or "Principal").strip()
+1379:     titulo = TITULOS_FORMULARIO_PLATO.get(tipo)
+1380: 
+1381:     if titulo and accion == "Agregar":
+1382:         return titulo
+1383: 
+1384:     if accion == "Editar":
+1385:         return "Editar plato"
+------------------------------------------------------------
+1366:     "Entrada": "Agregar una entrada",
+1367:     "Guarnicion": "Agregar una guarnición",
+1368:     "Dip": "Agregar un dip",
+1369:     "Salsa": "Agregar una salsa",
+1370:     "Picada": "Agregar una picada",
+1371:     "Ingrediente de picada": "Agregar un ingrediente de picada",
+1372:     "Postre": "Agregar un postre",
+1373:     "Trago": "Agregar una bebida / trago",
+1374: }
+1375: 
+1376: 
+1377: def titulo_formulario_plato(tipopag, accion="Agregar"):
+1378:     tipo = (tipopag or "Principal").strip()
+1379:     titulo = TITULOS_FORMULARIO_PLATO.get(tipo)
+1380: 
+1381:     if titulo and accion == "Agregar":
+1382:         return titulo
+1383: 
+1384:     if accion == "Editar":
+1385:         return "Editar plato"
+1386: 
+1387:     if accion == "Agregar variedad":
+1388:         return "Agregar variedad"
+1389: 
+1390:     return f"{accion} plato"
+1391: 
+1392: 
+1393: class PlatoCreate(LoginRequiredMixin, CreateView):
+1394:     model = Plato
+1395:     form_class = PlatoForm
+1396:     # Fallback de template por si tipopag no matchea
+1397:     DEFAULT_TEMPLATE = 'AdminVideos/ppal_form.html'
+1398: 
+------------------------------------------------------------
+1409:             html = render_to_string('AdminVideos/plato_form_inner.html', context, request=request)
+1410:             return JsonResponse({'html': html})
+1411: 
+1412:         return super().get(request, *args, **kwargs)
+1413: 
+1414: 
+1415: 
+1416:     def get_template_names(self):
+1417:         template_param = self.request.GET.get('tipopag')
+1418:         templates = {
+1419:             'Entrada': 'AdminVideos/entrada_form.html',
+1420:             'Dip': 'AdminVideos/dip_form.html',
+1421:             'Principal': 'AdminVideos/ppal_form.html',
+1422:             # 'Dash': 'AdminVideos/ppal_form.html',
+1423:             'Trago': 'AdminVideos/trago_form.html',
+1424:             'Salsa': 'AdminVideos/salsa_form.html',
+1425:             'Guarnicion': 'AdminVideos/guarnicion_form.html',
+1426:             'Picada': 'AdminVideos/ppal_form.html',
+1427:             'Ingrediente de picada': 'AdminVideos/ppal_form.html',
+1428:             'Postre': 'AdminVideos/postre_form.html',
+1429:             'Delivery': 'AdminVideos/delivery.html',
+1430:             'Comerafuera': 'AdminVideos/comerafuera.html',
+1431:         }
+1432:         return [templates.get(template_param, self.DEFAULT_TEMPLATE)]
+1433: 
+1434:     TIPOS_POR_TEMPLATE = {
+1435:         "Entrada": ["Guarnicion","Picada","Principal", "Entrada"],
+1436:         "Guarnicion": ["Guarnicion", "Principal", "Entrada", "Picada"],
+1437:         "Trago": ["Trago"],
+1438:         "Dip": ["Dip", "Guarnicion"],
+1439:         "Torta": ["Torta", "Postre"],
+1440:         "Postre": ["Postre"],
+1441:         "Principal": ["Principal", "Guarnicion", "Entrada", "Picada"],
+------------------------------------------------------------
+1423:             'Trago': 'AdminVideos/trago_form.html',
+1424:             'Salsa': 'AdminVideos/salsa_form.html',
+1425:             'Guarnicion': 'AdminVideos/guarnicion_form.html',
+1426:             'Picada': 'AdminVideos/ppal_form.html',
+1427:             'Ingrediente de picada': 'AdminVideos/ppal_form.html',
+1428:             'Postre': 'AdminVideos/postre_form.html',
+1429:             'Delivery': 'AdminVideos/delivery.html',
+1430:             'Comerafuera': 'AdminVideos/comerafuera.html',
+1431:         }
+1432:         return [templates.get(template_param, self.DEFAULT_TEMPLATE)]
+1433: 
+1434:     TIPOS_POR_TEMPLATE = {
+1435:         "Entrada": ["Guarnicion","Picada","Principal", "Entrada"],
+1436:         "Guarnicion": ["Guarnicion", "Principal", "Entrada", "Picada"],
+1437:         "Trago": ["Trago"],
+1438:         "Dip": ["Dip", "Guarnicion"],
+1439:         "Torta": ["Torta", "Postre"],
+1440:         "Postre": ["Postre"],
+1441:         "Principal": ["Principal", "Guarnicion", "Entrada", "Picada"],
+1442:         # "Dash": ["Principal", "Guarnicion", "Entrada", "Picada"],
+1443:         "Ingrediente de picada": ["Ingrediente de picada","Guarnicion", "Entrada"],
+1444:         "Picada": ["Picada"],
+1445:         "Salsa": ["Salsa", "Dip", "Guarnicion", "Entrada"],
+1446:     }
+1447: 
+1448:     # 1) Alinear “tipos” con tu modelo actual (CharField CSV)
+1449:     def get_form(self, form_class=None):
+1450:         form = super().get_form(form_class)
+1451:         template_param = self.request.GET.get('tipopag')
+1452: 
+1453:         opciones = self.TIPOS_POR_TEMPLATE.get(template_param, [])
+1454:         if opciones:
+1455:             form.fields['tipos'].choices = [
+------------------------------------------------------------
+1424:             'Salsa': 'AdminVideos/salsa_form.html',
+1425:             'Guarnicion': 'AdminVideos/guarnicion_form.html',
+1426:             'Picada': 'AdminVideos/ppal_form.html',
+1427:             'Ingrediente de picada': 'AdminVideos/ppal_form.html',
+1428:             'Postre': 'AdminVideos/postre_form.html',
+1429:             'Delivery': 'AdminVideos/delivery.html',
+1430:             'Comerafuera': 'AdminVideos/comerafuera.html',
+1431:         }
+1432:         return [templates.get(template_param, self.DEFAULT_TEMPLATE)]
+1433: 
+1434:     TIPOS_POR_TEMPLATE = {
+1435:         "Entrada": ["Guarnicion","Picada","Principal", "Entrada"],
+1436:         "Guarnicion": ["Guarnicion", "Principal", "Entrada", "Picada"],
+1437:         "Trago": ["Trago"],
+1438:         "Dip": ["Dip", "Guarnicion"],
+1439:         "Torta": ["Torta", "Postre"],
+1440:         "Postre": ["Postre"],
+1441:         "Principal": ["Principal", "Guarnicion", "Entrada", "Picada"],
+1442:         # "Dash": ["Principal", "Guarnicion", "Entrada", "Picada"],
+1443:         "Ingrediente de picada": ["Ingrediente de picada","Guarnicion", "Entrada"],
+1444:         "Picada": ["Picada"],
+1445:         "Salsa": ["Salsa", "Dip", "Guarnicion", "Entrada"],
+1446:     }
+1447: 
+1448:     # 1) Alinear “tipos” con tu modelo actual (CharField CSV)
+1449:     def get_form(self, form_class=None):
+1450:         form = super().get_form(form_class)
+1451:         template_param = self.request.GET.get('tipopag')
+1452: 
+1453:         opciones = self.TIPOS_POR_TEMPLATE.get(template_param, [])
+1454:         if opciones:
+1455:             form.fields['tipos'].choices = [
+1456:                 (k, v) for (k, v) in Plato.TIPOS_CHOICES if k in opciones
+------------------------------------------------------------
+1429:             'Delivery': 'AdminVideos/delivery.html',
+1430:             'Comerafuera': 'AdminVideos/comerafuera.html',
+1431:         }
+1432:         return [templates.get(template_param, self.DEFAULT_TEMPLATE)]
+1433: 
+1434:     TIPOS_POR_TEMPLATE = {
+1435:         "Entrada": ["Guarnicion","Picada","Principal", "Entrada"],
+1436:         "Guarnicion": ["Guarnicion", "Principal", "Entrada", "Picada"],
+1437:         "Trago": ["Trago"],
+1438:         "Dip": ["Dip", "Guarnicion"],
+1439:         "Torta": ["Torta", "Postre"],
+1440:         "Postre": ["Postre"],
+1441:         "Principal": ["Principal", "Guarnicion", "Entrada", "Picada"],
+1442:         # "Dash": ["Principal", "Guarnicion", "Entrada", "Picada"],
+1443:         "Ingrediente de picada": ["Ingrediente de picada","Guarnicion", "Entrada"],
+1444:         "Picada": ["Picada"],
+1445:         "Salsa": ["Salsa", "Dip", "Guarnicion", "Entrada"],
+1446:     }
+1447: 
+1448:     # 1) Alinear “tipos” con tu modelo actual (CharField CSV)
+1449:     def get_form(self, form_class=None):
+1450:         form = super().get_form(form_class)
+1451:         template_param = self.request.GET.get('tipopag')
+1452: 
+1453:         opciones = self.TIPOS_POR_TEMPLATE.get(template_param, [])
+1454:         if opciones:
+1455:             form.fields['tipos'].choices = [
+1456:                 (k, v) for (k, v) in Plato.TIPOS_CHOICES if k in opciones
+1457:             ]
+1458:             if template_param in opciones:
+1459:                 form.fields['tipos'].initial = [template_param]
+1460:             elif form.fields['tipos'].choices:
+1461:                 form.fields['tipos'].initial = [form.fields['tipos'].choices[0][0]]
+------------------------------------------------------------
+1430:             'Comerafuera': 'AdminVideos/comerafuera.html',
+1431:         }
+1432:         return [templates.get(template_param, self.DEFAULT_TEMPLATE)]
+1433: 
+1434:     TIPOS_POR_TEMPLATE = {
+1435:         "Entrada": ["Guarnicion","Picada","Principal", "Entrada"],
+1436:         "Guarnicion": ["Guarnicion", "Principal", "Entrada", "Picada"],
+1437:         "Trago": ["Trago"],
+1438:         "Dip": ["Dip", "Guarnicion"],
+1439:         "Torta": ["Torta", "Postre"],
+1440:         "Postre": ["Postre"],
+1441:         "Principal": ["Principal", "Guarnicion", "Entrada", "Picada"],
+1442:         # "Dash": ["Principal", "Guarnicion", "Entrada", "Picada"],
+1443:         "Ingrediente de picada": ["Ingrediente de picada","Guarnicion", "Entrada"],
+1444:         "Picada": ["Picada"],
+1445:         "Salsa": ["Salsa", "Dip", "Guarnicion", "Entrada"],
+1446:     }
+1447: 
+1448:     # 1) Alinear “tipos” con tu modelo actual (CharField CSV)
+1449:     def get_form(self, form_class=None):
+1450:         form = super().get_form(form_class)
+1451:         template_param = self.request.GET.get('tipopag')
+1452: 
+1453:         opciones = self.TIPOS_POR_TEMPLATE.get(template_param, [])
+1454:         if opciones:
+1455:             form.fields['tipos'].choices = [
+1456:                 (k, v) for (k, v) in Plato.TIPOS_CHOICES if k in opciones
+1457:             ]
+1458:             if template_param in opciones:
+1459:                 form.fields['tipos'].initial = [template_param]
+1460:             elif form.fields['tipos'].choices:
+1461:                 form.fields['tipos'].initial = [form.fields['tipos'].choices[0][0]]
+1462: 
+------------------------------------------------------------
+1724: 
+1725: 
+1726: 
+1727: 
+1728: class PlatoDetail(DetailView):
+1729:     model = Plato
+1730:     context_object_name = "plato"
+1731: 
+1732:     def get_context_data(self, **kwargs):
+1733:         context = super().get_context_data(**kwargs)
+1734:         plato = self.get_object()
+1735: 
+1736:         # Tipos: string "Entrada,Principal" -> lista
+1737:         if plato.tipos:
+1738:             context["tipos_lista"] = [t.strip() for t in plato.tipos.split(",") if t.strip()]
+1739:         else:
+1740:             context["tipos_lista"] = []
+1741: 
+1742:         # Variedades hijas
+1743:         context["variedades"] = plato.variedades_hijas.all().order_by("nombre_plato")
+1744: 
+1745:         # Padre, si este plato es una variedad
+1746:         context["plato_padre"] = plato.plato_padre
+1747: 
+1748:         return context
+1749: 
+1750:     def get(self, request, *args, **kwargs):
+1751:         self.object = self.get_object()
+1752:         context = self.get_context_data()
+1753: 
+1754:         html = render_to_string(
+1755:             "AdminVideos/plato_detail_content.html",
+1756:             context,
+------------------------------------------------------------
+1820:         return super().dispatch(request, *args, **kwargs)
+1821: 
+1822:     def get_template_names(self):
+1823:         """
+1824:         Mantener el mismo look & feel que el padre.
+1825:         Si viene tipopag por GET lo respeta; si no, intenta inferir desde el padre.
+1826:         """
+1827:         tipopag = self.request.GET.get("tipopag")
+1828: 
+1829:         if not tipopag:
+1830:             # tu campo 'tipos' es CSV; tomamos el primero como "tipopag" razonable
+1831:             raw = (self.padre.tipos or "").split(",")[0].strip()
+1832:             tipopag = raw or "Principal"
+1833: 
+1834:         # hack simple: reutiliza tu mapping interno de PlatoCreate.get_template_names
+1835:         self.request.GET._mutable = True
+1836:         self.request.GET["tipopag"] = tipopag
+1837:         self.request.GET._mutable = False
+1838: 
+1839:         return super().get_template_names()
+1840: 
+1841: 
+1842:     def get_context_data(self, **kwargs):
+1843:         context = super().get_context_data(**kwargs)
+1844: 
+1845:         context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
+1846: 
+1847:         tipopag = self.request.GET.get("tipopag")
+1848:         if not tipopag:
+1849:             raw = (self.padre.tipos or "").split(",")[0].strip()
+1850:             tipopag = raw or "Principal"
+1851:         context["tipopag"] = tipopag
+1852: 
+------------------------------------------------------------
+1838: 
+1839:         return super().get_template_names()
+1840: 
+1841: 
+1842:     def get_context_data(self, **kwargs):
+1843:         context = super().get_context_data(**kwargs)
+1844: 
+1845:         context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
+1846: 
+1847:         tipopag = self.request.GET.get("tipopag")
+1848:         if not tipopag:
+1849:             raw = (self.padre.tipos or "").split(",")[0].strip()
+1850:             tipopag = raw or "Principal"
+1851:         context["tipopag"] = tipopag
+1852: 
+1853:         context["plato_padre_obj"] = self.padre
+1854:         context["titulo_formulario"] = f"Agregar variedad de {self.padre.nombre_plato}"
+1855: 
+1856:         if self.request.method == "POST":
+1857:             context["ingrediente_formset"] = IngredienteEnPlatoFormSet(self.request.POST)
+1858:             return context
+1859: 
+1860:         # GET: clonar ingredientes del padre
+1861:         inicial = []
+1862:         for rel in self.padre.ingredientes_en_plato.select_related("ingrediente").all():
+1863:             inicial.append({
+1864:                 "ingrediente": rel.ingrediente_id,
+1865:                 "nombre_ingrediente": rel.ingrediente.nombre if rel.ingrediente else "",
+1866:                 "cantidad": rel.cantidad,
+1867:                 "unidad": rel.unidad,
+1868:             })
+1869: 
+1870:         # 👇 CLAVE: si tu formset es inlineformset, necesita extra >= len(inicial)
+------------------------------------------------------------
+2051:         if params:
+2052:             url += "?" + urlencode(params)
+2053: 
+2054:         return url
+2055: 
+2056:     def form_valid(self, form):
+2057:         # usa la lógica de guardado del update normal
+2058:         super().form_valid(form)
+2059: 
+2060:         parent_url = self._parent_url()
+2061: 
+2062:         # ✅ si es AJAX (modal), devolver JSON con redirect_url al PADRE
+2063:         # (NO devolvemos el resp del super(), porque ese suele apuntar a la principal)
+2064:         if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
+2065:             return JsonResponse({"success": True, "redirect_url": parent_url})
+2066: 
+2067:         # ✅ pantalla completa: volver al padre
+2068:         return redirect(parent_url)
+2069: 
+2070: 
+2071: 
+2072: class PlatoVariedadDelete(LoginRequiredMixin, DeleteView):
+2073:     model = Plato
+2074: 
+2075:     def dispatch(self, request, *args, **kwargs):
+2076:         self.object = self.get_object()
+2077: 
+2078:         if self.object.plato_padre_id is None:
+2079:             raise PermissionDenied("Este plato no es una variedad.")
+2080:         if self.object.propietario_id != request.user.id:
+2081:             raise PermissionDenied()
+2082: 
+2083:         self.padre = self.object.plato_padre
+------------------------------------------------------------
+2809:         quecomemos_sesion,
+2810:         misplatos_sesion,
+2811:         medios_sesion,
+2812:         categoria_sesion,
+2813:         dificultad_sesion,
+2814:         palabra_sesion,
+2815:     ) = obtener_parametros_sesion(request)
+2816: 
+2817:     tipopag = (
+2818:         request.POST.get("tipopag")
+2819:         or request.GET.get("tipopag")
+2820:         or tipo_sesion
+2821:         or "Principal"
+2822:     ).strip()
+2823: 
+2824:     if request.method == "POST":
+2825:         form = PlatoFilterForm(request.POST)
+2826: 
+2827:         medios = request.POST.get("medios") or None
+2828:         categoria = request.POST.get("categoria") or None
+2829:         dificultad = request.POST.get("dificultad") or None
+2830:         palabra_clave = (request.POST.get("palabra_clave") or "").strip()
+2831: 
+2832:         quecomemos = request.POST.get("quecomemos")
+2833:         misplatos = request.POST.get("misplatos")
+2834:         usar_lo_que_tengo = request.POST.get("usar_lo_que_tengo")
+2835: 
+2836:         if tipopag == "LoQueTengo":
+2837:             usar_lo_que_tengo = "1"
+2838: 
+2839:             if not quecomemos and not misplatos:
+2840:                 quecomemos = "quecomemos"
+2841:                 misplatos = "misplatos"
+------------------------------------------------------------
+2912:         return platos
+2913: 
+2914:     condicion = Q()
+2915: 
+2916:     for palabra in palabras:
+2917:         condicion |= Q(nombre_plato__icontains=palabra)
+2918:         condicion |= Q(ingredientes__icontains=palabra)
+2919:         condicion |= Q(ingredientes_en_plato__ingrediente__nombre__icontains=palabra)
+2920: 
+2921:     return platos.filter(condicion).distinct()
+2922: 
+2923: 
+2924: def obtener_resultados_principales(
+2925:     usuario,
+2926:     tipo_parametro,
+2927:     quecomemos,
+2928:     misplatos,
+2929:     medios,
+2930:     categoria,
+2931:     dificultad,
+2932:     palabra_clave,
+2933:     usar_lo_que_tengo=None
+2934: ):
+2935: 
+2936: 
+2937:     if tipo_parametro == "Delivery":
+2938:         lugares = Lugar.objects.filter(
+2939:             propietario=usuario,
+2940:             delivery=True
+2941:         )
+2942: 
+2943:         if palabra_clave:
+2944:             lugares = lugares.filter(
+------------------------------------------------------------
+3018:         ).days if getattr(p, "ultima_programacion", None) else None
+3019: 
+3020:         for v in p.variedades_hijas.all():
+3021:             v.dias_desde_ultima = (
+3022:                 hoy - v.ultima_programacion
+3023:             ).days if getattr(v, "ultima_programacion", None) else None
+3024: 
+3025:     return lugares, platos, platos_carousel, platos_listado
+3026: 
+3027: 
+3028: 
+3029: ORDEN_GRUPOS_LO_QUE_TENGO = [
+3030:     ("Principal", "Platos Principales", ("Principal",)),
+3031:     ("Entrada", "Entradas", ("Entrada",)),
+3032:     ("Dip", "Dips y Salsas", ("Dip", "Salsa")),
+3033:     ("Guarnicion", "Guarniciones", ("Guarnicion", "Guarnición")),
+3034:     ("Picada", "Picadas", ("Picada",)),
+3035:     ("Postre", "Postres / Reposterías", ("Postre", "Torta")),
+3036:     ("Trago", "Bebidas / Tragos", ("Trago",)),
+3037: ]
+3038: 
+3039: 
+3040: def agrupar_platos_para_lo_que_tengo(platos):
+3041:     platos_lista = list(platos)
+3042:     usados = set()
+3043:     grupos = []
+3044: 
+3045:     for codigo, titulo, tipos_grupo in ORDEN_GRUPOS_LO_QUE_TENGO:
+3046:         platos_grupo = []
+3047: 
+3048:         for plato in platos_lista:
+3049:             if plato.id in usados:
+3050:                 continue
+------------------------------------------------------------
+3089: 
+3090: 
+3091: def obtener_habitos_lookup(habitos):
+3092:     return {
+3093:         (h.dia_semana, h.momento, h.plato_id): h.id
+3094:         for h in habitos
+3095:     }
+3096: 
+3097: def obtener_contexto_compartidos(usuario):
+3098:     """
+3099:     Devuelve datos laterales de la pantalla de platos.
+3100: 
+3101:     No participa del filtrado principal de platos:
+3102:     - mensajes agrupados
+3103:     - platos compartidos pendientes de importar
+3104:     """
+3105:     return {
+3106:         "platos_compartidos": obtener_platos_compartidos_pendientes(usuario),
+3107:         "lugares_compartidos": obtener_lugares_compartidos_pendientes(usuario),
+3108: 
+3109:     }
+3110: 
+3111: 
+3112: @login_required(login_url=reverse_lazy('login'), redirect_field_name=None)
+3113: def FiltroDePlatos(request):
+3114: 
+3115:     fecha_actual, dias_desde_hoy = obtener_dias_desde_hoy()
+3116: 
+3117:     # Obtener el usuario actual
+3118:     usuario = request.user
+3119: 
+3120:     perfil = obtener_perfil_usuario(usuario)
+3121:     if perfil is None:
+------------------------------------------------------------
+3130:     estado_filtros = obtener_estado_filtros_platos(request, dia_activo)
+3131:     form = estado_filtros["form"]
+3132:     tipo_parametro = estado_filtros["tipo_parametro"]
+3133:     tipopag = estado_filtros["tipopag"]
+3134:     quecomemos = estado_filtros["quecomemos"]
+3135:     misplatos = estado_filtros["misplatos"]
+3136:     medios = estado_filtros["medios"]
+3137:     categoria = estado_filtros["categoria"]
+3138:     dificultad = estado_filtros["dificultad"]
+3139:     palabra_clave = estado_filtros["palabra_clave"]
+3140:     usar_lo_que_tengo = estado_filtros["usar_lo_que_tengo"]
+3141: 
+3142:     lugares, platos, platos_carousel, platos_listado = obtener_resultados_principales(
+3143:         usuario=usuario,
+3144:         tipo_parametro=tipo_parametro,
+3145:         quecomemos=quecomemos,
+3146:         misplatos=misplatos,
+3147:         medios=medios,
+3148:         categoria=categoria,
+3149:         dificultad=dificultad,
+3150:         palabra_clave=palabra_clave,
+3151:         usar_lo_que_tengo=usar_lo_que_tengo,
+3152:     )
+3153: 
+3154: 
+3155: 
+3156:     fechas_existentes = obtener_fechas_existentes_menu(usuario, fecha_actual)
+3157: 
+3158:     # Accede al atributo `amigues` desde la instancia
+3159:     amigues = obtener_usernames_amigues(request.user)
+3160: 
+3161:     # el avatar
+3162:     avatar = perfil.avatar_url
+------------------------------------------------------------
+3200:                 "parametro_activo": tipo_parametro,
+3201:                 **contexto_compartidos,
+3202:                 'dia_activo': dia_activo,
+3203:                 'dia_activo_obj': dia_activo_obj,
+3204:                 "guarniciones": guarniciones,
+3205:                 "salsas": salsas,
+3206:                 "platos_dia_x_dia": platos_dia_x_dia,
+3207:                 "lugares": lugares,
+3208:                 "habitos_lookup": habitos_lookup,
+3209:             }
+3210: 
+3211:     
+3212:     # tipopag = (request.GET.get("tipopag") or "Principal").strip()
+3213:     contexto["tipopag"] = tipopag
+3214: 
+3215:     return render(request, 'AdminVideos/lista_filtrada.html', contexto)
+3216: 
+3217: @login_required(login_url=reverse_lazy('login'), redirect_field_name=None)
+3218: def ajax_listado_platos(request):
+3219:     usuario = request.user
+3220: 
+3221:     perfil = obtener_perfil_usuario(usuario)
+3222:     if perfil is None:
+3223:         return redirect("profile-create")
+3224: 
+3225:     fecha_actual, dias_desde_hoy = obtener_dias_desde_hoy()
+3226:     dia_activo, dia_activo_obj = obtener_dia_activo(request, dias_desde_hoy)
+3227: 
+3228:     estado_filtros = obtener_estado_filtros_platos(request, dia_activo)
+3229: 
+3230:     tipo_parametro = estado_filtros["tipo_parametro"]
+3231:     tipopag = estado_filtros["tipopag"]
+3232:     quecomemos = estado_filtros["quecomemos"]
+------------------------------------------------------------
+3228:     estado_filtros = obtener_estado_filtros_platos(request, dia_activo)
+3229: 
+3230:     tipo_parametro = estado_filtros["tipo_parametro"]
+3231:     tipopag = estado_filtros["tipopag"]
+3232:     quecomemos = estado_filtros["quecomemos"]
+3233:     misplatos = estado_filtros["misplatos"]
+3234:     medios = estado_filtros["medios"]
+3235:     categoria = estado_filtros["categoria"]
+3236:     dificultad = estado_filtros["dificultad"]
+3237:     palabra_clave = estado_filtros["palabra_clave"]
+3238:     usar_lo_que_tengo = estado_filtros["usar_lo_que_tengo"]
+3239: 
+3240:     lugares, platos, platos_carousel, platos_listado = obtener_resultados_principales(
+3241:         usuario=usuario,
+3242:         tipo_parametro=tipo_parametro,
+3243:         quecomemos=quecomemos,
+3244:         misplatos=misplatos,
+3245:         medios=medios,
+3246:         categoria=categoria,
+3247:         dificultad=dificultad,
+3248:         palabra_clave=palabra_clave,
+3249:         usar_lo_que_tengo=usar_lo_que_tengo,
+3250:     )
+3251: 
+3252:     platos_agrupados_lo_que_tengo = (
+3253:         agrupar_platos_para_lo_que_tengo(platos_listado)
+3254:         if tipopag == "LoQueTengo"
+3255:         else None
+3256:     )
+3257: 
+3258:     return_to_url = request.POST.get("return_to") or reverse("filtro-de-platos")
+3259: 
+3260:     contexto = {
+------------------------------------------------------------
+3849:         dias_horarios=lugar_original.dias_horarios,
+3850:         image=lugar_original.image,
+3851:         delivery=lugar_original.delivery,
+3852:         propietario=usuario,
+3853:     )
+3854: 
+3855: 
+3856: def copiar_plato_para_usuario(plato_original, usuario):
+3857:     """
+3858:     Crea una copia de un plato para otro usuario.
+3859: 
+3860:     Copia:
+3861:     - campos principales del plato
+3862:     - componentes
+3863:     - ingredientes detallados
+3864:     """
+3865:     nuevo_plato = Plato.objects.create(
+3866:         nombre_plato=plato_original.nombre_plato,
+3867:         nombre_grupo=plato_original.nombre_grupo,
+3868:         receta=plato_original.receta,
+3869:         ingredientes=plato_original.ingredientes,
+3870:         medios=plato_original.medios,
+3871:         categoria=plato_original.categoria,
+3872:         elaboracion=plato_original.elaboracion,
+3873:         coccion=plato_original.coccion,
+3874:         tipos=plato_original.tipos,
+3875:         estacionalidad=plato_original.estacionalidad,
+3876:         porciones=plato_original.porciones,
+3877:         enlace=plato_original.enlace,
+3878:         propietario=usuario,
+3879:         image=plato_original.image,
+3880:         proviene_de=plato_original.propietario.username,
+3881:         id_original=plato_original.id,
+------------------------------------------------------------
+4081:                 for p in platos_a_asignar:
+4082:                     _, created = MenuItem.objects.get_or_create(
+4083:                         menu=menu_dia,
+4084:                         momento=momento,
+4085:                         plato=p,
+4086:                         defaults={"elegido": True},
+4087:                     )
+4088:                     if created:
+4089:                         creados += 1
+4090: 
+4091:                 # ===== Extras (0..N) validados por tipo =====
+4092:                 def _tiene_tipo(plato: Plato, tipo_txt: str) -> bool:
+4093:                     # tu campo es un string tipo "Entrada,Principal,Postre"
+4094:                     # match simple por substring (soporta tilde en Guarnición)
+4095:                     t = (plato.tipos or "")
+4096:                     if tipo_txt == "Guarnicion":
+4097:                         return ("Guarnicion" in t) or ("Guarnición" in t)
+4098:                     return (tipo_txt in t)
+4099: 
+4100:                 def _asignar_extra(extra_id_str: str, tipo_requerido: str) -> int:
+4101:                     if not extra_id_str or not extra_id_str.isdigit():
+4102:                         return 0
+4103: 
+4104:                     extra = Plato.objects.filter(
+4105:                         id=int(extra_id_str),
+4106:                         propietario=request.user,
+4107:                     ).first()
+4108: 
+4109:                     if not extra:
+4110:                         return 0
+4111: 
+4112:                     if not _tiene_tipo(extra, tipo_requerido):
+4113:                         return 0
+------------------------------------------------------------
+4429:         messages.warning(request, "No hay platos históricos para ese día.")
+4430:         return redirect("filtro-de-platos")
+4431: 
+4432:     # 3️⃣ Elegir un plato al azar
+4433:     plato_random = random.choice([i.plato for i in items])
+4434: 
+4435:     # 4️⃣ Crear (o traer) el menú del día activo
+4436:     menu_dia, _ = MenuDia.objects.get_or_create(
+4437:         propietario=usuario,
+4438:         fecha=fecha_activa
+4439:     )
+4440: 
+4441:     # 5️⃣ Asignar como plato principal (simple)
+4442:     try:
+4443:         MenuItem.objects.create(
+4444:             menu=menu_dia,
+4445:             momento="almuerzo",  # o el que vos definas
+4446:             plato=plato_random
+4447:         )
+4448:         messages.success(
+4449:             request,
+4450:             f"Se asignó aleatoriamente: {plato_random.nombre_plato}"
+4451:         )
+4452:     except Exception:
+4453:         messages.warning(
+4454:             request,
+4455:             "Ese plato ya estaba asignado en ese día."
+4456:         )
+4457: 
+4458:     return redirect("filtro-de-platos")
+4459: 
+4460: 
+4461: 
+------------------------------------------------------------
+
+--- patrón: tipopag ---
+0263: 
+0264:     # Recuperar parámetros de sesión
+0265:     medios = request.session.get('medios_estable', None)
+0266:     categoria = request.session.get('categoria_estable', None)
+0267:     dificultad = request.session.get('dificultad_estable', None)
+0268:     palabra_clave = (request.POST.get("palabra_clave") or "").strip()
+0269: 
+0270:     quecomemos = request.session.get('quecomemos', None)
+0271:     misplatos = request.session.get('misplatos', "misplatos")
+0272:     # preseleccionados = request.session.get('preseleccionados', None)
+0273: 
+0274:     # Obtener el valor del parámetro 'tipo' desde la URL
+0275:     tipo_parametro = (request.GET.get("tipopag") or "Principal").strip()
+0276: 
+0277: 
+0278:     # # Obtener el usuario actual
+0279:     # usuario = request.user
+0280: 
+0281:     # Devolver las variables por separado
+0282:     return tipo_parametro, quecomemos, misplatos, medios, categoria, dificultad, palabra_clave
+0283: 
+0284: 
+0285: def index(request):
+0286:     return redirect(reverse_lazy("filtro-de-platos"))
+0287: 
+0288: def about(request):
+0289:     return render(request, "AdminVideos/about.html")
+0290: 
+0291: 
+0292: 
+0293: def limpiar_none(value):
+0294:     return None if value == 'None' or value == '' else value
+0295: 
+------------------------------------------------------------
+1242:     if lugar.propietario != request.user:
+1243:         raise Http404("No tenés permiso para eliminar este lugar.")
+1244: 
+1245:     # 🔧 Desasignar de menús (MUY IMPORTANTE)
+1246:     MenuItem.objects.filter(
+1247:         lugar=lugar,
+1248:         menu__propietario=request.user
+1249:     ).delete()
+1250: 
+1251:     # 🗑️ Eliminar lugar
+1252:     lugar.delete()
+1253: 
+1254:     # 🔁 Volver al filtro respetando tipopag
+1255:     tipopag = request.GET.get("tipopag")
+1256:     url = reverse("filtro-de-platos")
+1257:     if tipopag:
+1258:         url += f"?tipopag={tipopag}"
+1259: 
+1260:     return redirect(url)
+1261: 
+1262: 
+1263: 
+1264: @login_required
+1265: def eliminar_plato(request, plato_id):
+1266:     plato = get_object_or_404(Plato, id=plato_id, propietario=request.user)
+1267: 
+1268:     if request.method != "POST":
+1269:         return HttpResponseNotAllowed(["POST"])
+1270: 
+1271:     return_to = request.POST.get("return_to") or request.GET.get("return_to")
+1272: 
+1273:     with transaction.atomic():
+1274:         perfil = get_object_or_404(Profile, user=request.user)
+------------------------------------------------------------
+1243:         raise Http404("No tenés permiso para eliminar este lugar.")
+1244: 
+1245:     # 🔧 Desasignar de menús (MUY IMPORTANTE)
+1246:     MenuItem.objects.filter(
+1247:         lugar=lugar,
+1248:         menu__propietario=request.user
+1249:     ).delete()
+1250: 
+1251:     # 🗑️ Eliminar lugar
+1252:     lugar.delete()
+1253: 
+1254:     # 🔁 Volver al filtro respetando tipopag
+1255:     tipopag = request.GET.get("tipopag")
+1256:     url = reverse("filtro-de-platos")
+1257:     if tipopag:
+1258:         url += f"?tipopag={tipopag}"
+1259: 
+1260:     return redirect(url)
+1261: 
+1262: 
+1263: 
+1264: @login_required
+1265: def eliminar_plato(request, plato_id):
+1266:     plato = get_object_or_404(Plato, id=plato_id, propietario=request.user)
+1267: 
+1268:     if request.method != "POST":
+1269:         return HttpResponseNotAllowed(["POST"])
+1270: 
+1271:     return_to = request.POST.get("return_to") or request.GET.get("return_to")
+1272: 
+1273:     with transaction.atomic():
+1274:         perfil = get_object_or_404(Profile, user=request.user)
+1275: 
+------------------------------------------------------------
+1245:     # 🔧 Desasignar de menús (MUY IMPORTANTE)
+1246:     MenuItem.objects.filter(
+1247:         lugar=lugar,
+1248:         menu__propietario=request.user
+1249:     ).delete()
+1250: 
+1251:     # 🗑️ Eliminar lugar
+1252:     lugar.delete()
+1253: 
+1254:     # 🔁 Volver al filtro respetando tipopag
+1255:     tipopag = request.GET.get("tipopag")
+1256:     url = reverse("filtro-de-platos")
+1257:     if tipopag:
+1258:         url += f"?tipopag={tipopag}"
+1259: 
+1260:     return redirect(url)
+1261: 
+1262: 
+1263: 
+1264: @login_required
+1265: def eliminar_plato(request, plato_id):
+1266:     plato = get_object_or_404(Plato, id=plato_id, propietario=request.user)
+1267: 
+1268:     if request.method != "POST":
+1269:         return HttpResponseNotAllowed(["POST"])
+1270: 
+1271:     return_to = request.POST.get("return_to") or request.GET.get("return_to")
+1272: 
+1273:     with transaction.atomic():
+1274:         perfil = get_object_or_404(Profile, user=request.user)
+1275: 
+1276:         if plato.id_original and plato.id_original in perfil.sugeridos_descartados:
+1277:             perfil.sugeridos_descartados.remove(plato.id_original)
+------------------------------------------------------------
+1246:     MenuItem.objects.filter(
+1247:         lugar=lugar,
+1248:         menu__propietario=request.user
+1249:     ).delete()
+1250: 
+1251:     # 🗑️ Eliminar lugar
+1252:     lugar.delete()
+1253: 
+1254:     # 🔁 Volver al filtro respetando tipopag
+1255:     tipopag = request.GET.get("tipopag")
+1256:     url = reverse("filtro-de-platos")
+1257:     if tipopag:
+1258:         url += f"?tipopag={tipopag}"
+1259: 
+1260:     return redirect(url)
+1261: 
+1262: 
+1263: 
+1264: @login_required
+1265: def eliminar_plato(request, plato_id):
+1266:     plato = get_object_or_404(Plato, id=plato_id, propietario=request.user)
+1267: 
+1268:     if request.method != "POST":
+1269:         return HttpResponseNotAllowed(["POST"])
+1270: 
+1271:     return_to = request.POST.get("return_to") or request.GET.get("return_to")
+1272: 
+1273:     with transaction.atomic():
+1274:         perfil = get_object_or_404(Profile, user=request.user)
+1275: 
+1276:         if plato.id_original and plato.id_original in perfil.sugeridos_descartados:
+1277:             perfil.sugeridos_descartados.remove(plato.id_original)
+1278: 
+------------------------------------------------------------
+1327:     success_url = reverse_lazy("crear-lugar")
+1328: 
+1329: 
+1330:     def form_invalid(self, form):
+1331:         return super().form_invalid(form)
+1332: 
+1333:     def form_valid(self, form):
+1334:         lugar = form.save(commit=False)
+1335:         lugar.propietario = self.request.user
+1336: 
+1337: 
+1338:         # Obtener el valor del parámetro 'template' desde la URL
+1339:         template_param = self.request.GET.get('tipopag')
+1340: 
+1341:         if template_param == 'Delivery':
+1342:             lugar.delivery = True
+1343:         elif template_param == 'Comerafuera':
+1344:             lugar.delivery = False
+1345: 
+1346:         lugar.save()
+1347: 
+1348:         # Obtener el parámetro 'tipopag' y pasarlo en la redirección
+1349:         template_param = self.request.GET.get('tipopag')
+1350:         return redirect(reverse("crear-lugar") + f"?tipopag={template_param}")
+1351: 
+1352: 
+1353: # ==========================================
+1354: # Helper: agregar params a una URL (sin romper querystring)
+1355: # ==========================================
+1356: def _add_qs(url, **params):
+1357:     parts = urlparse(url)
+1358:     q = dict(parse_qsl(parts.query))
+1359:     q.update({k: v for k, v in params.items() if v is not None})
+------------------------------------------------------------
+1336: 
+1337: 
+1338:         # Obtener el valor del parámetro 'template' desde la URL
+1339:         template_param = self.request.GET.get('tipopag')
+1340: 
+1341:         if template_param == 'Delivery':
+1342:             lugar.delivery = True
+1343:         elif template_param == 'Comerafuera':
+1344:             lugar.delivery = False
+1345: 
+1346:         lugar.save()
+1347: 
+1348:         # Obtener el parámetro 'tipopag' y pasarlo en la redirección
+1349:         template_param = self.request.GET.get('tipopag')
+1350:         return redirect(reverse("crear-lugar") + f"?tipopag={template_param}")
+1351: 
+1352: 
+1353: # ==========================================
+1354: # Helper: agregar params a una URL (sin romper querystring)
+1355: # ==========================================
+1356: def _add_qs(url, **params):
+1357:     parts = urlparse(url)
+1358:     q = dict(parse_qsl(parts.query))
+1359:     q.update({k: v for k, v in params.items() if v is not None})
+1360:     return urlunparse(parts._replace(query=urlencode(q)))
+1361: 
+1362: 
+1363: 
+1364: TITULOS_FORMULARIO_PLATO = {
+1365:     "Principal": "Agregar un plato principal",
+1366:     "Entrada": "Agregar una entrada",
+1367:     "Guarnicion": "Agregar una guarnición",
+1368:     "Dip": "Agregar un dip",
+------------------------------------------------------------
+1337: 
+1338:         # Obtener el valor del parámetro 'template' desde la URL
+1339:         template_param = self.request.GET.get('tipopag')
+1340: 
+1341:         if template_param == 'Delivery':
+1342:             lugar.delivery = True
+1343:         elif template_param == 'Comerafuera':
+1344:             lugar.delivery = False
+1345: 
+1346:         lugar.save()
+1347: 
+1348:         # Obtener el parámetro 'tipopag' y pasarlo en la redirección
+1349:         template_param = self.request.GET.get('tipopag')
+1350:         return redirect(reverse("crear-lugar") + f"?tipopag={template_param}")
+1351: 
+1352: 
+1353: # ==========================================
+1354: # Helper: agregar params a una URL (sin romper querystring)
+1355: # ==========================================
+1356: def _add_qs(url, **params):
+1357:     parts = urlparse(url)
+1358:     q = dict(parse_qsl(parts.query))
+1359:     q.update({k: v for k, v in params.items() if v is not None})
+1360:     return urlunparse(parts._replace(query=urlencode(q)))
+1361: 
+1362: 
+1363: 
+1364: TITULOS_FORMULARIO_PLATO = {
+1365:     "Principal": "Agregar un plato principal",
+1366:     "Entrada": "Agregar una entrada",
+1367:     "Guarnicion": "Agregar una guarnición",
+1368:     "Dip": "Agregar un dip",
+1369:     "Salsa": "Agregar una salsa",
+------------------------------------------------------------
+1338:         # Obtener el valor del parámetro 'template' desde la URL
+1339:         template_param = self.request.GET.get('tipopag')
+1340: 
+1341:         if template_param == 'Delivery':
+1342:             lugar.delivery = True
+1343:         elif template_param == 'Comerafuera':
+1344:             lugar.delivery = False
+1345: 
+1346:         lugar.save()
+1347: 
+1348:         # Obtener el parámetro 'tipopag' y pasarlo en la redirección
+1349:         template_param = self.request.GET.get('tipopag')
+1350:         return redirect(reverse("crear-lugar") + f"?tipopag={template_param}")
+1351: 
+1352: 
+1353: # ==========================================
+1354: # Helper: agregar params a una URL (sin romper querystring)
+1355: # ==========================================
+1356: def _add_qs(url, **params):
+1357:     parts = urlparse(url)
+1358:     q = dict(parse_qsl(parts.query))
+1359:     q.update({k: v for k, v in params.items() if v is not None})
+1360:     return urlunparse(parts._replace(query=urlencode(q)))
+1361: 
+1362: 
+1363: 
+1364: TITULOS_FORMULARIO_PLATO = {
+1365:     "Principal": "Agregar un plato principal",
+1366:     "Entrada": "Agregar una entrada",
+1367:     "Guarnicion": "Agregar una guarnición",
+1368:     "Dip": "Agregar un dip",
+1369:     "Salsa": "Agregar una salsa",
+1370:     "Picada": "Agregar una picada",
+------------------------------------------------------------
+1365:     "Principal": "Agregar un plato principal",
+1366:     "Entrada": "Agregar una entrada",
+1367:     "Guarnicion": "Agregar una guarnición",
+1368:     "Dip": "Agregar un dip",
+1369:     "Salsa": "Agregar una salsa",
+1370:     "Picada": "Agregar una picada",
+1371:     "Ingrediente de picada": "Agregar un ingrediente de picada",
+1372:     "Postre": "Agregar un postre",
+1373:     "Trago": "Agregar una bebida / trago",
+1374: }
+1375: 
+1376: 
+1377: def titulo_formulario_plato(tipopag, accion="Agregar"):
+1378:     tipo = (tipopag or "Principal").strip()
+1379:     titulo = TITULOS_FORMULARIO_PLATO.get(tipo)
+1380: 
+1381:     if titulo and accion == "Agregar":
+1382:         return titulo
+1383: 
+1384:     if accion == "Editar":
+1385:         return "Editar plato"
+1386: 
+1387:     if accion == "Agregar variedad":
+1388:         return "Agregar variedad"
+1389: 
+1390:     return f"{accion} plato"
+1391: 
+1392: 
+1393: class PlatoCreate(LoginRequiredMixin, CreateView):
+1394:     model = Plato
+1395:     form_class = PlatoForm
+1396:     # Fallback de template por si tipopag no matchea
+1397:     DEFAULT_TEMPLATE = 'AdminVideos/ppal_form.html'
+------------------------------------------------------------
+1366:     "Entrada": "Agregar una entrada",
+1367:     "Guarnicion": "Agregar una guarnición",
+1368:     "Dip": "Agregar un dip",
+1369:     "Salsa": "Agregar una salsa",
+1370:     "Picada": "Agregar una picada",
+1371:     "Ingrediente de picada": "Agregar un ingrediente de picada",
+1372:     "Postre": "Agregar un postre",
+1373:     "Trago": "Agregar una bebida / trago",
+1374: }
+1375: 
+1376: 
+1377: def titulo_formulario_plato(tipopag, accion="Agregar"):
+1378:     tipo = (tipopag or "Principal").strip()
+1379:     titulo = TITULOS_FORMULARIO_PLATO.get(tipo)
+1380: 
+1381:     if titulo and accion == "Agregar":
+1382:         return titulo
+1383: 
+1384:     if accion == "Editar":
+1385:         return "Editar plato"
+1386: 
+1387:     if accion == "Agregar variedad":
+1388:         return "Agregar variedad"
+1389: 
+1390:     return f"{accion} plato"
+1391: 
+1392: 
+1393: class PlatoCreate(LoginRequiredMixin, CreateView):
+1394:     model = Plato
+1395:     form_class = PlatoForm
+1396:     # Fallback de template por si tipopag no matchea
+1397:     DEFAULT_TEMPLATE = 'AdminVideos/ppal_form.html'
+1398: 
+------------------------------------------------------------
+1384:     if accion == "Editar":
+1385:         return "Editar plato"
+1386: 
+1387:     if accion == "Agregar variedad":
+1388:         return "Agregar variedad"
+1389: 
+1390:     return f"{accion} plato"
+1391: 
+1392: 
+1393: class PlatoCreate(LoginRequiredMixin, CreateView):
+1394:     model = Plato
+1395:     form_class = PlatoForm
+1396:     # Fallback de template por si tipopag no matchea
+1397:     DEFAULT_TEMPLATE = 'AdminVideos/ppal_form.html'
+1398: 
+1399:     def get_form_kwargs(self):
+1400:         kwargs = super().get_form_kwargs()
+1401:         kwargs["user"] = self.request.user
+1402:         return kwargs
+1403: 
+1404:     def get(self, request, *args, **kwargs):
+1405:         self.object = None  # ← necesario para evitar AttributeError
+1406:         context = self.get_context_data()
+1407: 
+1408:         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+1409:             html = render_to_string('AdminVideos/plato_form_inner.html', context, request=request)
+1410:             return JsonResponse({'html': html})
+1411: 
+1412:         return super().get(request, *args, **kwargs)
+1413: 
+1414: 
+1415: 
+1416:     def get_template_names(self):
+------------------------------------------------------------
+1405:         self.object = None  # ← necesario para evitar AttributeError
+1406:         context = self.get_context_data()
+1407: 
+1408:         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+1409:             html = render_to_string('AdminVideos/plato_form_inner.html', context, request=request)
+1410:             return JsonResponse({'html': html})
+1411: 
+1412:         return super().get(request, *args, **kwargs)
+1413: 
+1414: 
+1415: 
+1416:     def get_template_names(self):
+1417:         template_param = self.request.GET.get('tipopag')
+1418:         templates = {
+1419:             'Entrada': 'AdminVideos/entrada_form.html',
+1420:             'Dip': 'AdminVideos/dip_form.html',
+1421:             'Principal': 'AdminVideos/ppal_form.html',
+1422:             # 'Dash': 'AdminVideos/ppal_form.html',
+1423:             'Trago': 'AdminVideos/trago_form.html',
+1424:             'Salsa': 'AdminVideos/salsa_form.html',
+1425:             'Guarnicion': 'AdminVideos/guarnicion_form.html',
+1426:             'Picada': 'AdminVideos/ppal_form.html',
+1427:             'Ingrediente de picada': 'AdminVideos/ppal_form.html',
+1428:             'Postre': 'AdminVideos/postre_form.html',
+1429:             'Delivery': 'AdminVideos/delivery.html',
+1430:             'Comerafuera': 'AdminVideos/comerafuera.html',
+1431:         }
+1432:         return [templates.get(template_param, self.DEFAULT_TEMPLATE)]
+1433: 
+1434:     TIPOS_POR_TEMPLATE = {
+1435:         "Entrada": ["Guarnicion","Picada","Principal", "Entrada"],
+1436:         "Guarnicion": ["Guarnicion", "Principal", "Entrada", "Picada"],
+1437:         "Trago": ["Trago"],
+------------------------------------------------------------
+1439:         "Torta": ["Torta", "Postre"],
+1440:         "Postre": ["Postre"],
+1441:         "Principal": ["Principal", "Guarnicion", "Entrada", "Picada"],
+1442:         # "Dash": ["Principal", "Guarnicion", "Entrada", "Picada"],
+1443:         "Ingrediente de picada": ["Ingrediente de picada","Guarnicion", "Entrada"],
+1444:         "Picada": ["Picada"],
+1445:         "Salsa": ["Salsa", "Dip", "Guarnicion", "Entrada"],
+1446:     }
+1447: 
+1448:     # 1) Alinear “tipos” con tu modelo actual (CharField CSV)
+1449:     def get_form(self, form_class=None):
+1450:         form = super().get_form(form_class)
+1451:         template_param = self.request.GET.get('tipopag')
+1452: 
+1453:         opciones = self.TIPOS_POR_TEMPLATE.get(template_param, [])
+1454:         if opciones:
+1455:             form.fields['tipos'].choices = [
+1456:                 (k, v) for (k, v) in Plato.TIPOS_CHOICES if k in opciones
+1457:             ]
+1458:             if template_param in opciones:
+1459:                 form.fields['tipos'].initial = [template_param]
+1460:             elif form.fields['tipos'].choices:
+1461:                 form.fields['tipos'].initial = [form.fields['tipos'].choices[0][0]]
+1462: 
+1463:             if len(form.fields['tipos'].choices) == 1:
+1464:                 form.fields['tipos'].widget = forms.MultipleHiddenInput()
+1465:         else:
+1466:             form.fields['tipos'].choices = Plato.TIPOS_CHOICES
+1467:             form.fields['tipos'].initial = []
+1468: 
+1469:         # Imagen no requerida (por si el widget envia archivo sin nombre)
+1470:         if 'image' in form.fields:
+1471:             form.fields['image'].required = False
+------------------------------------------------------------
+1465:         else:
+1466:             form.fields['tipos'].choices = Plato.TIPOS_CHOICES
+1467:             form.fields['tipos'].initial = []
+1468: 
+1469:         # Imagen no requerida (por si el widget envia archivo sin nombre)
+1470:         if 'image' in form.fields:
+1471:             form.fields['image'].required = False
+1472: 
+1473:         return form
+1474: 
+1475:     def get_context_data(self, **kwargs):
+1476:         context = super().get_context_data(**kwargs)
+1477:         template_param = self.request.GET.get('tipopag')
+1478:         context['items'] = [k for (k, _) in Plato.TIPOS_CHOICES]
+1479:         context['tipopag'] = template_param
+1480:         context["titulo_formulario"] = titulo_formulario_plato(template_param, accion="Agregar")
+1481: 
+1482:         if self.request.method == 'POST':
+1483:             context['ingrediente_formset'] = IngredienteEnPlatoFormSet(self.request.POST)
+1484:         else:
+1485:             context['ingrediente_formset'] = IngredienteEnPlatoFormSet()
+1486:         return context
+1487: 
+1488:     def form_valid(self, form):
+1489:         context = self.get_context_data()
+1490:         ingrediente_formset = context['ingrediente_formset']
+1491: 
+1492:         # ✅ Unificamos detección AJAX (así no te quedan 2 returns distintos)
+1493:         is_ajax = self.request.headers.get("X-Requested-With") == "XMLHttpRequest"
+1494: 
+1495:         # --- Validación del formset ---
+1496:         if not ingrediente_formset.is_valid():
+1497:             # Si vino por AJAX (modal)
+------------------------------------------------------------
+1467:             form.fields['tipos'].initial = []
+1468: 
+1469:         # Imagen no requerida (por si el widget envia archivo sin nombre)
+1470:         if 'image' in form.fields:
+1471:             form.fields['image'].required = False
+1472: 
+1473:         return form
+1474: 
+1475:     def get_context_data(self, **kwargs):
+1476:         context = super().get_context_data(**kwargs)
+1477:         template_param = self.request.GET.get('tipopag')
+1478:         context['items'] = [k for (k, _) in Plato.TIPOS_CHOICES]
+1479:         context['tipopag'] = template_param
+1480:         context["titulo_formulario"] = titulo_formulario_plato(template_param, accion="Agregar")
+1481: 
+1482:         if self.request.method == 'POST':
+1483:             context['ingrediente_formset'] = IngredienteEnPlatoFormSet(self.request.POST)
+1484:         else:
+1485:             context['ingrediente_formset'] = IngredienteEnPlatoFormSet()
+1486:         return context
+1487: 
+1488:     def form_valid(self, form):
+1489:         context = self.get_context_data()
+1490:         ingrediente_formset = context['ingrediente_formset']
+1491: 
+1492:         # ✅ Unificamos detección AJAX (así no te quedan 2 returns distintos)
+1493:         is_ajax = self.request.headers.get("X-Requested-With") == "XMLHttpRequest"
+1494: 
+1495:         # --- Validación del formset ---
+1496:         if not ingrediente_formset.is_valid():
+1497:             # Si vino por AJAX (modal)
+1498:             if is_ajax:
+1499:                 html = render_to_string('AdminVideos/plato_form_inner.html', context, request=self.request)
+------------------------------------------------------------
+1553:             return JsonResponse({
+1554:                 "success": True,
+1555:                 "redirect_url": redirect_url,   # 👈 clave para que el JS navegue
+1556:                 "nombre": plato.nombre_plato,
+1557:                 "id": plato.id,
+1558:             })
+1559: 
+1560:         # --- Si NO es AJAX: si hay return_to, volvemos ahí ---
+1561:         if return_to:
+1562:             return redirect(_add_qs(return_to, msg="Guardado OK.", level="success"))
+1563: 
+1564:         # --- Comportamiento normal (tu lógica original) ---
+1565:         template_param = self.request.GET.get('tipopag')
+1566:         if template_param:
+1567:             tail = _add_qs(f"?tipopag={template_param}", msg="Guardado OK.", level="success")
+1568:         else:
+1569:             tail = _add_qs("", msg="Guardado OK.", level="success")
+1570:         return redirect(f"{reverse('videos-create')}{tail}")
+1571: 
+1572: 
+1573: class PlatoUpdate(LoginRequiredMixin, UpdateView):
+1574:     model = Plato
+1575:     form_class = PlatoForm
+1576:     template_name = "AdminVideos/plato_update.html"
+1577: 
+1578:     def get_object(self, queryset=None):
+1579:         obj = super().get_object(queryset)
+1580:         if obj.propietario != self.request.user:
+1581:             raise PermissionDenied("No tienes permiso para editar este plato.")
+1582:         return obj
+1583: 
+1584:     def get_form_kwargs(self):
+1585:         kwargs = super().get_form_kwargs()
+------------------------------------------------------------
+1555:                 "redirect_url": redirect_url,   # 👈 clave para que el JS navegue
+1556:                 "nombre": plato.nombre_plato,
+1557:                 "id": plato.id,
+1558:             })
+1559: 
+1560:         # --- Si NO es AJAX: si hay return_to, volvemos ahí ---
+1561:         if return_to:
+1562:             return redirect(_add_qs(return_to, msg="Guardado OK.", level="success"))
+1563: 
+1564:         # --- Comportamiento normal (tu lógica original) ---
+1565:         template_param = self.request.GET.get('tipopag')
+1566:         if template_param:
+1567:             tail = _add_qs(f"?tipopag={template_param}", msg="Guardado OK.", level="success")
+1568:         else:
+1569:             tail = _add_qs("", msg="Guardado OK.", level="success")
+1570:         return redirect(f"{reverse('videos-create')}{tail}")
+1571: 
+1572: 
+1573: class PlatoUpdate(LoginRequiredMixin, UpdateView):
+1574:     model = Plato
+1575:     form_class = PlatoForm
+1576:     template_name = "AdminVideos/plato_update.html"
+1577: 
+1578:     def get_object(self, queryset=None):
+1579:         obj = super().get_object(queryset)
+1580:         if obj.propietario != self.request.user:
+1581:             raise PermissionDenied("No tienes permiso para editar este plato.")
+1582:         return obj
+1583: 
+1584:     def get_form_kwargs(self):
+1585:         kwargs = super().get_form_kwargs()
+1586:         kwargs["user"] = self.request.user
+1587:         return kwargs
+------------------------------------------------------------
+1622:         # ✅ PARCHE: asegurar nombre_ingrediente en initial (evita VariableDoesNotExist)
+1623:         for f in formset.forms:
+1624:             if "nombre_ingrediente" not in f.initial:
+1625:                 ing = getattr(f.instance, "ingrediente", None)
+1626:                 f.initial["nombre_ingrediente"] = getattr(ing, "nombre", "") if ing else ""
+1627: 
+1628:         context["ingrediente_formset"] = formset
+1629:         context["titulo_formulario"] = "Editar plato"
+1630: 
+1631:         # 👉 TIPOS: enviar TODOS al template (para render del menú lateral)
+1632:         context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
+1633: 
+1634:         # ✅ tipopag SOLO para "menú activo" (contexto de navegación)
+1635:         # 1) si viene en la URL del update, usarlo
+1636:         tipopag = (self.request.GET.get("tipopag") or "").strip()
+1637: 
+1638:         # 2) si no viene, sacarlo del return_to (?tipopag=...)
+1639:         if not tipopag:
+1640:             return_to = (
+1641:                 self.request.GET.get("return_to")
+1642:                 or self.request.POST.get("return_to")
+1643:                 or ""
+1644:             ).strip()
+1645: 
+1646:             if return_to:
+1647:                 qs = parse_qs(urlparse(return_to).query)
+1648:                 tipopag = (qs.get("tipopag") or [""])[0].strip()
+1649: 
+1650:         # 3) si no hay origen, NO inventamos nada
+1651:         context["tipopag"] = tipopag  # puede ser ""
+1652: 
+1653:         # ✅ Variedades (hijos) en orden fijo
+1654:         context["variedades"] = (
+------------------------------------------------------------
+1624:             if "nombre_ingrediente" not in f.initial:
+1625:                 ing = getattr(f.instance, "ingrediente", None)
+1626:                 f.initial["nombre_ingrediente"] = getattr(ing, "nombre", "") if ing else ""
+1627: 
+1628:         context["ingrediente_formset"] = formset
+1629:         context["titulo_formulario"] = "Editar plato"
+1630: 
+1631:         # 👉 TIPOS: enviar TODOS al template (para render del menú lateral)
+1632:         context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
+1633: 
+1634:         # ✅ tipopag SOLO para "menú activo" (contexto de navegación)
+1635:         # 1) si viene en la URL del update, usarlo
+1636:         tipopag = (self.request.GET.get("tipopag") or "").strip()
+1637: 
+1638:         # 2) si no viene, sacarlo del return_to (?tipopag=...)
+1639:         if not tipopag:
+1640:             return_to = (
+1641:                 self.request.GET.get("return_to")
+1642:                 or self.request.POST.get("return_to")
+1643:                 or ""
+1644:             ).strip()
+1645: 
+1646:             if return_to:
+1647:                 qs = parse_qs(urlparse(return_to).query)
+1648:                 tipopag = (qs.get("tipopag") or [""])[0].strip()
+1649: 
+1650:         # 3) si no hay origen, NO inventamos nada
+1651:         context["tipopag"] = tipopag  # puede ser ""
+1652: 
+1653:         # ✅ Variedades (hijos) en orden fijo
+1654:         context["variedades"] = (
+1655:             Plato.objects
+1656:             .filter(plato_padre=self.object)
+------------------------------------------------------------
+1626:                 f.initial["nombre_ingrediente"] = getattr(ing, "nombre", "") if ing else ""
+1627: 
+1628:         context["ingrediente_formset"] = formset
+1629:         context["titulo_formulario"] = "Editar plato"
+1630: 
+1631:         # 👉 TIPOS: enviar TODOS al template (para render del menú lateral)
+1632:         context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
+1633: 
+1634:         # ✅ tipopag SOLO para "menú activo" (contexto de navegación)
+1635:         # 1) si viene en la URL del update, usarlo
+1636:         tipopag = (self.request.GET.get("tipopag") or "").strip()
+1637: 
+1638:         # 2) si no viene, sacarlo del return_to (?tipopag=...)
+1639:         if not tipopag:
+1640:             return_to = (
+1641:                 self.request.GET.get("return_to")
+1642:                 or self.request.POST.get("return_to")
+1643:                 or ""
+1644:             ).strip()
+1645: 
+1646:             if return_to:
+1647:                 qs = parse_qs(urlparse(return_to).query)
+1648:                 tipopag = (qs.get("tipopag") or [""])[0].strip()
+1649: 
+1650:         # 3) si no hay origen, NO inventamos nada
+1651:         context["tipopag"] = tipopag  # puede ser ""
+1652: 
+1653:         # ✅ Variedades (hijos) en orden fijo
+1654:         context["variedades"] = (
+1655:             Plato.objects
+1656:             .filter(plato_padre=self.object)
+1657:             .order_by("id")
+1658:         )
+------------------------------------------------------------
+1627: 
+1628:         context["ingrediente_formset"] = formset
+1629:         context["titulo_formulario"] = "Editar plato"
+1630: 
+1631:         # 👉 TIPOS: enviar TODOS al template (para render del menú lateral)
+1632:         context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
+1633: 
+1634:         # ✅ tipopag SOLO para "menú activo" (contexto de navegación)
+1635:         # 1) si viene en la URL del update, usarlo
+1636:         tipopag = (self.request.GET.get("tipopag") or "").strip()
+1637: 
+1638:         # 2) si no viene, sacarlo del return_to (?tipopag=...)
+1639:         if not tipopag:
+1640:             return_to = (
+1641:                 self.request.GET.get("return_to")
+1642:                 or self.request.POST.get("return_to")
+1643:                 or ""
+1644:             ).strip()
+1645: 
+1646:             if return_to:
+1647:                 qs = parse_qs(urlparse(return_to).query)
+1648:                 tipopag = (qs.get("tipopag") or [""])[0].strip()
+1649: 
+1650:         # 3) si no hay origen, NO inventamos nada
+1651:         context["tipopag"] = tipopag  # puede ser ""
+1652: 
+1653:         # ✅ Variedades (hijos) en orden fijo
+1654:         context["variedades"] = (
+1655:             Plato.objects
+1656:             .filter(plato_padre=self.object)
+1657:             .order_by("id")
+1658:         )
+1659: 
+------------------------------------------------------------
+1636:         tipopag = (self.request.GET.get("tipopag") or "").strip()
+1637: 
+1638:         # 2) si no viene, sacarlo del return_to (?tipopag=...)
+1639:         if not tipopag:
+1640:             return_to = (
+1641:                 self.request.GET.get("return_to")
+1642:                 or self.request.POST.get("return_to")
+1643:                 or ""
+1644:             ).strip()
+1645: 
+1646:             if return_to:
+1647:                 qs = parse_qs(urlparse(return_to).query)
+1648:                 tipopag = (qs.get("tipopag") or [""])[0].strip()
+1649: 
+1650:         # 3) si no hay origen, NO inventamos nada
+1651:         context["tipopag"] = tipopag  # puede ser ""
+1652: 
+1653:         # ✅ Variedades (hijos) en orden fijo
+1654:         context["variedades"] = (
+1655:             Plato.objects
+1656:             .filter(plato_padre=self.object)
+1657:             .order_by("id")
+1658:         )
+1659: 
+1660:         return context
+1661: 
+1662: 
+1663: 
+1664:     def form_valid(self, form):
+1665:         context = self.get_context_data()
+1666:         ingrediente_formset = context["ingrediente_formset"]
+1667: 
+1668:         if not ingrediente_formset.is_valid():
+------------------------------------------------------------
+1639:         if not tipopag:
+1640:             return_to = (
+1641:                 self.request.GET.get("return_to")
+1642:                 or self.request.POST.get("return_to")
+1643:                 or ""
+1644:             ).strip()
+1645: 
+1646:             if return_to:
+1647:                 qs = parse_qs(urlparse(return_to).query)
+1648:                 tipopag = (qs.get("tipopag") or [""])[0].strip()
+1649: 
+1650:         # 3) si no hay origen, NO inventamos nada
+1651:         context["tipopag"] = tipopag  # puede ser ""
+1652: 
+1653:         # ✅ Variedades (hijos) en orden fijo
+1654:         context["variedades"] = (
+1655:             Plato.objects
+1656:             .filter(plato_padre=self.object)
+1657:             .order_by("id")
+1658:         )
+1659: 
+1660:         return context
+1661: 
+1662: 
+1663: 
+1664:     def form_valid(self, form):
+1665:         context = self.get_context_data()
+1666:         ingrediente_formset = context["ingrediente_formset"]
+1667: 
+1668:         if not ingrediente_formset.is_valid():
+1669:             return self.render_to_response(self.get_context_data(form=form))
+1670: 
+1671:         # 🔒 Imagen: normalizar (si no viene nueva, no tocar la actual)
+------------------------------------------------------------
+1767: 
+1768: class PlatoVariedadCreate(PlatoCreate):
+1769:     
+1770: #     Crea un Plato hijo asociado a un Plato padre.
+1771: #     Reusa template, form, formset y AJAX de PlatoCreate.
+1772: #   else:
+1773: #     form.fields['tipos'].choices = []
+1774: #     form.fields['tipos'].initial = [] 
+1775: # 
+1776: 
+1777:     def get_form(self, form_class=None):
+1778:         form = super().get_form(form_class)
+1779:         # ✅ Para variedades, no queremos invalidar los checkboxes por falta de tipopag
+1780:         form.fields["tipos"].choices = Plato.TIPOS_CHOICES
+1781:         return form 
+1782: 
+1783:     def get_initial(self):
+1784:         initial = super().get_initial()
+1785: 
+1786:         p = self.padre
+1787: 
+1788:         # Sugerencia de nombre
+1789:         initial["nombre_plato"] = f"{p.nombre_plato} (variedad)"
+1790: 
+1791:         # Copiar campos “normales”
+1792:         initial["receta"] = p.receta
+1793:         initial["porciones"] = p.porciones
+1794:         initial["medios"] = p.medios
+1795:         initial["elaboracion"] = p.elaboracion
+1796:         initial["coccion"] = p.coccion
+1797:         initial["categoria"] = p.categoria
+1798:         initial["estacionalidad"] = p.estacionalidad
+1799:         initial["enlace"] = p.enlace
+------------------------------------------------------------
+1813:         if self.padre.plato_padre_id is not None:
+1814:             raise PermissionDenied("No se pueden crear variedades de una variedad.")
+1815: 
+1816:         # seguridad: mismo propietario
+1817:         if self.padre.propietario_id != request.user.id:
+1818:             raise PermissionDenied()
+1819: 
+1820:         return super().dispatch(request, *args, **kwargs)
+1821: 
+1822:     def get_template_names(self):
+1823:         """
+1824:         Mantener el mismo look & feel que el padre.
+1825:         Si viene tipopag por GET lo respeta; si no, intenta inferir desde el padre.
+1826:         """
+1827:         tipopag = self.request.GET.get("tipopag")
+1828: 
+1829:         if not tipopag:
+1830:             # tu campo 'tipos' es CSV; tomamos el primero como "tipopag" razonable
+1831:             raw = (self.padre.tipos or "").split(",")[0].strip()
+1832:             tipopag = raw or "Principal"
+1833: 
+1834:         # hack simple: reutiliza tu mapping interno de PlatoCreate.get_template_names
+1835:         self.request.GET._mutable = True
+1836:         self.request.GET["tipopag"] = tipopag
+1837:         self.request.GET._mutable = False
+1838: 
+1839:         return super().get_template_names()
+1840: 
+1841: 
+1842:     def get_context_data(self, **kwargs):
+1843:         context = super().get_context_data(**kwargs)
+1844: 
+1845:         context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
+------------------------------------------------------------
+1815: 
+1816:         # seguridad: mismo propietario
+1817:         if self.padre.propietario_id != request.user.id:
+1818:             raise PermissionDenied()
+1819: 
+1820:         return super().dispatch(request, *args, **kwargs)
+1821: 
+1822:     def get_template_names(self):
+1823:         """
+1824:         Mantener el mismo look & feel que el padre.
+1825:         Si viene tipopag por GET lo respeta; si no, intenta inferir desde el padre.
+1826:         """
+1827:         tipopag = self.request.GET.get("tipopag")
+1828: 
+1829:         if not tipopag:
+1830:             # tu campo 'tipos' es CSV; tomamos el primero como "tipopag" razonable
+1831:             raw = (self.padre.tipos or "").split(",")[0].strip()
+1832:             tipopag = raw or "Principal"
+1833: 
+1834:         # hack simple: reutiliza tu mapping interno de PlatoCreate.get_template_names
+1835:         self.request.GET._mutable = True
+1836:         self.request.GET["tipopag"] = tipopag
+1837:         self.request.GET._mutable = False
+1838: 
+1839:         return super().get_template_names()
+1840: 
+1841: 
+1842:     def get_context_data(self, **kwargs):
+1843:         context = super().get_context_data(**kwargs)
+1844: 
+1845:         context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
+1846: 
+1847:         tipopag = self.request.GET.get("tipopag")
+------------------------------------------------------------
+1817:         if self.padre.propietario_id != request.user.id:
+1818:             raise PermissionDenied()
+1819: 
+1820:         return super().dispatch(request, *args, **kwargs)
+1821: 
+1822:     def get_template_names(self):
+1823:         """
+1824:         Mantener el mismo look & feel que el padre.
+1825:         Si viene tipopag por GET lo respeta; si no, intenta inferir desde el padre.
+1826:         """
+1827:         tipopag = self.request.GET.get("tipopag")
+1828: 
+1829:         if not tipopag:
+1830:             # tu campo 'tipos' es CSV; tomamos el primero como "tipopag" razonable
+1831:             raw = (self.padre.tipos or "").split(",")[0].strip()
+1832:             tipopag = raw or "Principal"
+1833: 
+1834:         # hack simple: reutiliza tu mapping interno de PlatoCreate.get_template_names
+1835:         self.request.GET._mutable = True
+1836:         self.request.GET["tipopag"] = tipopag
+1837:         self.request.GET._mutable = False
+1838: 
+1839:         return super().get_template_names()
+1840: 
+1841: 
+1842:     def get_context_data(self, **kwargs):
+1843:         context = super().get_context_data(**kwargs)
+1844: 
+1845:         context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
+1846: 
+1847:         tipopag = self.request.GET.get("tipopag")
+1848:         if not tipopag:
+1849:             raw = (self.padre.tipos or "").split(",")[0].strip()
+------------------------------------------------------------
+1818:             raise PermissionDenied()
+1819: 
+1820:         return super().dispatch(request, *args, **kwargs)
+1821: 
+1822:     def get_template_names(self):
+1823:         """
+1824:         Mantener el mismo look & feel que el padre.
+1825:         Si viene tipopag por GET lo respeta; si no, intenta inferir desde el padre.
+1826:         """
+1827:         tipopag = self.request.GET.get("tipopag")
+1828: 
+1829:         if not tipopag:
+1830:             # tu campo 'tipos' es CSV; tomamos el primero como "tipopag" razonable
+1831:             raw = (self.padre.tipos or "").split(",")[0].strip()
+1832:             tipopag = raw or "Principal"
+1833: 
+1834:         # hack simple: reutiliza tu mapping interno de PlatoCreate.get_template_names
+1835:         self.request.GET._mutable = True
+1836:         self.request.GET["tipopag"] = tipopag
+1837:         self.request.GET._mutable = False
+1838: 
+1839:         return super().get_template_names()
+1840: 
+1841: 
+1842:     def get_context_data(self, **kwargs):
+1843:         context = super().get_context_data(**kwargs)
+1844: 
+1845:         context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
+1846: 
+1847:         tipopag = self.request.GET.get("tipopag")
+1848:         if not tipopag:
+1849:             raw = (self.padre.tipos or "").split(",")[0].strip()
+1850:             tipopag = raw or "Principal"
+------------------------------------------------------------
+1820:         return super().dispatch(request, *args, **kwargs)
+1821: 
+1822:     def get_template_names(self):
+1823:         """
+1824:         Mantener el mismo look & feel que el padre.
+1825:         Si viene tipopag por GET lo respeta; si no, intenta inferir desde el padre.
+1826:         """
+1827:         tipopag = self.request.GET.get("tipopag")
+1828: 
+1829:         if not tipopag:
+1830:             # tu campo 'tipos' es CSV; tomamos el primero como "tipopag" razonable
+1831:             raw = (self.padre.tipos or "").split(",")[0].strip()
+1832:             tipopag = raw or "Principal"
+1833: 
+1834:         # hack simple: reutiliza tu mapping interno de PlatoCreate.get_template_names
+1835:         self.request.GET._mutable = True
+1836:         self.request.GET["tipopag"] = tipopag
+1837:         self.request.GET._mutable = False
+1838: 
+1839:         return super().get_template_names()
+1840: 
+1841: 
+1842:     def get_context_data(self, **kwargs):
+1843:         context = super().get_context_data(**kwargs)
+1844: 
+1845:         context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
+1846: 
+1847:         tipopag = self.request.GET.get("tipopag")
+1848:         if not tipopag:
+1849:             raw = (self.padre.tipos or "").split(",")[0].strip()
+1850:             tipopag = raw or "Principal"
+1851:         context["tipopag"] = tipopag
+1852: 
+------------------------------------------------------------
+1824:         Mantener el mismo look & feel que el padre.
+1825:         Si viene tipopag por GET lo respeta; si no, intenta inferir desde el padre.
+1826:         """
+1827:         tipopag = self.request.GET.get("tipopag")
+1828: 
+1829:         if not tipopag:
+1830:             # tu campo 'tipos' es CSV; tomamos el primero como "tipopag" razonable
+1831:             raw = (self.padre.tipos or "").split(",")[0].strip()
+1832:             tipopag = raw or "Principal"
+1833: 
+1834:         # hack simple: reutiliza tu mapping interno de PlatoCreate.get_template_names
+1835:         self.request.GET._mutable = True
+1836:         self.request.GET["tipopag"] = tipopag
+1837:         self.request.GET._mutable = False
+1838: 
+1839:         return super().get_template_names()
+1840: 
+1841: 
+1842:     def get_context_data(self, **kwargs):
+1843:         context = super().get_context_data(**kwargs)
+1844: 
+1845:         context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
+1846: 
+1847:         tipopag = self.request.GET.get("tipopag")
+1848:         if not tipopag:
+1849:             raw = (self.padre.tipos or "").split(",")[0].strip()
+1850:             tipopag = raw or "Principal"
+1851:         context["tipopag"] = tipopag
+1852: 
+1853:         context["plato_padre_obj"] = self.padre
+1854:         context["titulo_formulario"] = f"Agregar variedad de {self.padre.nombre_plato}"
+1855: 
+1856:         if self.request.method == "POST":
+------------------------------------------------------------
+1835:         self.request.GET._mutable = True
+1836:         self.request.GET["tipopag"] = tipopag
+1837:         self.request.GET._mutable = False
+1838: 
+1839:         return super().get_template_names()
+1840: 
+1841: 
+1842:     def get_context_data(self, **kwargs):
+1843:         context = super().get_context_data(**kwargs)
+1844: 
+1845:         context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
+1846: 
+1847:         tipopag = self.request.GET.get("tipopag")
+1848:         if not tipopag:
+1849:             raw = (self.padre.tipos or "").split(",")[0].strip()
+1850:             tipopag = raw or "Principal"
+1851:         context["tipopag"] = tipopag
+1852: 
+1853:         context["plato_padre_obj"] = self.padre
+1854:         context["titulo_formulario"] = f"Agregar variedad de {self.padre.nombre_plato}"
+1855: 
+1856:         if self.request.method == "POST":
+1857:             context["ingrediente_formset"] = IngredienteEnPlatoFormSet(self.request.POST)
+1858:             return context
+1859: 
+1860:         # GET: clonar ingredientes del padre
+1861:         inicial = []
+1862:         for rel in self.padre.ingredientes_en_plato.select_related("ingrediente").all():
+1863:             inicial.append({
+1864:                 "ingrediente": rel.ingrediente_id,
+1865:                 "nombre_ingrediente": rel.ingrediente.nombre if rel.ingrediente else "",
+1866:                 "cantidad": rel.cantidad,
+1867:                 "unidad": rel.unidad,
+------------------------------------------------------------
+1836:         self.request.GET["tipopag"] = tipopag
+1837:         self.request.GET._mutable = False
+1838: 
+1839:         return super().get_template_names()
+1840: 
+1841: 
+1842:     def get_context_data(self, **kwargs):
+1843:         context = super().get_context_data(**kwargs)
+1844: 
+1845:         context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
+1846: 
+1847:         tipopag = self.request.GET.get("tipopag")
+1848:         if not tipopag:
+1849:             raw = (self.padre.tipos or "").split(",")[0].strip()
+1850:             tipopag = raw or "Principal"
+1851:         context["tipopag"] = tipopag
+1852: 
+1853:         context["plato_padre_obj"] = self.padre
+1854:         context["titulo_formulario"] = f"Agregar variedad de {self.padre.nombre_plato}"
+1855: 
+1856:         if self.request.method == "POST":
+1857:             context["ingrediente_formset"] = IngredienteEnPlatoFormSet(self.request.POST)
+1858:             return context
+1859: 
+1860:         # GET: clonar ingredientes del padre
+1861:         inicial = []
+1862:         for rel in self.padre.ingredientes_en_plato.select_related("ingrediente").all():
+1863:             inicial.append({
+1864:                 "ingrediente": rel.ingrediente_id,
+1865:                 "nombre_ingrediente": rel.ingrediente.nombre if rel.ingrediente else "",
+1866:                 "cantidad": rel.cantidad,
+1867:                 "unidad": rel.unidad,
+1868:             })
+------------------------------------------------------------
+1838: 
+1839:         return super().get_template_names()
+1840: 
+1841: 
+1842:     def get_context_data(self, **kwargs):
+1843:         context = super().get_context_data(**kwargs)
+1844: 
+1845:         context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
+1846: 
+1847:         tipopag = self.request.GET.get("tipopag")
+1848:         if not tipopag:
+1849:             raw = (self.padre.tipos or "").split(",")[0].strip()
+1850:             tipopag = raw or "Principal"
+1851:         context["tipopag"] = tipopag
+1852: 
+1853:         context["plato_padre_obj"] = self.padre
+1854:         context["titulo_formulario"] = f"Agregar variedad de {self.padre.nombre_plato}"
+1855: 
+1856:         if self.request.method == "POST":
+1857:             context["ingrediente_formset"] = IngredienteEnPlatoFormSet(self.request.POST)
+1858:             return context
+1859: 
+1860:         # GET: clonar ingredientes del padre
+1861:         inicial = []
+1862:         for rel in self.padre.ingredientes_en_plato.select_related("ingrediente").all():
+1863:             inicial.append({
+1864:                 "ingrediente": rel.ingrediente_id,
+1865:                 "nombre_ingrediente": rel.ingrediente.nombre if rel.ingrediente else "",
+1866:                 "cantidad": rel.cantidad,
+1867:                 "unidad": rel.unidad,
+1868:             })
+1869: 
+1870:         # 👇 CLAVE: si tu formset es inlineformset, necesita extra >= len(inicial)
+------------------------------------------------------------
+1839:         return super().get_template_names()
+1840: 
+1841: 
+1842:     def get_context_data(self, **kwargs):
+1843:         context = super().get_context_data(**kwargs)
+1844: 
+1845:         context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
+1846: 
+1847:         tipopag = self.request.GET.get("tipopag")
+1848:         if not tipopag:
+1849:             raw = (self.padre.tipos or "").split(",")[0].strip()
+1850:             tipopag = raw or "Principal"
+1851:         context["tipopag"] = tipopag
+1852: 
+1853:         context["plato_padre_obj"] = self.padre
+1854:         context["titulo_formulario"] = f"Agregar variedad de {self.padre.nombre_plato}"
+1855: 
+1856:         if self.request.method == "POST":
+1857:             context["ingrediente_formset"] = IngredienteEnPlatoFormSet(self.request.POST)
+1858:             return context
+1859: 
+1860:         # GET: clonar ingredientes del padre
+1861:         inicial = []
+1862:         for rel in self.padre.ingredientes_en_plato.select_related("ingrediente").all():
+1863:             inicial.append({
+1864:                 "ingrediente": rel.ingrediente_id,
+1865:                 "nombre_ingrediente": rel.ingrediente.nombre if rel.ingrediente else "",
+1866:                 "cantidad": rel.cantidad,
+1867:                 "unidad": rel.unidad,
+1868:             })
+1869: 
+1870:         # 👇 CLAVE: si tu formset es inlineformset, necesita extra >= len(inicial)
+1871:         context["ingrediente_formset"] = IngredienteEnPlatoFormSet(
+------------------------------------------------------------
+1955: 
+1956:             # ✅ (2) NO volver a guardar si ya se guardó en el else
+1957:             # (si no hay_al_menos_uno == False, usamos bulk_create arriba; si True, ya hicimos save)
+1958:             # ingrediente_formset.save()  <- eliminado
+1959: 
+1960:         # --- destino: volver al padre, preservando return_to + toast ---
+1961:         return_to = (
+1962:             self.request.POST.get("return_to")
+1963:             or self.request.GET.get("return_to")
+1964:             or ""
+1965:         )
+1966: 
+1967:         tipopag = (self.request.GET.get("tipopag") or self.request.POST.get("tipopag") or "").strip()
+1968: 
+1969:         parent_url = reverse("videos-update", kwargs={"pk": self.padre.id})
+1970: 
+1971:         if return_to:
+1972:             parent_url = _add_qs(parent_url, return_to=return_to)
+1973: 
+1974:         if tipopag:
+1975:             parent_url = _add_qs(parent_url, tipopag=tipopag)
+1976: 
+1977:         parent_url = _add_qs(parent_url, msg="Variedad OK.", level="success")
+1978: 
+1979:         # AJAX (modal)
+1980:         if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
+1981:             return JsonResponse({
+1982:                 "success": True,
+1983:                 "redirect_url": parent_url,
+1984:                 "nombre": plato.nombre_plato,
+1985:                 "id": plato.id,
+1986:             })
+1987: 
+------------------------------------------------------------
+1962:             self.request.POST.get("return_to")
+1963:             or self.request.GET.get("return_to")
+1964:             or ""
+1965:         )
+1966: 
+1967:         tipopag = (self.request.GET.get("tipopag") or self.request.POST.get("tipopag") or "").strip()
+1968: 
+1969:         parent_url = reverse("videos-update", kwargs={"pk": self.padre.id})
+1970: 
+1971:         if return_to:
+1972:             parent_url = _add_qs(parent_url, return_to=return_to)
+1973: 
+1974:         if tipopag:
+1975:             parent_url = _add_qs(parent_url, tipopag=tipopag)
+1976: 
+1977:         parent_url = _add_qs(parent_url, msg="Variedad OK.", level="success")
+1978: 
+1979:         # AJAX (modal)
+1980:         if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
+1981:             return JsonResponse({
+1982:                 "success": True,
+1983:                 "redirect_url": parent_url,
+1984:                 "nombre": plato.nombre_plato,
+1985:                 "id": plato.id,
+1986:             })
+1987: 
+1988:         # pantalla completa
+1989:         return redirect(parent_url)
+1990: 
+1991: 
+1992:     def form_invalid(self, form):
+1993:         # Si es AJAX, devolvemos JSON con el HTML del form + errores
+1994:         if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
+------------------------------------------------------------
+1963:             or self.request.GET.get("return_to")
+1964:             or ""
+1965:         )
+1966: 
+1967:         tipopag = (self.request.GET.get("tipopag") or self.request.POST.get("tipopag") or "").strip()
+1968: 
+1969:         parent_url = reverse("videos-update", kwargs={"pk": self.padre.id})
+1970: 
+1971:         if return_to:
+1972:             parent_url = _add_qs(parent_url, return_to=return_to)
+1973: 
+1974:         if tipopag:
+1975:             parent_url = _add_qs(parent_url, tipopag=tipopag)
+1976: 
+1977:         parent_url = _add_qs(parent_url, msg="Variedad OK.", level="success")
+1978: 
+1979:         # AJAX (modal)
+1980:         if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
+1981:             return JsonResponse({
+1982:                 "success": True,
+1983:                 "redirect_url": parent_url,
+1984:                 "nombre": plato.nombre_plato,
+1985:                 "id": plato.id,
+1986:             })
+1987: 
+1988:         # pantalla completa
+1989:         return redirect(parent_url)
+1990: 
+1991: 
+1992:     def form_invalid(self, form):
+1993:         # Si es AJAX, devolvemos JSON con el HTML del form + errores
+1994:         if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
+1995:             context = self.get_context_data(form=form)
+------------------------------------------------------------
+2025:     def get_success_url(self):
+2026:         # cuando se guarda una VARIEDAD, el "éxito" debe volver al PADRE
+2027:         url = reverse("videos-update", kwargs={"pk": self.padre.id})
+2028: 
+2029:         rt = self.request.GET.get("return_to")
+2030:         if rt:
+2031:             url += "?" + urlencode({"return_to": rt})
+2032: 
+2033:         return url
+2034: 
+2035:     def _parent_url(self):
+2036:         """
+2037:         URL final al padre, preservando return_to y tipopag
+2038:         (mismo espíritu que tu create).
+2039:         """
+2040:         url = reverse("videos-update", kwargs={"pk": self.padre.id})
+2041: 
+2042:         rt = (self.request.POST.get("return_to") or self.request.GET.get("return_to") or "").strip()
+2043:         tp = (self.request.POST.get("tipopag") or self.request.GET.get("tipopag") or "").strip()
+2044: 
+2045:         params = {}
+2046:         if rt:
+2047:             params["return_to"] = rt
+2048:         if tp:
+2049:             params["tipopag"] = tp
+2050: 
+2051:         if params:
+2052:             url += "?" + urlencode(params)
+2053: 
+2054:         return url
+2055: 
+2056:     def form_valid(self, form):
+2057:         # usa la lógica de guardado del update normal
+------------------------------------------------------------
+2031:             url += "?" + urlencode({"return_to": rt})
+2032: 
+2033:         return url
+2034: 
+2035:     def _parent_url(self):
+2036:         """
+2037:         URL final al padre, preservando return_to y tipopag
+2038:         (mismo espíritu que tu create).
+2039:         """
+2040:         url = reverse("videos-update", kwargs={"pk": self.padre.id})
+2041: 
+2042:         rt = (self.request.POST.get("return_to") or self.request.GET.get("return_to") or "").strip()
+2043:         tp = (self.request.POST.get("tipopag") or self.request.GET.get("tipopag") or "").strip()
+2044: 
+2045:         params = {}
+2046:         if rt:
+2047:             params["return_to"] = rt
+2048:         if tp:
+2049:             params["tipopag"] = tp
+2050: 
+2051:         if params:
+2052:             url += "?" + urlencode(params)
+2053: 
+2054:         return url
+2055: 
+2056:     def form_valid(self, form):
+2057:         # usa la lógica de guardado del update normal
+2058:         super().form_valid(form)
+2059: 
+2060:         parent_url = self._parent_url()
+2061: 
+2062:         # ✅ si es AJAX (modal), devolver JSON con redirect_url al PADRE
+2063:         # (NO devolvemos el resp del super(), porque ese suele apuntar a la principal)
+------------------------------------------------------------
+2037:         URL final al padre, preservando return_to y tipopag
+2038:         (mismo espíritu que tu create).
+2039:         """
+2040:         url = reverse("videos-update", kwargs={"pk": self.padre.id})
+2041: 
+2042:         rt = (self.request.POST.get("return_to") or self.request.GET.get("return_to") or "").strip()
+2043:         tp = (self.request.POST.get("tipopag") or self.request.GET.get("tipopag") or "").strip()
+2044: 
+2045:         params = {}
+2046:         if rt:
+2047:             params["return_to"] = rt
+2048:         if tp:
+2049:             params["tipopag"] = tp
+2050: 
+2051:         if params:
+2052:             url += "?" + urlencode(params)
+2053: 
+2054:         return url
+2055: 
+2056:     def form_valid(self, form):
+2057:         # usa la lógica de guardado del update normal
+2058:         super().form_valid(form)
+2059: 
+2060:         parent_url = self._parent_url()
+2061: 
+2062:         # ✅ si es AJAX (modal), devolver JSON con redirect_url al PADRE
+2063:         # (NO devolvemos el resp del super(), porque ese suele apuntar a la principal)
+2064:         if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
+2065:             return JsonResponse({"success": True, "redirect_url": parent_url})
+2066: 
+2067:         # ✅ pantalla completa: volver al padre
+2068:         return redirect(parent_url)
+2069: 
+------------------------------------------------------------
+2791: 
+2792: 
+2793: 
+2794: def obtener_estado_filtros_platos(request, dia_activo):
+2795:     """
+2796:     Centraliza el estado de filtros de la pantalla de platos.
+2797: 
+2798:     Reglas:
+2799:     - En POST, el request actual manda.
+2800:       Esto es importante para AJAX: si un checkbox no viene,
+2801:       significa que está destildado.
+2802:     - En GET, se usan valores de sesión como estado inicial.
+2803:     - tipopag puede venir por POST, GET o sesión, en ese orden.
+2804:     - La sesión se actualiza solo cuando llega un POST de filtros.
+2805:     """
+2806: 
+2807:     (
+2808:         tipo_sesion,
+2809:         quecomemos_sesion,
+2810:         misplatos_sesion,
+2811:         medios_sesion,
+2812:         categoria_sesion,
+2813:         dificultad_sesion,
+2814:         palabra_sesion,
+2815:     ) = obtener_parametros_sesion(request)
+2816: 
+2817:     tipopag = (
+2818:         request.POST.get("tipopag")
+2819:         or request.GET.get("tipopag")
+2820:         or tipo_sesion
+2821:         or "Principal"
+2822:     ).strip()
+2823: 
+------------------------------------------------------------
+2805:     """
+2806: 
+2807:     (
+2808:         tipo_sesion,
+2809:         quecomemos_sesion,
+2810:         misplatos_sesion,
+2811:         medios_sesion,
+2812:         categoria_sesion,
+2813:         dificultad_sesion,
+2814:         palabra_sesion,
+2815:     ) = obtener_parametros_sesion(request)
+2816: 
+2817:     tipopag = (
+2818:         request.POST.get("tipopag")
+2819:         or request.GET.get("tipopag")
+2820:         or tipo_sesion
+2821:         or "Principal"
+2822:     ).strip()
+2823: 
+2824:     if request.method == "POST":
+2825:         form = PlatoFilterForm(request.POST)
+2826: 
+2827:         medios = request.POST.get("medios") or None
+2828:         categoria = request.POST.get("categoria") or None
+2829:         dificultad = request.POST.get("dificultad") or None
+2830:         palabra_clave = (request.POST.get("palabra_clave") or "").strip()
+2831: 
+2832:         quecomemos = request.POST.get("quecomemos")
+2833:         misplatos = request.POST.get("misplatos")
+2834:         usar_lo_que_tengo = request.POST.get("usar_lo_que_tengo")
+2835: 
+2836:         if tipopag == "LoQueTengo":
+2837:             usar_lo_que_tengo = "1"
+------------------------------------------------------------
+2806: 
+2807:     (
+2808:         tipo_sesion,
+2809:         quecomemos_sesion,
+2810:         misplatos_sesion,
+2811:         medios_sesion,
+2812:         categoria_sesion,
+2813:         dificultad_sesion,
+2814:         palabra_sesion,
+2815:     ) = obtener_parametros_sesion(request)
+2816: 
+2817:     tipopag = (
+2818:         request.POST.get("tipopag")
+2819:         or request.GET.get("tipopag")
+2820:         or tipo_sesion
+2821:         or "Principal"
+2822:     ).strip()
+2823: 
+2824:     if request.method == "POST":
+2825:         form = PlatoFilterForm(request.POST)
+2826: 
+2827:         medios = request.POST.get("medios") or None
+2828:         categoria = request.POST.get("categoria") or None
+2829:         dificultad = request.POST.get("dificultad") or None
+2830:         palabra_clave = (request.POST.get("palabra_clave") or "").strip()
+2831: 
+2832:         quecomemos = request.POST.get("quecomemos")
+2833:         misplatos = request.POST.get("misplatos")
+2834:         usar_lo_que_tengo = request.POST.get("usar_lo_que_tengo")
+2835: 
+2836:         if tipopag == "LoQueTengo":
+2837:             usar_lo_que_tengo = "1"
+2838: 
+------------------------------------------------------------
+2807:     (
+2808:         tipo_sesion,
+2809:         quecomemos_sesion,
+2810:         misplatos_sesion,
+2811:         medios_sesion,
+2812:         categoria_sesion,
+2813:         dificultad_sesion,
+2814:         palabra_sesion,
+2815:     ) = obtener_parametros_sesion(request)
+2816: 
+2817:     tipopag = (
+2818:         request.POST.get("tipopag")
+2819:         or request.GET.get("tipopag")
+2820:         or tipo_sesion
+2821:         or "Principal"
+2822:     ).strip()
+2823: 
+2824:     if request.method == "POST":
+2825:         form = PlatoFilterForm(request.POST)
+2826: 
+2827:         medios = request.POST.get("medios") or None
+2828:         categoria = request.POST.get("categoria") or None
+2829:         dificultad = request.POST.get("dificultad") or None
+2830:         palabra_clave = (request.POST.get("palabra_clave") or "").strip()
+2831: 
+2832:         quecomemos = request.POST.get("quecomemos")
+2833:         misplatos = request.POST.get("misplatos")
+2834:         usar_lo_que_tengo = request.POST.get("usar_lo_que_tengo")
+2835: 
+2836:         if tipopag == "LoQueTengo":
+2837:             usar_lo_que_tengo = "1"
+2838: 
+2839:             if not quecomemos and not misplatos:
+------------------------------------------------------------
+2824:     if request.method == "POST":
+2825:         form = PlatoFilterForm(request.POST)
+2826: 
+2827:         medios = request.POST.get("medios") or None
+2828:         categoria = request.POST.get("categoria") or None
+2829:         dificultad = request.POST.get("dificultad") or None
+2830:         palabra_clave = (request.POST.get("palabra_clave") or "").strip()
+2831: 
+2832:         quecomemos = request.POST.get("quecomemos")
+2833:         misplatos = request.POST.get("misplatos")
+2834:         usar_lo_que_tengo = request.POST.get("usar_lo_que_tengo")
+2835: 
+2836:         if tipopag == "LoQueTengo":
+2837:             usar_lo_que_tengo = "1"
+2838: 
+2839:             if not quecomemos and not misplatos:
+2840:                 quecomemos = "quecomemos"
+2841:                 misplatos = "misplatos"
+2842: 
+2843:         request.session["medios_estable"] = medios
+2844:         request.session["categoria_estable"] = categoria
+2845:         request.session["dificultad_estable"] = dificultad
+2846:         request.session["palabra_clave"] = palabra_clave
+2847: 
+2848:         if tipopag != "LoQueTengo":
+2849:             request.session["quecomemos"] = quecomemos
+2850:             request.session["misplatos"] = misplatos
+2851:             request.session["usar_lo_que_tengo"] = usar_lo_que_tengo
+2852: 
+2853:         request.session["dia_activo"] = dia_activo
+2854: 
+2855:     else:
+2856:         medios = medios_sesion
+------------------------------------------------------------
+2836:         if tipopag == "LoQueTengo":
+2837:             usar_lo_que_tengo = "1"
+2838: 
+2839:             if not quecomemos and not misplatos:
+2840:                 quecomemos = "quecomemos"
+2841:                 misplatos = "misplatos"
+2842: 
+2843:         request.session["medios_estable"] = medios
+2844:         request.session["categoria_estable"] = categoria
+2845:         request.session["dificultad_estable"] = dificultad
+2846:         request.session["palabra_clave"] = palabra_clave
+2847: 
+2848:         if tipopag != "LoQueTengo":
+2849:             request.session["quecomemos"] = quecomemos
+2850:             request.session["misplatos"] = misplatos
+2851:             request.session["usar_lo_que_tengo"] = usar_lo_que_tengo
+2852: 
+2853:         request.session["dia_activo"] = dia_activo
+2854: 
+2855:     else:
+2856:         medios = medios_sesion
+2857:         categoria = categoria_sesion
+2858:         dificultad = dificultad_sesion
+2859:         palabra_clave = palabra_sesion
+2860: 
+2861:         quecomemos = quecomemos_sesion
+2862:         misplatos = misplatos_sesion
+2863:         usar_lo_que_tengo = request.session.get("usar_lo_que_tengo")
+2864: 
+2865:         if tipopag == "LoQueTengo":
+2866:             usar_lo_que_tengo = "1"
+2867: 
+2868:             if not quecomemos and not misplatos:
+------------------------------------------------------------
+2853:         request.session["dia_activo"] = dia_activo
+2854: 
+2855:     else:
+2856:         medios = medios_sesion
+2857:         categoria = categoria_sesion
+2858:         dificultad = dificultad_sesion
+2859:         palabra_clave = palabra_sesion
+2860: 
+2861:         quecomemos = quecomemos_sesion
+2862:         misplatos = misplatos_sesion
+2863:         usar_lo_que_tengo = request.session.get("usar_lo_que_tengo")
+2864: 
+2865:         if tipopag == "LoQueTengo":
+2866:             usar_lo_que_tengo = "1"
+2867: 
+2868:             if not quecomemos and not misplatos:
+2869:                 quecomemos = "quecomemos"
+2870:                 misplatos = "misplatos"
+2871: 
+2872:         form = PlatoFilterForm(initial={
+2873:             "medios": medios,
+2874:             "categoria": categoria,
+2875:             "dificultad": dificultad,
+2876:             "palabra_clave": palabra_clave,
+2877:         })
+2878: 
+2879:     return {
+2880:         "form": form,
+2881:         "tipo_parametro": tipopag,
+2882:         "tipopag": tipopag,
+2883:         "quecomemos": quecomemos,
+2884:         "misplatos": misplatos,
+2885:         "usar_lo_que_tengo": usar_lo_que_tengo,
+------------------------------------------------------------
+2869:                 quecomemos = "quecomemos"
+2870:                 misplatos = "misplatos"
+2871: 
+2872:         form = PlatoFilterForm(initial={
+2873:             "medios": medios,
+2874:             "categoria": categoria,
+2875:             "dificultad": dificultad,
+2876:             "palabra_clave": palabra_clave,
+2877:         })
+2878: 
+2879:     return {
+2880:         "form": form,
+2881:         "tipo_parametro": tipopag,
+2882:         "tipopag": tipopag,
+2883:         "quecomemos": quecomemos,
+2884:         "misplatos": misplatos,
+2885:         "usar_lo_que_tengo": usar_lo_que_tengo,
+2886:         "medios": medios,
+2887:         "categoria": categoria,
+2888:         "dificultad": dificultad,
+2889:         "palabra_clave": palabra_clave,
+2890:     }
+2891: 
+2892: 
+2893: 
+2894: 
+2895: 
+2896: 
+2897: 
+2898: 
+2899: def filtrar_platos_por_lo_que_tengo(platos, usuario, usar_lo_que_tengo):
+2900:     if usar_lo_que_tengo != "1":
+2901:         return platos
+------------------------------------------------------------
+2870:                 misplatos = "misplatos"
+2871: 
+2872:         form = PlatoFilterForm(initial={
+2873:             "medios": medios,
+2874:             "categoria": categoria,
+2875:             "dificultad": dificultad,
+2876:             "palabra_clave": palabra_clave,
+2877:         })
+2878: 
+2879:     return {
+2880:         "form": form,
+2881:         "tipo_parametro": tipopag,
+2882:         "tipopag": tipopag,
+2883:         "quecomemos": quecomemos,
+2884:         "misplatos": misplatos,
+2885:         "usar_lo_que_tengo": usar_lo_que_tengo,
+2886:         "medios": medios,
+2887:         "categoria": categoria,
+2888:         "dificultad": dificultad,
+2889:         "palabra_clave": palabra_clave,
+2890:     }
+2891: 
+2892: 
+2893: 
+2894: 
+2895: 
+2896: 
+2897: 
+2898: 
+2899: def filtrar_platos_por_lo_que_tengo(platos, usuario, usar_lo_que_tengo):
+2900:     if usar_lo_que_tengo != "1":
+2901:         return platos
+2902: 
+------------------------------------------------------------
+3121:     if perfil is None:
+3122:         return redirect("profile-create")
+3123: 
+3124:     habitos, habitos_set = obtener_habitos_usuario(perfil)
+3125:     
+3126:     asegurar_menus_desde_habitos(request, usuario, dias_desde_hoy, habitos)
+3127: 
+3128:     dia_activo, dia_activo_obj = obtener_dia_activo(request, dias_desde_hoy)
+3129: 
+3130:     estado_filtros = obtener_estado_filtros_platos(request, dia_activo)
+3131:     form = estado_filtros["form"]
+3132:     tipo_parametro = estado_filtros["tipo_parametro"]
+3133:     tipopag = estado_filtros["tipopag"]
+3134:     quecomemos = estado_filtros["quecomemos"]
+3135:     misplatos = estado_filtros["misplatos"]
+3136:     medios = estado_filtros["medios"]
+3137:     categoria = estado_filtros["categoria"]
+3138:     dificultad = estado_filtros["dificultad"]
+3139:     palabra_clave = estado_filtros["palabra_clave"]
+3140:     usar_lo_que_tengo = estado_filtros["usar_lo_que_tengo"]
+3141: 
+3142:     lugares, platos, platos_carousel, platos_listado = obtener_resultados_principales(
+3143:         usuario=usuario,
+3144:         tipo_parametro=tipo_parametro,
+3145:         quecomemos=quecomemos,
+3146:         misplatos=misplatos,
+3147:         medios=medios,
+3148:         categoria=categoria,
+3149:         dificultad=dificultad,
+3150:         palabra_clave=palabra_clave,
+3151:         usar_lo_que_tengo=usar_lo_que_tengo,
+3152:     )
+3153: 
+------------------------------------------------------------
+3170:         habitos_set
+3171:     )
+3172: 
+3173: 
+3174: 
+3175:     habitos_lookup = obtener_habitos_lookup(habitos)
+3176: 
+3177: 
+3178:     guarniciones, salsas = obtener_extras_platos(usuario)
+3179: 
+3180:     platos_agrupados_lo_que_tengo = (
+3181:         agrupar_platos_para_lo_que_tengo(platos_listado)
+3182:         if tipopag == "LoQueTengo"
+3183:         else None
+3184:     )
+3185: 
+3186:     return_to_url = request.get_full_path()
+3187: 
+3188:     contexto = {
+3189:                 'formulario': form,
+3190:                 'platos': platos_listado,
+3191:                 "return_to_url": return_to_url,
+3192:                 "platos_agrupados_lo_que_tengo": platos_agrupados_lo_que_tengo,
+3193:                 "carousel_items": platos_carousel,
+3194:                 "dias_desde_hoy": dias_desde_hoy,
+3195:                 "dias_programados": dias_programados,
+3196:                 "quecomemos_ck": quecomemos,
+3197:                 "misplatos_ck": misplatos,
+3198:                 "usar_lo_que_tengo_ck": usar_lo_que_tengo,
+3199:                 "amigues": amigues,
+3200:                 "parametro_activo": tipo_parametro,
+3201:                 **contexto_compartidos,
+3202:                 'dia_activo': dia_activo,
+------------------------------------------------------------
+3200:                 "parametro_activo": tipo_parametro,
+3201:                 **contexto_compartidos,
+3202:                 'dia_activo': dia_activo,
+3203:                 'dia_activo_obj': dia_activo_obj,
+3204:                 "guarniciones": guarniciones,
+3205:                 "salsas": salsas,
+3206:                 "platos_dia_x_dia": platos_dia_x_dia,
+3207:                 "lugares": lugares,
+3208:                 "habitos_lookup": habitos_lookup,
+3209:             }
+3210: 
+3211:     
+3212:     # tipopag = (request.GET.get("tipopag") or "Principal").strip()
+3213:     contexto["tipopag"] = tipopag
+3214: 
+3215:     return render(request, 'AdminVideos/lista_filtrada.html', contexto)
+3216: 
+3217: @login_required(login_url=reverse_lazy('login'), redirect_field_name=None)
+3218: def ajax_listado_platos(request):
+3219:     usuario = request.user
+3220: 
+3221:     perfil = obtener_perfil_usuario(usuario)
+3222:     if perfil is None:
+3223:         return redirect("profile-create")
+3224: 
+3225:     fecha_actual, dias_desde_hoy = obtener_dias_desde_hoy()
+3226:     dia_activo, dia_activo_obj = obtener_dia_activo(request, dias_desde_hoy)
+3227: 
+3228:     estado_filtros = obtener_estado_filtros_platos(request, dia_activo)
+3229: 
+3230:     tipo_parametro = estado_filtros["tipo_parametro"]
+3231:     tipopag = estado_filtros["tipopag"]
+3232:     quecomemos = estado_filtros["quecomemos"]
+------------------------------------------------------------
+3201:                 **contexto_compartidos,
+3202:                 'dia_activo': dia_activo,
+3203:                 'dia_activo_obj': dia_activo_obj,
+3204:                 "guarniciones": guarniciones,
+3205:                 "salsas": salsas,
+3206:                 "platos_dia_x_dia": platos_dia_x_dia,
+3207:                 "lugares": lugares,
+3208:                 "habitos_lookup": habitos_lookup,
+3209:             }
+3210: 
+3211:     
+3212:     # tipopag = (request.GET.get("tipopag") or "Principal").strip()
+3213:     contexto["tipopag"] = tipopag
+3214: 
+3215:     return render(request, 'AdminVideos/lista_filtrada.html', contexto)
+3216: 
+3217: @login_required(login_url=reverse_lazy('login'), redirect_field_name=None)
+3218: def ajax_listado_platos(request):
+3219:     usuario = request.user
+3220: 
+3221:     perfil = obtener_perfil_usuario(usuario)
+3222:     if perfil is None:
+3223:         return redirect("profile-create")
+3224: 
+3225:     fecha_actual, dias_desde_hoy = obtener_dias_desde_hoy()
+3226:     dia_activo, dia_activo_obj = obtener_dia_activo(request, dias_desde_hoy)
+3227: 
+3228:     estado_filtros = obtener_estado_filtros_platos(request, dia_activo)
+3229: 
+3230:     tipo_parametro = estado_filtros["tipo_parametro"]
+3231:     tipopag = estado_filtros["tipopag"]
+3232:     quecomemos = estado_filtros["quecomemos"]
+3233:     misplatos = estado_filtros["misplatos"]
+------------------------------------------------------------
+3219:     usuario = request.user
+3220: 
+3221:     perfil = obtener_perfil_usuario(usuario)
+3222:     if perfil is None:
+3223:         return redirect("profile-create")
+3224: 
+3225:     fecha_actual, dias_desde_hoy = obtener_dias_desde_hoy()
+3226:     dia_activo, dia_activo_obj = obtener_dia_activo(request, dias_desde_hoy)
+3227: 
+3228:     estado_filtros = obtener_estado_filtros_platos(request, dia_activo)
+3229: 
+3230:     tipo_parametro = estado_filtros["tipo_parametro"]
+3231:     tipopag = estado_filtros["tipopag"]
+3232:     quecomemos = estado_filtros["quecomemos"]
+3233:     misplatos = estado_filtros["misplatos"]
+3234:     medios = estado_filtros["medios"]
+3235:     categoria = estado_filtros["categoria"]
+3236:     dificultad = estado_filtros["dificultad"]
+3237:     palabra_clave = estado_filtros["palabra_clave"]
+3238:     usar_lo_que_tengo = estado_filtros["usar_lo_que_tengo"]
+3239: 
+3240:     lugares, platos, platos_carousel, platos_listado = obtener_resultados_principales(
+3241:         usuario=usuario,
+3242:         tipo_parametro=tipo_parametro,
+3243:         quecomemos=quecomemos,
+3244:         misplatos=misplatos,
+3245:         medios=medios,
+3246:         categoria=categoria,
+3247:         dificultad=dificultad,
+3248:         palabra_clave=palabra_clave,
+3249:         usar_lo_que_tengo=usar_lo_que_tengo,
+3250:     )
+3251: 
+------------------------------------------------------------
+3242:         tipo_parametro=tipo_parametro,
+3243:         quecomemos=quecomemos,
+3244:         misplatos=misplatos,
+3245:         medios=medios,
+3246:         categoria=categoria,
+3247:         dificultad=dificultad,
+3248:         palabra_clave=palabra_clave,
+3249:         usar_lo_que_tengo=usar_lo_que_tengo,
+3250:     )
+3251: 
+3252:     platos_agrupados_lo_que_tengo = (
+3253:         agrupar_platos_para_lo_que_tengo(platos_listado)
+3254:         if tipopag == "LoQueTengo"
+3255:         else None
+3256:     )
+3257: 
+3258:     return_to_url = request.POST.get("return_to") or reverse("filtro-de-platos")
+3259: 
+3260:     contexto = {
+3261:         "platos": platos_listado,
+3262:         "return_to_url": return_to_url,
+3263:         "platos_agrupados_lo_que_tengo": platos_agrupados_lo_que_tengo,
+3264:         "carousel_items": platos_carousel,
+3265:         "lugares": lugares,
+3266:         "amigues": obtener_usernames_amigues(request.user),
+3267:         "tipopag": tipopag,
+3268:     }
+3269: 
+3270:     html_listado = render_to_string(
+3271:         "AdminVideos/partials/_listado_platos.html",
+3272:         contexto,
+3273:         request=request
+3274:     )
+------------------------------------------------------------
+3255:         else None
+3256:     )
+3257: 
+3258:     return_to_url = request.POST.get("return_to") or reverse("filtro-de-platos")
+3259: 
+3260:     contexto = {
+3261:         "platos": platos_listado,
+3262:         "return_to_url": return_to_url,
+3263:         "platos_agrupados_lo_que_tengo": platos_agrupados_lo_que_tengo,
+3264:         "carousel_items": platos_carousel,
+3265:         "lugares": lugares,
+3266:         "amigues": obtener_usernames_amigues(request.user),
+3267:         "tipopag": tipopag,
+3268:     }
+3269: 
+3270:     html_listado = render_to_string(
+3271:         "AdminVideos/partials/_listado_platos.html",
+3272:         contexto,
+3273:         request=request
+3274:     )
+3275: 
+3276:     html_carousel = render_to_string(
+3277:         "AdminVideos/partials/_carousel_platos.html",
+3278:         contexto,
+3279:         request=request
+3280:     )
+3281: 
+3282:     html_lugares = render_to_string(
+3283:         "AdminVideos/partials/_listado_lugares.html",
+3284:         contexto,
+3285:         request=request
+3286:     )
+3287: 
+------------------------------------------------------------
+
+--- patrón: contenedor-carousel-platos ---
+
+--- patrón: contenedor-listado-platos ---
+
+--- patrón: html_carousel ---
+3264:         "carousel_items": platos_carousel,
+3265:         "lugares": lugares,
+3266:         "amigues": obtener_usernames_amigues(request.user),
+3267:         "tipopag": tipopag,
+3268:     }
+3269: 
+3270:     html_listado = render_to_string(
+3271:         "AdminVideos/partials/_listado_platos.html",
+3272:         contexto,
+3273:         request=request
+3274:     )
+3275: 
+3276:     html_carousel = render_to_string(
+3277:         "AdminVideos/partials/_carousel_platos.html",
+3278:         contexto,
+3279:         request=request
+3280:     )
+3281: 
+3282:     html_lugares = render_to_string(
+3283:         "AdminVideos/partials/_listado_lugares.html",
+3284:         contexto,
+3285:         request=request
+3286:     )
+3287: 
+3288:     return JsonResponse({
+3289:         "html_listado": html_listado,
+3290:         "html_carousel": html_carousel,
+3291:         "html_lugares": html_lugares,
+3292:     })
+3293: 
+3294: 
+3295: 
+3296: def _profile_usuario(usuario):
+------------------------------------------------------------
+3278:         contexto,
+3279:         request=request
+3280:     )
+3281: 
+3282:     html_lugares = render_to_string(
+3283:         "AdminVideos/partials/_listado_lugares.html",
+3284:         contexto,
+3285:         request=request
+3286:     )
+3287: 
+3288:     return JsonResponse({
+3289:         "html_listado": html_listado,
+3290:         "html_carousel": html_carousel,
+3291:         "html_lugares": html_lugares,
+3292:     })
+3293: 
+3294: 
+3295: 
+3296: def _profile_usuario(usuario):
+3297:     profile, _ = Profile.objects.get_or_create(user=usuario)
+3298:     return profile
+3299: 
+3300: 
+3301: def _serializar_palabras_lo_que_tengo(profile):
+3302:     palabras = (
+3303:         LoQueTengoPalabra.objects
+3304:         .filter(profile=profile)
+3305:         .order_by("palabra")
+3306:     )
+3307: 
+3308:     return [
+3309:         {
+3310:             "id": palabra.id,
+------------------------------------------------------------
+
+--- patrón: html_listado ---
+3258:     return_to_url = request.POST.get("return_to") or reverse("filtro-de-platos")
+3259: 
+3260:     contexto = {
+3261:         "platos": platos_listado,
+3262:         "return_to_url": return_to_url,
+3263:         "platos_agrupados_lo_que_tengo": platos_agrupados_lo_que_tengo,
+3264:         "carousel_items": platos_carousel,
+3265:         "lugares": lugares,
+3266:         "amigues": obtener_usernames_amigues(request.user),
+3267:         "tipopag": tipopag,
+3268:     }
+3269: 
+3270:     html_listado = render_to_string(
+3271:         "AdminVideos/partials/_listado_platos.html",
+3272:         contexto,
+3273:         request=request
+3274:     )
+3275: 
+3276:     html_carousel = render_to_string(
+3277:         "AdminVideos/partials/_carousel_platos.html",
+3278:         contexto,
+3279:         request=request
+3280:     )
+3281: 
+3282:     html_lugares = render_to_string(
+3283:         "AdminVideos/partials/_listado_lugares.html",
+3284:         contexto,
+3285:         request=request
+3286:     )
+3287: 
+3288:     return JsonResponse({
+3289:         "html_listado": html_listado,
+3290:         "html_carousel": html_carousel,
+------------------------------------------------------------
+3277:         "AdminVideos/partials/_carousel_platos.html",
+3278:         contexto,
+3279:         request=request
+3280:     )
+3281: 
+3282:     html_lugares = render_to_string(
+3283:         "AdminVideos/partials/_listado_lugares.html",
+3284:         contexto,
+3285:         request=request
+3286:     )
+3287: 
+3288:     return JsonResponse({
+3289:         "html_listado": html_listado,
+3290:         "html_carousel": html_carousel,
+3291:         "html_lugares": html_lugares,
+3292:     })
+3293: 
+3294: 
+3295: 
+3296: def _profile_usuario(usuario):
+3297:     profile, _ = Profile.objects.get_or_create(user=usuario)
+3298:     return profile
+3299: 
+3300: 
+3301: def _serializar_palabras_lo_que_tengo(profile):
+3302:     palabras = (
+3303:         LoQueTengoPalabra.objects
+3304:         .filter(profile=profile)
+3305:         .order_by("palabra")
+3306:     )
+3307: 
+3308:     return [
+3309:         {
+------------------------------------------------------------
+
+==========================================================================================
+AdminVideos/static/AdminVideos/js/filtros_platos.js
+==========================================================================================
+
+--- patrón: Sugerencias ---
+
+--- patrón: sugerencias ---
+
+--- patrón: Plato principal ---
+0193: 
+0194:     const params = new URLSearchParams();
+0195: 
+0196:     if (tipopag) {
+0197:       params.set("tipopag", tipopag);
+0198:     }
+0199: 
+0200:     params.set("return_to", window.location.pathname + window.location.search);
+0201: 
+0202:     boton.href = `${urlBase}?${params.toString()}`;
+0203: 
+0204:     
+0205:     let titulo = "Agregar receta de plato principal";
+0206:     if (tipopag === "Guarnicion") {
+0207:       titulo = "Agregar receta de guarnición";
+0208:     } else if (tipopag === "Comerafuera") {
+0209:       titulo = "Agregar lugar para comer afuera";
+0210:     } else if (tipopag === "Delivery") {
+0211:       titulo = "Agregar delivery";
+0212:     } else if (tipopag && tipopag !== "Principal" && tipopag !== "Dash") {
+0213:       titulo = `Agregar receta de ${tipopag.toLowerCase()}`;
+0214:     }
+0215: 
+0216:     boton.title = titulo;
+0217:     boton.setAttribute("aria-label", titulo);
+0218:   }
+0219: 
+0220:   // ============================================================
+0221:   // 4. Buscar por palabra clave sin recargar
+0222:   // ============================================================
+0223:   form.addEventListener("submit", function (event) {
+0224:     event.preventDefault();
+0225:     actualizarListadoPlatos();
+------------------------------------------------------------
+
+--- patrón: Principal ---
+0193: 
+0194:     const params = new URLSearchParams();
+0195: 
+0196:     if (tipopag) {
+0197:       params.set("tipopag", tipopag);
+0198:     }
+0199: 
+0200:     params.set("return_to", window.location.pathname + window.location.search);
+0201: 
+0202:     boton.href = `${urlBase}?${params.toString()}`;
+0203: 
+0204:     
+0205:     let titulo = "Agregar receta de plato principal";
+0206:     if (tipopag === "Guarnicion") {
+0207:       titulo = "Agregar receta de guarnición";
+0208:     } else if (tipopag === "Comerafuera") {
+0209:       titulo = "Agregar lugar para comer afuera";
+0210:     } else if (tipopag === "Delivery") {
+0211:       titulo = "Agregar delivery";
+0212:     } else if (tipopag && tipopag !== "Principal" && tipopag !== "Dash") {
+0213:       titulo = `Agregar receta de ${tipopag.toLowerCase()}`;
+0214:     }
+0215: 
+0216:     boton.title = titulo;
+0217:     boton.setAttribute("aria-label", titulo);
+0218:   }
+0219: 
+0220:   // ============================================================
+0221:   // 4. Buscar por palabra clave sin recargar
+0222:   // ============================================================
+0223:   form.addEventListener("submit", function (event) {
+0224:     event.preventDefault();
+0225:     actualizarListadoPlatos();
+------------------------------------------------------------
+0200:     params.set("return_to", window.location.pathname + window.location.search);
+0201: 
+0202:     boton.href = `${urlBase}?${params.toString()}`;
+0203: 
+0204:     
+0205:     let titulo = "Agregar receta de plato principal";
+0206:     if (tipopag === "Guarnicion") {
+0207:       titulo = "Agregar receta de guarnición";
+0208:     } else if (tipopag === "Comerafuera") {
+0209:       titulo = "Agregar lugar para comer afuera";
+0210:     } else if (tipopag === "Delivery") {
+0211:       titulo = "Agregar delivery";
+0212:     } else if (tipopag && tipopag !== "Principal" && tipopag !== "Dash") {
+0213:       titulo = `Agregar receta de ${tipopag.toLowerCase()}`;
+0214:     }
+0215: 
+0216:     boton.title = titulo;
+0217:     boton.setAttribute("aria-label", titulo);
+0218:   }
+0219: 
+0220:   // ============================================================
+0221:   // 4. Buscar por palabra clave sin recargar
+0222:   // ============================================================
+0223:   form.addEventListener("submit", function (event) {
+0224:     event.preventDefault();
+0225:     actualizarListadoPlatos();
+0226:   });
+0227: 
+0228:   // ============================================================
+0229:   // 4.b Buscar por palabra clave mientras se escribe
+0230:   // ============================================================
+0231:   const inputPalabraClave = form.querySelector('input[name="palabra_clave"]');
+0232:   let timeoutBusquedaPalabraClave = null;
+------------------------------------------------------------
+
+--- patrón: tipopag ---
+0017: 
+0018: document.addEventListener("DOMContentLoaded", function () {
+0019:   // ============================================================
+0020:   // 1. Elementos base de la pantalla
+0021:   // ============================================================
+0022:   const form = document.getElementById("form-filtros-platos");
+0023:   const contenedor = document.getElementById("contenedor-listado-platos");
+0024: 
+0025:   if (!form || !contenedor) return;
+0026: 
+0027:   let estadoAntesDeLoQueTengo = null;
+0028: 
+0029:   function aplicarModoLoQueTengo(tipopag) {
+0030:     const usarLoQueTengo = form.querySelector('input[name="usar_lo_que_tengo"]');
+0031:     const quecomemos = form.querySelector('input[name="quecomemos"]');
+0032:     const misplatos = form.querySelector('input[name="misplatos"]');
+0033: 
+0034:     if (tipopag === "LoQueTengo") {
+0035:       if (!estadoAntesDeLoQueTengo) {
+0036:         estadoAntesDeLoQueTengo = {
+0037:           usarLoQueTengo: usarLoQueTengo ? usarLoQueTengo.checked : false,
+0038:           quecomemos: quecomemos ? quecomemos.checked : false,
+0039:           misplatos: misplatos ? misplatos.checked : false,
+0040:         };
+0041:       }
+0042: 
+0043:       if (usarLoQueTengo) {
+0044:         usarLoQueTengo.checked = true;
+0045:       }
+0046: 
+0047:       if (quecomemos && misplatos && !quecomemos.checked && !misplatos.checked) {
+0048:         quecomemos.checked = true;
+0049:         misplatos.checked = true;
+------------------------------------------------------------
+0022:   const form = document.getElementById("form-filtros-platos");
+0023:   const contenedor = document.getElementById("contenedor-listado-platos");
+0024: 
+0025:   if (!form || !contenedor) return;
+0026: 
+0027:   let estadoAntesDeLoQueTengo = null;
+0028: 
+0029:   function aplicarModoLoQueTengo(tipopag) {
+0030:     const usarLoQueTengo = form.querySelector('input[name="usar_lo_que_tengo"]');
+0031:     const quecomemos = form.querySelector('input[name="quecomemos"]');
+0032:     const misplatos = form.querySelector('input[name="misplatos"]');
+0033: 
+0034:     if (tipopag === "LoQueTengo") {
+0035:       if (!estadoAntesDeLoQueTengo) {
+0036:         estadoAntesDeLoQueTengo = {
+0037:           usarLoQueTengo: usarLoQueTengo ? usarLoQueTengo.checked : false,
+0038:           quecomemos: quecomemos ? quecomemos.checked : false,
+0039:           misplatos: misplatos ? misplatos.checked : false,
+0040:         };
+0041:       }
+0042: 
+0043:       if (usarLoQueTengo) {
+0044:         usarLoQueTengo.checked = true;
+0045:       }
+0046: 
+0047:       if (quecomemos && misplatos && !quecomemos.checked && !misplatos.checked) {
+0048:         quecomemos.checked = true;
+0049:         misplatos.checked = true;
+0050:       }
+0051: 
+0052:       return;
+0053:     }
+0054: 
+------------------------------------------------------------
+0130:     if (texto) {
+0131:       texto.classList.toggle("text-white", activo);
+0132:       texto.classList.toggle("fw-bold", activo);
+0133:       texto.classList.toggle("text-white-50", !activo);
+0134:     }
+0135: 
+0136:     const icono = link.querySelector(".icon-wrap i");
+0137:     if (icono) {
+0138:       icono.classList.toggle("text-white-50", !activo);
+0139:     }
+0140:   }
+0141: 
+0142:   function actualizarMenuLateralActivo(tipopag) {
+0143:     document.querySelectorAll("#accordionSidebar .nav-item").forEach(function (item) {
+0144:       item.classList.remove("active");
+0145:     });
+0146: 
+0147:     document.querySelectorAll(".js-filtro-tipopag").forEach(function (link) {
+0148:       const activo = link.dataset.tipopag === tipopag;
+0149: 
+0150:       link.classList.toggle("is-active", activo);
+0151:       link.classList.toggle("active", activo);
+0152: 
+0153:       if (activo) {
+0154:         const item = link.closest(".nav-item");
+0155:         if (item) {
+0156:           item.classList.add("active");
+0157:         }
+0158:       }
+0159:     });
+0160: 
+0161:     document.querySelectorAll(".js-filtro-tipopag-grupo").forEach(function (link) {
+0162:       const valores = (link.dataset.tipopagValues || "")
+------------------------------------------------------------
+0135: 
+0136:     const icono = link.querySelector(".icon-wrap i");
+0137:     if (icono) {
+0138:       icono.classList.toggle("text-white-50", !activo);
+0139:     }
+0140:   }
+0141: 
+0142:   function actualizarMenuLateralActivo(tipopag) {
+0143:     document.querySelectorAll("#accordionSidebar .nav-item").forEach(function (item) {
+0144:       item.classList.remove("active");
+0145:     });
+0146: 
+0147:     document.querySelectorAll(".js-filtro-tipopag").forEach(function (link) {
+0148:       const activo = link.dataset.tipopag === tipopag;
+0149: 
+0150:       link.classList.toggle("is-active", activo);
+0151:       link.classList.toggle("active", activo);
+0152: 
+0153:       if (activo) {
+0154:         const item = link.closest(".nav-item");
+0155:         if (item) {
+0156:           item.classList.add("active");
+0157:         }
+0158:       }
+0159:     });
+0160: 
+0161:     document.querySelectorAll(".js-filtro-tipopag-grupo").forEach(function (link) {
+0162:       const valores = (link.dataset.tipopagValues || "")
+0163:         .split(",")
+0164:         .map(function (valor) {
+0165:           return valor.trim();
+0166:         })
+0167:         .filter(Boolean);
+------------------------------------------------------------
+0136:     const icono = link.querySelector(".icon-wrap i");
+0137:     if (icono) {
+0138:       icono.classList.toggle("text-white-50", !activo);
+0139:     }
+0140:   }
+0141: 
+0142:   function actualizarMenuLateralActivo(tipopag) {
+0143:     document.querySelectorAll("#accordionSidebar .nav-item").forEach(function (item) {
+0144:       item.classList.remove("active");
+0145:     });
+0146: 
+0147:     document.querySelectorAll(".js-filtro-tipopag").forEach(function (link) {
+0148:       const activo = link.dataset.tipopag === tipopag;
+0149: 
+0150:       link.classList.toggle("is-active", activo);
+0151:       link.classList.toggle("active", activo);
+0152: 
+0153:       if (activo) {
+0154:         const item = link.closest(".nav-item");
+0155:         if (item) {
+0156:           item.classList.add("active");
+0157:         }
+0158:       }
+0159:     });
+0160: 
+0161:     document.querySelectorAll(".js-filtro-tipopag-grupo").forEach(function (link) {
+0162:       const valores = (link.dataset.tipopagValues || "")
+0163:         .split(",")
+0164:         .map(function (valor) {
+0165:           return valor.trim();
+0166:         })
+0167:         .filter(Boolean);
+0168: 
+------------------------------------------------------------
+0149: 
+0150:       link.classList.toggle("is-active", activo);
+0151:       link.classList.toggle("active", activo);
+0152: 
+0153:       if (activo) {
+0154:         const item = link.closest(".nav-item");
+0155:         if (item) {
+0156:           item.classList.add("active");
+0157:         }
+0158:       }
+0159:     });
+0160: 
+0161:     document.querySelectorAll(".js-filtro-tipopag-grupo").forEach(function (link) {
+0162:       const valores = (link.dataset.tipopagValues || "")
+0163:         .split(",")
+0164:         .map(function (valor) {
+0165:           return valor.trim();
+0166:         })
+0167:         .filter(Boolean);
+0168: 
+0169:       marcarMenuItem(link, valores.includes(tipopag));
+0170:     });
+0171: 
+0172:     document.querySelectorAll(".js-filtro-tipopag:not(.dropdown-item)").forEach(function (link) {
+0173:       marcarMenuItem(link, link.dataset.tipopag === tipopag);
+0174:     });
+0175:   }
+0176: 
+0177:   // ============================================================
+0178:   // 3.b Actualizar botón flotante de crear según tipopag actual
+0179:   // ============================================================
+0180:   function actualizarBotonCrearPlato(tipopag) {
+0181:     const boton = document.getElementById("botonCrearPlatoFlotante");
+------------------------------------------------------------
+0150:       link.classList.toggle("is-active", activo);
+0151:       link.classList.toggle("active", activo);
+0152: 
+0153:       if (activo) {
+0154:         const item = link.closest(".nav-item");
+0155:         if (item) {
+0156:           item.classList.add("active");
+0157:         }
+0158:       }
+0159:     });
+0160: 
+0161:     document.querySelectorAll(".js-filtro-tipopag-grupo").forEach(function (link) {
+0162:       const valores = (link.dataset.tipopagValues || "")
+0163:         .split(",")
+0164:         .map(function (valor) {
+0165:           return valor.trim();
+0166:         })
+0167:         .filter(Boolean);
+0168: 
+0169:       marcarMenuItem(link, valores.includes(tipopag));
+0170:     });
+0171: 
+0172:     document.querySelectorAll(".js-filtro-tipopag:not(.dropdown-item)").forEach(function (link) {
+0173:       marcarMenuItem(link, link.dataset.tipopag === tipopag);
+0174:     });
+0175:   }
+0176: 
+0177:   // ============================================================
+0178:   // 3.b Actualizar botón flotante de crear según tipopag actual
+0179:   // ============================================================
+0180:   function actualizarBotonCrearPlato(tipopag) {
+0181:     const boton = document.getElementById("botonCrearPlatoFlotante");
+0182: 
+------------------------------------------------------------
+0157:         }
+0158:       }
+0159:     });
+0160: 
+0161:     document.querySelectorAll(".js-filtro-tipopag-grupo").forEach(function (link) {
+0162:       const valores = (link.dataset.tipopagValues || "")
+0163:         .split(",")
+0164:         .map(function (valor) {
+0165:           return valor.trim();
+0166:         })
+0167:         .filter(Boolean);
+0168: 
+0169:       marcarMenuItem(link, valores.includes(tipopag));
+0170:     });
+0171: 
+0172:     document.querySelectorAll(".js-filtro-tipopag:not(.dropdown-item)").forEach(function (link) {
+0173:       marcarMenuItem(link, link.dataset.tipopag === tipopag);
+0174:     });
+0175:   }
+0176: 
+0177:   // ============================================================
+0178:   // 3.b Actualizar botón flotante de crear según tipopag actual
+0179:   // ============================================================
+0180:   function actualizarBotonCrearPlato(tipopag) {
+0181:     const boton = document.getElementById("botonCrearPlatoFlotante");
+0182: 
+0183:     if (!boton) {
+0184:       return;
+0185:     }
+0186: 
+0187:     const esLugar = tipopag === "Delivery" || tipopag === "Comerafuera";
+0188:     const urlBase = esLugar ? boton.dataset.urlCrearLugar : boton.dataset.urlCrearPlato;
+0189: 
+------------------------------------------------------------
+0160: 
+0161:     document.querySelectorAll(".js-filtro-tipopag-grupo").forEach(function (link) {
+0162:       const valores = (link.dataset.tipopagValues || "")
+0163:         .split(",")
+0164:         .map(function (valor) {
+0165:           return valor.trim();
+0166:         })
+0167:         .filter(Boolean);
+0168: 
+0169:       marcarMenuItem(link, valores.includes(tipopag));
+0170:     });
+0171: 
+0172:     document.querySelectorAll(".js-filtro-tipopag:not(.dropdown-item)").forEach(function (link) {
+0173:       marcarMenuItem(link, link.dataset.tipopag === tipopag);
+0174:     });
+0175:   }
+0176: 
+0177:   // ============================================================
+0178:   // 3.b Actualizar botón flotante de crear según tipopag actual
+0179:   // ============================================================
+0180:   function actualizarBotonCrearPlato(tipopag) {
+0181:     const boton = document.getElementById("botonCrearPlatoFlotante");
+0182: 
+0183:     if (!boton) {
+0184:       return;
+0185:     }
+0186: 
+0187:     const esLugar = tipopag === "Delivery" || tipopag === "Comerafuera";
+0188:     const urlBase = esLugar ? boton.dataset.urlCrearLugar : boton.dataset.urlCrearPlato;
+0189: 
+0190:     if (!urlBase) {
+0191:       return;
+0192:     }
+------------------------------------------------------------
+0161:     document.querySelectorAll(".js-filtro-tipopag-grupo").forEach(function (link) {
+0162:       const valores = (link.dataset.tipopagValues || "")
+0163:         .split(",")
+0164:         .map(function (valor) {
+0165:           return valor.trim();
+0166:         })
+0167:         .filter(Boolean);
+0168: 
+0169:       marcarMenuItem(link, valores.includes(tipopag));
+0170:     });
+0171: 
+0172:     document.querySelectorAll(".js-filtro-tipopag:not(.dropdown-item)").forEach(function (link) {
+0173:       marcarMenuItem(link, link.dataset.tipopag === tipopag);
+0174:     });
+0175:   }
+0176: 
+0177:   // ============================================================
+0178:   // 3.b Actualizar botón flotante de crear según tipopag actual
+0179:   // ============================================================
+0180:   function actualizarBotonCrearPlato(tipopag) {
+0181:     const boton = document.getElementById("botonCrearPlatoFlotante");
+0182: 
+0183:     if (!boton) {
+0184:       return;
+0185:     }
+0186: 
+0187:     const esLugar = tipopag === "Delivery" || tipopag === "Comerafuera";
+0188:     const urlBase = esLugar ? boton.dataset.urlCrearLugar : boton.dataset.urlCrearPlato;
+0189: 
+0190:     if (!urlBase) {
+0191:       return;
+0192:     }
+0193: 
+------------------------------------------------------------
+0166:         })
+0167:         .filter(Boolean);
+0168: 
+0169:       marcarMenuItem(link, valores.includes(tipopag));
+0170:     });
+0171: 
+0172:     document.querySelectorAll(".js-filtro-tipopag:not(.dropdown-item)").forEach(function (link) {
+0173:       marcarMenuItem(link, link.dataset.tipopag === tipopag);
+0174:     });
+0175:   }
+0176: 
+0177:   // ============================================================
+0178:   // 3.b Actualizar botón flotante de crear según tipopag actual
+0179:   // ============================================================
+0180:   function actualizarBotonCrearPlato(tipopag) {
+0181:     const boton = document.getElementById("botonCrearPlatoFlotante");
+0182: 
+0183:     if (!boton) {
+0184:       return;
+0185:     }
+0186: 
+0187:     const esLugar = tipopag === "Delivery" || tipopag === "Comerafuera";
+0188:     const urlBase = esLugar ? boton.dataset.urlCrearLugar : boton.dataset.urlCrearPlato;
+0189: 
+0190:     if (!urlBase) {
+0191:       return;
+0192:     }
+0193: 
+0194:     const params = new URLSearchParams();
+0195: 
+0196:     if (tipopag) {
+0197:       params.set("tipopag", tipopag);
+0198:     }
+------------------------------------------------------------
+0168: 
+0169:       marcarMenuItem(link, valores.includes(tipopag));
+0170:     });
+0171: 
+0172:     document.querySelectorAll(".js-filtro-tipopag:not(.dropdown-item)").forEach(function (link) {
+0173:       marcarMenuItem(link, link.dataset.tipopag === tipopag);
+0174:     });
+0175:   }
+0176: 
+0177:   // ============================================================
+0178:   // 3.b Actualizar botón flotante de crear según tipopag actual
+0179:   // ============================================================
+0180:   function actualizarBotonCrearPlato(tipopag) {
+0181:     const boton = document.getElementById("botonCrearPlatoFlotante");
+0182: 
+0183:     if (!boton) {
+0184:       return;
+0185:     }
+0186: 
+0187:     const esLugar = tipopag === "Delivery" || tipopag === "Comerafuera";
+0188:     const urlBase = esLugar ? boton.dataset.urlCrearLugar : boton.dataset.urlCrearPlato;
+0189: 
+0190:     if (!urlBase) {
+0191:       return;
+0192:     }
+0193: 
+0194:     const params = new URLSearchParams();
+0195: 
+0196:     if (tipopag) {
+0197:       params.set("tipopag", tipopag);
+0198:     }
+0199: 
+0200:     params.set("return_to", window.location.pathname + window.location.search);
+------------------------------------------------------------
+0175:   }
+0176: 
+0177:   // ============================================================
+0178:   // 3.b Actualizar botón flotante de crear según tipopag actual
+0179:   // ============================================================
+0180:   function actualizarBotonCrearPlato(tipopag) {
+0181:     const boton = document.getElementById("botonCrearPlatoFlotante");
+0182: 
+0183:     if (!boton) {
+0184:       return;
+0185:     }
+0186: 
+0187:     const esLugar = tipopag === "Delivery" || tipopag === "Comerafuera";
+0188:     const urlBase = esLugar ? boton.dataset.urlCrearLugar : boton.dataset.urlCrearPlato;
+0189: 
+0190:     if (!urlBase) {
+0191:       return;
+0192:     }
+0193: 
+0194:     const params = new URLSearchParams();
+0195: 
+0196:     if (tipopag) {
+0197:       params.set("tipopag", tipopag);
+0198:     }
+0199: 
+0200:     params.set("return_to", window.location.pathname + window.location.search);
+0201: 
+0202:     boton.href = `${urlBase}?${params.toString()}`;
+0203: 
+0204:     
+0205:     let titulo = "Agregar receta de plato principal";
+0206:     if (tipopag === "Guarnicion") {
+0207:       titulo = "Agregar receta de guarnición";
+------------------------------------------------------------
+0184:       return;
+0185:     }
+0186: 
+0187:     const esLugar = tipopag === "Delivery" || tipopag === "Comerafuera";
+0188:     const urlBase = esLugar ? boton.dataset.urlCrearLugar : boton.dataset.urlCrearPlato;
+0189: 
+0190:     if (!urlBase) {
+0191:       return;
+0192:     }
+0193: 
+0194:     const params = new URLSearchParams();
+0195: 
+0196:     if (tipopag) {
+0197:       params.set("tipopag", tipopag);
+0198:     }
+0199: 
+0200:     params.set("return_to", window.location.pathname + window.location.search);
+0201: 
+0202:     boton.href = `${urlBase}?${params.toString()}`;
+0203: 
+0204:     
+0205:     let titulo = "Agregar receta de plato principal";
+0206:     if (tipopag === "Guarnicion") {
+0207:       titulo = "Agregar receta de guarnición";
+0208:     } else if (tipopag === "Comerafuera") {
+0209:       titulo = "Agregar lugar para comer afuera";
+0210:     } else if (tipopag === "Delivery") {
+0211:       titulo = "Agregar delivery";
+0212:     } else if (tipopag && tipopag !== "Principal" && tipopag !== "Dash") {
+0213:       titulo = `Agregar receta de ${tipopag.toLowerCase()}`;
+0214:     }
+0215: 
+0216:     boton.title = titulo;
+------------------------------------------------------------
+0185:     }
+0186: 
+0187:     const esLugar = tipopag === "Delivery" || tipopag === "Comerafuera";
+0188:     const urlBase = esLugar ? boton.dataset.urlCrearLugar : boton.dataset.urlCrearPlato;
+0189: 
+0190:     if (!urlBase) {
+0191:       return;
+0192:     }
+0193: 
+0194:     const params = new URLSearchParams();
+0195: 
+0196:     if (tipopag) {
+0197:       params.set("tipopag", tipopag);
+0198:     }
+0199: 
+0200:     params.set("return_to", window.location.pathname + window.location.search);
+0201: 
+0202:     boton.href = `${urlBase}?${params.toString()}`;
+0203: 
+0204:     
+0205:     let titulo = "Agregar receta de plato principal";
+0206:     if (tipopag === "Guarnicion") {
+0207:       titulo = "Agregar receta de guarnición";
+0208:     } else if (tipopag === "Comerafuera") {
+0209:       titulo = "Agregar lugar para comer afuera";
+0210:     } else if (tipopag === "Delivery") {
+0211:       titulo = "Agregar delivery";
+0212:     } else if (tipopag && tipopag !== "Principal" && tipopag !== "Dash") {
+0213:       titulo = `Agregar receta de ${tipopag.toLowerCase()}`;
+0214:     }
+0215: 
+0216:     boton.title = titulo;
+0217:     boton.setAttribute("aria-label", titulo);
+------------------------------------------------------------
+0194:     const params = new URLSearchParams();
+0195: 
+0196:     if (tipopag) {
+0197:       params.set("tipopag", tipopag);
+0198:     }
+0199: 
+0200:     params.set("return_to", window.location.pathname + window.location.search);
+0201: 
+0202:     boton.href = `${urlBase}?${params.toString()}`;
+0203: 
+0204:     
+0205:     let titulo = "Agregar receta de plato principal";
+0206:     if (tipopag === "Guarnicion") {
+0207:       titulo = "Agregar receta de guarnición";
+0208:     } else if (tipopag === "Comerafuera") {
+0209:       titulo = "Agregar lugar para comer afuera";
+0210:     } else if (tipopag === "Delivery") {
+0211:       titulo = "Agregar delivery";
+0212:     } else if (tipopag && tipopag !== "Principal" && tipopag !== "Dash") {
+0213:       titulo = `Agregar receta de ${tipopag.toLowerCase()}`;
+0214:     }
+0215: 
+0216:     boton.title = titulo;
+0217:     boton.setAttribute("aria-label", titulo);
+0218:   }
+0219: 
+0220:   // ============================================================
+0221:   // 4. Buscar por palabra clave sin recargar
+0222:   // ============================================================
+0223:   form.addEventListener("submit", function (event) {
+0224:     event.preventDefault();
+0225:     actualizarListadoPlatos();
+0226:   });
+------------------------------------------------------------
+0196:     if (tipopag) {
+0197:       params.set("tipopag", tipopag);
+0198:     }
+0199: 
+0200:     params.set("return_to", window.location.pathname + window.location.search);
+0201: 
+0202:     boton.href = `${urlBase}?${params.toString()}`;
+0203: 
+0204:     
+0205:     let titulo = "Agregar receta de plato principal";
+0206:     if (tipopag === "Guarnicion") {
+0207:       titulo = "Agregar receta de guarnición";
+0208:     } else if (tipopag === "Comerafuera") {
+0209:       titulo = "Agregar lugar para comer afuera";
+0210:     } else if (tipopag === "Delivery") {
+0211:       titulo = "Agregar delivery";
+0212:     } else if (tipopag && tipopag !== "Principal" && tipopag !== "Dash") {
+0213:       titulo = `Agregar receta de ${tipopag.toLowerCase()}`;
+0214:     }
+0215: 
+0216:     boton.title = titulo;
+0217:     boton.setAttribute("aria-label", titulo);
+0218:   }
+0219: 
+0220:   // ============================================================
+0221:   // 4. Buscar por palabra clave sin recargar
+0222:   // ============================================================
+0223:   form.addEventListener("submit", function (event) {
+0224:     event.preventDefault();
+0225:     actualizarListadoPlatos();
+0226:   });
+0227: 
+0228:   // ============================================================
+------------------------------------------------------------
+0198:     }
+0199: 
+0200:     params.set("return_to", window.location.pathname + window.location.search);
+0201: 
+0202:     boton.href = `${urlBase}?${params.toString()}`;
+0203: 
+0204:     
+0205:     let titulo = "Agregar receta de plato principal";
+0206:     if (tipopag === "Guarnicion") {
+0207:       titulo = "Agregar receta de guarnición";
+0208:     } else if (tipopag === "Comerafuera") {
+0209:       titulo = "Agregar lugar para comer afuera";
+0210:     } else if (tipopag === "Delivery") {
+0211:       titulo = "Agregar delivery";
+0212:     } else if (tipopag && tipopag !== "Principal" && tipopag !== "Dash") {
+0213:       titulo = `Agregar receta de ${tipopag.toLowerCase()}`;
+0214:     }
+0215: 
+0216:     boton.title = titulo;
+0217:     boton.setAttribute("aria-label", titulo);
+0218:   }
+0219: 
+0220:   // ============================================================
+0221:   // 4. Buscar por palabra clave sin recargar
+0222:   // ============================================================
+0223:   form.addEventListener("submit", function (event) {
+0224:     event.preventDefault();
+0225:     actualizarListadoPlatos();
+0226:   });
+0227: 
+0228:   // ============================================================
+0229:   // 4.b Buscar por palabra clave mientras se escribe
+0230:   // ============================================================
+------------------------------------------------------------
+0200:     params.set("return_to", window.location.pathname + window.location.search);
+0201: 
+0202:     boton.href = `${urlBase}?${params.toString()}`;
+0203: 
+0204:     
+0205:     let titulo = "Agregar receta de plato principal";
+0206:     if (tipopag === "Guarnicion") {
+0207:       titulo = "Agregar receta de guarnición";
+0208:     } else if (tipopag === "Comerafuera") {
+0209:       titulo = "Agregar lugar para comer afuera";
+0210:     } else if (tipopag === "Delivery") {
+0211:       titulo = "Agregar delivery";
+0212:     } else if (tipopag && tipopag !== "Principal" && tipopag !== "Dash") {
+0213:       titulo = `Agregar receta de ${tipopag.toLowerCase()}`;
+0214:     }
+0215: 
+0216:     boton.title = titulo;
+0217:     boton.setAttribute("aria-label", titulo);
+0218:   }
+0219: 
+0220:   // ============================================================
+0221:   // 4. Buscar por palabra clave sin recargar
+0222:   // ============================================================
+0223:   form.addEventListener("submit", function (event) {
+0224:     event.preventDefault();
+0225:     actualizarListadoPlatos();
+0226:   });
+0227: 
+0228:   // ============================================================
+0229:   // 4.b Buscar por palabra clave mientras se escribe
+0230:   // ============================================================
+0231:   const inputPalabraClave = form.querySelector('input[name="palabra_clave"]');
+0232:   let timeoutBusquedaPalabraClave = null;
+------------------------------------------------------------
+0201: 
+0202:     boton.href = `${urlBase}?${params.toString()}`;
+0203: 
+0204:     
+0205:     let titulo = "Agregar receta de plato principal";
+0206:     if (tipopag === "Guarnicion") {
+0207:       titulo = "Agregar receta de guarnición";
+0208:     } else if (tipopag === "Comerafuera") {
+0209:       titulo = "Agregar lugar para comer afuera";
+0210:     } else if (tipopag === "Delivery") {
+0211:       titulo = "Agregar delivery";
+0212:     } else if (tipopag && tipopag !== "Principal" && tipopag !== "Dash") {
+0213:       titulo = `Agregar receta de ${tipopag.toLowerCase()}`;
+0214:     }
+0215: 
+0216:     boton.title = titulo;
+0217:     boton.setAttribute("aria-label", titulo);
+0218:   }
+0219: 
+0220:   // ============================================================
+0221:   // 4. Buscar por palabra clave sin recargar
+0222:   // ============================================================
+0223:   form.addEventListener("submit", function (event) {
+0224:     event.preventDefault();
+0225:     actualizarListadoPlatos();
+0226:   });
+0227: 
+0228:   // ============================================================
+0229:   // 4.b Buscar por palabra clave mientras se escribe
+0230:   // ============================================================
+0231:   const inputPalabraClave = form.querySelector('input[name="palabra_clave"]');
+0232:   let timeoutBusquedaPalabraClave = null;
+0233: 
+------------------------------------------------------------
+0264:   // 5. Filtrar por checkboxes sin recargar
+0265:   // ============================================================
+0266:   form.querySelectorAll("input[type='checkbox']").forEach(function (checkbox) {
+0267:     checkbox.addEventListener("change", function () {
+0268:       actualizarListadoPlatos();
+0269:     });
+0270:   });
+0271: 
+0272:   // ============================================================
+0273:   // 6. Filtrar desde el menú lateral sin recargar
+0274:   // ============================================================
+0275:   document.addEventListener("click", function (event) {
+0276:     const link = event.target.closest(".js-filtro-tipopag");
+0277: 
+0278:     if (!link) {
+0279:       return;
+0280:     }
+0281: 
+0282:     const tipopag = link.dataset.tipopag;
+0283: 
+0284:     // Fallback seguro: si falta algo, dejamos navegar normal.
+0285:     if (!tipopag || !window.fetch) {
+0286:       return;
+0287:     }
+0288: 
+0289:     const inputTipopag = form.querySelector('input[name="tipopag"]');
+0290: 
+0291:     if (!inputTipopag) {
+0292:       return;
+0293:     }
+0294: 
+0295:     event.preventDefault();
+0296: 
+------------------------------------------------------------
+0270:   });
+0271: 
+0272:   // ============================================================
+0273:   // 6. Filtrar desde el menú lateral sin recargar
+0274:   // ============================================================
+0275:   document.addEventListener("click", function (event) {
+0276:     const link = event.target.closest(".js-filtro-tipopag");
+0277: 
+0278:     if (!link) {
+0279:       return;
+0280:     }
+0281: 
+0282:     const tipopag = link.dataset.tipopag;
+0283: 
+0284:     // Fallback seguro: si falta algo, dejamos navegar normal.
+0285:     if (!tipopag || !window.fetch) {
+0286:       return;
+0287:     }
+0288: 
+0289:     const inputTipopag = form.querySelector('input[name="tipopag"]');
+0290: 
+0291:     if (!inputTipopag) {
+0292:       return;
+0293:     }
+0294: 
+0295:     event.preventDefault();
+0296: 
+0297:     inputTipopag.value = tipopag;
+0298:     aplicarModoLoQueTengo(tipopag);
+0299: 
+0300:     actualizarMenuLateralActivo(tipopag);
+0301: 
+0302:     const nuevaUrl = new URL(link.href);
+------------------------------------------------------------
+0273:   // 6. Filtrar desde el menú lateral sin recargar
+0274:   // ============================================================
+0275:   document.addEventListener("click", function (event) {
+0276:     const link = event.target.closest(".js-filtro-tipopag");
+0277: 
+0278:     if (!link) {
+0279:       return;
+0280:     }
+0281: 
+0282:     const tipopag = link.dataset.tipopag;
+0283: 
+0284:     // Fallback seguro: si falta algo, dejamos navegar normal.
+0285:     if (!tipopag || !window.fetch) {
+0286:       return;
+0287:     }
+0288: 
+0289:     const inputTipopag = form.querySelector('input[name="tipopag"]');
+0290: 
+0291:     if (!inputTipopag) {
+0292:       return;
+0293:     }
+0294: 
+0295:     event.preventDefault();
+0296: 
+0297:     inputTipopag.value = tipopag;
+0298:     aplicarModoLoQueTengo(tipopag);
+0299: 
+0300:     actualizarMenuLateralActivo(tipopag);
+0301: 
+0302:     const nuevaUrl = new URL(link.href);
+0303:     window.history.pushState({ tipopag: tipopag }, "", nuevaUrl.toString());
+0304: 
+0305:     actualizarBotonCrearPlato(tipopag);
+------------------------------------------------------------
+0277: 
+0278:     if (!link) {
+0279:       return;
+0280:     }
+0281: 
+0282:     const tipopag = link.dataset.tipopag;
+0283: 
+0284:     // Fallback seguro: si falta algo, dejamos navegar normal.
+0285:     if (!tipopag || !window.fetch) {
+0286:       return;
+0287:     }
+0288: 
+0289:     const inputTipopag = form.querySelector('input[name="tipopag"]');
+0290: 
+0291:     if (!inputTipopag) {
+0292:       return;
+0293:     }
+0294: 
+0295:     event.preventDefault();
+0296: 
+0297:     inputTipopag.value = tipopag;
+0298:     aplicarModoLoQueTengo(tipopag);
+0299: 
+0300:     actualizarMenuLateralActivo(tipopag);
+0301: 
+0302:     const nuevaUrl = new URL(link.href);
+0303:     window.history.pushState({ tipopag: tipopag }, "", nuevaUrl.toString());
+0304: 
+0305:     actualizarBotonCrearPlato(tipopag);
+0306: 
+0307:     const dropdown = link.closest(".dropdown");
+0308:     const dropdownToggle = dropdown ? dropdown.querySelector('[data-bs-toggle="dropdown"]') : null;
+0309: 
+------------------------------------------------------------
+0279:       return;
+0280:     }
+0281: 
+0282:     const tipopag = link.dataset.tipopag;
+0283: 
+0284:     // Fallback seguro: si falta algo, dejamos navegar normal.
+0285:     if (!tipopag || !window.fetch) {
+0286:       return;
+0287:     }
+0288: 
+0289:     const inputTipopag = form.querySelector('input[name="tipopag"]');
+0290: 
+0291:     if (!inputTipopag) {
+0292:       return;
+0293:     }
+0294: 
+0295:     event.preventDefault();
+0296: 
+0297:     inputTipopag.value = tipopag;
+0298:     aplicarModoLoQueTengo(tipopag);
+0299: 
+0300:     actualizarMenuLateralActivo(tipopag);
+0301: 
+0302:     const nuevaUrl = new URL(link.href);
+0303:     window.history.pushState({ tipopag: tipopag }, "", nuevaUrl.toString());
+0304: 
+0305:     actualizarBotonCrearPlato(tipopag);
+0306: 
+0307:     const dropdown = link.closest(".dropdown");
+0308:     const dropdownToggle = dropdown ? dropdown.querySelector('[data-bs-toggle="dropdown"]') : null;
+0309: 
+0310:     if (dropdownToggle && window.bootstrap && bootstrap.Dropdown) {
+0311:       bootstrap.Dropdown.getOrCreateInstance(dropdownToggle).hide();
+------------------------------------------------------------
+0285:     if (!tipopag || !window.fetch) {
+0286:       return;
+0287:     }
+0288: 
+0289:     const inputTipopag = form.querySelector('input[name="tipopag"]');
+0290: 
+0291:     if (!inputTipopag) {
+0292:       return;
+0293:     }
+0294: 
+0295:     event.preventDefault();
+0296: 
+0297:     inputTipopag.value = tipopag;
+0298:     aplicarModoLoQueTengo(tipopag);
+0299: 
+0300:     actualizarMenuLateralActivo(tipopag);
+0301: 
+0302:     const nuevaUrl = new URL(link.href);
+0303:     window.history.pushState({ tipopag: tipopag }, "", nuevaUrl.toString());
+0304: 
+0305:     actualizarBotonCrearPlato(tipopag);
+0306: 
+0307:     const dropdown = link.closest(".dropdown");
+0308:     const dropdownToggle = dropdown ? dropdown.querySelector('[data-bs-toggle="dropdown"]') : null;
+0309: 
+0310:     if (dropdownToggle && window.bootstrap && bootstrap.Dropdown) {
+0311:       bootstrap.Dropdown.getOrCreateInstance(dropdownToggle).hide();
+0312:     }
+0313: 
+0314:     actualizarListadoPlatos();  
+0315:   });
+0316: 
+0317:   // ============================================================
+------------------------------------------------------------
+0286:       return;
+0287:     }
+0288: 
+0289:     const inputTipopag = form.querySelector('input[name="tipopag"]');
+0290: 
+0291:     if (!inputTipopag) {
+0292:       return;
+0293:     }
+0294: 
+0295:     event.preventDefault();
+0296: 
+0297:     inputTipopag.value = tipopag;
+0298:     aplicarModoLoQueTengo(tipopag);
+0299: 
+0300:     actualizarMenuLateralActivo(tipopag);
+0301: 
+0302:     const nuevaUrl = new URL(link.href);
+0303:     window.history.pushState({ tipopag: tipopag }, "", nuevaUrl.toString());
+0304: 
+0305:     actualizarBotonCrearPlato(tipopag);
+0306: 
+0307:     const dropdown = link.closest(".dropdown");
+0308:     const dropdownToggle = dropdown ? dropdown.querySelector('[data-bs-toggle="dropdown"]') : null;
+0309: 
+0310:     if (dropdownToggle && window.bootstrap && bootstrap.Dropdown) {
+0311:       bootstrap.Dropdown.getOrCreateInstance(dropdownToggle).hide();
+0312:     }
+0313: 
+0314:     actualizarListadoPlatos();  
+0315:   });
+0316: 
+0317:   // ============================================================
+0318:   // 7. Soportar botón atrás / adelante del navegador
+------------------------------------------------------------
+0288: 
+0289:     const inputTipopag = form.querySelector('input[name="tipopag"]');
+0290: 
+0291:     if (!inputTipopag) {
+0292:       return;
+0293:     }
+0294: 
+0295:     event.preventDefault();
+0296: 
+0297:     inputTipopag.value = tipopag;
+0298:     aplicarModoLoQueTengo(tipopag);
+0299: 
+0300:     actualizarMenuLateralActivo(tipopag);
+0301: 
+0302:     const nuevaUrl = new URL(link.href);
+0303:     window.history.pushState({ tipopag: tipopag }, "", nuevaUrl.toString());
+0304: 
+0305:     actualizarBotonCrearPlato(tipopag);
+0306: 
+0307:     const dropdown = link.closest(".dropdown");
+0308:     const dropdownToggle = dropdown ? dropdown.querySelector('[data-bs-toggle="dropdown"]') : null;
+0309: 
+0310:     if (dropdownToggle && window.bootstrap && bootstrap.Dropdown) {
+0311:       bootstrap.Dropdown.getOrCreateInstance(dropdownToggle).hide();
+0312:     }
+0313: 
+0314:     actualizarListadoPlatos();  
+0315:   });
+0316: 
+0317:   // ============================================================
+0318:   // 7. Soportar botón atrás / adelante del navegador
+0319:   // ============================================================
+0320:   window.addEventListener("popstate", function () {
+------------------------------------------------------------
+0291:     if (!inputTipopag) {
+0292:       return;
+0293:     }
+0294: 
+0295:     event.preventDefault();
+0296: 
+0297:     inputTipopag.value = tipopag;
+0298:     aplicarModoLoQueTengo(tipopag);
+0299: 
+0300:     actualizarMenuLateralActivo(tipopag);
+0301: 
+0302:     const nuevaUrl = new URL(link.href);
+0303:     window.history.pushState({ tipopag: tipopag }, "", nuevaUrl.toString());
+0304: 
+0305:     actualizarBotonCrearPlato(tipopag);
+0306: 
+0307:     const dropdown = link.closest(".dropdown");
+0308:     const dropdownToggle = dropdown ? dropdown.querySelector('[data-bs-toggle="dropdown"]') : null;
+0309: 
+0310:     if (dropdownToggle && window.bootstrap && bootstrap.Dropdown) {
+0311:       bootstrap.Dropdown.getOrCreateInstance(dropdownToggle).hide();
+0312:     }
+0313: 
+0314:     actualizarListadoPlatos();  
+0315:   });
+0316: 
+0317:   // ============================================================
+0318:   // 7. Soportar botón atrás / adelante del navegador
+0319:   // ============================================================
+0320:   window.addEventListener("popstate", function () {
+0321:     const params = new URLSearchParams(window.location.search);
+0322:     const tipopag = params.get("tipopag");
+0323: 
+------------------------------------------------------------
+0293:     }
+0294: 
+0295:     event.preventDefault();
+0296: 
+0297:     inputTipopag.value = tipopag;
+0298:     aplicarModoLoQueTengo(tipopag);
+0299: 
+0300:     actualizarMenuLateralActivo(tipopag);
+0301: 
+0302:     const nuevaUrl = new URL(link.href);
+0303:     window.history.pushState({ tipopag: tipopag }, "", nuevaUrl.toString());
+0304: 
+0305:     actualizarBotonCrearPlato(tipopag);
+0306: 
+0307:     const dropdown = link.closest(".dropdown");
+0308:     const dropdownToggle = dropdown ? dropdown.querySelector('[data-bs-toggle="dropdown"]') : null;
+0309: 
+0310:     if (dropdownToggle && window.bootstrap && bootstrap.Dropdown) {
+0311:       bootstrap.Dropdown.getOrCreateInstance(dropdownToggle).hide();
+0312:     }
+0313: 
+0314:     actualizarListadoPlatos();  
+0315:   });
+0316: 
+0317:   // ============================================================
+0318:   // 7. Soportar botón atrás / adelante del navegador
+0319:   // ============================================================
+0320:   window.addEventListener("popstate", function () {
+0321:     const params = new URLSearchParams(window.location.search);
+0322:     const tipopag = params.get("tipopag");
+0323: 
+0324:     if (!tipopag) {
+0325:       return;
+------------------------------------------------------------
+0310:     if (dropdownToggle && window.bootstrap && bootstrap.Dropdown) {
+0311:       bootstrap.Dropdown.getOrCreateInstance(dropdownToggle).hide();
+0312:     }
+0313: 
+0314:     actualizarListadoPlatos();  
+0315:   });
+0316: 
+0317:   // ============================================================
+0318:   // 7. Soportar botón atrás / adelante del navegador
+0319:   // ============================================================
+0320:   window.addEventListener("popstate", function () {
+0321:     const params = new URLSearchParams(window.location.search);
+0322:     const tipopag = params.get("tipopag");
+0323: 
+0324:     if (!tipopag) {
+0325:       return;
+0326:     }
+0327: 
+0328:     const inputTipopag = form.querySelector('input[name="tipopag"]');
+0329: 
+0330:     if (!inputTipopag) {
+0331:       return;
+0332:     }
+0333:     inputTipopag.value = tipopag;
+0334:     actualizarMenuLateralActivo(tipopag);
+0335:     actualizarBotonCrearPlato(tipopag);
+0336:     actualizarListadoPlatos();
+0337: 
+0338:   });
+0339: });
+------------------------------------------------------------
+0312:     }
+0313: 
+0314:     actualizarListadoPlatos();  
+0315:   });
+0316: 
+0317:   // ============================================================
+0318:   // 7. Soportar botón atrás / adelante del navegador
+0319:   // ============================================================
+0320:   window.addEventListener("popstate", function () {
+0321:     const params = new URLSearchParams(window.location.search);
+0322:     const tipopag = params.get("tipopag");
+0323: 
+0324:     if (!tipopag) {
+0325:       return;
+0326:     }
+0327: 
+0328:     const inputTipopag = form.querySelector('input[name="tipopag"]');
+0329: 
+0330:     if (!inputTipopag) {
+0331:       return;
+0332:     }
+0333:     inputTipopag.value = tipopag;
+0334:     actualizarMenuLateralActivo(tipopag);
+0335:     actualizarBotonCrearPlato(tipopag);
+0336:     actualizarListadoPlatos();
+0337: 
+0338:   });
+0339: });
+------------------------------------------------------------
+0316: 
+0317:   // ============================================================
+0318:   // 7. Soportar botón atrás / adelante del navegador
+0319:   // ============================================================
+0320:   window.addEventListener("popstate", function () {
+0321:     const params = new URLSearchParams(window.location.search);
+0322:     const tipopag = params.get("tipopag");
+0323: 
+0324:     if (!tipopag) {
+0325:       return;
+0326:     }
+0327: 
+0328:     const inputTipopag = form.querySelector('input[name="tipopag"]');
+0329: 
+0330:     if (!inputTipopag) {
+0331:       return;
+0332:     }
+0333:     inputTipopag.value = tipopag;
+0334:     actualizarMenuLateralActivo(tipopag);
+0335:     actualizarBotonCrearPlato(tipopag);
+0336:     actualizarListadoPlatos();
+0337: 
+0338:   });
+0339: });
+------------------------------------------------------------
+0318:   // 7. Soportar botón atrás / adelante del navegador
+0319:   // ============================================================
+0320:   window.addEventListener("popstate", function () {
+0321:     const params = new URLSearchParams(window.location.search);
+0322:     const tipopag = params.get("tipopag");
+0323: 
+0324:     if (!tipopag) {
+0325:       return;
+0326:     }
+0327: 
+0328:     const inputTipopag = form.querySelector('input[name="tipopag"]');
+0329: 
+0330:     if (!inputTipopag) {
+0331:       return;
+0332:     }
+0333:     inputTipopag.value = tipopag;
+0334:     actualizarMenuLateralActivo(tipopag);
+0335:     actualizarBotonCrearPlato(tipopag);
+0336:     actualizarListadoPlatos();
+0337: 
+0338:   });
+0339: });
+------------------------------------------------------------
+0321:     const params = new URLSearchParams(window.location.search);
+0322:     const tipopag = params.get("tipopag");
+0323: 
+0324:     if (!tipopag) {
+0325:       return;
+0326:     }
+0327: 
+0328:     const inputTipopag = form.querySelector('input[name="tipopag"]');
+0329: 
+0330:     if (!inputTipopag) {
+0331:       return;
+0332:     }
+0333:     inputTipopag.value = tipopag;
+0334:     actualizarMenuLateralActivo(tipopag);
+0335:     actualizarBotonCrearPlato(tipopag);
+0336:     actualizarListadoPlatos();
+0337: 
+0338:   });
+0339: });
+------------------------------------------------------------
+0322:     const tipopag = params.get("tipopag");
+0323: 
+0324:     if (!tipopag) {
+0325:       return;
+0326:     }
+0327: 
+0328:     const inputTipopag = form.querySelector('input[name="tipopag"]');
+0329: 
+0330:     if (!inputTipopag) {
+0331:       return;
+0332:     }
+0333:     inputTipopag.value = tipopag;
+0334:     actualizarMenuLateralActivo(tipopag);
+0335:     actualizarBotonCrearPlato(tipopag);
+0336:     actualizarListadoPlatos();
+0337: 
+0338:   });
+0339: });
+------------------------------------------------------------
+0323: 
+0324:     if (!tipopag) {
+0325:       return;
+0326:     }
+0327: 
+0328:     const inputTipopag = form.querySelector('input[name="tipopag"]');
+0329: 
+0330:     if (!inputTipopag) {
+0331:       return;
+0332:     }
+0333:     inputTipopag.value = tipopag;
+0334:     actualizarMenuLateralActivo(tipopag);
+0335:     actualizarBotonCrearPlato(tipopag);
+0336:     actualizarListadoPlatos();
+0337: 
+0338:   });
+0339: });
+------------------------------------------------------------
+
+--- patrón: contenedor-carousel-platos ---
+0086:       }
+0087:     })
+0088:       .then(function (response) {
+0089:         if (!response.ok) {
+0090:           throw new Error("Error al cargar el listado");
+0091:         }
+0092: 
+0093:         return response.json();
+0094:       })
+0095:       .then(function (data) {
+0096:         contenedor.innerHTML = data.html_listado;
+0097: 
+0098:         const contenedorCarousel = document.getElementById("contenedor-carousel-platos");
+0099:         if (contenedorCarousel) {
+0100:           contenedorCarousel.innerHTML = data.html_carousel;
+0101:           inicializarCarouselesPlatos(contenedorCarousel);
+0102:         }
+0103: 
+0104:         const contenedorLugares = document.getElementById("contenedor-listado-lugares");
+0105:         if (contenedorLugares) {
+0106:           contenedorLugares.innerHTML = data.html_lugares;
+0107:         }
+0108: 
+0109:         if (typeof initListadoPlatos === "function") {
+0110:           initListadoPlatos();
+0111:         }
+0112:       })
+0113:       .catch(function (error) {
+0114:         console.error(error);
+0115:       });
+0116:   }
+0117: 
+0118:   // ============================================================
+------------------------------------------------------------
+
+--- patrón: contenedor-listado-platos ---
+0011:       interval: false,
+0012:       touch: true,
+0013:       wrap: true,
+0014:     });
+0015:   });
+0016: }
+0017: 
+0018: document.addEventListener("DOMContentLoaded", function () {
+0019:   // ============================================================
+0020:   // 1. Elementos base de la pantalla
+0021:   // ============================================================
+0022:   const form = document.getElementById("form-filtros-platos");
+0023:   const contenedor = document.getElementById("contenedor-listado-platos");
+0024: 
+0025:   if (!form || !contenedor) return;
+0026: 
+0027:   let estadoAntesDeLoQueTengo = null;
+0028: 
+0029:   function aplicarModoLoQueTengo(tipopag) {
+0030:     const usarLoQueTengo = form.querySelector('input[name="usar_lo_que_tengo"]');
+0031:     const quecomemos = form.querySelector('input[name="quecomemos"]');
+0032:     const misplatos = form.querySelector('input[name="misplatos"]');
+0033: 
+0034:     if (tipopag === "LoQueTengo") {
+0035:       if (!estadoAntesDeLoQueTengo) {
+0036:         estadoAntesDeLoQueTengo = {
+0037:           usarLoQueTengo: usarLoQueTengo ? usarLoQueTengo.checked : false,
+0038:           quecomemos: quecomemos ? quecomemos.checked : false,
+0039:           misplatos: misplatos ? misplatos.checked : false,
+0040:         };
+0041:       }
+0042: 
+0043:       if (usarLoQueTengo) {
+------------------------------------------------------------
+
+--- patrón: html_carousel ---
+0088:       .then(function (response) {
+0089:         if (!response.ok) {
+0090:           throw new Error("Error al cargar el listado");
+0091:         }
+0092: 
+0093:         return response.json();
+0094:       })
+0095:       .then(function (data) {
+0096:         contenedor.innerHTML = data.html_listado;
+0097: 
+0098:         const contenedorCarousel = document.getElementById("contenedor-carousel-platos");
+0099:         if (contenedorCarousel) {
+0100:           contenedorCarousel.innerHTML = data.html_carousel;
+0101:           inicializarCarouselesPlatos(contenedorCarousel);
+0102:         }
+0103: 
+0104:         const contenedorLugares = document.getElementById("contenedor-listado-lugares");
+0105:         if (contenedorLugares) {
+0106:           contenedorLugares.innerHTML = data.html_lugares;
+0107:         }
+0108: 
+0109:         if (typeof initListadoPlatos === "function") {
+0110:           initListadoPlatos();
+0111:         }
+0112:       })
+0113:       .catch(function (error) {
+0114:         console.error(error);
+0115:       });
+0116:   }
+0117: 
+0118:   // ============================================================
+0119:   // 3. Marcar activo el item actual del menú lateral
+0120:   // ============================================================
+------------------------------------------------------------
+
+--- patrón: html_listado ---
+0084:       headers: {
+0085:         "X-Requested-With": "XMLHttpRequest"
+0086:       }
+0087:     })
+0088:       .then(function (response) {
+0089:         if (!response.ok) {
+0090:           throw new Error("Error al cargar el listado");
+0091:         }
+0092: 
+0093:         return response.json();
+0094:       })
+0095:       .then(function (data) {
+0096:         contenedor.innerHTML = data.html_listado;
+0097: 
+0098:         const contenedorCarousel = document.getElementById("contenedor-carousel-platos");
+0099:         if (contenedorCarousel) {
+0100:           contenedorCarousel.innerHTML = data.html_carousel;
+0101:           inicializarCarouselesPlatos(contenedorCarousel);
+0102:         }
+0103: 
+0104:         const contenedorLugares = document.getElementById("contenedor-listado-lugares");
+0105:         if (contenedorLugares) {
+0106:           contenedorLugares.innerHTML = data.html_lugares;
+0107:         }
+0108: 
+0109:         if (typeof initListadoPlatos === "function") {
+0110:           initListadoPlatos();
+0111:         }
+0112:       })
+0113:       .catch(function (error) {
+0114:         console.error(error);
+0115:       });
+0116:   }
+------------------------------------------------------------

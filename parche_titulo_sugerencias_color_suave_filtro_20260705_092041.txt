@@ -1,0 +1,148 @@
+==================================================
+Parche: usar color suave tipo filtro en título Sugerencias
+Fecha: Sun Jul  5 09:20:41 -03 2026
+Directorio: /Users/guillermogravino/quecomemos
+==================================================
+OK: texto del título cambiado a text-primary en AdminVideos/templates/AdminVideos/pre-base.html
+OK: fondo del título cambiado a #f2f4fc en AdminVideos/static/AdminVideos/css/mi-css.css
+OK: versión de mi-css.css actualizada con v=20260705092041
+
+---- grep título sugerencias ----
+AdminVideos/templates/AdminVideos/pre-base.html:20:  <div class="sugerencias-platos-titulo-bar text-center mb-2">
+AdminVideos/templates/AdminVideos/pre-base.html:22:      Sugerencias de
+AdminVideos/static/AdminVideos/css/mi-css.css:519:.sugerencias-platos-titulo-bar {
+AdminVideos/static/AdminVideos/css/mi-css.css:527:.sugerencias-platos-titulo-bar h5 {
+AdminVideos/templates/AdminVideos/base.html:22:    <!-- <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260705092041" rel="stylesheet"> -->
+AdminVideos/templates/AdminVideos/base.html:35:    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260705092041" rel="stylesheet">  <!-- al final + bust de caché -->
+
+---- contexto Lo que tengo / filtros ----
+AdminVideos/templates/AdminVideos/base.html:183:<li class="nav-item sidebar-special-item {% if tipopag == 'LoQueTengo' %}active{% endif %}">
+AdminVideos/templates/AdminVideos/base.html:185:            {% if tipopag == 'LoQueTengo' %}is-active{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:186:     href="{% url 'filtro-de-platos' %}?tipopag=LoQueTengo"
+AdminVideos/templates/AdminVideos/base.html:187:     data-tipopag="LoQueTengo">
+AdminVideos/templates/AdminVideos/base.html:191:      <i class="fa-solid fa-basket-shopping {% if tipopag != 'LoQueTengo' %}text-white-50{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:195:    <span class="item-text mt-2 small {% if tipopag == 'LoQueTengo' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+AdminVideos/templates/AdminVideos/lista_filtrada.html:114:            data-bs-target="#loQueTengoModal">
+AdminVideos/templates/AdminVideos/lista_filtrada.html:116:            Lo que tengo <span id="loQueTengoContador"></span>
+AdminVideos/templates/AdminVideos/lista_filtrada.html:124:            id="usarLoQueTengo"
+AdminVideos/templates/AdminVideos/lista_filtrada.html:128:          <label class="btn btn-filtro-plato mb-0" for="usarLoQueTengo">
+AdminVideos/templates/AdminVideos/lista_filtrada.html:129:            Usar para filtrar
+AdminVideos/templates/AdminVideos/lista_filtrada.html:141:  id="loQueTengoModal"
+AdminVideos/templates/AdminVideos/lista_filtrada.html:143:  aria-labelledby="loQueTengoModalLabel"
+AdminVideos/templates/AdminVideos/lista_filtrada.html:152:        <h5 class="modal-title" id="loQueTengoModalLabel">
+AdminVideos/templates/AdminVideos/lista_filtrada.html:153:          Lo que tengo
+AdminVideos/templates/AdminVideos/lista_filtrada.html:165:          <select id="loQueTengoSelect" class="form-select" style="width: 100%;"></select>
+AdminVideos/templates/AdminVideos/lista_filtrada.html:168:        <button type="button" class="btn btn-success btn-sm mb-3" id="loQueTengoAgregarBtn">
+AdminVideos/templates/AdminVideos/lista_filtrada.html:172:        <div class="alert alert-danger d-none small" id="loQueTengoError"></div>
+AdminVideos/templates/AdminVideos/lista_filtrada.html:174:        <ul class="list-group" id="loQueTengoLista">
+AdminVideos/static/AdminVideos/css/mi-css.css:446:  background: #d0d8f8; /* light */
+AdminVideos/static/AdminVideos/css/mi-css.css:466:  background: #f2f4fc; /* primary */
+AdminVideos/static/AdminVideos/css/mi-css.css:521:  background: #f2f4fc;
+AdminVideos/static/AdminVideos/css/mi-css.css:523:  border: 1px solid #d0d8f8;
+AdminVideos/static/AdminVideos/js/filtros_platos.js:27:  let estadoAntesDeLoQueTengo = null;
+AdminVideos/static/AdminVideos/js/filtros_platos.js:29:  function aplicarModoLoQueTengo(tipopag) {
+AdminVideos/static/AdminVideos/js/filtros_platos.js:30:    const usarLoQueTengo = form.querySelector('input[name="usar_lo_que_tengo"]');
+AdminVideos/static/AdminVideos/js/filtros_platos.js:34:    if (tipopag === "LoQueTengo") {
+AdminVideos/static/AdminVideos/js/filtros_platos.js:35:      if (!estadoAntesDeLoQueTengo) {
+AdminVideos/static/AdminVideos/js/filtros_platos.js:36:        estadoAntesDeLoQueTengo = {
+AdminVideos/static/AdminVideos/js/filtros_platos.js:37:          usarLoQueTengo: usarLoQueTengo ? usarLoQueTengo.checked : false,
+AdminVideos/static/AdminVideos/js/filtros_platos.js:43:      if (usarLoQueTengo) {
+AdminVideos/static/AdminVideos/js/filtros_platos.js:44:        usarLoQueTengo.checked = true;
+AdminVideos/static/AdminVideos/js/filtros_platos.js:55:    if (estadoAntesDeLoQueTengo) {
+AdminVideos/static/AdminVideos/js/filtros_platos.js:56:      if (usarLoQueTengo) {
+AdminVideos/static/AdminVideos/js/filtros_platos.js:57:        usarLoQueTengo.checked = estadoAntesDeLoQueTengo.usarLoQueTengo;
+AdminVideos/static/AdminVideos/js/filtros_platos.js:61:        quecomemos.checked = estadoAntesDeLoQueTengo.quecomemos;
+AdminVideos/static/AdminVideos/js/filtros_platos.js:65:        misplatos.checked = estadoAntesDeLoQueTengo.misplatos;
+AdminVideos/static/AdminVideos/js/filtros_platos.js:68:      estadoAntesDeLoQueTengo = null;
+AdminVideos/static/AdminVideos/js/filtros_platos.js:298:    aplicarModoLoQueTengo(tipopag);
+
+---- git diff relevantes ----
+diff --git a/AdminVideos/static/AdminVideos/css/mi-css.css b/AdminVideos/static/AdminVideos/css/mi-css.css
+index 2f407ba..4fa71cc 100644
+--- a/AdminVideos/static/AdminVideos/css/mi-css.css
++++ b/AdminVideos/static/AdminVideos/css/mi-css.css
+@@ -514,3 +514,17 @@ section > .d-flex {
+ 
+ /* FILA SELECCIONADA DE PLATO */
+ .plato-row.is-selected { background: rgba(13,110,253,.12); }
++
++/* Título de sugerencias de platos */
++.sugerencias-platos-titulo-bar {
++  width: 100%;
++  background: #f2f4fc;
++  padding: 0.35rem 0.75rem;
++  border: 1px solid #d0d8f8;
++  border-radius: 0.35rem;
++}
++
++.sugerencias-platos-titulo-bar h5 {
++  font-size: clamp(0.95rem, 2.2vw, 1.15rem);
++  line-height: 1.2;
++}
+diff --git a/AdminVideos/templates/AdminVideos/base.html b/AdminVideos/templates/AdminVideos/base.html
+index e02d316..6fccd92 100644
+--- a/AdminVideos/templates/AdminVideos/base.html
++++ b/AdminVideos/templates/AdminVideos/base.html
+@@ -19,7 +19,7 @@
+         rel="stylesheet">
+ 
+     <!-- mi css -->
+-    <!-- <link href="{% static 'AdminVideos/css/mi-css.css' %}" rel="stylesheet"> -->
++    <!-- <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260705092041" rel="stylesheet"> -->
+ 
+     <link href="{% static 'AdminVideos/css/sb-admin-2.min.css' %}" rel="stylesheet">
+ 
+@@ -32,7 +32,7 @@
+     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+ 
+     <!-- mi css -->
+-    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=65" rel="stylesheet">  <!-- al final + bust de caché -->
++    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260705092041" rel="stylesheet">  <!-- al final + bust de caché -->
+ 
+     <link rel="manifest" href="{% static 'AdminVideos/lista_super/manifest_lista_super.json' %}?v=1">
+ 
+diff --git a/AdminVideos/templates/AdminVideos/pre-base.html b/AdminVideos/templates/AdminVideos/pre-base.html
+index 7f0c997..50c51d8 100644
+--- a/AdminVideos/templates/AdminVideos/pre-base.html
++++ b/AdminVideos/templates/AdminVideos/pre-base.html
+@@ -15,20 +15,19 @@
+   
+ 
+ 
+-  <div class="border border-primary rounded p-2 position-relative m-2">
+-   
+-<span class="position-absolute top-0 start-50 translate-middle bg-info px-2 py-0
+-                d-inline-block text-center rounded-pill"
+-          style="transform: translate(-50%, -50%); max-width: 92%; line-height: 1.15;">
+-      <span class="menu-programado-text text-primary">
+-        Sugerencias de
+-        {% if tipopag == "Principal" %}
+-          Plato principal
+-        {% else %}
+-          {{ tipopag }}
+-        {% endif %}
+-      </span>
+-    </span>
++
++<div class="border border-primary rounded p-2 position-relative m-2">
++  <div class="sugerencias-platos-titulo-bar text-center mb-2">
++    <h5 class="mb-0 fw-bold text-primary">
++      Sugerencias de
++      {% if tipopag == "Principal" %}
++        Plato principal
++      {% else %}
++        {{ tipopag }}
++      {% endif %}
++    </h5>
++  </div>
++
+ 
+     <div class="shadow bg-dark p-1">
+       {% block filtro %}{% endblock %}
+
+---- django check ----
+System check identified no issues (0 silenced).
+
+==================================================
+Archivo generado: parche_titulo_sugerencias_color_suave_filtro_20260705_092041.txt
+==================================================

@@ -1,0 +1,107 @@
+==================================================
+Parche: actualizar versión de mi-css.css
+Fecha: Sun Jul  5 09:07:05 -03 2026
+Directorio: /Users/guillermogravino/quecomemos
+==================================================
+OK: actualizado AdminVideos/templates/AdminVideos/base.html (2 referencia/s) con v=20260705090705
+
+---- grep mi-css.css ----
+AdminVideos/templates/AdminVideos/base.html:22:    <!-- <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260705090705" rel="stylesheet"> -->
+AdminVideos/templates/AdminVideos/base.html:35:    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260705090705" rel="stylesheet">  <!-- al final + bust de caché -->
+
+---- grep título / css sugerencias ----
+AdminVideos/templates/AdminVideos/pre-base.html:18:<div class="sugerencias-platos-titulo-bar text-center mt-3 mb-3">
+AdminVideos/templates/AdminVideos/pre-base.html:20:    Sugerencias de
+AdminVideos/static/AdminVideos/css/mi-css.css:519:.sugerencias-platos-titulo-bar {
+AdminVideos/static/AdminVideos/css/mi-css.css:528:.sugerencias-platos-titulo-bar h4 {
+
+---- git diff templates/css relevantes ----
+diff --git a/AdminVideos/static/AdminVideos/css/mi-css.css b/AdminVideos/static/AdminVideos/css/mi-css.css
+index 2f407ba..2d19917 100644
+--- a/AdminVideos/static/AdminVideos/css/mi-css.css
++++ b/AdminVideos/static/AdminVideos/css/mi-css.css
+@@ -514,3 +514,18 @@ section > .d-flex {
+ 
+ /* FILA SELECCIONADA DE PLATO */
+ .plato-row.is-selected { background: rgba(13,110,253,.12); }
++
++/* Título de sugerencias de platos */
++.sugerencias-platos-titulo-bar {
++  width: 100vw;
++  margin-left: calc(50% - 50vw);
++  margin-right: calc(50% - 50vw);
++  background: var(--bs-primary);
++  padding: 0.65rem 1rem;
++  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.12);
++}
++
++.sugerencias-platos-titulo-bar h4 {
++  font-size: clamp(1.05rem, 2.5vw, 1.35rem);
++  line-height: 1.2;
++}
+diff --git a/AdminVideos/templates/AdminVideos/base.html b/AdminVideos/templates/AdminVideos/base.html
+index e02d316..78924d8 100644
+--- a/AdminVideos/templates/AdminVideos/base.html
++++ b/AdminVideos/templates/AdminVideos/base.html
+@@ -19,7 +19,7 @@
+         rel="stylesheet">
+ 
+     <!-- mi css -->
+-    <!-- <link href="{% static 'AdminVideos/css/mi-css.css' %}" rel="stylesheet"> -->
++    <!-- <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260705090705" rel="stylesheet"> -->
+ 
+     <link href="{% static 'AdminVideos/css/sb-admin-2.min.css' %}" rel="stylesheet">
+ 
+@@ -32,7 +32,7 @@
+     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+ 
+     <!-- mi css -->
+-    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=65" rel="stylesheet">  <!-- al final + bust de caché -->
++    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260705090705" rel="stylesheet">  <!-- al final + bust de caché -->
+ 
+     <link rel="manifest" href="{% static 'AdminVideos/lista_super/manifest_lista_super.json' %}?v=1">
+ 
+diff --git a/AdminVideos/templates/AdminVideos/pre-base.html b/AdminVideos/templates/AdminVideos/pre-base.html
+index 7f0c997..8447ea4 100644
+--- a/AdminVideos/templates/AdminVideos/pre-base.html
++++ b/AdminVideos/templates/AdminVideos/pre-base.html
+@@ -15,20 +15,18 @@
+   
+ 
+ 
+-  <div class="border border-primary rounded p-2 position-relative m-2">
+-   
+-<span class="position-absolute top-0 start-50 translate-middle bg-info px-2 py-0
+-                d-inline-block text-center rounded-pill"
+-          style="transform: translate(-50%, -50%); max-width: 92%; line-height: 1.15;">
+-      <span class="menu-programado-text text-primary">
+-        Sugerencias de
+-        {% if tipopag == "Principal" %}
+-          Plato principal
+-        {% else %}
+-          {{ tipopag }}
+-        {% endif %}
+-      </span>
+-    </span>
++<div class="sugerencias-platos-titulo-bar text-center mt-3 mb-3">
++  <h4 class="mb-0 fw-semibold text-white">
++    Sugerencias de
++    {% if tipopag == "Principal" %}
++      Plato principal
++    {% else %}
++      {{ tipopag }}
++    {% endif %}
++  </h4>
++</div>
++
++<div class="border border-primary rounded p-2 position-relative m-2">
+ 
+     <div class="shadow bg-dark p-1">
+       {% block filtro %}{% endblock %}
+
+---- django check ----
+System check identified no issues (0 silenced).
+
+==================================================
+Archivo generado: parche_version_css_sugerencias_20260705_090705.txt
+==================================================

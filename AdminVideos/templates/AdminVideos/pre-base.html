@@ -15,20 +15,19 @@
   
 
 
-  <div class="border border-primary rounded p-2 position-relative m-2">
-   
-<span class="position-absolute top-0 start-50 translate-middle bg-info px-2 py-0
-                d-inline-block text-center rounded-pill"
-          style="transform: translate(-50%, -50%); max-width: 92%; line-height: 1.15;">
-      <span class="menu-programado-text text-primary">
-        Sugerencias de
-        {% if tipopag == "Principal" %}
-          Plato principal
-        {% else %}
-          {{ tipopag }}
-        {% endif %}
-      </span>
-    </span>
+
+<div class="border border-primary rounded p-2 position-relative m-2">
+  <div class="sugerencias-platos-titulo-bar text-center mb-2">
+    <h5 class="mb-0 fw-bold text-white">
+      Sugerencias de
+      {% if tipopag == "Principal" %}
+        Plato principal
+      {% else %}
+        {{ tipopag }}
+      {% endif %}
+    </h5>
+  </div>
+
 
     <div class="shadow bg-dark p-1">
       {% block filtro %}{% endblock %}

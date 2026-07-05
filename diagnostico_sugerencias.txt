@@ -1,0 +1,346 @@
+==================================================
+Diagnóstico: título Sugerencias de
+Fecha: Sun Jul  5 08:55:01 -03 2026
+Directorio: /Users/guillermogravino/quecomemos
+==================================================
+
+---- git status ----
+ M AdminVideos/templates/AdminVideos/pre-base.html
+ M AdminVideos/views.py
+?? debug_titulo_sugerencias.txt
+?? diagnostico_sugerencias.txt
+?? parches_quecomemos.txt
+
+---- grep general Sugerencias / tipopag / menu-programado ----
+AdminVideos/templates/AdminVideos/base.html:177:   - Usa SOLO tipopag para activo
+AdminVideos/templates/AdminVideos/base.html:183:<li class="nav-item sidebar-special-item {% if tipopag == 'LoQueTengo' %}active{% endif %}">
+AdminVideos/templates/AdminVideos/base.html:184:  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
+AdminVideos/templates/AdminVideos/base.html:185:            {% if tipopag == 'LoQueTengo' %}is-active{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:186:     href="{% url 'filtro-de-platos' %}?tipopag=LoQueTengo"
+AdminVideos/templates/AdminVideos/base.html:187:     data-tipopag="LoQueTengo">
+AdminVideos/templates/AdminVideos/base.html:191:      <i class="fa-solid fa-basket-shopping {% if tipopag != 'LoQueTengo' %}text-white-50{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:195:    <span class="item-text mt-2 small {% if tipopag == 'LoQueTengo' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+AdminVideos/templates/AdminVideos/base.html:205:<li class="nav-item {% if tipopag == 'Principal' %}active{% endif %}">
+AdminVideos/templates/AdminVideos/base.html:206:  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
+AdminVideos/templates/AdminVideos/base.html:207:            {% if tipopag == 'Principal' %}is-active{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:208:     href="{% url 'filtro-de-platos' %}?tipopag=Principal"
+AdminVideos/templates/AdminVideos/base.html:209:     data-tipopag="Principal">
+AdminVideos/templates/AdminVideos/base.html:213:      <i class="fa-solid fa-utensils {% if tipopag != 'Principal' %}text-white-50{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:217:    <span class="item-text mt-2 small {% if tipopag == 'Principal' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+AdminVideos/templates/AdminVideos/base.html:226:<li class="nav-item {% if tipopag == 'Entrada' %}active{% endif %}">
+AdminVideos/templates/AdminVideos/base.html:227:  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
+AdminVideos/templates/AdminVideos/base.html:228:            {% if tipopag == 'Entrada' %}is-active{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:229:     href="{% url 'filtro-de-platos' %}?tipopag=Entrada{% if dia_activo %}&dia_activo={{ dia_activo }}{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:230:     data-tipopag="Entrada">
+AdminVideos/templates/AdminVideos/base.html:234:      <i class="fa-solid fa-shrimp {% if tipopag != 'Entrada' %}text-white-50{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:238:    <span class="item-text mt-2 small {% if tipopag == 'Entrada' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+AdminVideos/templates/AdminVideos/base.html:245:<li class="nav-item dropdown {% if tipopag == 'Dip' or tipopag == 'Salsa' %}active{% endif %}">
+AdminVideos/templates/AdminVideos/base.html:246:  <a class="nav-link menu-item dropdown-toggle sidebar-dropdown-toggle d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag-grupo
+AdminVideos/templates/AdminVideos/base.html:247:            {% if tipopag == 'Dip' or tipopag == 'Salsa' %}is-active{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:254:     data-tipopag-values="Dip,Salsa">
+AdminVideos/templates/AdminVideos/base.html:258:      <i class="fas fa-solid fa-bowl-rice {% if tipopag != 'Dip' and tipopag != 'Salsa' %}text-white-50{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:262:    <span class="item-text mt-2 small {% if tipopag == 'Dip' or tipopag == 'Salsa' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+AdminVideos/templates/AdminVideos/base.html:271:      <a class="dropdown-item js-filtro-tipopag {% if tipopag == 'Dip' %}active{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:272:         href="{% url 'filtro-de-platos' %}?tipopag=Dip"
+AdminVideos/templates/AdminVideos/base.html:273:         data-tipopag="Dip">
+AdminVideos/templates/AdminVideos/base.html:278:      <a class="dropdown-item js-filtro-tipopag {% if tipopag == 'Salsa' %}active{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:279:         href="{% url 'filtro-de-platos' %}?tipopag=Salsa"
+AdminVideos/templates/AdminVideos/base.html:280:         data-tipopag="Salsa">
+AdminVideos/templates/AdminVideos/base.html:288:<li class="nav-item {% if tipopag == 'Guarnicion' %}active{% endif %}">
+AdminVideos/templates/AdminVideos/base.html:289:  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
+AdminVideos/templates/AdminVideos/base.html:290:            {% if tipopag == 'Guarnicion' %}is-active{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:291:     href="{% url 'filtro-de-platos' %}?tipopag=Guarnicion"
+AdminVideos/templates/AdminVideos/base.html:292:     data-tipopag="Guarnicion">
+AdminVideos/templates/AdminVideos/base.html:296:      <i class="fa-solid fa-plate-wheat {% if tipopag != 'Guarnicion' %}text-white-50{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:300:    <span class="item-text mt-2 small {% if tipopag == 'Guarnicion' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+AdminVideos/templates/AdminVideos/base.html:307:<li class="nav-item {% if tipopag == 'Picada' %}active{% endif %}">
+AdminVideos/templates/AdminVideos/base.html:308:  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
+AdminVideos/templates/AdminVideos/base.html:309:            {% if tipopag == 'Picada' %}is-active{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:310:     href="{% url 'filtro-de-platos' %}?tipopag=Picada"
+AdminVideos/templates/AdminVideos/base.html:311:     data-tipopag="Picada">
+AdminVideos/templates/AdminVideos/base.html:315:      <i class="fa-solid fa-cheese {% if tipopag != 'Picada' %}text-white-50{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:319:    <span class="item-text mt-2 small {% if tipopag == 'Picada' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+AdminVideos/templates/AdminVideos/base.html:326:<li class="nav-item {% if tipopag == 'Postre' %}active{% endif %}">
+AdminVideos/templates/AdminVideos/base.html:327:  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
+AdminVideos/templates/AdminVideos/base.html:328:            {% if tipopag == 'Postre' %}is-active{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:329:     href="{% url 'filtro-de-platos' %}?tipopag=Postre"
+AdminVideos/templates/AdminVideos/base.html:330:     data-tipopag="Postre">
+AdminVideos/templates/AdminVideos/base.html:334:      <i class="fa-solid fa-ice-cream {% if tipopag != 'Postre' %}text-white-50{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:338:    <span class="item-text mt-2 small {% if tipopag == 'Postre' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+AdminVideos/templates/AdminVideos/base.html:346:<li class="nav-item {% if tipopag == 'Trago' %}active{% endif %}">
+AdminVideos/templates/AdminVideos/base.html:347:  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
+AdminVideos/templates/AdminVideos/base.html:348:            {% if tipopag == 'Trago' %}is-active{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:349:     href="{% url 'filtro-de-platos' %}?tipopag=Trago"
+AdminVideos/templates/AdminVideos/base.html:350:     data-tipopag="Trago">
+AdminVideos/templates/AdminVideos/base.html:354:      <i class="fa-solid fa-martini-glass-citrus {% if tipopag != 'Trago' %}text-white-50{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:358:    <span class="item-text mt-2 small {% if tipopag == 'Trago' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+AdminVideos/templates/AdminVideos/base.html:370:<li class="nav-item {% if tipopag == 'Delivery' %}active{% endif %}">
+AdminVideos/templates/AdminVideos/base.html:371:  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-0 py-0 js-filtro-tipopag
+AdminVideos/templates/AdminVideos/base.html:372:            {% if tipopag == 'Delivery' %}is-active{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:373:     href="{% url 'filtro-de-platos' %}?tipopag=Delivery"
+AdminVideos/templates/AdminVideos/base.html:374:     data-tipopag="Delivery">
+AdminVideos/templates/AdminVideos/base.html:378:      <i class="fa-solid fa-motorcycle {% if tipopag != 'Delivery' %}text-white-50{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:382:    <span class="item-text mt-2 small {% if tipopag == 'Delivery' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+AdminVideos/templates/AdminVideos/base.html:389:<li class="nav-item {% if tipopag == 'Comerafuera' %}active{% endif %}">
+AdminVideos/templates/AdminVideos/base.html:390:  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
+AdminVideos/templates/AdminVideos/base.html:391:            {% if tipopag == 'Comerafuera' %}is-active{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:392:     href="{% url 'filtro-de-platos' %}?tipopag=Comerafuera"
+AdminVideos/templates/AdminVideos/base.html:393:     data-tipopag="Comerafuera">
+AdminVideos/templates/AdminVideos/base.html:397:      <i class="fa-solid fa-location-dot {% if tipopag != 'Comerafuera' %}text-white-50{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:401:    <span class="item-text mt-2 small {% if tipopag == 'Comerafuera' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+AdminVideos/templates/AdminVideos/base.html:1060:     href="{% url 'videos-create' %}?tipopag={{ tipopag|default:''|urlencode }}&return_to={{ request.get_full_path|urlencode }}"
+AdminVideos/templates/AdminVideos/base.html:1065:    title="{% if tipopag == 'Principal' or not tipopag %}Agregar receta de plato principal{% elif tipopag == 'Guarnicion' %}Agregar receta de guarnición{% elif tipopag == 'Comerafuera' %}Agregar lugar para comer afuera{% elif tipopag == 'Delivery' %}Agregar delivery{% else %}Agregar receta de {{ tipopag|lower }}{% endif %}"
+AdminVideos/templates/AdminVideos/base.html:1066:    aria-label="{% if tipopag == 'Principal' or not tipopag %}Agregar receta de plato principal{% elif tipopag == 'Guarnicion' %}Agregar receta de guarnición{% elif tipopag == 'Comerafuera' %}Agregar lugar para comer afuera{% elif tipopag == 'Delivery' %}Agregar delivery{% else %}Agregar receta de {{ tipopag|lower }}{% endif %}">
+AdminVideos/templates/AdminVideos/lista_filtrada.html:61:  <input type="hidden" name="tipopag" value="{{ tipopag }}">
+AdminVideos/templates/AdminVideos/plato_form_inner.html:299:              {% if tipopag == "Picada" and form.instance.tipos != "Ingrediente de picada" %}
+AdminVideos/templates/AdminVideos/plato_form_inner.html:412:              data-url="{% url 'plato_variedad_update' v.id %}?tipopag={{ tipopag }}&return_to={{ request.GET.return_to|urlencode }}">
+AdminVideos/templates/AdminVideos/plato_form_inner.html:469:                <a class="btn btn-primary" href="{{ request.path }}?tipopag={{ request.GET.tipopag }}">Crear otro
+AdminVideos/templates/AdminVideos/partials/_plato_row_gmail.html:96:                <a href="{% url 'videos-update' plato.id %}?return_to={{ return_to_url|urlencode }}{% if tipopag %}&tipopag={{ tipopag|urlencode }}{% endif %}"
+AdminVideos/templates/AdminVideos/partials/_plato_row_gmail.html:153:                    href="{% url 'videos-update' plato.id %}?return_to={{ return_to_url|urlencode }}{% if tipopag %}&tipopag={{ tipopag|urlencode }}{% endif %}">
+AdminVideos/templates/AdminVideos/partials/_menu_programado_dias.html:178:        <span class="menu-programado-badge position-absolute top-0 start-50 translate-middle">
+AdminVideos/templates/AdminVideos/partials/_menu_programado_dias.html:188:            <span class="menu-programado-text text-primary">
+AdminVideos/templates/AdminVideos/partials/_listado_lugares.html:5:  {% if tipopag == "Delivery" or tipopag == "Comerafuera" %}
+AdminVideos/templates/AdminVideos/partials/_carousel_platos.html:270:{% elif tipopag != "Delivery" and tipopag != "Comerafuera"%}
+AdminVideos/templates/AdminVideos/partials/_carousel_platos.html:272:        <i class="bi bi-geo-alt-fill"></i> No hay {{tipopag}} ingresados para mostrar.
+AdminVideos/static/AdminVideos/css/mi-css.css:415:.menu-programado-badge {
+AdminVideos/static/AdminVideos/css/mi-css.css:419:.menu-programado-text {
+AdminVideos/static/AdminVideos/css/mi-css.css:510:.menu-programado-text{
+AdminVideos/static/AdminVideos/js/filtros_platos.js:29:  function aplicarModoLoQueTengo(tipopag) {
+AdminVideos/static/AdminVideos/js/filtros_platos.js:34:    if (tipopag === "LoQueTengo") {
+AdminVideos/static/AdminVideos/js/filtros_platos.js:142:  function actualizarMenuLateralActivo(tipopag) {
+AdminVideos/static/AdminVideos/js/filtros_platos.js:147:    document.querySelectorAll(".js-filtro-tipopag").forEach(function (link) {
+AdminVideos/static/AdminVideos/js/filtros_platos.js:148:      const activo = link.dataset.tipopag === tipopag;
+AdminVideos/static/AdminVideos/js/filtros_platos.js:161:    document.querySelectorAll(".js-filtro-tipopag-grupo").forEach(function (link) {
+AdminVideos/static/AdminVideos/js/filtros_platos.js:162:      const valores = (link.dataset.tipopagValues || "")
+AdminVideos/static/AdminVideos/js/filtros_platos.js:169:      marcarMenuItem(link, valores.includes(tipopag));
+AdminVideos/static/AdminVideos/js/filtros_platos.js:172:    document.querySelectorAll(".js-filtro-tipopag:not(.dropdown-item)").forEach(function (link) {
+AdminVideos/static/AdminVideos/js/filtros_platos.js:173:      marcarMenuItem(link, link.dataset.tipopag === tipopag);
+AdminVideos/static/AdminVideos/js/filtros_platos.js:178:  // 3.b Actualizar botón flotante de crear según tipopag actual
+AdminVideos/static/AdminVideos/js/filtros_platos.js:180:  function actualizarBotonCrearPlato(tipopag) {
+AdminVideos/static/AdminVideos/js/filtros_platos.js:187:    const esLugar = tipopag === "Delivery" || tipopag === "Comerafuera";
+AdminVideos/static/AdminVideos/js/filtros_platos.js:196:    if (tipopag) {
+AdminVideos/static/AdminVideos/js/filtros_platos.js:197:      params.set("tipopag", tipopag);
+AdminVideos/static/AdminVideos/js/filtros_platos.js:206:    if (tipopag === "Guarnicion") {
+AdminVideos/static/AdminVideos/js/filtros_platos.js:208:    } else if (tipopag === "Comerafuera") {
+AdminVideos/static/AdminVideos/js/filtros_platos.js:210:    } else if (tipopag === "Delivery") {
+AdminVideos/static/AdminVideos/js/filtros_platos.js:212:    } else if (tipopag && tipopag !== "Principal" && tipopag !== "Dash") {
+AdminVideos/static/AdminVideos/js/filtros_platos.js:213:      titulo = `Agregar receta de ${tipopag.toLowerCase()}`;
+AdminVideos/static/AdminVideos/js/filtros_platos.js:276:    const link = event.target.closest(".js-filtro-tipopag");
+AdminVideos/static/AdminVideos/js/filtros_platos.js:282:    const tipopag = link.dataset.tipopag;
+AdminVideos/static/AdminVideos/js/filtros_platos.js:285:    if (!tipopag || !window.fetch) {
+AdminVideos/static/AdminVideos/js/filtros_platos.js:289:    const inputTipopag = form.querySelector('input[name="tipopag"]');
+AdminVideos/static/AdminVideos/js/filtros_platos.js:297:    inputTipopag.value = tipopag;
+AdminVideos/static/AdminVideos/js/filtros_platos.js:298:    aplicarModoLoQueTengo(tipopag);
+AdminVideos/static/AdminVideos/js/filtros_platos.js:300:    actualizarMenuLateralActivo(tipopag);
+AdminVideos/static/AdminVideos/js/filtros_platos.js:303:    window.history.pushState({ tipopag: tipopag }, "", nuevaUrl.toString());
+AdminVideos/static/AdminVideos/js/filtros_platos.js:305:    actualizarBotonCrearPlato(tipopag);
+AdminVideos/static/AdminVideos/js/filtros_platos.js:322:    const tipopag = params.get("tipopag");
+AdminVideos/static/AdminVideos/js/filtros_platos.js:324:    if (!tipopag) {
+AdminVideos/static/AdminVideos/js/filtros_platos.js:328:    const inputTipopag = form.querySelector('input[name="tipopag"]');
+AdminVideos/static/AdminVideos/js/filtros_platos.js:333:    inputTipopag.value = tipopag;
+AdminVideos/static/AdminVideos/js/filtros_platos.js:334:    actualizarMenuLateralActivo(tipopag);
+AdminVideos/static/AdminVideos/js/filtros_platos.js:335:    actualizarBotonCrearPlato(tipopag);
+AdminVideos/views.py:275:    tipo_parametro = (request.GET.get("tipopag") or "Principal").strip()
+AdminVideos/views.py:1254:    # 🔁 Volver al filtro respetando tipopag
+AdminVideos/views.py:1255:    tipopag = request.GET.get("tipopag")
+AdminVideos/views.py:1257:    if tipopag:
+AdminVideos/views.py:1258:        url += f"?tipopag={tipopag}"
+AdminVideos/views.py:1339:        template_param = self.request.GET.get('tipopag')
+AdminVideos/views.py:1348:        # Obtener el parámetro 'tipopag' y pasarlo en la redirección
+AdminVideos/views.py:1349:        template_param = self.request.GET.get('tipopag')
+AdminVideos/views.py:1350:        return redirect(reverse("crear-lugar") + f"?tipopag={template_param}")
+AdminVideos/views.py:1377:def titulo_formulario_plato(tipopag, accion="Agregar"):
+AdminVideos/views.py:1378:    tipo = (tipopag or "Principal").strip()
+AdminVideos/views.py:1397:    # Fallback de template por si tipopag no matchea
+AdminVideos/views.py:1418:        template_param = self.request.GET.get('tipopag')
+AdminVideos/views.py:1452:        template_param = self.request.GET.get('tipopag')
+AdminVideos/views.py:1478:        template_param = self.request.GET.get('tipopag')
+AdminVideos/views.py:1480:        context['tipopag'] = template_param
+AdminVideos/views.py:1566:        template_param = self.request.GET.get('tipopag')
+AdminVideos/views.py:1568:            tail = _add_qs(f"?tipopag={template_param}", msg="Guardado OK.", level="success")
+AdminVideos/views.py:1635:        # ✅ tipopag SOLO para "menú activo" (contexto de navegación)
+AdminVideos/views.py:1637:        tipopag = (self.request.GET.get("tipopag") or "").strip()
+AdminVideos/views.py:1639:        # 2) si no viene, sacarlo del return_to (?tipopag=...)
+AdminVideos/views.py:1640:        if not tipopag:
+AdminVideos/views.py:1649:                tipopag = (qs.get("tipopag") or [""])[0].strip()
+AdminVideos/views.py:1652:        context["tipopag"] = tipopag  # puede ser ""
+AdminVideos/views.py:1780:        # ✅ Para variedades, no queremos invalidar los checkboxes por falta de tipopag
+AdminVideos/views.py:1826:        Si viene tipopag por GET lo respeta; si no, intenta inferir desde el padre.
+AdminVideos/views.py:1828:        tipopag = self.request.GET.get("tipopag")
+AdminVideos/views.py:1830:        if not tipopag:
+AdminVideos/views.py:1831:            # tu campo 'tipos' es CSV; tomamos el primero como "tipopag" razonable
+AdminVideos/views.py:1833:            tipopag = raw or "Principal"
+AdminVideos/views.py:1837:        self.request.GET["tipopag"] = tipopag
+AdminVideos/views.py:1848:        tipopag = self.request.GET.get("tipopag")
+AdminVideos/views.py:1849:        if not tipopag:
+AdminVideos/views.py:1851:            tipopag = raw or "Principal"
+AdminVideos/views.py:1852:        context["tipopag"] = tipopag
+AdminVideos/views.py:1968:        tipopag = (self.request.GET.get("tipopag") or self.request.POST.get("tipopag") or "").strip()
+AdminVideos/views.py:1975:        if tipopag:
+AdminVideos/views.py:1976:            parent_url = _add_qs(parent_url, tipopag=tipopag)
+AdminVideos/views.py:2038:        URL final al padre, preservando return_to y tipopag
+AdminVideos/views.py:2044:        tp = (self.request.POST.get("tipopag") or self.request.GET.get("tipopag") or "").strip()
+AdminVideos/views.py:2050:            params["tipopag"] = tp
+AdminVideos/views.py:2804:    - tipopag puede venir por POST, GET o sesión, en ese orden.
+AdminVideos/views.py:2818:    tipopag = (
+AdminVideos/views.py:2819:        request.POST.get("tipopag")
+AdminVideos/views.py:2820:        or request.GET.get("tipopag")
+AdminVideos/views.py:2837:        if tipopag == "LoQueTengo":
+AdminVideos/views.py:2849:        if tipopag != "LoQueTengo":
+AdminVideos/views.py:2866:        if tipopag == "LoQueTengo":
+AdminVideos/views.py:2882:        "tipo_parametro": tipopag,
+AdminVideos/views.py:2883:        "tipopag": tipopag,
+AdminVideos/views.py:3134:    tipopag = estado_filtros["tipopag"]
+AdminVideos/views.py:3183:        if tipopag == "LoQueTengo"
+AdminVideos/views.py:3213:    # tipopag = (request.GET.get("tipopag") or "Principal").strip()
+AdminVideos/views.py:3214:    contexto["tipopag"] = tipopag
+AdminVideos/views.py:3232:    tipopag = estado_filtros["tipopag"]
+AdminVideos/views.py:3255:        if tipopag == "LoQueTengo"
+AdminVideos/views.py:3268:        "tipopag": tipopag,
+
+---- pre-base.html completo primeras 80 líneas ----
+     1	{% extends "AdminVideos/base.html" %}
+     2	  
+     3	{% block pestanias-menues-platos %}
+     4	
+     5	<!-- PESTAÑAS - MENÚES PROGRAMADOS - PLATOS -->
+     6	
+     7	
+     8	
+     9	
+    10	<div id="contenedor-menu-programado-dias">
+    11	  {% include "AdminVideos/partials/_menu_programado_dias.html" %}
+    12	</div>
+    13	
+    14	
+    15	  
+    16	
+    17	
+    18	<div class="border border-primary rounded p-2 position-relative m-2">
+    19	
+    20	    <div class="shadow bg-dark p-1">
+    21	      {% block filtro %}{% endblock %}
+    22	    </div>
+    23	
+    24	      {% block principal %}{% endblock %}
+    25	
+    26	  </div>
+    27	
+    28	</div>
+    29	
+    30	
+    31	
+    32	
+    33	<!-- FIN DE PESTAÑAS - MENÚES PROGRAMADOS - PLATOS -->
+    34	
+    35	{% endblock %}
+
+---- _menu_programado_dias.html líneas 160 a 210 ----
+   160	
+   161	<!-- FIN DEL CAROUSEL -->
+   162	
+   163	
+   164	
+   165	
+   166	                  {% endif %}
+   167	                {% endfor %}
+   168	              {% else %}
+   169	                <h3 class="text-muted text-center mt-1" style="font-size: 1rem;">
+   170	                  Aún no programaste ningún plato para este día.
+   171	                </h3>
+   172	              {% endif %}
+   173	
+   174	            </div>
+   175	          </div>
+   176	        </div>
+   177	
+   178	        <span class="menu-programado-badge position-absolute top-0 start-50 translate-middle">
+   179	          <span class="menu-programado-pill">
+   180	
+   181	            <a href="/random-dia/{{ dia|date:'l'|slice:':2'|upper }}/"
+   182	              class="btn btn-sm text-danger p-0 me-1">
+   183	              <span class="material-symbols-outlined" style="font-size: 16px;">
+   184	                wand_shine
+   185	              </span>
+   186	            </a>
+   187	
+   188	            <span class="menu-programado-text text-primary">
+   189	              Menú programado
+   190	            </span>
+   191	
+   192	            {% if dia in platos_dia_x_dia %}
+   193	              <a href="#"
+   194	                data-bs-toggle="modal"
+   195	                data-bs-target="#confirmActionModal"
+   196	                data-confirm-title="Eliminar menú del día"
+   197	                data-confirm-body="¿Seguro querés borrar lo que comemos en este día?"
+   198	                data-confirm-action="{% url 'eliminar-menu-programado' %}"
+   199	                data-confirm-btn="Sí, borrar"
+   200	                title="Borrar menú del día"
+   201	                aria-label="Borrar menú del día"
+   202	                class="text-secondary text-decoration-none ms-1">
+   203	                <i class="bi bi-trash-fill fa-lg"></i>
+   204	              </a>
+   205	            {% endif %}
+   206	
+   207	          </span>
+   208	        </span>
+   209	
+   210	
+
+---- buscar archivos que incluyan pre-base o carousel ----
+AdminVideos/templates/AdminVideos/index.html:1:{% extends "AdminVideos/pre-base.html" %}
+AdminVideos/templates/AdminVideos/compartir_elemento.html:1:{% extends "AdminVideos/pre-base.html" %}
+AdminVideos/templates/AdminVideos/base.html:1341:<script src="{% static 'AdminVideos/js/menu_programado.js' %}?v=3"></script>
+AdminVideos/templates/AdminVideos/pre-base.html:11:  {% include "AdminVideos/partials/_menu_programado_dias.html" %}
+AdminVideos/templates/AdminVideos/lugar_update.html:1:{% extends "AdminVideos/pre-base.html" %}
+AdminVideos/templates/AdminVideos/lugar_detail.html:1:{% extends "AdminVideos/pre-base.html" %}
+AdminVideos/templates/AdminVideos/video_list_base.html:18:  {% include "AdminVideos/partials/_carousel_platos.html" %}
+AdminVideos/templates/AdminVideos/profile_form.html:2:{% extends "AdminVideos/pre-base.html" %}
+AdminVideos/templates/AdminVideos/partials/_menu_programado_dias.html:31:      {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Desayuno" platos=dia_plato.1.desayuno comida="desayuno" modo="desktop" %}
+AdminVideos/templates/AdminVideos/partials/_menu_programado_dias.html:38:      {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Almuerzo" platos=dia_plato.1.almuerzo comida="almuerzo" modo="desktop" %}
+AdminVideos/templates/AdminVideos/partials/_menu_programado_dias.html:44:      {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Merienda" platos=dia_plato.1.merienda comida="merienda" modo="desktop" %}
+AdminVideos/templates/AdminVideos/partials/_menu_programado_dias.html:49:      {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Cena" platos=dia_plato.1.cena comida="cena" modo="desktop" %}
+AdminVideos/templates/AdminVideos/partials/_menu_programado_dias.html:76:          {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Desayuno" platos=dia_plato.1.desayuno comida="desayuno" modo="mobile" %}
+AdminVideos/templates/AdminVideos/partials/_menu_programado_dias.html:83:          {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Almuerzo" platos=dia_plato.1.almuerzo comida="almuerzo" modo="mobile" %}
+AdminVideos/templates/AdminVideos/partials/_menu_programado_dias.html:90:          {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Merienda" platos=dia_plato.1.merienda comida="merienda" modo="mobile" %}
+AdminVideos/templates/AdminVideos/partials/_menu_programado_dias.html:97:          {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Cena" platos=dia_plato.1.cena comida="cena" modo="mobile" %}
+AdminVideos/templates/AdminVideos/partials/_menu_programado_comida.html:9:        {% include "AdminVideos/partials/_menu_programado_item.html" with comida=comida item_class="mb-1 ms-1 d-flex align-items-center text-primary justify-content-between" nombre_class="text-decoration-none me-2 w-75" span_class="me-2 w-75" iconos_class="d-flex" pin_link_class="ms-2" pin_icon_extra_class="" extras_class="ms-5" %}
+AdminVideos/templates/AdminVideos/partials/_menu_programado_comida.html:11:        {% include "AdminVideos/partials/_menu_programado_item.html" with comida=comida item_class="mb-1 ms-1 d-flex align-items-center text-primary" nombre_class="text-decoration-none me-2" span_class="me-2" iconos_class="d-flex" pin_link_class="" pin_icon_extra_class="ms-2" extras_class="ms-4" %}
+
+---- git diff pre-base.html ----
+diff --git a/AdminVideos/templates/AdminVideos/pre-base.html b/AdminVideos/templates/AdminVideos/pre-base.html
+index 7f0c997..ef6bbaa 100644
+--- a/AdminVideos/templates/AdminVideos/pre-base.html
++++ b/AdminVideos/templates/AdminVideos/pre-base.html
+@@ -15,20 +15,7 @@
+   
+ 
+ 
+-  <div class="border border-primary rounded p-2 position-relative m-2">
+-   
+-<span class="position-absolute top-0 start-50 translate-middle bg-info px-2 py-0
+-                d-inline-block text-center rounded-pill"
+-          style="transform: translate(-50%, -50%); max-width: 92%; line-height: 1.15;">
+-      <span class="menu-programado-text text-primary">
+-        Sugerencias de
+-        {% if tipopag == "Principal" %}
+-          Plato principal
+-        {% else %}
+-          {{ tipopag }}
+-        {% endif %}
+-      </span>
+-    </span>
++<div class="border border-primary rounded p-2 position-relative m-2">
+ 
+     <div class="shadow bg-dark p-1">
+       {% block filtro %}{% endblock %}
+
+---- git diff _menu_programado_dias.html ----
+
+---- django check ----
+System check identified no issues (0 silenced).
+
+==================================================
+Archivo generado: diagnostico_sugerencias.txt
+==================================================
