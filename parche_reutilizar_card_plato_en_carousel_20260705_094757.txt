@@ -1,0 +1,357 @@
+==================================================
+Parche: reutilizar partial de card en carousel y modal
+Fecha: Sun Jul  5 09:47:57 -03 2026
+Directorio: /Users/guillermogravino/quecomemos
+==================================================
+OK: renombrado AdminVideos/templates/AdminVideos/partials/_plato_card_detalle_modal.html -> AdminVideos/templates/AdminVideos/partials/_plato_card_detalle.html
+OK: include actualizado en AdminVideos/templates/AdminVideos/partials/_plato_row_gmail.html
+OK: carousel simplificado en AdminVideos/templates/AdminVideos/partials/_carousel_platos.html
+
+---- grep reutilización card ----
+AdminVideos/templates/AdminVideos/partials/_plato_row_gmail.html:31:  {% include "AdminVideos/partials/_plato_card_detalle.html" with plato_detalle=plato %}
+AdminVideos/templates/AdminVideos/partials/_carousel_platos.html:6:{% if carousel_items %}
+AdminVideos/templates/AdminVideos/partials/_carousel_platos.html:16:        {% for grupo in carousel_items %}
+AdminVideos/templates/AdminVideos/partials/_carousel_platos.html:29:        {% for grupo in carousel_items %}
+AdminVideos/templates/AdminVideos/partials/_carousel_platos.html:33:                {% include "AdminVideos/partials/_plato_card_detalle.html" with plato_detalle=grupo %}
+AdminVideos/templates/AdminVideos/partials/_carousel_platos.html:41:      {% if carousel_items|length > 1 %}
+
+---- tamaños de templates ----
+      66 AdminVideos/templates/AdminVideos/partials/_carousel_platos.html
+     175 AdminVideos/templates/AdminVideos/partials/_plato_card_detalle.html
+      32 AdminVideos/templates/AdminVideos/partials/_plato_row_gmail.html
+     273 total
+
+---- git diff stat ----
+ .../AdminVideos/partials/_carousel_platos.html     | 313 ++++-----------------
+ .../partials/_plato_card_detalle_modal.html        | 175 ------------
+ .../AdminVideos/partials/_plato_row_gmail.html     |   2 +-
+ 3 files changed, 53 insertions(+), 437 deletions(-)
+
+---- git diff relevante ----
+diff --git a/AdminVideos/templates/AdminVideos/partials/_carousel_platos.html b/AdminVideos/templates/AdminVideos/partials/_carousel_platos.html
+index a97d417..84fe3b5 100644
+--- a/AdminVideos/templates/AdminVideos/partials/_carousel_platos.html
++++ b/AdminVideos/templates/AdminVideos/partials/_carousel_platos.html
+@@ -1,275 +1,66 @@
+-
+ <!-- ===========================
+-     SECCIÓN: PLATOS EN CAROUSEL (PADRE + VARIEDADES ANIDADAS)
+-     - Sin scroll horizontal
+-     - Padre en card principal
+-     - Variedades en mini-grilla debajo
++     SECCIÓN: PLATOS EN CAROUSEL
++     Reutiliza la misma card que el modal del listado Gmail.
+ =========================== -->
+ 
+ {% if carousel_items %}
+- <section class="w-100 bg-warning rounded shadow-sm p-3 mb-3">
+-
+-  <div id="platosCarousel" class="carousel slide comidas-carousel" data-bs-ride="false" data-bs-interval="false">
++  <section class="w-100 bg-warning rounded shadow-sm p-3 mb-3">
++
++    <div id="platosCarousel"
++         class="carousel slide comidas-carousel"
++         data-bs-ride="false"
++         data-bs-interval="false">
++
++      <!-- Indicadores: uno por plato/grupo -->
++      <div class="carousel-indicators">
++        {% for grupo in carousel_items %}
++          <button type="button"
++                  data-bs-target="#platosCarousel"
++                  data-bs-slide-to="{{ forloop.counter0 }}"
++                  class="{% if forloop.first %}active{% endif %}"
++                  aria-current="{% if forloop.first %}true{% endif %}"
++                  aria-label="Grupo {{ forloop.counter }}">
++          </button>
++        {% endfor %}
++      </div>
++
++      <div class="carousel-inner">
++
++        {% for grupo in carousel_items %}
++          <div class="carousel-item {% if forloop.first %}active{% endif %}">
++            <div class="d-flex justify-content-center py-2">
++              <div class="w-100" style="max-width: 720px;">
++                {% include "AdminVideos/partials/_plato_card_detalle.html" with plato_detalle=grupo %}
++              </div>
++            </div>
++          </div>
++        {% endfor %}
+ 
+-    <!-- Indicadores (1 por grupo/padre) -->
+-    <div class="carousel-indicators">
+-      {% for grupo in carousel_items %}
++      </div>
+ 
+-        <button type="button"
++      {% if carousel_items|length > 1 %}
++        <button class="carousel-control-prev"
++                type="button"
+                 data-bs-target="#platosCarousel"
+-                data-bs-slide-to="{{ forloop.counter0 }}"
+-                class="{% if forloop.first %}active{% endif %}"
+-                aria-current="{% if forloop.first %}true{% endif %}"
+-                aria-label="Grupo {{ forloop.counter }}">
++                data-bs-slide="prev">
++          <span class="carousel-control-prev-icon"></span>
++          <span class="visually-hidden">Anterior</span>
+         </button>
+-      {% endfor %}
+-    </div>
+-
+-    <div class="carousel-inner">
+-
+-      {% for grupo in carousel_items %}
+-
+-        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+-          <div class="d-flex justify-content-center py-2">
+-
+-            <div class="w-100" style="max-width: 720px;">
+-
+-              {# ===== CARD PRINCIPAL (PADRE o plato único) ===== #}
+-              <div class="card position-relative">
+-
+-                <a href="#"
+-                   data-bs-toggle="modal"
+-                   data-bs-target="#asignarPlatoModal"
+-                   onclick="setPlatoInfo('{{ grupo.id }}', 'plato', '{{ grupo.nombre_plato }}')"
+-                   class="text-decoration-none plato-carousel-thumb">
+-
+-                  <img src="{{ grupo.image_url }}"
+-                       class="
+-                       {% if user.id == grupo.propietario.id and not grupo.proviene_de %}
+-                         sombra-verde
+-                       {% elif user.id == grupo.propietario.id and grupo.proviene_de %}
+-                         sombra-naranja
+-                       {% else %}
+-                         sombra-violeta
+-                       {% endif %}"
+-                       alt="Imagen del Plato">
+-
+-                  <!-- + central -->
+-                  <!-- <div class="plato-carousel-plus text-success">
+-                    <i class="fa-solid fa-plus-circle"></i>
+-                  </div> -->
+-
+-                   <!-- + central -->
+-                  <div class="plato-plus">
+-                    <span>Programar</span>
+-                  </div>
+-                </a>
+-
+-                {# Badge uso #}
+-                {% if grupo.ultima_programacion %}
+-                  <span class="badge bg-secondary position-absolute top-0 start-0 m-2">
+-                    Hace {{ grupo.dias_desde_ultima }} día{% if grupo.dias_desde_ultima != 1 %}s{% endif %}
+-                  </span>
+-                {% else %}
+-                  <span class="badge bg-success position-absolute top-0 start-0 m-2">
+-                    Nunca usado
+-                  </span>
+-                {% endif %}
+-
+-                {# Badge folder si tiene variedades #}
+-                {% if grupo.variedades_count > 0 %}
+-                  <span class="badge bg-dark position-absolute top-0 end-0 m-2">
+-                    📁 {{ grupo.variedades_count|add:"1" }}
+-                  </span>
+-                {% endif %}
+-
+-                <div class="card-body">
+-
+-                  <h5 class="card-title text-center mb-2">
+-                    {% if grupo.variedades_count > 0 %}
+-                      {{ grupo.nombre_para_front }}
+-                    {% else %}
+-                      {{ grupo.nombre_plato }}
+-                    {% endif %}
+-                  </h5>
+-
+-                  <!-- Acciones -->
+-                  <div class="d-flex flex-wrap justify-content-center gap-2">
+-
+-                    {% if grupo.id %}
+-                      <a href="#"
+-                         class="btn btn-sm btn-outline-primary js-plato-ingredientes"
+-                         data-url="{% url 'plato_ingredientes' grupo.id %}">
+-                        <i class="fa-solid fa-list-check me-1"></i> Ingredientes
+-                      </a>
+-                    {% else %}
+-                      <span class="btn btn-sm btn-outline-secondary disabled">
+-                        <i class="fa-solid fa-list-check me-1"></i> Ingredientes
+-                      </span>
+-                    {% endif %}
+-                   
+-
+-                    {% if amigues %}
+-                    <a href="#"
+-                       class="btn btn-sm btn-outline-primary"
+-                       data-bs-toggle="modal"
+-                       data-bs-target="#compartirModal"
+-                       onclick="setPlatoInfo('{{ grupo.id }}', 'plato')">
+-                      <i class="fa-solid fa-share-nodes me-1"></i> Compartir
+-                    </a>
+-                    {% endif %}
+-
+-                    {% if grupo.propietario == request.user %}
+-                      <a href="{% url 'videos-update' grupo.id %}?return_to={{ return_to_url|urlencode }}"
+-                        class="btn btn-sm btn-outline-dark">
+-                        <i class="fa-regular fa-pen-to-square me-1"></i> Editar
+-                      </a>
+-
+-                      <a href="#"
+-                        class="btn btn-sm btn-outline-danger"
+-                        data-bs-toggle="modal"
+-                        data-bs-target="#confirmActionModal"
+-                        data-confirm-title="Eliminar plato"
+-                        data-confirm-body="¿Seguro que querés borrar {{ grupo.nombre_plato|escape }}?"
+-                        data-confirm-hint="También se borrarán las programaciones de este plato y sus variedades. Esta acción no se puede deshacer."
+-                        data-confirm-action="{% url 'eliminar-plato' grupo.id %}?return_to={{ return_to_url|urlencode }}"
+-                        data-confirm-btn="Sí, borrar">
+-                        <i class="fa-solid fa-trash-can me-1"></i> Eliminar
+-                      </a>
+-
+-                    {% else %}
+-                      <a href="#"
+-                        class="btn btn-sm btn-outline-dark js-ver-detalle-plato"
+-                        data-detail-url="{% url 'platos-detail' grupo.id %}"
+-                        title="Ver detalle">
+-                        <i class="fa-regular fa-eye me-1"></i> Ver
+-                      </a>
+-                    {% endif %}
+ 
+-
+-              
+-                  </div>
+-
+-                  {# ===== VARIEDADES ANIDADAS (MINI GRILLA) ===== #}
+-                  {% if grupo.variedades_hijas.all %}
+-                    {% if grupo.variedades_count > 0 %}
+-                      <hr class="my-3">
+-
+-                      <div class="small text-muted text-center mb-2">
+-                        Variedades
+-                      </div>
+-
+-                      <div class="row g-2">
+-                        {% for v in grupo.variedades_hijas.all %}
+-                          <div class="col-6 col-md-4">
+-                            <div class="card h-100 border">
+-
+-                              <a href="#"
+-                                 data-bs-toggle="modal"
+-                                 data-bs-target="#asignarPlatoModal"
+-                                 onclick="setPlatoInfo('{{ v.id }}', 'plato', '{{ v.nombre_plato }}')"
+-                                 class="text-decoration-none plato-mini-thumb">
+-
+-                                <img src="{{ v.image_url }}"
+-                                     class="w-100"
+-                                     alt="Imagen variedad">
+-                                <div class="plato-mini-plus text-success">
+-                                  <i class="fa-solid fa-plus-circle"></i>
+-                                </div>
+-                              </a>
+-
+-                              <div class="p-2">
+-                                <div class="text-center fw-semibold" style="font-size:.85rem; line-height:1.1;">
+-                                  {{ v.nombre_plato }}
+-                                </div>
+-
+-                                <div class="d-flex justify-content-center gap-1 flex-wrap mt-2">
+-                                  <a href="#"
+-                                     class="btn btn-sm btn-outline-primary py-0 px-2 js-plato-ingredientes"
+-                                     data-url="{% url 'plato_ingredientes' v.id %}"
+-                                     title="Ingredientes">
+-                                    <i class="fa-solid fa-list-check"></i>
+-                                  </a>
+-
+-                                  {% if grupo.propietario == request.user %}
+-
+-                                    <a href="{% url 'videos-update' v.id %}?return_to={{ return_to_url|urlencode }}
+-"
+-                                      class="btn btn-sm btn-outline-dark py-0 px-2"
+-                                      title="Editar">
+-                                      <i class="fa-regular fa-pen-to-square"></i>
+-                                    </a>
+-
+-                                    <a href="#"
+-                                      class="btn btn-sm btn-outline-danger py-0 px-2"
+-                                      data-bs-toggle="modal"
+-                                      data-bs-target="#confirmActionModal"
+-                                      data-confirm-title="Eliminar plato"
+-                                      data-confirm-body="¿Seguro que querés borrar {{ v.nombre_plato|escape }}?"
+-                                      data-confirm-hint="También se borrarán las programaciones de este plato y sus variedades. Esta acción no se puede deshacer."
+-                                      data-confirm-action="{% url 'eliminar-plato' v.id %}"
+-                                      data-confirm-btn="Sí, borrar"
+-                                      title="Eliminar">
+-                                      <i class="fa-solid fa-trash-can"></i>
+-                                    </a>
+-
+-                                  {% else %}
+-                                  <!-- Botón Ver: abre modal -->
+-                                  <a href="#"
+-                                    class="btn btn-sm btn-outline-dark js-ver-detalle-plato"
+-                                    data-detail-url="{% url 'platos-detail' grupo.id %}"
+-                                    title="Ver detalle">
+-                                    <i class="fa-regular fa-eye me-1"></i> Ver
+-                                  </a>
+-                                {% endif %}
+-
+-                                </div>
+-
+-                                {% if v.ultima_programacion %}
+-                                  <div class="text-center text-muted mt-2" style="font-size:.75rem;">
+-                                    Hace {{ v.dias_desde_ultima }} día{% if v.dias_desde_ultima != 1 %}s{% endif %}
+-                                  </div>
+-                                {% else %}
+-                                  <div class="text-center text-success mt-2" style="font-size:.75rem;">
+-                                    Nunca usado
+-                                  </div>
+-                                {% endif %}
+-                              </div>
+-                            </div>
+-                          </div>
+-                        {% endfor %}
+-                      </div>
+-                    {% endif %}
+-                  {% endif %}
+-
+-                </div>
+-              </div>
+-
+-            </div>
+-          </div>
+-        </div>
+-      {% endfor %}
++        <button class="carousel-control-next"
++                type="button"
++                data-bs-target="#platosCarousel"
++                data-bs-slide="next">
++          <span class="carousel-control-next-icon"></span>
++          <span class="visually-hidden">Siguiente</span>
++        </button>
++      {% endif %}
+ 
+     </div>
++  </section>
+ 
+-    <!-- Controles -->
+-    <button class="carousel-control-prev" type="button"
+-            data-bs-target="#platosCarousel" data-bs-slide="prev">
+-      <span class="carousel-control-prev-icon"></span>
+-      <span class="visually-hidden">Anterior</span>
+-    </button>
+-
+-    <button class="carousel-control-next" type="button"
+-            data-bs-target="#platosCarousel" data-bs-slide="next">
+-      <span class="carousel-control-next-icon"></span>
+-      <span class="visually-hidden">Siguiente</span>
+-    </button>
+
+---- django check ----
+System check identified no issues (0 silenced).
+
+==================================================
+Archivo generado: parche_reutilizar_card_plato_en_carousel_20260705_094757.txt
+==================================================
