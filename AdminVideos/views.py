@@ -2206,24 +2206,31 @@ def filtrar_platos(
         ).distinct()
 
     # Orden de prioridad de los platos:
-    # 1) Menos días programados primero (0 = nunca usado → arriba del todo)
-    # 2) A igualdad de días, los que hace más tiempo que no aparecen
-    #    (NULL = nunca programado → primero; fechas viejas → antes que recientes)
-    # 3) Como desempate final, los más nuevos (-id)
+    # 1) Nunca programados históricamente primero.
+    # 2) Después, los que hace más tiempo que no se programan históricamente.
+    # 3) Al final, los más recientemente programados históricamente.
+    # 4) Los menús futuros no cuentan como histórico hasta que llegue/pase su fecha.
+    # 5) Como desempate final, los más nuevos (-id).
+
+    hoy = timezone.localdate()
+    filtro_programaciones_historicas = (
+        Q(en_menus__menu__propietario=usuario)
+        & Q(en_menus__plato__isnull=False)
+        & Q(en_menus__menu__fecha__lte=hoy)
+    )
 
     # queryset ANOTADO para variedades (hijas) del usuario "usuario"
     variedades_qs = Plato.objects.annotate(
         programaciones_count=Count(
             "en_menus__menu__fecha",
-            filter=Q(en_menus__menu__propietario=usuario) & Q(en_menus__plato__isnull=False),
+            filter=filtro_programaciones_historicas,
             distinct=True,
         ),
         ultima_programacion=Max(
             "en_menus__menu__fecha",
-            filter=Q(en_menus__menu__propietario=usuario) & Q(en_menus__plato__isnull=False),
+            filter=filtro_programaciones_historicas,
         ),
     ).order_by(
-        "programaciones_count",
         OrderBy(F("ultima_programacion"), descending=False, nulls_first=True),
         "-id",
     )
@@ -2231,16 +2238,15 @@ def filtrar_platos(
     platos_qs = platos_qs.annotate(
         programaciones_count=Count(
             "en_menus__menu__fecha",
-            filter=Q(en_menus__menu__propietario=usuario) & Q(en_menus__plato__isnull=False),
+            filter=filtro_programaciones_historicas,
             distinct=True,
         ),
         ultima_programacion=Max(
             "en_menus__menu__fecha",
-            filter=Q(en_menus__menu__propietario=usuario) & Q(en_menus__plato__isnull=False),
+            filter=filtro_programaciones_historicas,
         ),
         variedades_count=Count("variedades_hijas", distinct=True),
     ).order_by(
-        "programaciones_count",
         OrderBy(F("ultima_programacion"), descending=False, nulls_first=True),
         "-id",
     ).prefetch_related(
@@ -3094,6 +3100,7 @@ def obtener_habitos_lookup(habitos):
         (h.dia_semana, h.momento, h.plato_id): h.id
         for h in habitos
     }
+
 
 def obtener_contexto_compartidos(usuario):
     """
