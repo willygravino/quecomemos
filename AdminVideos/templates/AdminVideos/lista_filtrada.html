@@ -127,6 +127,45 @@
   #filtroPlatosModal .filtros-platos-card {
     box-shadow: none !important;
   }
+  .filtro-mobile-keyword-box {
+    position: relative;
+  }
+
+  .filtro-mobile-keyword-box .form-control {
+    padding-right: 2rem;
+  }
+
+  .filtro-mobile-keyword-clear {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: #6c757d;
+    width: 1.75rem;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .filtro-mobile-keyword-clear:hover,
+  .filtro-mobile-keyword-clear:focus {
+    background: transparent;
+    color: var(--bs-danger, #dc3545);
+    outline: none;
+    box-shadow: none;
+  }
+
+  .filtro-mobile-keyword-box.filtro-keyword-activo .filtro-mobile-keyword-clear {
+    color: var(--bs-danger, #dc3545);
+    background: transparent;
+  }
 
 </style>
 
@@ -145,6 +184,14 @@
         id="palabraClaveMobile"
         value="{{ formulario.palabra_clave.value|default:'' }}"
         placeholder="Buscar">
+
+      <button
+        type="button"
+        class="filtro-mobile-keyword-clear {% if not formulario.palabra_clave.value %}d-none{% endif %}"
+        id="limpiarPalabraClaveMobile"
+        aria-label="Borrar palabra clave">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
     </div>
 
     <button
@@ -504,12 +551,19 @@
       mobile.value = real.value || "";
     }
 
-    mobile.classList.toggle("text-danger", !!mobile.value.trim());
-    mobile.classList.toggle("fw-semibold", !!mobile.value.trim());
+    const activo = !!mobile.value.trim();
+
+    mobile.classList.toggle("text-danger", activo);
+    mobile.classList.toggle("fw-semibold", activo);
 
     const box = mobile.closest(".filtro-mobile-keyword-box");
     if (box) {
-      box.classList.toggle("filtro-keyword-activo", !!mobile.value.trim());
+      box.classList.toggle("filtro-keyword-activo", activo);
+    }
+
+    const clearBtn = document.getElementById("limpiarPalabraClaveMobile");
+    if (clearBtn) {
+      clearBtn.classList.toggle("d-none", !activo);
     }
   }
 
@@ -599,6 +653,25 @@
   });
 
   document.addEventListener("click", function (event) {
+    const clearKeywordBtn = event.target.closest("#limpiarPalabraClaveMobile");
+    if (!clearKeywordBtn) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const mobile = document.getElementById("palabraClaveMobile");
+    if (!mobile) return;
+
+    mobile.value = "";
+    syncKeywordRealDesdeMobile();
+
+    const form = getForm();
+    if (form) {
+      form.requestSubmit ? form.requestSubmit() : form.submit();
+    }
+  });
+
+  document.addEventListener("click", function (event) {
     const removeBtn = event.target.closest("[data-filtro-chip-remove]");
     if (!removeBtn) return;
 
@@ -623,7 +696,7 @@
 })();
 </script>
 
-<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=19"></script>
+<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=22"></script>
 <script src="{% static 'AdminVideos/js/lo_que_tengo.js' %}?v=3"></script>
 
 {% endblock %}
