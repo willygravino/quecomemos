@@ -103,9 +103,9 @@
   }
 
   .filtro-platos-mobile-summary .filtro-chip-success {
-    background: #198754 !important;
+    background: #4e73df !important;
     color: #fff !important;
-    border-color: #198754 !important;
+    border-color: #4e73df !important;
   }
 
   .filtro-platos-mobile-summary:empty {
@@ -165,6 +165,175 @@
   .filtro-mobile-keyword-box.filtro-keyword-activo .filtro-mobile-keyword-clear {
     color: var(--bs-danger, #dc3545);
     background: transparent;
+  }
+  .loquetengo-control-integrado {
+    display: inline-flex;
+    align-items: stretch;
+    max-width: 100%;
+    border: 1px solid rgba(78, 115, 223, .38);
+    border-radius: 999px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+  }
+
+  .loquetengo-control-main,
+  .loquetengo-control-filter {
+    appearance: none;
+    border: 0;
+    background: #fff;
+    color: #4e73df;
+    line-height: 1.15;
+  }
+
+  .loquetengo-control-main {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    padding: .32rem .68rem;
+    font-size: .875rem;
+    font-weight: 650;
+    cursor: pointer;
+  }
+
+  .loquetengo-control-main:hover,
+  .loquetengo-control-main:focus {
+    background: rgba(78, 115, 223, .08);
+    color: #4e73df;
+    outline: none;
+  }
+
+  .loquetengo-control-filter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.15rem;
+    min-width: 2.15rem;
+    margin: 0;
+    border-left: 1px solid rgba(78, 115, 223, .22);
+    cursor: pointer;
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+  }
+
+  .loquetengo-control-filter:hover {
+    background: rgba(78, 115, 223, .08);
+    color: #4e73df;
+  }
+
+  .loquetengo-control-integrado:has(#usarLoQueTengo:checked) {
+    border-color: rgba(220, 53, 69, .22);
+    background: rgba(220, 53, 69, .06);
+  }
+
+  .loquetengo-control-integrado:has(#usarLoQueTengo:checked) .loquetengo-control-main {
+    background: rgba(220, 53, 69, .06);
+    color: #b02a37;
+  }
+
+  #usarLoQueTengo:checked + .loquetengo-control-filter {
+    border-left-color: #dc3545;
+    background: #dc3545;
+    color: #fff;
+  }
+
+  #usarLoQueTengo:focus-visible + .loquetengo-control-filter {
+    outline: 0;
+    box-shadow: inset 0 0 0 .18rem rgba(220, 53, 69, .20);
+  }
+
+  #usarLoQueTengo:checked + .loquetengo-control-filter .loquetengo-filter-icon {
+    display: none;
+  }
+
+  #usarLoQueTengo:not(:checked) + .loquetengo-control-filter .loquetengo-check-icon {
+    display: none;
+  }
+
+
+  .filtro-toggle-integrado {
+    display: inline-flex;
+    align-items: stretch;
+    max-width: 100%;
+    border: 1px solid rgba(78, 115, 223, .38);
+    border-radius: 999px;
+    overflow: hidden;
+    background: #fff;
+    color: #4e73df;
+    line-height: 1.15;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+    padding: 0;
+  }
+
+  .filtro-toggle-integrado:hover,
+  .filtro-toggle-integrado:focus {
+    color: #4e73df;
+    background: #fff;
+    outline: none;
+  }
+
+  .filtro-toggle-integrado-text {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .35rem;
+    padding: .32rem .68rem;
+    font-size: .875rem;
+    font-weight: 650;
+    background: #fff;
+    color: #4e73df;
+  }
+
+  .filtro-toggle-integrado-state {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.15rem;
+    min-width: 2.15rem;
+    border-left: 1px solid rgba(78, 115, 223, .22);
+    background: #fff;
+    color: #4e73df;
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+  }
+
+  .filtro-toggle-integrado:hover .filtro-toggle-integrado-text,
+  .filtro-toggle-integrado:hover .filtro-toggle-integrado-state {
+    background: rgba(78, 115, 223, .08);
+  }
+
+  #quecomemos:checked + .filtro-toggle-integrado,
+  #misplatos:checked + .filtro-toggle-integrado {
+    border-color: rgba(220, 53, 69, .22);
+    background: rgba(220, 53, 69, .06);
+  }
+
+  #quecomemos:checked + .filtro-toggle-integrado .filtro-toggle-integrado-text,
+  #misplatos:checked + .filtro-toggle-integrado .filtro-toggle-integrado-text {
+    background: rgba(220, 53, 69, .06);
+    color: #b02a37;
+  }
+
+  #quecomemos:checked + .filtro-toggle-integrado .filtro-toggle-integrado-state,
+  #misplatos:checked + .filtro-toggle-integrado .filtro-toggle-integrado-state {
+    border-left-color: #dc3545;
+    background: #dc3545;
+    color: #fff;
+  }
+
+  #quecomemos:focus-visible + .filtro-toggle-integrado,
+  #misplatos:focus-visible + .filtro-toggle-integrado {
+    box-shadow: none;
+  }
+
+  #quecomemos:checked + .filtro-toggle-integrado .filtro-toggle-filter-icon,
+  #misplatos:checked + .filtro-toggle-integrado .filtro-toggle-filter-icon {
+    display: none;
+  }
+
+  #quecomemos:not(:checked) + .filtro-toggle-integrado .filtro-toggle-check-icon,
+  #misplatos:not(:checked) + .filtro-toggle-integrado .filtro-toggle-check-icon {
+    display: none;
   }
 
 </style>
@@ -246,9 +415,15 @@
           autocomplete="off"
           {% if quecomemos_ck == "quecomemos" %}checked{% endif %}
         >
-        <label class="btn btn-sm btn-filtro-plato mb-0" for="quecomemos">
-          <i class="fa-solid fa-wand-magic-sparkles me-1"></i>
-          Sugerencia quecomemos
+                <label class="filtro-toggle-integrado mb-0" for="quecomemos">
+          <span class="filtro-toggle-integrado-text">
+            <i class="fa-solid fa-lightbulb"></i>
+            Sugerencias Quecomemos
+          </span>
+          <span class="filtro-toggle-integrado-state" aria-hidden="true">
+            <i class="fa-solid fa-filter filtro-toggle-filter-icon"></i>
+            <i class="fa-solid fa-check filtro-toggle-check-icon"></i>
+          </span>
         </label>
 
         <input
@@ -260,23 +435,31 @@
           autocomplete="off"
           {% if misplatos_ck == "misplatos" %}checked{% endif %}
         >
-        <label class="btn btn-sm btn-filtro-plato mb-0" for="misplatos">
-          <i class="fa-solid fa-user me-1"></i>
-          Mis platos
+                <label class="filtro-toggle-integrado mb-0" for="misplatos">
+          <span class="filtro-toggle-integrado-text">
+            <i class="fa-solid fa-utensils"></i>
+            Mis platos
+          </span>
+          <span class="filtro-toggle-integrado-state" aria-hidden="true">
+            <i class="fa-solid fa-filter filtro-toggle-filter-icon"></i>
+            <i class="fa-solid fa-check filtro-toggle-check-icon"></i>
+          </span>
         </label>
 
         <div class="input-group input-group-sm w-auto">
 
-          <button
-            type="button"
-            class="btn btn-primary fw-semibold"
-            data-bs-toggle="modal"
-            data-bs-target="#loQueTengoModal">
-            <i class="fa-solid fa-basket-shopping me-1"></i>
-            Lo que tengo <span id="loQueTengoContador"></span>
-          </button>
+                    <div class="loquetengo-control-integrado">
+            <button
+              type="button"
+              class="loquetengo-control-main"
+              data-bs-toggle="modal"
+              data-bs-target="#loQueTengoModal"
+              aria-label="Abrir Lo que tengo">
+              <i class="fa-solid fa-basket-shopping"></i>
+              Lo que tengo <span id="loQueTengoContador"></span>
+            </button>
 
-          <input
+            <input
             class="btn-check"
             type="checkbox"
             name="usar_lo_que_tengo"
@@ -285,9 +468,16 @@
             autocomplete="off"
             {% if usar_lo_que_tengo_ck == "1" %}checked{% endif %}
           >
-          <label class="btn btn-filtro-plato mb-0" for="usarLoQueTengo">
-            Usar para filtrar
-          </label>
+
+            <label
+              class="loquetengo-control-filter"
+              for="usarLoQueTengo"
+              title="Usar Lo que tengo para filtrar"
+              aria-label="Usar Lo que tengo para filtrar">
+              <i class="fa-solid fa-filter loquetengo-filter-icon"></i>
+              <i class="fa-solid fa-check loquetengo-check-icon"></i>
+            </label>
+          </div>
         </div>
 
       </div>
