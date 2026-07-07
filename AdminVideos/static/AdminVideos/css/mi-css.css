@@ -559,7 +559,6 @@ section > .d-flex {
 .sidebar {
   position: relative;
   z-index: 1065;
-  overflow: visible;
 }
 
 #accordionSidebar .nav-item.dropdown,
@@ -627,5 +626,42 @@ section > .d-flex {
   #accordionSidebar .sidebar-dropdown-menu .dropdown-item,
   .sidebar .sidebar-dropdown-menu .dropdown-item {
     white-space: normal;
+  }
+}
+
+/* =====================================================
+   Sidebar mobile: evitar items flotantes sobre contenido
+   Cuando el sidebar se cierra en responsive, sus hijos no
+   deben escapar ni quedar sobre el texto principal.
+===================================================== */
+@media (max-width: 767.98px) {
+  #accordionSidebar,
+  .sidebar {
+    background-color: #4e73df;
+    background-image: linear-gradient(180deg, #4e73df 10%, #224abe 100%);
+  }
+
+  #accordionSidebar.toggled,
+  .sidebar.toggled {
+    overflow: hidden !important;
+  }
+
+  #accordionSidebar.toggled .nav-item,
+  #accordionSidebar.toggled .nav-link,
+  #accordionSidebar.toggled .collapse,
+  #accordionSidebar.toggled .dropdown-menu,
+  .sidebar.toggled .nav-item,
+  .sidebar.toggled .nav-link,
+  .sidebar.toggled .collapse,
+  .sidebar.toggled .dropdown-menu {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  #accordionSidebar:not(.toggled) .nav-item,
+  #accordionSidebar:not(.toggled) .nav-link,
+  .sidebar:not(.toggled) .nav-item,
+  .sidebar:not(.toggled) .nav-link {
+    visibility: visible;
   }
 }
