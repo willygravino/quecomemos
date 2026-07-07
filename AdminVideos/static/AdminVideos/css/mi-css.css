@@ -712,6 +712,26 @@ body.filtro-platos-cambiando .sugerencias-platos-titulo-bar {
   filter: brightness(1.08);
 }
 
+body.filtro-platos-cambiando #contenedor-carousel-platos,
+body.filtro-platos-cambiando #contenedor-listado-platos,
+body.filtro-platos-cambiando #contenedor-lugares,
+body.filtro-platos-cambiando #contenedor-delivery,
+body.filtro-platos-cambiando #contenedor-comer-afuera,
+body.filtro-platos-cambiando [data-listado-url] {
+  opacity: .46;
+  filter: saturate(.86) brightness(.96);
+  transition: opacity .16s ease, filter .16s ease;
+}
+
+#contenedor-carousel-platos,
+#contenedor-listado-platos,
+#contenedor-lugares,
+#contenedor-delivery,
+#contenedor-comer-afuera,
+[data-listado-url] {
+  transition: opacity .18s ease, filter .18s ease;
+}
+
 @keyframes filtroPlatosBarrido {
   0% {
     transform: translateX(-120%);
@@ -726,5 +746,14 @@ body.filtro-platos-cambiando .sugerencias-platos-titulo-bar {
   .filtro-platos-barrido-overlay::before {
     animation: none;
     transform: none;
+  }
+
+  body.filtro-platos-cambiando #contenedor-carousel-platos,
+  body.filtro-platos-cambiando #contenedor-listado-platos,
+  body.filtro-platos-cambiando #contenedor-lugares,
+  body.filtro-platos-cambiando #contenedor-delivery,
+  body.filtro-platos-cambiando #contenedor-comer-afuera,
+  body.filtro-platos-cambiando [data-listado-url] {
+    opacity: .70;
   }
 }

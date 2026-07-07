@@ -210,10 +210,16 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
 
+
   // ============================================================
   // 3.a.1 Barrido visual mientras cambia el filtro por AJAX
   // ============================================================
   let filtroBarridoHideTimer = null;
+  let filtroBarridoInicio = 0;
+
+  const FILTRO_BARRIDO_MIN_MS = 320;
+  const FILTRO_BARRIDO_MAX_MS = 5000;
+  const FILTRO_BARRIDO_DOM_QUIETO_MS = 180;
 
   function obtenerNodosBarridoCambioFiltro() {
     const selectores = [
@@ -245,6 +251,29 @@ document.addEventListener("DOMContentLoaded", function () {
       const rect = nodo.getBoundingClientRect();
       return rect.width > 0 && rect.height > 0;
     });
+  }
+
+  function obtenerNodosRenderCambioFiltro() {
+    const selectores = [
+      "#contenedor-carousel-platos",
+      "#contenedor-listado-platos",
+      "#contenedor-lugares",
+      "#contenedor-delivery",
+      "#contenedor-comer-afuera",
+      "[data-listado-url]",
+    ];
+
+    const nodos = [];
+
+    selectores.forEach((selector) => {
+      document.querySelectorAll(selector).forEach((nodo) => {
+        if (!nodos.includes(nodo)) {
+          nodos.push(nodo);
+        }
+      });
+    });
+
+    return nodos.filter((nodo) => nodo.isConnected);
   }
 
   function calcularRectBarridoCambioFiltro() {
@@ -306,6 +335,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function activarBarridoCambioFiltro() {
     window.clearTimeout(filtroBarridoHideTimer);
 
+    filtroBarridoInicio = Date.now();
     document.body.classList.add("filtro-platos-cambiando");
 
     const overlay = posicionarBarridoCambioFiltro();
@@ -317,26 +347,80 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  function desactivarBarridoCambioFiltro() {
-    const overlay = document.getElementById("filtroPlatosBarridoOverlay");
+  function esperarRenderCambioFiltro() {
+    const nodos = obtenerNodosRenderCambioFiltro();
 
-    document.body.classList.remove("filtro-platos-cambiando");
-
-    if (!overlay) {
-      return;
+    if (!nodos.length || typeof MutationObserver === "undefined") {
+      return new Promise((resolve) => {
+        window.setTimeout(resolve, 650);
+      });
     }
 
-    overlay.classList.add("is-hiding");
-    overlay.classList.remove("is-active");
+    return new Promise((resolve) => {
+      let finalizado = false;
+      let quietTimer = null;
 
-    filtroBarridoHideTimer = window.setTimeout(() => {
-      overlay.remove();
-    }, 180);
+      const finalizar = () => {
+        if (finalizado) {
+          return;
+        }
+
+        finalizado = true;
+        window.clearTimeout(quietTimer);
+        window.clearTimeout(maxTimer);
+        observer.disconnect();
+        resolve();
+      };
+
+      const observer = new MutationObserver(() => {
+        window.clearTimeout(quietTimer);
+        posicionarBarridoCambioFiltro();
+
+        quietTimer = window.setTimeout(() => {
+          finalizar();
+        }, FILTRO_BARRIDO_DOM_QUIETO_MS);
+      });
+
+      const maxTimer = window.setTimeout(() => {
+        finalizar();
+      }, FILTRO_BARRIDO_MAX_MS);
+
+      nodos.forEach((nodo) => {
+        observer.observe(nodo, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          characterData: true,
+        });
+      });
+    });
+  }
+
+  function desactivarBarridoCambioFiltro() {
+    const overlay = document.getElementById("filtroPlatosBarridoOverlay");
+    const elapsed = Date.now() - filtroBarridoInicio;
+    const delay = Math.max(0, FILTRO_BARRIDO_MIN_MS - elapsed);
+
+    window.setTimeout(() => {
+      document.body.classList.remove("filtro-platos-cambiando");
+
+      if (!overlay) {
+        return;
+      }
+
+      overlay.classList.add("is-hiding");
+      overlay.classList.remove("is-active");
+
+      filtroBarridoHideTimer = window.setTimeout(() => {
+        overlay.remove();
+      }, 180);
+    }, delay);
   }
 
   function actualizarListadoPlatosConBarrido() {
     activarBarridoCambioFiltro();
 
+    const esperaRender = esperarRenderCambioFiltro();
     let resultado = null;
 
     try {
@@ -346,18 +430,17 @@ document.addEventListener("DOMContentLoaded", function () {
       throw error;
     }
 
-    if (resultado && typeof resultado.finally === "function") {
-      resultado.finally(() => {
-        desactivarBarridoCambioFiltro();
-      });
-    } else {
-      window.setTimeout(() => {
-        desactivarBarridoCambioFiltro();
-      }, 650);
-    }
+    const esperaAjax = resultado && typeof resultado.finally === "function"
+      ? resultado
+      : Promise.resolve();
+
+    Promise.allSettled([esperaAjax, esperaRender]).then(() => {
+      desactivarBarridoCambioFiltro();
+    });
 
     return resultado;
   }
+
 
   // 3.b Actualizar botón flotante de crear según tipopag actual
   // ============================================================
