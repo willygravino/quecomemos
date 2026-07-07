@@ -550,3 +550,82 @@ section > .d-flex {
   font-size: .82rem;
   line-height: 1;
 }
+
+/* =====================================================
+   Sidebar: dropdowns por encima del contenido
+   Mantiene visibles Dips/Salsas y Picadas submodos.
+===================================================== */
+#accordionSidebar,
+.sidebar {
+  position: relative;
+  z-index: 1065;
+  overflow: visible;
+}
+
+#accordionSidebar .nav-item.dropdown,
+.sidebar .nav-item.dropdown {
+  position: relative;
+  z-index: 1070;
+  overflow: visible;
+}
+
+#accordionSidebar .sidebar-dropdown-menu,
+.sidebar .sidebar-dropdown-menu,
+#accordionSidebar .dropdown-menu,
+.sidebar .dropdown-menu {
+  z-index: 1080;
+}
+
+/* =====================================================
+   Sidebar: dropdowns legibles y con ancho suficiente
+   Evita que Dips/Salsas y Picadas se corten o queden
+   con texto blanco fuera del contenedor.
+===================================================== */
+#accordionSidebar .sidebar-dropdown-menu,
+.sidebar .sidebar-dropdown-menu {
+  min-width: 15rem;
+  width: max-content;
+  max-width: min(22rem, calc(100vw - 1.5rem));
+  padding: .45rem;
+  background-color: #343a40;
+  border: 1px solid rgba(255, 255, 255, .20);
+  border-radius: .5rem;
+  box-shadow: 0 .75rem 1.5rem rgba(0, 0, 0, .35);
+  overflow: visible;
+}
+
+#accordionSidebar .sidebar-dropdown-menu .dropdown-item,
+.sidebar .sidebar-dropdown-menu .dropdown-item {
+  color: #f8f9fa;
+  white-space: nowrap;
+  border-radius: .35rem;
+  padding: .55rem .8rem;
+  line-height: 1.2;
+}
+
+#accordionSidebar .sidebar-dropdown-menu .dropdown-item:hover,
+#accordionSidebar .sidebar-dropdown-menu .dropdown-item:focus,
+.sidebar .sidebar-dropdown-menu .dropdown-item:hover,
+.sidebar .sidebar-dropdown-menu .dropdown-item:focus {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, .14);
+}
+
+#accordionSidebar .sidebar-dropdown-menu .dropdown-item.active,
+.sidebar .sidebar-dropdown-menu .dropdown-item.active {
+  color: #ffffff;
+  background-color: #0d6efd;
+}
+
+@media (max-width: 575.98px) {
+  #accordionSidebar .sidebar-dropdown-menu,
+  .sidebar .sidebar-dropdown-menu {
+    min-width: 13.5rem;
+    max-width: calc(100vw - 1rem);
+  }
+
+  #accordionSidebar .sidebar-dropdown-menu .dropdown-item,
+  .sidebar .sidebar-dropdown-menu .dropdown-item {
+    white-space: normal;
+  }
+}
