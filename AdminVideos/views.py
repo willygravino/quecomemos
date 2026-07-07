@@ -84,6 +84,34 @@ def eliminar_platos_masivo(request):
     return redirect("filtro-de-platos")
 
     
+
+@login_required
+def eliminar_lugares_masivo(request):
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+
+    ids = request.POST.getlist("lugares_selected") or request.POST.getlist("platos_selected")
+
+    lugares = Lugar.objects.filter(
+        id__in=ids,
+        propietario=request.user,
+    )
+
+    for lugar in lugares:
+        MenuItem.objects.filter(
+            lugar=lugar,
+            menu__propietario=request.user,
+        ).delete()
+        lugar.delete()
+
+    tipopag = request.GET.get("tipopag") or request.POST.get("tipopag")
+    url = reverse("filtro-de-platos")
+    if tipopag:
+        url += f"?tipopag={tipopag}"
+
+    return redirect(url)
+
+
 @login_required
 def fijar_o_eliminar_habito(request, es_lugar, objeto_id, comida):
     usuario = request.user

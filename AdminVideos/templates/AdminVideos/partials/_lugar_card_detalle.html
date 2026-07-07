@@ -1,0 +1,95 @@
+<div class="plato-detalle-card lugar-detalle-card">
+  <div class="card position-relative">
+
+    <a href="#"
+       data-bs-toggle="modal"
+       data-bs-target="#asignarPlatoModal"
+       onclick="setPlatoInfo('{{ lugar_detalle.id }}', 'lugar', '{{ lugar_detalle.nombre|escapejs }}')"
+       class="text-decoration-none plato-carousel-thumb">
+
+      <img src="{{ lugar_detalle.image_url }}"
+           class="{% if lugar_detalle.propietario == request.user %}sombra-verde{% else %}sombra-violeta{% endif %}"
+           alt="Imagen del lugar">
+
+      <div class="plato-carousel-plus">
+        <i class="fa-solid {% if lugar_detalle.delivery %}fa-motorcycle{% else %}fa-location-dot{% endif %}"></i>
+      </div>
+    </a>
+
+    <div class="card-body text-center">
+
+      <div class="mb-2">
+        <span class="badge rounded-pill {% if lugar_detalle.delivery %}bg-info text-dark{% else %}bg-success{% endif %}">
+          {% if lugar_detalle.delivery %}
+            Delivery
+          {% else %}
+            Lugar
+          {% endif %}
+        </span>
+      </div>
+
+      <h5 class="card-title mb-1">
+        {{ lugar_detalle.nombre }}
+      </h5>
+
+      <p class="text-muted small mb-2">
+        {{ lugar_detalle.direccion|default:"Sin dirección" }}
+      </p>
+
+      {% if lugar_detalle.telefono %}
+        <p class="small mb-1">
+          <i class="fa-solid fa-phone me-1"></i>{{ lugar_detalle.telefono }}
+        </p>
+      {% endif %}
+
+      {% if lugar_detalle.dias_horarios %}
+        <p class="small text-muted mb-2">
+          <i class="fa-regular fa-clock me-1"></i>{{ lugar_detalle.dias_horarios }}
+        </p>
+      {% endif %}
+
+      {% if lugar_detalle.enlace %}
+        <p class="small mb-2">
+          <a href="{{ lugar_detalle.enlace }}" target="_blank" rel="noopener" class="text-decoration-none">
+            <i class="fa-solid fa-up-right-from-square me-1"></i>Abrir enlace
+          </a>
+        </p>
+      {% endif %}
+
+      <div class="d-flex justify-content-center flex-wrap gap-2 mt-3">
+        <button type="button"
+                class="btn btn-sm btn-programar"
+                data-bs-toggle="modal"
+                data-bs-target="#asignarPlatoModal"
+                onclick="setPlatoInfo('{{ lugar_detalle.id }}', 'lugar', '{{ lugar_detalle.nombre|escapejs }}')">
+          <i class="fa-solid fa-calendar-plus me-1"></i>Programar
+        </button>
+
+        <button type="button"
+           class="btn btn-sm btn-outline-primary"
+           data-bs-toggle="modal"
+           data-bs-target="#lugarDetailModal{{ lugar_detalle.id }}">
+          <i class="fa-solid fa-eye me-1"></i>Ver
+        </button>
+
+        {% if lugar_detalle.propietario == request.user %}
+          <a href="{% url 'lugar-update' lugar_detalle.id %}"
+             class="btn btn-sm btn-outline-secondary">
+            <i class="fa-solid fa-pen-to-square me-1"></i>Editar
+          </a>
+
+          <a href="#"
+             class="btn btn-sm btn-outline-danger"
+             data-confirm-title="Eliminar lugar"
+             data-confirm-body="¿Seguro que querés eliminar {{ lugar_detalle.nombre|escape }}?"
+             data-confirm-hint="También se borrarán las programaciones de este lugar. Esta acción no se puede deshacer."
+             data-confirm-action="{% url 'eliminar-lugar' lugar_detalle.id %}?tipopag={{ tipopag|urlencode }}"
+             data-confirm-btn="Sí, borrar">
+            <i class="fa-solid fa-trash-can me-1"></i>Eliminar
+          </a>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</div>

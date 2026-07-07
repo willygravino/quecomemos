@@ -90,7 +90,7 @@
   }
 
   function getRows() {
-    return Array.from(document.querySelectorAll("#contenedor-listado-platos .plato-row[data-plato-id]"));
+    return Array.from(document.querySelectorAll("#contenedor-listado-platos .plato-row[data-plato-id], #contenedor-listado-lugares .plato-row[data-plato-id]"));
   }
 
   function getSlides(carouselEl) {
@@ -147,6 +147,10 @@
       return;
     }
 
+    if (event.target.closest("a, button, input, label, select, textarea")) {
+      return;
+    }
+
     const row = event.target.closest(".js-plato-carousel-index[data-plato-id]");
     if (!row) return;
 
@@ -160,6 +164,10 @@
     }
 
     if (event.target.closest(".js-plato-select")) {
+      return;
+    }
+
+    if (event.target.closest("a, button, input, label, select, textarea")) {
       return;
     }
 
@@ -184,7 +192,7 @@
   });
 
   document.addEventListener("DOMContentLoaded", function () {
-    ["contenedor-carousel-platos", "contenedor-listado-platos"].forEach(function (id) {
+    ["contenedor-carousel-platos", "contenedor-listado-platos", "contenedor-listado-lugares"].forEach(function (id) {
       const el = document.getElementById(id);
       if (el) {
         observer.observe(el, { childList: true, subtree: true });
@@ -391,15 +399,16 @@ function initListadoPlatos() {
       trigger.setAttribute('data-bs-toggle', 'modal');
       trigger.setAttribute('data-bs-target', '#confirmActionModal');
 
-      trigger.setAttribute('data-confirm-title', 'Eliminar platos seleccionados');
+      const singular = bulkDeleteForm?.dataset.bulkLabelSingular || 'plato';
+      const plural = bulkDeleteForm?.dataset.bulkLabelPlural || 'platos';
+      const hint = bulkDeleteForm?.dataset.bulkHint || `También se borrarán las programaciones de esos ${plural}. Esta acción no se puede deshacer.`;
+
+      trigger.setAttribute('data-confirm-title', `Eliminar ${plural} seleccionados`);
       trigger.setAttribute(
         'data-confirm-body',
-        `¿Seguro que querés borrar <strong>${cantidad}</strong> plato(s) seleccionado(s)?`
+        `¿Seguro que querés borrar <strong>${cantidad}</strong> ${cantidad === 1 ? singular : plural} seleccionado${cantidad === 1 ? '' : 's'}?`
       );
-      trigger.setAttribute(
-        'data-confirm-hint',
-        'También se borrarán las programaciones de esos platos. Esta acción no se puede deshacer.'
-      );
+      trigger.setAttribute('data-confirm-hint', hint);
       trigger.setAttribute('data-confirm-action', '#');
       trigger.setAttribute('data-confirm-submit-form', 'bulk-delete-form');
       trigger.setAttribute('data-confirm-btn', 'Sí, borrar');

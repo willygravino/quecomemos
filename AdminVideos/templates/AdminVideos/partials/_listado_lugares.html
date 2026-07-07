@@ -1,54 +1,142 @@
+{% if tipopag == "Delivery" or tipopag == "Comerafuera" %}
 
+  <!-- LISTA TIPO GMAIL (LUGARES / DELIVERY) -->
+  <section class="w-100 text-white bg-light rounded shadow-sm">
 
-<!-- ESTAS SON LAS TARJETAS DE LUGARES, SI ES QUE ESTAMOS EN LUGARES -->
-<section class="w-100 bg-info text-white">
-  {% if tipopag == "Delivery" or tipopag == "Comerafuera" %}
-    {% if not lugares %}
-      <div class="alert alert-info text-center" role="alert">
-        <i class="bi bi-geo-alt-fill"></i> No hay lugares ingresados para mostrar.
+    <div class="px-2 py-2 border-bottom d-flex align-items-center gap-2 text-dark flex-wrap">
+
+      <div class="form-check m-0">
+        <input class="form-check-input" type="checkbox" id="chk-platos-all" aria-label="Seleccionar todos">
       </div>
-    {% else %}
-      <div class="container p-0">
-        <div class="row">
-          {% for lugar in lugares %}
-            <div class="col-6 col-sm-4 col-md-3">
-                <div class="card h-100 shadow-sm rounded-4" style="font-size: 0.9rem; position: relative;">
-                  <a href="{% url 'lugar-detail' lugar.id %}" style="position: relative; display: block;">
-                    <img src="{{ lugar.image_url }}" class="card-img-top object-fit-cover rounded-top-4" alt="Imagen del Lugar"
-                      style="height: 150px; object-fit: cover;">
-                    <div
-                      style="position: absolute; top: 0; left: 0; right: 0; height: 150px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.4); color: white; font-weight: bold; border-top-left-radius: 1rem; border-top-right-radius: 1rem;">
-                      {{ lugar.nombre }}
-                    </div>
-                  </a>
 
-                  <div class="card-body text-center p-1">
-                    <p class="text-muted mb-0" style="font-size: 0.8rem;">{{ lugar.direccion|default:"Sin dirección" }}</p>
+      <div class="flex-grow-1 d-flex align-items-center gap-2 min-w-0">
+        <span class="small text-muted mb-0">
+          {% if tipopag == "Delivery" %}
+            Delivery
+          {% else %}
+            Lugares para comer afuera
+          {% endif %}
+        </span>
+        <span id="platos-selected-count" class="badge rounded-pill bg-primary d-none">0 seleccionados</span>
+      </div>
 
-                    {% if amigues %}
-                      <div class="mt-2">
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#compartirModal"
-                          onclick="setPlatoInfo('{{ lugar.id }}', 'lugar')" class="text-primary me-2">
-                          <i class="fa-solid fa-share-nodes"></i>
-                        </a>
-                      </div>
-                    {% endif %}
-                    
-                    <a href="#"
-                      data-bs-toggle="modal"
-                      data-bs-target="#asignarPlatoModal"
-                      onclick="setPlatoInfo('{{ lugar.id }}', 'lugar')"
-                      class="btn btn-sm btn-primary p-0">
-                      Programar
-                    </a>
+      <div class="dropdown">
+        <button
+          class="btn btn-sm btn-outline-secondary dropdown-toggle"
+          type="button"
+          id="bulkPlatosActionsBtn"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+          disabled>
+          Acciones masivas
+        </button>
 
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="bulkPlatosActionsBtn">
+          <li>
+            <button class="dropdown-item text-danger" type="button" id="bulk-delete">
+              <i class="fa-solid fa-trash-can me-2"></i>Eliminar seleccionados
+            </button>
+          </li>
+        </ul>
+      </div>
 
-                  </div>
-                </div>
+    </div>
+
+    <div class="list-group list-group-flush">
+      {% for lugar in lugares %}
+        <div class="list-group-item text-dark px-2 py-2 border-bottom border-secondary-subtle list-group-item-action plato-row js-plato-carousel-index"
+             data-row
+             data-plato-id="{{ lugar.id }}"
+             role="button"
+             tabindex="0">
+
+          <div class="d-flex align-items-center gap-2">
+
+            <div class="form-check m-0 flex-shrink-0">
+              <input class="form-check-input js-plato-select"
+                     type="checkbox"
+                     name="lugares_selected"
+                     value="{{ lugar.id }}"
+                     aria-label="Seleccionar lugar">
             </div>
-          {% endfor %}
+
+            <div class="flex-shrink-0">
+              <img src="{{ lugar.image_url }}"
+                   class="{% if lugar.propietario == request.user %}sombra-verde{% else %}sombra-violeta{% endif %}"
+                   style="width: 42px; height: 42px; object-fit: cover; border-radius: 10px;"
+                   alt="Imagen del lugar">
+            </div>
+
+            <div class="flex-grow-1 min-w-0">
+              <div class="d-flex align-items-center gap-2 min-w-0">
+                <div class="fw-semibold text-truncate">
+                  {{ lugar.nombre }}
+                </div>
+
+                <a href="#"
+                   class="btn plato-gmail-programar-btn btn-programar"
+                   data-bs-toggle="modal"
+                   data-bs-target="#asignarPlatoModal"
+                   onclick="event.preventDefault(); event.stopPropagation(); setPlatoInfo('{{ lugar.id }}', 'lugar', '{{ lugar.nombre|escapejs }}')"
+                   title="Programar"
+                   aria-label="Programar">
+                  <i class="fa-regular fa-calendar-plus" aria-hidden="true"></i>
+                </a>
+              </div>
+
+              <div class="small text-muted text-truncate">
+                {{ lugar.direccion|default:"Sin dirección" }}
+                {% if lugar.telefono %}
+                  · {{ lugar.telefono }}
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-1 flex-shrink-0">
+              <button type="button"
+                 class="btn btn-sm btn-outline-primary"
+                 title="Ver"
+                 aria-label="Ver lugar"
+                 data-bs-toggle="modal"
+                 data-bs-target="#lugarDetailModal{{ lugar.id }}">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+
+              {% if lugar.propietario == request.user %}
+                <a href="{% url 'lugar-update' lugar.id %}"
+                   class="btn btn-sm btn-outline-secondary"
+                   title="Editar"
+                   aria-label="Editar lugar">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                </a>
+              {% endif %}
+            </div>
+
+          </div>
         </div>
-      </div>
-    {% endif %}
-  {% endif %}
-</section>
+      {% empty %}
+        <div class="list-group-item text-center text-muted py-4">
+          <i class="fa-solid {% if tipopag == 'Delivery' %}fa-motorcycle{% else %}fa-location-dot{% endif %} me-1"></i>
+          No hay {% if tipopag == "Delivery" %}delivery{% else %}lugares{% endif %} ingresados para mostrar.
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  {% for lugar in lugares %}
+    {% include "AdminVideos/partials/_lugar_detail_modal.html" with lugar_modal=lugar %}
+  {% endfor %}
+
+  <form id="bulk-delete-form"
+        method="post"
+        action="{% url 'eliminar-lugares-masivo' %}?tipopag={{ tipopag|urlencode }}"
+        class="d-none"
+        data-bulk-input-name="lugares_selected"
+        data-bulk-label-singular="lugar"
+        data-bulk-label-plural="lugares"
+        data-bulk-hint="También se borrarán las programaciones de esos lugares. Esta acción no se puede deshacer.">
+    {% csrf_token %}
+    <div id="bulk-delete-inputs"></div>
+  </form>
+
+{% endif %}

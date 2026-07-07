@@ -93,17 +93,17 @@ document.addEventListener("DOMContentLoaded", function () {
         return response.json();
       })
       .then(function (data) {
-        contenedor.innerHTML = data.html_listado;
+        contenedor.innerHTML = data.html_listado || '';
 
         const contenedorCarousel = document.getElementById("contenedor-carousel-platos");
         if (contenedorCarousel) {
-          contenedorCarousel.innerHTML = data.html_carousel;
+          contenedorCarousel.innerHTML = data.html_carousel || '';
           inicializarCarouselesPlatos(contenedorCarousel);
         }
 
         const contenedorLugares = document.getElementById("contenedor-listado-lugares");
         if (contenedorLugares) {
-          contenedorLugares.innerHTML = data.html_lugares;
+          contenedorLugares.innerHTML = data.html_lugares || '';
         }
 
         if (typeof initListadoPlatos === "function") {
@@ -232,6 +232,7 @@ document.addEventListener("DOMContentLoaded", function () {
       "[data-listado-url]",
       "#contenedor-carousel-platos",
       "#contenedor-listado-platos",
+      "#contenedor-listado-lugares",
       "#contenedor-lugares",
       "#contenedor-delivery",
       "#contenedor-comer-afuera",
@@ -257,6 +258,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const selectores = [
       "#contenedor-carousel-platos",
       "#contenedor-listado-platos",
+      "#contenedor-listado-lugares",
       "#contenedor-lugares",
       "#contenedor-delivery",
       "#contenedor-comer-afuera",

@@ -49,11 +49,11 @@
 
         {% if plato_detalle.id %}
           <a href="#"
-             class="btn btn-sm btn-programar-plato-inline"
+             class="btn btn-sm btn-programar-plato-inline btn-programar"
              data-bs-toggle="modal"
              data-bs-target="#asignarPlatoModal"
              onclick="setPlatoInfo('{{ plato_detalle.id }}', 'plato', '{{ plato_detalle.nombre_plato|escapejs }}')">
-            <i class="fa-regular fa-calendar-plus me-1"></i> Programar plato
+            <i class="fa-regular fa-calendar-plus me-1"></i> Programar
           </a>
         {% endif %}
 
@@ -131,11 +131,11 @@
 
                     <div class="d-flex justify-content-center gap-1 flex-wrap mt-2">
                       <a href="#"
-                         class="btn btn-sm btn-programar-plato-inline py-0 px-2"
+                         class="btn btn-sm btn-programar-plato-inline py-0 px-2 btn-programar"
                          data-bs-toggle="modal"
                          data-bs-target="#asignarPlatoModal"
                          onclick="setPlatoInfo('{{ v.id }}', 'plato', '{{ v.nombre_plato|escapejs }}')"
-                         title="Programar plato">
+                         title="Programar">
                         <i class="fa-regular fa-calendar-plus"></i>
                         <span class="d-none d-md-inline ms-1">Programar</span>
                       </a>

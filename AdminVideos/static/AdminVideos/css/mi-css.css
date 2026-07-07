@@ -507,6 +507,48 @@ section > .d-flex {
 }
 
 /* Acciones para programar platos */
+/* Botón violeta compartido para programar cualquier ítem */
+.btn-programar,
+.btn.btn-programar,
+a.btn-programar,
+button.btn-programar {
+  color: #fff !important;
+  background-color: #6f42c1 !important;
+  border-color: #6f42c1 !important;
+}
+
+.btn-programar:hover,
+.btn-programar:focus,
+.btn.btn-programar:hover,
+.btn.btn-programar:focus,
+a.btn-programar:hover,
+a.btn-programar:focus,
+button.btn-programar:hover,
+button.btn-programar:focus {
+  color: #fff !important;
+  background-color: #5a32a3 !important;
+  border-color: #5a32a3 !important;
+}
+
+.btn-programar:active,
+.btn.btn-programar:active,
+a.btn-programar:active,
+button.btn-programar:active {
+  color: #fff !important;
+  background-color: #4c288d !important;
+  border-color: #4c288d !important;
+}
+
+.btn-programar:disabled,
+.btn-programar.disabled,
+.btn.btn-programar:disabled,
+.btn.btn-programar.disabled {
+  color: #fff !important;
+  background-color: #8f6ed5 !important;
+  border-color: #8f6ed5 !important;
+  opacity: .72;
+}
+
 .plato-detalle-card .btn-programar-plato-inline {
   border-color: #6f42c1;
   background: #6f42c1;

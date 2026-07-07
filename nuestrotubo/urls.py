@@ -17,7 +17,7 @@ from django import views
 from django.contrib import admin
 from django.urls import path
 
-from AdminVideos.views import ajax_mensajes_usuario, ajax_eliminar_mensaje_chat, agregar_lugar_compartido, ajax_eliminar_programado, ajax_listado_platos, ajax_lo_que_tengo_palabras, ajax_lo_que_tengo_agregar, ajax_lo_que_tengo_eliminar, CrearLugar, EnviarMensaje, LugarDetail, LugarUpdate, PlatoDetail, PlatoVariedadCreate, PlatoVariedadDelete, PlatoVariedadUpdate,  agregar_a_mi_lista, agregar_plato_compartido, ajax_panel_amigues, ajax_solicitudes_amistad, amigue_borrar, api_ingredientes, api_toggle_item, compartir_elemento, compartir_ing_plato, descartar_sugerido, eliminar_lugar, eliminar_menu_programado, eliminar_plato, eliminar_platos_masivo, eliminar_programado, fijar_o_eliminar_habito, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, lista_de_compras, FiltroDePlatos, plato_ingredientes, plato_opciones_asignar, random_dia, set_dia_activo, sumar_amigue, user_logout, SolicitarAmistad, AsignarPlato, compartir_lista
+from AdminVideos.views import eliminar_lugares_masivo, ajax_mensajes_usuario, ajax_eliminar_mensaje_chat, agregar_lugar_compartido, ajax_eliminar_programado, ajax_listado_platos, ajax_lo_que_tengo_palabras, ajax_lo_que_tengo_agregar, ajax_lo_que_tengo_eliminar, CrearLugar, EnviarMensaje, LugarDetail, LugarUpdate, PlatoDetail, PlatoVariedadCreate, PlatoVariedadDelete, PlatoVariedadUpdate,  agregar_a_mi_lista, agregar_plato_compartido, ajax_panel_amigues, ajax_solicitudes_amistad, amigue_borrar, api_ingredientes, api_toggle_item, compartir_elemento, compartir_ing_plato, descartar_sugerido, eliminar_lugar, eliminar_menu_programado, eliminar_plato, eliminar_platos_masivo, eliminar_programado, fijar_o_eliminar_habito, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, lista_de_compras, FiltroDePlatos, plato_ingredientes, plato_opciones_asignar, random_dia, set_dia_activo, sumar_amigue, user_logout, SolicitarAmistad, AsignarPlato, compartir_lista
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -87,6 +87,7 @@ urlpatterns = [
 
     path('habito/<int:es_lugar>/<int:objeto_id>/<str:comida>/',fijar_o_eliminar_habito,name="fijar-o-eliminar-habito"),
     path('platos/eliminar-masivo/', eliminar_platos_masivo, name='eliminar-platos-masivo'),
+    path("eliminar-lugares-masivo/", eliminar_lugares_masivo, name="eliminar-lugares-masivo"),
     path("ajax/listado-platos/", ajax_listado_platos, name="ajax_listado_platos"),
     path("ajax/lo-que-tengo/palabras/", ajax_lo_que_tengo_palabras, name="ajax-lo-que-tengo-palabras"),
     path("ajax/lo-que-tengo/agregar/", ajax_lo_que_tengo_agregar, name="ajax-lo-que-tengo-agregar"),

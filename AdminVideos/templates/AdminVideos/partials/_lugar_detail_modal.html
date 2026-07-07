@@ -1,0 +1,111 @@
+<div class="modal fade lugar-detail-modal"
+     id="lugarDetailModal{{ lugar_modal.id }}"
+     tabindex="-1"
+     aria-labelledby="lugarDetailModalLabel{{ lugar_modal.id }}"
+     aria-hidden="true">
+
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <div class="min-w-0">
+          <h5 class="modal-title text-truncate"
+              id="lugarDetailModalLabel{{ lugar_modal.id }}">
+            {{ lugar_modal.nombre }}
+          </h5>
+
+          <div class="small text-muted">
+            {% if lugar_modal.delivery %}
+              <i class="fa-solid fa-motorcycle me-1"></i>Delivery
+            {% else %}
+              <i class="fa-solid fa-location-dot me-1"></i>Lugar para comer afuera
+            {% endif %}
+          </div>
+        </div>
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="row g-3 align-items-start">
+          <div class="col-12 col-md-5">
+            <img src="{{ lugar_modal.image_url }}"
+                 class="img-fluid rounded shadow-sm w-100"
+                 style="max-height: 260px; object-fit: cover;"
+                 alt="Imagen de {{ lugar_modal.nombre }}">
+          </div>
+
+          <div class="col-12 col-md-7">
+
+            <div class="mb-3">
+              <span class="badge rounded-pill {% if lugar_modal.delivery %}bg-info text-dark{% else %}bg-success{% endif %}">
+                {% if lugar_modal.delivery %}
+                  Delivery
+                {% else %}
+                  Lugar
+                {% endif %}
+              </span>
+            </div>
+
+            <dl class="row small mb-0">
+
+              <dt class="col-sm-4 text-muted">Dirección</dt>
+              <dd class="col-sm-8">
+                {{ lugar_modal.direccion|default:"Sin dirección cargada" }}
+              </dd>
+
+              <dt class="col-sm-4 text-muted">Teléfono</dt>
+              <dd class="col-sm-8">
+                {{ lugar_modal.telefono|default:"Sin teléfono cargado" }}
+              </dd>
+
+              <dt class="col-sm-4 text-muted">Días / horarios</dt>
+              <dd class="col-sm-8">
+                {% if lugar_modal.dias_horarios %}
+                  {{ lugar_modal.dias_horarios|linebreaksbr }}
+                {% else %}
+                  Sin días u horarios cargados
+                {% endif %}
+              </dd>
+
+              {% if lugar_modal.enlace %}
+                <dt class="col-sm-4 text-muted">Enlace</dt>
+                <dd class="col-sm-8">
+                  <a href="{{ lugar_modal.enlace }}"
+                     target="_blank"
+                     rel="noopener"
+                     class="text-decoration-none">
+                    Abrir enlace
+                    <i class="fa-solid fa-up-right-from-square ms-1"></i>
+                  </a>
+                </dd>
+              {% endif %}
+
+            </dl>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button"
+                class="btn btn-outline-secondary"
+                data-bs-dismiss="modal">
+          Cerrar
+        </button>
+
+        {% if lugar_modal.propietario == request.user %}
+          <a href="{% url 'lugar-update' lugar_modal.id %}"
+             class="btn btn-primary">
+            <i class="fa-solid fa-pen-to-square me-1"></i>Editar
+          </a>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</div>

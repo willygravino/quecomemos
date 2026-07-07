@@ -1,3 +1,4 @@
+{% if tipopag != "Delivery" and tipopag != "Comerafuera" %}
 
 <!-- LISTA TIPO GMAIL (PLATOS) -->
 <section class="w-100 text-white bg-light rounded shadow-sm">
@@ -79,8 +80,15 @@
 </section>
 
 <!-- formulario oculto para enviar por POST los platos seleccionados a eliminación masiva -->
-<form id="bulk-delete-form" method="post" action="{% url 'eliminar-platos-masivo' %}" class="d-none">
+<form id="bulk-delete-form"
+      method="post"
+      action="{% url 'eliminar-platos-masivo' %}"
+      class="d-none"
+      data-bulk-input-name="platos_selected"
+      data-bulk-label-singular="plato"
+      data-bulk-label-plural="platos"
+      data-bulk-hint="También se borrarán las programaciones de esos platos. Esta acción no se puede deshacer.">
   {% csrf_token %}
   <div id="bulk-delete-inputs"></div>
 </form>
-
+{% endif %}

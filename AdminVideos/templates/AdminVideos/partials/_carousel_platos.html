@@ -1,6 +1,6 @@
 <!-- ===========================
-     SECCIÓN: PLATOS EN CAROUSEL
-     Reutiliza la misma card que el modal del listado Gmail.
+     SECCIÓN: CAROUSEL DE SUGERENCIAS
+     Platos, lugares y delivery comparten la misma interfaz.
 =========================== -->
 
 {% if carousel_items %}
@@ -11,7 +11,6 @@
          data-bs-ride="false"
          data-bs-interval="false">
 
-      <!-- Indicadores: uno por plato/grupo -->
       <div class="carousel-indicators">
         {% for grupo in carousel_items %}
           <button type="button"
@@ -25,7 +24,6 @@
       </div>
 
       <div class="carousel-inner">
-
         {% for grupo in carousel_items %}
           <div class="carousel-item {% if forloop.first %}active{% endif %}"
                data-plato-id="{{ grupo.id }}">
@@ -36,7 +34,6 @@
             </div>
           </div>
         {% endfor %}
-
       </div>
 
       {% if carousel_items|length > 1 %}
@@ -60,7 +57,68 @@
     </div>
   </section>
 
-{% elif tipopag != "Delivery" and tipopag != "Comerafuera" %}
+{% elif tipopag == "Delivery" or tipopag == "Comerafuera" %}
+  {% if lugares %}
+    <section class="w-100 bg-warning rounded shadow-sm p-3 mb-3">
+
+      <div id="platosCarousel"
+           class="carousel slide comidas-carousel"
+           data-bs-ride="false"
+           data-bs-interval="false">
+
+        <div class="carousel-indicators">
+          {% for lugar in lugares %}
+            <button type="button"
+                    data-bs-target="#platosCarousel"
+                    data-bs-slide-to="{{ forloop.counter0 }}"
+                    class="{% if forloop.first %}active{% endif %}"
+                    aria-current="{% if forloop.first %}true{% endif %}"
+                    aria-label="Lugar {{ forloop.counter }}">
+            </button>
+          {% endfor %}
+        </div>
+
+        <div class="carousel-inner">
+          {% for lugar in lugares %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}"
+                 data-plato-id="{{ lugar.id }}">
+              <div class="d-flex justify-content-center py-2">
+                <div class="w-100" style="max-width: 720px;">
+                  {% include "AdminVideos/partials/_lugar_card_detalle.html" with lugar_detalle=lugar %}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        {% if lugares|length > 1 %}
+          <button class="carousel-control-prev"
+                  type="button"
+                  data-bs-target="#platosCarousel"
+                  data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+            <span class="visually-hidden">Anterior</span>
+          </button>
+
+          <button class="carousel-control-next"
+                  type="button"
+                  data-bs-target="#platosCarousel"
+                  data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+            <span class="visually-hidden">Siguiente</span>
+          </button>
+        {% endif %}
+
+      </div>
+    </section>
+  {% else %}
+    <div class="alert alert-warning text-center m-2">
+      <i class="fa-solid {% if tipopag == 'Delivery' %}fa-motorcycle{% else %}fa-location-dot{% endif %} me-1"></i>
+      No hay {% if tipopag == "Delivery" %}delivery{% else %}lugares{% endif %} ingresados para mostrar.
+    </div>
+  {% endif %}
+
+{% else %}
   <div class="alert alert-warning text-center m-2">
     <i class="bi bi-geo-alt-fill"></i> No hay {{ tipopag }} ingresados para mostrar.
   </div>
