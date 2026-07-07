@@ -2183,9 +2183,12 @@ def filtrar_platos(
     # 🔹 Aplicar filtros adicionales
     if tipo_parametro == "Picada":
         platos_qs = platos_qs.filter(
-            Q(tipos__icontains="Picada") |
-            Q(tipos__icontains="Ingrediente de picada")
+            tipos__icontains="Picada"
+        ).exclude(
+            tipos__icontains="Ingrediente de picada"
         )
+    elif tipo_parametro == "Ingrediente de picada":
+        platos_qs = platos_qs.filter(tipos__icontains="Ingrediente de picada")
     elif tipo_parametro:
         platos_qs = platos_qs.filter(tipos__icontains=tipo_parametro)
 
@@ -3003,19 +3006,8 @@ def obtener_resultados_principales(
 
     )
 
-    if tipo_parametro == "Picada":
-        platos_carousel = platos.filter(
-            tipos__icontains="Picada"
-        ).exclude(
-            tipos__icontains="Ingrediente de picada"
-        )
-
-        platos_listado = platos.filter(
-            tipos__icontains="Ingrediente de picada"
-        )
-    else:
-        platos_carousel = platos
-        platos_listado = platos
+    platos_carousel = platos
+    platos_listado = platos
 
     hoy = timezone.localdate()
 

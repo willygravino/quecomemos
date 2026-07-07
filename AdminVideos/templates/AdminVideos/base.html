@@ -303,22 +303,45 @@
 </li>
 
 <!-- {# 4.2) PICADAS #} -->
-<li class="nav-item {% if tipopag == 'Picada' %}active{% endif %}">
-  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
-            {% if tipopag == 'Picada' %}is-active{% endif %}"
-     href="{% url 'filtro-de-platos' %}?tipopag=Picada"
-     data-tipopag="Picada">
+<li class="nav-item dropdown {% if tipopag == 'Picada' or tipopag == 'Ingrediente de picada' %}active{% endif %}">
+  <a class="nav-link menu-item dropdown-toggle sidebar-dropdown-toggle d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag-grupo
+            {% if tipopag == 'Picada' or tipopag == 'Ingrediente de picada' %}is-active{% endif %}"
+     href="#"
+     id="picadasDropdown"
+     role="button"
+     data-bs-toggle="dropdown"
+     data-bs-display="static"
+     aria-expanded="false"
+     data-tipopag-values="Picada,Ingrediente de picada">
 
     <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
           style="width: 38px; height: 38px;">
-      <i class="fa-solid fa-cheese {% if tipopag != 'Picada' %}text-white-50{% endif %}"
+      <i class="fa-solid fa-cheese {% if tipopag != 'Picada' and tipopag != 'Ingrediente de picada' %}text-white-50{% endif %}"
          style="font-size: 1.1rem;"></i>
     </span>
 
-    <span class="item-text mt-2 small {% if tipopag == 'Picada' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+    <span class="item-text mt-2 small {% if tipopag == 'Picada' or tipopag == 'Ingrediente de picada' %}text-white fw-bold{% else %}text-white-50{% endif %}">
       Picadas
     </span>
   </a>
+
+  <ul class="dropdown-menu dropdown-menu-dark sidebar-dropdown-menu text-small shadow"
+      aria-labelledby="picadasDropdown">
+    <li>
+      <a class="dropdown-item js-filtro-tipopag {% if tipopag == 'Picada' %}active{% endif %}"
+         href="{% url 'filtro-de-platos' %}?tipopag=Picada"
+         data-tipopag="Picada">
+        <i class="fa-solid fa-cheese me-2"></i>Armado de picadas
+      </a>
+    </li>
+    <li>
+      <a class="dropdown-item js-filtro-tipopag {% if tipopag == 'Ingrediente de picada' %}active{% endif %}"
+         href="{% url 'filtro-de-platos' %}?tipopag=Ingrediente%20de%20picada"
+         data-tipopag="Ingrediente de picada">
+        <i class="fa-solid fa-carrot me-2"></i>Gestión de ingredientes
+      </a>
+    </li>
+  </ul>
 </li>
 
 <!-- {# 5) POSTRE #} -->
@@ -1061,8 +1084,8 @@ Root globl para modales cargados dinámicamente (AJAX)
      data-url-crear-lugar="{% url 'crear-lugar' %}"
      class="btn btn-success rounded-circle shadow position-fixed d-flex align-items-center justify-content-center"
      style="right: 1rem; bottom: 9rem; width: 56px; height: 56px; z-index: 1050;"
-    title="{% if tipopag == 'Principal' or not tipopag %}Agregar receta de plato principal{% elif tipopag == 'Guarnicion' %}Agregar receta de guarnición{% elif tipopag == 'Comerafuera' %}Agregar lugar para comer afuera{% elif tipopag == 'Delivery' %}Agregar delivery{% else %}Agregar receta de {{ tipopag|lower }}{% endif %}"
-    aria-label="{% if tipopag == 'Principal' or not tipopag %}Agregar receta de plato principal{% elif tipopag == 'Guarnicion' %}Agregar receta de guarnición{% elif tipopag == 'Comerafuera' %}Agregar lugar para comer afuera{% elif tipopag == 'Delivery' %}Agregar delivery{% else %}Agregar receta de {{ tipopag|lower }}{% endif %}">
+    title="{% if tipopag == 'Picada' %}Armar picada{% elif tipopag == 'Ingrediente de picada' %}Agregar ingrediente de picada{% elif tipopag == 'Principal' or not tipopag %}Agregar receta de plato principal{% elif tipopag == 'Guarnicion' %}Agregar receta de guarnición{% elif tipopag == 'Comerafuera' %}Agregar lugar para comer afuera{% elif tipopag == 'Delivery' %}Agregar delivery{% else %}Agregar receta de {{ tipopag|lower }}{% endif %}"
+    aria-label="{% if tipopag == 'Picada' %}Armar picada{% elif tipopag == 'Ingrediente de picada' %}Agregar ingrediente de picada{% elif tipopag == 'Principal' or not tipopag %}Agregar receta de plato principal{% elif tipopag == 'Guarnicion' %}Agregar receta de guarnición{% elif tipopag == 'Comerafuera' %}Agregar lugar para comer afuera{% elif tipopag == 'Delivery' %}Agregar delivery{% else %}Agregar receta de {{ tipopag|lower }}{% endif %}">
     <i class="fa-solid fa-plus"></i>
   </a>
 {% endif %}

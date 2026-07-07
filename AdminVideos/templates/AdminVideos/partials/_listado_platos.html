@@ -12,7 +12,15 @@
 
   <!-- Título / contador -->
   <div class="flex-grow-1 d-flex align-items-center gap-2 min-w-0">
-    <span class="small text-muted mb-0">Platos</span>
+    <span class="small text-muted mb-0">
+      {% if tipopag == 'Picada' %}
+        Picadas armadas
+      {% elif tipopag == 'Ingrediente de picada' %}
+        Ingredientes de picada
+      {% else %}
+        Platos
+      {% endif %}
+    </span>
     <span id="platos-selected-count" class="badge rounded-pill bg-primary d-none">0 seleccionados</span>
   </div>
 
