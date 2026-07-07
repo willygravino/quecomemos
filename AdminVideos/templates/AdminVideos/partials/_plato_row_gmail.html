@@ -17,9 +17,25 @@
 
     <div class="flex-grow-1 min-w-0 fw-semibold text-truncate">
       {% if plato.variedades_count > 0 %}
-        {{ plato.nombre_para_front }}
+        {{ plato.nombre_para_front }} <a href="#"
+           class="plato-gmail-programar-btn"
+           data-bs-toggle="modal"
+           data-bs-target="#asignarPlatoModal"
+           onclick="event.preventDefault(); event.stopPropagation(); setPlatoInfo('{{ plato.id }}', 'plato', '{% if plato.variedades_count > 0 %}{{ plato.nombre_para_front|escapejs }}{% else %}{{ plato.nombre_plato|escapejs }}{% endif %}')"
+           title="Programar plato"
+           aria-label="Programar plato">
+          <i class="fa-regular fa-calendar-plus" aria-hidden="true"></i>
+        </a>
       {% else %}
-        {{ plato.nombre_plato }}
+        {{ plato.nombre_plato }} <a href="#"
+           class="plato-gmail-programar-btn"
+           data-bs-toggle="modal"
+           data-bs-target="#asignarPlatoModal"
+           onclick="event.preventDefault(); event.stopPropagation(); setPlatoInfo('{{ plato.id }}', 'plato', '{% if plato.variedades_count > 0 %}{{ plato.nombre_para_front|escapejs }}{% else %}{{ plato.nombre_plato|escapejs }}{% endif %}')"
+           title="Programar plato"
+           aria-label="Programar plato">
+          <i class="fa-regular fa-calendar-plus" aria-hidden="true"></i>
+        </a>
       {% endif %}
     </div>
 
