@@ -20,11 +20,26 @@
   <div class="sugerencias-platos-titulo-bar text-center mb-2">
     <h5 class="mb-0 fw-bold text-white">
       Sugerencias de
-      {% if tipopag == "Principal" %}
-        Plato principal
-      {% else %}
-        {{ tipopag }}
-      {% endif %}
+      <span id="sugerenciasPlatosTituloTipo"
+            data-tipopag-actual="{{ tipopag|default:'Principal' }}">
+        {% if tipopag == "Principal" %}
+          Plato principal
+        {% elif tipopag == "Guarnicion" %}
+          Guarniciones
+        {% elif tipopag == "Picada" %}
+          Picadas armadas
+        {% elif tipopag == "Ingrediente de picada" %}
+          Ingredientes de picada
+        {% elif tipopag == "Comerafuera" %}
+          lugares para comer afuera
+        {% elif tipopag == "Delivery" %}
+          delivery
+        {% elif tipopag == "LoQueTengo" %}
+          lo que tengo
+        {% else %}
+          {{ tipopag }}
+        {% endif %}
+      </span>
     </h5>
   </div>
 

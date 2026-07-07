@@ -175,6 +175,190 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // ============================================================
+
+  // ============================================================
+  // 3.a Actualizar título "Sugerencias de..." según tipopag actual
+  // ============================================================
+  function etiquetaSugerenciasTipopag(tipopag) {
+    const etiquetas = {
+      "Principal": "Plato principal",
+      "Entrada": "Entradas",
+      "Guarnicion": "Guarniciones",
+      "Dip": "Dips",
+      "Salsa": "Salsas",
+      "Picada": "Picadas armadas",
+      "Ingrediente de picada": "Ingredientes de picada",
+      "Postre": "Postres",
+      "Trago": "Bebidas / tragos",
+      "Delivery": "delivery",
+      "Comerafuera": "lugares para comer afuera",
+      "LoQueTengo": "lo que tengo",
+    };
+
+    return etiquetas[tipopag] || tipopag || "Plato principal";
+  }
+
+  function actualizarTituloSugerencias(tipopag) {
+    const target = document.getElementById("sugerenciasPlatosTituloTipo");
+
+    if (!target) {
+      return;
+    }
+
+    target.textContent = etiquetaSugerenciasTipopag(tipopag);
+    target.dataset.tipopagActual = tipopag || "Principal";
+  }
+
+
+  // ============================================================
+  // 3.a.1 Barrido visual mientras cambia el filtro por AJAX
+  // ============================================================
+  let filtroBarridoHideTimer = null;
+
+  function obtenerNodosBarridoCambioFiltro() {
+    const selectores = [
+      ".sugerencias-platos-titulo-bar",
+      "#filtrosPlatosForm",
+      "#filtros-platos-form",
+      ".filtros-platos-panel",
+      ".filtros-platos-wrapper",
+      ".filtros-activos-wrap",
+      "[data-listado-url]",
+      "#contenedor-carousel-platos",
+      "#contenedor-listado-platos",
+      "#contenedor-lugares",
+      "#contenedor-delivery",
+      "#contenedor-comer-afuera",
+    ];
+
+    const nodos = [];
+
+    selectores.forEach((selector) => {
+      document.querySelectorAll(selector).forEach((nodo) => {
+        if (!nodos.includes(nodo)) {
+          nodos.push(nodo);
+        }
+      });
+    });
+
+    return nodos.filter((nodo) => {
+      const rect = nodo.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    });
+  }
+
+  function calcularRectBarridoCambioFiltro() {
+    const nodos = obtenerNodosBarridoCambioFiltro();
+
+    if (!nodos.length) {
+      return null;
+    }
+
+    const rects = nodos.map((nodo) => nodo.getBoundingClientRect());
+
+    const top = Math.min(...rects.map((rect) => rect.top));
+    const left = Math.min(...rects.map((rect) => rect.left));
+    const right = Math.max(...rects.map((rect) => rect.right));
+    const bottom = Math.max(...rects.map((rect) => rect.bottom));
+
+    const margen = 6;
+    const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+
+    return {
+      top: Math.max(0, top - margen),
+      left: Math.max(0, left - margen),
+      width: Math.min(viewportWidth, right + margen) - Math.max(0, left - margen),
+      height: Math.min(viewportHeight, bottom + margen) - Math.max(0, top - margen),
+    };
+  }
+
+  function obtenerOverlayBarridoCambioFiltro() {
+    let overlay = document.getElementById("filtroPlatosBarridoOverlay");
+
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.id = "filtroPlatosBarridoOverlay";
+      overlay.className = "filtro-platos-barrido-overlay";
+      overlay.setAttribute("aria-hidden", "true");
+      document.body.appendChild(overlay);
+    }
+
+    return overlay;
+  }
+
+  function posicionarBarridoCambioFiltro() {
+    const overlay = obtenerOverlayBarridoCambioFiltro();
+    const rect = calcularRectBarridoCambioFiltro();
+
+    if (!rect) {
+      return overlay;
+    }
+
+    overlay.style.top = `${rect.top}px`;
+    overlay.style.left = `${rect.left}px`;
+    overlay.style.width = `${rect.width}px`;
+    overlay.style.height = `${rect.height}px`;
+
+    return overlay;
+  }
+
+  function activarBarridoCambioFiltro() {
+    window.clearTimeout(filtroBarridoHideTimer);
+
+    document.body.classList.add("filtro-platos-cambiando");
+
+    const overlay = posicionarBarridoCambioFiltro();
+    overlay.classList.remove("is-hiding");
+
+    requestAnimationFrame(() => {
+      posicionarBarridoCambioFiltro();
+      overlay.classList.add("is-active");
+    });
+  }
+
+  function desactivarBarridoCambioFiltro() {
+    const overlay = document.getElementById("filtroPlatosBarridoOverlay");
+
+    document.body.classList.remove("filtro-platos-cambiando");
+
+    if (!overlay) {
+      return;
+    }
+
+    overlay.classList.add("is-hiding");
+    overlay.classList.remove("is-active");
+
+    filtroBarridoHideTimer = window.setTimeout(() => {
+      overlay.remove();
+    }, 180);
+  }
+
+  function actualizarListadoPlatosConBarrido() {
+    activarBarridoCambioFiltro();
+
+    let resultado = null;
+
+    try {
+      resultado = actualizarListadoPlatos();
+    } catch (error) {
+      desactivarBarridoCambioFiltro();
+      throw error;
+    }
+
+    if (resultado && typeof resultado.finally === "function") {
+      resultado.finally(() => {
+        desactivarBarridoCambioFiltro();
+      });
+    } else {
+      window.setTimeout(() => {
+        desactivarBarridoCambioFiltro();
+      }, 650);
+    }
+
+    return resultado;
+  }
+
   // 3.b Actualizar botón flotante de crear según tipopag actual
   // ============================================================
   function actualizarBotonCrearPlato(tipopag) {
@@ -203,7 +387,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     
     let titulo = "Agregar receta de plato principal";
-    if (tipopag === "Guarnicion") {
+    if (tipopag === "Picada") {
+      titulo = "Armar picada";
+    } else if (tipopag === "Ingrediente de picada") {
+      titulo = "Agregar ingrediente de picada";
+    } else if (tipopag === "Guarnicion") {
       titulo = "Agregar receta de guarnición";
     } else if (tipopag === "Comerafuera") {
       titulo = "Agregar lugar para comer afuera";
@@ -222,7 +410,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // ============================================================
   form.addEventListener("submit", function (event) {
     event.preventDefault();
-    actualizarListadoPlatos();
+    actualizarListadoPlatosConBarrido();
   });
 
   // ============================================================
@@ -253,7 +441,7 @@ document.addEventListener("DOMContentLoaded", function () {
       clearTimeout(timeoutBusquedaPalabraClave);
 
       timeoutBusquedaPalabraClave = setTimeout(function () {
-        actualizarListadoPlatos();
+        actualizarListadoPlatosConBarrido();
       }, 400);
     });
 
@@ -265,7 +453,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // ============================================================
   form.querySelectorAll("input[type='checkbox']").forEach(function (checkbox) {
     checkbox.addEventListener("change", function () {
-      actualizarListadoPlatos();
+      actualizarListadoPlatosConBarrido();
     });
   });
 
@@ -298,6 +486,7 @@ document.addEventListener("DOMContentLoaded", function () {
     aplicarModoLoQueTengo(tipopag);
 
     actualizarMenuLateralActivo(tipopag);
+    actualizarTituloSugerencias(tipopag);
 
     const nuevaUrl = new URL(link.href);
     window.history.pushState({ tipopag: tipopag }, "", nuevaUrl.toString());
@@ -311,7 +500,7 @@ document.addEventListener("DOMContentLoaded", function () {
       bootstrap.Dropdown.getOrCreateInstance(dropdownToggle).hide();
     }
 
-    actualizarListadoPlatos();  
+    actualizarListadoPlatosConBarrido();
   });
 
   // ============================================================
@@ -332,8 +521,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     inputTipopag.value = tipopag;
     actualizarMenuLateralActivo(tipopag);
+    actualizarTituloSugerencias(tipopag);
     actualizarBotonCrearPlato(tipopag);
-    actualizarListadoPlatos();
+    actualizarListadoPlatosConBarrido();
 
   });
 });
