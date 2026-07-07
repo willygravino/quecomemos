@@ -195,13 +195,27 @@
     font-size: .875rem;
     font-weight: 650;
     cursor: pointer;
+    background: rgba(78, 115, 223, .07);
   }
 
   .loquetengo-control-main:hover,
   .loquetengo-control-main:focus {
-    background: rgba(78, 115, 223, .08);
+    background: rgba(78, 115, 223, .13);
     color: #4e73df;
     outline: none;
+  }
+
+  .loquetengo-control-action-icon {
+    margin-left: .12rem;
+    font-size: .78rem;
+    opacity: .72;
+    transition: opacity .15s ease, transform .15s ease;
+  }
+
+  .loquetengo-control-main:hover .loquetengo-control-action-icon,
+  .loquetengo-control-main:focus .loquetengo-control-action-icon {
+    opacity: 1;
+    transform: translateY(-.02rem);
   }
 
   .loquetengo-control-filter {
@@ -228,7 +242,13 @@
 
   .loquetengo-control-integrado:has(#usarLoQueTengo:checked) .loquetengo-control-main {
     background: rgba(220, 53, 69, .06);
-    color: #b02a37;
+    color: #4e73df;
+  }
+
+  .loquetengo-control-integrado:has(#usarLoQueTengo:checked) .loquetengo-control-main:hover,
+  .loquetengo-control-integrado:has(#usarLoQueTengo:checked) .loquetengo-control-main:focus {
+    background: rgba(78, 115, 223, .13);
+    color: #4e73df;
   }
 
   #usarLoQueTengo:checked + .loquetengo-control-filter {
@@ -311,7 +331,15 @@
   #quecomemos:checked + .filtro-toggle-integrado .filtro-toggle-integrado-text,
   #misplatos:checked + .filtro-toggle-integrado .filtro-toggle-integrado-text {
     background: rgba(220, 53, 69, .06);
-    color: #b02a37;
+    color: #4e73df;
+  }
+
+  #quecomemos:checked + .filtro-toggle-integrado:hover .filtro-toggle-integrado-text,
+  #quecomemos:checked + .filtro-toggle-integrado:focus .filtro-toggle-integrado-text,
+  #misplatos:checked + .filtro-toggle-integrado:hover .filtro-toggle-integrado-text,
+  #misplatos:checked + .filtro-toggle-integrado:focus .filtro-toggle-integrado-text {
+    background: rgba(78, 115, 223, .13);
+    color: #4e73df;
   }
 
   #quecomemos:checked + .filtro-toggle-integrado .filtro-toggle-integrado-state,
@@ -449,15 +477,16 @@
         <div class="input-group input-group-sm w-auto">
 
                     <div class="loquetengo-control-integrado">
-            <button
-              type="button"
-              class="loquetengo-control-main"
-              data-bs-toggle="modal"
-              data-bs-target="#loQueTengoModal"
-              aria-label="Abrir Lo que tengo">
-              <i class="fa-solid fa-basket-shopping"></i>
-              Lo que tengo <span id="loQueTengoContador"></span>
-            </button>
+                                                <button
+                          type="button"
+                          class="loquetengo-control-main"
+                          data-bs-toggle="modal"
+                          data-bs-target="#loQueTengoModal"
+                          title="Abrir para cargar o editar Lo que tengo"
+                          aria-label="Abrir para cargar o editar Lo que tengo">
+                          Lo que tengo <span id="loQueTengoContador"></span>
+                          <i class="fa-solid fa-pen-to-square loquetengo-control-action-icon" aria-hidden="true"></i>
+                        </button>
 
             <input
             class="btn-check"
