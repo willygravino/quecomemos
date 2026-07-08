@@ -92,25 +92,6 @@
               </div>
             </div>
 
-            <div class="d-flex align-items-center gap-1 flex-shrink-0">
-              <button type="button"
-                 class="btn btn-sm btn-outline-primary"
-                 title="Ver"
-                 aria-label="Ver lugar"
-                 data-bs-toggle="modal"
-                 data-bs-target="#lugarDetailModal{{ lugar.id }}">
-                <i class="fa-solid fa-eye"></i>
-              </button>
-
-              {% if lugar.propietario == request.user %}
-                <a href="{% url 'lugar-update' lugar.id %}"
-                   class="btn btn-sm btn-outline-secondary"
-                   title="Editar"
-                   aria-label="Editar lugar">
-                  <i class="fa-solid fa-pen-to-square"></i>
-                </a>
-              {% endif %}
-            </div>
 
           </div>
         </div>
