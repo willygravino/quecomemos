@@ -3049,6 +3049,10 @@ def obtener_resultados_principales(
                 hoy - v.ultima_programacion
             ).days if getattr(v, "ultima_programacion", None) else None
 
+    platos_carousel = adjuntar_compartidos_enviados_a_platos(platos_carousel, usuario)
+    platos_listado = adjuntar_compartidos_enviados_a_platos(platos_listado, usuario)
+    platos = platos_listado
+
     return lugares, platos, platos_carousel, platos_listado
 
 
@@ -3121,6 +3125,69 @@ def obtener_habitos_lookup(habitos):
         for h in habitos
     }
 
+
+
+def adjuntar_compartidos_enviados_a_platos(platos, usuario):
+    """
+    Adjunta a cada plato el historial de veces que el usuario lo compartió.
+
+    Se usa en el carousel/listado para mostrar, desde la tarjeta, con quiénes
+    se compartió ese plato sin navegar a otra pantalla.
+    """
+    if not platos:
+        return platos
+
+    try:
+        platos_lista = list(platos)
+    except TypeError:
+        return platos
+
+    plato_ids = [
+        getattr(plato, "id", None)
+        for plato in platos_lista
+        if getattr(plato, "id", None)
+    ]
+
+    for plato in platos_lista:
+        plato.compartidos_enviados_info = []
+        plato.compartidos_enviados_count = 0
+        plato.compartidos_enviados_destinatarios = []
+
+    if not plato_ids:
+        return platos_lista
+
+    compartidos = (
+        ElementoCompartido.objects
+        .filter(
+            usuario_que_envia=usuario,
+            tipo=ElementoCompartido.PLATO,
+            plato_id__in=plato_ids,
+        )
+        .select_related("destinatario")
+        .order_by("-creado_el")
+    )
+
+    compartidos_por_plato = {}
+
+    for compartido in compartidos:
+        try:
+            estado_label = compartido.get_estado_display()
+        except Exception:
+            estado_label = getattr(compartido, "estado", "") or "Compartido"
+
+        compartidos_por_plato.setdefault(compartido.plato_id, []).append({
+            "destinatario": getattr(compartido.destinatario, "username", "amigue"),
+            "mensaje": compartido.mensaje,
+            "estado": estado_label,
+            "creado_el": compartido.creado_el,
+        })
+
+    for plato in platos_lista:
+        historial = compartidos_por_plato.get(plato.id, [])
+        plato.compartidos_enviados_info = historial
+        plato.compartidos_enviados_count = len(historial)
+
+    return platos_lista
 
 def obtener_contexto_compartidos(usuario):
     """
@@ -3630,7 +3697,7 @@ class EnviarMensaje(LoginRequiredMixin, CreateView):
 
 
 
-class compartir_elemento(CreateView):
+class compartir_elemento(LoginRequiredMixin, CreateView):
     model = ElementoCompartido
     template_name = 'AdminVideos/compartir_elemento.html'
     success_url = reverse_lazy('filtro-de-platos')
@@ -3638,6 +3705,18 @@ class compartir_elemento(CreateView):
     # Solo incluimos el campo del mensaje.
     # El elemento compartido, destinatario y tipo se asignan manualmente.
     fields = ['mensaje']
+
+    def es_ajax(self):
+        return self.request.headers.get("x-requested-with") == "XMLHttpRequest"
+
+    def respuesta_ajax(self, mensaje, nivel="success", ok=True, status=200, **extra):
+        data = {
+            "ok": ok,
+            "message": mensaje,
+            "level": nivel,
+        }
+        data.update(extra)
+        return JsonResponse(data, status=status)
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
@@ -3660,6 +3739,17 @@ class compartir_elemento(CreateView):
 
         return context
 
+    def form_invalid(self, form):
+        if self.es_ajax():
+            errores = []
+            for field_errors in form.errors.values():
+                errores.extend(str(error) for error in field_errors)
+
+            mensaje = errores[0] if errores else "Revisá los datos antes de compartir."
+            return self.respuesta_ajax(mensaje, nivel="danger", ok=False, status=400)
+
+        return super().form_invalid(form)
+
     def form_valid(self, form):
         # =====================================================
         # Datos enviados desde el formulario de compartir
@@ -3668,23 +3758,28 @@ class compartir_elemento(CreateView):
         amigue_username = self.request.POST.get('amigue', '').strip()
         tipo_elemento = self.request.POST.get('tipo_elemento', '').strip()
 
-        # =====================================================
-        # Validaciones mínimas
-        # =====================================================
-        if not elemento_id or not elemento_id.isdigit():
-            messages.error(self.request, "No se pudo compartir: falta el elemento.")
+        def error(mensaje, status=400):
+            if self.es_ajax():
+                return self.respuesta_ajax(mensaje, nivel="danger", ok=False, status=status)
+
+            messages.error(self.request, mensaje)
             return redirect(self.success_url)
+
+        if not elemento_id or not elemento_id.isdigit():
+            return error("No se pudo compartir: falta el elemento.")
 
         if not amigue_username:
-            messages.error(self.request, "No se pudo compartir: falta seleccionar un amigue.")
-            return redirect(self.success_url)
+            return error("No se pudo compartir: falta seleccionar un amigue.")
 
         if tipo_elemento not in (ElementoCompartido.PLATO, ElementoCompartido.LUGAR):
-            messages.error(self.request, "No se pudo compartir: tipo de elemento inválido.")
-            return redirect(self.success_url)
+            return error("No se pudo compartir: tipo de elemento inválido.")
 
         elemento_id = int(elemento_id)
-        destinatario = get_object_or_404(User, username=amigue_username)
+
+        try:
+            destinatario = User.objects.get(username=amigue_username)
+        except User.DoesNotExist:
+            return error("No se pudo compartir: no se encontró ese amigue.", status=404)
 
         # =====================================================
         # Datos comunes del compartido
@@ -3698,19 +3793,64 @@ class compartir_elemento(CreateView):
         # Elemento compartido
         # =====================================================
         if tipo_elemento == ElementoCompartido.PLATO:
-            form.instance.plato = get_object_or_404(Plato, id=elemento_id)
+            plato = Plato.objects.filter(id=elemento_id).first()
+            if not plato:
+                return error("No se pudo compartir: no se encontró el plato.", status=404)
+
+            if ElementoCompartido.objects.filter(
+                usuario_que_envia=self.request.user,
+                destinatario=destinatario,
+                tipo=ElementoCompartido.PLATO,
+                plato=plato,
+            ).exists():
+                return error("Este plato ya fue compartido con ese amigue.", status=409)
+
+            form.instance.plato = plato
 
         elif tipo_elemento == ElementoCompartido.LUGAR:
-            form.instance.lugar = get_object_or_404(Lugar, id=elemento_id)
+            lugar = Lugar.objects.filter(id=elemento_id).first()
+            if not lugar:
+                return error("No se pudo compartir: no se encontró el lugar.", status=404)
 
-        messages.success(self.request, "Elemento compartido correctamente.")
-        return super().form_valid(form)
+            if ElementoCompartido.objects.filter(
+                usuario_que_envia=self.request.user,
+                destinatario=destinatario,
+                tipo=ElementoCompartido.LUGAR,
+                lugar=lugar,
+            ).exists():
+                return error("Este lugar ya fue compartido con ese amigue.", status=409)
 
+            form.instance.lugar = lugar
 
+        self.object = form.save()
 
+        mensaje_ok = "Compartido correctamente."
 
+        if self.es_ajax():
+            try:
+                estado_label = self.object.get_estado_display()
+            except Exception:
+                estado_label = getattr(self.object, "estado", "") or "Compartido"
 
+            try:
+                creado_el = self.object.creado_el.strftime("%d/%m/%Y %H:%M")
+            except Exception:
+                creado_el = ""
 
+            compartido_payload = {
+                "tipo": self.object.tipo,
+                "plato_id": self.object.plato_id,
+                "lugar_id": self.object.lugar_id,
+                "destinatario": destinatario.username,
+                "mensaje": self.object.mensaje,
+                "estado": estado_label,
+                "creado_el": creado_el,
+            }
+
+            return self.respuesta_ajax(mensaje_ok, compartido=compartido_payload)
+
+        messages.success(self.request, mensaje_ok)
+        return redirect(self.get_success_url())
 
 
 def obtener_contexto_amigues(usuario):

@@ -799,3 +799,98 @@ body.filtro-platos-cambiando [data-listado-url] {
     opacity: .70;
   }
 }
+/* =====================================================
+   Compartir: split button + historial scrolleable
+   ===================================================== */
+.compartir-split-wrap {
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.compartir-historial-toggle {
+  position: relative;
+  min-width: 1.9rem;
+  width: auto;
+  padding-left: .42rem !important;
+  padding-right: .42rem !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: .22rem;
+  overflow: visible !important;
+}
+
+.compartir-historial-toggle::after {
+  display: none !important;
+}
+
+.compartir-caret-visible {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-left: .28em solid transparent;
+  border-right: .28em solid transparent;
+  border-top: .34em solid currentColor;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+
+.compartir-historial-toggle-empty {
+  min-width: 1.85rem;
+  width: 1.85rem;
+  opacity: .48;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+.compartir-historial-toggle-empty .compartir-caret-visible {
+  opacity: .85;
+}
+
+.compartir-count-badge {
+  position: static !important;
+  transform: none !important;
+  z-index: 1;
+  pointer-events: none;
+  font-size: .66rem;
+  line-height: 1;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .18rem .32rem;
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+.compartir-historial-dropdown {
+  min-width: 310px;
+  max-width: min(92vw, 390px);
+  max-height: min(58vh, 380px);
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain;
+  z-index: 2055 !important;
+}
+
+.compartir-historial-portaled {
+  position: fixed !important;
+  display: block !important;
+  transform: none !important;
+  margin: 0 !important;
+}
+
+.compartir-historial-header {
+  z-index: 1;
+}
+
+.compartir-historial-mensaje {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+#amigue-select option[disabled] {
+  color: #6c757d;
+}

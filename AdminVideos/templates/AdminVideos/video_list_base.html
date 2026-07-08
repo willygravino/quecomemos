@@ -40,43 +40,593 @@
 
 {% endcomment %}
 
-<!-- Modal para compartir plato -->
-  <div class="modal fade" id="compartirModal" tabindex="-1" aria-labelledby="compartirModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <!-- <div class="modal-header">
-        <h5 class="modal-title" id="compartirModalLabel">Compartir plato</h5>
-        
-      </div> -->
-        <div class="modal-body">
-          <form method="post" action="{% url 'compartir-plato' %}">
-            {% csrf_token %}
+<!-- Modal para compartir plato/lugar -->
+<div class="modal fade" id="compartirModal" tabindex="-1" aria-labelledby="compartirModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 overflow-hidden">
 
-            <div class="mb-3">
-              <h6>Compartir con:</h6>
-              <select id="amigue-select" name="amigue" class="form-select" aria-label="Seleccionar amigue">
-                {% for amigue in amigues %}
-                <option value="{{ amigue }}">{{ amigue }}</option>
-                {% endfor %}
-              </select>
-              <!-- Campo oculto donde se establecerá el plato id dinámicamente -->
-              <input type="hidden" name="elemento_id" id="platoIdInputCompartir">
+      <form id="compartirElementoForm"
+            method="post"
+            action="{% url 'compartir-plato' %}"
+            data-ajax-compartir="true"
+            novalidate>
+        {% csrf_token %}
 
-              <!-- Campo oculto para el tipo de elemento -->
-              <input type="hidden" name="tipo_elemento" id="tipoObjetoCompartir">
+        <div class="modal-header bg-light">
+          <div>
+            <h5 class="modal-title mb-0" id="compartirModalLabel">Compartir</h5>
+            <small class="text-muted">
+              Enviá una sugerencia a un amigue sin salir de esta pantalla.
+            </small>
+          </div>
 
-            </div>
-
-            <button type="submit" class="btn btn-primary">Compartir</button>
-
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-
-          </form>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
-      </div>
+
+        <div class="modal-body">
+
+          <div id="compartirModalFeedback"
+               class="alert d-none mb-3"
+               role="alert"></div>
+
+          <div class="mb-3">
+            <label for="amigue-select" class="form-label fw-semibold">
+              Compartir con
+            </label>
+
+            <select id="amigue-select"
+                    name="amigue"
+                    class="form-select"
+                    aria-label="Seleccionar amigue"
+                    required>
+              <option value="">Elegí un amigue...</option>
+              {% for amigue in amigues %}
+                <option value="{{ amigue }}">{{ amigue }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <div class="small text-muted mb-1">Elemento seleccionado</div>
+            <div class="fw-semibold" id="compartirElementoNombre">Este elemento</div>
+          </div>
+
+          <div class="mb-0">
+            <label for="compartirMensaje" class="form-label fw-semibold">
+              Mensaje
+            </label>
+
+            <textarea id="compartirMensaje"
+                      name="mensaje"
+                      class="form-control"
+                      rows="4"
+                      maxlength="1000"
+                      placeholder="Ej: Te recomiendo probar esto, creo que te va a gustar."
+                      required></textarea>
+          </div>
+
+          <input type="hidden" name="elemento_id" id="platoIdInputCompartir">
+          <input type="hidden" name="tipo_elemento" id="tipoObjetoCompartir">
+
+        </div>
+
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+            Cerrar
+          </button>
+
+          <button type="submit" class="btn btn-primary" id="compartirSubmitBtn">
+            <i class="fa-solid fa-share-nodes me-1"></i>
+            Compartir
+          </button>
+        </div>
+
+      </form>
+
     </div>
   </div>
+</div>
 
+<script id="compartir-modal-ajax">
+(function () {
+  if (window.__compartirModalAjaxInicializado) {
+    return;
+  }
+
+  window.__compartirModalAjaxInicializado = true;
+
+  function mostrarFeedback(form, nivel, mensaje) {
+    const feedback = form.querySelector("#compartirModalFeedback");
+
+    if (!feedback) {
+      return;
+    }
+
+    feedback.className = `alert alert-${nivel || "info"} mb-3`;
+    feedback.textContent = mensaje || "";
+    feedback.classList.remove("d-none");
+  }
+
+
+
+  function escapeHtmlCompartir(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function actualizarHistorialCompartidos(data, formData) {
+    const compartido = data.compartido || {};
+    const tipo = compartido.tipo || formData.get("tipo_elemento");
+    const platoId = String(compartido.plato_id || formData.get("elemento_id") || "");
+
+    if (tipo !== "plato" || !platoId) {
+      return;
+    }
+
+    const listas = Array.from(document.querySelectorAll("[data-compartidos-list-plato-id]"))
+      .filter(function (elemento) {
+        return String(elemento.dataset.compartidosListPlatoId || "") === platoId;
+      });
+
+    if (!listas.length) {
+      return;
+    }
+
+    const destinatario = compartido.destinatario || formData.get("amigue") || "amigue";
+    const mensaje = compartido.mensaje || formData.get("mensaje") || "";
+    const estado = compartido.estado || "Pendiente";
+    const creadoEl = compartido.creado_el || "recién";
+
+    listas.forEach(function (lista) {
+      const vacio = lista.querySelector("[data-compartidos-empty]");
+
+      if (vacio) {
+        vacio.remove();
+      }
+
+      const item = document.createElement("div");
+      item.className = "px-3 py-2 border-bottom js-compartido-item";
+      item.innerHTML = `
+        <div class="d-flex justify-content-between gap-2">
+          <strong class="small text-truncate">${escapeHtmlCompartir(destinatario)}</strong>
+          <span class="badge rounded-pill bg-light text-dark border flex-shrink-0">${escapeHtmlCompartir(estado)}</span>
+        </div>
+        ${mensaje ? `<div class="small text-muted mt-1" style="white-space: normal;">“${escapeHtmlCompartir(mensaje)}”</div>` : ""}
+        <div class="small text-muted mt-1">${escapeHtmlCompartir(creadoEl)}</div>
+      `;
+
+      lista.prepend(item);
+    });
+
+    Array.from(document.querySelectorAll("[data-compartidos-count-plato-id]"))
+      .filter(function (badge) {
+        return String(badge.dataset.compartidosCountPlatoId || "") === platoId;
+      })
+      .forEach(function (badge) {
+        const actual = parseInt((badge.textContent || "0").trim(), 10) || 0;
+        badge.textContent = String(actual + 1);
+        badge.classList.remove("d-none");
+      });
+  }
+
+  function limpiarFeedback(form) {
+    const feedback = form.querySelector("#compartirModalFeedback");
+
+    if (!feedback) {
+      return;
+    }
+
+    feedback.textContent = "";
+    feedback.className = "alert d-none mb-3";
+  }
+
+  document.addEventListener("show.bs.modal", function (event) {
+    if (!event.target || event.target.id !== "compartirModal") {
+      return;
+    }
+
+    const form = event.target.querySelector("#compartirElementoForm");
+
+    if (!form) {
+      return;
+    }
+
+    limpiarFeedback(form);
+  });
+
+  document.addEventListener("submit", function (event) {
+    const form = event.target.closest("#compartirElementoForm");
+
+    if (!form) {
+      return;
+    }
+
+    event.preventDefault();
+
+    limpiarFeedback(form);
+
+    const submitBtn = form.querySelector("#compartirSubmitBtn");
+    const formData = new FormData(form);
+
+    const amigue = (formData.get("amigue") || "").trim();
+    const mensaje = (formData.get("mensaje") || "").trim();
+    const elementoId = (formData.get("elemento_id") || "").trim();
+    const tipoElemento = (formData.get("tipo_elemento") || "").trim();
+
+    if (!elementoId || !tipoElemento) {
+      mostrarFeedback(form, "danger", "No se pudo compartir: falta el elemento seleccionado.");
+      return;
+    }
+
+    if (!amigue) {
+      mostrarFeedback(form, "warning", "Elegí un amigue antes de compartir.");
+      return;
+    }
+
+    if (!mensaje) {
+      mostrarFeedback(form, "warning", "Escribí un mensaje antes de compartir.");
+      return;
+    }
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.dataset.originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>Compartiendo...';
+    }
+
+    fetch(form.action, {
+      method: "POST",
+      body: formData,
+      headers: {
+        "X-Requested-With": "XMLHttpRequest",
+        "Accept": "application/json"
+      }
+    })
+      .then(async function (response) {
+        let data = {};
+
+        try {
+          data = await response.json();
+        } catch (error) {
+          data = {};
+        }
+
+        if (!response.ok || data.ok === false) {
+          throw new Error(data.message || "No se pudo compartir.");
+        }
+
+        return data;
+      })
+      .then(function (data) {
+        mostrarFeedback(form, data.level || "success", data.message || "Compartido correctamente.");
+        actualizarHistorialCompartidos(data, formData);
+
+        if (window.compartirActualizarDestinatarios) {
+          window.compartirActualizarDestinatarios(data, formData, form);
+        }
+
+        const textarea = form.querySelector("#compartirMensaje");
+
+        if (textarea) {
+          textarea.value = "";
+        }
+      })
+      .catch(function (error) {
+        mostrarFeedback(form, "danger", error.message || "No se pudo compartir.");
+      })
+      .finally(function () {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = submitBtn.dataset.originalText || '<i class="fa-solid fa-share-nodes me-1"></i>Compartir';
+        }
+      });
+  });
+})();
+</script>
+
+<script id="compartir-historial-scroll-duplicados">
+(function () {
+  if (window.__compartirHistorialScrollDuplicadosInicializadoV2) {
+    return;
+  }
+
+  window.__compartirHistorialScrollDuplicadosInicializadoV2 = true;
+
+  let menuAbierto = null;
+  let toggleAbierto = null;
+  let placeholderAbierto = null;
+
+  function cssEscape(value) {
+    if (window.CSS && typeof window.CSS.escape === "function") {
+      return window.CSS.escape(String(value));
+    }
+
+    return String(value).replace(/"/g, '\\"');
+  }
+
+  function parseDestinatarios(raw) {
+    return new Set(String(raw || "")
+      .split("|")
+      .map(function (item) { return item.trim(); })
+      .filter(Boolean));
+  }
+
+  function obtenerWrapperPlato(platoId) {
+    if (!platoId) {
+      return null;
+    }
+
+    return document.querySelector('[data-compartidos-destinatarios-plato-id="' + cssEscape(platoId) + '"]');
+  }
+
+  function obtenerDestinatariosYaCompartidos(platoId) {
+    const wrapper = obtenerWrapperPlato(platoId);
+
+    if (!wrapper) {
+      return new Set();
+    }
+
+    return parseDestinatarios(wrapper.dataset.compartidosDestinatarios || "");
+  }
+
+  function actualizarSelectAmiguesCompartir(form) {
+    form = form || document.getElementById("compartirElementoForm");
+
+    if (!form) {
+      return;
+    }
+
+    const select = form.querySelector('[name="amigue"]');
+    const platoInput = form.querySelector('[name="elemento_id"]');
+    const tipoInput = form.querySelector('[name="tipo_elemento"]');
+
+    if (!select || !platoInput || !tipoInput) {
+      return;
+    }
+
+    const tipo = tipoInput.value;
+    const platoId = platoInput.value;
+    const yaCompartidos = tipo === "plato" ? obtenerDestinatariosYaCompartidos(platoId) : new Set();
+
+    Array.from(select.options).forEach(function (option) {
+      if (!option.value) {
+        option.disabled = false;
+        return;
+      }
+
+      if (!option.dataset.originalText) {
+        option.dataset.originalText = option.textContent;
+      }
+
+      const yaCompartido = yaCompartidos.has(option.value);
+      option.disabled = yaCompartido;
+      option.textContent = yaCompartido
+        ? option.dataset.originalText + " (ya compartido)"
+        : option.dataset.originalText;
+    });
+
+    if (select.selectedOptions.length && select.selectedOptions[0].disabled) {
+      select.value = "";
+    }
+  }
+
+  function habilitarToggleHistorial(platoId) {
+    Array.from(document.querySelectorAll('[data-compartir-plato-id="' + cssEscape(platoId) + '"] .compartir-historial-toggle'))
+      .forEach(function (toggle) {
+        toggle.disabled = false;
+        toggle.removeAttribute("disabled");
+        toggle.removeAttribute("aria-disabled");
+        toggle.classList.remove("compartir-historial-toggle-empty");
+        toggle.setAttribute("data-bs-toggle", "dropdown");
+        toggle.setAttribute("data-bs-display", "dynamic");
+        toggle.setAttribute("data-bs-boundary", "viewport");
+        toggle.setAttribute("data-bs-auto-close", "outside");
+        toggle.setAttribute("aria-expanded", "false");
+        toggle.setAttribute("title", "Ver historial de compartidos");
+        toggle.setAttribute("aria-label", "Ver historial de compartidos");
+      });
+  }
+
+  function agregarDestinatarioAData(platoId, destinatario) {
+    if (!platoId || !destinatario) {
+      return;
+    }
+
+    const nodos = document.querySelectorAll('[data-compartidos-destinatarios-plato-id="' + cssEscape(platoId) + '"]');
+
+    nodos.forEach(function (wrapper) {
+      const actuales = parseDestinatarios(wrapper.dataset.compartidosDestinatarios || "");
+      actuales.add(destinatario);
+      wrapper.dataset.compartidosDestinatarios = Array.from(actuales).join("|");
+    });
+
+    habilitarToggleHistorial(platoId);
+  }
+
+  window.compartirActualizarDestinatarios = function (data, formData, form) {
+    const compartido = data && data.compartido ? data.compartido : {};
+    const tipo = compartido.tipo || formData.get("tipo_elemento");
+    const platoId = String(compartido.plato_id || formData.get("elemento_id") || "");
+    const destinatario = compartido.destinatario || formData.get("amigue") || "";
+
+    if (tipo === "plato" && platoId && destinatario) {
+      agregarDestinatarioAData(platoId, destinatario);
+    }
+
+    actualizarSelectAmiguesCompartir(form);
+  };
+
+  function obtenerToggleDesdeEvento(event) {
+    const target = event.target;
+
+    if (!target || !target.closest) {
+      return null;
+    }
+
+    return target.closest(".compartir-historial-toggle");
+  }
+
+  function devolverMenuAlLugarOriginal() {
+    if (!menuAbierto || !placeholderAbierto) {
+      return;
+    }
+
+    const parent = placeholderAbierto.parentNode;
+
+    if (parent) {
+      parent.insertBefore(menuAbierto, placeholderAbierto);
+      placeholderAbierto.remove();
+    }
+  }
+
+  function cerrarMenuPortal() {
+    if (!menuAbierto) {
+      return;
+    }
+
+    menuAbierto.classList.remove("show", "compartir-historial-portaled");
+    menuAbierto.style.top = "";
+    menuAbierto.style.left = "";
+    menuAbierto.style.right = "";
+    menuAbierto.style.bottom = "";
+    menuAbierto.style.maxHeight = "";
+    menuAbierto.style.visibility = "";
+
+    if (toggleAbierto) {
+      toggleAbierto.setAttribute("aria-expanded", "false");
+    }
+
+    devolverMenuAlLugarOriginal();
+
+    menuAbierto = null;
+    toggleAbierto = null;
+    placeholderAbierto = null;
+  }
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(value, max));
+  }
+
+  function posicionarMenuCercaDelToggle(menu, toggle) {
+    const margen = 10;
+    const separacion = 8;
+    const rect = toggle.getBoundingClientRect();
+
+    menu.style.visibility = "hidden";
+    menu.classList.add("show", "compartir-historial-portaled");
+    menu.style.maxHeight = "";
+
+    const viewportW = window.innerWidth || document.documentElement.clientWidth;
+    const viewportH = window.innerHeight || document.documentElement.clientHeight;
+
+    const disponibleArriba = Math.max(0, rect.top - margen - separacion);
+    const disponibleAbajo = Math.max(0, viewportH - rect.bottom - margen - separacion);
+    const usarArriba = disponibleArriba >= 170 || disponibleArriba >= disponibleAbajo;
+    const disponibleVertical = usarArriba ? disponibleArriba : disponibleAbajo;
+    const altoMax = clamp(disponibleVertical, 160, 420);
+
+    menu.style.maxHeight = altoMax + "px";
+    menu.style.overflowY = "auto";
+    menu.style.overflowX = "hidden";
+
+    const menuRect = menu.getBoundingClientRect();
+    const anchoMenu = Math.min(menuRect.width || 320, viewportW - margen * 2);
+    const altoMenu = Math.min(menu.offsetHeight || menuRect.height || altoMax, altoMax);
+
+    let left = rect.right - anchoMenu;
+    left = clamp(left, margen, viewportW - anchoMenu - margen);
+
+    let top;
+    if (usarArriba) {
+      top = rect.top - altoMenu - separacion;
+      top = clamp(top, margen, Math.max(margen, viewportH - altoMenu - margen));
+    } else {
+      top = rect.bottom + separacion;
+      top = clamp(top, margen, Math.max(margen, viewportH - altoMenu - margen));
+    }
+
+    menu.style.left = left + "px";
+    menu.style.top = top + "px";
+    menu.style.visibility = "visible";
+  }
+
+  function abrirMenuPortal(toggle) {
+    if (!toggle || toggle.disabled || toggle.classList.contains("compartir-historial-toggle-empty")) {
+      return;
+    }
+
+    const wrapper = toggle.closest(".compartir-split-wrap");
+    const menu = wrapper ? wrapper.querySelector(".compartir-historial-dropdown") : null;
+
+    if (!wrapper || !menu) {
+      return;
+    }
+
+    if (menuAbierto === menu) {
+      cerrarMenuPortal();
+      return;
+    }
+
+    cerrarMenuPortal();
+
+    placeholderAbierto = document.createComment("compartir-historial-placeholder");
+    wrapper.insertBefore(placeholderAbierto, menu);
+    document.body.appendChild(menu);
+
+    menuAbierto = menu;
+    toggleAbierto = toggle;
+
+    toggle.setAttribute("aria-expanded", "true");
+    posicionarMenuCercaDelToggle(menu, toggle);
+  }
+
+  document.addEventListener("click", function (event) {
+    const toggle = obtenerToggleDesdeEvento(event);
+
+    if (toggle) {
+      event.preventDefault();
+      event.stopPropagation();
+      abrirMenuPortal(toggle);
+      return;
+    }
+
+    if (menuAbierto && !menuAbierto.contains(event.target)) {
+      cerrarMenuPortal();
+    }
+  }, true);
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") {
+      cerrarMenuPortal();
+    }
+  });
+
+  window.addEventListener("resize", cerrarMenuPortal);
+  window.addEventListener("scroll", cerrarMenuPortal, true);
+
+  document.addEventListener("show.bs.modal", function (event) {
+    if (!event.target || event.target.id !== "compartirModal") {
+      return;
+    }
+
+    setTimeout(function () {
+      actualizarSelectAmiguesCompartir(event.target.querySelector("#compartirElementoForm"));
+    }, 0);
+  });
+
+  document.addEventListener("shown.bs.modal", function (event) {
+    if (!event.target || event.target.id !== "compartirModal") {
+      return;
+    }
+
+    actualizarSelectAmiguesCompartir(event.target.querySelector("#compartirElementoForm"));
+  });
+})();
+</script>
 
 <script>
 // LISTADO GMAIL COMO ÍNDICE DEL CAROUSEL
@@ -435,3 +985,284 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 {% endblock %}
+
+<script id="compartir-select-disabled-historial-final">
+(function () {
+  if (window.__compartirSelectDisabledHistorialFinal) {
+    return;
+  }
+
+  window.__compartirSelectDisabledHistorialFinal = true;
+  window.__compartirPlatoActivo = window.__compartirPlatoActivo || "";
+
+  function normalizar(value) {
+    return String(value || "").trim();
+  }
+
+  function cssEscape(value) {
+    if (window.CSS && typeof window.CSS.escape === "function") {
+      return window.CSS.escape(String(value));
+    }
+
+    return String(value).replace(/"/g, '\\"');
+  }
+
+  function parseLista(raw) {
+    return String(raw || "")
+      .split("|")
+      .map(function (item) { return normalizar(item); })
+      .filter(Boolean);
+  }
+
+  function wrappers(platoId) {
+    platoId = normalizar(platoId);
+    if (!platoId) {
+      return [];
+    }
+
+    return Array.from(
+      document.querySelectorAll('[data-compartir-plato-id="' + cssEscape(platoId) + '"], [data-compartidos-destinatarios-plato-id="' + cssEscape(platoId) + '"]')
+    );
+  }
+
+  function destinatariosDesdeDataset(platoId) {
+    const set = new Set();
+
+    wrappers(platoId).forEach(function (wrapper) {
+      parseLista(wrapper.dataset.compartidosDestinatarios || "").forEach(function (destinatario) {
+        set.add(destinatario);
+      });
+    });
+
+    return set;
+  }
+
+  function destinatariosDesdeHistorial(platoId) {
+    const set = new Set();
+    platoId = normalizar(platoId);
+
+    if (!platoId) {
+      return set;
+    }
+
+    const listas = Array.from(
+      document.querySelectorAll('[data-compartidos-list-plato-id="' + cssEscape(platoId) + '"]')
+    );
+
+    listas.forEach(function (lista) {
+      Array.from(lista.querySelectorAll("[data-compartido-destinatario]")).forEach(function (node) {
+        const destinatario = normalizar(node.dataset.compartidoDestinatario || node.textContent);
+        if (destinatario) {
+          set.add(destinatario);
+        }
+      });
+
+      // Fallback por si algún HTML viejo no tiene data-compartido-destinatario.
+      Array.from(lista.querySelectorAll(".js-compartido-item strong")).forEach(function (node) {
+        const destinatario = normalizar(node.textContent);
+        if (destinatario && !destinatario.toLowerCase().includes("todavía")) {
+          set.add(destinatario);
+        }
+      });
+    });
+
+    return set;
+  }
+
+  function destinatariosCompartidos(platoId) {
+    const set = new Set();
+
+    destinatariosDesdeDataset(platoId).forEach(function (destinatario) {
+      set.add(destinatario);
+    });
+
+    destinatariosDesdeHistorial(platoId).forEach(function (destinatario) {
+      set.add(destinatario);
+    });
+
+    return set;
+  }
+
+  function setDatasetDestinatario(platoId, destinatario) {
+    platoId = normalizar(platoId);
+    destinatario = normalizar(destinatario);
+
+    if (!platoId || !destinatario) {
+      return;
+    }
+
+    wrappers(platoId).forEach(function (wrapper) {
+      const actuales = destinatariosCompartidos(platoId);
+      actuales.add(destinatario);
+      wrapper.dataset.compartidosDestinatarios = Array.from(actuales).join("|");
+    });
+  }
+
+  function limpiarSelect(select) {
+    if (!select) {
+      return;
+    }
+
+    Array.from(select.options).forEach(function (option, index) {
+      if (index === 0) {
+        option.disabled = false;
+        return;
+      }
+
+      if (!option.dataset.originalText) {
+        option.dataset.originalText = option.textContent.replace(/\s+\(ya compartido\)$/i, "");
+      }
+
+      option.textContent = option.dataset.originalText;
+      option.disabled = false;
+      option.removeAttribute("aria-disabled");
+    });
+  }
+
+  function refrescarSelect2(select) {
+    if (!select || !window.jQuery) {
+      return;
+    }
+
+    const $select = window.jQuery(select);
+
+    if ($select.data("select2")) {
+      $select.trigger("change.select2");
+    }
+  }
+
+  function deshabilitar(platoId) {
+    platoId = normalizar(platoId || window.__compartirPlatoActivo);
+
+    const select = document.getElementById("amigue-select");
+
+    if (!select) {
+      return;
+    }
+
+    limpiarSelect(select);
+
+    if (!platoId) {
+      refrescarSelect2(select);
+      return;
+    }
+
+    const compartidos = destinatariosCompartidos(platoId);
+
+    Array.from(select.options).forEach(function (option, index) {
+      if (index === 0) {
+        return;
+      }
+
+      const username = normalizar(option.value);
+
+      if (username && compartidos.has(username)) {
+        option.disabled = true;
+        option.setAttribute("aria-disabled", "true");
+        option.textContent = (option.dataset.originalText || option.textContent) + " (ya compartido)";
+      }
+    });
+
+    if (select.selectedOptions.length && select.selectedOptions[0].disabled) {
+      select.value = "";
+    }
+
+    refrescarSelect2(select);
+  }
+
+  window.compartirDeshabilitarYaCompartidos = deshabilitar;
+  window.compartirMarcarAmiguesYaCompartidos = deshabilitar;
+
+  function tomarPlatoDesdeTrigger(trigger) {
+    const wrapper = trigger && trigger.closest("[data-compartir-plato-id]");
+
+    if (wrapper && wrapper.dataset.compartirPlatoId) {
+      window.__compartirPlatoActivo = normalizar(wrapper.dataset.compartirPlatoId);
+    }
+
+    return window.__compartirPlatoActivo;
+  }
+
+  document.addEventListener("click", function (event) {
+    const trigger = event.target.closest('[data-bs-target="#compartirModal"]');
+
+    if (!trigger) {
+      return;
+    }
+
+    const platoId = tomarPlatoDesdeTrigger(trigger);
+
+    window.setTimeout(function () { deshabilitar(platoId); }, 0);
+    window.setTimeout(function () { deshabilitar(platoId); }, 60);
+    window.setTimeout(function () { deshabilitar(platoId); }, 180);
+  }, true);
+
+  ["show.bs.modal", "shown.bs.modal"].forEach(function (eventName) {
+    document.addEventListener(eventName, function (event) {
+      if (!event.target || event.target.id !== "compartirModal") {
+        return;
+      }
+
+      const tipoInput = event.target.querySelector("#tipoObjetoCompartir");
+      const idInput = event.target.querySelector("#platoIdInputCompartir");
+
+      if (tipoInput && tipoInput.value === "plato" && idInput && idInput.value) {
+        window.__compartirPlatoActivo = normalizar(idInput.value);
+      }
+
+      const platoId = window.__compartirPlatoActivo;
+
+      window.setTimeout(function () { deshabilitar(platoId); }, 0);
+      window.setTimeout(function () { deshabilitar(platoId); }, 60);
+      window.setTimeout(function () { deshabilitar(platoId); }, 180);
+    });
+  });
+
+  document.addEventListener("submit", function (event) {
+    const form = event.target.closest("#compartirElementoForm");
+
+    if (!form) {
+      return;
+    }
+
+    const formData = new FormData(form);
+    const tipo = normalizar(formData.get("tipo_elemento"));
+    const platoId = normalizar(formData.get("elemento_id") || window.__compartirPlatoActivo);
+    const amigue = normalizar(formData.get("amigue"));
+
+    if (tipo !== "plato" || !platoId || !amigue) {
+      return;
+    }
+
+    if (destinatariosCompartidos(platoId).has(amigue)) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      deshabilitar(platoId);
+      return false;
+    }
+  }, true);
+
+  const actualizarOriginal = window.compartirActualizarDestinatarios;
+
+  window.compartirActualizarDestinatarios = function (data, formData, form) {
+    if (typeof actualizarOriginal === "function") {
+      actualizarOriginal(data, formData, form);
+    }
+
+    const compartido = (data && data.compartido) || {};
+    const tipo = normalizar(compartido.tipo || (formData && formData.get("tipo_elemento")));
+    const platoId = normalizar(compartido.plato_id || (formData && formData.get("elemento_id")) || window.__compartirPlatoActivo);
+    const destinatario = normalizar(compartido.destinatario || (formData && formData.get("amigue")));
+
+    if (tipo === "plato" && platoId && destinatario) {
+      setDatasetDestinatario(platoId, destinatario);
+      deshabilitar(platoId);
+    }
+  };
+
+  // Aplicar por si el modal ya quedó abierto al cargar dinámicamente.
+  window.setTimeout(function () {
+    deshabilitar(window.__compartirPlatoActivo);
+  }, 250);
+})();
+</script>

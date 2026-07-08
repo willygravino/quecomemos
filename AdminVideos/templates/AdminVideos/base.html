@@ -31,7 +31,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <!-- mi css -->
-    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260707183903" rel="stylesheet">  <!-- al final + bust de caché -->
+    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260708075407" rel="stylesheet">  <!-- al final + bust de caché -->
 
     <link rel="manifest" href="{% static 'AdminVideos/lista_super/manifest_lista_super.json' %}?v=1">
 
@@ -1166,6 +1166,23 @@ async function setPlatoInfo(platoId, tipo, nombrePlato) {
 
   if (idCompartir) idCompartir.value = platoId;
   if (tipoCompartir) tipoCompartir.value = tipo;
+
+  const tituloCompartir = document.getElementById("compartirElementoNombre");
+  const modalTituloCompartir = document.getElementById("compartirModalLabel");
+  const feedbackCompartir = document.getElementById("compartirModalFeedback");
+
+  if (tituloCompartir) {
+    tituloCompartir.textContent = nombrePlato || (tipo === "lugar" ? "Este lugar" : "Este plato");
+  }
+
+  if (modalTituloCompartir) {
+    modalTituloCompartir.textContent = tipo === "lugar" ? "Compartir lugar" : "Compartir plato";
+  }
+
+  if (feedbackCompartir) {
+    feedbackCompartir.textContent = "";
+    feedbackCompartir.className = "alert d-none mb-3";
+  }
 
   // Limpiar SIEMPRE estado previo
   if (listaVar) listaVar.innerHTML = "";

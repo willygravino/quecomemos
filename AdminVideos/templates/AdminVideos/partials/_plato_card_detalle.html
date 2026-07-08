@@ -66,13 +66,93 @@
         {% endif %}
 
         {% if amigues %}
-          <a href="#"
-             class="btn btn-sm btn-outline-primary"
-             data-bs-toggle="modal"
-             data-bs-target="#compartirModal"
-             onclick="setPlatoInfo('{{ plato_detalle.id }}', 'plato')">
-            <i class="fa-solid fa-share-nodes me-1"></i> Compartir
-          </a>
+          <div class="btn-group btn-group-sm compartir-split-wrap"
+               data-compartir-plato-id="{{ plato_detalle.id }}"
+               data-compartidos-destinatarios-plato-id="{{ plato_detalle.id }}"
+               data-compartidos-destinatarios="{% for compartido in plato_detalle.compartidos_enviados_info %}{{ compartido.destinatario|escape }}{% if not forloop.last %}|{% endif %}{% endfor %}">
+            <a href="#"
+               class="btn btn-outline-primary"
+               data-bs-toggle="modal"
+               data-bs-target="#compartirModal"
+               onclick="event.preventDefault(); setPlatoInfo('{{ plato_detalle.id }}', 'plato', '{{ plato_detalle.nombre_plato|escapejs }}')"
+               title="Compartir"
+               aria-label="Compartir plato">
+              <i class="fa-solid fa-share-nodes me-1"></i> Compartir
+            </a>
+
+            <button class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split compartir-historial-toggle position-relative {% if not plato_detalle.compartidos_enviados_count %}compartir-historial-toggle-empty{% endif %}"
+                    type="button"
+                    id="compartirDropdownPlato{{ plato_detalle.id }}"
+                    {% if plato_detalle.compartidos_enviados_count %}
+                      data-bs-toggle="dropdown"
+                      data-bs-display="dynamic"
+                      data-bs-boundary="viewport"
+                      data-bs-auto-close="outside"
+                      aria-expanded="false"
+                      title="Ver historial de compartidos"
+                      aria-label="Ver historial de compartidos"
+                    {% else %}
+                      disabled
+                      aria-disabled="true"
+                      aria-expanded="false"
+                      title="Todavía no compartiste este plato"
+                      aria-label="Todavía no hay historial de compartidos"
+                    {% endif %}>
+              <span class="visually-hidden">Ver historial de compartidos</span>
+              {% if plato_detalle.compartidos_enviados_count %}
+                <span class="badge rounded-pill bg-primary compartir-count-badge"
+                      data-compartidos-count-plato-id="{{ plato_detalle.id }}">
+                  {{ plato_detalle.compartidos_enviados_count }}
+                </span>
+              {% else %}
+                <span class="badge rounded-pill bg-primary compartir-count-badge d-none"
+                      data-compartidos-count-plato-id="{{ plato_detalle.id }}">0</span>
+              {% endif %}
+              <span class="compartir-caret-visible" aria-hidden="true"></span>
+            </button>
+
+            <div class="dropdown-menu dropdown-menu-end shadow p-0 compartir-historial-dropdown"
+                 aria-labelledby="compartirDropdownPlato{{ plato_detalle.id }}">
+
+              <div class="px-3 py-2 border-bottom bg-light sticky-top compartir-historial-header">
+                <div class="fw-semibold">Compartido con</div>
+                <div class="small text-muted">Historial de este plato</div>
+              </div>
+
+              <div class="compartir-historial-lista"
+                   data-compartidos-list-plato-id="{{ plato_detalle.id }}">
+                {% if plato_detalle.compartidos_enviados_info %}
+                  {% for compartido in plato_detalle.compartidos_enviados_info %}
+                    <div class="px-3 py-2 border-bottom js-compartido-item">
+                      <div class="d-flex justify-content-between gap-2">
+                        <strong class="small text-truncate" data-compartido-destinatario="{{ compartido.destinatario|escape }}">{{ compartido.destinatario }}</strong>
+                        <span class="badge rounded-pill bg-light text-dark border flex-shrink-0">
+                          {{ compartido.estado }}
+                        </span>
+                      </div>
+
+                      {% if compartido.mensaje %}
+                        <div class="small text-muted mt-1 compartir-historial-mensaje">
+                          “{{ compartido.mensaje|truncatechars:90 }}”
+                        </div>
+                      {% endif %}
+
+                      {% if compartido.creado_el %}
+                        <div class="small text-muted mt-1">
+                          {{ compartido.creado_el|date:"d/m/Y H:i" }}
+                        </div>
+                      {% endif %}
+                    </div>
+                  {% endfor %}
+                {% else %}
+                  <div class="px-3 py-3 text-muted small" data-compartidos-empty>
+                    Todavía no compartiste este plato.
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
         {% endif %}
 
         {% if plato_detalle.propietario == request.user %}
