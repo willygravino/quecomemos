@@ -2,25 +2,51 @@
 
 {% load static %}
 
-{% block lista_platos %}
+{% block compartidos_recibidos %}
+<!-- Compartidos recibidos compactos: fuera de sugeridos, debajo de programados -->
+{% if platos_compartidos or lugares_compartidos %}
+<div id="contenedor-platos-compartidos" class="compartidos-recibidos-section compartidos-recibidos-section-compacta mb-3">
+  <div class="compartidos-recibidos-header-compacto d-flex align-items-center justify-content-between gap-2 mb-2">
+    <div class="d-flex align-items-center gap-2 min-width-0">
+      <span class="compartidos-recibidos-icono flex-shrink-0">
+        <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
+      </span>
 
+      <div class="min-width-0">
+        <div class="fw-semibold text-truncate">
+          Compartidos con vos
+        </div>
+        <div class="small text-muted text-truncate">
+          Agregá o descartá las sugerencias pendientes.
+        </div>
+      </div>
+    </div>
 
+    <div class="d-flex align-items-center gap-2 flex-shrink-0">
+      <span class="badge rounded-pill bg-primary compartidos-recibidos-badge">
+        {{ compartidos_recibidos_total|default:0 }}
+      </span>
+      {% if compartidos_recibidos_hay_scroll %}
+        <span class="small text-muted d-none d-sm-inline">
+          Deslizá para ver más
+        </span>
+      {% endif %}
+    </div>
+  </div>
 
-<div id="contenedor-platos-compartidos">
-  {% include "AdminVideos/partials/_platos_compartidos.html" %}
-  {% include "AdminVideos/partials/_lugares_compartidos.html" %}
+  <div class="compartidos-recibidos-carousel-track" role="list" aria-label="Elementos compartidos pendientes">
+    {% include "AdminVideos/partials/_platos_compartidos.html" %}
+    {% include "AdminVideos/partials/_lugares_compartidos.html" %}
+  </div>
 </div>
+{% endif %}
+{% endblock %}
 
-
-
+{% block lista_platos %}
 
 <div id="contenedor-carousel-platos">
   {% include "AdminVideos/partials/_carousel_platos.html" %}
 </div>
-
-
-
-
 
 <div id="contenedor-listado-platos">
   {% include "AdminVideos/partials/_listado_platos.html" %}

@@ -3193,14 +3193,19 @@ def obtener_contexto_compartidos(usuario):
     """
     Devuelve datos laterales de la pantalla de platos.
 
-    No participa del filtrado principal de platos:
-    - mensajes agrupados
     - platos compartidos pendientes de importar
+    - lugares compartidos pendientes de importar
     """
-    return {
-        "platos_compartidos": obtener_platos_compartidos_pendientes(usuario),
-        "lugares_compartidos": obtener_lugares_compartidos_pendientes(usuario),
+    platos_compartidos = obtener_platos_compartidos_pendientes(usuario)
+    lugares_compartidos = obtener_lugares_compartidos_pendientes(usuario)
 
+    compartidos_recibidos_total = len(platos_compartidos) + len(lugares_compartidos)
+
+    return {
+        "platos_compartidos": platos_compartidos,
+        "lugares_compartidos": lugares_compartidos,
+        "compartidos_recibidos_total": compartidos_recibidos_total,
+        "compartidos_recibidos_hay_scroll": compartidos_recibidos_total > 2,
     }
 
 
@@ -4066,6 +4071,37 @@ def copiar_plato_para_usuario(plato_original, usuario):
         )
 
     return nuevo_plato
+
+
+
+@login_required
+@require_POST
+def descartar_elemento_compartido(request, compartido_id):
+    # Descarta un elemento compartido recibido por el usuario logueado.
+    # Mantiene el registro para historial/auditoría, pero deja de aparecer
+    # en la bandeja de compartidos pendientes porque cambia su estado.
+    tipo = (request.POST.get("tipo") or "").strip()
+
+    filtros = {
+        "pk": compartido_id,
+        "destinatario": request.user,
+        "estado": ElementoCompartido.PENDIENTE,
+    }
+
+    if tipo in (ElementoCompartido.PLATO, ElementoCompartido.LUGAR):
+        filtros["tipo"] = tipo
+
+    compartido = get_object_or_404(ElementoCompartido, **filtros)
+
+    compartido.estado = ElementoCompartido.DESCARTADO
+    compartido.save(update_fields=["estado", "actualizado_el"])
+
+    if compartido.tipo == ElementoCompartido.LUGAR:
+        messages.info(request, "Lugar compartido descartado.")
+    else:
+        messages.info(request, "Plato compartido descartado.")
+
+    return redirect("filtro-de-platos")
 
 
 @login_required

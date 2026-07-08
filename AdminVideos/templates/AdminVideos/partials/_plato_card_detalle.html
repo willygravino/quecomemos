@@ -44,6 +44,12 @@
           {{ plato_detalle.nombre_plato }}
         {% endif %}
       </h5>
+{% if plato_detalle.proviene_de %}
+  {% firstof plato_detalle.proviene_de.propietario.get_full_name plato_detalle.proviene_de.propietario.username plato_detalle.proviene_de.usuario.get_full_name plato_detalle.proviene_de.usuario.username plato_detalle.proviene_de.get_full_name plato_detalle.proviene_de.username plato_detalle.proviene_de "otro usuario" as origen_importado %}
+  <div class="plato-card-procedencia-importada text-center small text-muted mb-2">
+    Plato original de {{ origen_importado }}
+  </div>
+{% endif %}
 
       <div class="d-flex flex-wrap justify-content-center gap-2">
 

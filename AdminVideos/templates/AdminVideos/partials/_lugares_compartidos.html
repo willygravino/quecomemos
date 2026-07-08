@@ -1,32 +1,61 @@
 {% if lugares_compartidos %}
-  <section class="container my-3">
-    <div class="alert alert-info shadow-sm rounded-4">
-      <h5 class="mb-3">
-        <i class="fa-solid fa-share-nodes me-2"></i>
-        Lugares compartidos con vos
-      </h5>
+  {% for lugar in lugares_compartidos %}
+    {% firstof lugar.usuario_que_envia "Alguien" as remitente_lugar %}
+    <div class="compartido-recibido-slide" role="listitem">
+      <article class="card compartido-recibido-card compartido-recibido-card-compacta h-100 shadow-sm border-0">
+        <div class="card-body p-2 d-flex align-items-center gap-2">
+          <div class="compartido-recibido-thumb compartido-recibido-thumb-lugar flex-shrink-0">
+            <div class="compartido-recibido-thumb-placeholder">
+              <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+            </div>
+          </div>
 
-      {% for lugar in lugares_compartidos %}
-        <div class="d-flex justify-content-between align-items-center border-top pt-2 mt-2">
-          <div>
-            <strong>{{ lugar.nombre }}</strong>
-            <div class="small text-muted">
-              Compartido por {{ lugar.usuario_que_envia }}
+          <div class="flex-grow-1 min-width-0">
+            <div class="d-flex align-items-start justify-content-between gap-2 mb-1">
+              <div class="min-width-0">
+                <div class="small text-muted text-truncate">
+                  {{ remitente_lugar }} te compartió:
+                </div>
+                <h6 class="mb-0 text-truncate">
+                  {{ lugar.nombre }}
+                </h6>
+              </div>
+
+              <span class="badge rounded-pill bg-light text-dark border flex-shrink-0">
+                Lugar
+              </span>
             </div>
 
             {% if lugar.mensaje %}
-              <div class="small">“{{ lugar.mensaje }}”</div>
+              <p class="small text-muted mb-2 compartido-recibido-mensaje">
+                “{{ lugar.mensaje }}”
+              </p>
             {% endif %}
-          </div>
 
-          <a
-            href="{% url 'agregar-lugar-compartido' lugar.id_lugar lugar.compartido_id %}"
-            class="btn btn-sm btn-primary"
-          >
-            Agregar lugar
-          </a>
+            <div class="d-flex flex-wrap gap-2">
+              <form method="post"
+                    action="{% url 'agregar-lugar-compartido' lugar.id_lugar lugar.compartido_id %}"
+                    class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary btn-sm compartido-recibido-action">
+                  <i class="fa-solid fa-plus me-1" aria-hidden="true"></i>
+                  Agregar
+                </button>
+              </form>
+
+              <form method="post"
+                    action="{% url 'descartar-elemento-compartido' lugar.compartido_id %}"
+                    class="m-0">
+                {% csrf_token %}
+                <input type="hidden" name="tipo" value="lugar">
+                <button type="submit" class="btn btn-outline-secondary btn-sm compartido-recibido-action">
+                  Descartar
+                </button>
+              </form>
+            </div>
+          </div>
         </div>
-      {% endfor %}
+      </article>
     </div>
-  </section>
+  {% endfor %}
 {% endif %}

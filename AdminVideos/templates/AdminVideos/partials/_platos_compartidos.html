@@ -1,42 +1,67 @@
-
-<!-- ESTAS SON LAS TARJETAS DE COMPARTIDOS -->
-<section class="w-100 py-2">
-  <div class="container">
-      
-          {% if platos_compartidos %}
-
-
-          <div class="d-flex flex-wrap gap-2 justify-content-center text-center">
-            {% for plato_compartido in platos_compartidos %}
-              <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
-                <div class="card h-100">
-          
-                  <img src="{{ plato_compartido.image_url }}" class="img-thumbnail" alt="Imagen">
-          
-                  <div class="card-body text-center">
-                    <div class="position-absolute top-0 mt-1 start-50 translate-middle-x text-center text-white bg-dark rounded">
-                      <h6 class="mb-0 small">{{ plato_compartido.nombre_plato }} de {{ plato_compartido.quien_comparte }}</h6>
-                    </div>
-          
-                    <h6>{{ plato_compartido.mensaje }}</h6>
-          
-                    <div class="d-flex gap-1 align-items-center justify-content-center">
-                      <a class="btn btn-primary btn-sm" href="{% url 'agregar-plato-compartido' plato_compartido.id_plato plato_compartido.mensaje_id %}">Agregar a mi lista</a>
-                      <a class="btn btn-primary btn-sm" href="">Rechazar</a>
-                    </div>
-                  </div>
-          
-                </div>
+{% if platos_compartidos %}
+  {% for plato_compartido in platos_compartidos %}
+    {% firstof plato_compartido.usuario_que_envia plato_compartido.quien_comparte "Alguien" as remitente_plato %}
+    <div class="compartido-recibido-slide" role="listitem">
+      <article class="card compartido-recibido-card compartido-recibido-card-compacta h-100 shadow-sm border-0">
+        <div class="card-body p-2 d-flex align-items-center gap-2">
+          <div class="compartido-recibido-thumb flex-shrink-0">
+            {% if plato_compartido.image_url %}
+              <img src="{{ plato_compartido.image_url }}"
+                   alt="Imagen de {{ plato_compartido.nombre_plato }}"
+                   loading="lazy">
+            {% else %}
+              <div class="compartido-recibido-thumb-placeholder">
+                <i class="fa-solid fa-utensils" aria-hidden="true"></i>
               </div>
-            {% endfor %}
+            {% endif %}
           </div>
-          
 
+          <div class="flex-grow-1 min-width-0">
+            <div class="d-flex align-items-start justify-content-between gap-2 mb-1">
+              <div class="min-width-0">
+                <div class="small text-muted text-truncate">
+                  {{ remitente_plato }} te compartió:
+                </div>
+                <h6 class="mb-0 text-truncate">
+                  {{ plato_compartido.nombre_plato }}
+                </h6>
+              </div>
 
+              <span class="badge rounded-pill bg-light text-dark border flex-shrink-0">
+                Plato
+              </span>
+            </div>
 
+            {% if plato_compartido.mensaje %}
+              <p class="small text-muted mb-2 compartido-recibido-mensaje">
+                “{{ plato_compartido.mensaje }}”
+              </p>
+            {% endif %}
 
-          {% endif %}
-      
-  </div>
-</section>
+            <div class="d-flex flex-wrap gap-2">
+              <form method="post"
+                    action="{% url 'agregar-plato-compartido' plato_compartido.id_plato plato_compartido.mensaje_id %}"
+                    class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary btn-sm compartido-recibido-action">
+                  <i class="fa-solid fa-plus me-1" aria-hidden="true"></i>
+                  Agregar
+                </button>
+              </form>
 
+              <form method="post"
+                    action="{% url 'descartar-elemento-compartido' plato_compartido.mensaje_id %}"
+                    class="m-0">
+                {% csrf_token %}
+                <input type="hidden" name="tipo" value="plato">
+                <button type="submit" class="btn btn-outline-secondary btn-sm compartido-recibido-action">
+                  Descartar
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  {% endfor %}
+{% endif %}
