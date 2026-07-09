@@ -4340,12 +4340,9 @@ class AsignarPlato(View):
 
                     creados_extras += _asignar_extra(extra_id_str, tipo_req)
 
+                # Éxito silencioso: el menú se actualiza visualmente.
+                # Evitamos toasts obvios como "Asignados 1/1 platos a almuerzo.".
                 total = len(platos_a_asignar)
-                messages.success(
-                    request,
-                    f"Asignados {creados}/{total} platos a {momento}."
-                    + (f" Extras agregados: {creados_extras}." if creados_extras else "")
-                )
 
             elif tipo == "lugar":
                 lugar_id = request.POST.get("plato_id")  # Usamos plato_id para obtener el ID del lugar
@@ -4364,8 +4361,7 @@ class AsignarPlato(View):
                     momento=momento,
                     lugar=lugar,  # Asignamos el lugar al MenuItem
                 )
-                
-                messages.success(request, f"Lugar {lugar.nombre} (ID: {lugar.id}) asignado correctamente a {momento}.")
+                # Éxito silencioso: lugar asignado; el menú visible ya lo confirma.
 
 
         except Exception as e:
@@ -4381,7 +4377,6 @@ class AsignarPlato(View):
         if es_ajax:
             return JsonResponse({
                 "ok": True,
-                "message": "Elemento asignado correctamente.",
             })
 
         return redirect("filtro-de-platos")
