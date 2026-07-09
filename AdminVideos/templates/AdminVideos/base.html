@@ -666,7 +666,9 @@
                         id="tab-{{ dia|date:'Y-m-d' }}" data-bs-toggle="tab"
                         data-bs-target="#tab-content-{{ dia|date:'Y-m-d' }}" type="button" role="tab"
                         aria-controls="tab-content-{{ dia|date:'Y-m-d' }}"
-                        aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+                        aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+                        data-dia-activo="{{ dia|date:'Y-m-d' }}"
+                        data-dia-label="{{ dia|date:'l j'|capfirst }}">
 
                         <span class="d-none d-md-block">
 
@@ -758,77 +760,7 @@
         });
     </script>
 
-
-    <script>
-
-        // COMBINA AMBOS SCRIPT
-
-        document.addEventListener("DOMContentLoaded", function () {
-            let modal = document.getElementById("asignarPlatoModal");
-            let tabs = document.querySelectorAll(".nav-link");
-
-            // Función para actualizar los valores
-            function actualizarDiaActivo() {
-                let tabActivo = document.querySelector(".nav-link.active");
-                if (tabActivo) {
-                    let diaActivo = tabActivo.id.replace("tab-", "");
-                    
-                    const diaSeleccionadoInput = document.getElementById("diaSeleccionado");
-                    const diaActivoTexto = document.getElementById("diaActivoTexto");
-
-                    if (diaSeleccionadoInput) {
-                      diaSeleccionadoInput.value = diaActivo;
-                    }
-
-                    if (diaActivoTexto) {
-                      diaActivoTexto.textContent = diaActivo;
-                    }
-
-                }
-            }
-
-            // Evento al abrir el modal
-            modal.addEventListener("show.bs.modal", actualizarDiaActivo);
-
-            // Evento al hacer clic en las pestañas
-            tabs.forEach(tab => {
-                tab.addEventListener("click", actualizarDiaActivo);
-            });
-        });
-
-
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const buttons = document.querySelectorAll('#diasTab .nav-link');
-
-            buttons.forEach(btn => {
-                btn.addEventListener('click', function () {
-                    const diaSeleccionado = this.id.replace('tab-', '');
-
-                    fetch("{% url 'set-dia-activo' %}", {
-                        method: "POST",
-                        headers: {
-                            "X-CSRFToken": "{{ csrf_token }}",
-                            "Content-Type": "application/x-www-form-urlencoded"
-                        },
-                        body: `dia_activo=${diaSeleccionado}`
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.status === "ok") {
-                                console.log("Día activo actualizado:", diaSeleccionado);
-                                // Aquí podés actualizar contenido si querés
-                            }
-                        });
-                });
-            });
-        });
-    </script>
-
-
-    <!--
+<!--
   Modal Bootstrap reutilizable para mostrar
   el detalle de un plato sin salir de la pantalla principal
 -->
@@ -976,6 +908,117 @@ Root globl para modales cargados dinámicamente (AJAX)
 <div id="modal-root"></div>
 
  <!-- ===== Modal global: asignar plato =====  -->
+
+<script id="dias-tab-menu-programado-sync">
+(function () {
+  "use strict";
+
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) {
+      return parts.pop().split(";").shift();
+    }
+    return "";
+  }
+
+  function getTabDia(tab) {
+    if (!tab) return "";
+    return tab.dataset.diaActivo || (tab.id || "").replace("tab-", "");
+  }
+
+  function getTabLabel(tab) {
+    if (!tab) return "";
+    if (tab.dataset.diaLabel) return tab.dataset.diaLabel;
+
+    const labelNode = tab.querySelector(".d-block, .small, span");
+    return labelNode ? labelNode.textContent.trim() : getTabDia(tab);
+  }
+
+  function getTabActivo() {
+    return document.querySelector("#diasTab .nav-link.active");
+  }
+
+  function sincronizarDiaActivo(tab) {
+    tab = tab || getTabActivo();
+    if (!tab) return;
+
+    const dia = getTabDia(tab);
+    const label = getTabLabel(tab);
+
+    if (!dia) return;
+
+    window.diaActivoActual = dia;
+    window.diaActivoLabelActual = label || dia;
+
+    const diaSeleccionadoInput = document.getElementById("diaSeleccionado");
+    if (diaSeleccionadoInput) {
+      diaSeleccionadoInput.value = dia;
+    }
+
+    const diaActivoTexto = document.getElementById("diaActivoTexto");
+    if (diaActivoTexto) {
+      diaActivoTexto.textContent = window.diaActivoLabelActual;
+    }
+
+    document.dispatchEvent(new CustomEvent("diaActivo:change", {
+      detail: {
+        dia: dia,
+        label: window.diaActivoLabelActual
+      }
+    }));
+  }
+
+  window.getDiaActivoLabelActual = function () {
+    const texto = document.getElementById("diaActivoTexto");
+    return window.diaActivoLabelActual || (texto ? texto.textContent.trim() : "") || "{{ dia_activo_obj|date:'l j'|capfirst }}";
+  };
+
+  function guardarDiaActivoEnSesion(tab) {
+    if (!tab || !window.fetch) return;
+
+    const dia = getTabDia(tab);
+    if (!dia) return;
+
+    const body = new URLSearchParams();
+    body.set("dia_activo", dia);
+
+    fetch("{% url 'set-dia-activo' %}", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": getCookie("csrftoken") || "{{ csrf_token }}",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      body: body.toString()
+    }).catch(function (error) {
+      console.warn("No se pudo guardar el día activo en sesión.", error);
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const tabs = document.querySelectorAll("#diasTab .nav-link");
+    if (!tabs.length) return;
+
+    sincronizarDiaActivo(getTabActivo());
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener("shown.bs.tab", function (event) {
+        sincronizarDiaActivo(event.target);
+        guardarDiaActivoEnSesion(event.target);
+      });
+
+      // Fallback por si Bootstrap no emite shown.bs.tab en algún contexto.
+      tab.addEventListener("click", function () {
+        window.setTimeout(function () {
+          sincronizarDiaActivo(getTabActivo());
+        }, 0);
+      });
+    });
+  });
+})();
+</script>
+
 <div class="modal fade" id="asignarPlatoModal" tabindex="-1" aria-labelledby="asignarPlatoLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -1194,7 +1237,7 @@ async function setPlatoInfo(platoId, tipo, nombrePlato) {
   // Caso: no es plato (ej. lugar)
   if (tipo !== "plato") {
     titulo.textContent =
-      `Programar ${nombrePlato} para el día {{ dia_activo_obj|date:"l j"|capfirst }}`;
+      `Programar ${nombrePlato} para el día ${getDiaActivoLabelActual()}`;
     return;
   }
 
@@ -1206,7 +1249,7 @@ async function setPlatoInfo(platoId, tipo, nombrePlato) {
 
     if (!res.ok) {
       titulo.textContent =
-        `Programar ${nombrePlato} para el día {{ dia_activo_obj|date:"l j"|capfirst }}`;
+        `Programar ${nombrePlato} para el día ${getDiaActivoLabelActual()}`;
       return;
     }
 
@@ -1227,14 +1270,14 @@ async function setPlatoInfo(platoId, tipo, nombrePlato) {
 
     if (opciones.length <= 1) {
       titulo.textContent =
-        `Programar ${nombrePlato} para el día {{ dia_activo_obj|date:"l j"|capfirst }}`;
+        `Programar ${nombrePlato} para el día ${getDiaActivoLabelActual()}`;
       return;
     }
 
     // Mostrar checklist de variedades
     if (bloqueVar) bloqueVar.classList.remove("d-none");
     titulo.textContent =
-      `Tildá los platos que quieras programar para el día {{ dia_activo_obj|date:"l j"|capfirst }}`;
+      `Tildá los platos que quieras programar para el día ${getDiaActivoLabelActual()}`;
 
     for (const op of opciones) {
       const wrap = document.createElement("label");
@@ -1259,7 +1302,7 @@ async function setPlatoInfo(platoId, tipo, nombrePlato) {
   } catch (e) {
     console.error(e);
     titulo.textContent =
-      `Programar ${nombrePlato} para el día {{ dia_activo_obj|date:"l j"|capfirst }}`;
+      `Programar ${nombrePlato} para el día ${getDiaActivoLabelActual()}`;
   }
 }
 
