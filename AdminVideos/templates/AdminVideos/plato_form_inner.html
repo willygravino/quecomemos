@@ -159,56 +159,154 @@
                 </div>
 
 
+<style id="plato-form-ingredientes-compactos-css">
+  .ingredientes-compact-list {
+    display: block;
+    padding-left: 0;
+    margin-bottom: .65rem;
+  }
+
+  .ingrediente-compact-item {
+    width: 100%;
+    max-width: 100%;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    padding: .10rem 0 !important;
+    margin: 0 !important;
+  }
+
+  .ingrediente-compact-item + .ingrediente-compact-item {
+    margin-top: .12rem !important;
+  }
+
+  .ingrediente-compact-summary {
+    display: inline-flex !important;
+    width: auto;
+    max-width: 100%;
+    min-width: 0;
+    align-items: center;
+    justify-content: flex-start;
+    gap: .42rem !important;
+  }
+
+  .ingrediente-summary-btn {
+    flex: 0 1 auto;
+    width: auto;
+    color: inherit;
+    text-decoration: none;
+    max-width: min(72vw, 34rem);
+    min-width: 0;
+  }
+
+  .ingrediente-summary-btn:hover,
+  .ingrediente-summary-btn:focus {
+    color: #0d6efd;
+    text-decoration: none;
+  }
+
+  .ingrediente-summary-nombre {
+    display: inline-block;
+    max-width: min(48vw, 18rem);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: bottom;
+    white-space: nowrap;
+    font-size: .98rem;
+    line-height: 1.2;
+  }
+
+  .ingrediente-summary-detalle {
+    font-size: .86rem;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .ingrediente-summary-detalle:empty {
+    display: none;
+  }
+
+  .ingrediente-compact-item .btn {
+    font-size: .76rem;
+    line-height: 1.1;
+  }
+
+  .ingrediente-formset-fields {
+    display: none !important;
+  }
+</style>
+
 <!-- Botón para abrir modal -->
-<button type="button" class="btn btn-outline-secondary mb-4" data-bs-toggle="modal" data-bs-target="#ingredienteModal">
-  Agregar Ingrediente
+<button type="button"
+        class="btn btn-sm btn-outline-secondary mb-2 js-agregar-ingrediente"
+        data-bs-toggle="modal"
+        data-bs-target="#ingredienteModal">
+  + Agregar ingrediente
 </button>
 
 
 <div id="ingredientes-list">
   {{ ingrediente_formset.management_form }}
 
-  <ul id="ingredientes-ul" class="list-group mb-3">
+  <ul id="ingredientes-ul" class="list-group list-group-flush ingredientes-compact-list mb-3">
     {% for ing_form in ingrediente_formset.forms %}
 
 
-<li class="list-group-item d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2">
+<li class="list-group-item ingrediente-compact-item"
+    data-ingrediente-row>
+  <div class="ingrediente-formset-fields">
+    {% if ing_form.instance.pk %}
+      <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-id" value="{{ ing_form.instance.pk }}">
+    {% endif %}
 
-  <!-- id / fk ocultos como ya los tenés -->
-  {% if ing_form.instance.pk %}
-    <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-id" value="{{ ing_form.instance.pk }}">
-  {% endif %}
-  <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-ingrediente"
-       value="{% firstof ing_form.instance.ingrediente_id ing_form.initial.ingrediente '' %}">
+    <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-ingrediente"
+           value="{% firstof ing_form.instance.ingrediente_id ing_form.initial.ingrediente '' %}">
 
-  <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-nombre_ingrediente"
-        value="{% firstof ing_form.instance.ingrediente.nombre ing_form.initial.nombre_ingrediente '' %}">
+    <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-nombre_ingrediente"
+           value="{% firstof ing_form.instance.ingrediente.nombre ing_form.initial.nombre_ingrediente '' %}">
 
-  <select class="form-select form-select-sm ingrediente-select"
-        data-initial-id="{{ ... }}"
-        data-initial-text="{{ ... }}">
-</select>
+    <select class="form-select form-select-sm ingrediente-select"
+            data-initial-id="{% firstof ing_form.instance.ingrediente_id ing_form.initial.ingrediente '' %}"
+            data-initial-text="{% firstof ing_form.instance.ingrediente.nombre ing_form.initial.nombre_ingrediente '' %}">
+    </select>
 
+    <input type="text"
+           name="ingredientes_en_plato-{{ forloop.counter0 }}-cantidad"
+           value="{% if ing_form.cantidad.value %}{{ ing_form.cantidad.value|stringformat:'g' }}{% endif %}"
+           class="form-control form-control-sm"
+           placeholder="Cantidad">
 
-
-  <!-- Cantidad -->
-  <input type="text" name="ingredientes_en_plato-{{ forloop.counter0 }}-cantidad"
-         value="{% if ing_form.cantidad.value %}{{ ing_form.cantidad.value|stringformat:'g' }}{% endif %}"
-         class="form-control form-control-sm w-100 w-sm-auto" placeholder="Cantidad">
-
-  <!-- Unidad (usa el widget del form) -->
-  <div class="w-100 w-sm-auto">
     {{ ing_form.unidad|add_class:"form-select form-select-sm" }}
+
+    <input type="checkbox"
+           name="ingredientes_en_plato-{{ forloop.counter0 }}-DELETE"
+           class="d-none delete-flag">
   </div>
 
-  <input type="checkbox" name="ingredientes_en_plato-{{ forloop.counter0 }}-DELETE" class="d-none delete-flag">
+  <div class="d-flex align-items-center gap-1 ingrediente-compact-summary">
+    <button type="button"
+            class="btn btn-link btn-sm p-0 text-start ingrediente-summary-btn editar-ingrediente"
+            data-bs-toggle="modal"
+            data-bs-target="#ingredienteModal"
+            title="Editar ingrediente">
+      <span class="fw-semibold ingrediente-summary-nombre">
+        {% firstof ing_form.instance.ingrediente.nombre ing_form.initial.nombre_ingrediente "Ingrediente" %}
+      </span>
+      <span class="text-muted ingrediente-summary-detalle">{% if ing_form.cantidad.value %}{{ ing_form.cantidad.value|stringformat:'g' }}{% endif %}{% if ing_form.cantidad.value and ing_form.unidad.value %} {% endif %}{% if ing_form.unidad.value %}{{ ing_form.unidad.value }}{% endif %}</span>
+    </button>
 
-  <!-- Botón borrar pegado a la derecha en desktop, ocupa fila en móvil -->
-  <button type="button"
-          class="btn btn-sm btn-danger ms-sm-auto eliminar-ingrediente">
-    X
-  </button>
+    <button type="button"
+            class="btn btn-sm btn-outline-secondary py-0 px-2 editar-ingrediente"
+            data-bs-toggle="modal"
+            data-bs-target="#ingredienteModal">
+      Editar
+    </button>
 
+    <button type="button"
+            class="btn btn-sm btn-outline-danger py-0 px-2 eliminar-ingrediente">
+      ×
+    </button>
+  </div>
 </li>
 
 
@@ -482,7 +580,7 @@
     <div class="modal-content">
 
       <div class="modal-header">
-        <h5 class="modal-title" id="ingredienteModalLabel">Agregar Ingrediente</h5>
+        <h5 class="modal-title" id="ingredienteModalLabel">Agregar ingrediente</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
 

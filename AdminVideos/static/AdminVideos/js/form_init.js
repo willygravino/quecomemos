@@ -357,6 +357,230 @@
     });
   }
 
+  let ingredienteEditandoLi = null;
+
+  function getIngredienteModalEl(context) {
+    return document.getElementById("ingredienteModal") ||
+      (context && context.querySelector ? context.querySelector("#ingredienteModal") : null);
+  }
+
+  function getIngredienteModalCampo(context, selector) {
+    const modalEl = getIngredienteModalEl(context);
+
+    return (modalEl && modalEl.querySelector(selector)) ||
+      (context && context.querySelector ? context.querySelector(selector) : null) ||
+      document.querySelector(selector);
+  }
+
+  function getModalNombreSelect(context) {
+    const modalEl = getIngredienteModalEl(context);
+    const select = (modalEl && modalEl.querySelector("#modal-nombre")) ||
+      document.getElementById("modal-nombre");
+
+    return window.jQuery && select ? $(select) : null;
+  }
+
+  function setSelect2Value($select, id, text) {
+    if (!$select || !$select.length) return;
+
+    $select.empty();
+
+    if (id) {
+      const opt = new Option(text || id, id, true, true);
+      $select.append(opt);
+      $select.val(id);
+    } else {
+      $select.val(null);
+    }
+
+    $select.trigger("change");
+    $select.trigger("change.select2");
+  }
+
+  function obtenerUnidadTexto(select) {
+    if (!select || !select.value) return "";
+
+    const opt = select.options[select.selectedIndex];
+    return opt ? (opt.text || opt.value || "").trim() : "";
+  }
+
+  function datosIngredienteDesdeFila(li) {
+    if (!li) return null;
+
+    const idInput = li.querySelector('input[name$="-ingrediente"]');
+    const nombreInput = li.querySelector('input[name$="-nombre_ingrediente"]');
+    const cantidadInput = li.querySelector('input[name$="-cantidad"]');
+    const unidadSelect = li.querySelector('select[name$="-unidad"]');
+
+    return {
+      id: (idInput?.value || "").trim(),
+      text: (nombreInput?.value || "").trim(),
+      cantidad: (cantidadInput?.value || "").trim(),
+      unidad: (unidadSelect?.value || "").trim()
+    };
+  }
+
+  function aplicarDatosIngredienteEnModal(context, datos) {
+    if (!datos) return;
+
+    const modalCantidad = getIngredienteModalCampo(context, "#modal-cantidad");
+    const modalUnidad = getIngredienteModalCampo(context, "#modal-unidad");
+    const nombreNuevo = getIngredienteModalCampo(context, "#nuevo-nombre");
+    const errores = getIngredienteModalCampo(context, "#nuevo-ingrediente-errores");
+    const $modalNombre = getModalNombreSelect(context);
+
+    if (modalCantidad) {
+      modalCantidad.value = datos.cantidad || "";
+    }
+
+    if (modalUnidad) {
+      modalUnidad.value = datos.unidad || "";
+    }
+
+    if (nombreNuevo) {
+      nombreNuevo.value = "";
+    }
+
+    if (errores) {
+      errores.classList.add("d-none");
+      errores.innerHTML = "";
+    }
+
+    if ($modalNombre && $modalNombre.length) {
+      setSelect2Value($modalNombre, datos.id || "", datos.text || "");
+    }
+  }
+
+  function refrescarResumenIngrediente(li) {
+    if (!li) return;
+
+    const datos = datosIngredienteDesdeFila(li);
+    const unidadSelect = li.querySelector('select[name$="-unidad"]');
+    const nombreSpan = li.querySelector(".ingrediente-summary-nombre");
+    const detalleSpan = li.querySelector(".ingrediente-summary-detalle");
+
+    const nombre = (datos?.text || "").trim() || "Ingrediente";
+    const cantidad = (datos?.cantidad || "").trim();
+    const unidadTexto = obtenerUnidadTexto(unidadSelect);
+
+    if (nombreSpan) nombreSpan.textContent = nombre;
+    if (detalleSpan) {
+      const detalle = [cantidad, unidadTexto].filter(Boolean).join(" ");
+      detalleSpan.textContent = detalle;
+      detalleSpan.hidden = !detalle;
+    }
+  }
+
+  function resetModalIngrediente(context) {
+    ingredienteEditandoLi = null;
+
+    const modalEl = getIngredienteModalEl(context);
+    const titulo = modalEl?.querySelector("#ingredienteModalLabel");
+    const guardar = modalEl?.querySelector("#guardarIngrediente");
+
+    if (modalEl) {
+      delete modalEl.dataset.modoIngrediente;
+      delete modalEl.dataset.editIngredienteId;
+      delete modalEl.dataset.editIngredienteText;
+      delete modalEl.dataset.editCantidad;
+      delete modalEl.dataset.editUnidad;
+    }
+
+    if (titulo) titulo.textContent = "Agregar ingrediente";
+    if (guardar) guardar.textContent = "Guardar";
+
+    const nombreNuevo = getIngredienteModalCampo(context, "#nuevo-nombre");
+    const tipoNuevo = getIngredienteModalCampo(context, "#nuevo-tipo");
+    const detalleNuevo = getIngredienteModalCampo(context, "#nuevo-detalle");
+    const errores = getIngredienteModalCampo(context, "#nuevo-ingrediente-errores");
+    const cantidad = getIngredienteModalCampo(context, "#modal-cantidad");
+    const unidad = getIngredienteModalCampo(context, "#modal-unidad");
+    const $modalNombre = getModalNombreSelect(context);
+
+    if (nombreNuevo) nombreNuevo.value = "";
+    if (tipoNuevo) tipoNuevo.value = "otro";
+    if (detalleNuevo) detalleNuevo.innerHTML = '<option value="">— (opcional)</option>';
+    if (errores) {
+      errores.classList.add("d-none");
+      errores.innerHTML = "";
+    }
+    if (cantidad) cantidad.value = "";
+    if (unidad) unidad.selectedIndex = 0;
+    if ($modalNombre) setSelect2Value($modalNombre, "", "");
+  }
+
+  function prepararEditarIngrediente(context, li) {
+    if (!li) return;
+
+    ingredienteEditandoLi = li;
+
+    const modalEl = getIngredienteModalEl(context);
+    const titulo = modalEl?.querySelector("#ingredienteModalLabel");
+    const guardar = modalEl?.querySelector("#guardarIngrediente");
+    const datos = datosIngredienteDesdeFila(li);
+
+    if (titulo) titulo.textContent = "Editar ingrediente";
+    if (guardar) guardar.textContent = "Guardar cambios";
+
+    if (modalEl && datos) {
+      modalEl.dataset.modoIngrediente = "editar";
+      modalEl.dataset.editIngredienteId = datos.id || "";
+      modalEl.dataset.editIngredienteText = datos.text || "";
+      modalEl.dataset.editCantidad = datos.cantidad || "";
+      modalEl.dataset.editUnidad = datos.unidad || "";
+    }
+
+    aplicarDatosIngredienteEnModal(context, datos);
+
+    // Reaplicar después del click: Bootstrap/Select2 pueden inicializar el modal
+    // unos milisegundos después de nuestra delegación.
+    window.setTimeout(function () {
+      aplicarDatosIngredienteEnModal(context, datos);
+    }, 0);
+
+    window.setTimeout(function () {
+      aplicarDatosIngredienteEnModal(context, datos);
+    }, 80);
+  }
+
+  function actualizarIngredienteEditado(context, li, elegido) {
+    if (!li || !elegido) return;
+
+    const idInput = li.querySelector('input[name$="-ingrediente"]');
+    const nombreInput = li.querySelector('input[name$="-nombre_ingrediente"]');
+    const cantidadInput = li.querySelector('input[name$="-cantidad"]');
+    const unidadSelect = li.querySelector('select[name$="-unidad"]');
+    const selectInterno = li.querySelector(".ingrediente-select");
+    const deleteFlag = li.querySelector('input[name$="-DELETE"]');
+
+    const cantidad = (getIngredienteModalCampo(context, "#modal-cantidad")?.value || "").replace(",", ".");
+    const unidad = getIngredienteModalCampo(context, "#modal-unidad")?.value || "";
+
+    if (idInput) idInput.value = elegido.id || "";
+    if (nombreInput) nombreInput.value = elegido.text || "";
+    if (cantidadInput) cantidadInput.value = cantidad;
+
+    if (unidadSelect) {
+      unidadSelect.disabled = false;
+      unidadSelect.value = unidad || "";
+    }
+
+    if (selectInterno) {
+      selectInterno.dataset.initialId = elegido.id || "";
+      selectInterno.dataset.initialText = elegido.text || "";
+
+      if (window.jQuery && $(selectInterno).data("select2")) {
+        setSelect2Value($(selectInterno), elegido.id || "", elegido.text || "");
+      }
+    }
+
+    if (deleteFlag) deleteFlag.checked = false;
+
+    li.style.removeProperty("display");
+    li.removeAttribute("aria-hidden");
+    refrescarResumenIngrediente(li);
+  }
+
   // ===== Crear ingrediente si hace falta (POST a /api/ingredientes/) =====
   async function crearIngredienteSiHaceFalta(context) {
     const nombreNuevo = (context.querySelector("#nuevo-nombre")?.value || "").trim();
@@ -467,32 +691,48 @@
 
     // Construir <li>
     const li = document.createElement("li");
-    li.className =
-      "list-group-item d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2";
+    li.className = "list-group-item ingrediente-compact-item";
+    li.setAttribute("data-ingrediente-row", "1");
     li.innerHTML = `
-      <input type="hidden" name="${prefix}-${totalForms}-ingrediente" value="${idIngrediente}">
-      <input type="hidden" name="${prefix}-${totalForms}-nombre_ingrediente" value="${nombre}">
+      <div class="ingrediente-formset-fields">
+        <input type="hidden" name="${prefix}-${totalForms}-ingrediente" value="${idIngrediente}">
+        <input type="hidden" name="${prefix}-${totalForms}-nombre_ingrediente" value="${nombre}">
 
-      <select class="form-select form-select-sm ingrediente-select w-100 w-sm-auto flex-fill"
-              data-initial-id="${idIngrediente}"
-              data-initial-text="${nombre}"></select>
+        <select class="form-select form-select-sm ingrediente-select"
+                data-initial-id="${idIngrediente}"
+                data-initial-text="${nombre}"></select>
 
-      <input type="text" name="${prefix}-${totalForms}-cantidad"
-             value="${cantidad}"
-             class="form-control form-control-sm w-100 w-sm-auto"
-             placeholder="Cantidad">
+        <input type="text" name="${prefix}-${totalForms}-cantidad"
+               value="${cantidad}"
+               class="form-control form-control-sm"
+               placeholder="Cantidad">
 
-      <div class="w-100 w-sm-auto">
         ${unidadHtml}
+
+        <input type="checkbox" name="${prefix}-${totalForms}-DELETE" class="d-none delete-flag" value="">
       </div>
 
-      <input type="checkbox" name="${prefix}-${totalForms}-DELETE" class="d-none delete-flag" value="">
+      <div class="d-flex align-items-center gap-1 ingrediente-compact-summary">
+        <button type="button"
+                class="btn btn-link btn-sm p-0 text-start ingrediente-summary-btn editar-ingrediente"
+                data-bs-toggle="modal"
+                data-bs-target="#ingredienteModal"
+                title="Editar ingrediente">
+          <span class="fw-semibold ingrediente-summary-nombre"></span>
+          <span class="text-muted ingrediente-summary-detalle" hidden></span>
+        </button>
 
+        <button type="button"
+                class="btn btn-sm btn-outline-secondary py-0 px-2 editar-ingrediente"
+                data-bs-toggle="modal"
+                data-bs-target="#ingredienteModal">
+          Editar
+        </button>
 
-      <button type="button" class="btn btn-sm btn-danger ms-sm-auto eliminar-ingrediente">X</button>
+        <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2 eliminar-ingrediente">×</button>
+      </div>
     `;
-
-    ul.appendChild(li);
+ul.appendChild(li);
 
     // Actualizar TOTAL_FORMS
     totalFormsInput.value = totalForms + 1;
@@ -507,6 +747,8 @@
       unidadSelect.disabled = false;
       unidadSelect.value = unidadElegida || "";
     }
+
+    refrescarResumenIngrediente(li);
 
     // Limpiar modal
     $("#modal-nombre").val(null).trigger("change");
@@ -560,6 +802,19 @@
     const ul = context.querySelector("#ingredientes-ul");
     if (ul && !ul.__deleteDelegationBound) {
       ul.addEventListener("click", function (ev) {
+        const editBtn = ev.target.closest(".editar-ingrediente");
+        if (editBtn) {
+          ev.preventDefault();
+          prepararEditarIngrediente(context, editBtn.closest("li"));
+
+          const modalEl = document.getElementById("ingredienteModal");
+          if (modalEl && window.bootstrap?.Modal) {
+            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+          }
+
+          return;
+        }
+
         const btn = ev.target.closest(".eliminar-ingrediente");
         if (btn) {
           ev.preventDefault();
@@ -568,6 +823,18 @@
       });
       ul.__deleteDelegationBound = true;
     }
+
+    // ===== Botón Agregar ingrediente: asegura modo alta
+    const agregarIngredienteBtn = context.querySelector(".js-agregar-ingrediente");
+    if (agregarIngredienteBtn && !agregarIngredienteBtn.__ingredienteAddBound) {
+      agregarIngredienteBtn.addEventListener("click", function () {
+        resetModalIngrediente(context);
+      });
+      agregarIngredienteBtn.__ingredienteAddBound = true;
+    }
+
+    // ===== Resumen inicial de filas compactas
+    context.querySelectorAll("#ingredientes-ul [data-ingrediente-row]").forEach(refrescarResumenIngrediente);
 
     // ===== Subcategorías por tipo (nuevo ingrediente)
     const tipoSel = context.querySelector("#nuevo-tipo");
@@ -582,16 +849,27 @@
 
     // ===== Modal ingredientes → Select2 del modal-nombre (delegado) =====
     if (!document.__ingredienteModalSelect2Bound) {
-      document.addEventListener("shown.bs.modal", function (e) {
-        if (!e.target || e.target.id !== "ingredienteModal") return;
+            document.addEventListener("shown.bs.modal", function (e) {
+        if (e.target?.id !== "ingredienteModal") return;
 
-        const $modal = $(e.target);
-        const $sel = $modal.find("#modal-nombre");
-        if (!$sel.length) return;
+        const modalEl = e.target;
+        const $modal = $("#ingredienteModal");
+        const $sel = $("#modal-nombre");
 
         if (!$sel.data("select2")) {
           $sel.select2(buildSelect2Config($modal));
         }
+
+        if (modalEl.dataset.modoIngrediente === "editar") {
+          aplicarDatosIngredienteEnModal(document, {
+            id: modalEl.dataset.editIngredienteId || "",
+            text: modalEl.dataset.editIngredienteText || "",
+            cantidad: modalEl.dataset.editCantidad || "",
+            unidad: modalEl.dataset.editUnidad || ""
+          });
+          return;
+        }
+
         $sel.select2("open");
       });
 
@@ -614,7 +892,21 @@
           $modalSel.empty();
           const opt = new Option(elegido.text, elegido.id, true, true);
           $modalSel.append(opt).trigger("change");
-          agregarIngrediente(context);
+
+          if (ingredienteEditandoLi) {
+            actualizarIngredienteEditado(context, ingredienteEditandoLi, elegido);
+
+            const modalEl = context.querySelector("#ingredienteModal") || document.getElementById("ingredienteModal");
+            const modal = modalEl
+              ? bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl)
+              : null;
+
+            if (modal) modal.hide();
+
+            resetModalIngrediente(context);
+          } else {
+            agregarIngrediente(context);
+          }
         } catch (err) {
           if (err?.message) console.warn(err.message);
         }
@@ -1014,4 +1306,73 @@
       initPlatoForm(document);
     }
   });
+  // ===== Ingrediente existing/selector/nuevo: elección única visual =====
+  function bindEleccionUnicaVisualIngredienteModal() {
+    if (document.__ingredienteEleccionUnicaVisualBound) return;
+    document.__ingredienteEleccionUnicaVisualBound = true;
+
+    function limpiarSelectIngredienteExistente() {
+      if (!window.jQuery) return;
+
+      const $sel = $("#modal-nombre");
+      if (!$sel.length) return;
+
+      try {
+        $sel.val(null);
+        $sel.find("option").prop("selected", false);
+        $sel.empty();
+        $sel.trigger("change");
+        $sel.trigger("change.select2");
+      } catch (error) {
+        console.warn("No se pudo limpiar el ingrediente existente.", error);
+      }
+    }
+
+    function limpiarNuevoIngrediente() {
+      const nuevo = document.querySelector("#ingredienteModal #nuevo-nombre");
+      if (nuevo && nuevo.value) {
+        nuevo.value = "";
+        nuevo.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+
+      const errores = document.querySelector("#ingredienteModal #nuevo-ingrediente-errores");
+      if (errores) {
+        errores.classList.add("d-none");
+        errores.innerHTML = "";
+      }
+    }
+
+    document.addEventListener("input", function (event) {
+      const nuevo = event.target && event.target.closest
+        ? event.target.closest("#ingredienteModal #nuevo-nombre")
+        : null;
+
+      if (!nuevo) return;
+
+      const valorNuevo = (nuevo.value || "").trim();
+      if (!valorNuevo) return;
+
+      limpiarSelectIngredienteExistente();
+    }, true);
+
+    if (window.jQuery) {
+      $(document).on("select2:select", "#ingredienteModal #modal-nombre", function () {
+        const valorSeleccionado = ($(this).val() || "").toString();
+        if (!valorSeleccionado) return;
+
+        limpiarNuevoIngrediente();
+      });
+
+      $(document).on("change", "#ingredienteModal #modal-nombre", function () {
+        const valorSeleccionado = ($(this).val() || "").toString();
+        if (!valorSeleccionado) return;
+
+        limpiarNuevoIngrediente();
+      });
+    }
+  }
+
+  bindEleccionUnicaVisualIngredienteModal();
+
+
 })(); // ← cierre final del IIFE principal
