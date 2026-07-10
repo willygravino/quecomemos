@@ -82,7 +82,7 @@
                   {% if form.instance.pk %}
                     <!-- CLONAR -->
                     <a href="{% url 'agregar-a-mi-lista' form.instance.pk %}?duplicar=true"
-                      class="plato-action-btn text-dark" title="Clonar plato">
+                      class="plato-action-btn text-body" title="Clonar plato">
                       <i class="fa-regular fa-copy"></i>
                     </a>
 
@@ -398,7 +398,7 @@
 
                 <input type="hidden" name="tipos" value="Picada">
               {% else %}
-                <div class="mb-3 border rounded p-3 bg-light{% if form.tipos.errors %} border-danger{% endif %}">
+                <div class="mb-3 border rounded p-3 bg-body-tertiary{% if form.tipos.errors %} border-danger{% endif %}">
                   <label class="form-label d-block">Tipo de plato:</label>
 
                   {% if items %}
@@ -604,7 +604,7 @@
 
 
         <!-- ========== NUEVO (campos del modelo) ========== -->
-        <div id="bloque-nuevo" class="border rounded p-3 bg-light mt-3">
+        <div id="bloque-nuevo" class="border rounded p-3 bg-body-tertiary mt-3">
 
           <div class="mb-3">
             <label for="nuevo-nombre" class="form-label">Nombre</label>

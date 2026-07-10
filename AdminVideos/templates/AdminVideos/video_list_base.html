@@ -78,7 +78,7 @@
             novalidate>
         {% csrf_token %}
 
-        <div class="modal-header bg-light">
+        <div class="modal-header bg-body-tertiary">
           <div>
             <h5 class="modal-title mb-0" id="compartirModalLabel">Compartir</h5>
             <small class="text-muted">
@@ -136,7 +136,7 @@
 
         </div>
 
-        <div class="modal-footer bg-light">
+        <div class="modal-footer bg-body-tertiary">
           <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
             Cerrar
           </button>
@@ -219,7 +219,7 @@
       item.innerHTML = `
         <div class="d-flex justify-content-between gap-2">
           <strong class="small text-truncate">${escapeHtmlCompartir(destinatario)}</strong>
-          <span class="badge rounded-pill bg-light text-dark border flex-shrink-0">${escapeHtmlCompartir(estado)}</span>
+          <span class="badge rounded-pill bg-body-tertiary text-body border flex-shrink-0">${escapeHtmlCompartir(estado)}</span>
         </div>
         ${mensaje ? `<div class="small text-muted mt-1" style="white-space: normal;">“${escapeHtmlCompartir(mensaje)}”</div>` : ""}
         <div class="small text-muted mt-1">${escapeHtmlCompartir(creadoEl)}</div>

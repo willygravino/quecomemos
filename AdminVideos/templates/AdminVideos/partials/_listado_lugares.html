@@ -1,9 +1,9 @@
 {% if tipopag == "Delivery" or tipopag == "Comerafuera" %}
 
   <!-- LISTA TIPO GMAIL (LUGARES / DELIVERY) -->
-  <section class="w-100 text-white bg-light rounded shadow-sm">
+  <section class="w-100 text-body bg-body-tertiary rounded shadow-sm">
 
-    <div class="px-2 py-2 border-bottom d-flex align-items-center gap-2 text-dark flex-wrap">
+    <div class="px-2 py-2 border-bottom d-flex align-items-center gap-2 text-body flex-wrap">
 
       <div class="form-check m-0">
         <input class="form-check-input" type="checkbox" id="chk-platos-all" aria-label="Seleccionar todos">
@@ -44,7 +44,7 @@
 
     <div class="list-group list-group-flush">
       {% for lugar in lugares %}
-        <div class="list-group-item text-dark px-2 py-2 border-bottom border-secondary-subtle list-group-item-action plato-row js-plato-carousel-index"
+        <div class="list-group-item text-body px-2 py-2 border-bottom border-secondary-subtle list-group-item-action plato-row js-plato-carousel-index"
              data-row
              data-plato-id="{{ lugar.id }}"
              role="button"

@@ -1,4 +1,4 @@
-<div class="list-group-item text-dark px-2 py-2 border-bottom border-secondary-subtle list-group-item-action plato-row js-plato-carousel-index {% if user.id == plato.propietario.id and not plato.proviene_de %}plato-row-procedencia-propia{% elif user.id == plato.propietario.id and plato.proviene_de %}plato-row-procedencia-importada{% else %}plato-row-procedencia-ajena{% endif %}"
+<div class="list-group-item text-body px-2 py-2 border-bottom border-secondary-subtle list-group-item-action plato-row js-plato-carousel-index {% if user.id == plato.propietario.id and not plato.proviene_de %}plato-row-procedencia-propia{% elif user.id == plato.propietario.id and plato.proviene_de %}plato-row-procedencia-importada{% else %}plato-row-procedencia-ajena{% endif %}"
      data-row
      data-plato-id="{{ plato.id }}"
      data-plato-nombre="{% if plato.variedades_count > 0 %}{{ plato.nombre_para_front|escape }}{% else %}{{ plato.nombre_plato|escape }}{% endif %}"

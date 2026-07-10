@@ -15,7 +15,7 @@
     {% if mensajes %}
       {% for mensaje in mensajes reversed %}
         <div class="d-flex {% if mensaje.usuario_que_envia_fk == request.user %}justify-content-end{% else %}justify-content-start{% endif %}">
-          <div class="px-3 py-2 rounded-3 shadow-sm position-relative {% if mensaje.usuario_que_envia_fk == request.user %}bg-primary text-white{% else %}bg-light text-dark{% endif %}"
+          <div class="px-3 py-2 rounded-3 shadow-sm position-relative {% if mensaje.usuario_que_envia_fk == request.user %}bg-primary text-white{% else %}bg-body-tertiary text-body{% endif %}"
                style="max-width: 78%;">
 
             <div style="white-space: pre-wrap;">{{ mensaje.mensaje }}</div>

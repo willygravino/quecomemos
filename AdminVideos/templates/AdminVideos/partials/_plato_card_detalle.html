@@ -120,7 +120,7 @@
             <div class="dropdown-menu dropdown-menu-end shadow p-0 compartir-historial-dropdown"
                  aria-labelledby="compartirDropdownPlato{{ plato_detalle.id }}">
 
-              <div class="px-3 py-2 border-bottom bg-light sticky-top compartir-historial-header">
+              <div class="px-3 py-2 border-bottom bg-body-tertiary sticky-top compartir-historial-header">
                 <div class="fw-semibold">Compartido con</div>
                 <div class="small text-muted">Historial de este plato</div>
               </div>
@@ -132,7 +132,7 @@
                     <div class="px-3 py-2 border-bottom js-compartido-item">
                       <div class="d-flex justify-content-between gap-2">
                         <strong class="small text-truncate" data-compartido-destinatario="{{ compartido.destinatario|escape }}">{{ compartido.destinatario }}</strong>
-                        <span class="badge rounded-pill bg-light text-dark border flex-shrink-0">
+                        <span class="badge rounded-pill bg-body-tertiary text-body border flex-shrink-0">
                           {{ compartido.estado }}
                         </span>
                       </div>
