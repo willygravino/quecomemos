@@ -1,0 +1,222 @@
+==================================================
+Parche sidebar gris en modo oscuro v3
+Fecha: Fri Jul 10 20:38:17 -03 2026
+Directorio: /Users/guillermogravino/quecomemos
+==================================================
+
+---- estado inicial ----
+ M AdminVideos/static/AdminVideos/css/mi-css.css
+ M AdminVideos/templates/AdminVideos/base.html
+?? "parche_sidebar_gris_modo_oscuro_v2 (1).sh"
+?? parche_sidebar_gris_modo_oscuro_v2.sh
+?? parche_sidebar_gris_modo_oscuro_v2_20260710_202734.txt
+?? parche_sidebar_gris_modo_oscuro_v2_20260710_203254.txt
+?? parche_sidebar_gris_modo_oscuro_v3.sh
+?? parche_sidebar_gris_modo_oscuro_v3_20260710_203817.txt
+?? parche_sidebar_gris_modo_oscuro_v4.sh
+
+---- limpieza segura de logs/scripts sidebar anteriores no versionados ----
+BORRADO: parche_sidebar_gris_modo_oscuro_v2 (1).sh
+BORRADO: parche_sidebar_gris_modo_oscuro_v2.sh
+BORRADO: parche_sidebar_gris_modo_oscuro_v2_20260710_202734.txt
+BORRADO: parche_sidebar_gris_modo_oscuro_v2_20260710_203254.txt
+OK: bloque previo removido desde: /* ===== QC Bootstrap-first: sidebar gris modo oscuro v2 ===== */
+OK: bloque sidebar gris modo oscuro v3 agregado
+OK: cache bust mi-css.css actualizado a 20260710203817
+OK: Bootstrap 5.3.3 sigue cargado
+OK: data-bs-theme sigue en html
+OK: toggle topbar sigue
+OK: bloque sidebar v3 presente
+OK: bloque sidebar v2 ausente
+OK: sin franja activa
+OK: no seleccionados apagados
+OK: activo brillante
+OK: activo icon-wrap más marcado
+OK: cache bust actualizado
+OK: validaciones completas
+
+---- grep sidebar gris v3 ----
+1298-[data-bs-theme="dark"] .bg-primary,
+1299-[data-bs-theme="dark"] .text-bg-primary {
+1300-  color: #fff !important;
+1301-}
+1302-
+1303:/* ===== QC Bootstrap-first: sidebar gris modo oscuro v3 ===== */
+1304-/*
+1305-  Sólo modo oscuro.
+1306-  Sidebar gris, sin franja completa para el activo.
+1307-  Diferencia más clara:
+1308-  - no seleccionados más apagados;
+1309-  - hover intermedio;
+1310-  - activo mucho más brillante y redondel más marcado.
+1311-*/
+1312-[data-bs-theme="dark"] .sidebar,
+1313-[data-bs-theme="dark"] .sidebar.sidebar-dark,
+1314-[data-bs-theme="dark"] .bg-gradient-primary {
+1315-  background-color: var(--bs-tertiary-bg) !important;
+1316-  background-image: linear-gradient(180deg, #212529 0%, #16181b 100%) !important;
+1317-  color: var(--bs-body-color) !important;
+1318-}
+1319-
+1320-[data-bs-theme="dark"] .sidebar .sidebar-brand,
+1321-[data-bs-theme="dark"] .sidebar .sidebar-brand:hover,
+1322-[data-bs-theme="dark"] .sidebar .sidebar-brand:focus,
+1323-[data-bs-theme="dark"] .sidebar .sidebar-brand-icon,
+1324-[data-bs-theme="dark"] .sidebar .sidebar-brand-text {
+1325-  color: var(--bs-emphasis-color) !important;
+1326-  background: transparent !important;
+1327-}
+1328-
+1329-[data-bs-theme="dark"] .sidebar .sidebar-divider {
+1330-  border-top-color: rgba(255, 255, 255, .12) !important;
+1331-}
+1332-
+1333-[data-bs-theme="dark"] .sidebar .sidebar-heading {
+1334-  color: rgba(255, 255, 255, .42) !important;
+1335-}
+1336-
+1337-/* Links normales: más apagados para que el activo se note */
+1338-[data-bs-theme="dark"] .sidebar .nav-item .nav-link,
+1339-[data-bs-theme="dark"] .sidebar .nav-item .nav-link span,
+1340-[data-bs-theme="dark"] .sidebar .nav-item .nav-link i,
+1341-[data-bs-theme="dark"] .sidebar .menu-item,
+1342-[data-bs-theme="dark"] .sidebar .menu-item .item-text,
+1343-[data-bs-theme="dark"] .sidebar .menu-item .icon-wrap,
+1344-[data-bs-theme="dark"] .sidebar .menu-item .icon-wrap i {
+1345-  color: rgba(255, 255, 255, .50) !important;
+1346-}
+1347-
+1348-/* Nunca pintar toda la fila */
+1349-[data-bs-theme="dark"] .sidebar .nav-item .nav-link,
+1350-[data-bs-theme="dark"] .sidebar .menu-item,
+1351-[data-bs-theme="dark"] .sidebar .nav-item.active .nav-link,
+1352-[data-bs-theme="dark"] .sidebar .menu-item.is-active {
+1353-  background-color: transparent !important;
+1354-  background-image: none !important;
+1355-  box-shadow: none !important;
+1356-}
+1357-
+1358-/* Hover: sube, pero sigue por debajo del activo */
+1359-[data-bs-theme="dark"] .sidebar .nav-item .nav-link:hover,
+1360-[data-bs-theme="dark"] .sidebar .nav-item .nav-link:focus,
+1361-[data-bs-theme="dark"] .sidebar .menu-item:not(.is-active):hover {
+1362-  background-color: transparent !important;
+1363-  color: rgba(255, 255, 255, .78) !important;
+1364-}
+1365-
+1366-[data-bs-theme="dark"] .sidebar .nav-item .nav-link:hover span,
+1367-[data-bs-theme="dark"] .sidebar .nav-item .nav-link:hover i,
+1368-[data-bs-theme="dark"] .sidebar .nav-item .nav-link:focus span,
+1369-[data-bs-theme="dark"] .sidebar .nav-item .nav-link:focus i,
+1370-[data-bs-theme="dark"] .sidebar .menu-item:not(.is-active):hover .item-text,
+1371-[data-bs-theme="dark"] .sidebar .menu-item:not(.is-active):hover .icon-wrap,
+1372-[data-bs-theme="dark"] .sidebar .menu-item:not(.is-active):hover .icon-wrap i {
+1373-  color: rgba(255, 255, 255, .78) !important;
+1374-}
+1375-
+1376-/* Activo: claramente más brillante, sin franja */
+1377-[data-bs-theme="dark"] .sidebar .nav-item.active .nav-link,
+1378-[data-bs-theme="dark"] .sidebar .nav-item.active .nav-link span,
+1379-[data-bs-theme="dark"] .sidebar .nav-item.active .nav-link i,
+1380-[data-bs-theme="dark"] .sidebar .menu-item.is-active,
+1381-[data-bs-theme="dark"] .sidebar .menu-item.is-active .item-text,
+1382-[data-bs-theme="dark"] .sidebar .menu-item.is-active .icon-wrap,
+1383-[data-bs-theme="dark"] .sidebar .menu-item.is-active .icon-wrap i {
+1384-  color: rgba(255, 255, 255, .96) !important;
+1385-  font-weight: 600 !important;
+1386-}
+1387-
+1388-/* Círculos/iconos custom del menú */
+1389-[data-bs-theme="dark"] .sidebar .icon-wrap {
+1390-  background-color: rgba(255, 255, 255, .045) !important;
+1391-  border-color: rgba(255, 255, 255, .10) !important;
+1392-}
+1393-
+1394-/* Hover sólo intensifica el redondel, todavía suave */
+1395-[data-bs-theme="dark"] .sidebar .menu-item:not(.is-active):hover .icon-wrap,
+1396-[data-bs-theme="dark"] .sidebar .nav-item .nav-link:hover .icon-wrap {
+1397-  background-color: rgba(255, 255, 255, .12) !important;
+1398-  border-color: rgba(255, 255, 255, .25) !important;
+1399-  box-shadow: 0 0 0 1px rgba(255, 255, 255, .04) !important;
+1400-}
+1401-
+1402-/* Activo: redondel más brillante, sin franja de fondo */
+1403-[data-bs-theme="dark"] .sidebar .menu-item.is-active .icon-wrap,
+1404-[data-bs-theme="dark"] .sidebar .nav-item.active .icon-wrap {
+1405-  background-color: rgba(255, 255, 255, .28) !important;
+1406-  border-color: rgba(255, 255, 255, .56) !important;
+1407-  box-shadow:
+1408-    0 0 0 2px rgba(255, 255, 255, .12),
+1409-    0 .25rem .75rem rgba(0, 0, 0, .32) !important;
+1410-}
+1411-
+1412-/* Si hay activos SB Admin sin icon-wrap, sólo texto/icono brillante; sin franja */
+1413-[data-bs-theme="dark"] .sidebar .nav-item.active {
+1414-  background-color: transparent !important;
+1415-}
+1416-
+1417-/* Dropdowns/collapses internos de la sidebar */
+1418-[data-bs-theme="dark"] .sidebar .collapse-inner,
+1419-[data-bs-theme="dark"] .sidebar .dropdown-menu,
+1420-[data-bs-theme="dark"] .sidebar .sidebar-dropdown-menu {
+1421-  background-color: #1f2328 !important;
+1422-  border: 1px solid var(--bs-border-color) !important;
+1423-  box-shadow: 0 .6rem 1.25rem rgba(0, 0, 0, .38) !important;
+1424-}
+1425-
+1426-[data-bs-theme="dark"] .sidebar .collapse-item,
+1427-[data-bs-theme="dark"] .sidebar .dropdown-item,
+1428-[data-bs-theme="dark"] .sidebar .sidebar-dropdown-menu .dropdown-item {
+1429-  color: rgba(255, 255, 255, .55) !important;
+1430-  background-color: transparent !important;
+1431-}
+1432-
+1433-[data-bs-theme="dark"] .sidebar .collapse-item:hover,
+1434-[data-bs-theme="dark"] .sidebar .collapse-item:focus,
+1435-[data-bs-theme="dark"] .sidebar .dropdown-item:hover,
+1436-[data-bs-theme="dark"] .sidebar .dropdown-item:focus,
+1437-[data-bs-theme="dark"] .sidebar .sidebar-dropdown-menu .dropdown-item:hover,
+1438-[data-bs-theme="dark"] .sidebar .sidebar-dropdown-menu .dropdown-item:focus {
+1439-  color: rgba(255, 255, 255, .88) !important;
+1440-  background-color: rgba(255, 255, 255, .08) !important;
+1441-}
+1442-
+1443-[data-bs-theme="dark"] .sidebar .collapse-item.active,
+1444-[data-bs-theme="dark"] .sidebar .dropdown-item.active,
+1445-[data-bs-theme="dark"] .sidebar .sidebar-dropdown-menu .dropdown-item.active {
+1446-  color: rgba(255, 255, 255, .96) !important;
+1447-  background-color: rgba(255, 255, 255, .12) !important;
+1448-}
+1449-
+1450-/* Toggle de sidebar */
+1451-[data-bs-theme="dark"] #sidebarToggle,
+1452-[data-bs-theme="dark"] #sidebarToggleTop {
+1453-  color: rgba(255, 255, 255, .56) !important;
+1454-  background-color: rgba(255, 255, 255, .07) !important;
+1455-  border-color: rgba(255, 255, 255, .12) !important;
+1456-}
+1457-
+1458-[data-bs-theme="dark"] #sidebarToggle:hover,
+1459-[data-bs-theme="dark"] #sidebarToggleTop:hover {
+1460-  color: rgba(255, 255, 255, .92) !important;
+1461-  background-color: rgba(255, 255, 255, .16) !important;
+1462-}
+
+---- checks ----
+System check identified no issues (0 silenced).
+
+---- diff resumido ----
+ AdminVideos/static/AdminVideos/css/mi-css.css | 161 ++++++++++++++++++++++++++
+ AdminVideos/templates/AdminVideos/base.html   |   2 +-
+ 2 files changed, 162 insertions(+), 1 deletion(-)
+
+---- git status ----
+ M AdminVideos/static/AdminVideos/css/mi-css.css
+ M AdminVideos/templates/AdminVideos/base.html
+?? parche_sidebar_gris_modo_oscuro_v3.sh
+?? parche_sidebar_gris_modo_oscuro_v3_20260710_203817.txt
+?? parche_sidebar_gris_modo_oscuro_v4.sh
+
+==================================================
+Archivo generado: parche_sidebar_gris_modo_oscuro_v3_20260710_203817.txt
+==================================================
