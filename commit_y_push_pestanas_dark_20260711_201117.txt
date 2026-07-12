@@ -1,0 +1,107 @@
+==================================================
+Commit + push pestañas dark
+Fecha: Sat Jul 11 20:11:17 -03 2026
+Directorio: /Users/guillermogravino/quecomemos
+==================================================
+
+---- estado inicial ----
+ M AdminVideos/static/AdminVideos/css/mi-css.css
+ M AdminVideos/templates/AdminVideos/base.html
+ M media/avatares/logo.png
+?? backup_visual_antes_rollback_20260711_195744/
+?? backup_visual_antes_rollback_20260711_195900/
+?? commit_y_push_pestanas_dark.sh
+?? commit_y_push_pestanas_dark_20260711_201117.txt
+?? fix_solo_pestanas_activas_dark.sh
+?? fix_solo_pestanas_activas_dark_20260711_200312.txt
+?? media/avatares/viejologo.png
+?? "rollback_visual_a_ultimo_commit_limpio (1).sh"
+?? rollback_visual_a_ultimo_commit_limpio.sh
+?? rollback_visual_a_ultimo_commit_limpio_20260711_195744.txt
+?? rollback_visual_a_ultimo_commit_limpio_20260711_195900.txt
+
+---- verificar fix de pestañas ----
+OK: bloque pestañas presente
+OK: nav-tabs activo oscuro
+OK: nav-pills activo oscuro
+OK: no toca btn-check
+OK: base carga mi-css con cache bust
+
+---- limpiar temporales generados por parches/rollback ----
+BORRADO: fix_solo_pestanas_activas_dark.sh
+BORRADO: fix_solo_pestanas_activas_dark_20260711_200312.txt
+BORRADO: rollback_visual_a_ultimo_commit_limpio (1).sh
+BORRADO: rollback_visual_a_ultimo_commit_limpio.sh
+BORRADO: rollback_visual_a_ultimo_commit_limpio_20260711_195744.txt
+BORRADO: rollback_visual_a_ultimo_commit_limpio_20260711_195900.txt
+
+---- checks ----
+System check identified no issues (0 silenced).
+
+---- add sólo pestañas ----
+
+---- staged diff resumido ----
+ AdminVideos/static/AdminVideos/css/mi-css.css | 46 +++++++++++++++++++++++++++
+ AdminVideos/templates/AdminVideos/base.html   |  2 +-
+ 2 files changed, 47 insertions(+), 1 deletion(-)
+
+---- confirmar que media NO está staged ----
+OK: no hay media staged
+
+---- commit ----
+[main fe611e4] Ajusta pestañas activas en modo oscuro
+ Committer: Guillermo Gravino <guillermogravino@MacBook-Air-de-Guillermo.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 47 insertions(+), 1 deletion(-)
+
+---- estado antes de push ----
+ M media/avatares/logo.png
+?? backup_visual_antes_rollback_20260711_195744/
+?? backup_visual_antes_rollback_20260711_195900/
+?? commit_y_push_pestanas_dark.sh
+?? commit_y_push_pestanas_dark_20260711_201117.txt
+?? media/avatares/viejologo.png
+fe611e4 (HEAD -> main) Ajusta pestañas activas en modo oscuro
+f91990b (origin/main, origin/HEAD) Ajusta sidebar gris en modo oscuro
+235f056 Agrega base de modo oscuro con Bootstrap
+1623f02 Mejora edición compacta de ingredientes en plato
+cbfaa12 Silencia mensajes obvios al asignar al menú
+c04086d Evita recarga al cambiar día activo
+
+---- push ----
+remote: 
+remote: GitHub found 48 vulnerabilities on willygravino/quecomemos's default branch (3 critical, 19 high, 25 moderate, 1 low). To find out more, visit:        
+remote:      https://github.com/willygravino/quecomemos/security/dependabot        
+remote: 
+To https://github.com/willygravino/quecomemos.git
+   f91990b..fe611e4  main -> main
+OK: push completado
+
+---- estado final ----
+ M media/avatares/logo.png
+?? backup_visual_antes_rollback_20260711_195744/
+?? backup_visual_antes_rollback_20260711_195900/
+?? commit_y_push_pestanas_dark.sh
+?? commit_y_push_pestanas_dark_20260711_201117.txt
+?? media/avatares/viejologo.png
+fe611e4 (HEAD -> main, origin/main, origin/HEAD) Ajusta pestañas activas en modo oscuro
+f91990b Ajusta sidebar gris en modo oscuro
+235f056 Agrega base de modo oscuro con Bootstrap
+1623f02 Mejora edición compacta de ingredientes en plato
+cbfaa12 Silencia mensajes obvios al asignar al menú
+c04086d Evita recarga al cambiar día activo
+
+==================================================
+Archivo generado: commit_y_push_pestanas_dark_20260711_201117.txt
+==================================================

@@ -1,0 +1,2162 @@
+<!DOCTYPE html>
+<html lang="es-AR" data-bs-theme="dark">
+
+<head>
+    {% load static %}
+
+<!-- QC Bootstrap color-mode boot -->
+<script>
+  (function () {
+    try {
+      var key = "quecomemos-bs-theme";
+      var saved = localStorage.getItem(key);
+      var theme = saved || "dark";
+      document.documentElement.setAttribute("data-bs-theme", theme);
+    } catch (error) {
+      document.documentElement.setAttribute("data-bs-theme", "dark");
+    }
+  })();
+</script>
+
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/album/">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="{% static 'AdminVideos/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
+    <link
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+        rel="stylesheet">
+
+    <!-- mi css -->
+
+    <link href="{% static 'AdminVideos/css/sb-admin-2.min.css' %}" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=wand_shine" />
+
+    <!-- CSS de Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+    <!-- mi css -->
+    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260710203817" rel="stylesheet">  <!-- al final + bust de caché -->
+
+    <link rel="manifest" href="{% static 'AdminVideos/lista_super/manifest_lista_super.json' %}?v=1">
+
+   
+
+    <title>¿Qué cómemos? · V1.0</title>
+
+
+
+<style id="navbar-dropdown-viewport-fix">
+  /*
+    Evita que los dropdowns grandes de la topbar
+    se salgan del borde derecho/izquierdo de la pantalla.
+  */
+  #amiguesDropdownContenido,
+  #mensajesDropdownContenido {
+    right: 0 !important;
+    left: auto !important;
+    width: min(22rem, calc(100vw - 1.5rem));
+    max-width: calc(100vw - 1.5rem);
+    max-height: min(70vh, 32rem);
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  @media (max-width: 575.98px) {
+    #amiguesDropdownContenido,
+    #mensajesDropdownContenido {
+      position: fixed !important;
+      top: 4.25rem !important;
+      left: 0.75rem !important;
+      right: 0.75rem !important;
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: none !important;
+      max-height: calc(100vh - 5rem);
+    }
+  }
+</style>
+
+
+<style id="sidebar-dropdown-menu-fix">
+  #accordionSidebar .sidebar-dropdown-toggle {
+    position: relative;
+  }
+
+  #accordionSidebar .sidebar-dropdown-toggle.dropdown-toggle::after {
+    position: absolute;
+    top: 3.2rem;
+    right: 0.55rem;
+    margin-left: 0;
+  }
+
+  #accordionSidebar .sidebar-dropdown-menu {
+    background: #263445;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    min-width: 10rem;
+  }
+
+  #accordionSidebar .sidebar-dropdown-menu .dropdown-item {
+    color: rgba(255, 255, 255, 0.92);
+    font-weight: 600;
+  }
+
+  #accordionSidebar .sidebar-dropdown-menu .dropdown-item:hover,
+  #accordionSidebar .sidebar-dropdown-menu .dropdown-item:focus {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.16);
+  }
+
+  #accordionSidebar .sidebar-dropdown-menu .dropdown-item.active,
+  #accordionSidebar .sidebar-dropdown-menu .dropdown-item:active {
+    color: #ffffff;
+    background: #0d6efd;
+  }
+</style>
+
+
+<style id="sidebar-special-items-fix">
+  #accordionSidebar .sidebar-special-item {
+    width: calc(100% - 1rem);
+    margin: 0.25rem auto;
+    border-radius: 0.75rem;
+    background: rgba(25, 135, 84, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-sizing: border-box;
+  }
+
+  #accordionSidebar .sidebar-special-item .nav-link {
+    width: 100% !important;
+    border-radius: 0.75rem;
+    box-sizing: border-box;
+  }
+
+  #accordionSidebar .sidebar-special-item:hover {
+    background: rgba(25, 135, 84, 0.32);
+  }
+
+  #accordionSidebar .sidebar-special-item.active {
+    background: rgba(25, 135, 84, 0.46);
+    border-color: rgba(255, 255, 255, 0.42);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  }
+</style>
+
+</head>
+
+<body id="page-top" class="sidebar-toggled">
+    <!-- Page Wrapper -->
+    <div id="wrapper" class="bg-body">
+
+
+
+
+
+        <!-- Sidebar -->
+
+
+<!-- Sidebar -->
+<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion toggled" id="accordionSidebar">
+
+  <!-- Sidebar - Brand -->
+  <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'about' %}">
+    <div class="sidebar-brand-icon">
+      <img src="/media/avatares/logo.png" height="60" alt="Logo"
+           style="border-radius: 50%; width: 60px; height: 60px; object-fit: cover;">
+    </div>
+  </a>
+
+  <!-- TÍTULO -->
+  <div class="text-center text-white fw-bold text-uppercase small mt-2 mb-2 px-3">
+    Carta de platos
+  </div>
+  <hr class="my-2 border border-white opacity-100">
+
+
+
+  
+<!-- 
+{# ============================
+   MENÚ LATERAL POR TIPOS
+   - Usa SOLO tipopag para activo
+   - Lista de Compras activa por url_name
+   ============================ #}
+-->
+
+<!-- {# 0) CON LO QUE TENGO #} -->
+<li class="nav-item sidebar-special-item {% if tipopag == 'LoQueTengo' %}active{% endif %}">
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
+            {% if tipopag == 'LoQueTengo' %}is-active{% endif %}"
+     href="{% url 'filtro-de-platos' %}?tipopag=LoQueTengo"
+     data-tipopag="LoQueTengo">
+
+    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
+          style="width: 38px; height: 38px;">
+      <i class="fa-solid fa-basket-shopping {% if tipopag != 'LoQueTengo' %}text-white-50{% endif %}"
+         style="font-size: 1.1rem;"></i>
+    </span>
+
+    <span class="item-text mt-2 small {% if tipopag == 'LoQueTengo' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+      <span class="d-block">Con lo que</span>
+      <span class="d-block">tengo</span>
+    </span>
+  </a>
+</li>
+
+<hr class="sidebar-divider">
+
+<!-- {# 1) PRINCIPAL #} -->
+<li class="nav-item {% if tipopag == 'Principal' %}active{% endif %}">
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
+            {% if tipopag == 'Principal' %}is-active{% endif %}"
+     href="{% url 'filtro-de-platos' %}?tipopag=Principal"
+     data-tipopag="Principal">
+
+    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
+          style="width: 38px; height: 38px;">
+      <i class="fa-solid fa-utensils {% if tipopag != 'Principal' %}text-white-50{% endif %}"
+         style="font-size: 1.1rem;"></i>
+    </span>
+
+    <span class="item-text mt-2 small {% if tipopag == 'Principal' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+      Platos Principales
+    </span>
+  </a>
+</li>
+
+<hr class="sidebar-divider">
+
+<!-- {# 2) ENTRADA #} -->
+<li class="nav-item {% if tipopag == 'Entrada' %}active{% endif %}">
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
+            {% if tipopag == 'Entrada' %}is-active{% endif %}"
+     href="{% url 'filtro-de-platos' %}?tipopag=Entrada{% if dia_activo %}&dia_activo={{ dia_activo }}{% endif %}"
+     data-tipopag="Entrada">
+
+    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
+          style="width: 38px; height: 38px;">
+      <i class="fa-solid fa-shrimp {% if tipopag != 'Entrada' %}text-white-50{% endif %}"
+         style="font-size: 1.1rem;"></i>
+    </span>
+
+    <span class="item-text mt-2 small {% if tipopag == 'Entrada' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+      Entradas
+    </span>
+  </a>
+</li>
+
+<!-- {# 3) DIPS Y SALSAS #} -->
+<li class="nav-item dropdown {% if tipopag == 'Dip' or tipopag == 'Salsa' %}active{% endif %}">
+  <a class="nav-link menu-item dropdown-toggle sidebar-dropdown-toggle d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag-grupo
+            {% if tipopag == 'Dip' or tipopag == 'Salsa' %}is-active{% endif %}"
+     href="#"
+     id="dipsSalsasDropdown"
+     role="button"
+     data-bs-toggle="dropdown"
+     data-bs-display="static"
+     aria-expanded="false"
+     data-tipopag-values="Dip,Salsa">
+
+    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
+          style="width: 38px; height: 38px;">
+      <i class="fas fa-solid fa-bowl-rice {% if tipopag != 'Dip' and tipopag != 'Salsa' %}text-white-50{% endif %}"
+         style="font-size: 1.1rem;"></i>
+    </span>
+
+    <span class="item-text mt-2 small {% if tipopag == 'Dip' or tipopag == 'Salsa' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+      <span class="d-block">Dips</span>
+      <span class="d-block">y Salsas</span>
+    </span>
+  </a>
+
+  <ul class="dropdown-menu dropdown-menu-dark sidebar-dropdown-menu text-small shadow"
+      aria-labelledby="dipsSalsasDropdown">
+    <li>
+      <a class="dropdown-item js-filtro-tipopag {% if tipopag == 'Dip' %}active{% endif %}"
+         href="{% url 'filtro-de-platos' %}?tipopag=Dip"
+         data-tipopag="Dip">
+        <i class="fa-solid fa-bowl-food me-2"></i>Dips
+      </a>
+    </li>
+    <li>
+      <a class="dropdown-item js-filtro-tipopag {% if tipopag == 'Salsa' %}active{% endif %}"
+         href="{% url 'filtro-de-platos' %}?tipopag=Salsa"
+         data-tipopag="Salsa">
+        <i class="fa-solid fa-droplet me-2"></i>Salsas
+      </a>
+    </li>
+  </ul>
+</li>
+
+<!-- {# 4) GUARNICION #} -->
+<li class="nav-item {% if tipopag == 'Guarnicion' %}active{% endif %}">
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
+            {% if tipopag == 'Guarnicion' %}is-active{% endif %}"
+     href="{% url 'filtro-de-platos' %}?tipopag=Guarnicion"
+     data-tipopag="Guarnicion">
+
+    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
+          style="width: 38px; height: 38px;">
+      <i class="fa-solid fa-plate-wheat {% if tipopag != 'Guarnicion' %}text-white-50{% endif %}"
+         style="font-size: 1.1rem;"></i>
+    </span>
+
+    <span class="item-text mt-2 small {% if tipopag == 'Guarnicion' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+      Guarniciones
+    </span>
+  </a>
+</li>
+
+<!-- {# 4.2) PICADAS #} -->
+<li class="nav-item dropdown {% if tipopag == 'Picada' or tipopag == 'Ingrediente de picada' %}active{% endif %}">
+  <a class="nav-link menu-item dropdown-toggle sidebar-dropdown-toggle d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag-grupo
+            {% if tipopag == 'Picada' or tipopag == 'Ingrediente de picada' %}is-active{% endif %}"
+     href="#"
+     id="picadasDropdown"
+     role="button"
+     data-bs-toggle="dropdown"
+     data-bs-display="static"
+     aria-expanded="false"
+     data-tipopag-values="Picada,Ingrediente de picada">
+
+    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
+          style="width: 38px; height: 38px;">
+      <i class="fa-solid fa-cheese {% if tipopag != 'Picada' and tipopag != 'Ingrediente de picada' %}text-white-50{% endif %}"
+         style="font-size: 1.1rem;"></i>
+    </span>
+
+    <span class="item-text mt-2 small {% if tipopag == 'Picada' or tipopag == 'Ingrediente de picada' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+      Picadas
+    </span>
+  </a>
+
+  <ul class="dropdown-menu dropdown-menu-dark sidebar-dropdown-menu text-small shadow"
+      aria-labelledby="picadasDropdown">
+    <li>
+      <a class="dropdown-item js-filtro-tipopag {% if tipopag == 'Picada' %}active{% endif %}"
+         href="{% url 'filtro-de-platos' %}?tipopag=Picada"
+         data-tipopag="Picada">
+        <i class="fa-solid fa-cheese me-2"></i>Armado de picadas
+      </a>
+    </li>
+    <li>
+      <a class="dropdown-item js-filtro-tipopag {% if tipopag == 'Ingrediente de picada' %}active{% endif %}"
+         href="{% url 'filtro-de-platos' %}?tipopag=Ingrediente%20de%20picada"
+         data-tipopag="Ingrediente de picada">
+        <i class="fa-solid fa-carrot me-2"></i>Gestión de ingredientes
+      </a>
+    </li>
+  </ul>
+</li>
+
+<!-- {# 5) POSTRE #} -->
+<li class="nav-item {% if tipopag == 'Postre' %}active{% endif %}">
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
+            {% if tipopag == 'Postre' %}is-active{% endif %}"
+     href="{% url 'filtro-de-platos' %}?tipopag=Postre"
+     data-tipopag="Postre">
+
+    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
+          style="width: 38px; height: 38px;">
+      <i class="fa-solid fa-ice-cream {% if tipopag != 'Postre' %}text-white-50{% endif %}"
+         style="font-size: 1.1rem;"></i>
+    </span>
+
+    <span class="item-text mt-2 small {% if tipopag == 'Postre' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+      <span class="d-block">Postres</span>
+      <span class="d-block">Reposterías</span>
+    </span>
+  </a>
+</li>
+
+<!-- {# 6) TRAGO #} -->
+<li class="nav-item {% if tipopag == 'Trago' %}active{% endif %}">
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
+            {% if tipopag == 'Trago' %}is-active{% endif %}"
+     href="{% url 'filtro-de-platos' %}?tipopag=Trago"
+     data-tipopag="Trago">
+
+    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
+          style="width: 38px; height: 38px;">
+      <i class="fa-solid fa-martini-glass-citrus {% if tipopag != 'Trago' %}text-white-50{% endif %}"
+         style="font-size: 1.1rem;"></i>
+    </span>
+
+    <span class="item-text mt-2 small {% if tipopag == 'Trago' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+      <span class="d-block">Bebidas</span>
+      <span class="d-block">Tragos</span>
+    </span>
+  </a>
+</li>
+
+
+  <!-- Divider -->
+  <hr class="sidebar-divider d-none d-md-block">
+
+<!-- {# 7) DELIVERY #} -->
+<li class="nav-item {% if tipopag == 'Delivery' %}active{% endif %}">
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-0 py-0 js-filtro-tipopag
+            {% if tipopag == 'Delivery' %}is-active{% endif %}"
+     href="{% url 'filtro-de-platos' %}?tipopag=Delivery"
+     data-tipopag="Delivery">
+
+    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
+          style="width: 38px; height: 38px;">
+      <i class="fa-solid fa-motorcycle {% if tipopag != 'Delivery' %}text-white-50{% endif %}"
+         style="font-size: 1.1rem;"></i>
+    </span>
+
+    <span class="item-text mt-2 small {% if tipopag == 'Delivery' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+      Delivery
+    </span>
+  </a>
+</li>
+
+<!-- {# 8) COMER AFUERA #} -->
+<li class="nav-item {% if tipopag == 'Comerafuera' %}active{% endif %}">
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
+            {% if tipopag == 'Comerafuera' %}is-active{% endif %}"
+     href="{% url 'filtro-de-platos' %}?tipopag=Comerafuera"
+     data-tipopag="Comerafuera">
+
+    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
+          style="width: 38px; height: 38px;">
+      <i class="fa-solid fa-location-dot {% if tipopag != 'Comerafuera' %}text-white-50{% endif %}"
+         style="font-size: 1.1rem;"></i>
+    </span>
+
+    <span class="item-text mt-2 small {% if tipopag == 'Comerafuera' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+      Comer afuera
+    </span>
+  </a>
+</li>
+
+
+
+
+
+
+  <!-- Divider -->
+  <hr class="sidebar-divider d-none d-md-block">
+
+
+  <!-- Sidebar Toggler (Sidebar) -->
+  <div class="text-center d-none d-md-inline">
+    <button class="rounded-circle border-0" id="sidebarToggle"></button>
+  </div>
+
+</ul>
+<!-- End of Sidebar -->
+
+
+
+
+
+        <!-- End of Sidebar -->
+
+
+
+
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column bg-body">
+
+            <!-- COLOR PARA UBICAR
+        <div id="content-wrapper" style="background-color: rgb(255, 0, 255);" class="d-flex flex-column"></div> -->
+
+            <!-- Main Content -->
+            <!-- <div id="content"> -->
+
+            <!-- Topbar -->
+            <nav class="navbar navbar-expand bg-body topbar mb-2 static-top shadow">
+
+                <!-- Sidebar Toggle (Topbar) -->
+                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                    <i class="fa fa-bars"></i>
+                </button>
+
+                <!-- Topbar Navbar -->
+                <ul class="navbar-nav ml-auto">
+
+<!-- QC Bootstrap theme toggle topbar -->
+<li class="nav-item mx-1 d-flex align-items-center">
+  <button type="button"
+          id="qcBootstrapThemeToggle"
+          class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1"
+          aria-label="Cambiar modo claro u oscuro"
+          aria-pressed="true"
+          title="Cambiar modo claro u oscuro">
+    <span id="qcBootstrapThemeToggleIcon">☀️</span>
+    <span id="qcBootstrapThemeToggleText">Claro</span>
+  </button>
+</li>
+
+
+                    <!-- Nav Item - Search Dropdown (Visible Only XS) -->
+                    <li class="nav-item dropdown no-arrow d-sm-none">
+                        <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <!-- Dropdown - Messages -->
+                        <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in"
+                            aria-labelledby="searchDropdown">
+                            <form class="form-inline mr-auto w-100 navbar-search">
+                                <div class="input-group">
+                                    <input type="text" class="form-control bg-body-tertiary small" placeholder="Search for..."
+                                        aria-label="Search" aria-describedby="basic-addon2">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary" type="button">
+                                            <i class="fas fa-search fa-sm"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </li>
+
+                    <!-- Nav Item - Alerts -->
+                    <li class="nav-item dropdown no-arrow mx-1">
+                        <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-bell fa-fw"></i>
+                            <!-- Counter - Alerts -->
+                            <!-- <span class="badge badge-danger badge-counter">3+</span> -->
+                        </a>
+                        <!-- Dropdown - Alerts -->
+                        <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                            aria-labelledby="alertsDropdown">
+                            <h6 class="dropdown-header">
+                                Notificaciones
+                            </h6>
+
+                            <a class="dropdown-item d-flex align-items-center" href="#">
+                                <div class="mr-3">
+                                    <div class="icon-circle bg-warning">
+                                        <i class="fas fa-exclamation-triangle text-white"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <!-- <div class="small text-gray-500">December 2, 2019</div> -->
+                                    No hay notificaciones.
+                                </div>
+                            </a>
+                            <a class="dropdown-item text-center small text-gray-500" href="#">Mostrar Todas Las
+                                Notificaciones</a>
+                        </div>
+                    </li>
+
+                
+                    {# Navbar: acceso a Amigues y solicitudes pendientes #}
+                    <li class="nav-item dropdown no-arrow mx-1">
+                      <a class="nav-link dropdown-toggle position-relative"
+                        href="#"
+                        id="amiguesDropdown"
+                        role="button"
+                        data-bs-toggle="dropdown"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                        title="Amigues"
+                        aria-label="Amigues">
+
+                        <i class="fa-regular fa-address-book"></i>
+
+                        <span id="amiguesBadge"
+                              class="badge badge-danger badge-counter d-none"
+                              data-url="{% url 'ajax-solicitudes-amistad' %}">
+                        </span>
+                      </a>
+
+                      <div id="amiguesDropdownContenido"
+                          class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in overflow-auto"
+                          style="max-height: 600px; min-width: 320px;"
+                          aria-labelledby="amiguesDropdown"
+                          data-url="{% url 'ajax-panel-amigues' %}">
+
+                        <div class="p-3 text-muted small">
+                          Cargando amigues…
+                        </div>
+
+                      </div>
+                    </li>
+                
+                    <!-- Nav Item - CHAT -->
+
+                    <li class="nav-item dropdown no-arrow">
+                        <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fa-solid fa-comments"></i>
+                            <!-- Counter - Messages -->
+
+                      
+                            <span id="mensajesBadge"
+                                  class="badge badge-danger badge-counter {% if not mensajes %}d-none{% endif %}">
+                              {% if mensajes %}{{ mensajes|length }}{% endif %}
+                            </span>
+
+                          </a>
+                        <!-- Dropdown - Messages -->
+                        <div id="mensajesDropdownContenido"
+                            class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in overflow-auto"
+                            style="max-height: 600px;"
+                            aria-labelledby="messagesDropdown"
+                            data-url="{% url 'ajax-mensajes-usuario' %}">
+
+                          {% include "AdminVideos/partials/_dropdown_mensajes.html" %}
+
+                        </div>
+
+
+
+
+
+
+
+                    </li>
+
+                    <div class="topbar-divider d-none d-sm-block"></div>
+
+
+
+                    <li class="nav-item dropdown no-arrow">
+                        <a class="nav-link dropdown-toggle" id="userDropdown" role="button" data-bs-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false">
+                            {% if user.username != "quecomemos" %}
+                            <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{user.username}}
+                                ({{user.profile.nombre}})</span>
+                            <img class="img-profile rounded-circle" src="{{user.profile.avatar_url}}">
+                            {% else %}
+                            <span class="small border rounded bg-success text-white">MODO ADMINISTRADOR</span>
+                            {% endif %}
+                        </a>
+
+
+                        <!-- Dropdown - User Information -->
+                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                            aria-labelledby="userDropdown">
+
+                            {% if user.profile %}
+                            <a class="dropdown-item" href="{% url 'profile-update' user.profile.id %}">
+                                <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                                Actualizar Perfil
+                            </a>
+
+                            {% else %}
+                            <a class="dropdown-item" href="{% url 'profile-create' %}">
+                                <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                                Completar Perfil
+                            </a>
+
+                            {% endif %}
+
+                            <a class="dropdown-item" href="#">
+                                <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
+                                Preferencias
+                            </a>
+
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">
+                                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                Salir
+                            </a>
+                        </div>
+                    </li>
+
+                </ul>
+
+            </nav>
+
+            <!-- End of Topbar -->
+
+
+
+            <ul class="nav nav-tabs flex-nowrap overflow-hidden border-0 w-100 justify-content-start" id="diasTab"
+                role="tablist" style="white-space: nowrap;">
+
+                <!-- <span class="btn btn-outline-danger material-symbols-outlined ">wand_shine</span> -->
+
+
+                {% for dia in dias_desde_hoy %}
+                
+
+                <li class="nav-item flex-fill" role="presentation" style="flex: 1 0 auto;">
+                    <button
+                        class="nav-link {% if dia_activo == dia|date:'Y-m-d' %}active{% elif forloop.first and not dia_activo %}active{% endif %} text-center px-2"
+                        id="tab-{{ dia|date:'Y-m-d' }}" data-bs-toggle="tab"
+                        data-bs-target="#tab-content-{{ dia|date:'Y-m-d' }}" type="button" role="tab"
+                        aria-controls="tab-content-{{ dia|date:'Y-m-d' }}"
+                        aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+                        data-dia-activo="{{ dia|date:'Y-m-d' }}"
+                        data-dia-label="{{ dia|date:'l j'|capfirst }}">
+
+                        <span class="d-none d-md-block">
+
+                            {{ dia|date:"l j"|capfirst }}
+                            {% if dia in dias_programados %}
+                            &nbsp;
+                            <i class="fa-solid fa-check text-success"></i>
+                            <!-- Icono pin al lado del nombre -->
+                            {% endif %}
+                        </span>
+                        <span class="d-block d-md-none">
+                            {{ dia|date:"D"|slice:":2"|upper }}<br>{{ dia|date:"j" }}
+                            {% if dia in dias_programados %}
+                            <i class="fa-solid fa-check text-success"></i>
+                            <!-- <i class="bi bi-pin-angle-fill"></i> -->
+                            {% endif %}
+                        </span>
+                    </button>
+                </li>
+                {% endfor %}
+            </ul>
+
+  <!-- PESTAÑAS - MENÚES PROGRAMADOS - PLATOS -->
+
+       {% block pestanias-menues-platos %}
+       {% endblock %}
+  
+
+  <!-- FIN DE PESTAÑAS - MENÚES PROGRAMADOS - PLATOS -->
+
+
+  <!-- End of Main Content -->
+
+            <!-- Footer -->
+            <footer class="sticky-footer bg-body-tertiary">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Copyright ¿Qué comemos? V1.0© 2025</span>
+                    </div>
+                </div>
+            </footer>
+            <!-- End of Footer -->
+
+        </div>
+        <!-- End of Content Wrapper -->
+    </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top" style="display: none;">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">¿Querés salir?</h5>
+                    <button class="close" type="button" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Seleccioná "Salir" si estás listo para cerrar la sesión.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancelar</button>
+                    <a class="btn btn-primary" href="{% url 'logout' %}">Salir</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Detectamos el tab activo al hacer clic en los enlaces de navegación
+            document.querySelectorAll("a.nav-link").forEach(link => {
+                link.addEventListener("click", function (event) {
+                    let activeTab = document.querySelector(".nav-tabs .nav-link.active");
+                    if (activeTab) {
+                        let diaActivo = activeTab.id.replace("tab-", "");  // Extraemos la fecha de la pestaña activa
+                        let url = new URL(this.href, window.location.origin);
+                        url.searchParams.set("dia_activo", diaActivo);  // Agregamos el día a la URL
+                        this.href = url.toString();  // Actualizamos el `href`
+                    }
+                });
+            });
+        });
+    </script>
+
+<!--
+  Modal Bootstrap reutilizable para mostrar
+  el detalle de un plato sin salir de la pantalla principal
+-->
+<div class="modal fade" id="platoDetailModal" tabindex="-1">
+
+  <!--
+    modal-dialog:
+    - modal-lg → ancho grande (ideal para cards con info)
+    - modal-dialog-centered → centrado vertical
+    - modal-dialog-scrollable → scroll interno si el contenido es largo
+  -->
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+
+    <div class="modal-content">
+
+      <!--
+        CABECERA DEL MODAL
+        Contiene el título y el botón de cerrar
+      -->
+      <div class="modal-header">
+        <h5 class="modal-title">Detalle del plato</h5>
+
+        <!--
+          Botón estándar de Bootstrap para cerrar el modal
+        -->
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Cerrar">
+        </button>
+      </div>
+
+      <!--
+        CUERPO DEL MODAL
+        Acá se inyecta dinámicamente el HTML del plato
+        mediante fetch + AJAX
+      -->
+      <div class="modal-body" id="platoDetailModalBody">
+
+        <!--
+          Contenido temporal mientras se carga el detalle
+        -->
+        <div class="text-center text-muted py-5">
+          Cargando…
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<script>
+/*
+  SCRIPT: Carga dinámica del detalle de un Plato en un modal Bootstrap
+
+  ¿Qué hace?
+  - Escucha clicks en cualquier botón/link con la clase `.js-ver-detalle-plato`
+  - Toma la URL real del detalle desde `data-detail-url`
+  - Hace una petición AJAX (fetch) a Django
+  - Django responde con HTML ya renderizado (parcial)
+  - Inserta ese HTML dentro del modal
+  - Abre (o reutiliza) el modal Bootstrap
+
+  ¿Por qué así?
+  - Evita navegar a otra página
+  - Reutiliza la misma vista para padre y variedades
+  - Funciona desde dashboard, cards y desde dentro del modal
+  - No hardcodea URLs en JS (menos errores)
+*/
+
+document.addEventListener("click", function (e) {
+
+  // Buscamos si el click ocurrió sobre (o dentro de) un elemento
+  // que tenga la clase disparadora del modal
+  const btn = e.target.closest(".js-ver-detalle-plato");
+  if (!btn) return; // si no es ese botón, no hacemos nada
+
+  // Evita que un <a href="#"> navegue
+  e.preventDefault();
+
+  // URL real del detalle del plato (viene del template Django)
+  const url = btn.dataset.detailUrl;
+
+  // Contenedor del cuerpo del modal donde se inyecta el HTML
+  const modalBody = document.getElementById("platoDetailModalBody");
+
+  // Estado de carga mientras se espera la respuesta del servidor
+  modalBody.innerHTML = `
+    <div class="text-center py-5 text-muted">
+      Cargando…
+    </div>
+  `;
+
+  // Petición AJAX al backend
+  fetch(url, {
+    headers: {
+      "X-Requested-With": "XMLHttpRequest"
+    }
+  })
+    // Django devuelve JSON con una clave "html"
+    .then(response => response.json())
+
+    // Insertamos el HTML y abrimos el modal
+    .then(data => {
+      modalBody.innerHTML = data.html;
+
+      bootstrap.Modal
+        .getOrCreateInstance(document.getElementById("platoDetailModal"))
+        .show();
+    })
+
+    // Log básico por si algo falla
+    .catch(err => {
+      console.error("Error cargando detalle del plato:", err);
+    });
+
+});
+</script>
+
+
+
+
+
+    <!-- Inicialización de Tooltips y Popovers -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Activar tooltips en los elementos con data-bs-toggle="tooltip"
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            tooltipTriggerList.forEach(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
+            // Inicializar popovers en los elementos con data-bs-toggle="popover"
+            const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+            popoverTriggerList.forEach(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+        });
+    </script>
+
+<!-- 
+⚠️ NO DUPLICAR ⚠️
+     Este contenedor se usa para inyectar modales por JS
+     (plato ingredientes, compartir, etc.)
+Root globl para modales cargados dinámicamente (AJAX) 
+ Contenedor único para modales dinámicos (ingredientes, compartir, etc.) -->
+<div id="modal-root"></div>
+
+ <!-- ===== Modal global: asignar plato =====  -->
+
+<script id="dias-tab-menu-programado-sync">
+(function () {
+  "use strict";
+
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) {
+      return parts.pop().split(";").shift();
+    }
+    return "";
+  }
+
+  function getTabDia(tab) {
+    if (!tab) return "";
+    return tab.dataset.diaActivo || (tab.id || "").replace("tab-", "");
+  }
+
+  function getTabLabel(tab) {
+    if (!tab) return "";
+    if (tab.dataset.diaLabel) return tab.dataset.diaLabel;
+
+    const labelNode = tab.querySelector(".d-block, .small, span");
+    return labelNode ? labelNode.textContent.trim() : getTabDia(tab);
+  }
+
+  function getTabActivo() {
+    return document.querySelector("#diasTab .nav-link.active");
+  }
+
+  function sincronizarDiaActivo(tab) {
+    tab = tab || getTabActivo();
+    if (!tab) return;
+
+    const dia = getTabDia(tab);
+    const label = getTabLabel(tab);
+
+    if (!dia) return;
+
+    window.diaActivoActual = dia;
+    window.diaActivoLabelActual = label || dia;
+
+    const diaSeleccionadoInput = document.getElementById("diaSeleccionado");
+    if (diaSeleccionadoInput) {
+      diaSeleccionadoInput.value = dia;
+    }
+
+    const diaActivoTexto = document.getElementById("diaActivoTexto");
+    if (diaActivoTexto) {
+      diaActivoTexto.textContent = window.diaActivoLabelActual;
+    }
+
+    document.dispatchEvent(new CustomEvent("diaActivo:change", {
+      detail: {
+        dia: dia,
+        label: window.diaActivoLabelActual
+      }
+    }));
+  }
+
+  window.getDiaActivoLabelActual = function () {
+    const texto = document.getElementById("diaActivoTexto");
+    return window.diaActivoLabelActual || (texto ? texto.textContent.trim() : "") || "{{ dia_activo_obj|date:'l j'|capfirst }}";
+  };
+
+  function guardarDiaActivoEnSesion(tab) {
+    if (!tab || !window.fetch) return;
+
+    const dia = getTabDia(tab);
+    if (!dia) return;
+
+    const body = new URLSearchParams();
+    body.set("dia_activo", dia);
+
+    fetch("{% url 'set-dia-activo' %}", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": getCookie("csrftoken") || "{{ csrf_token }}",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      body: body.toString()
+    }).catch(function (error) {
+      console.warn("No se pudo guardar el día activo en sesión.", error);
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const tabs = document.querySelectorAll("#diasTab .nav-link");
+    if (!tabs.length) return;
+
+    sincronizarDiaActivo(getTabActivo());
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener("shown.bs.tab", function (event) {
+        sincronizarDiaActivo(event.target);
+        guardarDiaActivoEnSesion(event.target);
+      });
+
+      // Fallback por si Bootstrap no emite shown.bs.tab en algún contexto.
+      tab.addEventListener("click", function () {
+        window.setTimeout(function () {
+          sincronizarDiaActivo(getTabActivo());
+        }, 0);
+      });
+    });
+  });
+})();
+</script>
+
+<div class="modal fade" id="asignarPlatoModal" tabindex="-1" aria-labelledby="asignarPlatoLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="asignarPlatoForm" action="{% url 'asignar-plato' %}" method="post" novalidate>
+        {% csrf_token %}
+
+        <!-- Header -->
+        <div class="modal-header">
+          <h5 class="modal-title" id="asignarPlatoLabel">
+            <span id="modalTitulo">
+              Tildá los platos que quieras programar para el día
+              <span id="diaActivoTexto">{{ dia_activo_obj|date:"l j"|capfirst }}</span>
+            </span>
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+
+        <!-- Body -->
+        <div class="modal-body">
+          <input type="hidden" name="dia" id="diaSeleccionado">
+          <input type="hidden" name="plato_id" id="platoIdInputAsignar">
+          <input type="hidden" name="tipo_elemento" id="tipoObjetoAsignar">
+
+          <!-- Bloque para listar las variedades -->
+          <div id="bloque-platos-para-asignar" class="mt-3 d-none">
+            <div id="lista-platos-para-asignar" class="d-flex flex-column gap-2"></div>
+          </div>
+
+          <!-- Selector de comida -->
+          <div class="mb-3 mt-3">
+            <label for="comidaSeleccionada" class="form-label">Seleccionar comida:</label>
+            <select name="comida" id="comidaSeleccionada" class="form-select">
+              <option value="desayuno">Desayuno</option>
+              <option value="almuerzo" selected>Almuerzo</option>
+              <option value="merienda">Merienda</option>
+              <option value="cena">Cena</option>
+            </select>
+          </div>
+
+          <!-- =====================================================
+               EXTRAS (solo para platos Principal)
+               - Se muestra/oculta desde setPlatoInfo()
+               - Cada fila agrega 2 inputs:
+                   extra_tipo (hidden) + extra_id (select)
+               ===================================================== -->
+          <div id="bloqueExtras" class="mt-3 d-none">
+            <label class="form-label fw-semibold">Extras (opcional)</label>
+
+            <!-- Botones + -->
+            <div class="d-flex gap-2 flex-wrap mb-2">
+              <button type="button" class="btn btn-sm btn-outline-primary js-add-extra" data-tipo="Guarnicion">
+                + Guarnición
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-primary js-add-extra" data-tipo="Salsa">
+                + Salsa
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-primary js-add-extra" data-tipo="Postre">
+                + Postre
+              </button>
+            </div>
+
+            <!-- Filas dinámicas -->
+            <div id="extrasRows" class="vstack gap-2"></div>
+
+            <!-- Plantillas ocultas (para clonar options ya renderizadas por Django) -->
+            <select id="tplGuarnicion" class="d-none">
+              <option value="">— Elegí guarnición —</option>
+              {% for g in guarniciones %}
+                <option value="{{ g.id }}">{{ g.nombre_plato }}</option>
+              {% endfor %}
+            </select>
+
+            <select id="tplSalsa" class="d-none">
+              <option value="">— Elegí salsa —</option>
+              {% for s in salsas %}
+                <option value="{{ s.id }}">{{ s.nombre_plato }}</option>
+              {% endfor %}
+            </select>
+
+            <select id="tplPostre" class="d-none">
+              <option value="">— Elegí postre —</option>
+              {% for p in postres %}
+                <option value="{{ p.id }}">{{ p.nombre_plato }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Programar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
+{# Botón flotante: crear plato rápido según la sección actual #}
+{% if user.is_authenticated %}
+  <a id="botonCrearPlatoFlotante"
+     href="{% url 'videos-create' %}?tipopag={{ tipopag|default:''|urlencode }}&return_to={{ request.get_full_path|urlencode }}"
+     data-url-crear-plato="{% url 'videos-create' %}"
+     data-url-crear-lugar="{% url 'crear-lugar' %}"
+     class="btn btn-success rounded-circle shadow position-fixed d-flex align-items-center justify-content-center"
+     style="right: 1rem; bottom: 9rem; width: 56px; height: 56px; z-index: 1050;"
+    title="{% if tipopag == 'Picada' %}Armar picada{% elif tipopag == 'Ingrediente de picada' %}Agregar ingrediente de picada{% elif tipopag == 'Principal' or not tipopag %}Agregar receta de plato principal{% elif tipopag == 'Guarnicion' %}Agregar receta de guarnición{% elif tipopag == 'Comerafuera' %}Agregar lugar para comer afuera{% elif tipopag == 'Delivery' %}Agregar delivery{% else %}Agregar receta de {{ tipopag|lower }}{% endif %}"
+    aria-label="{% if tipopag == 'Picada' %}Armar picada{% elif tipopag == 'Ingrediente de picada' %}Agregar ingrediente de picada{% elif tipopag == 'Principal' or not tipopag %}Agregar receta de plato principal{% elif tipopag == 'Guarnicion' %}Agregar receta de guarnición{% elif tipopag == 'Comerafuera' %}Agregar lugar para comer afuera{% elif tipopag == 'Delivery' %}Agregar delivery{% else %}Agregar receta de {{ tipopag|lower }}{% endif %}">
+    <i class="fa-solid fa-plus"></i>
+  </a>
+{% endif %}
+
+
+<div id="botonListaComprasFlotanteWrap">
+  {# Botón flotante: acceso rápido a la lista de compras #}
+  {% if user.is_authenticated %}
+    {% if hay_lista_de_compras %}
+      <a href="{% url 'menu-elegido' %}"
+         class="btn btn-primary rounded-circle shadow position-fixed d-flex align-items-center justify-content-center"
+         style="right: 1rem; bottom: 5rem; width: 56px; height: 56px; z-index: 1050;"
+         title="Lista de compras"
+         aria-label="Lista de compras">
+        <i class="fa-solid fa-cart-shopping"></i>
+      </a>
+
+    {% else %}
+      <span class="btn btn-primary rounded-circle shadow position-fixed d-flex align-items-center justify-content-center"
+            style="right: 1rem; bottom: 5rem; width: 56px; height: 56px; z-index: 1050; opacity: 0.50; pointer-events: none;"
+            title="No hay platos programados para comprar"
+            aria-label="No hay platos programados para comprar">
+        <i class="fa-solid fa-cart-shopping"></i>
+      </span>
+    {% endif %}
+  {% endif %}
+</div>
+
+
+
+<script>
+/**
+ * ============================================================
+ * MODAL "ASIGNAR PLATO"
+ * ============================================================
+ * Este script controla TODA la lógica del modal:
+ *
+ * 1) setPlatoInfo(...)
+ *    - Prepara el modal al hacer click en un plato o lugar
+ *    - Carga variedades vía AJAX
+ *    - Decide si el plato es "Principal"
+ *    - SOLO si es Principal, muestra el bloque "Extras"
+ *    - Limpia siempre el estado previo (variedades + extras)
+ *
+ * 2) Extras dinámicos
+ *    - Botones: + Guarnición / + Salsa / + Postre
+ *    - Cada click agrega una fila con:
+ *        - input hidden: extra_tipo
+ *        - select: extra_id
+ *    - Se pueden agregar 0..N extras
+ *
+ * 3) No guarda nada:
+ *    - Todo se envía junto al submit normal del form
+ * ============================================================
+ */
+
+
+/* ============================================================
+   PREPARAR MODAL AL ABRIR (PLATO / LUGAR)
+   ============================================================ */
+async function setPlatoInfo(platoId, tipo, nombrePlato) {
+  const idAsignar   = document.getElementById("platoIdInputAsignar");
+  const tipoAsignar = document.getElementById("tipoObjetoAsignar");
+  const titulo = document.getElementById("modalTitulo");
+
+  const idCompartir = document.getElementById("platoIdInputCompartir");
+  const tipoCompartir = document.getElementById("tipoObjetoCompartir");
+
+  const bloqueVar = document.getElementById("bloque-platos-para-asignar");
+  const listaVar = document.getElementById("lista-platos-para-asignar");
+
+  const bloqueExtras = document.getElementById("bloqueExtras");
+  const extrasRows = document.getElementById("extrasRows");
+
+  // Setear hidden inputs base
+  if (idAsignar)   idAsignar.value = platoId;
+  if (tipoAsignar) tipoAsignar.value = tipo;
+
+  if (idCompartir) idCompartir.value = platoId;
+  if (tipoCompartir) tipoCompartir.value = tipo;
+
+  const tituloCompartir = document.getElementById("compartirElementoNombre");
+  const modalTituloCompartir = document.getElementById("compartirModalLabel");
+  const feedbackCompartir = document.getElementById("compartirModalFeedback");
+
+  if (tituloCompartir) {
+    tituloCompartir.textContent = nombrePlato || (tipo === "lugar" ? "Este lugar" : "Este plato");
+  }
+
+  if (modalTituloCompartir) {
+    modalTituloCompartir.textContent = tipo === "lugar" ? "Compartir lugar" : "Compartir plato";
+  }
+
+  if (feedbackCompartir) {
+    feedbackCompartir.textContent = "";
+    feedbackCompartir.className = "alert d-none mb-3";
+  }
+
+  // Limpiar SIEMPRE estado previo
+  if (listaVar) listaVar.innerHTML = "";
+  if (bloqueVar) bloqueVar.classList.add("d-none");
+
+  if (extrasRows)  extrasRows.innerHTML = "";
+  if (bloqueExtras) bloqueExtras.classList.add("d-none");
+
+  // Caso: no es plato (ej. lugar)
+  if (tipo !== "plato") {
+    titulo.textContent =
+      `Programar ${nombrePlato} para el día ${getDiaActivoLabelActual()}`;
+    return;
+  }
+
+  try {
+    const res = await fetch(`/platos/${platoId}/opciones-asignar/`, {
+      headers: { "X-Requested-With": "XMLHttpRequest" },
+      credentials: "same-origin",
+    });
+
+    if (!res.ok) {
+      titulo.textContent =
+        `Programar ${nombrePlato} para el día ${getDiaActivoLabelActual()}`;
+      return;
+    }
+
+    const data = await res.json();
+
+    /* ===== Decidir si es Principal ===== */
+    const tiposBase = (data.tipos_base || "");
+    const tiposArr  = tiposBase.split(",").map(t => t.trim());
+    const esPrincipal = tiposArr.includes("Principal");
+
+    // Mostrar extras SOLO si es Principal
+    if (bloqueExtras) {
+      bloqueExtras.classList.toggle("d-none", !esPrincipal);
+    }
+
+    /* ===== Variedades ===== */
+    const opciones = data.opciones || [];
+
+    if (opciones.length <= 1) {
+      titulo.textContent =
+        `Programar ${nombrePlato} para el día ${getDiaActivoLabelActual()}`;
+      return;
+    }
+
+    // Mostrar checklist de variedades
+    if (bloqueVar) bloqueVar.classList.remove("d-none");
+    titulo.textContent =
+      `Tildá los platos que quieras programar para el día ${getDiaActivoLabelActual()}`;
+
+    for (const op of opciones) {
+      const wrap = document.createElement("label");
+      wrap.className = "form-check d-flex align-items-center gap-2";
+
+      const cb = document.createElement("input");
+      cb.type  = "checkbox";
+      cb.name  = "platos_ids";
+      cb.value = String(op.id);
+      cb.className = "form-check-input";
+
+      if (String(op.id) === String(platoId)) cb.checked = true;
+
+      const span = document.createElement("span");
+      span.textContent = op.nombre;
+
+      wrap.appendChild(cb);
+      wrap.appendChild(span);
+      listaVar.appendChild(wrap);
+    }
+
+  } catch (e) {
+    console.error(e);
+    titulo.textContent =
+      `Programar ${nombrePlato} para el día ${getDiaActivoLabelActual()}`;
+  }
+}
+
+
+/* ============================================================
+   EXTRAS DINÁMICOS (+ Guarnición / + Salsa / + Postre)
+   ============================================================ */
+function getTplSelectByTipo(tipo) {
+  if (tipo === "Guarnicion") return document.getElementById("tplGuarnicion");
+  if (tipo === "Salsa")     return document.getElementById("tplSalsa");
+  if (tipo === "Postre")   return document.getElementById("tplPostre");
+  return null;
+}
+
+function addExtraRow(tipo) {
+  const rows = document.getElementById("extrasRows");
+  if (!rows) return;
+
+  // Si ya existe una fila vacía de este tipo, no crear otra.
+  const filaVaciaExistente = Array.from(rows.querySelectorAll(".extra-row-dinamica")).find((row) => {
+    const tipoInput = row.querySelector('input[name="extra_tipo"]');
+    const select = row.querySelector('select[name="extra_id"]');
+
+    return tipoInput?.value === tipo && !select?.value;
+  });
+
+  if (filaVaciaExistente) {
+    const select = filaVaciaExistente.querySelector('select[name="extra_id"]');
+    select?.focus();
+    return;
+  }
+
+  const tpl = getTplSelectByTipo(tipo);
+  if (!tpl) return;
+
+  const row = document.createElement("div");
+  row.className = "extra-row-dinamica d-flex gap-2 align-items-center";
+
+  // hidden: tipo del extra
+  const tipoInput = document.createElement("input");
+  tipoInput.type  = "hidden";
+  tipoInput.name  = "extra_tipo";
+  tipoInput.value = tipo;
+
+  // select: id del plato extra
+  const sel = tpl.cloneNode(true);
+  sel.id   = "";
+  sel.name = "extra_id";
+  sel.className = "form-select form-select-sm";
+
+  // botón quitar fila
+  const del = document.createElement("button");
+  del.type = "button";
+  del.className = "btn btn-sm btn-outline-danger";
+  del.textContent = "✕";
+  del.title = "Quitar";
+  del.onclick = () => row.remove();
+
+  row.appendChild(tipoInput);
+  row.appendChild(sel);
+  row.appendChild(del);
+
+  rows.appendChild(row);
+  sel.focus();
+}
+
+// Delegación global para botones "+"
+document.addEventListener("click", function (e) {
+  const btn = e.target.closest(".js-add-extra");
+  if (!btn) return;
+  e.preventDefault();
+  addExtraRow(btn.getAttribute("data-tipo"));
+});
+
+
+
+</script>
+
+
+
+<div class="modal fade" id="solicitarAmistadModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Solicitar amistad</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body" id="solicitarAmistadModalBody">
+        <div class="text-muted small">
+          Cargando…
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+
+<!-- INCLUYE EL MODAL GENERICO DE CONFIRMACIÓN -->
+ <!-- ESTO PODRÍA CARGARSE SOLO CUANDO SE NECESITA, CON UN SISTEMA DE BLOCK-ENDBLOCK -->
+{% include "AdminVideos/partials/_confirm_action_modal.html" %}
+
+
+
+
+
+
+<!-- jQuery (tu versión local, no uses la de CDN para evitar duplicados) -->
+<script src="{% static 'AdminVideos/vendor/jquery/jquery.min.js' %}"></script>
+
+<!-- Bootstrap (incluye Popper en bundle) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Menú programado: asignar, hábitos y refresco AJAX -->
+<script src="{% static 'AdminVideos/js/menu_programado.js' %}?v=3"></script>
+
+<!-- Plugins que dependen de jQuery -->
+<script src="{% static 'AdminVideos/vendor/jquery-easing/jquery.easing.min.js' %}"></script>
+<script src="{% static 'AdminVideos/js/sb-admin-2.min.js' %}?v=2"></script>
+
+
+
+<!-- Select2 (después de jQuery y Bootstrap) -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script src="{% static 'AdminVideos/js/form_init.js' %}?v=20260710014919"></script>
+<script src="{% static 'AdminVideos/js/pantry_bind.js' %}?v=3"></script>
+
+<script>
+  (function () {
+    // Service Worker: habilita offline/cache para el sitio
+    if (!("serviceWorker" in navigator)) return;
+
+    // Subí el ?v cuando cambies sw_lista_super.js
+    const swUrl = "{% static 'AdminVideos/lista_super/sw_lista_super.js' %}?v=3";
+    navigator.serviceWorker.register(swUrl).catch(console.error);
+  })();
+</script>
+
+
+<!-- AJAX: mantiene actualizado el dropdown de mensajes en cualquier pantalla -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const contenedorMensajes = document.getElementById("mensajesDropdownContenido");
+  const badgeMensajes = document.getElementById("mensajesBadge");
+
+  if (!contenedorMensajes || !badgeMensajes) {
+    return;
+  }
+
+  const urlMensajes = contenedorMensajes.dataset.url;
+
+  function actualizarMensajes() {
+    fetch(urlMensajes, {
+      headers: {
+        "X-Requested-With": "XMLHttpRequest"
+      }
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("No se pudieron cargar los mensajes.");
+        }
+        return response.json();
+      })
+      .then(data => {
+        contenedorMensajes.innerHTML = data.html;
+
+        if (data.cantidad > 0) {
+          badgeMensajes.textContent = data.cantidad;
+          badgeMensajes.classList.remove("d-none");
+        } else {
+          badgeMensajes.textContent = "";
+          badgeMensajes.classList.add("d-none");
+        }
+      })
+      .catch(error => {
+        console.warn(error);
+      });
+  }
+
+  actualizarMensajes();
+
+  document.getElementById("messagesDropdown")?.addEventListener("click", actualizarMensajes);
+});
+</script>
+
+
+
+<!-- AJAX: panel de Amigues, solicitar amistad y aceptar solicitudes -->
+<!--
+  Este script centraliza todo lo relacionado con el panel de Amigues:
+  - Carga el panel emergente.
+  - Actualiza el badge de solicitudes pendientes.
+  - Abre el modal para solicitar amistad.
+  - Envía el formulario de solicitud por AJAX.
+  - Acepta solicitudes pendientes por AJAX.
+  - Muestra mensajes arriba del panel sin navegar a otra página.
+-->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const amiguesDropdown = document.getElementById("amiguesDropdown");
+  const amiguesBadge = document.getElementById("amiguesBadge");
+  const panelAmigues = document.getElementById("amiguesDropdownContenido");
+
+  const solicitarModalEl = document.getElementById("solicitarAmistadModal");
+  const solicitarModalBody = document.getElementById("solicitarAmistadModalBody");
+
+  if (!panelAmigues) {
+    return;
+  }
+
+  const urlPanelAmigues = panelAmigues.dataset.url;
+
+  if (!urlPanelAmigues) {
+    console.warn("Falta data-url en #amiguesDropdownContenido");
+    return;
+  }
+
+  // Construye el mensaje que se muestra arriba del panel.
+  function buildPanelMessage(message, level) {
+    if (!message) {
+      return "";
+    }
+
+    const safeLevel = ["success", "danger", "warning", "info"].includes(level)
+      ? level
+      : "info";
+
+    return `
+      <div class="px-3 pt-3">
+        <div class="alert alert-${safeLevel} py-2 px-3 mb-2 small" role="alert">
+          ${message}
+        </div>
+      </div>
+    `;
+  }
+
+  // Actualiza el número rojo del ícono de Amigues.
+  function actualizarBadgeAmigues(cantidad) {
+    if (!amiguesBadge) {
+      return;
+    }
+
+    if (cantidad > 0) {
+      amiguesBadge.textContent = cantidad;
+      amiguesBadge.classList.remove("d-none");
+    } else {
+      amiguesBadge.textContent = "";
+      amiguesBadge.classList.add("d-none");
+    }
+  }
+
+  // Muestra HTML actualizado dentro del panel y opcionalmente un mensaje arriba.
+  function renderPanelAmigues(data) {
+    if (!data || !data.html) {
+      return;
+    }
+
+    panelAmigues.innerHTML = buildPanelMessage(data.message, data.level) + data.html;
+    actualizarBadgeAmigues(data.cantidad || 0);
+  }
+
+  // Carga/refresca el panel completo de Amigues.
+  function actualizarPanelAmigues() {
+    fetch(urlPanelAmigues, {
+      headers: {
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      credentials: "same-origin"
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("No se pudo cargar el panel de amigues.");
+        }
+
+        return response.json();
+      })
+      .then(data => {
+        renderPanelAmigues(data);
+      })
+      .catch(error => {
+        console.warn(error);
+
+        panelAmigues.innerHTML = `
+          <div class="p-3 text-muted small">
+            No se pudo cargar Amigues.
+          </div>
+        `;
+      });
+  }
+
+  // Vuelve a abrir el dropdown de Amigues.
+  function mostrarPanelAmigues() {
+    if (!amiguesDropdown || !bootstrap.Dropdown) {
+      return;
+    }
+
+    const dropdown = bootstrap.Dropdown.getOrCreateInstance(amiguesDropdown);
+    dropdown.show();
+  }
+
+  // Carga inicial y refresco al abrir el dropdown.
+  actualizarPanelAmigues();
+
+  if (amiguesDropdown) {
+    amiguesDropdown.addEventListener("click", actualizarPanelAmigues);
+  }
+
+  // Abrir modal de "Solicitar amistad".
+  document.addEventListener("click", function (e) {
+    const btn = e.target.closest(".js-open-solicitar-amistad");
+
+    if (!btn) {
+      return;
+    }
+
+    e.preventDefault();
+
+    if (!solicitarModalEl || !solicitarModalBody) {
+      console.error("Falta #solicitarAmistadModal o #solicitarAmistadModalBody");
+      return;
+    }
+
+    const url = btn.dataset.url;
+
+    if (!url) {
+      console.error("Falta data-url en .js-open-solicitar-amistad");
+      return;
+    }
+
+    solicitarModalBody.innerHTML = `
+      <div class="text-muted small">
+        Cargando…
+      </div>
+    `;
+
+    const modal =
+      bootstrap.Modal.getInstance(solicitarModalEl) ||
+      new bootstrap.Modal(solicitarModalEl);
+
+    modal.show();
+
+    fetch(url, {
+      headers: {
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      credentials: "same-origin"
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("No se pudo cargar el formulario de solicitud.");
+        }
+
+        return response.json();
+      })
+      .then(data => {
+        solicitarModalBody.innerHTML = data.html;
+      })
+      .catch(error => {
+        console.warn(error);
+
+        solicitarModalBody.innerHTML = `
+          <div class="alert alert-warning small mb-0">
+            No se pudo cargar el formulario.
+          </div>
+        `;
+      });
+  });
+
+  // Enviar formulario de "Solicitar amistad" dentro del modal.
+  if (solicitarModalBody) {
+    solicitarModalBody.addEventListener("submit", function (e) {
+      const form = e.target.closest("#solicitarAmistadForm");
+
+      if (!form) {
+        return;
+      }
+
+      e.preventDefault();
+
+      const submitBtn = form.querySelector('button[type="submit"]');
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+      }
+
+      fetch(form.action, {
+        method: "POST",
+        body: new FormData(form),
+        headers: {
+          "X-Requested-With": "XMLHttpRequest"
+        },
+        credentials: "same-origin"
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("No se pudo enviar la solicitud.");
+          }
+
+          return response.json();
+        })
+        .then(data => {
+          if (data.ok && data.html) {
+            renderPanelAmigues(data);
+
+            const modal = bootstrap.Modal.getInstance(solicitarModalEl);
+            if (modal) {
+              modal.hide();
+            }
+
+            solicitarModalEl.addEventListener(
+              "hidden.bs.modal",
+              function () {
+                mostrarPanelAmigues();
+              },
+              { once: true }
+            );
+
+            return;
+          }
+
+          if (data.html) {
+            solicitarModalBody.innerHTML = data.html;
+          }
+        })
+        .catch(error => {
+          console.warn(error);
+
+          solicitarModalBody.innerHTML = `
+            <div class="alert alert-warning small mb-0">
+              No se pudo enviar la solicitud.
+            </div>
+          `;
+        })
+        .finally(() => {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+          }
+        });
+    });
+  }
+
+  // Aceptar solicitud de amistad desde el panel.
+  panelAmigues.addEventListener("submit", function (e) {
+    const form = e.target.closest(".js-aceptar-amigue-form");
+
+    if (!form) {
+      return;
+    }
+
+    e.preventDefault();
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+    }
+
+    fetch(form.action, {
+      method: "POST",
+      body: new FormData(form),
+      headers: {
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      credentials: "same-origin"
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("No se pudo aceptar la solicitud.");
+        }
+
+        return response.json();
+      })
+      .then(data => {
+        renderPanelAmigues(data);
+        mostrarPanelAmigues();
+
+      })
+      .catch(error => {
+        console.warn(error);
+
+        panelAmigues.insertAdjacentHTML(
+          "afterbegin",
+          buildPanelMessage("No se pudo aceptar la solicitud.", "warning")
+        );
+      })
+      .finally(() => {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+        }
+      });
+  });
+});
+</script>
+
+
+<!-- 
+==========================================
+   TOAST GLOBAL POR QUERYSTRING
+   Si la URL trae ?msg=... (y opcionalmente &level=success|danger|warning|info),
+   muestra un toast y luego limpia esos parámetros sin recargar.
+   ==========================================  -->
+{% if request.GET.msg %}
+  {% include "AdminVideos/partials/_toast_msg.html" %}
+{% endif %}
+
+
+
+<!-- AJAX: chat emergente desde mensajes/amigues -->
+<script id="chat-modal-ajax">
+document.addEventListener("DOMContentLoaded", function () {
+  if (window.__chatModalAjaxBound) return;
+  window.__chatModalAjaxBound = true;
+
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(";").shift();
+    return "";
+  }
+
+  function ensureChatModal() {
+    let modalEl = document.getElementById("chatModal");
+
+    if (modalEl) return modalEl;
+
+    modalEl = document.createElement("div");
+    modalEl.className = "modal fade";
+    modalEl.id = "chatModal";
+    modalEl.tabIndex = -1;
+    modalEl.setAttribute("aria-hidden", "true");
+
+    modalEl.innerHTML = `
+      <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content" id="chatModalContent">
+          <div class="modal-body text-muted">Cargando chat…</div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modalEl);
+
+    modalEl.addEventListener("hidden.bs.modal", function () {
+      const content = modalEl.querySelector("#chatModalContent");
+      if (content) {
+        content.innerHTML = '<div class="modal-body text-muted">Cargando chat…</div>';
+      }
+    });
+
+    return modalEl;
+  }
+
+  function scrollChatToBottom() {
+    const box = document.getElementById("chatMessages");
+    if (box) {
+      box.scrollTop = box.scrollHeight;
+    }
+  }
+
+  function actualizarBadgeMensajes(cantidad) {
+    const badge = document.getElementById("mensajesBadge");
+
+    if (!badge) return;
+
+    if (cantidad > 0) {
+      badge.textContent = cantidad;
+      badge.classList.remove("d-none");
+    } else {
+      badge.textContent = "";
+      badge.classList.add("d-none");
+    }
+  }
+
+  function cerrarDropdownAbierto(trigger) {
+    const dropdownMenu = trigger.closest(".dropdown-menu");
+    if (!dropdownMenu) return;
+
+    const dropdown = dropdownMenu.previousElementSibling;
+    if (!dropdown || !bootstrap.Dropdown) return;
+
+    const instance = bootstrap.Dropdown.getInstance(dropdown);
+    if (instance) {
+      instance.hide();
+    }
+  }
+
+  async function cargarChat(url) {
+    const modalEl = ensureChatModal();
+    const content = modalEl.querySelector("#chatModalContent");
+
+    content.innerHTML = '<div class="modal-body text-muted">Cargando chat…</div>';
+
+    const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+    modal.show();
+
+    const response = await fetch(url, {
+      headers: { "X-Requested-With": "XMLHttpRequest" },
+      credentials: "same-origin",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.html) {
+      throw new Error("No se pudo cargar el chat.");
+    }
+
+    content.innerHTML = data.html;
+    actualizarBadgeMensajes(data.cantidad || 0);
+    bindChatForm(content);
+    bindChatInlineDeletes(content);
+    scrollChatToBottom();
+  }
+
+  function bindChatForm(context) {
+    const form = context.querySelector("#chatForm");
+    if (!form || form.__chatBound) return;
+
+    form.__chatBound = true;
+
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const button = form.querySelector('button[type="submit"]');
+      if (button) {
+        button.disabled = true;
+      }
+
+      try {
+        const response = await fetch(form.action, {
+          method: "POST",
+          body: new FormData(form),
+          headers: {
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+          credentials: "same-origin",
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.html) {
+          throw new Error("No se pudo enviar el mensaje.");
+        }
+
+        const content = document.getElementById("chatModalContent");
+        content.innerHTML = data.html;
+
+        actualizarBadgeMensajes(data.cantidad || 0);
+        bindChatForm(content);
+        bindChatInlineDeletes(content);
+        scrollChatToBottom();
+      } catch (error) {
+        console.warn(error);
+      } finally {
+        if (button) {
+          button.disabled = false;
+        }
+      }
+    });
+  }
+
+
+  function escapeHtml(value) {
+    return String(value || "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function bindChatInlineDeletes(context) {
+    context.querySelectorAll(".js-chat-inline-delete").forEach(function (button) {
+      if (button.__chatInlineDeleteBound) return;
+      button.__chatInlineDeleteBound = true;
+
+      button.addEventListener("click", function (event) {
+        event.preventDefault();
+
+        const content = document.getElementById("chatModalContent");
+        if (!content) return;
+
+        const action = button.getAttribute("data-confirm-action");
+        if (!action) return;
+
+        const title = button.getAttribute("data-confirm-title") || "Borrar mensaje";
+        const body = button.getAttribute("data-confirm-body") || "Este mensaje se borrará del chat de ambos.";
+        const btnText = button.getAttribute("data-confirm-btn") || "Borrar";
+
+        let slot = document.getElementById("chatInlineDeleteConfirm");
+
+        if (!slot) {
+          slot = document.createElement("div");
+          slot.id = "chatInlineDeleteConfirm";
+
+          const form = content.querySelector("#chatForm");
+          if (form) {
+            form.insertAdjacentElement("beforebegin", slot);
+          } else {
+            content.appendChild(slot);
+          }
+        }
+
+        slot.innerHTML = `
+          <div class="alert alert-warning py-2 px-3 mb-3" role="alert">
+            <div class="fw-semibold mb-1">${escapeHtml(title)}</div>
+            <div class="small mb-2">${escapeHtml(body)}</div>
+
+            <div class="d-flex justify-content-end gap-2">
+              <button type="button"
+                      class="btn btn-sm btn-outline-secondary js-chat-delete-cancel">
+                Cancelar
+              </button>
+
+              <button type="button"
+                      class="btn btn-sm btn-danger js-chat-delete-accept">
+                ${escapeHtml(btnText)}
+              </button>
+            </div>
+          </div>
+        `;
+
+        const cancelButton = slot.querySelector(".js-chat-delete-cancel");
+        const acceptButton = slot.querySelector(".js-chat-delete-accept");
+
+        if (cancelButton) {
+          cancelButton.addEventListener("click", function () {
+            slot.remove();
+          }, { once: true });
+        }
+
+        if (acceptButton) {
+          acceptButton.addEventListener("click", async function () {
+            acceptButton.disabled = true;
+
+            try {
+              const response = await fetch(action, {
+                method: "POST",
+                headers: {
+                  "X-Requested-With": "XMLHttpRequest",
+                  "X-CSRFToken": getCookie("csrftoken"),
+                },
+                credentials: "same-origin",
+              });
+
+              const data = await response.json();
+
+              if (!response.ok || !data.html) {
+                throw new Error(data.message || "No se pudo borrar el mensaje.");
+              }
+
+              content.innerHTML = data.html;
+
+              actualizarBadgeMensajes(data.cantidad || 0);
+              bindChatForm(content);
+              bindChatInlineDeletes(content);
+              scrollChatToBottom();
+            } catch (error) {
+              console.warn(error);
+              acceptButton.disabled = false;
+            }
+          }, { once: true });
+        }
+
+        slot.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      });
+    });
+  }
+
+  document.addEventListener("click", function (event) {
+    const trigger = event.target.closest(".js-open-chat-modal");
+    if (!trigger) return;
+
+    event.preventDefault();
+
+    const url = trigger.dataset.chatUrl || trigger.getAttribute("href");
+    if (!url) return;
+
+    cerrarDropdownAbierto(trigger);
+
+    cargarChat(url).catch(function (error) {
+      console.warn(error);
+      window.location.href = url;
+    });
+  });
+});
+</script>
+
+<!-- QC Bootstrap theme toggle script -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var key = "quecomemos-bs-theme";
+    var btn = document.getElementById("qcBootstrapThemeToggle");
+    var icon = document.getElementById("qcBootstrapThemeToggleIcon");
+    var text = document.getElementById("qcBootstrapThemeToggleText");
+
+    function setTheme(theme) {
+      document.documentElement.setAttribute("data-bs-theme", theme);
+
+      try {
+        localStorage.setItem(key, theme);
+      } catch (error) {}
+
+      var isDark = theme === "dark";
+
+      if (icon) icon.textContent = isDark ? "☀️" : "🌙";
+      if (text) text.textContent = isDark ? "Claro" : "Oscuro";
+      if (btn) btn.setAttribute("aria-pressed", isDark ? "true" : "false");
+    }
+
+    var current = document.documentElement.getAttribute("data-bs-theme") || "dark";
+    setTheme(current);
+
+    if (btn) {
+      btn.addEventListener("click", function () {
+        var actual = document.documentElement.getAttribute("data-bs-theme") || "dark";
+        setTheme(actual === "dark" ? "light" : "dark");
+      });
+    }
+  });
+</script>
+
+</body>
+
+</html>

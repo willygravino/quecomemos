@@ -364,6 +364,99 @@
     display: none;
   }
 
+  /* ===== QC dark exacto v3: filtros integrados uniformes ===== */
+  /*
+    Sólo modo oscuro y sólo estos controles:
+    1) #quecomemos + label.filtro-toggle-integrado
+    2) #misplatos + label.filtro-toggle-integrado
+    3) .loquetengo-control-main + #usarLoQueTengo + label.loquetengo-control-filter
+
+    Misma visual para los tres:
+    - destildados: fondo oscuro, letra clara, icono filtro claro;
+    - tildados: rojo, letra blanca, check blanco.
+  */
+
+  html[data-bs-theme="dark"] #form-filtros-platos #quecomemos.btn-check:not(:checked) + label.filtro-toggle-integrado,
+  html[data-bs-theme="dark"] #form-filtros-platos #misplatos.btn-check:not(:checked) + label.filtro-toggle-integrado,
+  html[data-bs-theme="dark"] #form-filtros-platos .loquetengo-control-integrado:not(:has(#usarLoQueTengo:checked)) .loquetengo-control-main,
+  html[data-bs-theme="dark"] #form-filtros-platos #usarLoQueTengo.btn-check:not(:checked) + label.loquetengo-control-filter {
+    background: #212529 !important;
+    background-color: #212529 !important;
+    background-image: none !important;
+    color: #dee2e6 !important;
+    border-color: #495057 !important;
+    box-shadow: none !important;
+  }
+
+  html[data-bs-theme="dark"] #form-filtros-platos #quecomemos.btn-check:not(:checked) + label.filtro-toggle-integrado span,
+  html[data-bs-theme="dark"] #form-filtros-platos #quecomemos.btn-check:not(:checked) + label.filtro-toggle-integrado i,
+  html[data-bs-theme="dark"] #form-filtros-platos #misplatos.btn-check:not(:checked) + label.filtro-toggle-integrado span,
+  html[data-bs-theme="dark"] #form-filtros-platos #misplatos.btn-check:not(:checked) + label.filtro-toggle-integrado i,
+  html[data-bs-theme="dark"] #form-filtros-platos .loquetengo-control-integrado:not(:has(#usarLoQueTengo:checked)) .loquetengo-control-main,
+  html[data-bs-theme="dark"] #form-filtros-platos .loquetengo-control-integrado:not(:has(#usarLoQueTengo:checked)) .loquetengo-control-main span,
+  html[data-bs-theme="dark"] #form-filtros-platos .loquetengo-control-integrado:not(:has(#usarLoQueTengo:checked)) .loquetengo-control-main i,
+  html[data-bs-theme="dark"] #form-filtros-platos #usarLoQueTengo.btn-check:not(:checked) + label.loquetengo-control-filter,
+  html[data-bs-theme="dark"] #form-filtros-platos #usarLoQueTengo.btn-check:not(:checked) + label.loquetengo-control-filter i {
+    color: #dee2e6 !important;
+  }
+
+  html[data-bs-theme="dark"] #form-filtros-platos #quecomemos.btn-check:not(:checked) + label.filtro-toggle-integrado .filtro-toggle-filter-icon,
+  html[data-bs-theme="dark"] #form-filtros-platos #misplatos.btn-check:not(:checked) + label.filtro-toggle-integrado .filtro-toggle-filter-icon,
+  html[data-bs-theme="dark"] #form-filtros-platos #usarLoQueTengo.btn-check:not(:checked) + label.loquetengo-control-filter .loquetengo-filter-icon {
+    display: inline-block !important;
+    color: #dee2e6 !important;
+  }
+
+  html[data-bs-theme="dark"] #form-filtros-platos #quecomemos.btn-check:not(:checked) + label.filtro-toggle-integrado .filtro-toggle-check-icon,
+  html[data-bs-theme="dark"] #form-filtros-platos #misplatos.btn-check:not(:checked) + label.filtro-toggle-integrado .filtro-toggle-check-icon,
+  html[data-bs-theme="dark"] #form-filtros-platos #usarLoQueTengo.btn-check:not(:checked) + label.loquetengo-control-filter .loquetengo-check-icon {
+    display: none !important;
+  }
+
+  html[data-bs-theme="dark"] #form-filtros-platos #quecomemos.btn-check:checked + label.filtro-toggle-integrado,
+  html[data-bs-theme="dark"] #form-filtros-platos #misplatos.btn-check:checked + label.filtro-toggle-integrado,
+  html[data-bs-theme="dark"] #form-filtros-platos .loquetengo-control-integrado:has(#usarLoQueTengo:checked) .loquetengo-control-main,
+  html[data-bs-theme="dark"] #form-filtros-platos #usarLoQueTengo.btn-check:checked + label.loquetengo-control-filter {
+    background: #dc3545 !important;
+    background-color: #dc3545 !important;
+    background-image: none !important;
+    color: #fff !important;
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, .22) !important;
+  }
+
+  html[data-bs-theme="dark"] #form-filtros-platos #quecomemos.btn-check:checked + label.filtro-toggle-integrado span,
+  html[data-bs-theme="dark"] #form-filtros-platos #quecomemos.btn-check:checked + label.filtro-toggle-integrado i,
+  html[data-bs-theme="dark"] #form-filtros-platos #misplatos.btn-check:checked + label.filtro-toggle-integrado span,
+  html[data-bs-theme="dark"] #form-filtros-platos #misplatos.btn-check:checked + label.filtro-toggle-integrado i,
+  html[data-bs-theme="dark"] #form-filtros-platos .loquetengo-control-integrado:has(#usarLoQueTengo:checked) .loquetengo-control-main,
+  html[data-bs-theme="dark"] #form-filtros-platos .loquetengo-control-integrado:has(#usarLoQueTengo:checked) .loquetengo-control-main span,
+  html[data-bs-theme="dark"] #form-filtros-platos .loquetengo-control-integrado:has(#usarLoQueTengo:checked) .loquetengo-control-main i,
+  html[data-bs-theme="dark"] #form-filtros-platos #usarLoQueTengo.btn-check:checked + label.loquetengo-control-filter,
+  html[data-bs-theme="dark"] #form-filtros-platos #usarLoQueTengo.btn-check:checked + label.loquetengo-control-filter i {
+    color: #fff !important;
+  }
+
+  html[data-bs-theme="dark"] #form-filtros-platos #quecomemos.btn-check:checked + label.filtro-toggle-integrado .filtro-toggle-filter-icon,
+  html[data-bs-theme="dark"] #form-filtros-platos #misplatos.btn-check:checked + label.filtro-toggle-integrado .filtro-toggle-filter-icon,
+  html[data-bs-theme="dark"] #form-filtros-platos #usarLoQueTengo.btn-check:checked + label.loquetengo-control-filter .loquetengo-filter-icon {
+    display: none !important;
+  }
+
+  html[data-bs-theme="dark"] #form-filtros-platos #quecomemos.btn-check:checked + label.filtro-toggle-integrado .filtro-toggle-check-icon,
+  html[data-bs-theme="dark"] #form-filtros-platos #misplatos.btn-check:checked + label.filtro-toggle-integrado .filtro-toggle-check-icon,
+  html[data-bs-theme="dark"] #form-filtros-platos #usarLoQueTengo.btn-check:checked + label.loquetengo-control-filter .loquetengo-check-icon {
+    display: inline-block !important;
+    color: #fff !important;
+  }
+
+  html[data-bs-theme="dark"] #form-filtros-platos #quecomemos + label.filtro-toggle-integrado:hover,
+  html[data-bs-theme="dark"] #form-filtros-platos #misplatos + label.filtro-toggle-integrado:hover,
+  html[data-bs-theme="dark"] #form-filtros-platos .loquetengo-control-main:hover,
+  html[data-bs-theme="dark"] #form-filtros-platos #usarLoQueTengo + label.loquetengo-control-filter:hover {
+    filter: brightness(1.08);
+  }
+
 </style>
 
 
@@ -410,7 +503,7 @@
 <form
   method="POST"
   id="form-filtros-platos"
-  class="mb-2"
+  class="mb-3"
   data-listado-url="{% url 'ajax_listado_platos' %}">
 
   {% csrf_token %}

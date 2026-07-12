@@ -1167,7 +1167,7 @@ body.filtro-platos-cambiando [data-listado-url] {
 [data-bs-theme="dark"] .list-group,
 [data-bs-theme="dark"] .list-group-item,
 [data-bs-theme="dark"] .tab-content,
-[data-bs-theme="dark"] .album,git p
+[data-bs-theme="dark"] .album,
 [data-bs-theme="dark"] .plato-form {
   background-color: var(--bs-body-bg) !important;
   color: var(--bs-body-color) !important;
@@ -1459,50 +1459,4 @@ body.filtro-platos-cambiando [data-listado-url] {
 [data-bs-theme="dark"] #sidebarToggleTop:hover {
   color: rgba(255, 255, 255, .92) !important;
   background-color: rgba(255, 255, 255, .16) !important;
-}
-
-/* ===== QC dark exacto: pestañas Bootstrap activas ===== */
-/*
-  Sólo pestañas Bootstrap en modo oscuro.
-  No toca filtros, no toca btn-check, no toca labels custom.
-*/
-[data-bs-theme="dark"] .nav-tabs {
-  border-bottom-color: var(--bs-border-color) !important;
-}
-
-[data-bs-theme="dark"] .nav-tabs .nav-link {
-  color: rgba(255, 255, 255, .72) !important;
-  background-color: transparent !important;
-  border-color: transparent !important;
-}
-
-[data-bs-theme="dark"] .nav-tabs .nav-link:hover,
-[data-bs-theme="dark"] .nav-tabs .nav-link:focus {
-  color: rgba(255, 255, 255, .92) !important;
-  background-color: #1f2328 !important;
-  border-color: var(--bs-border-color) !important;
-}
-
-[data-bs-theme="dark"] .nav-tabs .nav-link.active,
-[data-bs-theme="dark"] .nav-tabs .nav-item.show .nav-link {
-  color: #fff !important;
-  background-color: #212529 !important;
-  border-color: var(--bs-border-color) var(--bs-border-color) #212529 !important;
-}
-
-[data-bs-theme="dark"] .nav-pills .nav-link {
-  color: rgba(255, 255, 255, .72) !important;
-  background-color: transparent !important;
-}
-
-[data-bs-theme="dark"] .nav-pills .nav-link:hover,
-[data-bs-theme="dark"] .nav-pills .nav-link:focus {
-  color: rgba(255, 255, 255, .92) !important;
-  background-color: #1f2328 !important;
-}
-
-[data-bs-theme="dark"] .nav-pills .nav-link.active,
-[data-bs-theme="dark"] .nav-pills .show > .nav-link {
-  color: #fff !important;
-  background-color: #343a40 !important;
 }

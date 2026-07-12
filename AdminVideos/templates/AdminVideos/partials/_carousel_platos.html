@@ -4,7 +4,7 @@
 =========================== -->
 
 {% if carousel_items %}
-  <section class="w-100 bg-warning rounded shadow-sm p-3 mb-3">
+  <section class="w-100 bg-warning rounded shadow-sm">
 
     <div id="platosCarousel"
          class="carousel slide comidas-carousel"
@@ -27,8 +27,8 @@
         {% for grupo in carousel_items %}
           <div class="carousel-item {% if forloop.first %}active{% endif %}"
                data-plato-id="{{ grupo.id }}">
-            <div class="d-flex justify-content-center py-2">
-              <div class="w-100" style="max-width: 720px;">
+            <div class="d-flex justify-content-center mb-5">
+              <div class="w-100" style="max-width: 800px;">
                 {% include "AdminVideos/partials/_plato_card_detalle.html" with plato_detalle=grupo %}
               </div>
             </div>

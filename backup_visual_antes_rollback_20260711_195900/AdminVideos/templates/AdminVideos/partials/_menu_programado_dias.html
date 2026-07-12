@@ -72,28 +72,28 @@
 
       <!-- Slide 1: Desayuno-->
       <div class="carousel-item">
-        <div class="px-5">
+        <div class="p-1">
           {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Desayuno" platos=dia_plato.1.desayuno comida="desayuno" modo="mobile" %}
         </div>
       </div>
 
       <!-- Slide 2: Almuerzo -->
       <div class="carousel-item active">
-        <div class="px-5">
+        <div class="p-1">
           {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Almuerzo" platos=dia_plato.1.almuerzo comida="almuerzo" modo="mobile" %}
         </div>
       </div>
 
       <!-- Slide 3: Merienda -->
       <div class="carousel-item">
-        <div class="px-5">
+        <div class="p-1">
           {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Merienda" platos=dia_plato.1.merienda comida="merienda" modo="mobile" %}
         </div>
       </div>
 
       <!-- Slide 4: Cena -->
       <div class="carousel-item">
-        <div class="px-5">
+        <div class="p-1">
           {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Cena" platos=dia_plato.1.cena comida="cena" modo="mobile" %}
         </div>
       </div>
@@ -175,7 +175,39 @@
           </div>
         </div>
 
-       ©
+        <span class="menu-programado-badge position-absolute top-0 start-50 translate-middle">
+          <span class="menu-programado-pill">
+
+            <a href="/random-dia/{{ dia|date:'l'|slice:':2'|upper }}/"
+              class="btn btn-sm text-danger p-0 me-1">
+              <span class="material-symbols-outlined" style="font-size: 16px;">
+                wand_shine
+              </span>
+            </a>
+
+            <span class="menu-programado-text text-primary">
+              Menú programado
+            </span>
+
+            {% if dia in platos_dia_x_dia %}
+              <a href="#"
+                data-bs-toggle="modal"
+                data-bs-target="#confirmActionModal"
+                data-confirm-title="Eliminar menú del día"
+                data-confirm-body="¿Seguro querés borrar lo que comemos en este día?"
+                data-confirm-action="{% url 'eliminar-menu-programado' %}"
+                data-confirm-btn="Sí, borrar"
+                title="Borrar menú del día"
+                aria-label="Borrar menú del día"
+                class="text-secondary text-decoration-none ms-1">
+                <i class="bi bi-trash-fill fa-lg"></i>
+              </a>
+            {% endif %}
+
+          </span>
+        </span>
+
+
 
 
 
