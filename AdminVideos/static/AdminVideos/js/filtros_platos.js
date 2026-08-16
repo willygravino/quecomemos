@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   let estadoAntesDeLoQueTengo = null;
 
-  function aplicarModoLoQueTengo(tipopag) {
+  function aplicarModoLoQueTengo(tipopag, tipopagAnterior = "") {
     const usarLoQueTengo = form.querySelector('input[name="usar_lo_que_tengo"]');
     const quecomemos = form.querySelector('input[name="quecomemos"]');
     const misplatos = form.querySelector('input[name="misplatos"]');
@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (tipopag === "LoQueTengo") {
       if (!estadoAntesDeLoQueTengo) {
         estadoAntesDeLoQueTengo = {
+          tipopag: tipopagAnterior || "Principal",
           usarLoQueTengo: usarLoQueTengo ? usarLoQueTengo.checked : false,
           quecomemos: quecomemos ? quecomemos.checked : false,
           misplatos: misplatos ? misplatos.checked : false,
@@ -66,6 +67,8 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       estadoAntesDeLoQueTengo = null;
+    } else if (tipopagAnterior === "LoQueTengo" && usarLoQueTengo) {
+      usarLoQueTengo.checked = false;
     }
   }
 
@@ -552,10 +555,10 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    const tipopag = link.dataset.tipopag;
+    const tipopagSolicitado = link.dataset.tipopag;
 
     // Fallback seguro: si falta algo, dejamos navegar normal.
-    if (!tipopag || !window.fetch) {
+    if (!tipopagSolicitado || !window.fetch) {
       return;
     }
 
@@ -567,13 +570,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
     event.preventDefault();
 
+    const tipopagActual = inputTipopag.value || "Principal";
+    const desactivarLoQueTengo =
+      tipopagSolicitado === "LoQueTengo" &&
+      tipopagActual === "LoQueTengo";
+
+    const tipopag = desactivarLoQueTengo
+      ? (estadoAntesDeLoQueTengo?.tipopag || "Principal")
+      : tipopagSolicitado;
+
+    aplicarModoLoQueTengo(tipopag, tipopagActual);
     inputTipopag.value = tipopag;
-    aplicarModoLoQueTengo(tipopag);
 
     actualizarMenuLateralActivo(tipopag);
     actualizarTituloSugerencias(tipopag);
 
     const nuevaUrl = new URL(link.href);
+    nuevaUrl.searchParams.set("tipopag", tipopag);
     window.history.pushState({ tipopag: tipopag }, "", nuevaUrl.toString());
 
     actualizarBotonCrearPlato(tipopag);
@@ -604,6 +617,8 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!inputTipopag) {
       return;
     }
+    const tipopagAnterior = inputTipopag.value || "Principal";
+    aplicarModoLoQueTengo(tipopag, tipopagAnterior);
     inputTipopag.value = tipopag;
     actualizarMenuLateralActivo(tipopag);
     actualizarTituloSugerencias(tipopag);
