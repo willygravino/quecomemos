@@ -166,111 +166,6 @@
     color: var(--bs-danger, #dc3545);
     background: transparent;
   }
-  .loquetengo-control-integrado {
-    display: inline-flex;
-    align-items: stretch;
-    max-width: 100%;
-    border: 1px solid rgba(78, 115, 223, .38);
-    border-radius: 999px;
-    overflow: hidden;
-    background: #fff;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
-  }
-
-  .loquetengo-control-main,
-  .loquetengo-control-filter {
-    appearance: none;
-    border: 0;
-    background: #fff;
-    color: #4e73df;
-    line-height: 1.15;
-  }
-
-  .loquetengo-control-main {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: .4rem;
-    padding: .32rem .68rem;
-    font-size: .875rem;
-    font-weight: 650;
-    cursor: pointer;
-    background: rgba(78, 115, 223, .07);
-  }
-
-  .loquetengo-control-main:hover,
-  .loquetengo-control-main:focus {
-    background: rgba(78, 115, 223, .13);
-    color: #4e73df;
-    outline: none;
-  }
-
-  .loquetengo-control-action-icon {
-    margin-left: .12rem;
-    font-size: .78rem;
-    opacity: .72;
-    transition: opacity .15s ease, transform .15s ease;
-  }
-
-  .loquetengo-control-main:hover .loquetengo-control-action-icon,
-  .loquetengo-control-main:focus .loquetengo-control-action-icon {
-    opacity: 1;
-    transform: translateY(-.02rem);
-  }
-
-  .loquetengo-control-filter {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.15rem;
-    min-width: 2.15rem;
-    margin: 0;
-    border-left: 1px solid rgba(78, 115, 223, .22);
-    cursor: pointer;
-    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
-  }
-
-  .loquetengo-control-filter:hover {
-    background: rgba(78, 115, 223, .08);
-    color: #4e73df;
-  }
-
-  .loquetengo-control-integrado:has(#usarLoQueTengo:checked) {
-    border-color: rgba(220, 53, 69, .22);
-    background: rgba(220, 53, 69, .06);
-  }
-
-  .loquetengo-control-integrado:has(#usarLoQueTengo:checked) .loquetengo-control-main {
-    background: rgba(220, 53, 69, .06);
-    color: #4e73df;
-  }
-
-  .loquetengo-control-integrado:has(#usarLoQueTengo:checked) .loquetengo-control-main:hover,
-  .loquetengo-control-integrado:has(#usarLoQueTengo:checked) .loquetengo-control-main:focus {
-    background: rgba(78, 115, 223, .13);
-    color: #4e73df;
-  }
-
-  #usarLoQueTengo:checked + .loquetengo-control-filter {
-    border-left-color: #dc3545;
-    background: #dc3545;
-    color: #fff;
-  }
-
-  #usarLoQueTengo:focus-visible + .loquetengo-control-filter {
-    outline: 0;
-    box-shadow: inset 0 0 0 .18rem rgba(220, 53, 69, .20);
-  }
-
-  #usarLoQueTengo:checked + .loquetengo-control-filter .loquetengo-filter-icon {
-    display: none;
-  }
-
-  #usarLoQueTengo:not(:checked) + .loquetengo-control-filter .loquetengo-check-icon {
-    display: none;
-  }
-
-
   .filtro-toggle-integrado {
     display: inline-flex;
     align-items: stretch;
@@ -474,40 +369,7 @@
           </span>
         </label>
 
-        <div class="input-group input-group-sm w-auto">
 
-                    <div class="loquetengo-control-integrado">
-                                                <button
-                          type="button"
-                          class="loquetengo-control-main"
-                          data-bs-toggle="modal"
-                          data-bs-target="#loQueTengoModal"
-                          title="Abrir para cargar o editar Lo que tengo"
-                          aria-label="Abrir para cargar o editar Lo que tengo">
-                          Lo que tengo <span id="loQueTengoContador"></span>
-                          <i class="fa-solid fa-pen-to-square loquetengo-control-action-icon" aria-hidden="true"></i>
-                        </button>
-
-            <input
-            class="btn-check"
-            type="checkbox"
-            name="usar_lo_que_tengo"
-            value="1"
-            id="usarLoQueTengo"
-            autocomplete="off"
-            {% if usar_lo_que_tengo_ck == "1" %}checked{% endif %}
-          >
-
-            <label
-              class="loquetengo-control-filter"
-              for="usarLoQueTengo"
-              title="Usar Lo que tengo para filtrar"
-              aria-label="Usar Lo que tengo para filtrar">
-              <i class="fa-solid fa-filter loquetengo-filter-icon"></i>
-              <i class="fa-solid fa-check loquetengo-check-icon"></i>
-            </label>
-          </div>
-        </div>
 
       </div>
     </div>
@@ -671,13 +533,6 @@
       input = form.querySelector('input[name="misplatos"]');
     }
 
-    if (filtro === "loquetengo") {
-      input =
-        form.querySelector('input[name="usar_lo_que_tengo"]') ||
-        form.querySelector('input[name="usarLoQueTengo"]') ||
-        form.querySelector('#usarLoQueTengo');
-    }
-
     if (!input) return;
 
     input.checked = false;
@@ -693,26 +548,14 @@
 
     const chips = [];
 
-    const tipopag = form.querySelector('input[name="tipopag"]')?.value || "";
     const quecomemos = form.querySelector('input[name="quecomemos"]')?.checked;
     const misplatos = form.querySelector('input[name="misplatos"]')?.checked;
-    const usarLoQueTengo = (
-      tipopag === "LoQueTengo" ||
-      form.querySelector('input[name="usar_lo_que_tengo"]')?.checked ||
-      form.querySelector('input[name="usarLoQueTengo"]')?.checked ||
-      form.querySelector('#usarLoQueTengo')?.checked
-    );
-
     if (quecomemos) {
       chips.push(badge("Quecomemos", "filtro-chip-light", "quecomemos"));
     }
 
     if (misplatos) {
       chips.push(badge("Mis platos", "filtro-chip-light", "misplatos"));
-    }
-
-    if (usarLoQueTengo) {
-      chips.push(badge("Lo que tengo", "filtro-chip-success", "loquetengo"));
     }
 
     summary.innerHTML = chips.join(" ");

@@ -36,23 +36,12 @@
     };
   }
 
-  function actualizarContador(palabras) {
-    const contador = document.getElementById("loQueTengoContador");
-    const cantidad = Array.isArray(palabras) ? palabras.length : 0;
-
-    if (contador) {
-      contador.textContent = cantidad ? `(${cantidad})` : "";
-    }
-  }
-
   function renderPalabras(palabras) {
     const lista = document.getElementById("loQueTengoLista");
 
     if (!lista) {
       return;
     }
-
-    actualizarContador(palabras);
 
     if (!palabras || !palabras.length) {
       lista.innerHTML = `

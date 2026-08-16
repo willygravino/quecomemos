@@ -27,7 +27,6 @@ document.addEventListener("DOMContentLoaded", function () {
   let estadoAntesDeLoQueTengo = null;
 
   function aplicarModoLoQueTengo(tipopag, tipopagAnterior = "") {
-    const usarLoQueTengo = form.querySelector('input[name="usar_lo_que_tengo"]');
     const quecomemos = form.querySelector('input[name="quecomemos"]');
     const misplatos = form.querySelector('input[name="misplatos"]');
 
@@ -35,14 +34,9 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!estadoAntesDeLoQueTengo) {
         estadoAntesDeLoQueTengo = {
           tipopag: tipopagAnterior || "Principal",
-          usarLoQueTengo: usarLoQueTengo ? usarLoQueTengo.checked : false,
           quecomemos: quecomemos ? quecomemos.checked : false,
           misplatos: misplatos ? misplatos.checked : false,
         };
-      }
-
-      if (usarLoQueTengo) {
-        usarLoQueTengo.checked = true;
       }
 
       if (quecomemos && misplatos && !quecomemos.checked && !misplatos.checked) {
@@ -54,10 +48,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (estadoAntesDeLoQueTengo) {
-      if (usarLoQueTengo) {
-        usarLoQueTengo.checked = estadoAntesDeLoQueTengo.usarLoQueTengo;
-      }
-
       if (quecomemos) {
         quecomemos.checked = estadoAntesDeLoQueTengo.quecomemos;
       }
@@ -67,8 +57,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       estadoAntesDeLoQueTengo = null;
-    } else if (tipopagAnterior === "LoQueTengo" && usarLoQueTengo) {
-      usarLoQueTengo.checked = false;
     }
   }
 

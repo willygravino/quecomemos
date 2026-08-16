@@ -2869,11 +2869,8 @@ def obtener_estado_filtros_platos(request, dia_activo):
 
         quecomemos = request.POST.get("quecomemos")
         misplatos = request.POST.get("misplatos")
-        usar_lo_que_tengo = request.POST.get("usar_lo_que_tengo")
 
         if tipopag == "LoQueTengo":
-            usar_lo_que_tengo = "1"
-
             if not quecomemos and not misplatos:
                 quecomemos = "quecomemos"
                 misplatos = "misplatos"
@@ -2886,7 +2883,6 @@ def obtener_estado_filtros_platos(request, dia_activo):
         if tipopag != "LoQueTengo":
             request.session["quecomemos"] = quecomemos
             request.session["misplatos"] = misplatos
-            request.session["usar_lo_que_tengo"] = usar_lo_que_tengo
 
         request.session["dia_activo"] = dia_activo
 
@@ -2898,11 +2894,8 @@ def obtener_estado_filtros_platos(request, dia_activo):
 
         quecomemos = quecomemos_sesion
         misplatos = misplatos_sesion
-        usar_lo_que_tengo = request.session.get("usar_lo_que_tengo")
 
         if tipopag == "LoQueTengo":
-            usar_lo_que_tengo = "1"
-
             if not quecomemos and not misplatos:
                 quecomemos = "quecomemos"
                 misplatos = "misplatos"
@@ -2920,7 +2913,6 @@ def obtener_estado_filtros_platos(request, dia_activo):
         "tipopag": tipopag,
         "quecomemos": quecomemos,
         "misplatos": misplatos,
-        "usar_lo_que_tengo": usar_lo_que_tengo,
         "medios": medios,
         "categoria": categoria,
         "dificultad": dificultad,
@@ -2934,8 +2926,8 @@ def obtener_estado_filtros_platos(request, dia_activo):
 
 
 
-def filtrar_platos_por_lo_que_tengo(platos, usuario, usar_lo_que_tengo):
-    if usar_lo_que_tengo != "1":
+def filtrar_platos_por_lo_que_tengo(platos, usuario, activo):
+    if not activo:
         return platos
 
     palabras = [
@@ -2968,7 +2960,6 @@ def obtener_resultados_principales(
     categoria,
     dificultad,
     palabra_clave,
-    usar_lo_que_tengo=None
 ):
 
 
@@ -3030,7 +3021,7 @@ def obtener_resultados_principales(
 
         usuario=usuario,
 
-        usar_lo_que_tengo=usar_lo_que_tengo,
+        activo=tipo_parametro == "LoQueTengo",
 
     )
 
@@ -3237,7 +3228,6 @@ def FiltroDePlatos(request):
     categoria = estado_filtros["categoria"]
     dificultad = estado_filtros["dificultad"]
     palabra_clave = estado_filtros["palabra_clave"]
-    usar_lo_que_tengo = estado_filtros["usar_lo_que_tengo"]
 
     lugares, platos, platos_carousel, platos_listado = obtener_resultados_principales(
         usuario=usuario,
@@ -3248,7 +3238,6 @@ def FiltroDePlatos(request):
         categoria=categoria,
         dificultad=dificultad,
         palabra_clave=palabra_clave,
-        usar_lo_que_tengo=usar_lo_que_tengo,
     )
 
 
@@ -3295,7 +3284,6 @@ def FiltroDePlatos(request):
                 "dias_programados": dias_programados,
                 "quecomemos_ck": quecomemos,
                 "misplatos_ck": misplatos,
-                "usar_lo_que_tengo_ck": usar_lo_que_tengo,
                 "amigues": amigues,
                 "parametro_activo": tipo_parametro,
                 **contexto_compartidos,
@@ -3335,7 +3323,6 @@ def ajax_listado_platos(request):
     categoria = estado_filtros["categoria"]
     dificultad = estado_filtros["dificultad"]
     palabra_clave = estado_filtros["palabra_clave"]
-    usar_lo_que_tengo = estado_filtros["usar_lo_que_tengo"]
 
     lugares, platos, platos_carousel, platos_listado = obtener_resultados_principales(
         usuario=usuario,
@@ -3346,7 +3333,6 @@ def ajax_listado_platos(request):
         categoria=categoria,
         dificultad=dificultad,
         palabra_clave=palabra_clave,
-        usar_lo_que_tengo=usar_lo_que_tengo,
     )
 
     platos_agrupados_lo_que_tengo = (
