@@ -14,6 +14,29 @@
             <div class="col py-2">
 
               {% if dia in platos_dia_x_dia %}
+
+                <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
+                  <span class="badge rounded-pill bg-body text-body border shadow-sm px-3 py-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-primary me-1"></i>
+                    Menú programado
+                  </span>
+
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger rounded-circle d-inline-flex align-items-center justify-content-center p-0"
+                    style="width: 2rem; height: 2rem;"
+                    data-bs-toggle="modal"
+                    data-bs-target="#confirmActionModal"
+                    data-confirm-title="Eliminar menú del día"
+                    data-confirm-body="¿Seguro querés borrar lo que comemos en este día?"
+                    data-confirm-action="{% url 'eliminar-menu-programado' %}"
+                    data-confirm-btn="Sí, borrar"
+                    title="Borrar menú del día"
+                    aria-label="Borrar menú del día">
+                    <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                  </button>
+                </div>
+
                 <!-- Si hay platos programados para este día, los mostramos -->
                 {% for dia_plato in platos_dia_x_dia.items %}
                   {% if dia_plato.0 == dia %}
@@ -175,7 +198,6 @@
           </div>
         </div>
 
-       ©
 
 
 
