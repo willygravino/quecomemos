@@ -194,7 +194,7 @@
 -->
 
 <!-- {# 0) CON LO QUE TENGO #} -->
-<li class="nav-item sidebar-special-item {% if tipopag == 'LoQueTengo' %}active{% endif %}">
+<li class="nav-item sidebar-special-item position-relative {% if tipopag == 'LoQueTengo' %}active{% endif %}">
   <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
             {% if tipopag == 'LoQueTengo' %}is-active{% endif %}"
      href="{% url 'filtro-de-platos' %}?tipopag=LoQueTengo"
@@ -211,6 +211,17 @@
       <span class="d-block">tengo</span>
     </span>
   </a>
+
+  <button
+    type="button"
+    class="btn btn-light btn-sm position-absolute top-0 end-0 mt-1 me-1 rounded-circle d-inline-flex align-items-center justify-content-center p-0 text-primary"
+    style="width: 1.75rem; height: 1.75rem; z-index: 2;"
+    data-bs-toggle="modal"
+    data-bs-target="#loQueTengoModal"
+    title="Agregar o editar palabras de Lo que tengo"
+    aria-label="Agregar o editar palabras de Lo que tengo">
+    <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+  </button>
 </li>
 
 <hr class="sidebar-divider">
