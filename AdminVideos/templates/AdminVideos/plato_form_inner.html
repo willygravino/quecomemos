@@ -60,9 +60,9 @@
 
 
 
-<div class="container my-5">
-    <div class="card shadow-lg">
-        <div class="card-body">
+<div class="container plato-form-page my-4">
+    <div class="card border-0 shadow-lg plato-form-card">
+        <div class="card-body p-3 p-md-4">
 
 
             <form
@@ -77,7 +77,7 @@
 
                 {% csrf_token %}
 
-                <div class="plato-form-actions">
+                <div class="plato-form-actions" aria-label="Acciones del plato">
 
                   {% if form.instance.pk %}
                     <!-- CLONAR -->
@@ -116,6 +116,17 @@
                 </div>
 
 
+                <section class="plato-form-section plato-form-section-principal">
+                  <div class="plato-form-section-header">
+                    <span class="plato-form-section-icon" aria-hidden="true">
+                      <i class="fa-solid fa-utensils"></i>
+                    </span>
+                    <div>
+                      <h2 class="plato-form-section-title">Datos principales</h2>
+                      <p class="plato-form-section-help">Identificá el plato y resumí su preparación.</p>
+                    </div>
+                  </div>
+
                 <!-- Nombre del Plato -->
 
                 <div class="mb-3 row">
@@ -153,88 +164,24 @@
                 </div> -->
 
                 <!-- Receta -->
-                <div class="mb-3">
+                <div class="mb-0">
                     <label class="form-label">Receta:</label>
                     {{ form.receta|add_class:"form-control" }}
                 </div>
+                </section>
 
 
-<style id="plato-form-ingredientes-compactos-css">
-  .ingredientes-compact-list {
-    display: block;
-    padding-left: 0;
-    margin-bottom: .65rem;
-  }
 
-  .ingrediente-compact-item {
-    width: 100%;
-    max-width: 100%;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    padding: .10rem 0 !important;
-    margin: 0 !important;
-  }
-
-  .ingrediente-compact-item + .ingrediente-compact-item {
-    margin-top: .12rem !important;
-  }
-
-  .ingrediente-compact-summary {
-    display: inline-flex !important;
-    width: auto;
-    max-width: 100%;
-    min-width: 0;
-    align-items: center;
-    justify-content: flex-start;
-    gap: .42rem !important;
-  }
-
-  .ingrediente-summary-btn {
-    flex: 0 1 auto;
-    width: auto;
-    color: inherit;
-    text-decoration: none;
-    max-width: min(72vw, 34rem);
-    min-width: 0;
-  }
-
-  .ingrediente-summary-btn:hover,
-  .ingrediente-summary-btn:focus {
-    color: #0d6efd;
-    text-decoration: none;
-  }
-
-  .ingrediente-summary-nombre {
-    display: inline-block;
-    max-width: min(48vw, 18rem);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    vertical-align: bottom;
-    white-space: nowrap;
-    font-size: .98rem;
-    line-height: 1.2;
-  }
-
-  .ingrediente-summary-detalle {
-    font-size: .86rem;
-    line-height: 1.2;
-    white-space: nowrap;
-  }
-
-  .ingrediente-summary-detalle:empty {
-    display: none;
-  }
-
-  .ingrediente-compact-item .btn {
-    font-size: .76rem;
-    line-height: 1.1;
-  }
-
-  .ingrediente-formset-fields {
-    display: none !important;
-  }
-</style>
+<section class="plato-form-section plato-form-section-ingredientes">
+  <div class="plato-form-section-header plato-form-section-header-actions">
+    <span class="plato-form-section-icon" aria-hidden="true">
+      <i class="fa-solid fa-list-check"></i>
+    </span>
+    <div class="flex-grow-1">
+      <h2 class="plato-form-section-title">Ingredientes</h2>
+      <p class="plato-form-section-help">Agregá los ingredientes con sus cantidades y unidades.</p>
+    </div>
+  </div>
 
 <!-- Botón para abrir modal -->
 <button type="button"
@@ -321,75 +268,64 @@
 </div>
 
 
-<div id="componentes-hidden-fields" class="d-none">
-  {{ form.componentes }}
-</div>
+</section>
 
-<hr class="my-4">
+                <!-- Preparación -->
+                <section class="plato-form-section plato-form-section-preparacion">
+                  <div class="plato-form-section-header">
+                    <span class="plato-form-section-icon" aria-hidden="true">
+                      <i class="fa-solid fa-kitchen-set"></i>
+                    </span>
+                    <div>
+                      <h2 class="plato-form-section-title">Preparación</h2>
+                      <p class="plato-form-section-help">Indicá rendimiento, cocción y tiempos estimados.</p>
+                    </div>
+                  </div>
 
-<div id="componentes-section" class="mb-4">
-  <div class="d-flex align-items-center justify-content-between">
-    <h5 class="mb-0">Platos asociados</h5>
-
-    <button type="button"
-            class="btn btn-sm btn-outline-primary"
-            data-bs-toggle="modal"
-            data-bs-target="#componenteModal">
-      + Asociar otro plato
-    </button>
-  </div>
-
-  <ul id="componentes-ul" class="list-group mt-3">
-    {% for componente in form.instance.componentes.all %}
-      <li class="list-group-item d-flex justify-content-between align-items-center"
-          data-componente-id="{{ componente.id }}">
-        <div>
-          <div class="fw-semibold">{{ componente.nombre_plato }}</div>
-          <small class="text-muted">ID: {{ componente.id }}</small>
-        </div>
-
-        <button type="button"
-                class="btn btn-sm btn-outline-danger eliminar-componente"
-                data-componente-id="{{ componente.id }}">
-          Eliminar
-        </button>
-      </li>
-    {% empty %}
-      <li class="list-group-item text-muted" id="componentes-empty">
-        Todavía no hay platos asociados.
-      </li>
-    {% endfor %}
-  </ul>
-</div>
-
-                <!-- Otros campos -->
-
-                <div class="row mb-3 justify-content-center">
-
-                    <div class="col-md-2 mb-2">
-                        <!-- <label class="form-label">Porciones:</label> -->
-                        {{ form.porciones|add_class:"form-control" }}
+                  <div class="row g-3">
+                    <div class="col-12 col-sm-6 col-lg-3">
+                      <label for="{{ form.porciones.id_for_label }}" class="form-label">Porciones</label>
+                      {{ form.porciones|add_class:"form-control" }}
                     </div>
 
-                    <div class="col-md-3 mb-2">
-                        <!-- <label class="form-label">Medios de cocción:</label> -->
-                        {{ form.medios|add_class:"form-control" }}
+                    <div class="col-12 col-sm-6 col-lg-3">
+                      <label for="{{ form.medios.id_for_label }}" class="form-label">Medio de cocción</label>
+                      {{ form.medios|add_class:"form-select" }}
                     </div>
 
-                    <div class="col-md-2 mb-2">
-                        <!-- <label class="form-label">Preparación:</label> -->
+                    <div class="col-12 col-sm-6 col-lg-3">
+                      <label for="{{ form.elaboracion.id_for_label }}" class="form-label">Preparación</label>
+                      <div class="input-group">
                         {{ form.elaboracion|add_class:"form-control" }}
+                        <span class="input-group-text">min</span>
+                      </div>
                     </div>
-                    <div class="col-md-2 mb-2">
-                        <!-- <label class="form-label">Cocción:</label> -->
-                        {{ form.coccion|add_class:"form-control" }}
-                    </div>
-                </div>
 
-                  <div class="col-md-2 mb-2">
-                        <label class="form-label">Categoría:</label>
-                        {{ form.categoria|add_class:"form-control" }}
+                    <div class="col-12 col-sm-6 col-lg-3">
+                      <label for="{{ form.coccion.id_for_label }}" class="form-label">Cocción</label>
+                      <div class="input-group">
+                        {{ form.coccion|add_class:"form-control" }}
+                        <span class="input-group-text">min</span>
+                      </div>
                     </div>
+                  </div>
+                </section>
+
+                <section class="plato-form-section plato-form-section-clasificacion">
+                  <div class="plato-form-section-header">
+                    <span class="plato-form-section-icon" aria-hidden="true">
+                      <i class="fa-solid fa-tags"></i>
+                    </span>
+                    <div>
+                      <h2 class="plato-form-section-title">Clasificación</h2>
+                      <p class="plato-form-section-help">Organizá el plato para encontrarlo y filtrarlo fácilmente.</p>
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="{{ form.categoria.id_for_label }}" class="form-label">Categoría</label>
+                      {{ form.categoria|add_class:"form-select" }}
+                  </div>
 
 
 
@@ -398,7 +334,7 @@
 
                 <input type="hidden" name="tipos" value="Picada">
               {% else %}
-                <div class="mb-3 border rounded p-3 bg-body-tertiary{% if form.tipos.errors %} border-danger{% endif %}">
+                <div class="plato-form-tipos-box mb-3{% if form.tipos.errors %} border border-danger{% endif %}">
                   <label class="form-label d-block">Tipo de plato:</label>
 
                   {% if items %}
@@ -437,10 +373,22 @@
 
 
 
-                <div class="mb-3">
-                    <label class="form-label">Estacionalidad:</label>
-                    {{ form.estacionalidad|add_class:"form-select" }}
-                </div>
+                  <div class="mb-0">
+                      <label for="{{ form.estacionalidad.id_for_label }}" class="form-label">Estacionalidad</label>
+                      {{ form.estacionalidad|add_class:"form-select" }}
+                  </div>
+                </section>
+
+                <section class="plato-form-section plato-form-section-contenido">
+                  <div class="plato-form-section-header">
+                    <span class="plato-form-section-icon" aria-hidden="true">
+                      <i class="fa-solid fa-photo-film"></i>
+                    </span>
+                    <div>
+                      <h2 class="plato-form-section-title">Imagen y referencia</h2>
+                      <p class="plato-form-section-help">Sumá una imagen y, si querés, un video o una receta externa.</p>
+                    </div>
+                  </div>
 
                 <div class="mb-3">
                   <label for="{{ form.enlace.id_for_label }}" class="form-label">
@@ -470,11 +418,62 @@
                   {% endfor %}
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Imagen:</label>
+                <div class="mb-0">
+                    <label for="{{ form.image.id_for_label }}" class="form-label">Imagen</label>
                     {{ form.image|add_class:"form-control" }}
-                </div> 
+                </div>
+                </section>
 
+
+<section class="plato-form-section plato-form-section-composicion">
+  <div class="plato-form-section-header">
+    <span class="plato-form-section-icon" aria-hidden="true">
+      <i class="fa-solid fa-layer-group"></i>
+    </span>
+    <div>
+      <h2 class="plato-form-section-title">Composición del plato</h2>
+      <p class="plato-form-section-help">Relacioná otros platos o administrá sus variedades.</p>
+    </div>
+  </div>
+
+<div id="componentes-hidden-fields" class="d-none">
+  {{ form.componentes }}
+</div>
+
+<div id="componentes-section" class="mb-4">
+  <div class="d-flex align-items-center justify-content-between">
+    <h5 class="mb-0">Platos asociados</h5>
+
+    <button type="button"
+            class="btn btn-sm btn-outline-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#componenteModal">
+      + Asociar otro plato
+    </button>
+  </div>
+
+  <ul id="componentes-ul" class="list-group mt-3">
+    {% for componente in form.instance.componentes.all %}
+      <li class="list-group-item d-flex justify-content-between align-items-center"
+          data-componente-id="{{ componente.id }}">
+        <div>
+          <div class="fw-semibold">{{ componente.nombre_plato }}</div>
+          <small class="text-muted">ID: {{ componente.id }}</small>
+        </div>
+
+        <button type="button"
+                class="btn btn-sm btn-outline-danger eliminar-componente"
+                data-componente-id="{{ componente.id }}">
+          Eliminar
+        </button>
+      </li>
+    {% empty %}
+      <li class="list-group-item text-muted" id="componentes-empty">
+        Todavía no hay platos asociados.
+      </li>
+    {% endfor %}
+  </ul>
+</div>
 
 <!-- 
  ===========================
@@ -560,10 +559,18 @@
 {% endif %}
 
 <!-- fin de variedades -->
+</section>
 
 
-  <div class="text-center mt-2 mb-2">
-                    <button type="submit" class="btn btn-success px-5">Guardar</button>
+  <div class="plato-form-footer d-flex flex-column flex-sm-row justify-content-end gap-2 mt-4">
+                    <a href="{{ request.GET.return_to|default:'/' }}"
+                       class="btn btn-outline-secondary js-close-plato-form">
+                      Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-success px-5">
+                      <i class="fa-solid fa-floppy-disk me-1" aria-hidden="true"></i>
+                      Guardar plato
+                    </button>
                 </div>
 
              <input type="hidden" name="return_to" value="{% firstof request.POST.return_to request.GET.return_to '/' %}">
@@ -754,8 +761,3 @@
     </div>
   </div>
 </div>
-
-
-
-
-
