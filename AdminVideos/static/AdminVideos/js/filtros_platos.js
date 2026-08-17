@@ -24,43 +24,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (!form || !contenedor) return;
 
-  let estadoAntesDeLoQueTengo = null;
+  // Sincronizar el botón de creación con la vista inicial.
+  actualizarBotonCrearPlato(
+    form.querySelector('input[name="tipopag"]')?.value || "Principal"
+  );
 
-  function aplicarModoLoQueTengo(tipopag, tipopagAnterior = "") {
-    const quecomemos = form.querySelector('input[name="quecomemos"]');
-    const misplatos = form.querySelector('input[name="misplatos"]');
+  // Impedir crear platos desde la vista Todos.
+  document.addEventListener("click", function (event) {
+    const botonCrear = event.target.closest("#botonCrearPlatoFlotante");
+    if (!botonCrear) return;
 
-    if (tipopag === "LoQueTengo") {
-      if (!estadoAntesDeLoQueTengo) {
-        estadoAntesDeLoQueTengo = {
-          tipopag: tipopagAnterior || "Principal",
-          quecomemos: quecomemos ? quecomemos.checked : false,
-          misplatos: misplatos ? misplatos.checked : false,
-        };
-      }
+    const tipopagFormulario =
+      form.querySelector('input[name="tipopag"]')?.value || "";
+    const tipopagUrl =
+      new URLSearchParams(window.location.search).get("tipopag") || "";
 
-      if (quecomemos && misplatos && !quecomemos.checked && !misplatos.checked) {
-        quecomemos.checked = true;
-        misplatos.checked = true;
-      }
-
-      return;
+    if (tipopagFormulario === "Todos" || tipopagUrl === "Todos") {
+      event.preventDefault();
+      event.stopImmediatePropagation();
     }
-
-    if (estadoAntesDeLoQueTengo) {
-      if (quecomemos) {
-        quecomemos.checked = estadoAntesDeLoQueTengo.quecomemos;
-      }
-
-      if (misplatos) {
-        misplatos.checked = estadoAntesDeLoQueTengo.misplatos;
-      }
-
-      estadoAntesDeLoQueTengo = null;
-    }
-  }
-
-  // ============================================================
+  }, true);
+// ============================================================
   // 2. Refrescar listado, carousel y lugares por AJAX
   // ============================================================
   function actualizarListadoPlatos() {
@@ -130,6 +114,67 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  function estaActivoLoQueTengo() {
+    const input = form.querySelector('input[name="lo_que_tengo_activo"]');
+    return Boolean(input && input.value === "1");
+  }
+
+  function valoresGrupoTipopag(link) {
+    return (link.dataset.tipopagValues || "")
+      .split(",")
+      .map(function (valor) {
+        return valor.trim();
+      })
+      .filter(Boolean);
+  }
+
+  function actualizarEstadoLoQueTengo(activo, tipopag) {
+    const input = form.querySelector('input[name="lo_que_tengo_activo"]');
+    const linkFiltro = document.querySelector(".js-filtro-lo-que-tengo");
+    const sidebar = document.getElementById("accordionSidebar");
+
+    if (sidebar) {
+      sidebar.classList.toggle("lo-que-tengo-activo", activo);
+    }
+
+    if (input) {
+      input.value = activo ? "1" : "0";
+    }
+
+    if (linkFiltro) {
+      marcarMenuItem(linkFiltro, activo);
+      linkFiltro.dataset.loQueTengoActivo = activo ? "1" : "0";
+      linkFiltro.setAttribute("aria-pressed", activo ? "true" : "false");
+
+      const urlFiltro = new URL(linkFiltro.href, window.location.href);
+      urlFiltro.searchParams.set("tipopag", tipopag || "Principal");
+      urlFiltro.searchParams.set("lo_que_tengo", activo ? "0" : "1");
+      linkFiltro.href = urlFiltro.toString();
+    }
+
+    document.querySelectorAll(
+      ".js-filtro-tipopag, .js-filtro-tipopag-grupo"
+    ).forEach(function (link) {
+      link.classList.remove("is-filtered-lo-que-tengo");
+    });
+
+    if (!activo) {
+      return;
+    }
+
+    document.querySelectorAll(".js-filtro-tipopag").forEach(function (link) {
+      if (link.dataset.tipopag === tipopag) {
+        link.classList.add("is-filtered-lo-que-tengo");
+      }
+    });
+
+    document.querySelectorAll(".js-filtro-tipopag-grupo").forEach(function (link) {
+      if (valoresGrupoTipopag(link).includes(tipopag)) {
+        link.classList.add("is-filtered-lo-que-tengo");
+      }
+    });
+  }
+
   function actualizarMenuLateralActivo(tipopag) {
     document.querySelectorAll("#accordionSidebar .nav-item").forEach(function (item) {
       item.classList.remove("active");
@@ -163,6 +208,8 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".js-filtro-tipopag:not(.dropdown-item)").forEach(function (link) {
       marcarMenuItem(link, link.dataset.tipopag === tipopag);
     });
+
+    actualizarEstadoLoQueTengo(estaActivoLoQueTengo(), tipopag);
   }
 
   // ============================================================
@@ -183,7 +230,7 @@ document.addEventListener("DOMContentLoaded", function () {
       "Trago": "Bebidas / tragos",
       "Delivery": "delivery",
       "Comerafuera": "lugares para comer afuera",
-      "LoQueTengo": "lo que tengo",
+      "Todos": "Todos los platos",
     };
 
     return etiquetas[tipopag] || tipopag || "Plato principal";
@@ -444,6 +491,25 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
+    const esVistaTodos = tipopag === "Todos";
+
+    // En Todos se muestra el botón, pero queda gris y sin acción.
+    boton.style.removeProperty("display");
+    boton.classList.toggle("disabled", esVistaTodos);
+    boton.classList.toggle("btn-secondary", esVistaTodos);
+    boton.classList.toggle("btn-success", !esVistaTodos);
+    boton.setAttribute("aria-disabled", esVistaTodos ? "true" : "false");
+    boton.tabIndex = esVistaTodos ? -1 : 0;
+
+    if (esVistaTodos) {
+      boton.removeAttribute("href");
+      const aviso = "Seleccioná un tipo de plato para crear uno nuevo";
+      boton.title = aviso;
+      boton.setAttribute("aria-label", aviso);
+      return;
+    }
+
+
     const esLugar = tipopag === "Delivery" || tipopag === "Comerafuera";
     const urlBase = esLugar ? boton.dataset.urlCrearLugar : boton.dataset.urlCrearPlato;
 
@@ -453,7 +519,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const params = new URLSearchParams();
 
-    if (tipopag) {
+    if (tipopag && tipopag !== "Todos") {
       params.set("tipopag", tipopag);
     }
 
@@ -473,7 +539,12 @@ document.addEventListener("DOMContentLoaded", function () {
       titulo = "Agregar lugar para comer afuera";
     } else if (tipopag === "Delivery") {
       titulo = "Agregar delivery";
-    } else if (tipopag && tipopag !== "Principal" && tipopag !== "Dash") {
+    } else if (
+      tipopag &&
+      tipopag !== "Principal" &&
+      tipopag !== "Todos" &&
+      tipopag !== "Dash"
+    ) {
       titulo = `Agregar receta de ${tipopag.toLowerCase()}`;
     }
 
@@ -537,16 +608,57 @@ document.addEventListener("DOMContentLoaded", function () {
   // 6. Filtrar desde el menú lateral sin recargar
   // ============================================================
   document.addEventListener("click", function (event) {
+    const linkFiltro = event.target.closest(".js-filtro-lo-que-tengo");
+
+    if (!linkFiltro || !window.fetch) {
+      return;
+    }
+
+    const inputTipopag = form.querySelector('input[name="tipopag"]');
+    const inputLoQueTengo = form.querySelector('input[name="lo_que_tengo_activo"]');
+
+    if (!inputTipopag || !inputLoQueTengo) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const tipopag = inputTipopag.value || "Principal";
+    const activar = !estaActivoLoQueTengo();
+
+    inputLoQueTengo.value = activar ? "1" : "0";
+    actualizarMenuLateralActivo(tipopag);
+
+    const nuevaUrl = new URL(window.location.href);
+    nuevaUrl.searchParams.set("tipopag", tipopag);
+
+    if (activar) {
+      nuevaUrl.searchParams.set("lo_que_tengo", "1");
+    } else {
+      nuevaUrl.searchParams.delete("lo_que_tengo");
+    }
+
+    window.history.pushState(
+      { tipopag: tipopag, loQueTengoActivo: activar },
+      "",
+      nuevaUrl.toString()
+    );
+
+    actualizarBotonCrearPlato(tipopag);
+    actualizarListadoPlatosConBarrido();
+  });
+
+  document.addEventListener("click", function (event) {
     const link = event.target.closest(".js-filtro-tipopag");
 
     if (!link) {
       return;
     }
 
-    const tipopagSolicitado = link.dataset.tipopag;
+    const tipopag = link.dataset.tipopag;
 
     // Fallback seguro: si falta algo, dejamos navegar normal.
-    if (!tipopagSolicitado || !window.fetch) {
+    if (!tipopag || !window.fetch) {
       return;
     }
 
@@ -558,29 +670,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
     event.preventDefault();
 
-    const tipopagActual = inputTipopag.value || "Principal";
-    const desactivarLoQueTengo =
-      tipopagSolicitado === "LoQueTengo" &&
-      tipopagActual === "LoQueTengo";
-
-    const tipopag = desactivarLoQueTengo
-      ? (estadoAntesDeLoQueTengo?.tipopag || "Principal")
-      : tipopagSolicitado;
-
-    aplicarModoLoQueTengo(tipopag, tipopagActual);
     inputTipopag.value = tipopag;
-
     actualizarMenuLateralActivo(tipopag);
     actualizarTituloSugerencias(tipopag);
 
-    const nuevaUrl = new URL(link.href);
+    const nuevaUrl = new URL(link.href, window.location.href);
     nuevaUrl.searchParams.set("tipopag", tipopag);
-    window.history.pushState({ tipopag: tipopag }, "", nuevaUrl.toString());
+
+    if (estaActivoLoQueTengo()) {
+      nuevaUrl.searchParams.set("lo_que_tengo", "1");
+    } else {
+      nuevaUrl.searchParams.delete("lo_que_tengo");
+    }
+
+    window.history.pushState(
+      { tipopag: tipopag, loQueTengoActivo: estaActivoLoQueTengo() },
+      "",
+      nuevaUrl.toString()
+    );
 
     actualizarBotonCrearPlato(tipopag);
 
     const dropdown = link.closest(".dropdown");
-    const dropdownToggle = dropdown ? dropdown.querySelector('[data-bs-toggle="dropdown"]') : null;
+    const dropdownToggle = dropdown
+      ? dropdown.querySelector('[data-bs-toggle="dropdown"]')
+      : null;
 
     if (dropdownToggle && window.bootstrap && bootstrap.Dropdown) {
       bootstrap.Dropdown.getOrCreateInstance(dropdownToggle).hide();
@@ -589,29 +703,38 @@ document.addEventListener("DOMContentLoaded", function () {
     actualizarListadoPlatosConBarrido();
   });
 
-  // ============================================================
   // 7. Soportar botón atrás / adelante del navegador
   // ============================================================
   window.addEventListener("popstate", function () {
     const params = new URLSearchParams(window.location.search);
-    const tipopag = params.get("tipopag");
+    let tipopag = params.get("tipopag") || "Principal";
+    let loQueTengoActivo = params.get("lo_que_tengo") === "1";
 
-    if (!tipopag) {
-      return;
+    // Compatibilidad con enlaces o entradas antiguas del historial.
+    if (tipopag === "LoQueTengo") {
+      tipopag = "Todos";
+      loQueTengoActivo = true;
     }
 
     const inputTipopag = form.querySelector('input[name="tipopag"]');
+    const inputLoQueTengo = form.querySelector('input[name="lo_que_tengo_activo"]');
 
-    if (!inputTipopag) {
+    if (!inputTipopag || !inputLoQueTengo) {
       return;
     }
-    const tipopagAnterior = inputTipopag.value || "Principal";
-    aplicarModoLoQueTengo(tipopag, tipopagAnterior);
+
     inputTipopag.value = tipopag;
+    inputLoQueTengo.value = loQueTengoActivo ? "1" : "0";
+
     actualizarMenuLateralActivo(tipopag);
     actualizarTituloSugerencias(tipopag);
     actualizarBotonCrearPlato(tipopag);
     actualizarListadoPlatosConBarrido();
-
   });
+
+  const tipopagInicial = (
+    form.querySelector('input[name="tipopag"]')?.value || "Principal"
+  );
+  actualizarMenuLateralActivo(tipopagInicial);
+
 });

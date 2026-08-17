@@ -46,7 +46,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <!-- mi css -->
-    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260711200312" rel="stylesheet">  <!-- al final + bust de caché -->
+    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260816183500" rel="stylesheet">  <!-- al final + bust de caché -->
 
     <link rel="manifest" href="{% static 'AdminVideos/lista_super/manifest_lista_super.json' %}?v=1">
 
@@ -193,20 +193,21 @@
    ============================ #}
 -->
 
-<!-- {# 0) CON LO QUE TENGO #} -->
-<li class="nav-item sidebar-special-item position-relative {% if tipopag == 'LoQueTengo' %}active{% endif %}">
-  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
-            {% if tipopag == 'LoQueTengo' %}is-active{% endif %}"
-     href="{% url 'filtro-de-platos' %}?tipopag=LoQueTengo"
-     data-tipopag="LoQueTengo">
+<!-- {# 0) CON LO QUE TENGO: FILTRO GLOBAL #} -->
+<li class="nav-item sidebar-special-item sidebar-lo-que-tengo-item position-relative {% if lo_que_tengo_activo %}active{% endif %}">
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-lo-que-tengo
+            {% if lo_que_tengo_activo %}is-active{% endif %}"
+     href="{% url 'filtro-de-platos' %}?tipopag={{ tipopag|default:'Principal'|urlencode }}&lo_que_tengo={% if lo_que_tengo_activo %}0{% else %}1{% endif %}"
+     data-lo-que-tengo-activo="{% if lo_que_tengo_activo %}1{% else %}0{% endif %}"
+     aria-pressed="{% if lo_que_tengo_activo %}true{% else %}false{% endif %}">
 
     <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
           style="width: 38px; height: 38px;">
-      <i class="fa-solid fa-basket-shopping {% if tipopag != 'LoQueTengo' %}text-white-50{% endif %}"
+      <i class="fa-solid fa-basket-shopping {% if not lo_que_tengo_activo %}text-white-50{% endif %}"
          style="font-size: 1.1rem;"></i>
     </span>
 
-    <span class="item-text mt-2 small {% if tipopag == 'LoQueTengo' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+    <span class="item-text mt-2 small {% if lo_que_tengo_activo %}text-white fw-bold{% else %}text-white-50{% endif %}">
       <span class="d-block">Con lo que</span>
       <span class="d-block">tengo</span>
     </span>
@@ -222,6 +223,28 @@
     aria-label="Agregar o editar palabras de Lo que tengo">
     <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
   </button>
+</li>
+
+<hr class="sidebar-divider">
+
+<!-- {# 0.5) TODOS LOS PLATOS #} -->
+<li class="nav-item {% if tipopag == 'Todos' %}active{% endif %}">
+  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
+            {% if tipopag == 'Todos' %}is-active{% endif %}"
+     href="{% url 'filtro-de-platos' %}?tipopag=Todos{% if lo_que_tengo_activo %}&lo_que_tengo=1{% endif %}"
+     data-tipopag="Todos">
+
+    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
+          style="width: 38px; height: 38px;">
+      <i class="fa-solid fa-border-all {% if tipopag != 'Todos' %}text-white-50{% endif %}"
+         style="font-size: 1.1rem;"></i>
+    </span>
+
+    <span class="item-text mt-2 small {% if tipopag == 'Todos' %}text-white fw-bold{% else %}text-white-50{% endif %}">
+      <span class="d-block">Todos los</span>
+      <span class="d-block">platos</span>
+    </span>
+  </a>
 </li>
 
 <hr class="sidebar-divider">
@@ -1165,10 +1188,13 @@ Root globl para modales cargados dinámicamente (AJAX)
      href="{% url 'videos-create' %}?tipopag={{ tipopag|default:''|urlencode }}&return_to={{ request.get_full_path|urlencode }}"
      data-url-crear-plato="{% url 'videos-create' %}"
      data-url-crear-lugar="{% url 'crear-lugar' %}"
-     class="btn btn-success rounded-circle shadow position-fixed d-flex align-items-center justify-content-center"
+     class="btn {% if tipopag == 'Todos' %}btn-secondary disabled{% else %}btn-success{% endif %} rounded-circle shadow position-fixed d-flex align-items-center justify-content-center"
      style="right: 1rem; bottom: 9rem; width: 56px; height: 56px; z-index: 1050;"
     title="{% if tipopag == 'Picada' %}Armar picada{% elif tipopag == 'Ingrediente de picada' %}Agregar ingrediente de picada{% elif tipopag == 'Principal' or not tipopag %}Agregar receta de plato principal{% elif tipopag == 'Guarnicion' %}Agregar receta de guarnición{% elif tipopag == 'Comerafuera' %}Agregar lugar para comer afuera{% elif tipopag == 'Delivery' %}Agregar delivery{% else %}Agregar receta de {{ tipopag|lower }}{% endif %}"
-    aria-label="{% if tipopag == 'Picada' %}Armar picada{% elif tipopag == 'Ingrediente de picada' %}Agregar ingrediente de picada{% elif tipopag == 'Principal' or not tipopag %}Agregar receta de plato principal{% elif tipopag == 'Guarnicion' %}Agregar receta de guarnición{% elif tipopag == 'Comerafuera' %}Agregar lugar para comer afuera{% elif tipopag == 'Delivery' %}Agregar delivery{% else %}Agregar receta de {{ tipopag|lower }}{% endif %}">
+    aria-label="{% if tipopag == 'Picada' %}Armar picada{% elif tipopag == 'Ingrediente de picada' %}Agregar ingrediente de picada{% elif tipopag == 'Principal' or not tipopag %}Agregar receta de plato principal{% elif tipopag == 'Guarnicion' %}Agregar receta de guarnición{% elif tipopag == 'Comerafuera' %}Agregar lugar para comer afuera{% elif tipopag == 'Delivery' %}Agregar delivery{% else %}Agregar receta de {{ tipopag|lower }}{% endif %}"
+     data-deshabilitado-en-todos="1"
+     aria-disabled="{% if tipopag == 'Todos' %}true{% else %}false{% endif %}"
+     tabindex="{% if tipopag == 'Todos' %}-1{% else %}0{% endif %}">
     <i class="fa-solid fa-plus"></i>
   </a>
 {% endif %}

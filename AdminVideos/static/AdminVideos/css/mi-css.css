@@ -1506,3 +1506,63 @@ body.filtro-platos-cambiando [data-listado-url] {
   color: #fff !important;
   background-color: #343a40 !important;
 }
+
+/* FILTRO GLOBAL CON LO QUE TENGO */
+.sidebar .menu-item.is-filtered-lo-que-tengo .icon-wrap,
+.sidebar .js-filtro-lo-que-tengo.is-active .icon-wrap {
+  background-color: #fff5f5 !important;
+  border: 1px solid rgba(220, 53, 69, .52) !important;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, .13) !important;
+}
+
+.sidebar .menu-item.is-filtered-lo-que-tengo .icon-wrap i,
+.sidebar .js-filtro-lo-que-tengo.is-active .icon-wrap i {
+  color: #dc3545 !important;
+}
+
+.sidebar .js-filtro-lo-que-tengo.is-active .item-text {
+  color: #fff !important;
+  font-weight: 700 !important;
+}
+
+[data-bs-theme="dark"] .sidebar .menu-item.is-filtered-lo-que-tengo .icon-wrap,
+[data-bs-theme="dark"] .sidebar .js-filtro-lo-que-tengo.is-active .icon-wrap {
+  background-color: rgba(220, 53, 69, .18) !important;
+  border-color: rgba(255, 118, 132, .72) !important;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, .18) !important;
+}
+
+[data-bs-theme="dark"] .sidebar .menu-item.is-filtered-lo-que-tengo .icon-wrap i,
+[data-bs-theme="dark"] .sidebar .js-filtro-lo-que-tengo.is-active .icon-wrap i {
+  color: #ff7f8c !important;
+}
+
+/* REFUERZO VISUAL DEL FILTRO GLOBAL */
+#accordionSidebar.lo-que-tengo-activo
+  .menu-item.is-active:not(.js-filtro-lo-que-tengo)
+  .icon-wrap > i {
+  color: #dc3545 !important;
+}
+
+#accordionSidebar.lo-que-tengo-activo
+  .menu-item.is-active:not(.js-filtro-lo-que-tengo)
+  .icon-wrap {
+  background-color: #fff5f5 !important;
+  border-color: rgba(220, 53, 69, .65) !important;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, .16) !important;
+}
+
+[data-bs-theme="dark"]
+  #accordionSidebar.lo-que-tengo-activo
+  .menu-item.is-active:not(.js-filtro-lo-que-tengo)
+  .icon-wrap > i {
+  color: #ff7f8c !important;
+}
+
+[data-bs-theme="dark"]
+  #accordionSidebar.lo-que-tengo-activo
+  .menu-item.is-active:not(.js-filtro-lo-que-tengo)
+  .icon-wrap {
+  background-color: rgba(220, 53, 69, .22) !important;
+  border-color: rgba(255, 118, 132, .78) !important;
+}

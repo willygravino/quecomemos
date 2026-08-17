@@ -311,6 +311,7 @@
   {% csrf_token %}
 
   <input type="hidden" name="tipopag" value="{{ tipopag }}">
+  <input type="hidden" name="lo_que_tengo_activo" value="{% if lo_que_tengo_activo %}1{% else %}0{% endif %}">
 
   <div class="card border-0 shadow-sm rounded-3 bg-body filtros-platos-card">
     <div class="card-body px-3 py-2">
@@ -758,7 +759,7 @@
 })();
 </script>
 
-<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=20260707182827"></script>
+<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=20260817021610"></script>
 <script src="{% static 'AdminVideos/js/lo_que_tengo.js' %}?v=3"></script>
 
 {% endblock %}
