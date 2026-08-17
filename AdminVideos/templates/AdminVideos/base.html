@@ -46,7 +46,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <!-- mi css -->
-    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260817104455" rel="stylesheet">  <!-- al final + bust de caché -->
+    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260817105717" rel="stylesheet">  <!-- al final + bust de caché -->
 
     <link rel="manifest" href="{% static 'AdminVideos/lista_super/manifest_lista_super.json' %}?v=1">
 
@@ -723,7 +723,7 @@
                 {% for dia in dias_desde_hoy %}
                 
 
-                <li class="nav-item flex-fill" role="presentation" style="flex: 1 0 auto;">
+                <li class="nav-item flex-fill position-relative {% if dia in dias_programados %}tiene-menu-programado{% endif %}" role="presentation" style="flex: 1 0 auto;">
                     <button
                         class="nav-link {% if dia_activo == dia|date:'Y-m-d' %}active{% elif forloop.first and not dia_activo %}active{% endif %} text-center px-2"
                         id="tab-{{ dia|date:'Y-m-d' }}" data-bs-toggle="tab"
@@ -736,20 +736,33 @@
                         <span class="d-none d-md-block">
 
                             {{ dia|date:"l j"|capfirst }}
-                            {% if dia in dias_programados %}
-                            &nbsp;
-                            <i class="fa-solid fa-check text-success"></i>
-                            <!-- Icono pin al lado del nombre -->
-                            {% endif %}
                         </span>
                         <span class="d-block d-md-none">
                             {{ dia|date:"D"|slice:":2"|upper }}<br>{{ dia|date:"j" }}
-                            {% if dia in dias_programados %}
-                            <i class="fa-solid fa-check text-success"></i>
-                            <!-- <i class="bi bi-pin-angle-fill"></i> -->
-                            {% endif %}
                         </span>
                     </button>
+
+                    {% if dia in dias_programados %}
+                    <span class="menu-programado-tab-acciones"
+                          aria-label="Este día tiene un menú programado">
+                        <i class="fa-solid fa-check menu-programado-tab-check"
+                           aria-hidden="true"></i>
+
+                        <button
+                            type="button"
+                            class="btn btn-danger menu-programado-tab-eliminar"
+                            data-bs-toggle="modal"
+                            data-bs-target="#confirmActionModal"
+                            data-confirm-title="Eliminar menú del día"
+                            data-confirm-body="¿Seguro querés borrar lo que comemos en este día?"
+                            data-confirm-action="{% url 'eliminar-menu-programado' %}"
+                            data-confirm-btn="Sí, borrar"
+                            title="Borrar menú del día"
+                            aria-label="Borrar menú del día">
+                            <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                        </button>
+                    </span>
+                    {% endif %}
                 </li>
                 {% endfor %}
             </ul>

@@ -1643,3 +1643,77 @@ body.filtro-platos-cambiando [data-listado-url] {
   background-color: #4e73df !important;
   border: 0 !important;
 }
+
+/* ===== Acciones del menú programado dentro de la pestaña ===== */
+#diasTab .tiene-menu-programado .nav-link {
+  padding-right: 2rem !important;
+}
+
+#diasTab .tiene-menu-programado .nav-link.active {
+  padding-right: 3.65rem !important;
+}
+
+.menu-programado-tab-acciones {
+  position: absolute;
+  top: 50%;
+  right: .32rem;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.menu-programado-tab-check {
+  color: #198754;
+  font-size: .78rem;
+  line-height: 1;
+}
+
+#diasTab .nav-link.active ~ .menu-programado-tab-acciones .menu-programado-tab-check {
+  color: #fff;
+}
+
+.menu-programado-tab-eliminar {
+  display: none;
+  width: 1.55rem;
+  height: 1.55rem;
+  min-width: 1.55rem;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  align-items: center;
+  justify-content: center;
+  font-size: .68rem;
+  line-height: 1;
+  pointer-events: auto;
+}
+
+#diasTab .nav-link.active ~ .menu-programado-tab-acciones .menu-programado-tab-eliminar {
+  display: inline-flex;
+}
+
+.menu-programado-tab-eliminar:hover,
+.menu-programado-tab-eliminar:focus {
+  color: #fff;
+  background-color: #bb2d3b;
+}
+
+@media (max-width: 767.98px) {
+  #diasTab .tiene-menu-programado .nav-link.active {
+    padding-right: 3.25rem !important;
+  }
+
+  .menu-programado-tab-acciones {
+    right: .18rem;
+    gap: .28rem;
+  }
+
+  .menu-programado-tab-eliminar {
+    width: 1.4rem;
+    height: 1.4rem;
+    min-width: 1.4rem;
+    font-size: .62rem;
+  }
+}
