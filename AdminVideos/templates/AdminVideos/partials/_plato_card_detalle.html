@@ -44,6 +44,21 @@
           {{ plato_detalle.nombre_plato }}
         {% endif %}
       </h5>
+
+      {% if plato_detalle.enlace %}
+        <div class="text-center mb-2">
+          <a href="{{ plato_detalle.enlace }}"
+             target="_blank"
+             rel="noopener noreferrer"
+             class="btn btn-sm btn-outline-primary py-0 px-2"
+             title="Abrir enlace relacionado en una pestaña nueva"
+             aria-label="Abrir enlace relacionado de {{ plato_detalle.nombre_plato|escape }}">
+            <i class="fa-solid fa-arrow-up-right-from-square me-1" aria-hidden="true"></i>
+            Ver enlace
+          </a>
+        </div>
+      {% endif %}
+
 {% if plato_detalle.proviene_de %}
   {% firstof plato_detalle.proviene_de.propietario.get_full_name plato_detalle.proviene_de.propietario.username plato_detalle.proviene_de.usuario.get_full_name plato_detalle.proviene_de.usuario.username plato_detalle.proviene_de.get_full_name plato_detalle.proviene_de.username plato_detalle.proviene_de "otro usuario" as origen_importado %}
   <div class="plato-card-procedencia-importada text-center small text-muted mb-2">
