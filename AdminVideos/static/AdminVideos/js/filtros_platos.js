@@ -175,6 +175,40 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  window.addEventListener("loQueTengo:disponibilidad", function (event) {
+    const disponible = Boolean(event.detail && event.detail.disponible);
+
+    if (disponible || !estaActivoLoQueTengo()) {
+      return;
+    }
+
+    const inputTipopag = form.querySelector('input[name="tipopag"]');
+    const inputLoQueTengo = form.querySelector(
+      'input[name="lo_que_tengo_activo"]'
+    );
+
+    if (!inputTipopag || !inputLoQueTengo) {
+      return;
+    }
+
+    const tipopag = inputTipopag.value || "Principal";
+    inputLoQueTengo.value = "0";
+    actualizarEstadoLoQueTengo(false, tipopag);
+
+    const nuevaUrl = new URL(window.location.href);
+    nuevaUrl.searchParams.set("tipopag", tipopag);
+    nuevaUrl.searchParams.delete("lo_que_tengo");
+
+    window.history.replaceState(
+      { tipopag: tipopag, loQueTengoActivo: false },
+      "",
+      nuevaUrl.toString()
+    );
+
+    actualizarMenuLateralActivo(tipopag);
+    actualizarListadoPlatosConBarrido();
+  });
+
   function actualizarMenuLateralActivo(tipopag) {
     document.querySelectorAll("#accordionSidebar .nav-item").forEach(function (item) {
       item.classList.remove("active");
@@ -623,6 +657,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     event.preventDefault();
 
+    if (linkFiltro.dataset.tienePalabrasLoQueTengo !== "1") {
+      return;
+    }
+
     const tipopag = inputTipopag.value || "Principal";
     const activar = !estaActivoLoQueTengo();
 
@@ -714,6 +752,17 @@ document.addEventListener("DOMContentLoaded", function () {
     if (tipopag === "LoQueTengo") {
       tipopag = "Todos";
       loQueTengoActivo = true;
+    }
+
+    // No reactivar desde el historial un filtro sin palabras.
+    const linkFiltroLoQueTengo = document.querySelector(
+      ".js-filtro-lo-que-tengo"
+    );
+    if (
+      linkFiltroLoQueTengo &&
+      linkFiltroLoQueTengo.dataset.tienePalabrasLoQueTengo !== "1"
+    ) {
+      loQueTengoActivo = false;
     }
 
     const inputTipopag = form.querySelector('input[name="tipopag"]');
