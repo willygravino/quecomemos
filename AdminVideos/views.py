@@ -1819,6 +1819,7 @@ class PlatoVariedadCreate(PlatoCreate):
 
         # Copiar campos “normales”
         initial["receta"] = p.receta
+        initial["partes_receta_json"] = json.dumps(p.partes_receta or [], ensure_ascii=False)
         initial["porciones"] = p.porciones
         initial["medios"] = p.medios
         initial["elaboracion"] = p.elaboracion
@@ -1894,6 +1895,7 @@ class PlatoVariedadCreate(PlatoCreate):
                 "nombre_ingrediente": rel.ingrediente.nombre if rel.ingrediente else "",
                 "cantidad": rel.cantidad,
                 "unidad": rel.unidad,
+                "parte_clave": rel.parte_clave,
             })
 
         # 👇 CLAVE: si tu formset es inlineformset, necesita extra >= len(inicial)
@@ -1967,6 +1969,7 @@ class PlatoVariedadCreate(PlatoCreate):
                         ingrediente=rel.ingrediente,
                         cantidad=rel.cantidad,
                         unidad=rel.unidad,
+                        parte_clave=rel.parte_clave,
                     )
                     for rel in self.padre.ingredientes_en_plato.select_related("ingrediente").all()
                     if rel.ingrediente_id
@@ -4039,6 +4042,7 @@ def copiar_plato_para_usuario(plato_original, usuario):
         nombre_plato=plato_original.nombre_plato,
         nombre_grupo=plato_original.nombre_grupo,
         receta=plato_original.receta,
+        partes_receta=plato_original.partes_receta,
         ingredientes=plato_original.ingredientes,
         medios=plato_original.medios,
         categoria=plato_original.categoria,
@@ -4198,6 +4202,7 @@ def agregar_a_mi_lista(request, plato_id):
         nombre_plato=nombre_copia,
         nombre_grupo="",          # 👈 evita "grupo" suelto
         receta=plato_original.receta,
+        partes_receta=plato_original.partes_receta,
         ingredientes="",          # se reconstruye luego
         medios=plato_original.medios,
         categoria=plato_original.categoria,
@@ -4220,6 +4225,7 @@ def agregar_a_mi_lista(request, plato_id):
             ingrediente=ing.ingrediente,
             cantidad=ing.cantidad,
             unidad=ing.unidad,
+            parte_clave=ing.parte_clave,
         )
         if ing.ingrediente:
             ingredientes_texto.append(ing.ingrediente.nombre)
@@ -4715,4 +4721,3 @@ def eliminar_menu_programado(request):
         f"Se eliminó el menú programado del {dia_activo} (items borrados: {borrados})."
     )
     return redirect("filtro-de-platos")
-

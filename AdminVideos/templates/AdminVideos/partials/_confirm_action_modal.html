@@ -42,6 +42,8 @@
     let submitMode = "default";
     let ajaxRefreshTarget = null;
     let ajaxReopenDropdown = null;
+    let clientEventName = null;
+    let clientEventTrigger = null;
 
     if (!modalEl || !titleEl || !bodyEl || !btnEl || !formEl) return;
 
@@ -74,6 +76,9 @@
       const hint       = trigger.getAttribute("data-confirm-hint");
       const submitForm = trigger.getAttribute("data-confirm-submit-form");
       const ajax       = trigger.getAttribute("data-confirm-ajax") === "true";
+      const clientEvent = trigger.getAttribute("data-confirm-event");
+      clientEventName = clientEvent || null;
+      clientEventTrigger = clientEvent ? trigger : null;
 
       ajaxRefreshTarget = trigger.getAttribute("data-confirm-refresh-target");
       ajaxReopenDropdown = trigger.getAttribute("data-confirm-reopen-dropdown");
@@ -99,6 +104,12 @@
         return;
       }
 
+      if (clientEventName) {
+        submitMode = "client-event";
+        btnEl.disabled = false;
+        formEl.removeAttribute("action");
+        return;
+      }
       if (ajax) {
         submitMode = "ajax";
       } else {
@@ -121,6 +132,19 @@
         return;
       }
 
+      if (submitMode === "client-event") {
+        if (!clientEventName || !clientEventTrigger) return;
+
+        document.dispatchEvent(
+          new CustomEvent(clientEventName, {
+            detail: { trigger: clientEventTrigger }
+          })
+        );
+
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+        return;
+      }
       const action = formEl.getAttribute("action");
       if (!action) return;
 

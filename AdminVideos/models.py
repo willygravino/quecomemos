@@ -175,7 +175,12 @@ class Plato(models.Model):
         help_text="Nombre del grupo de variedades (ej: Empanadas)"
     )
 
-    receta = models.CharField(max_length=80, blank=True)
+    receta = models.TextField(blank=True)
+    partes_receta = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Partes ordenadas de la receta: nombre, instrucciones y clave estable.",
+    )
     # descripcion_plato = models.CharField(max_length=300, blank=True)
     
     ingredientes = models.CharField(
@@ -496,6 +501,12 @@ class IngredienteEnPlato(models.Model):
     ingrediente = models.ForeignKey(Ingrediente, on_delete=models.CASCADE,null=True, blank=True)
     cantidad = models.FloatField(null=True, blank=True)
     unidad = models.CharField(max_length=20, choices=UNIDADES_CHOICES, default='-', blank=True)
+    parte_clave = models.CharField(
+        max_length=64,
+        blank=True,
+        default="",
+        help_text="Clave de la parte de receta a la que pertenece este ingrediente.",
+    )
 
     def __str__(self):
         return f"{self.cantidad or ''} {self.unidad} de {self.ingrediente} en {self.plato}"

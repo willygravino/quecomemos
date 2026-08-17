@@ -671,6 +671,94 @@ button.btn-programar:active {
   }
 }
 
+/* === PARTES DE LA RECETA === */
+.parte-receta-editor {
+  padding: 1rem;
+  background-color: var(--bs-body-bg);
+  border: 1px solid rgba(var(--bs-primary-rgb), .35);
+  border-radius: .75rem;
+  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .06);
+}
+
+.parte-receta-card {
+  margin-bottom: .85rem;
+  overflow: hidden;
+  background-color: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: .75rem;
+}
+
+.parte-receta-card-general {
+  border-style: dashed;
+}
+
+.parte-receta-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .75rem;
+  background-color: rgba(var(--bs-primary-rgb), .08);
+  border-bottom: 1px solid var(--bs-border-color-translucent);
+}
+
+.parte-receta-card-general .parte-receta-card-header {
+  background-color: var(--bs-secondary-bg);
+}
+
+.parte-receta-card-textos {
+  min-width: 0;
+}
+
+.parte-receta-card-title {
+  margin: 0;
+  color: var(--bs-body-color);
+  font-size: .95rem;
+  font-weight: 700;
+}
+
+.parte-receta-card-instrucciones {
+  margin: .25rem 0 0;
+  color: var(--bs-secondary-color);
+  font-size: .8rem;
+  line-height: 1.35;
+  white-space: pre-line;
+}
+
+.parte-receta-card-actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: .3rem;
+}
+
+.parte-receta-ingredientes {
+  padding: .45rem .75rem;
+}
+
+.parte-receta-vacia {
+  padding: .65rem .75rem;
+  font-style: italic;
+}
+
+@media (max-width: 575.98px) {
+  .parte-receta-card-header {
+    flex-direction: column;
+  }
+
+  .parte-receta-card-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .parte-receta-card-actions .btn {
+    padding-right: .5rem;
+    padding-left: .5rem;
+    font-size: .75rem;
+  }
+}
+
 /* =====================================================
    Sidebar mobile: evitar items flotantes sobre contenido
    Cuando el sidebar se cierra en responsive, sus hijos no

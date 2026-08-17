@@ -1,4 +1,7 @@
 
+import json
+import re
+
 from django import forms
 from .models import Ingrediente, IngredienteEnPlato, Lugar, MenuItem, MenuItemExtra, Plato, TipoPlato
 from django.contrib.auth.forms import AuthenticationForm
@@ -57,6 +60,11 @@ class PlatoForm(forms.ModelForm):
         widget=forms.MultipleHiddenInput,
     )
 
+    partes_receta_json = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput(attrs={"id": "partesRecetaJson"}),
+    )
+
     class Meta:
         model = Plato
         fields = [
@@ -98,6 +106,19 @@ class PlatoForm(forms.ModelForm):
                 t.strip() for t in self.instance.tipos.split(",") if t.strip()
             ]
 
+        if not self.is_bound and not self.initial.get("partes_receta_json"):
+            self.initial["partes_receta_json"] = json.dumps(
+                getattr(self.instance, "partes_receta", []) or [],
+                ensure_ascii=False,
+            )
+
+        # Área amplia para escribir la receta completa
+        if "receta" in self.fields:
+            self.fields["receta"].widget.attrs.update({
+                "rows": 8,
+                "placeholder": "Escribí aquí la receta completa, con todos los pasos que necesites",
+            })
+
         # Placeholders
         if "porciones" in self.fields:
             self.fields["porciones"].widget.attrs.update({"placeholder": "Porciones"})
@@ -121,12 +142,59 @@ class PlatoForm(forms.ModelForm):
 
         return cleaned_data
 
+    def clean_partes_receta_json(self):
+        raw = self.cleaned_data.get("partes_receta_json")
+
+        if raw in (None, ""):
+            return getattr(self.instance, "partes_receta", []) or []
+
+        try:
+            partes = json.loads(raw) if isinstance(raw, str) else raw
+        except (TypeError, ValueError, json.JSONDecodeError):
+            raise forms.ValidationError("No se pudieron interpretar las partes de la receta.")
+
+        if not isinstance(partes, list):
+            raise forms.ValidationError("Las partes de la receta tienen un formato inválido.")
+
+        normalizadas = []
+        claves = set()
+
+        for indice, parte in enumerate(partes):
+            if not isinstance(parte, dict):
+                raise forms.ValidationError("Una parte de la receta tiene un formato inválido.")
+
+            clave = str(parte.get("clave") or "").strip()
+            nombre = str(parte.get("nombre") or "").strip()
+            instrucciones = str(parte.get("instrucciones") or "").strip()
+
+            if not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", clave):
+                raise forms.ValidationError("Una parte de la receta tiene una clave inválida.")
+            if clave in claves:
+                raise forms.ValidationError("Hay partes de la receta repetidas.")
+            if not nombre:
+                raise forms.ValidationError("Todas las partes deben tener un nombre.")
+            if len(nombre) > 60:
+                raise forms.ValidationError("El nombre de una parte no puede superar 60 caracteres.")
+            if len(instrucciones) > 5000:
+                raise forms.ValidationError("Las instrucciones de una parte son demasiado extensas.")
+
+            claves.add(clave)
+            normalizadas.append({
+                "clave": clave,
+                "nombre": nombre,
+                "instrucciones": instrucciones,
+                "orden": indice,
+            })
+
+        return normalizadas
+
     def save(self, commit=True):
         obj = super().save(commit=False)
 
         # ✅ Convertimos lista → CSV recién al guardar
         tipos_lista = self.cleaned_data.get("tipos") or []
         obj.tipos = ",".join([t.strip() for t in tipos_lista if t.strip()])
+        obj.partes_receta = self.cleaned_data.get("partes_receta_json") or []
 
         if commit:
             obj.save()
@@ -147,18 +215,22 @@ class IngredienteEnPlatoForm(forms.ModelForm):
 
     class Meta:
         model = IngredienteEnPlato
-        fields = ['ingrediente', 'cantidad', 'unidad']
+        fields = ['ingrediente', 'cantidad', 'unidad', 'parte_clave']
+        widgets = {
+            'parte_clave': forms.HiddenInput(),
+        }
         labels = {
             'ingrediente': '',
             'cantidad': '',
             'unidad': '',
+            'parte_clave': '',
         }
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         # Ordenamos los campos
-        self.order_fields(['nombre_ingrediente', 'cantidad', 'unidad'])
+        self.order_fields(['nombre_ingrediente', 'cantidad', 'unidad', 'parte_clave'])
 
         # Precargar nombre del ingrediente si existe
         if self.instance and self.instance.pk and self.instance.ingrediente:
@@ -236,5 +308,3 @@ class CustomAuthenticationForm(AuthenticationForm):
         ),
         'inactive': ("Esta cuenta está inactiva."),
     }
-
-

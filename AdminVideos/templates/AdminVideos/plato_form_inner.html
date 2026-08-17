@@ -183,19 +183,61 @@
     </div>
   </div>
 
-<!-- Botón para abrir modal -->
-<button type="button"
-        class="btn btn-sm btn-outline-secondary mb-2 js-agregar-ingrediente"
-        data-bs-toggle="modal"
-        data-bs-target="#ingredienteModal">
-  + Agregar ingrediente
-</button>
+{{ form.partes_receta_json }}
+
+<div class="partes-receta-toolbar d-flex flex-wrap gap-2 mb-3">
+  <button type="button"
+          class="btn btn-sm btn-outline-secondary js-agregar-ingrediente"
+          data-bs-toggle="modal"
+          data-bs-target="#ingredienteModal">
+    <i class="fa-solid fa-plus me-1" aria-hidden="true"></i>
+    Ingrediente general
+  </button>
+
+  <button type="button" class="btn btn-sm btn-primary js-agregar-parte-receta">
+    <i class="fa-solid fa-layer-group me-1" aria-hidden="true"></i>
+    Agregar parte
+  </button>
+</div>
+
+<div class="parte-receta-editor d-none mb-3" data-parte-receta-editor>
+  <input type="hidden" data-parte-editor-clave>
+
+  <div class="row g-2">
+    <div class="col-12 col-md-4">
+      <label class="form-label">Nombre de la parte</label>
+      <input type="text"
+             class="form-control"
+             maxlength="60"
+             placeholder="Ej.: Masa, relleno o crumble"
+             data-parte-editor-nombre>
+    </div>
+
+    <div class="col-12 col-md-8">
+      <label class="form-label">Preparación de esta parte</label>
+      <textarea class="form-control"
+                rows="3"
+                maxlength="5000"
+                placeholder="Instrucciones opcionales"
+                data-parte-editor-instrucciones></textarea>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-end gap-2 mt-2">
+    <button type="button" class="btn btn-sm btn-outline-secondary js-cancelar-parte-receta">
+      Cancelar
+    </button>
+    <button type="button" class="btn btn-sm btn-success js-guardar-parte-receta">
+      Guardar parte
+    </button>
+  </div>
+</div>
 
 
 <div id="ingredientes-list">
   {{ ingrediente_formset.management_form }}
 
-  <ul id="ingredientes-ul" class="list-group list-group-flush ingredientes-compact-list mb-3">
+  <div id="ingredientes-ul" class="ingredientes-compact-list mb-3" data-partes-receta-root>
     {% for ing_form in ingrediente_formset.forms %}
 
 
@@ -211,6 +253,9 @@
 
     <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-nombre_ingrediente"
            value="{% firstof ing_form.instance.ingrediente.nombre ing_form.initial.nombre_ingrediente '' %}">
+
+    <input type="hidden" name="ingredientes_en_plato-{{ forloop.counter0 }}-parte_clave"
+           value="{% firstof ing_form.instance.parte_clave ing_form.initial.parte_clave '' %}">
 
     <select class="form-select form-select-sm ingrediente-select"
             data-initial-id="{% firstof ing_form.instance.ingrediente_id ing_form.initial.ingrediente '' %}"
@@ -260,7 +305,7 @@
 
     
     {% endfor %}
-  </ul>
+  </div>
 
 
 
@@ -616,6 +661,8 @@
       </div>
 
       <div class="modal-body">
+
+        <div id="ingredienteParteActual" class="alert alert-primary py-2 small d-none"></div>
 
         <!-- ====== Ingrediente existente + alternativa "nuevo" en la misma fila ====== -->
         <div class="mb-3" id="bloque-existente">
