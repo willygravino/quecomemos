@@ -1566,3 +1566,80 @@ body.filtro-platos-cambiando [data-listado-url] {
   background-color: rgba(220, 53, 69, .22) !important;
   border-color: rgba(255, 118, 132, .78) !important;
 }
+
+/* ===== Pestaña activa integrada al menú programado ===== */
+/* La unión se construye con un fondo sólido continuo, no con bordes. */
+#diasTab {
+  --menu-programado-solido: #4e73df;
+  gap: .18rem;
+  margin-bottom: 0 !important;
+  background-color: transparent;
+}
+
+#diasTab .nav-item {
+  margin-bottom: 0;
+}
+
+#diasTab .nav-link {
+  width: 100%;
+  min-height: 3.15rem;
+  margin: 0;
+  color: #3154b8 !important;
+  background-color: #e9edfb !important;
+  border: 0 !important;
+  border-radius: .55rem .55rem 0 0 !important;
+  box-shadow: none !important;
+  transition: background-color .15s ease, color .15s ease;
+}
+
+#diasTab .nav-link:hover,
+#diasTab .nav-link:focus {
+  color: #24469f !important;
+  background-color: #dce4fb !important;
+  border: 0 !important;
+}
+
+#diasTab .nav-link.active,
+#diasTab .nav-item.show .nav-link {
+  color: #fff !important;
+  background-color: var(--menu-programado-solido) !important;
+  border: 0 !important;
+}
+
+#diasTabContent {
+  background-color: #4e73df !important;
+  border: 0 !important;
+  border-radius: 0 0 .65rem .65rem;
+  padding: .45rem;
+}
+
+#diasTabContent .tab-pane > .text-body {
+  padding: 0 !important;
+}
+
+#diasTabContent .menu-programado-contenido-solido {
+  margin-top: 0 !important;
+  background-color: var(--bs-tertiary-bg) !important;
+  border: 0 !important;
+  border-radius: .45rem !important;
+}
+
+[data-bs-theme="dark"] #diasTab .nav-link {
+  color: #dce4ff !important;
+  background-color: #2f3852 !important;
+  border: 0 !important;
+}
+
+[data-bs-theme="dark"] #diasTab .nav-link:hover,
+[data-bs-theme="dark"] #diasTab .nav-link:focus {
+  color: #fff !important;
+  background-color: #374469 !important;
+  border: 0 !important;
+}
+
+[data-bs-theme="dark"] #diasTab .nav-link.active,
+[data-bs-theme="dark"] #diasTab .nav-item.show .nav-link {
+  color: #fff !important;
+  background-color: #4e73df !important;
+  border: 0 !important;
+}
