@@ -16,30 +16,18 @@
     </div>
 
     <div class="flex-grow-1 min-w-0 fw-semibold text-truncate">
-      {% if plato.propietario == request.user %}
-        <a href="{% url 'videos-update' plato.id %}?return_to={{ return_to_url|urlencode }}{% if tipopag %}&tipopag={{ tipopag|urlencode }}{% endif %}"
-           class="plato-row-nombre text-body text-decoration-none"
-           onclick="event.stopPropagation();"
-           title="Editar plato"
-           aria-label="Editar {{ plato.nombre_plato|escape }}">
-          {% if plato.variedades_count > 0 %}
-            {{ plato.nombre_para_front }}
-          {% else %}
-            {{ plato.nombre_plato }}
-          {% endif %}
-        </a>
-      {% else %}
-        <span class="plato-row-nombre">
-          {% if plato.variedades_count > 0 %}
-            {{ plato.nombre_para_front }}
-          {% else %}
-            {{ plato.nombre_plato }}
-          {% endif %}
-        </span>
-      {% endif %}
+      <span class="plato-row-nombre">
+        {% if plato.variedades_count > 0 %}
+          {{ plato.nombre_para_front }}
+        {% else %}
+          {{ plato.nombre_plato }}
+        {% endif %}
+      </span>
+    </div>
 
+    <div class="plato-gmail-actions flex-shrink-0" aria-label="Acciones del plato">
       <a href="#"
-         class="btn plato-gmail-programar-btn btn-programar"
+         class="btn plato-gmail-action-btn plato-gmail-action-programar btn-programar"
          data-bs-toggle="modal"
          data-bs-target="#asignarPlatoModal"
          onclick="event.preventDefault(); event.stopPropagation(); setPlatoInfo('{{ plato.id }}', 'plato', '{% if plato.variedades_count > 0 %}{{ plato.nombre_para_front|escapejs }}{% else %}{{ plato.nombre_plato|escapejs }}{% endif %}')"
@@ -47,6 +35,25 @@
          aria-label="Programar">
         <i class="fa-regular fa-calendar-plus" aria-hidden="true"></i>
       </a>
+
+      <a href="#"
+         class="btn plato-gmail-action-btn plato-gmail-action-ingredientes js-plato-ingredientes"
+         data-url="{% url 'plato_ingredientes' plato.id %}"
+         onclick="event.preventDefault(); event.stopPropagation(); window.openPlatoIngredientesModal(this.dataset.url);"
+         title="Ingredientes"
+         aria-label="Ver ingredientes de {{ plato.nombre_plato|escape }}">
+        <i class="fa-solid fa-list-check" aria-hidden="true"></i>
+      </a>
+
+      {% if plato.propietario == request.user %}
+        <a href="{% url 'videos-update' plato.id %}?return_to={{ return_to_url|urlencode }}{% if tipopag %}&tipopag={{ tipopag|urlencode }}{% endif %}"
+           class="btn plato-gmail-action-btn plato-gmail-action-editar"
+           onclick="event.stopPropagation();"
+           title="Editar"
+           aria-label="Editar {{ plato.nombre_plato|escape }}">
+          <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
+        </a>
+      {% endif %}
     </div>
 
   </div>

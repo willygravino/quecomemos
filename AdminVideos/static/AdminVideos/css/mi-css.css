@@ -563,34 +563,78 @@ button.btn-programar:active {
   color: #fff;
 }
 
-.plato-gmail-programar-btn {
+.plato-gmail-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: .22rem;
+}
+
+.plato-gmail-action-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 1.65rem;
   height: 1.65rem;
-  margin-left: .35rem;
-  border: 1px solid rgba(111, 66, 193, .30);
+  padding: 0;
+  border: 1px solid currentColor;
   border-radius: 999px;
-  background: rgba(111, 66, 193, .08);
-  color: #6f42c1;
+  background: transparent;
   text-decoration: none;
-  vertical-align: middle;
-  transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .15s ease;
+  transition: background-color .15s ease, color .15s ease, transform .15s ease;
 }
 
-.plato-gmail-programar-btn:hover,
-.plato-gmail-programar-btn:focus {
-  border-color: #6f42c1;
-  background: #6f42c1;
+.plato-gmail-action-btn:hover,
+.plato-gmail-action-btn:focus {
   color: #fff;
   text-decoration: none;
   transform: translateY(-.02rem);
 }
 
-.plato-gmail-programar-btn i {
-  font-size: .82rem;
+.plato-gmail-action-programar {
+  color: #6f42c1;
+  background: rgba(111, 66, 193, .08);
+}
+
+.plato-gmail-action-programar:hover,
+.plato-gmail-action-programar:focus {
+  background: #6f42c1;
+}
+
+.plato-gmail-action-ingredientes {
+  color: var(--bs-primary);
+  background: rgba(var(--bs-primary-rgb), .08);
+}
+
+.plato-gmail-action-ingredientes:hover,
+.plato-gmail-action-ingredientes:focus {
+  background: var(--bs-primary);
+}
+
+.plato-gmail-action-editar {
+  color: var(--bs-body-color);
+  background: var(--bs-tertiary-bg);
+}
+
+.plato-gmail-action-editar:hover,
+.plato-gmail-action-editar:focus {
+  background: var(--bs-body-color);
+  color: var(--bs-body-bg);
+}
+
+.plato-gmail-action-btn i {
+  font-size: .78rem;
   line-height: 1;
+}
+
+@media (max-width: 575.98px) {
+  .plato-gmail-actions {
+    gap: .12rem;
+  }
+
+  .plato-gmail-action-btn {
+    width: 1.55rem;
+    height: 1.55rem;
+  }
 }
 
 /* =====================================================

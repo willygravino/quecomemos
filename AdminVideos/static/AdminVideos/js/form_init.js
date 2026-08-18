@@ -232,6 +232,10 @@
       );
     }
 
+    // Permite abrir este mismo modal desde controles que deben detener
+    // el clic de su fila contenedora, como las acciones del listado Gmail.
+    window.openPlatoIngredientesModal = openPlatoIngredientesModal;
+
     document.addEventListener("click", (e) => {
       const btn = e.target.closest(".js-plato-ingredientes");
 
