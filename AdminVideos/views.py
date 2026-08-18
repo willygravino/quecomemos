@@ -462,6 +462,8 @@ def plato_ingredientes(request: HttpRequest, pk: int):
             )
 
     items = []
+    ingredientes_vistos = set()
+
     for iep in ingredientes_directos:
         ing = iep.ingrediente
         if not ing:
@@ -470,6 +472,12 @@ def plato_ingredientes(request: HttpRequest, pk: int):
         ing_id = iep.ingrediente_id
         if not ing_id:
             continue
+
+        # Una receta puede usar el mismo ingrediente en varias partes.
+        # En esta lista general debe aparecer una sola vez.
+        if ing_id in ingredientes_vistos:
+            continue
+        ingredientes_vistos.add(ing_id)
 
         # Si este ingrediente también viene de un plato asociado,
         # se muestra solo dentro del bloque del plato asociado.
