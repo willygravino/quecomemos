@@ -4218,12 +4218,17 @@ def agregar_a_mi_lista(request, plato_id):
         coccion=plato_original.coccion,
         tipos=plato_original.tipos,
         estacionalidad=plato_original.estacionalidad,
+        porciones=plato_original.porciones,
+        enlace=plato_original.enlace,
         propietario=request.user,
         image=plato_original.image,
         proviene_de=proviene_de_str,
         id_original=plato_original.id,
         plato_padre=None,         # 👈 clave: si era variedad, ahora queda como “padre”
     )
+
+    # Mantener los platos componentes asociados al original.
+    nuevo_plato.componentes.set(plato_original.componentes.all())
 
     # Clonar ingredientes estructurados + reconstruir texto
     ingredientes_texto = []
