@@ -77,53 +77,45 @@
 
                 {% csrf_token %}
 
-                <div class="plato-form-actions" aria-label="Acciones del plato">
-
-                  {% if form.instance.pk %}
-                    <!-- CLONAR -->
-                    <a href="{% url 'agregar-a-mi-lista' form.instance.pk %}?duplicar=true"
-                      class="plato-action-btn text-body" title="Clonar plato">
-                      <i class="fa-regular fa-copy"></i>
-                    </a>
-
-                    <!-- INGREDIENTES -->
-                    <a href="#"
-                      class="plato-action-btn text-primary js-plato-ingredientes"
-                      data-url="{% url 'plato_ingredientes' form.instance.pk %}"
-                      title="Ver lista de ingredientes">
-                      <i class="fa-solid fa-list-check"></i>
-                    </a>
-
-                    <!-- PROGRAMAR -->
-                    <a href="#"
-                      class="btn plato-action-btn btn-programar"
-                      data-bs-toggle="modal"
-                      data-bs-target="#asignarPlatoModal"
-                      onclick="setPlatoInfo('{{ form.instance.pk }}', 'plato')"
-                      title="Programar este plato">
-                      <i class="fa-solid fa-plus"></i>
-                    </a>
-                  {% endif %}
-
-                  <!-- CERRAR -->
-                 <a href="{{ request.GET.return_to|default:'/' }}"
-                    class="plato-action-btn text-muted js-close-plato-form"
-                    title="Cerrar">
-                    <i class="fa-solid fa-xmark"></i>
-                  </a>
-
-
-                </div>
-
-
                 <section class="plato-form-section plato-form-section-principal">
-                  <div class="plato-form-section-header">
+                  <div class="plato-form-section-header plato-form-section-header-actions flex-wrap">
                     <span class="plato-form-section-icon" aria-hidden="true">
                       <i class="fa-solid fa-utensils"></i>
                     </span>
-                    <div>
+
+                    <div class="flex-grow-1">
                       <h2 class="plato-form-section-title">Datos principales</h2>
                       <p class="plato-form-section-help">Identificá el plato y resumí su preparación.</p>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-end gap-2 ms-auto"
+                         aria-label="Acciones del plato">
+                      {% if form.instance.pk %}
+                        <a href="{% url 'agregar-a-mi-lista' form.instance.pk %}?duplicar=true"
+                           class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
+                           title="Duplicar plato"
+                           aria-label="Duplicar plato">
+                          <i class="fa-regular fa-copy" aria-hidden="true"></i>
+                          <span class="d-none d-lg-inline">Duplicar</span>
+                        </a>
+
+                        <a href="#"
+                           class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1 js-plato-ingredientes"
+                           data-url="{% url 'plato_ingredientes' form.instance.pk %}"
+                           title="Ver ingredientes"
+                           aria-label="Ver ingredientes">
+                          <i class="fa-solid fa-list-check" aria-hidden="true"></i>
+                          <span class="d-none d-lg-inline">Ingredientes</span>
+                        </a>
+                      {% endif %}
+
+                      <a href="{{ request.GET.return_to|default:'/' }}"
+                         class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1 js-close-plato-form"
+                         title="Cerrar formulario"
+                         aria-label="Cerrar formulario">
+                        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                        <span class="d-none d-lg-inline">Cerrar</span>
+                      </a>
                     </div>
                   </div>
 
@@ -173,32 +165,23 @@
 
 
 <section class="plato-form-section plato-form-section-ingredientes">
-  <div class="plato-form-section-header plato-form-section-header-actions">
-    <span class="plato-form-section-icon" aria-hidden="true">
-      <i class="fa-solid fa-list-check"></i>
-    </span>
-    <div class="flex-grow-1">
-      <h2 class="plato-form-section-title">Ingredientes</h2>
-      <p class="plato-form-section-help">Agregá los ingredientes con sus cantidades y unidades.</p>
-    </div>
-  </div>
-
 {{ form.partes_receta_json }}
 
-<div class="partes-receta-toolbar d-flex flex-wrap gap-2 mb-3">
-  <button type="button"
-          class="btn btn-sm btn-outline-secondary js-agregar-ingrediente"
-          data-bs-toggle="modal"
-          data-bs-target="#ingredienteModal">
-    <i class="fa-solid fa-plus me-1" aria-hidden="true"></i>
-    Ingrediente general
-  </button>
+{# Disparador interno: los botones de cada cuadro lo usan para abrir el modal. #}
+<button type="button"
+        class="d-none js-agregar-ingrediente"
+        data-bs-toggle="modal"
+        data-bs-target="#ingredienteModal"
+        aria-hidden="true"
+        tabindex="-1"></button>
 
-  <button type="button" class="btn btn-sm btn-primary js-agregar-parte-receta">
-    <i class="fa-solid fa-layer-group me-1" aria-hidden="true"></i>
-    Agregar parte
-  </button>
-</div>
+<div data-partes-receta-controles>
+  <div class="partes-receta-toolbar d-flex flex-wrap justify-content-end gap-2 mb-3">
+    <button type="button" class="btn btn-sm btn-primary js-agregar-parte-receta">
+      <i class="fa-solid fa-layer-group me-1" aria-hidden="true"></i>
+      Agregar parte
+    </button>
+  </div>
 
 <div class="parte-receta-editor d-none mb-3" data-parte-receta-editor>
   <input type="hidden" data-parte-editor-clave>
@@ -231,6 +214,7 @@
       Guardar parte
     </button>
   </div>
+</div>
 </div>
 
 

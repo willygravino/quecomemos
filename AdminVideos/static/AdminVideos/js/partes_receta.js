@@ -214,6 +214,8 @@
     const root = form.querySelector("[data-partes-receta-root]");
     if (!root) return;
 
+    const controles = form.querySelector("[data-partes-receta-controles]");
+
     const filas = Array.from(root.querySelectorAll("[data-ingrediente-row]"));
     filas.forEach(function (fila) {
       fila.remove();
@@ -234,6 +236,11 @@
     todas.forEach(function (parte) {
       const seccion = crearSeccionParte(form, parte);
       root.appendChild(seccion);
+
+      if (!parte.clave && controles) {
+        root.appendChild(controles);
+      }
+
       listas.set(parte.clave || "", seccion.querySelector("[data-parte-lista]"));
     });
 
