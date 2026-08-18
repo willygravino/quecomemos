@@ -4,6 +4,32 @@
 (function () {
   "use strict";
 
+  function formatearUnidadReceta(codigo, cantidad) {
+    const numero = Number(
+      String(cantidad == null ? "" : cantidad).replace(",", ".")
+    );
+    const esSingular = Number.isFinite(numero) && Math.abs(numero - 1) < 0.000001;
+    const etiquetas = {
+      "-": ["", ""],
+      unidad: ["u.", "u."],
+      gr: ["g", "g"],
+      kg: ["kg", "kg"],
+      mg: ["mg", "mg"],
+      ml: ["ml", "ml"],
+      l: ["l", "l"],
+      cdita: ["cdita.", "cditas."],
+      cda: ["cda.", "cdas."],
+      taza: ["taza", "tazas"],
+      pizca: ["pizca", "pizcas"],
+    };
+
+    const unidad = String(codigo || "").trim();
+    const opciones = etiquetas[unidad];
+
+    if (!opciones) return unidad;
+    return esSingular ? opciones[0] : opciones[1];
+  }
+
   // AUTO-REFRESH AL VOLVER DESDE LISTA COMPARTIDA
 
   // Este snippet refresca la página al volver desde la lista compartida.
@@ -63,32 +89,55 @@
 
     function initCantidadesPorComensales(modalEl) {
       const input = modalEl.querySelector(".js-comensales-input");
-      if (!input) return;
-
-      const porcionesBase = Number(input.dataset.porcionesBase);
-      if (!Number.isFinite(porcionesBase) || porcionesBase <= 0) return;
-
       const cantidades = modalEl.querySelectorAll(".js-cantidad-escalable");
       const formato = new Intl.NumberFormat("es-AR", {
         maximumFractionDigits: 3,
       });
+
+      function mostrarCantidad(elemento, factor) {
+        const cantidadBase = Number(elemento.dataset.cantidadBase);
+        if (!Number.isFinite(cantidadBase)) return;
+
+        const cantidadCalculada = Math.round(
+          (cantidadBase * factor + Number.EPSILON) * 1000
+        ) / 1000;
+
+        elemento.textContent = formato.format(cantidadCalculada);
+
+        const medida = elemento.closest(".js-medida-escalable");
+        const unidadElemento = medida
+          ? medida.querySelector(".js-unidad-escalable")
+          : null;
+
+        if (unidadElemento) {
+          unidadElemento.textContent = formatearUnidadReceta(
+            unidadElemento.dataset.unidad,
+            cantidadCalculada
+          );
+        }
+      }
+
+      function actualizarUnidadesSinEscalar() {
+        cantidades.forEach((elemento) => mostrarCantidad(elemento, 1));
+      }
+
+      if (!input) {
+        actualizarUnidadesSinEscalar();
+        return;
+      }
+
+      const porcionesBase = Number(input.dataset.porcionesBase);
+      if (!Number.isFinite(porcionesBase) || porcionesBase <= 0) {
+        actualizarUnidadesSinEscalar();
+        return;
+      }
 
       function actualizar() {
         const comensales = Number(input.value);
         if (!Number.isFinite(comensales) || comensales <= 0) return;
 
         const factor = comensales / porcionesBase;
-
-        cantidades.forEach((elemento) => {
-          const cantidadBase = Number(elemento.dataset.cantidadBase);
-          if (!Number.isFinite(cantidadBase)) return;
-
-          const cantidadCalculada = Math.round(
-            (cantidadBase * factor + Number.EPSILON) * 1000
-          ) / 1000;
-
-          elemento.textContent = formato.format(cantidadCalculada);
-        });
+        cantidades.forEach((elemento) => mostrarCantidad(elemento, factor));
       }
 
       function cambiar(delta) {
@@ -452,11 +501,9 @@
     $select.trigger("change.select2");
   }
 
-  function obtenerUnidadTexto(select) {
+  function obtenerUnidadTexto(select, cantidad) {
     if (!select || !select.value) return "";
-
-    const opt = select.options[select.selectedIndex];
-    return opt ? (opt.text || opt.value || "").trim() : "";
+    return formatearUnidadReceta(select.value, cantidad);
   }
 
   function datosIngredienteDesdeFila(li) {
@@ -516,7 +563,7 @@
 
     const nombre = (datos?.text || "").trim() || "Ingrediente";
     const cantidad = (datos?.cantidad || "").trim();
-    const unidadTexto = obtenerUnidadTexto(unidadSelect);
+    const unidadTexto = obtenerUnidadTexto(unidadSelect, cantidad);
 
     if (nombreSpan) nombreSpan.textContent = nombre;
     if (detalleSpan) {

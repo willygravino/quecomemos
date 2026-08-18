@@ -83,8 +83,11 @@
                 {% if item.cantidades %}
                   <small class="text-muted text-end">
                     {% for medida in item.cantidades %}
-                      <span class="js-cantidad-escalable"
-                            data-cantidad-base="{{ medida.cantidad_base }}">{{ medida.cantidad_base }}</span>{% if medida.unidad %} {{ medida.unidad }}{% endif %}{% if not forloop.last %} + {% endif %}
+                      <span class="js-medida-escalable">
+                        <span class="js-cantidad-escalable"
+                              data-cantidad-base="{{ medida.cantidad_base }}">{{ medida.cantidad_base }}</span>{% if medida.unidad %} <span class="js-unidad-escalable"
+                              data-unidad="{{ medida.unidad }}">{{ medida.unidad }}</span>{% endif %}
+                      </span>{% if not forloop.last %} + {% endif %}
                     {% endfor %}
                   </small>
                 {% endif %}
@@ -150,8 +153,11 @@
                     {% if item.cantidades %}
                       <small class="text-muted text-end">
                         {% for medida in item.cantidades %}
-                          <span class="js-cantidad-escalable"
-                                data-cantidad-base="{{ medida.cantidad_base }}">{{ medida.cantidad_base }}</span>{% if medida.unidad %} {{ medida.unidad }}{% endif %}{% if not forloop.last %} + {% endif %}
+                          <span class="js-medida-escalable">
+                            <span class="js-cantidad-escalable"
+                                  data-cantidad-base="{{ medida.cantidad_base }}">{{ medida.cantidad_base }}</span>{% if medida.unidad %} <span class="js-unidad-escalable"
+                                  data-unidad="{{ medida.unidad }}">{{ medida.unidad }}</span>{% endif %}
+                          </span>{% if not forloop.last %} + {% endif %}
                         {% endfor %}
                       </small>
                     {% endif %}
