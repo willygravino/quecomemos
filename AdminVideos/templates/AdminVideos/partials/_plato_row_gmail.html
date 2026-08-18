@@ -16,27 +16,37 @@
     </div>
 
     <div class="flex-grow-1 min-w-0 fw-semibold text-truncate">
-      {% if plato.variedades_count > 0 %}
-        {{ plato.nombre_para_front }} <a href="#"
-           class="btn plato-gmail-programar-btn btn-programar"
-           data-bs-toggle="modal"
-           data-bs-target="#asignarPlatoModal"
-           onclick="event.preventDefault(); event.stopPropagation(); setPlatoInfo('{{ plato.id }}', 'plato', '{% if plato.variedades_count > 0 %}{{ plato.nombre_para_front|escapejs }}{% else %}{{ plato.nombre_plato|escapejs }}{% endif %}')"
-           title="Programar"
-           aria-label="Programar">
-          <i class="fa-regular fa-calendar-plus" aria-hidden="true"></i>
+      {% if plato.propietario == request.user %}
+        <a href="{% url 'videos-update' plato.id %}?return_to={{ return_to_url|urlencode }}{% if tipopag %}&tipopag={{ tipopag|urlencode }}{% endif %}"
+           class="plato-row-nombre text-body text-decoration-none"
+           onclick="event.stopPropagation();"
+           title="Editar plato"
+           aria-label="Editar {{ plato.nombre_plato|escape }}">
+          {% if plato.variedades_count > 0 %}
+            {{ plato.nombre_para_front }}
+          {% else %}
+            {{ plato.nombre_plato }}
+          {% endif %}
         </a>
       {% else %}
-        {{ plato.nombre_plato }} <a href="#"
-           class="btn plato-gmail-programar-btn btn-programar"
-           data-bs-toggle="modal"
-           data-bs-target="#asignarPlatoModal"
-           onclick="event.preventDefault(); event.stopPropagation(); setPlatoInfo('{{ plato.id }}', 'plato', '{% if plato.variedades_count > 0 %}{{ plato.nombre_para_front|escapejs }}{% else %}{{ plato.nombre_plato|escapejs }}{% endif %}')"
-           title="Programar"
-           aria-label="Programar">
-          <i class="fa-regular fa-calendar-plus" aria-hidden="true"></i>
-        </a>
+        <span class="plato-row-nombre">
+          {% if plato.variedades_count > 0 %}
+            {{ plato.nombre_para_front }}
+          {% else %}
+            {{ plato.nombre_plato }}
+          {% endif %}
+        </span>
       {% endif %}
+
+      <a href="#"
+         class="btn plato-gmail-programar-btn btn-programar"
+         data-bs-toggle="modal"
+         data-bs-target="#asignarPlatoModal"
+         onclick="event.preventDefault(); event.stopPropagation(); setPlatoInfo('{{ plato.id }}', 'plato', '{% if plato.variedades_count > 0 %}{{ plato.nombre_para_front|escapejs }}{% else %}{{ plato.nombre_plato|escapejs }}{% endif %}')"
+         title="Programar"
+         aria-label="Programar">
+        <i class="fa-regular fa-calendar-plus" aria-hidden="true"></i>
+      </a>
     </div>
 
   </div>
