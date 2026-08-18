@@ -481,6 +481,7 @@ def plato_ingredientes(request: HttpRequest, pk: int):
                 item = {
                     "ingrediente_id": ing_id,
                     "nombre": ing.nombre,
+                    "rubro": ing.get_tipo_display() if ing.tipo else "Otros",
                     "a_comprar": not tengo,
                     "comentario": comentario,
                     "cantidades_por_unidad": {},
@@ -510,15 +511,16 @@ def plato_ingredientes(request: HttpRequest, pk: int):
         sort_items_by_name(resultado)
         return resultado
 
-    items = construir_items_modal(ingredientes_directos)
+    # Una única lista: deduplica ingredientes repetidos y suma cantidades compatibles.
+    items = construir_items_modal(ingredientes_para_guardar)
 
+    items_por_rubro = defaultdict(list)
+    for item in items:
+        items_por_rubro[item["rubro"]].append(item)
+    items_por_rubro = dict(items_por_rubro)
+
+    # Se conserva la clave por compatibilidad con otros contextos existentes.
     componentes_items = []
-
-    for componente in componentes:
-        componentes_items.append({
-            "plato": componente,
-            "items": construir_items_modal(componente.ingredientes_en_plato.all()),
-        })
 
     # ======================================================
     # 4) Links / tokens (lo tuyo, sin cambiar lógica)
@@ -530,6 +532,7 @@ def plato_ingredientes(request: HttpRequest, pk: int):
         "plato": plato,
         "componentes_items": componentes_items,
         "items": items,
+        "items_por_rubro": items_por_rubro,
         "api_token": perfil.share_token,
 
         # URL de la pantalla de ingredientes del plato (tu vista normal)
@@ -582,6 +585,7 @@ def compartir_ing_plato(request, token, pk: int):
             perfil.ensure_share_token()
         return render(request, "AdminVideos/compartir_lista.html", {
             "items": [],
+            "items_por_rubro": {},
             "api_token": perfil.share_token,
             "token": f"user-{perfil.pk}",
         })
@@ -597,10 +601,14 @@ def compartir_ing_plato(request, token, pk: int):
     now = timezone.now()
 
     items = []
+    ingredientes_vistos = set()
+
     for iep in ingredientes_qs:
         ing = iep.ingrediente
-        if not ing:
+        ing_id = iep.ingrediente_id
+        if not ing or not ing_id or ing_id in ingredientes_vistos:
             continue
+        ingredientes_vistos.add(ing_id)
 
         pi = pantry_map.get(iep.ingrediente_id)
         comentario = (pi.comentario or "") if pi else ""
@@ -617,17 +625,24 @@ def compartir_ing_plato(request, token, pk: int):
         items.append({
             "ingrediente_id": iep.ingrediente_id,
             "nombre": ing.nombre,
+            "rubro": ing.get_tipo_display() if ing.tipo else "Otros",
             "comentario": comentario,
             "estado": estado,
         })
 
     items.sort(key=lambda i: i["nombre"].casefold())
 
+    items_por_rubro = defaultdict(list)
+    for item in items:
+        items_por_rubro[item["rubro"]].append(item)
+    items_por_rubro = dict(items_por_rubro)
+
     if not perfil.share_token:
         perfil.ensure_share_token()
 
     return render(request, "AdminVideos/compartir_lista.html", {
         "items": items,
+        "items_por_rubro": items_por_rubro,
         "api_token": perfil.share_token,
         "token": f"user-{perfil.pk}",
     })

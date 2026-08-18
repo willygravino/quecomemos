@@ -52,148 +52,66 @@
     </div>
   {% endif %}
 
-  {# Ingredientes directos del plato #}
-  {% if items %}
-    <div class="mb-3">
-      <div class="fw-semibold mb-2">
-        {{ plato.nombre_plato }}
-      </div>
+  {% if items_por_rubro %}
+    <div class="ingredientes-editor-compacto">
+      {% for rubro, items_rubro in items_por_rubro.items %}
+        <section class="ingredientes-editor-rubro">
+          <div class="ingredientes-editor-rubro-titulo">
+            <span>{{ rubro }}</span>
+            <span class="ingredientes-editor-rubro-cantidad">{{ items_rubro|length }}</span>
+          </div>
 
-      <ul class="list-group">
-        {% for item in items %}
-          <li class="list-group-item">
-            <div class="d-flex flex-column gap-2">
-
-              <div class="d-flex align-items-start justify-content-between gap-2">
-                <div class="form-check m-0 flex-grow-1">
+          <div class="ingredientes-editor-lista">
+            {% for item in items_rubro %}
+              <div class="ingrediente-editor-fila">
+                <div class="ingrediente-editor-principal form-check m-0">
                   <input
                     class="form-check-input"
                     type="checkbox"
-                    id="ing-directo-{{ item.ingrediente_id }}"
+                    id="ing-compacto-{{ item.ingrediente_id }}"
                     name="ingrediente_a_comprar_id"
                     value="{{ item.ingrediente_id }}"
                     {% if item.a_comprar %}checked{% endif %}
                   >
-
-                  <label class="form-check-label fw-semibold" for="ing-directo-{{ item.ingrediente_id }}">
+                  <label class="form-check-label fw-semibold" for="ing-compacto-{{ item.ingrediente_id }}">
                     {{ item.nombre }}
                   </label>
                 </div>
 
-                {% if item.cantidades %}
-                  <small class="text-muted text-end">
-                    {% for medida in item.cantidades %}
-                      <span class="js-medida-escalable">
-                        <span class="js-cantidad-escalable"
-                              data-cantidad-base="{{ medida.cantidad_base }}">{{ medida.cantidad_base }}</span>{% if medida.unidad %} <span class="js-unidad-escalable"
-                              data-unidad="{{ medida.unidad }}">{{ medida.unidad }}</span>{% endif %}
-                      </span>{% if not forloop.last %} + {% endif %}
-                    {% endfor %}
-                  </small>
-                {% endif %}
-              </div>
-
-              <div class="input-group input-group-sm">
-                <input
-                  type="text"
-                  class="form-control"
-                  name="comentario_{{ item.ingrediente_id }}"
-                  value="{{ item.comentario }}"
-                  placeholder="Comentario"
-                >
-
-                <button
-                  class="btn btn-outline-secondary"
-                  type="button"
-                  onclick="const el=this.previousElementSibling; el.value=''; el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true}));"
-                  title="Limpiar comentario"
-                >
-                  &times;
-                </button>
-              </div>
-
-            </div>
-          </li>
-        {% endfor %}
-      </ul>
-    </div>
-  {% endif %}
-
-
-  {# Ingredientes de platos asociados #}
-  {% if componentes_items %}
-    {% for bloque in componentes_items %}
-      {% if bloque.items %}
-        <div class="mb-3">
-          <div class="fw-semibold mb-2">
-            {{ bloque.plato.nombre_plato }}
-          </div>
-
-          <ul class="list-group">
-            {% for item in bloque.items %}
-              <li class="list-group-item">
-                <div class="d-flex flex-column gap-2">
-
-                  <div class="d-flex align-items-start justify-content-between gap-2">
-                    <div class="form-check m-0 flex-grow-1">
-                      <input
-                        class="form-check-input"
-                        type="checkbox"
-                        id="ing-comp-{{ bloque.plato.id }}-{{ item.ingrediente_id }}"
-                        name="ingrediente_a_comprar_id"
-                        value="{{ item.ingrediente_id }}"
-                        {% if item.a_comprar %}checked{% endif %}
-                      >
-
-                      <label class="form-check-label fw-semibold" for="ing-comp-{{ bloque.plato.id }}-{{ item.ingrediente_id }}">
-                        {{ item.nombre }}
-                      </label>
-                    </div>
-
-                    {% if item.cantidades %}
-                      <small class="text-muted text-end">
-                        {% for medida in item.cantidades %}
-                          <span class="js-medida-escalable">
-                            <span class="js-cantidad-escalable"
-                                  data-cantidad-base="{{ medida.cantidad_base }}">{{ medida.cantidad_base }}</span>{% if medida.unidad %} <span class="js-unidad-escalable"
-                                  data-unidad="{{ medida.unidad }}">{{ medida.unidad }}</span>{% endif %}
-                          </span>{% if not forloop.last %} + {% endif %}
-                        {% endfor %}
-                      </small>
-                    {% endif %}
-                  </div>
-
-                  <div class="input-group input-group-sm">
-                    <input
-                      type="text"
-                      class="form-control"
-                      name="comentario_{{ item.ingrediente_id }}"
-                      value="{{ item.comentario }}"
-                      placeholder="Comentario"
-                    >
-
-                    <button
-                      class="btn btn-outline-secondary"
-                      type="button"
-                      onclick="const el=this.previousElementSibling; el.value=''; el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true}));"
-                      title="Limpiar comentario"
-                    >
-                      &times;
-                    </button>
-                  </div>
-
+                <div class="ingrediente-editor-medidas text-muted">
+                  {% for medida in item.cantidades %}
+                    <span class="js-cantidad-escalable"
+                          data-cantidad-base="{{ medida.cantidad_base }}">{{ medida.cantidad_base }}</span>{% if medida.unidad %} {{ medida.unidad }}{% endif %}{% if not forloop.last %} + {% endif %}
+                  {% empty %}
+                    <span aria-hidden="true">—</span>
+                  {% endfor %}
                 </div>
-              </li>
+
+                <div class="input-group input-group-sm ingrediente-editor-comentario">
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="comentario_{{ item.ingrediente_id }}"
+                    value="{{ item.comentario }}"
+                    placeholder="Comentario"
+                    aria-label="Comentario para {{ item.nombre }}"
+                  >
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    onclick="const el=this.previousElementSibling; el.value=''; el.dispatchEvent(new Event('input',{bubbles:true})); el.dispatchEvent(new Event('change',{bubbles:true}));"
+                    title="Limpiar comentario"
+                    aria-label="Limpiar comentario de {{ item.nombre }}"
+                  >&times;</button>
+                </div>
+              </div>
             {% endfor %}
-          </ul>
-        </div>
-      {% endif %}
-    {% endfor %}
-  {% endif %}
-
-
-  {% if not items and not componentes_items %}
-    <div class="alert alert-secondary mb-0">
+          </div>
+        </section>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="small text-muted py-2">
       Este plato no tiene ingredientes cargados.
     </div>
   {% endif %}

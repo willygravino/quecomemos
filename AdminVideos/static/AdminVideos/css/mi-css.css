@@ -1990,3 +1990,87 @@ body.filtro-platos-cambiando [data-listado-url] {
     flex-wrap: wrap;
   }
 }
+/* =========================================================
+   INGREDIENTES EDITABLES MINIMALISTAS
+   ========================================================= */
+.ingredientes-editor-rubro + .ingredientes-editor-rubro {
+  margin-top: 1rem;
+}
+
+.ingredientes-editor-rubro-titulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .3rem .15rem;
+  border-bottom: 1px solid var(--bs-border-color);
+  color: var(--bs-secondary-color);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .065em;
+  text-transform: uppercase;
+}
+
+.ingredientes-editor-rubro-cantidad {
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+.ingrediente-editor-fila {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: .3rem .55rem;
+  align-items: center;
+  padding: .48rem .15rem;
+  border-bottom: 1px solid var(--bs-border-color-translucent);
+}
+
+.ingrediente-editor-fila:last-child {
+  border-bottom: 0;
+}
+
+.ingrediente-editor-principal,
+.ingrediente-editor-medidas,
+.ingrediente-editor-comentario {
+  min-width: 0;
+}
+
+.ingrediente-editor-principal .form-check-label {
+  line-height: 1.25;
+}
+
+
+.ingrediente-editor-comentario {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  width: auto;
+  margin-left: 1.5rem;
+  margin-right: .5rem;
+}
+
+.ingrediente-editor-medidas {
+  font-size: .78rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.ingrediente-editor-comentario .form-control,
+.ingrediente-editor-comentario .btn {
+  padding-top: .2rem;
+  padding-bottom: .2rem;
+}
+
+@media (max-width: 575.98px) {
+  .ingrediente-editor-fila {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: .3rem .55rem;
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+  }
+
+  .ingrediente-editor-medidas {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+}
