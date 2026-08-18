@@ -2139,6 +2139,7 @@ class PlatoVariedadDelete(LoginRequiredMixin, DeleteView):
 class Login(LoginView):
     authentication_form = CustomAuthenticationForm
     next_page = reverse_lazy("filtro-de-platos")
+    redirect_authenticated_user = True
 
     def form_valid(self, form):
         response = super().form_valid(form)
