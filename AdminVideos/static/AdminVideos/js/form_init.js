@@ -61,6 +61,60 @@
       }, 0);
     }
 
+    function initCantidadesPorComensales(modalEl) {
+      const input = modalEl.querySelector(".js-comensales-input");
+      if (!input) return;
+
+      const porcionesBase = Number(input.dataset.porcionesBase);
+      if (!Number.isFinite(porcionesBase) || porcionesBase <= 0) return;
+
+      const cantidades = modalEl.querySelectorAll(".js-cantidad-escalable");
+      const formato = new Intl.NumberFormat("es-AR", {
+        maximumFractionDigits: 3,
+      });
+
+      function actualizar() {
+        const comensales = Number(input.value);
+        if (!Number.isFinite(comensales) || comensales <= 0) return;
+
+        const factor = comensales / porcionesBase;
+
+        cantidades.forEach((elemento) => {
+          const cantidadBase = Number(elemento.dataset.cantidadBase);
+          if (!Number.isFinite(cantidadBase)) return;
+
+          const cantidadCalculada = Math.round(
+            (cantidadBase * factor + Number.EPSILON) * 1000
+          ) / 1000;
+
+          elemento.textContent = formato.format(cantidadCalculada);
+        });
+      }
+
+      function cambiar(delta) {
+        const actual = Number.parseInt(input.value, 10) || 1;
+        input.value = String(Math.max(1, actual + delta));
+        actualizar();
+      }
+
+      modalEl.querySelector(".js-comensales-restar")?.addEventListener("click", () => {
+        cambiar(-1);
+      });
+
+      modalEl.querySelector(".js-comensales-sumar")?.addEventListener("click", () => {
+        cambiar(1);
+      });
+
+      input.addEventListener("input", actualizar);
+      input.addEventListener("change", () => {
+        const valor = Number.parseInt(input.value, 10);
+        input.value = String(Number.isFinite(valor) && valor > 0 ? valor : 1);
+        actualizar();
+      });
+
+      actualizar();
+    }
+
     async function openPlatoIngredientesModal(url) {
       const res = await fetch(url, {
         headers: { "X-Requested-With": "XMLHttpRequest" },
@@ -104,6 +158,7 @@
 
       // Que viva en body para z-index correcto.
       document.body.appendChild(modalEl);
+      initCantidadesPorComensales(modalEl);
 
       const modal =
         bootstrap.Modal.getInstance(modalEl) ||
@@ -683,8 +738,8 @@
     const sel = $("#modal-nombre").select2("data")[0] || {};
     const idIngrediente = sel?.id || "";
     const nombre = sel?.text || "";
-    const cantidad = (context.querySelector("#modal-cantidad")?.value || "").replace(",", ".");
-    const unidadElegida = context.querySelector("#modal-unidad")?.value || "";
+    const cantidad = (getIngredienteModalCampo(context, "#modal-cantidad")?.value || "").replace(",", ".");
+    const unidadElegida = getIngredienteModalCampo(context, "#modal-unidad")?.value || "";
 
     // Clonar prototype de unidad con el índice correcto
     let unidadHtml = proto.innerHTML.replace(/__prefix__/g, totalForms);
@@ -752,13 +807,13 @@ ul.appendChild(li);
 
     // Limpiar modal
     $("#modal-nombre").val(null).trigger("change");
-    const cantEl = context.querySelector("#modal-cantidad");
-    const uniEl = context.querySelector("#modal-unidad");
+    const cantEl = getIngredienteModalCampo(context, "#modal-cantidad");
+    const uniEl = getIngredienteModalCampo(context, "#modal-unidad");
     if (cantEl) cantEl.value = "";
     if (uniEl) uniEl.selectedIndex = 0;
 
     // Cerrar modal
-    const modalEl = context.querySelector("#ingredienteModal");
+    const modalEl = getIngredienteModalEl(context);
     const modal = modalEl
       ? bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl)
       : null;

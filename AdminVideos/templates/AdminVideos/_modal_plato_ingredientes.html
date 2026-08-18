@@ -27,6 +27,31 @@
 
   <h6 class="mb-2">Marcá lo que necesites comprar:</h6>
 
+  {% if plato.porciones %}
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 border rounded bg-body-tertiary p-2 mb-3">
+      <div>
+        <div class="fw-semibold">Comensales</div>
+        <div class="small text-muted">Receta base: {{ plato.porciones }}</div>
+      </div>
+
+      <div class="input-group input-group-sm" style="width: 142px;">
+        <button type="button"
+                class="btn btn-outline-secondary js-comensales-restar"
+                aria-label="Quitar un comensal">−</button>
+        <input type="number"
+               class="form-control text-center js-comensales-input"
+               min="1"
+               step="1"
+               value="{{ plato.porciones }}"
+               data-porciones-base="{{ plato.porciones }}"
+               aria-label="Cantidad de comensales">
+        <button type="button"
+                class="btn btn-outline-secondary js-comensales-sumar"
+                aria-label="Agregar un comensal">+</button>
+      </div>
+    </div>
+  {% endif %}
+
   {# Ingredientes directos del plato #}
   {% if items %}
     <div class="mb-3">
@@ -55,9 +80,14 @@
                   </label>
                 </div>
 
-                <small class="text-muted">
-                  {{ item.cantidad }} {{ item.unidad }}
-                </small>
+                {% if item.cantidades %}
+                  <small class="text-muted text-end">
+                    {% for medida in item.cantidades %}
+                      <span class="js-cantidad-escalable"
+                            data-cantidad-base="{{ medida.cantidad_base }}">{{ medida.cantidad_base }}</span>{% if medida.unidad %} {{ medida.unidad }}{% endif %}{% if not forloop.last %} + {% endif %}
+                    {% endfor %}
+                  </small>
+                {% endif %}
               </div>
 
               <div class="input-group input-group-sm">
@@ -117,9 +147,14 @@
                       </label>
                     </div>
 
-                    <small class="text-muted">
-                      {{ item.cantidad }} {{ item.unidad }}
-                    </small>
+                    {% if item.cantidades %}
+                      <small class="text-muted text-end">
+                        {% for medida in item.cantidades %}
+                          <span class="js-cantidad-escalable"
+                                data-cantidad-base="{{ medida.cantidad_base }}">{{ medida.cantidad_base }}</span>{% if medida.unidad %} {{ medida.unidad }}{% endif %}{% if not forloop.last %} + {% endif %}
+                        {% endfor %}
+                      </small>
+                    {% endif %}
                   </div>
 
                   <div class="input-group input-group-sm">
@@ -200,4 +235,3 @@
     </div>
   </div>
 </div>
-

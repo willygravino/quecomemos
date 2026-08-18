@@ -461,78 +461,63 @@ def plato_ingredientes(request: HttpRequest, pk: int):
     only_fields=("ingrediente_id", "tengo", "comentario", "updated_at"),
             )
 
-    items = []
-    ingredientes_vistos = set()
+    def construir_items_modal(relaciones):
+        """Agrupa un ingrediente repetido y suma sólo cantidades compatibles."""
+        agrupados = {}
 
-    for iep in ingredientes_directos:
-        ing = iep.ingrediente
-        if not ing:
-            continue
+        for iep in relaciones:
+            ing = iep.ingrediente
+            ing_id = iep.ingrediente_id
 
-        ing_id = iep.ingrediente_id
-        if not ing_id:
-            continue
+            if not ing or not ing_id:
+                continue
 
-        # Una receta puede usar el mismo ingrediente en varias partes.
-        # En esta lista general debe aparecer una sola vez.
-        if ing_id in ingredientes_vistos:
-            continue
-        ingredientes_vistos.add(ing_id)
+            item = agrupados.get(ing_id)
+            if item is None:
+                p = pantry_map.get(ing_id)
+                tengo = p.tengo if p else False
+                comentario = (p.comentario or "") if p else ""
 
-        # Si este ingrediente también viene de un plato asociado,
-        # se muestra solo dentro del bloque del plato asociado.
-       
-        p = pantry_map.get(ing_id)
+                item = {
+                    "ingrediente_id": ing_id,
+                    "nombre": ing.nombre,
+                    "a_comprar": not tengo,
+                    "comentario": comentario,
+                    "cantidades_por_unidad": {},
+                }
+                agrupados[ing_id] = item
 
-        # Si no hay registro, asumimos que NO lo tiene (=> hay que comprar)
-        tengo = p.tengo if p else False
-        comentario = (p.comentario or "") if p else ""
+            if iep.cantidad is not None:
+                unidad = (iep.unidad or "-").strip() or "-"
+                cantidades = item["cantidades_por_unidad"]
+                cantidades[unidad] = cantidades.get(unidad, 0.0) + float(iep.cantidad)
 
-        items.append({
-            "ingrediente_id": ing_id,
-            "nombre": ing.nombre,
-            "cantidad": iep.cantidad,
-            "unidad": iep.unidad,
-            "a_comprar": (not tengo),      # True => checkbox checked
-            "comentario": comentario,
-        })
+        resultado = []
 
-    # ✅ Orden igual que lista de compras
-    sort_items_by_name(items)
+        for item in agrupados.values():
+            cantidades = []
+
+            for unidad, cantidad in item.pop("cantidades_por_unidad").items():
+                cantidad_base = f"{cantidad:.3f}".rstrip("0").rstrip(".")
+                cantidades.append({
+                    "cantidad_base": cantidad_base or "0",
+                    "unidad": "" if unidad == "-" else unidad,
+                })
+
+            item["cantidades"] = cantidades
+            resultado.append(item)
+
+        sort_items_by_name(resultado)
+        return resultado
+
+    items = construir_items_modal(ingredientes_directos)
 
     componentes_items = []
 
-    for componente in componentes:  
-        subitems = []
-
-        for iep in componente.ingredientes_en_plato.all():
-            ing = iep.ingrediente
-            if not ing:
-                continue
-
-            ing_id = iep.ingrediente_id
-            if not ing_id:
-                continue
-
-            p = pantry_map.get(ing_id)
-
-            tengo = p.tengo if p else False
-            comentario = (p.comentario or "") if p else ""
-
-            subitems.append({
-                "ingrediente_id": ing_id,
-                "nombre": ing.nombre,
-                "cantidad": iep.cantidad,
-                "unidad": iep.unidad,
-                "a_comprar": (not tengo),
-                "comentario": comentario,
-            })
-
-        sort_items_by_name(subitems)
-
+    for componente in componentes:
         componentes_items.append({
             "plato": componente,
-            "items": subitems,
+            "items": construir_items_modal(componente.ingredientes_en_plato.all()),
         })
 
     # ======================================================
