@@ -46,7 +46,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <!-- mi css -->
-    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260822174918" rel="stylesheet">  <!-- al final + bust de caché -->
+    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260822180453" rel="stylesheet">  <!-- al final + bust de caché -->
 
     <link rel="manifest" href="{% static 'AdminVideos/lista_super/manifest_lista_super.json' %}?v=1">
 
@@ -88,422 +88,20 @@
 </style>
 
 
-<style id="sidebar-dropdown-menu-fix">
-  #accordionSidebar .sidebar-dropdown-toggle {
-    position: relative;
-  }
-
-  #accordionSidebar .sidebar-dropdown-toggle.dropdown-toggle::after {
-    position: absolute;
-    top: 3.2rem;
-    right: 0.55rem;
-    margin-left: 0;
-  }
-
-  #accordionSidebar .sidebar-dropdown-menu {
-    background: #263445;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    min-width: 10rem;
-  }
-
-  #accordionSidebar .sidebar-dropdown-menu .dropdown-item {
-    color: rgba(255, 255, 255, 0.92);
-    font-weight: 600;
-  }
-
-  #accordionSidebar .sidebar-dropdown-menu .dropdown-item:hover,
-  #accordionSidebar .sidebar-dropdown-menu .dropdown-item:focus {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.16);
-  }
-
-  #accordionSidebar .sidebar-dropdown-menu .dropdown-item.active,
-  #accordionSidebar .sidebar-dropdown-menu .dropdown-item:active {
-    color: #ffffff;
-    background: #0d6efd;
-  }
-</style>
-
-
-<style id="sidebar-special-items-fix">
-  #accordionSidebar .sidebar-special-item {
-    width: calc(100% - 1rem);
-    margin: 0.25rem auto;
-    border-radius: 0.75rem;
-    background: rgba(25, 135, 84, 0.22);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    box-sizing: border-box;
-  }
-
-  #accordionSidebar .sidebar-special-item .nav-link {
-    width: 100% !important;
-    border-radius: 0.75rem;
-    box-sizing: border-box;
-  }
-
-  #accordionSidebar .sidebar-special-item:hover {
-    background: rgba(25, 135, 84, 0.32);
-  }
-
-  #accordionSidebar .sidebar-special-item.active {
-    background: rgba(25, 135, 84, 0.46);
-    border-color: rgba(255, 255, 255, 0.42);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
-  }
-</style>
 
 </head>
 
-<body id="page-top" class="sidebar-toggled">
+<body id="page-top">
     <!-- Page Wrapper -->
     <div id="wrapper" class="bg-body">
-
-
-
-
-
-        <!-- Sidebar -->
-
-
-<!-- Sidebar -->
-<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion toggled" id="accordionSidebar">
-
-  <!-- Sidebar - Brand -->
-  <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'about' %}">
-    <div class="sidebar-brand-icon">
-      <img src="/media/avatares/logo.png" height="60" alt="Logo"
-           style="border-radius: 50%; width: 60px; height: 60px; object-fit: cover;">
-    </div>
-  </a>
-
-  <!-- TÍTULO -->
-  <div class="text-center text-white fw-bold text-uppercase small mt-2 mb-2 px-3">
-    Carta de platos
-  </div>
-  <hr class="my-2 border border-white opacity-100">
-
-
-
-  
-<!-- 
-{# ============================
-   MENÚ LATERAL POR TIPOS
-   - Usa SOLO tipopag para activo
-   - Lista de Compras activa por url_name
-   ============================ #}
--->
-
-<!-- {# 0) CON LO QUE TENGO: FILTRO GLOBAL #} -->
-<li class="nav-item sidebar-special-item sidebar-lo-que-tengo-item position-relative {% if lo_que_tengo_activo %}active{% endif %}">
-  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-lo-que-tengo
-            {% if lo_que_tengo_activo %}is-active{% endif %}"
-     href="{% url 'filtro-de-platos' %}?tipopag={{ tipopag|default:'Principal'|urlencode }}&lo_que_tengo={% if lo_que_tengo_activo %}0{% else %}1{% endif %}"
-     data-lo-que-tengo-activo="{% if lo_que_tengo_activo %}1{% else %}0{% endif %}"
-     aria-pressed="{% if lo_que_tengo_activo %}true{% else %}false{% endif %}">
-
-    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
-          style="width: 38px; height: 38px;">
-      <i class="fa-solid fa-basket-shopping {% if not lo_que_tengo_activo %}text-white-50{% endif %}"
-         style="font-size: 1.1rem;"></i>
-    </span>
-
-    <span class="item-text mt-2 small {% if lo_que_tengo_activo %}text-white fw-bold{% else %}text-white-50{% endif %}">
-      <span class="d-block">Con lo que</span>
-      <span class="d-block">tengo</span>
-    </span>
-  </a>
-
-  <button
-    type="button"
-    class="btn btn-light btn-sm position-absolute top-0 end-0 mt-1 me-1 rounded-circle d-inline-flex align-items-center justify-content-center p-0 text-primary"
-    style="width: 1.75rem; height: 1.75rem; z-index: 2;"
-    data-bs-toggle="modal"
-    data-bs-target="#loQueTengoModal"
-    title="Agregar o editar palabras de Lo que tengo"
-    aria-label="Agregar o editar palabras de Lo que tengo">
-    <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
-  </button>
-</li>
-
-<hr class="sidebar-divider">
-
-<!-- {# 0.5) TODOS LOS PLATOS #} -->
-<li class="nav-item {% if tipopag == 'Todos' %}active{% endif %}">
-  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
-            {% if tipopag == 'Todos' %}is-active{% endif %}"
-     href="{% url 'filtro-de-platos' %}?tipopag=Todos{% if lo_que_tengo_activo %}&lo_que_tengo=1{% endif %}"
-     data-tipopag="Todos">
-
-    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
-          style="width: 38px; height: 38px;">
-      <i class="fa-solid fa-border-all {% if tipopag != 'Todos' %}text-white-50{% endif %}"
-         style="font-size: 1.1rem;"></i>
-    </span>
-
-    <span class="item-text mt-2 small {% if tipopag == 'Todos' %}text-white fw-bold{% else %}text-white-50{% endif %}">
-      <span class="d-block">Todos los</span>
-      <span class="d-block">platos</span>
-    </span>
-  </a>
-</li>
-
-<hr class="sidebar-divider">
-
-<!-- {# 1) PRINCIPAL #} -->
-<li class="nav-item {% if tipopag == 'Principal' %}active{% endif %}">
-  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
-            {% if tipopag == 'Principal' %}is-active{% endif %}"
-     href="{% url 'filtro-de-platos' %}?tipopag=Principal"
-     data-tipopag="Principal">
-
-    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
-          style="width: 38px; height: 38px;">
-      <i class="fa-solid fa-utensils {% if tipopag != 'Principal' %}text-white-50{% endif %}"
-         style="font-size: 1.1rem;"></i>
-    </span>
-
-    <span class="item-text mt-2 small {% if tipopag == 'Principal' %}text-white fw-bold{% else %}text-white-50{% endif %}">
-      Platos Principales
-    </span>
-  </a>
-</li>
-
-<hr class="sidebar-divider">
-
-<!-- {# 2) ENTRADA #} -->
-<li class="nav-item {% if tipopag == 'Entrada' %}active{% endif %}">
-  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
-            {% if tipopag == 'Entrada' %}is-active{% endif %}"
-     href="{% url 'filtro-de-platos' %}?tipopag=Entrada{% if dia_activo %}&dia_activo={{ dia_activo }}{% endif %}"
-     data-tipopag="Entrada">
-
-    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
-          style="width: 38px; height: 38px;">
-      <i class="fa-solid fa-shrimp {% if tipopag != 'Entrada' %}text-white-50{% endif %}"
-         style="font-size: 1.1rem;"></i>
-    </span>
-
-    <span class="item-text mt-2 small {% if tipopag == 'Entrada' %}text-white fw-bold{% else %}text-white-50{% endif %}">
-      Entradas
-    </span>
-  </a>
-</li>
-
-<!-- {# 3) DIPS Y SALSAS #} -->
-<li class="nav-item dropdown {% if tipopag == 'Dip' or tipopag == 'Salsa' %}active{% endif %}">
-  <a class="nav-link menu-item dropdown-toggle sidebar-dropdown-toggle d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag-grupo
-            {% if tipopag == 'Dip' or tipopag == 'Salsa' %}is-active{% endif %}"
-     href="#"
-     id="dipsSalsasDropdown"
-     role="button"
-     data-bs-toggle="dropdown"
-     data-bs-display="static"
-     aria-expanded="false"
-     data-tipopag-values="Dip,Salsa">
-
-    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
-          style="width: 38px; height: 38px;">
-      <i class="fas fa-solid fa-bowl-rice {% if tipopag != 'Dip' and tipopag != 'Salsa' %}text-white-50{% endif %}"
-         style="font-size: 1.1rem;"></i>
-    </span>
-
-    <span class="item-text mt-2 small {% if tipopag == 'Dip' or tipopag == 'Salsa' %}text-white fw-bold{% else %}text-white-50{% endif %}">
-      <span class="d-block">Dips</span>
-      <span class="d-block">y Salsas</span>
-    </span>
-  </a>
-
-  <ul class="dropdown-menu dropdown-menu-dark sidebar-dropdown-menu text-small shadow"
-      aria-labelledby="dipsSalsasDropdown">
-    <li>
-      <a class="dropdown-item js-filtro-tipopag {% if tipopag == 'Dip' %}active{% endif %}"
-         href="{% url 'filtro-de-platos' %}?tipopag=Dip"
-         data-tipopag="Dip">
-        <i class="fa-solid fa-bowl-food me-2"></i>Dips
-      </a>
-    </li>
-    <li>
-      <a class="dropdown-item js-filtro-tipopag {% if tipopag == 'Salsa' %}active{% endif %}"
-         href="{% url 'filtro-de-platos' %}?tipopag=Salsa"
-         data-tipopag="Salsa">
-        <i class="fa-solid fa-droplet me-2"></i>Salsas
-      </a>
-    </li>
-  </ul>
-</li>
-
-<!-- {# 4) GUARNICION #} -->
-<li class="nav-item {% if tipopag == 'Guarnicion' %}active{% endif %}">
-  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
-            {% if tipopag == 'Guarnicion' %}is-active{% endif %}"
-     href="{% url 'filtro-de-platos' %}?tipopag=Guarnicion"
-     data-tipopag="Guarnicion">
-
-    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
-          style="width: 38px; height: 38px;">
-      <i class="fa-solid fa-plate-wheat {% if tipopag != 'Guarnicion' %}text-white-50{% endif %}"
-         style="font-size: 1.1rem;"></i>
-    </span>
-
-    <span class="item-text mt-2 small {% if tipopag == 'Guarnicion' %}text-white fw-bold{% else %}text-white-50{% endif %}">
-      Guarniciones
-    </span>
-  </a>
-</li>
-
-<!-- {# 4.2) PICADAS #} -->
-<li class="nav-item dropdown {% if tipopag == 'Picada' or tipopag == 'Ingrediente de picada' %}active{% endif %}">
-  <a class="nav-link menu-item dropdown-toggle sidebar-dropdown-toggle d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag-grupo
-            {% if tipopag == 'Picada' or tipopag == 'Ingrediente de picada' %}is-active{% endif %}"
-     href="#"
-     id="picadasDropdown"
-     role="button"
-     data-bs-toggle="dropdown"
-     data-bs-display="static"
-     aria-expanded="false"
-     data-tipopag-values="Picada,Ingrediente de picada">
-
-    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
-          style="width: 38px; height: 38px;">
-      <i class="fa-solid fa-cheese {% if tipopag != 'Picada' and tipopag != 'Ingrediente de picada' %}text-white-50{% endif %}"
-         style="font-size: 1.1rem;"></i>
-    </span>
-
-    <span class="item-text mt-2 small {% if tipopag == 'Picada' or tipopag == 'Ingrediente de picada' %}text-white fw-bold{% else %}text-white-50{% endif %}">
-      Picadas
-    </span>
-  </a>
-
-  <ul class="dropdown-menu dropdown-menu-dark sidebar-dropdown-menu text-small shadow"
-      aria-labelledby="picadasDropdown">
-    <li>
-      <a class="dropdown-item js-filtro-tipopag {% if tipopag == 'Picada' %}active{% endif %}"
-         href="{% url 'filtro-de-platos' %}?tipopag=Picada"
-         data-tipopag="Picada">
-        <i class="fa-solid fa-cheese me-2"></i>Armado de picadas
-      </a>
-    </li>
-    <li>
-      <a class="dropdown-item js-filtro-tipopag {% if tipopag == 'Ingrediente de picada' %}active{% endif %}"
-         href="{% url 'filtro-de-platos' %}?tipopag=Ingrediente%20de%20picada"
-         data-tipopag="Ingrediente de picada">
-        <i class="fa-solid fa-carrot me-2"></i>Gestión de ingredientes
-      </a>
-    </li>
-  </ul>
-</li>
-
-<!-- {# 5) POSTRE #} -->
-<li class="nav-item {% if tipopag == 'Postre' %}active{% endif %}">
-  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
-            {% if tipopag == 'Postre' %}is-active{% endif %}"
-     href="{% url 'filtro-de-platos' %}?tipopag=Postre"
-     data-tipopag="Postre">
-
-    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
-          style="width: 38px; height: 38px;">
-      <i class="fa-solid fa-ice-cream {% if tipopag != 'Postre' %}text-white-50{% endif %}"
-         style="font-size: 1.1rem;"></i>
-    </span>
-
-    <span class="item-text mt-2 small {% if tipopag == 'Postre' %}text-white fw-bold{% else %}text-white-50{% endif %}">
-      <span class="d-block">Postres</span>
-      <span class="d-block">Reposterías</span>
-    </span>
-  </a>
-</li>
-
-<!-- {# 6) TRAGO #} -->
-<li class="nav-item {% if tipopag == 'Trago' %}active{% endif %}">
-  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
-            {% if tipopag == 'Trago' %}is-active{% endif %}"
-     href="{% url 'filtro-de-platos' %}?tipopag=Trago"
-     data-tipopag="Trago">
-
-    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
-          style="width: 38px; height: 38px;">
-      <i class="fa-solid fa-martini-glass-citrus {% if tipopag != 'Trago' %}text-white-50{% endif %}"
-         style="font-size: 1.1rem;"></i>
-    </span>
-
-    <span class="item-text mt-2 small {% if tipopag == 'Trago' %}text-white fw-bold{% else %}text-white-50{% endif %}">
-      <span class="d-block">Bebidas</span>
-      <span class="d-block">Tragos</span>
-    </span>
-  </a>
-</li>
-
-
-  <!-- Divider -->
-  <hr class="sidebar-divider d-none d-md-block">
-
-<!-- {# 7) DELIVERY #} -->
-<li class="nav-item {% if tipopag == 'Delivery' %}active{% endif %}">
-  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-0 py-0 js-filtro-tipopag
-            {% if tipopag == 'Delivery' %}is-active{% endif %}"
-     href="{% url 'filtro-de-platos' %}?tipopag=Delivery"
-     data-tipopag="Delivery">
-
-    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
-          style="width: 38px; height: 38px;">
-      <i class="fa-solid fa-motorcycle {% if tipopag != 'Delivery' %}text-white-50{% endif %}"
-         style="font-size: 1.1rem;"></i>
-    </span>
-
-    <span class="item-text mt-2 small {% if tipopag == 'Delivery' %}text-white fw-bold{% else %}text-white-50{% endif %}">
-      Delivery
-    </span>
-  </a>
-</li>
-
-<!-- {# 8) COMER AFUERA #} -->
-<li class="nav-item {% if tipopag == 'Comerafuera' %}active{% endif %}">
-  <a class="nav-link menu-item d-flex flex-column align-items-center text-center px-3 py-2 js-filtro-tipopag
-            {% if tipopag == 'Comerafuera' %}is-active{% endif %}"
-     href="{% url 'filtro-de-platos' %}?tipopag=Comerafuera"
-     data-tipopag="Comerafuera">
-
-    <span class="icon-wrap d-inline-flex align-items-center justify-content-center rounded-circle lh-1"
-          style="width: 38px; height: 38px;">
-      <i class="fa-solid fa-location-dot {% if tipopag != 'Comerafuera' %}text-white-50{% endif %}"
-         style="font-size: 1.1rem;"></i>
-    </span>
-
-    <span class="item-text mt-2 small {% if tipopag == 'Comerafuera' %}text-white fw-bold{% else %}text-white-50{% endif %}">
-      Comer afuera
-    </span>
-  </a>
-</li>
-
-
-
-
-
-
-  <!-- Divider -->
-  <hr class="sidebar-divider d-none d-md-block">
-
-
-  <!-- Sidebar Toggler (Sidebar) -->
-  <div class="text-center d-none d-md-inline">
-    <button class="rounded-circle border-0" id="sidebarToggle"></button>
-  </div>
-
-</ul>
 <!-- End of Sidebar -->
 
 
 
 
 
-        <!-- End of Sidebar -->
-
-
-
-
-
         <!-- Content Wrapper -->
-        <div id="content-wrapper" class="d-flex flex-column bg-body">
+        <div id="content-wrapper" class="d-flex flex-column bg-body w-100">
 
             <!-- COLOR PARA UBICAR
         <div id="content-wrapper" style="background-color: rgb(255, 0, 255);" class="d-flex flex-column"></div> -->
@@ -514,9 +112,13 @@
             <!-- Topbar -->
             <nav class="navbar navbar-expand bg-body topbar mb-2 static-top shadow">
 
-                <!-- Sidebar Toggle (Topbar) -->
-                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                    <i class="fa fa-bars"></i>
+                <button type="button"
+                        class="topbar-about-button d-inline-flex align-items-center border-0 bg-transparent p-0"
+                        data-bs-toggle="modal"
+                        data-bs-target="#aboutModal"
+                        title="Acerca de Qué comemos"
+                        aria-label="Acerca de Qué comemos">
+                  <img src="/media/avatares/logo.png" class="topbar-about-logo" alt="">
                 </button>
 
                 <!-- Topbar Navbar -->
@@ -1171,6 +773,25 @@ Root globl para modales cargados dinámicamente (AJAX)
   </div>
 </div>
 
+
+
+{# Modal informativo: se abre desde el logo sin abandonar la pantalla actual. #}
+<div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header py-2">
+        <h5 class="modal-title" id="aboutModalLabel">Acerca de</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body py-4">
+        {% include "AdminVideos/partials/_about_content.html" %}
+      </div>
+      <div class="modal-footer py-2">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 {# Botón flotante: crear plato rápido según la sección actual #}

@@ -383,60 +383,6 @@ section > .d-flex {
 }
 
 
-/* MENÚ SIDEBAR - LOS HOVER Y TODO ESO *//* Base (no activo): círculo transparente + icono claro */
-/* Hover + estados (icono + texto) */
-.sidebar .menu-item .icon-wrap,
-.sidebar .menu-item .icon-wrap i,
-.sidebar .menu-item .item-text{
-  transition: background-color .12s ease, color .12s ease, text-shadow .12s ease;
-}
-
-/* Base */
-.sidebar .menu-item .icon-wrap{
-  background: transparent;
-}
-
-/* INACTIVO: hover -> texto blanco + círculo claro + icono azul */
-.sidebar .menu-item:not(.is-active):hover .item-text{
-    /* hover del texto "postre" cuando no está seleccionado */
-
-  color: hsl(219, 70%, 94%) !important;
-  text-shadow: 0 0 6px rgba(255,255,255,.25);
-}
-.sidebar .menu-item:not(.is-active):hover .icon-wrap{
-  /* hover del fondo del icono cuando no está activo */
-  background: #d0d8f8; /* light */
-}
-.sidebar .menu-item:not(.is-active):hover .icon-wrap i{
-  /* hover del icono  cuando no está activo */
-  color: #5173ef !important; /* primary */
-}
-
-/* ACTIVO (normal): círculo claro + icono azul */
-.sidebar .menu-item.is-active .icon-wrap{
-  /* fondo del icono cuando está seleccionado */
-  background: #f8f9faea;
-}
-.sidebar .menu-item.is-active .icon-wrap i{
-  /* color del icono cuando está seleccionado */
-  color: #537ebf !important;
-}
-
-/* ACTIVO: hover -> invertir (círculo azul + icono blanco) y texto resalta */
-.sidebar .menu-item.is-active:hover .icon-wrap{
-  /* hover del fondo del ícono cuando está activo o no activo pero afecta al icono*/
-  background: #f2f4fc; /* primary */
-}
-.sidebar .menu-item.is-active:hover .icon-wrap i{
-  color: #304768 !important;
-}
-.sidebar .menu-item.is-active:hover .item-text{
-  /* hover del texto "postre" cuando está activo */
-  color: rgba(255,255,255,1) !important;
-  text-shadow: 0 0 6px rgba(255,255,255,.35);
-}
-
-
 /* Zócalo del carousel: muestra un tilde verde minimalista al lado del link cuando tiene plato (.has-plato) */
 
 .meal-link.has-plato::after{
@@ -637,84 +583,6 @@ button.btn-programar:active {
   }
 }
 
-/* =====================================================
-   Sidebar: dropdowns por encima del contenido
-   Mantiene visibles Dips/Salsas y Picadas submodos.
-===================================================== */
-#accordionSidebar,
-.sidebar {
-  position: relative;
-  z-index: 1065;
-}
-
-#accordionSidebar .nav-item.dropdown,
-.sidebar .nav-item.dropdown {
-  position: relative;
-  z-index: 1070;
-  overflow: visible;
-}
-
-#accordionSidebar .sidebar-dropdown-menu,
-.sidebar .sidebar-dropdown-menu,
-#accordionSidebar .dropdown-menu,
-.sidebar .dropdown-menu {
-  z-index: 1080;
-}
-
-/* =====================================================
-   Sidebar: dropdowns legibles y con ancho suficiente
-   Evita que Dips/Salsas y Picadas se corten o queden
-   con texto blanco fuera del contenedor.
-===================================================== */
-#accordionSidebar .sidebar-dropdown-menu,
-.sidebar .sidebar-dropdown-menu {
-  min-width: 15rem;
-  width: max-content;
-  max-width: min(22rem, calc(100vw - 1.5rem));
-  padding: .45rem;
-  background-color: #343a40;
-  border: 1px solid rgba(255, 255, 255, .20);
-  border-radius: .5rem;
-  box-shadow: 0 .75rem 1.5rem rgba(0, 0, 0, .35);
-  overflow: visible;
-}
-
-#accordionSidebar .sidebar-dropdown-menu .dropdown-item,
-.sidebar .sidebar-dropdown-menu .dropdown-item {
-  color: #f8f9fa;
-  white-space: nowrap;
-  border-radius: .35rem;
-  padding: .55rem .8rem;
-  line-height: 1.2;
-}
-
-#accordionSidebar .sidebar-dropdown-menu .dropdown-item:hover,
-#accordionSidebar .sidebar-dropdown-menu .dropdown-item:focus,
-.sidebar .sidebar-dropdown-menu .dropdown-item:hover,
-.sidebar .sidebar-dropdown-menu .dropdown-item:focus {
-  color: #ffffff;
-  background-color: rgba(255, 255, 255, .14);
-}
-
-#accordionSidebar .sidebar-dropdown-menu .dropdown-item.active,
-.sidebar .sidebar-dropdown-menu .dropdown-item.active {
-  color: #ffffff;
-  background-color: #0d6efd;
-}
-
-@media (max-width: 575.98px) {
-  #accordionSidebar .sidebar-dropdown-menu,
-  .sidebar .sidebar-dropdown-menu {
-    min-width: 13.5rem;
-    max-width: calc(100vw - 1rem);
-  }
-
-  #accordionSidebar .sidebar-dropdown-menu .dropdown-item,
-  .sidebar .sidebar-dropdown-menu .dropdown-item {
-    white-space: normal;
-  }
-}
-
 /* === PARTES DE LA RECETA === */
 .parte-receta-editor {
   padding: 1rem;
@@ -800,43 +668,6 @@ button.btn-programar:active {
     padding-right: .5rem;
     padding-left: .5rem;
     font-size: .75rem;
-  }
-}
-
-/* =====================================================
-   Sidebar mobile: evitar items flotantes sobre contenido
-   Cuando el sidebar se cierra en responsive, sus hijos no
-   deben escapar ni quedar sobre el texto principal.
-===================================================== */
-@media (max-width: 767.98px) {
-  #accordionSidebar,
-  .sidebar {
-    background-color: #4e73df;
-    background-image: linear-gradient(180deg, #4e73df 10%, #224abe 100%);
-  }
-
-  #accordionSidebar.toggled,
-  .sidebar.toggled {
-    overflow: hidden !important;
-  }
-
-  #accordionSidebar.toggled .nav-item,
-  #accordionSidebar.toggled .nav-link,
-  #accordionSidebar.toggled .collapse,
-  #accordionSidebar.toggled .dropdown-menu,
-  .sidebar.toggled .nav-item,
-  .sidebar.toggled .nav-link,
-  .sidebar.toggled .collapse,
-  .sidebar.toggled .dropdown-menu {
-    visibility: hidden;
-    pointer-events: none;
-  }
-
-  #accordionSidebar:not(.toggled) .nav-item,
-  #accordionSidebar:not(.toggled) .nav-link,
-  .sidebar:not(.toggled) .nav-item,
-  .sidebar:not(.toggled) .nav-link {
-    visibility: visible;
   }
 }
 
@@ -1430,273 +1261,6 @@ body.filtro-platos-cambiando [data-listado-url] {
 [data-bs-theme="dark"] .bg-primary,
 [data-bs-theme="dark"] .text-bg-primary {
   color: #fff !important;
-}
-
-/* ===== QC Bootstrap-first: sidebar gris modo oscuro v3 ===== */
-/*
-  Sólo modo oscuro.
-  Sidebar gris, sin franja completa para el activo.
-  Diferencia más clara:
-  - no seleccionados más apagados;
-  - hover intermedio;
-  - activo mucho más brillante y redondel más marcado.
-*/
-[data-bs-theme="dark"] .sidebar,
-[data-bs-theme="dark"] .sidebar.sidebar-dark,
-[data-bs-theme="dark"] .bg-gradient-primary {
-  background-color: var(--bs-tertiary-bg) !important;
-  background-image: linear-gradient(180deg, #212529 0%, #16181b 100%) !important;
-  color: var(--bs-body-color) !important;
-}
-
-[data-bs-theme="dark"] .sidebar .sidebar-brand,
-[data-bs-theme="dark"] .sidebar .sidebar-brand:hover,
-[data-bs-theme="dark"] .sidebar .sidebar-brand:focus,
-[data-bs-theme="dark"] .sidebar .sidebar-brand-icon,
-[data-bs-theme="dark"] .sidebar .sidebar-brand-text {
-  color: var(--bs-emphasis-color) !important;
-  background: transparent !important;
-}
-
-[data-bs-theme="dark"] .sidebar .sidebar-divider {
-  border-top-color: rgba(255, 255, 255, .12) !important;
-}
-
-[data-bs-theme="dark"] .sidebar .sidebar-heading {
-  color: rgba(255, 255, 255, .42) !important;
-}
-
-/* Links normales: más apagados para que el activo se note */
-[data-bs-theme="dark"] .sidebar .nav-item .nav-link,
-[data-bs-theme="dark"] .sidebar .nav-item .nav-link span,
-[data-bs-theme="dark"] .sidebar .nav-item .nav-link i,
-[data-bs-theme="dark"] .sidebar .menu-item,
-[data-bs-theme="dark"] .sidebar .menu-item .item-text,
-[data-bs-theme="dark"] .sidebar .menu-item .icon-wrap,
-[data-bs-theme="dark"] .sidebar .menu-item .icon-wrap i {
-  color: rgba(255, 255, 255, .50) !important;
-}
-
-/* Nunca pintar toda la fila */
-[data-bs-theme="dark"] .sidebar .nav-item .nav-link,
-[data-bs-theme="dark"] .sidebar .menu-item,
-[data-bs-theme="dark"] .sidebar .nav-item.active .nav-link,
-[data-bs-theme="dark"] .sidebar .menu-item.is-active {
-  background-color: transparent !important;
-  background-image: none !important;
-  box-shadow: none !important;
-}
-
-/* Hover: sube, pero sigue por debajo del activo */
-[data-bs-theme="dark"] .sidebar .nav-item .nav-link:hover,
-[data-bs-theme="dark"] .sidebar .nav-item .nav-link:focus,
-[data-bs-theme="dark"] .sidebar .menu-item:not(.is-active):hover {
-  background-color: transparent !important;
-  color: rgba(255, 255, 255, .78) !important;
-}
-
-[data-bs-theme="dark"] .sidebar .nav-item .nav-link:hover span,
-[data-bs-theme="dark"] .sidebar .nav-item .nav-link:hover i,
-[data-bs-theme="dark"] .sidebar .nav-item .nav-link:focus span,
-[data-bs-theme="dark"] .sidebar .nav-item .nav-link:focus i,
-[data-bs-theme="dark"] .sidebar .menu-item:not(.is-active):hover .item-text,
-[data-bs-theme="dark"] .sidebar .menu-item:not(.is-active):hover .icon-wrap,
-[data-bs-theme="dark"] .sidebar .menu-item:not(.is-active):hover .icon-wrap i {
-  color: rgba(255, 255, 255, .78) !important;
-}
-
-/* Activo: claramente más brillante, sin franja */
-[data-bs-theme="dark"] .sidebar .nav-item.active .nav-link,
-[data-bs-theme="dark"] .sidebar .nav-item.active .nav-link span,
-[data-bs-theme="dark"] .sidebar .nav-item.active .nav-link i,
-[data-bs-theme="dark"] .sidebar .menu-item.is-active,
-[data-bs-theme="dark"] .sidebar .menu-item.is-active .item-text,
-[data-bs-theme="dark"] .sidebar .menu-item.is-active .icon-wrap,
-[data-bs-theme="dark"] .sidebar .menu-item.is-active .icon-wrap i {
-  color: rgba(255, 255, 255, .96) !important;
-  font-weight: 600 !important;
-}
-
-/* Círculos/iconos custom del menú */
-[data-bs-theme="dark"] .sidebar .icon-wrap {
-  background-color: rgba(255, 255, 255, .045) !important;
-  border-color: rgba(255, 255, 255, .10) !important;
-}
-
-/* Hover sólo intensifica el redondel, todavía suave */
-[data-bs-theme="dark"] .sidebar .menu-item:not(.is-active):hover .icon-wrap,
-[data-bs-theme="dark"] .sidebar .nav-item .nav-link:hover .icon-wrap {
-  background-color: rgba(255, 255, 255, .12) !important;
-  border-color: rgba(255, 255, 255, .25) !important;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, .04) !important;
-}
-
-/* Activo: redondel más brillante, sin franja de fondo */
-[data-bs-theme="dark"] .sidebar .menu-item.is-active .icon-wrap,
-[data-bs-theme="dark"] .sidebar .nav-item.active .icon-wrap {
-  background-color: rgba(255, 255, 255, .28) !important;
-  border-color: rgba(255, 255, 255, .56) !important;
-  box-shadow:
-    0 0 0 2px rgba(255, 255, 255, .12),
-    0 .25rem .75rem rgba(0, 0, 0, .32) !important;
-}
-
-/* Si hay activos SB Admin sin icon-wrap, sólo texto/icono brillante; sin franja */
-[data-bs-theme="dark"] .sidebar .nav-item.active {
-  background-color: transparent !important;
-}
-
-/* Dropdowns/collapses internos de la sidebar */
-[data-bs-theme="dark"] .sidebar .collapse-inner,
-[data-bs-theme="dark"] .sidebar .dropdown-menu,
-[data-bs-theme="dark"] .sidebar .sidebar-dropdown-menu {
-  background-color: #1f2328 !important;
-  border: 1px solid var(--bs-border-color) !important;
-  box-shadow: 0 .6rem 1.25rem rgba(0, 0, 0, .38) !important;
-}
-
-[data-bs-theme="dark"] .sidebar .collapse-item,
-[data-bs-theme="dark"] .sidebar .dropdown-item,
-[data-bs-theme="dark"] .sidebar .sidebar-dropdown-menu .dropdown-item {
-  color: rgba(255, 255, 255, .55) !important;
-  background-color: transparent !important;
-}
-
-[data-bs-theme="dark"] .sidebar .collapse-item:hover,
-[data-bs-theme="dark"] .sidebar .collapse-item:focus,
-[data-bs-theme="dark"] .sidebar .dropdown-item:hover,
-[data-bs-theme="dark"] .sidebar .dropdown-item:focus,
-[data-bs-theme="dark"] .sidebar .sidebar-dropdown-menu .dropdown-item:hover,
-[data-bs-theme="dark"] .sidebar .sidebar-dropdown-menu .dropdown-item:focus {
-  color: rgba(255, 255, 255, .88) !important;
-  background-color: rgba(255, 255, 255, .08) !important;
-}
-
-[data-bs-theme="dark"] .sidebar .collapse-item.active,
-[data-bs-theme="dark"] .sidebar .dropdown-item.active,
-[data-bs-theme="dark"] .sidebar .sidebar-dropdown-menu .dropdown-item.active {
-  color: rgba(255, 255, 255, .96) !important;
-  background-color: rgba(255, 255, 255, .12) !important;
-}
-
-/* Toggle de sidebar */
-[data-bs-theme="dark"] #sidebarToggle,
-[data-bs-theme="dark"] #sidebarToggleTop {
-  color: rgba(255, 255, 255, .56) !important;
-  background-color: rgba(255, 255, 255, .07) !important;
-  border-color: rgba(255, 255, 255, .12) !important;
-}
-
-[data-bs-theme="dark"] #sidebarToggle:hover,
-[data-bs-theme="dark"] #sidebarToggleTop:hover {
-  color: rgba(255, 255, 255, .92) !important;
-  background-color: rgba(255, 255, 255, .16) !important;
-}
-
-/* ===== QC dark exacto: pestañas Bootstrap activas ===== */
-/*
-  Sólo pestañas Bootstrap en modo oscuro.
-  No toca filtros, no toca btn-check, no toca labels custom.
-*/
-[data-bs-theme="dark"] .nav-tabs {
-  border-bottom-color: var(--bs-border-color) !important;
-}
-
-[data-bs-theme="dark"] .nav-tabs .nav-link {
-  color: rgba(255, 255, 255, .72) !important;
-  background-color: transparent !important;
-  border-color: transparent !important;
-}
-
-[data-bs-theme="dark"] .nav-tabs .nav-link:hover,
-[data-bs-theme="dark"] .nav-tabs .nav-link:focus {
-  color: rgba(255, 255, 255, .92) !important;
-  background-color: #1f2328 !important;
-  border-color: var(--bs-border-color) !important;
-}
-
-[data-bs-theme="dark"] .nav-tabs .nav-link.active,
-[data-bs-theme="dark"] .nav-tabs .nav-item.show .nav-link {
-  color: #fff !important;
-  background-color: #212529 !important;
-  border-color: var(--bs-border-color) var(--bs-border-color) #212529 !important;
-}
-
-[data-bs-theme="dark"] .nav-pills .nav-link {
-  color: rgba(255, 255, 255, .72) !important;
-  background-color: transparent !important;
-}
-
-[data-bs-theme="dark"] .nav-pills .nav-link:hover,
-[data-bs-theme="dark"] .nav-pills .nav-link:focus {
-  color: rgba(255, 255, 255, .92) !important;
-  background-color: #1f2328 !important;
-}
-
-[data-bs-theme="dark"] .nav-pills .nav-link.active,
-[data-bs-theme="dark"] .nav-pills .show > .nav-link {
-  color: #fff !important;
-  background-color: #343a40 !important;
-}
-
-/* FILTRO GLOBAL CON LO QUE TENGO */
-.sidebar .menu-item.is-filtered-lo-que-tengo .icon-wrap,
-.sidebar .js-filtro-lo-que-tengo.is-active .icon-wrap {
-  background-color: #fff5f5 !important;
-  border: 1px solid rgba(220, 53, 69, .52) !important;
-  box-shadow: 0 0 0 2px rgba(220, 53, 69, .13) !important;
-}
-
-.sidebar .menu-item.is-filtered-lo-que-tengo .icon-wrap i,
-.sidebar .js-filtro-lo-que-tengo.is-active .icon-wrap i {
-  color: #dc3545 !important;
-}
-
-.sidebar .js-filtro-lo-que-tengo.is-active .item-text {
-  color: #fff !important;
-  font-weight: 700 !important;
-}
-
-[data-bs-theme="dark"] .sidebar .menu-item.is-filtered-lo-que-tengo .icon-wrap,
-[data-bs-theme="dark"] .sidebar .js-filtro-lo-que-tengo.is-active .icon-wrap {
-  background-color: rgba(220, 53, 69, .18) !important;
-  border-color: rgba(255, 118, 132, .72) !important;
-  box-shadow: 0 0 0 2px rgba(220, 53, 69, .18) !important;
-}
-
-[data-bs-theme="dark"] .sidebar .menu-item.is-filtered-lo-que-tengo .icon-wrap i,
-[data-bs-theme="dark"] .sidebar .js-filtro-lo-que-tengo.is-active .icon-wrap i {
-  color: #ff7f8c !important;
-}
-
-/* REFUERZO VISUAL DEL FILTRO GLOBAL */
-#accordionSidebar.lo-que-tengo-activo
-  .menu-item.is-active:not(.js-filtro-lo-que-tengo)
-  .icon-wrap > i {
-  color: #dc3545 !important;
-}
-
-#accordionSidebar.lo-que-tengo-activo
-  .menu-item.is-active:not(.js-filtro-lo-que-tengo)
-  .icon-wrap {
-  background-color: #fff5f5 !important;
-  border-color: rgba(220, 53, 69, .65) !important;
-  box-shadow: 0 0 0 2px rgba(220, 53, 69, .16) !important;
-}
-
-[data-bs-theme="dark"]
-  #accordionSidebar.lo-que-tengo-activo
-  .menu-item.is-active:not(.js-filtro-lo-que-tengo)
-  .icon-wrap > i {
-  color: #ff7f8c !important;
-}
-
-[data-bs-theme="dark"]
-  #accordionSidebar.lo-que-tengo-activo
-  .menu-item.is-active:not(.js-filtro-lo-que-tengo)
-  .icon-wrap {
-  background-color: rgba(220, 53, 69, .22) !important;
-  border-color: rgba(255, 118, 132, .78) !important;
 }
 
 /* ===== Pestaña activa integrada al menú programado ===== */
@@ -2667,4 +2231,54 @@ body.filtro-platos-cambiando [data-listado-url] {
     max-width: 9.5rem;
     font-size: .72rem;
   }
+}
+
+/* ===== QC: acceso a Acerca de en la barra superior ===== */
+.topbar-about-button {
+  flex: 0 0 auto;
+  margin-left: .75rem;
+  color: var(--bs-body-color);
+}
+
+.topbar-about-button:hover,
+.topbar-about-button:focus {
+  color: var(--bs-primary);
+}
+
+.topbar-about-logo {
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px var(--bs-border-color);
+}
+
+
+@media (max-width: 575.98px) {
+  .topbar-about-button {
+    margin-left: .35rem;
+  }
+
+  .topbar-about-logo {
+    width: 2rem;
+    height: 2rem;
+  }
+}
+
+.topbar-about-button {
+  cursor: pointer;
+}
+
+.topbar-about-button:hover .topbar-about-logo,
+.topbar-about-button:focus-visible .topbar-about-logo {
+  box-shadow: 0 0 0 3px rgba(var(--bs-primary-rgb), .22);
+}
+
+.about-content-logo {
+  display: block;
+  width: 9rem;
+  height: 9rem;
+  margin-inline: auto;
+  border-radius: 1rem;
+  object-fit: contain;
 }

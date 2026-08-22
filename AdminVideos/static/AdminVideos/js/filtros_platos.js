@@ -91,57 +91,16 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // ============================================================
-  // 3. Marcar activo el item actual del menú lateral
+  // 3. Sincronizar selector horizontal y filtro global
   // ============================================================
-  function marcarMenuItem(link, activo) {
-    link.classList.toggle("is-active", activo);
-
-    const item = link.closest(".nav-item");
-    if (item) {
-      item.classList.toggle("active", activo);
-    }
-
-    // Las clases blancas pertenecen únicamente a la barra lateral.
-    // El selector horizontal administra sus colores desde mi-css.css.
-    if (!link.closest("#accordionSidebar")) {
-      return;
-    }
-
-    const texto = link.querySelector(".item-text");
-    if (texto) {
-      texto.classList.toggle("text-white", activo);
-      texto.classList.toggle("fw-bold", activo);
-      texto.classList.toggle("text-white-50", !activo);
-    }
-
-    const icono = link.querySelector(".icon-wrap i");
-    if (icono) {
-      icono.classList.toggle("text-white-50", !activo);
-    }
-  }
-
   function estaActivoLoQueTengo() {
     const input = form.querySelector('input[name="lo_que_tengo_activo"]');
     return Boolean(input && input.value === "1");
   }
 
-  function valoresGrupoTipopag(link) {
-    return (link.dataset.tipopagValues || "")
-      .split(",")
-      .map(function (valor) {
-        return valor.trim();
-      })
-      .filter(Boolean);
-  }
-
   function actualizarEstadoLoQueTengo(activo, tipopag) {
     const input = form.querySelector('input[name="lo_que_tengo_activo"]');
     const linksFiltro = document.querySelectorAll(".js-filtro-lo-que-tengo");
-    const sidebar = document.getElementById("accordionSidebar");
-
-    if (sidebar) {
-      sidebar.classList.toggle("lo-que-tengo-activo", activo);
-    }
 
     document.querySelectorAll(".js-lo-que-tengo-state-root").forEach(function (root) {
       root.classList.toggle("lo-que-tengo-activo", activo);
@@ -152,7 +111,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     linksFiltro.forEach(function (linkFiltro) {
-      marcarMenuItem(linkFiltro, activo);
+      linkFiltro.classList.toggle("is-active", activo);
       linkFiltro.dataset.loQueTengoActivo = activo ? "1" : "0";
       linkFiltro.setAttribute("aria-pressed", activo ? "true" : "false");
       linkFiltro.setAttribute("aria-checked", activo ? "true" : "false");
@@ -163,26 +122,11 @@ document.addEventListener("DOMContentLoaded", function () {
       linkFiltro.href = urlFiltro.toString();
     });
 
-    document.querySelectorAll(
-      ".js-filtro-tipopag, .js-filtro-tipopag-grupo"
-    ).forEach(function (link) {
-      link.classList.remove("is-filtered-lo-que-tengo");
-    });
-
-    if (!activo) {
-      return;
-    }
-
     document.querySelectorAll(".js-filtro-tipopag").forEach(function (link) {
-      if (link.dataset.tipopag === tipopag) {
-        link.classList.add("is-filtered-lo-que-tengo");
-      }
-    });
-
-    document.querySelectorAll(".js-filtro-tipopag-grupo").forEach(function (link) {
-      if (valoresGrupoTipopag(link).includes(tipopag)) {
-        link.classList.add("is-filtered-lo-que-tengo");
-      }
+      link.classList.toggle(
+        "is-filtered-lo-que-tengo",
+        activo && link.dataset.tipopag === tipopag
+      );
     });
   }
 
@@ -194,9 +138,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const inputTipopag = form.querySelector('input[name="tipopag"]');
-    const inputLoQueTengo = form.querySelector(
-      'input[name="lo_que_tengo_activo"]'
-    );
+    const inputLoQueTengo = form.querySelector('input[name="lo_que_tengo_activo"]');
 
     if (!inputTipopag || !inputLoQueTengo) {
       return;
@@ -216,42 +158,16 @@ document.addEventListener("DOMContentLoaded", function () {
       nuevaUrl.toString()
     );
 
-    actualizarMenuLateralActivo(tipopag);
+    actualizarSelectorHorizontalActivo(tipopag);
     actualizarListadoPlatosConBarrido();
   });
 
-  function actualizarMenuLateralActivo(tipopag) {
-    document.querySelectorAll("#accordionSidebar .nav-item").forEach(function (item) {
-      item.classList.remove("active");
-    });
-
+  function actualizarSelectorHorizontalActivo(tipopag) {
     document.querySelectorAll(".js-filtro-tipopag").forEach(function (link) {
       const activo = link.dataset.tipopag === tipopag;
-
       link.classList.toggle("is-active", activo);
       link.classList.toggle("active", activo);
-
-      if (activo) {
-        const item = link.closest(".nav-item");
-        if (item) {
-          item.classList.add("active");
-        }
-      }
-    });
-
-    document.querySelectorAll(".js-filtro-tipopag-grupo").forEach(function (link) {
-      const valores = (link.dataset.tipopagValues || "")
-        .split(",")
-        .map(function (valor) {
-          return valor.trim();
-        })
-        .filter(Boolean);
-
-      marcarMenuItem(link, valores.includes(tipopag));
-    });
-
-    document.querySelectorAll(".js-filtro-tipopag:not(.dropdown-item)").forEach(function (link) {
-      marcarMenuItem(link, link.dataset.tipopag === tipopag);
+      link.setAttribute("aria-current", activo ? "page" : "false");
     });
 
     actualizarEstadoLoQueTengo(estaActivoLoQueTengo(), tipopag);
@@ -264,11 +180,11 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    const activo = Array.from(
-      rail.querySelectorAll(".js-filtro-tipopag")
-    ).find(function (link) {
-      return link.dataset.tipopag === tipopag;
-    });
+    const activo = Array.from(rail.querySelectorAll(".js-filtro-tipopag")).find(
+      function (link) {
+        return link.dataset.tipopag === tipopag;
+      }
+    );
 
     if (!activo) {
       return;
@@ -733,7 +649,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const activar = !estaActivoLoQueTengo();
 
     inputLoQueTengo.value = activar ? "1" : "0";
-    actualizarMenuLateralActivo(tipopag);
+    actualizarSelectorHorizontalActivo(tipopag);
 
     const nuevaUrl = new URL(window.location.href);
     nuevaUrl.searchParams.set("tipopag", tipopag);
@@ -777,7 +693,7 @@ document.addEventListener("DOMContentLoaded", function () {
     event.preventDefault();
 
     inputTipopag.value = tipopag;
-    actualizarMenuLateralActivo(tipopag);
+    actualizarSelectorHorizontalActivo(tipopag);
     actualizarTituloSugerencias(tipopag);
 
     const nuevaUrl = new URL(link.href, window.location.href);
@@ -843,7 +759,7 @@ document.addEventListener("DOMContentLoaded", function () {
     inputTipopag.value = tipopag;
     inputLoQueTengo.value = loQueTengoActivo ? "1" : "0";
 
-    actualizarMenuLateralActivo(tipopag);
+    actualizarSelectorHorizontalActivo(tipopag);
     actualizarTituloSugerencias(tipopag);
     actualizarBotonCrearPlato(tipopag);
     actualizarListadoPlatosConBarrido();
@@ -852,6 +768,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const tipopagInicial = (
     form.querySelector('input[name="tipopag"]')?.value || "Principal"
   );
-  actualizarMenuLateralActivo(tipopagInicial);
+  actualizarSelectorHorizontalActivo(tipopagInicial);
 
 });

@@ -1,20 +1,18 @@
 {% extends "AdminVideos/base.html" %}
 
-{% load static %}
-
 {% block pestanias-menues-platos %}
-<div class="container"> 
-  <div class="row">
-      <div class="d-flex flex-column align-items-center">
-        <img src="/media/avatares/logo.png" height="200" alt="Logo">
-        <h1 class="fw-light">Sobre 'qué comemos' v1.0.</h1>
-        <p class="lead text-body-secondary">Explicación</p>
-        <p></p>
-        <!-- <h2 class="fw-light">Sobre mi.</h2>
-        <p></p>
-        <h6> Explicación.</h6> -->
+<div class="container py-4">
+  <div class="card border-0 shadow-sm mx-auto" style="max-width: 32rem;">
+    <div class="card-body p-4">
+      {% include "AdminVideos/partials/_about_content.html" %}
+
+      <div class="text-center mt-4">
+        <a href="{% url 'filtro-de-platos' %}" class="btn btn-primary btn-sm">
+          <i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>
+          Volver a los platos
+        </a>
       </div>
+    </div>
   </div>
 </div>
-
 {% endblock %}
