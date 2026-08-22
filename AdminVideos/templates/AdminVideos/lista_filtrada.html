@@ -295,12 +295,15 @@
       Filtros
     </button>
 
+    {% include "AdminVideos/partials/_control_lo_que_tengo_global.html" with modo="mobile" %}
+
   </div>
 
   <div id="filtroPlatosMobileSummary" class="filtro-platos-mobile-summary mt-2 d-none"></div>
 </div>
 
-<div id="filtroPlatosInlineHome" class="d-none d-md-block">
+<div class="filtro-platos-y-lo-que-tengo d-none d-md-flex align-items-stretch gap-2 mb-2">
+<div id="filtroPlatosInlineHome" class="flex-grow-1 min-w-0">
 
 <form
   method="POST"
@@ -379,7 +382,8 @@
 
 </div>
 
-
+{% include "AdminVideos/partials/_control_lo_que_tengo_global.html" with modo="desktop" %}
+</div>
 
 
 <!-- Modal móvil para el filtro de platos.
@@ -759,7 +763,7 @@
 })();
 </script>
 
-<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=20260817023252"></script>
-<script src="{% static 'AdminVideos/js/lo_que_tengo.js' %}?v=20260817023252"></script>
+<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=20260822172620"></script>
+<script src="{% static 'AdminVideos/js/lo_que_tengo.js' %}?v=20260822172620"></script>
 
 {% endblock %}

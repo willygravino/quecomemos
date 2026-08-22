@@ -37,44 +37,46 @@
   }
 
   function actualizarDisponibilidadFiltro(palabras, confirmado) {
-    const linkFiltro = document.querySelector(".js-filtro-lo-que-tengo");
+    const linksFiltro = document.querySelectorAll(".js-filtro-lo-que-tengo");
 
-    if (!linkFiltro) {
+    if (!linksFiltro.length) {
       return;
     }
 
     const cantidad = Array.isArray(palabras) ? palabras.length : 0;
     const disponible = confirmado && cantidad > 0;
 
-    if (!linkFiltro.dataset.tituloDisponibleLoQueTengo) {
-      linkFiltro.dataset.tituloDisponibleLoQueTengo =
-        linkFiltro.getAttribute("title") || "Activar Con lo que tengo";
-    }
+    linksFiltro.forEach(function (linkFiltro) {
+      if (!linkFiltro.dataset.tituloDisponibleLoQueTengo) {
+        linkFiltro.dataset.tituloDisponibleLoQueTengo =
+          linkFiltro.getAttribute("title") || "Activar Con lo que tengo";
+      }
 
-    linkFiltro.dataset.tienePalabrasLoQueTengo = confirmado
-      ? (disponible ? "1" : "0")
-      : "cargando";
-    linkFiltro.classList.toggle("disabled", !disponible);
-    linkFiltro.setAttribute("aria-disabled", disponible ? "false" : "true");
-    linkFiltro.tabIndex = disponible ? 0 : -1;
+      linkFiltro.dataset.tienePalabrasLoQueTengo = confirmado
+        ? (disponible ? "1" : "0")
+        : "cargando";
+      linkFiltro.classList.toggle("disabled", !disponible);
+      linkFiltro.setAttribute("aria-disabled", disponible ? "false" : "true");
+      linkFiltro.tabIndex = disponible ? 0 : -1;
 
-    if (disponible) {
-      linkFiltro.style.removeProperty("opacity");
-      linkFiltro.style.removeProperty("cursor");
-      linkFiltro.setAttribute(
-        "title",
-        linkFiltro.dataset.tituloDisponibleLoQueTengo
-      );
-    } else {
-      linkFiltro.style.setProperty("opacity", "0.45");
-      linkFiltro.style.setProperty("cursor", "not-allowed");
-      linkFiltro.setAttribute(
-        "title",
-        confirmado
-          ? "Agregá al menos una palabra con el lápiz para activar este filtro"
-          : "Comprobando palabras de Lo que tengo"
-      );
-    }
+      if (disponible) {
+        linkFiltro.style.removeProperty("opacity");
+        linkFiltro.style.removeProperty("cursor");
+        linkFiltro.setAttribute(
+          "title",
+          linkFiltro.dataset.tituloDisponibleLoQueTengo
+        );
+      } else {
+        linkFiltro.style.setProperty("opacity", "0.45");
+        linkFiltro.style.setProperty("cursor", "not-allowed");
+        linkFiltro.setAttribute(
+          "title",
+          confirmado
+            ? "Agregá al menos una palabra con el lápiz para activar este filtro"
+            : "Comprobando palabras de Lo que tengo"
+        );
+      }
+    });
 
     if (confirmado) {
       window.dispatchEvent(new CustomEvent("loQueTengo:disponibilidad", {

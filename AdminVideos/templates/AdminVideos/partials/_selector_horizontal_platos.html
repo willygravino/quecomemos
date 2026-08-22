@@ -1,0 +1,110 @@
+{# Selector horizontal de tipos de plato. Etapa 1: convive con la barra lateral. #}
+<section
+  id="selectorHorizontalPlatos"
+  class="selector-platos-shell js-lo-que-tengo-state-root {% if lo_que_tengo_activo %}lo-que-tengo-activo{% endif %}"
+  aria-label="Tipos de platos y filtro global">
+
+  <div class="selector-platos-categorias-wrap">
+    <button
+      type="button"
+      class="selector-platos-arrow selector-platos-arrow-prev"
+      data-selector-platos-scroll="-1"
+      aria-label="Ver categorías anteriores">
+      <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+    </button>
+
+    <nav id="selectorPlatosRail" class="selector-platos-rail" aria-label="Tipos de platos">
+      <a class="selector-platos-item js-filtro-tipopag {% if tipopag == 'Todos' %}is-active{% endif %}"
+         href="{% url 'filtro-de-platos' %}?tipopag=Todos{% if lo_que_tengo_activo %}&lo_que_tengo=1{% endif %}"
+         data-tipopag="Todos">
+        <span class="icon-wrap"><i class="fa-solid fa-border-all"></i></span>
+        <span class="item-text">Todos</span>
+      </a>
+
+      <a class="selector-platos-item js-filtro-tipopag {% if tipopag == 'Principal' %}is-active{% endif %}"
+         href="{% url 'filtro-de-platos' %}?tipopag=Principal{% if lo_que_tengo_activo %}&lo_que_tengo=1{% endif %}"
+         data-tipopag="Principal">
+        <span class="icon-wrap"><i class="fa-solid fa-utensils"></i></span>
+        <span class="item-text">Principales</span>
+      </a>
+
+      <a class="selector-platos-item js-filtro-tipopag {% if tipopag == 'Entrada' %}is-active{% endif %}"
+         href="{% url 'filtro-de-platos' %}?tipopag=Entrada{% if lo_que_tengo_activo %}&lo_que_tengo=1{% endif %}"
+         data-tipopag="Entrada">
+        <span class="icon-wrap"><i class="fa-solid fa-shrimp"></i></span>
+        <span class="item-text">Entradas</span>
+      </a>
+
+      <a class="selector-platos-item js-filtro-tipopag {% if tipopag == 'Dip' %}is-active{% endif %}"
+         href="{% url 'filtro-de-platos' %}?tipopag=Dip{% if lo_que_tengo_activo %}&lo_que_tengo=1{% endif %}"
+         data-tipopag="Dip">
+        <span class="icon-wrap"><i class="fa-solid fa-bowl-food"></i></span>
+        <span class="item-text">Dips</span>
+      </a>
+
+      <a class="selector-platos-item js-filtro-tipopag {% if tipopag == 'Salsa' %}is-active{% endif %}"
+         href="{% url 'filtro-de-platos' %}?tipopag=Salsa{% if lo_que_tengo_activo %}&lo_que_tengo=1{% endif %}"
+         data-tipopag="Salsa">
+        <span class="icon-wrap"><i class="fa-solid fa-droplet"></i></span>
+        <span class="item-text">Salsas</span>
+      </a>
+
+      <a class="selector-platos-item js-filtro-tipopag {% if tipopag == 'Guarnicion' %}is-active{% endif %}"
+         href="{% url 'filtro-de-platos' %}?tipopag=Guarnicion{% if lo_que_tengo_activo %}&lo_que_tengo=1{% endif %}"
+         data-tipopag="Guarnicion">
+        <span class="icon-wrap"><i class="fa-solid fa-plate-wheat"></i></span>
+        <span class="item-text">Guarniciones</span>
+      </a>
+
+      <a class="selector-platos-item js-filtro-tipopag {% if tipopag == 'Picada' %}is-active{% endif %}"
+         href="{% url 'filtro-de-platos' %}?tipopag=Picada{% if lo_que_tengo_activo %}&lo_que_tengo=1{% endif %}"
+         data-tipopag="Picada">
+        <span class="icon-wrap"><i class="fa-solid fa-cheese"></i></span>
+        <span class="item-text">Picadas</span>
+      </a>
+
+      <a class="selector-platos-item js-filtro-tipopag {% if tipopag == 'Ingrediente de picada' %}is-active{% endif %}"
+         href="{% url 'filtro-de-platos' %}?tipopag=Ingrediente%20de%20picada{% if lo_que_tengo_activo %}&lo_que_tengo=1{% endif %}"
+         data-tipopag="Ingrediente de picada">
+        <span class="icon-wrap"><i class="fa-solid fa-carrot"></i></span>
+        <span class="item-text">Ingredientes de picada</span>
+      </a>
+
+      <a class="selector-platos-item js-filtro-tipopag {% if tipopag == 'Postre' %}is-active{% endif %}"
+         href="{% url 'filtro-de-platos' %}?tipopag=Postre{% if lo_que_tengo_activo %}&lo_que_tengo=1{% endif %}"
+         data-tipopag="Postre">
+        <span class="icon-wrap"><i class="fa-solid fa-ice-cream"></i></span>
+        <span class="item-text">Postres</span>
+      </a>
+
+      <a class="selector-platos-item js-filtro-tipopag {% if tipopag == 'Trago' %}is-active{% endif %}"
+         href="{% url 'filtro-de-platos' %}?tipopag=Trago{% if lo_que_tengo_activo %}&lo_que_tengo=1{% endif %}"
+         data-tipopag="Trago">
+        <span class="icon-wrap"><i class="fa-solid fa-martini-glass-citrus"></i></span>
+        <span class="item-text">Bebidas y tragos</span>
+      </a>
+
+      <a class="selector-platos-item js-filtro-tipopag {% if tipopag == 'Delivery' %}is-active{% endif %}"
+         href="{% url 'filtro-de-platos' %}?tipopag=Delivery{% if lo_que_tengo_activo %}&lo_que_tengo=1{% endif %}"
+         data-tipopag="Delivery">
+        <span class="icon-wrap"><i class="fa-solid fa-motorcycle"></i></span>
+        <span class="item-text">Delivery</span>
+      </a>
+
+      <a class="selector-platos-item js-filtro-tipopag {% if tipopag == 'Comerafuera' %}is-active{% endif %}"
+         href="{% url 'filtro-de-platos' %}?tipopag=Comerafuera{% if lo_que_tengo_activo %}&lo_que_tengo=1{% endif %}"
+         data-tipopag="Comerafuera">
+        <span class="icon-wrap"><i class="fa-solid fa-location-dot"></i></span>
+        <span class="item-text">Comer afuera</span>
+      </a>
+    </nav>
+
+    <button
+      type="button"
+      class="selector-platos-arrow selector-platos-arrow-next"
+      data-selector-platos-scroll="1"
+      aria-label="Ver categorías siguientes">
+      <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+    </button>
+  </div>
+</section>

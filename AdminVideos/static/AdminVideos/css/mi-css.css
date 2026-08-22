@@ -2118,3 +2118,450 @@ body.filtro-platos-cambiando [data-listado-url] {
   }
 
 }
+/* ===== QC: selector horizontal de platos - etapa 1 ===== */
+.selector-platos-shell {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: .65rem;
+  margin: .45rem .5rem .75rem;
+  padding: .55rem;
+  color: var(--bs-body-color);
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: .9rem;
+  box-shadow: 0 .25rem .8rem rgba(0, 0, 0, .10);
+}
+
+.selector-lo-que-tengo-wrap {
+  display: flex;
+  align-items: stretch;
+  min-width: 13rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: .75rem;
+  overflow: hidden;
+  background: var(--bs-tertiary-bg);
+}
+
+.selector-lo-que-tengo {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: .55rem;
+  min-width: 0;
+  padding: .45rem .55rem;
+  color: var(--bs-body-color);
+  text-decoration: none;
+  transition: background-color .18s ease, color .18s ease;
+}
+
+.selector-lo-que-tengo:hover,
+.selector-lo-que-tengo:focus {
+  color: var(--bs-body-color);
+  background: rgba(var(--bs-primary-rgb), .08);
+}
+
+.selector-lo-que-tengo-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  flex: 0 0 2.15rem;
+  border-radius: 50%;
+  border: 1px solid var(--bs-border-color);
+  background: var(--bs-body-bg);
+}
+
+.selector-lo-que-tengo-copy {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: .55rem;
+  min-width: 0;
+}
+
+.selector-lo-que-tengo-label {
+  font-size: .78rem;
+  line-height: 1.05;
+  font-weight: 700;
+}
+
+.selector-lo-que-tengo.is-active .selector-lo-que-tengo-icon {
+  color: #dc3545;
+  border-color: rgba(220, 53, 69, .55);
+  background: rgba(220, 53, 69, .10);
+}
+
+.selector-lo-que-tengo-edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.45rem;
+  flex: 0 0 2.45rem;
+  color: var(--bs-secondary-color);
+  background: transparent;
+  border: 0;
+  border-left: 1px solid var(--bs-border-color);
+}
+
+.selector-lo-que-tengo-edit:hover,
+.selector-lo-que-tengo-edit:focus {
+  color: var(--bs-body-color);
+  background: var(--bs-secondary-bg);
+}
+
+.selector-platos-categorias-wrap {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr) 2rem;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.selector-platos-rail {
+  display: flex;
+  align-items: stretch;
+  gap: .38rem;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: .04rem .2rem .15rem;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  overscroll-behavior-inline: contain;
+}
+
+.selector-platos-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.selector-platos-item {
+  display: flex;
+  flex: 0 0 auto;
+  min-width: 5.4rem;
+  max-width: 8.2rem;
+  min-height: 4.2rem;
+  padding: .38rem .48rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .28rem;
+  color: var(--bs-secondary-color);
+  text-decoration: none;
+  text-align: center;
+  border: 1px solid transparent;
+  border-radius: .7rem;
+  scroll-snap-align: center;
+  transition: color .16s ease, background-color .16s ease, border-color .16s ease, transform .16s ease;
+}
+
+.selector-platos-item .icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--bs-tertiary-bg);
+  border: 1px solid var(--bs-border-color);
+}
+
+.selector-platos-item .item-text {
+  font-size: .68rem;
+  line-height: 1.05;
+  font-weight: 650;
+}
+
+.selector-platos-item:hover,
+.selector-platos-item:focus {
+  color: var(--bs-body-color);
+  background: var(--bs-tertiary-bg);
+  border-color: var(--bs-border-color);
+  transform: translateY(-1px);
+}
+
+.selector-platos-item.is-active {
+  color: var(--bs-emphasis-color);
+  background: var(--bs-secondary-bg);
+  border-color: var(--bs-secondary-color);
+  box-shadow: 0 .2rem .55rem rgba(0, 0, 0, .12);
+}
+
+.selector-platos-item.is-active .icon-wrap {
+  color: var(--bs-emphasis-color);
+  background: var(--bs-body-bg);
+  border-color: var(--bs-secondary-color);
+}
+
+.selector-platos-item.is-filtered-lo-que-tengo,
+.selector-platos-shell.lo-que-tengo-activo .selector-platos-item.is-active {
+  color: #dc3545;
+  border-color: rgba(220, 53, 69, .65);
+  background: rgba(220, 53, 69, .08);
+}
+
+.selector-platos-item.is-filtered-lo-que-tengo .icon-wrap,
+.selector-platos-shell.lo-que-tengo-activo .selector-platos-item.is-active .icon-wrap {
+  color: #dc3545;
+  border-color: rgba(220, 53, 69, .58);
+  background: rgba(220, 53, 69, .10);
+}
+
+.selector-platos-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bs-secondary-color);
+  background: transparent;
+  border: 0;
+  border-radius: .55rem;
+}
+
+.selector-platos-arrow:hover,
+.selector-platos-arrow:focus {
+  color: var(--bs-body-color);
+  background: var(--bs-tertiary-bg);
+}
+
+[data-bs-theme="dark"] .selector-platos-shell {
+  background: #181b20;
+  border-color: rgba(255, 255, 255, .12);
+  box-shadow: 0 .35rem 1rem rgba(0, 0, 0, .28);
+}
+
+[data-bs-theme="dark"] .selector-lo-que-tengo-wrap,
+[data-bs-theme="dark"] .selector-platos-item .icon-wrap {
+  background: rgba(255, 255, 255, .035);
+  border-color: rgba(255, 255, 255, .12);
+}
+
+[data-bs-theme="dark"] .selector-platos-item.is-active {
+  color: rgba(255, 255, 255, .96);
+  background: rgba(255, 255, 255, .10);
+  border-color: rgba(255, 255, 255, .34);
+}
+
+[data-bs-theme="dark"] .selector-platos-item.is-active .icon-wrap {
+  color: #fff;
+  background: rgba(255, 255, 255, .13);
+  border-color: rgba(255, 255, 255, .42);
+}
+
+[data-bs-theme="dark"] .selector-platos-item.is-filtered-lo-que-tengo,
+[data-bs-theme="dark"] .selector-platos-shell.lo-que-tengo-activo .selector-platos-item.is-active {
+  color: #ff7f8c;
+  background: rgba(220, 53, 69, .16);
+  border-color: rgba(255, 118, 132, .72);
+}
+
+[data-bs-theme="dark"] .selector-platos-item.is-filtered-lo-que-tengo .icon-wrap,
+[data-bs-theme="dark"] .selector-platos-shell.lo-que-tengo-activo .selector-platos-item.is-active .icon-wrap {
+  color: #ff7f8c;
+  background: rgba(220, 53, 69, .20);
+  border-color: rgba(255, 118, 132, .76);
+}
+
+@media (max-width: 767.98px) {
+  .selector-platos-shell {
+    grid-template-columns: minmax(0, 1fr);
+    margin-inline: .35rem;
+    padding: .45rem;
+  }
+
+  .selector-lo-que-tengo-wrap {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .selector-platos-categorias-wrap {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .selector-platos-arrow {
+    display: none;
+  }
+
+  .selector-platos-rail {
+    padding-inline: .1rem;
+  }
+
+  .selector-platos-item {
+    min-width: 4.75rem;
+    max-width: 6.6rem;
+    min-height: 3.85rem;
+  }
+}
+
+/* ===== QC: Con lo que tengo separado del selector horizontal ===== */
+.selector-platos-shell {
+  display: block;
+}
+
+.selector-platos-categorias-wrap {
+  width: 100%;
+}
+
+.filtro-platos-y-lo-que-tengo {
+  min-width: 0;
+}
+
+.filtro-platos-y-lo-que-tengo #form-filtros-platos {
+  margin-bottom: 0 !important;
+  height: 100%;
+}
+
+.filtro-platos-y-lo-que-tengo .filtros-platos-card {
+  height: 100%;
+}
+
+.lo-que-tengo-global {
+  display: flex;
+  align-items: stretch;
+  flex: 0 0 auto;
+  min-width: 13rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: .75rem;
+  overflow: hidden;
+  background: var(--bs-body-bg);
+  box-shadow: 0 .125rem .35rem rgba(0, 0, 0, .07);
+}
+
+.lo-que-tengo-global .selector-lo-que-tengo {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.lo-que-tengo-global .selector-lo-que-tengo-edit {
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.lo-que-tengo-global-mobile {
+  display: none;
+}
+
+[data-bs-theme="dark"] .lo-que-tengo-global {
+  background: #181b20;
+  border-color: rgba(255, 255, 255, .12);
+  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .24);
+}
+
+@media (max-width: 767.98px) {
+  .selector-platos-shell {
+    display: block;
+  }
+
+  .lo-que-tengo-global-mobile {
+    display: flex;
+    min-width: 0;
+    max-width: 8.8rem;
+    border-radius: .45rem;
+    box-shadow: none;
+  }
+
+  .lo-que-tengo-global-mobile .selector-lo-que-tengo {
+    min-width: 0;
+    padding: .25rem .38rem;
+    gap: .3rem;
+  }
+
+  .lo-que-tengo-global-mobile .selector-lo-que-tengo-icon {
+    width: 1.8rem;
+    height: 1.8rem;
+    min-width: 1.8rem;
+  }
+
+  .lo-que-tengo-global-mobile .selector-lo-que-tengo-label {
+    max-width: 4rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: .67rem;
+  }
+
+
+
+
+  .lo-que-tengo-global-mobile .selector-lo-que-tengo-edit {
+    width: 1.9rem;
+    min-width: 1.9rem;
+    font-size: .72rem;
+  }
+}
+
+/* ===== QC: control minimalista Con lo que tengo ===== */
+.lo-que-tengo-global {
+  min-width: 10.6rem;
+  border-radius: .6rem;
+}
+
+.lo-que-tengo-global .selector-lo-que-tengo {
+  gap: .4rem;
+  padding: .32rem .45rem;
+}
+
+.lo-que-tengo-global .selector-lo-que-tengo-copy {
+  justify-content: flex-start;
+}
+
+.lo-que-tengo-global .selector-lo-que-tengo-icon {
+  width: 1.85rem;
+  height: 1.85rem;
+  flex-basis: 1.85rem;
+  border: 0;
+  background: transparent;
+}
+
+.lo-que-tengo-global .selector-lo-que-tengo-label {
+  font-size: .74rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.lo-que-tengo-global .selector-lo-que-tengo.is-active {
+  color: var(--bs-body-color);
+  background: rgba(220, 53, 69, .05);
+}
+
+.lo-que-tengo-global .selector-lo-que-tengo.is-active .selector-lo-que-tengo-icon {
+  color: #dc3545;
+  background: transparent;
+  border: 0;
+}
+
+.lo-que-tengo-global .selector-lo-que-tengo-edit {
+  width: 2.15rem;
+  flex-basis: 2.15rem;
+}
+
+@media (max-width: 767.98px) {
+  .lo-que-tengo-global-mobile {
+    width: auto;
+    max-width: none;
+  }
+
+  .lo-que-tengo-global-mobile .selector-lo-que-tengo {
+    padding: .2rem .25rem;
+  }
+
+  .lo-que-tengo-global-mobile .selector-lo-que-tengo-copy {
+    display: none;
+  }
+
+  .lo-que-tengo-global-mobile .selector-lo-que-tengo-icon {
+    width: 1.65rem;
+    height: 1.65rem;
+    min-width: 1.65rem;
+    flex-basis: 1.65rem;
+  }
+
+  .lo-que-tengo-global-mobile .selector-lo-que-tengo-edit {
+    width: 1.75rem;
+    min-width: 1.75rem;
+    flex-basis: 1.75rem;
+  }
+}
