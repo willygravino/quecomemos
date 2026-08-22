@@ -22,23 +22,23 @@
 {% block compartidos_recibidos %}{% endblock %}
 
 <div class="border border-primary rounded p-2 position-relative m-2">
-  <div class="sugerencias-platos-titulo-bar text-center mb-2">
-    <h5 class="mb-0 fw-bold text-white">
-      Sugerencias de
+  <div class="sugerencias-platos-titulo-bar categoria-actual-bar mb-2" aria-live="polite">
+    <span class="categoria-actual-eyebrow">Viendo</span>
+    <h5 class="categoria-actual-titulo mb-0">
       <span id="sugerenciasPlatosTituloTipo"
             data-tipopag-actual="{{ tipopag|default:'Principal' }}">
         {% if tipopag == "Principal" %}
-          Plato principal
+          Platos principales
         {% elif tipopag == "Guarnicion" %}
           Guarniciones
         {% elif tipopag == "Picada" %}
-          Picadas armadas
+          Picadas
         {% elif tipopag == "Ingrediente de picada" %}
           Ingredientes de picada
         {% elif tipopag == "Comerafuera" %}
-          lugares para comer afuera
+          Comer afuera
         {% elif tipopag == "Delivery" %}
-          delivery
+          Delivery
         {% elif tipopag == "Todos" %}
           Todos los platos
         {% else %}

@@ -290,7 +290,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // ============================================================
   function etiquetaSugerenciasTipopag(tipopag) {
     const etiquetas = {
-      "Principal": "Plato principal",
+      "Principal": "Platos principales",
       "Entrada": "Entradas",
       "Guarnicion": "Guarniciones",
       "Dip": "Dips",
@@ -572,11 +572,16 @@ document.addEventListener("DOMContentLoaded", function () {
     boton.setAttribute("aria-disabled", esVistaTodos ? "true" : "false");
     boton.tabIndex = esVistaTodos ? -1 : 0;
 
+    const textoBoton = boton.querySelector(".boton-crear-plato-texto");
+
     if (esVistaTodos) {
       boton.removeAttribute("href");
       const aviso = "Seleccioná un tipo de plato para crear uno nuevo";
       boton.title = aviso;
       boton.setAttribute("aria-label", aviso);
+      if (textoBoton) {
+        textoBoton.textContent = "Elegí una categoría";
+      }
       return;
     }
 
@@ -621,6 +626,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     boton.title = titulo;
     boton.setAttribute("aria-label", titulo);
+    if (textoBoton) {
+      textoBoton.textContent = titulo
+        .replace("Agregar receta de ", "Agregar ")
+        .replace("Agregar ingrediente de picada", "Agregar ingrediente");
+    }
   }
 
   // ============================================================

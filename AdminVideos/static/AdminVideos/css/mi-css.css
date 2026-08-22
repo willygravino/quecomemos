@@ -2565,3 +2565,106 @@ body.filtro-platos-cambiando [data-listado-url] {
     flex-basis: 1.75rem;
   }
 }
+
+/* ===== QC: contexto visible de categoría y acción de creación ===== */
+.categoria-actual-bar {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: .5rem;
+  padding: .45rem .75rem;
+  border-radius: .65rem;
+  color: var(--bs-body-color);
+  background: var(--bs-secondary-bg);
+  border: 1px solid var(--bs-border-color);
+}
+
+.categoria-actual-eyebrow {
+  color: var(--bs-secondary-color);
+  font-size: .69rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.categoria-actual-titulo {
+  color: var(--bs-body-color);
+  font-size: 1rem;
+  font-weight: 750;
+  line-height: 1.2;
+}
+
+.selector-platos-item.is-active {
+  position: relative;
+  color: #fff;
+  background: #4e73df;
+  border-color: #4e73df;
+  box-shadow: 0 .2rem .55rem rgba(78, 115, 223, .28);
+  transform: translateY(-1px);
+}
+
+.selector-platos-item.is-active .icon-wrap {
+  color: #fff;
+  background: rgba(255, 255, 255, .16);
+  border-color: rgba(255, 255, 255, .55);
+}
+
+.selector-platos-shell.lo-que-tengo-activo .selector-platos-item.is-active,
+.selector-platos-item.is-active.is-filtered-lo-que-tengo {
+  color: #fff;
+  background: #dc3545;
+  border-color: #dc3545;
+  box-shadow: 0 .2rem .55rem rgba(220, 53, 69, .28);
+}
+
+.selector-platos-shell.lo-que-tengo-activo .selector-platos-item.is-active .icon-wrap,
+.selector-platos-item.is-active.is-filtered-lo-que-tengo .icon-wrap {
+  color: #fff;
+  background: rgba(255, 255, 255, .16);
+  border-color: rgba(255, 255, 255, .58);
+}
+
+.boton-crear-plato-flotante {
+  right: 1rem;
+  bottom: 9rem;
+  z-index: 1050;
+  min-height: 3.25rem;
+  max-width: min(18rem, calc(100vw - 2rem));
+  gap: .48rem;
+  padding: .65rem .9rem;
+  border-radius: 999rem;
+  white-space: nowrap;
+}
+
+.boton-crear-plato-icono {
+  flex: 0 0 auto;
+}
+
+.boton-crear-plato-texto {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+@media (max-width: 575.98px) {
+  .categoria-actual-bar {
+    justify-content: flex-start;
+    padding: .38rem .55rem;
+  }
+
+  .categoria-actual-titulo {
+    font-size: .9rem;
+  }
+
+  .boton-crear-plato-flotante {
+    bottom: 8rem;
+    min-height: 2.9rem;
+    padding: .55rem .72rem;
+  }
+
+  .boton-crear-plato-texto {
+    max-width: 9.5rem;
+    font-size: .72rem;
+  }
+}

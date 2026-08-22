@@ -46,7 +46,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <!-- mi css -->
-    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260822173828" rel="stylesheet">  <!-- al final + bust de caché -->
+    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260822174918" rel="stylesheet">  <!-- al final + bust de caché -->
 
     <link rel="manifest" href="{% static 'AdminVideos/lista_super/manifest_lista_super.json' %}?v=1">
 
@@ -1179,14 +1179,16 @@ Root globl para modales cargados dinámicamente (AJAX)
      href="{% url 'videos-create' %}?tipopag={{ tipopag|default:''|urlencode }}&return_to={{ request.get_full_path|urlencode }}"
      data-url-crear-plato="{% url 'videos-create' %}"
      data-url-crear-lugar="{% url 'crear-lugar' %}"
-     class="btn {% if tipopag == 'Todos' %}btn-secondary disabled{% else %}btn-success{% endif %} rounded-circle shadow position-fixed d-flex align-items-center justify-content-center"
-     style="right: 1rem; bottom: 9rem; width: 56px; height: 56px; z-index: 1050;"
+     class="boton-crear-plato-flotante btn {% if tipopag == 'Todos' %}btn-secondary disabled{% else %}btn-success{% endif %} shadow position-fixed d-flex align-items-center justify-content-center"
     title="{% if tipopag == 'Picada' %}Armar picada{% elif tipopag == 'Ingrediente de picada' %}Agregar ingrediente de picada{% elif tipopag == 'Principal' or not tipopag %}Agregar receta de plato principal{% elif tipopag == 'Guarnicion' %}Agregar receta de guarnición{% elif tipopag == 'Comerafuera' %}Agregar lugar para comer afuera{% elif tipopag == 'Delivery' %}Agregar delivery{% else %}Agregar receta de {{ tipopag|lower }}{% endif %}"
     aria-label="{% if tipopag == 'Picada' %}Armar picada{% elif tipopag == 'Ingrediente de picada' %}Agregar ingrediente de picada{% elif tipopag == 'Principal' or not tipopag %}Agregar receta de plato principal{% elif tipopag == 'Guarnicion' %}Agregar receta de guarnición{% elif tipopag == 'Comerafuera' %}Agregar lugar para comer afuera{% elif tipopag == 'Delivery' %}Agregar delivery{% else %}Agregar receta de {{ tipopag|lower }}{% endif %}"
      data-deshabilitado-en-todos="1"
      aria-disabled="{% if tipopag == 'Todos' %}true{% else %}false{% endif %}"
      tabindex="{% if tipopag == 'Todos' %}-1{% else %}0{% endif %}">
-    <i class="fa-solid fa-plus"></i>
+    <i class="fa-solid fa-plus boton-crear-plato-icono" aria-hidden="true"></i>
+    <span class="boton-crear-plato-texto">
+      {% if tipopag == 'Todos' %}Elegí una categoría{% elif tipopag == 'Picada' %}Armar picada{% elif tipopag == 'Ingrediente de picada' %}Agregar ingrediente{% elif tipopag == 'Comerafuera' %}Agregar lugar{% elif tipopag == 'Delivery' %}Agregar delivery{% elif tipopag == 'Principal' or not tipopag %}Agregar plato principal{% else %}Agregar {{ tipopag|lower }}{% endif %}
+    </span>
   </a>
 {% endif %}
 
