@@ -1,0 +1,118 @@
+.shopping-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1070;
+  background: rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.shopping-panel-backdrop.is-open {
+  opacity: 1;
+}
+
+.shopping-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1080;
+  width: min(72vw, 1100px);
+  min-width: 680px;
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  border-left: 1px solid var(--bs-border-color);
+  box-shadow: -12px 0 36px rgba(0, 0, 0, 0.18);
+  transform: translateX(102%);
+  transition: transform 220ms ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.shopping-panel.is-open {
+  transform: translateX(var(--qc-swipe-offset, 0px));
+}
+
+.shopping-panel.qc-swipe-dragging {
+  transition: none;
+}
+
+.shopping-panel-header {
+  flex: 0 0 auto;
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid var(--bs-border-color);
+  background: var(--bs-body-bg);
+}
+
+.shopping-panel-title {
+  font-weight: 600;
+}
+
+.shopping-panel-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.75rem 0.75rem 2rem;
+  overscroll-behavior: contain;
+}
+
+.shopping-panel-placeholder {
+  padding: 2rem;
+  text-align: center;
+}
+
+#shoppingPanel #btn-volver-lista-compras {
+  display: none !important;
+}
+
+body.shopping-panel-open {
+  overflow: hidden;
+}
+
+#content-wrapper {
+  transition: transform 220ms ease;
+}
+
+@media (min-width: 769px) {
+  body.shopping-panel-open #content-wrapper {
+    transform: translateX(-48px);
+  }
+}
+
+body.shopping-panel-open .boton-crear-plato-flotante,
+body.shopping-panel-open #botonListaComprasFlotanteWrap {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .shopping-panel {
+    width: 88vw;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .shopping-panel {
+    width: 100vw;
+    min-width: 0;
+    border-left: 0;
+  }
+
+  .shopping-panel-body {
+    padding-left: 0.5rem;
+    padding-right: 0.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shopping-panel,
+  .shopping-panel-backdrop,
+  #content-wrapper {
+    transition: none;
+  }
+}

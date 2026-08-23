@@ -89,6 +89,8 @@
 
 
 
+  <link rel="stylesheet" href="{% static 'AdminVideos/css/shopping_panel.css' %}?v=1">
+  <link rel="stylesheet" href="{% static 'AdminVideos/css/plato_create_sheet.css' %}?v=1">
 </head>
 
 <body id="page-top">
@@ -824,7 +826,7 @@ Root globl para modales cargados dinámicamente (AJAX)
          class="btn btn-primary rounded-circle shadow position-fixed d-flex align-items-center justify-content-center"
          style="right: 1rem; bottom: 5rem; width: 56px; height: 56px; z-index: 1050;"
          title="Lista de compras"
-         aria-label="Lista de compras" data-nav-store-current="lista-compras">
+         aria-label="Lista de compras" data-nav-store-current="lista-compras" data-shopping-panel-open="1" aria-controls="shoppingPanel" aria-expanded="false">
         <i class="fa-solid fa-cart-shopping"></i>
       </a>
 
@@ -840,6 +842,50 @@ Root globl para modales cargados dinámicamente (AJAX)
 </div>
 {% endif %}
 {% endwith %}
+
+{% if user.is_authenticated %}
+<div id="shoppingPanelBackdrop" class="shopping-panel-backdrop" hidden></div>
+<aside id="shoppingPanel"
+       class="shopping-panel"
+       aria-hidden="true"
+       aria-labelledby="shoppingPanelTitle">
+  <header class="shopping-panel-header">
+    <button type="button"
+            class="btn btn-sm btn-outline-secondary shopping-panel-close"
+            data-shopping-panel-close
+            aria-label="Volver">
+      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+      <span>Volver</span>
+    </button>
+    <h5 id="shoppingPanelTitle" class="shopping-panel-title mb-0">Lista de compras</h5>
+  </header>
+  <div id="shoppingPanelBody" class="shopping-panel-body">
+    <div class="shopping-panel-placeholder text-muted">Cargando lista…</div>
+  </div>
+</aside>
+{% endif %}
+
+{% if user.is_authenticated %}
+<div id="platoCreateSheetBackdrop"
+     class="plato-create-sheet-backdrop"
+     hidden></div>
+
+<section id="modalPlato"
+         class="plato-create-sheet"
+         aria-hidden="true"
+         aria-label="Crear plato">
+  <div class="plato-create-sheet-handle-wrap" aria-hidden="true">
+    <div class="plato-create-sheet-handle"></div>
+  </div>
+
+  <div id="platoCreateSheetBody"
+       class="plato-create-sheet-body">
+    <div class="plato-create-sheet-placeholder text-muted">
+      Cargando formulario…
+    </div>
+  </div>
+</section>
+{% endif %}
 
 <script>
 /**
@@ -1812,7 +1858,11 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 </script>
 
-  <script src="{% static 'AdminVideos/js/navigation.js' %}"></script>
+  <script src="{% static 'AdminVideos/js/lista_de_compras.js' %}?v=1"></script>
+<script src="{% static 'AdminVideos/js/overlay_ui.js' %}?v=1"></script>
+<script src="{% static 'AdminVideos/js/shopping_panel.js' %}?v=1"></script>
+<script src="{% static 'AdminVideos/js/plato_create_sheet.js' %}?v=1"></script>
+<script src="{% static 'AdminVideos/js/navigation.js' %}"></script>
 </body>
 
 </html>

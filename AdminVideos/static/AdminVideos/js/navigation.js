@@ -35,6 +35,10 @@
   document.addEventListener("click", function (event) {
     const storeLink = event.target.closest("[data-nav-store-current]");
     if (storeLink) {
+      // Si otra mejora progresiva ya interceptó el enlace (por ejemplo,
+      // Lista de compras como panel), no guardar un origen que no se usó.
+      if (event.defaultPrevented) return;
+
       const name = (storeLink.dataset.navStoreCurrent || "").trim();
       if (name) setOrigin(name);
       return;

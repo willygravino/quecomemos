@@ -1,0 +1,117 @@
+.plato-create-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1040;
+  background: rgba(0, 0, 0, 0.28);
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.plato-create-sheet-backdrop.is-open {
+  opacity: 1;
+}
+
+.plato-create-sheet {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: 1045;
+  width: min(1180px, calc(100vw - 2rem));
+  height: min(92vh, 980px);
+  height: min(92dvh, 980px);
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  border: 1px solid var(--bs-border-color);
+  border-bottom: 0;
+  border-radius: 1.25rem 1.25rem 0 0;
+  box-shadow: 0 -18px 50px rgba(0, 0, 0, 0.24);
+  transform: translate(-50%, 103%);
+  transition: transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.plato-create-sheet.is-open {
+  transform: translate(-50%, var(--qc-swipe-offset, 0px));
+}
+
+.plato-create-sheet.qc-swipe-dragging {
+  transition: none;
+}
+
+.plato-create-sheet-handle-wrap {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  padding: 0.55rem 0 0.25rem;
+  background: var(--bs-body-bg);
+}
+
+.plato-create-sheet-handle {
+  width: 46px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--bs-secondary-color);
+  opacity: 0.45;
+}
+
+.plato-create-sheet-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  background: var(--bs-body-bg);
+}
+
+.plato-create-sheet-placeholder {
+  display: grid;
+  place-items: center;
+  min-height: 35vh;
+  padding: 2rem;
+  text-align: center;
+}
+
+body.plato-create-sheet-open {
+  overflow: hidden;
+}
+
+body.plato-create-sheet-open .boton-crear-plato-flotante,
+body.plato-create-sheet-open #botonListaComprasFlotanteWrap {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#modalPlato .plato-form-page {
+  margin-top: 0.75rem !important;
+  margin-bottom: 2rem !important;
+}
+
+#modalPlato .album {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+body > .select2-container--open {
+  z-index: 1050;
+}
+
+@media (max-width: 768px) {
+  .plato-create-sheet {
+    width: 100vw;
+    height: 96vh;
+    height: 96dvh;
+    border-left: 0;
+    border-right: 0;
+    border-radius: 1rem 1rem 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plato-create-sheet,
+  .plato-create-sheet-backdrop {
+    transition: none;
+  }
+}

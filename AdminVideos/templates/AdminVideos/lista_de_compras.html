@@ -2,6 +2,7 @@
 {% extends "AdminVideos/base.html" %}
 {% load static %}
 {% block pestanias-menues-platos %}
+<div id="lista-compras-contenido" class="lista-compras-contenido">
 
   <div class="px-2 pt-1 mb-2">
     <a id="btn-volver-lista-compras"
@@ -259,88 +260,5 @@
 
       </section>
     </div>
-
-    
-<script>
-/**
- * LISTA DE COMPRAS (page)
- * Este script queda SOLO para:
- * - Toggle de platos del menú (requiere recarga)
- *
- * Ingredientes + comentarios:
- * - los maneja pantry_bind.js (reutilizable)
- */
-(function () {
-  const form = document.getElementById('frm-menu');
-  if (!form) return;
-
-  const csrf = form.querySelector('input[name=csrfmiddlewaretoken]')?.value || '';
-  const origenInput = document.getElementById('post_origen');
-
-  const toggleIdInput = document.getElementById('toggle_plato_id');
-  const toggleCheckedInput = document.getElementById('toggle_plato_checked');
-
-
-  function setOrigen(v) {
-    if (origenInput) origenInput.value = v;
-  }
-
-  async function autosave() {
-    const fd = new FormData(form);
-    await fetch(form.action, {
-      method: 'POST',
-      headers: { 'X-CSRFToken': csrf, 'X-Requested-With': 'XMLHttpRequest' },
-      body: fd,
-      credentials: 'same-origin'
-    });
-  }
-
-  // --- Cambios de menú (requieren recarga) ---
-  form.querySelectorAll('input[name="plato_seleccionado"]').forEach(el => {
-    el.addEventListener('change', async () => {
-      try {
-        setOrigen('menu');
-
-        // value = "<plato_id>_<Ymd>"
-        const val = el.value || "";
-        const platoId = val.split("_", 1)[0];
-
-        if (toggleIdInput) toggleIdInput.value = platoId;
-        if (toggleCheckedInput) toggleCheckedInput.value = el.checked ? "1" : "0";
-
-        await autosave();
-        location.reload();
-      } catch (e) {
-        console.error('No se pudo guardar y recargar', e);
-      }
-    });
-  });
-
-
-  form.querySelectorAll('input[name="componente_seleccionado"]').forEach(el => {
-    el.addEventListener('change', async () => {
-      try {
-        setOrigen('menu');
-
-        const val = el.value || "";
-        const [menuItemId, componentePlatoId] = val.split("_");
-
-        if (toggleIdInput) toggleIdInput.value = componentePlatoId;
-        if (toggleCheckedInput) toggleCheckedInput.value = el.checked ? "1" : "0";
-
-        await autosave();
-        location.reload();
-
-      } catch (e) {
-        console.error('No se pudo guardar componente', e);
-      }
-    });
-  });
-
-  form.addEventListener('submit', (e) => e.preventDefault());
-})();
-</script>
-
-
-
+</div><!-- /#lista-compras-contenido -->
 {% endblock %}
