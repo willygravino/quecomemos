@@ -68,12 +68,15 @@
                   <input
                     class="form-check-input"
                     type="checkbox"
-                    id="ing-compacto-{{ item.ingrediente_id }}"
-                    name="ingrediente_a_comprar_id"
-                    value="{{ item.ingrediente_id }}"
+                    id="pantry-compacto-{{ item.pantry_key }}"
+                    name="pantry_a_comprar"
+                    value="{{ item.pantry_id }}"
+                    data-pantry-type="{{ item.pantry_type }}"
+                    data-pantry-id="{{ item.pantry_id }}"
+                    data-pantry-key="{{ item.pantry_key }}"
                     {% if item.a_comprar %}checked{% endif %}
                   >
-                  <label class="form-check-label fw-semibold" for="ing-compacto-{{ item.ingrediente_id }}">
+                  <label class="form-check-label fw-semibold" for="pantry-compacto-{{ item.pantry_key }}">
                     {{ item.nombre }}
                   </label>
                 </div>
@@ -91,8 +94,12 @@
                   <input
                     type="text"
                     class="form-control"
-                    name="comentario_{{ item.ingrediente_id }}"
+                    name="comentario_{{ item.pantry_key }}"
                     value="{{ item.comentario }}"
+                    data-pantry-comment="1"
+                    data-pantry-type="{{ item.pantry_type }}"
+                    data-pantry-id="{{ item.pantry_id }}"
+                    data-pantry-key="{{ item.pantry_key }}"
                     placeholder="Comentario"
                     aria-label="Comentario para {{ item.nombre }}"
                   >
@@ -112,7 +119,7 @@
     </div>
   {% else %}
     <div class="small text-muted py-2">
-      Este plato no tiene ingredientes cargados.
+      Este plato no tiene ingredientes ni insumos cargados.
     </div>
   {% endif %}
 

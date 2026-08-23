@@ -33,8 +33,12 @@ from django.views.decorators.http import require_http_methods
 from django.core.exceptions import ValidationError
 from django.core.exceptions import PermissionDenied
 from AdminVideos.services.pantry import (
+    persist_profile_pantry_from_post,
     persist_profile_ingrediente_from_post,
     get_pantry_map,
+    build_insumo_pantry_items,
+    decorate_pantry_item,
+    set_pantry_have_state,
     sort_items_by_name,
 )
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -435,6 +439,7 @@ def plato_ingredientes(request: HttpRequest, pk: int):
 
     # Ingredientes usados para guardar y leer estado de despensa
     ingredientes_para_guardar = ingredientes_directos + ingredientes_componentes
+    plato_ids_pantry = [plato.pk] + [componente.pk for componente in componentes]
 
 
     # ======================================================
@@ -447,8 +452,8 @@ def plato_ingredientes(request: HttpRequest, pk: int):
         # 2.A) POST modo "ingredientes" (toggle/comentario por ingrediente)
         #     - ahora usa helper compartido
         # --------------------------------------------------
-        if post_origen == "ingredientes":
-            result = persist_profile_ingrediente_from_post(perfil=perfil, post=request.POST)
+        if post_origen in {"ingredientes", "pantry"}:
+            result = persist_profile_pantry_from_post(perfil=perfil, post=request.POST)
 
             if not result.ok:
                 return JsonResponse({"success": False, "error": result.error or "Error"}, status=400)
@@ -570,6 +575,25 @@ def plato_ingredientes(request: HttpRequest, pk: int):
     # Una única lista: deduplica ingredientes repetidos y suma cantidades compatibles.
     items = construir_items_modal(ingredientes_para_guardar)
 
+    for item in items:
+        ing_id = item.get("ingrediente_id")
+        if ing_id:
+            decorate_pantry_item(
+                item,
+                "ingrediente",
+                ing_id,
+            )
+
+    items.extend(
+        build_insumo_pantry_items(
+            perfil=perfil,
+            plato_ids=plato_ids_pantry,
+            hide_have=False,
+        )
+    )
+
+    sort_items_by_name(items)
+
     items_por_rubro = defaultdict(list)
     for item in items:
         items_por_rubro[item["rubro"]].append(item)
@@ -628,6 +652,8 @@ def compartir_ing_plato(request, token, pk: int):
     # Ingredientes finales: directos + componentes
     ingredientes_qs = list(ingredientes_directos_qs) + ingredientes_componentes
 
+    plato_ids_pantry = [plato.pk] + list(plato.componentes.values_list("pk", flat=True))
+
     # IDs de ingredientes del plato
     ing_ids = [
         iep.ingrediente_id
@@ -635,16 +661,6 @@ def compartir_ing_plato(request, token, pk: int):
         if iep.ingrediente_id and iep.ingrediente
     ]
 
-    # Si no hay ingredientes, render vacío
-    if not ing_ids:
-        if not perfil.share_token:
-            perfil.ensure_share_token()
-        return render(request, "AdminVideos/compartir_lista.html", {
-            "items": [],
-            "items_por_rubro": {},
-            "api_token": perfil.share_token,
-            "token": f"user-{perfil.pk}",
-        })
 
     # Estados guardados por ingrediente_id (nuevo modelo)
     pantry_qs = (
@@ -686,7 +702,24 @@ def compartir_ing_plato(request, token, pk: int):
             "estado": estado,
         })
 
-    items.sort(key=lambda i: i["nombre"].casefold())
+    for item in items:
+        ing_id = item.get("ingrediente_id")
+        if ing_id:
+            decorate_pantry_item(
+                item,
+                "ingrediente",
+                ing_id,
+            )
+
+    items.extend(
+        build_insumo_pantry_items(
+            perfil=perfil,
+            plato_ids=plato_ids_pantry,
+            hide_have=True,
+        )
+    )
+
+    sort_items_by_name(items)
 
     items_por_rubro = defaultdict(list)
     for item in items:
@@ -785,8 +818,8 @@ def lista_de_compras(request):
 
 
     # ✅ REFACTORIZADO: POST ingredientes usa helper (sin tocar el resto)
-    if request.method == "POST" and post_origen == "ingredientes":
-        result = persist_profile_ingrediente_from_post(perfil=perfil, post=request.POST)
+    if request.method == "POST" and post_origen in {"ingredientes", "pantry"}:
+        result = persist_profile_pantry_from_post(perfil=perfil, post=request.POST)
 
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             if not result.ok:
@@ -997,6 +1030,24 @@ def lista_de_compras(request):
             "usos": data["usos"],
         })
 
+    for item in items:
+        ing_id = item.get("ingrediente_id")
+        if ing_id:
+            decorate_pantry_item(
+                item,
+                "ingrediente",
+                ing_id,
+            )
+
+    items.extend(
+        build_insumo_pantry_items(
+            perfil=perfil,
+            plato_ids=plato_ids_con_componentes,
+            needed_by_map=plato_min_fecha,
+            hide_have=False,
+        )
+    )
+
     sort_items_by_name(items)
 
     items_por_rubro = defaultdict(list)
@@ -1036,6 +1087,7 @@ def lista_de_compras(request):
     "almacen": "Almacén",
     "lacteos": "Lácteos",
     "bebidas": "Bebidas",
+    "insumos": "Insumos",
     "otro": "Otros",
     }
 
@@ -1198,7 +1250,25 @@ def compartir_lista(request, token):
 
 
 
-    items.sort(key=lambda i: i["nombre"].casefold())
+    for item in items:
+        ing_id = item.get("ingrediente_id")
+        if ing_id:
+            decorate_pantry_item(
+                item,
+                "ingrediente",
+                ing_id,
+            )
+
+    items.extend(
+        build_insumo_pantry_items(
+            perfil=perfil,
+            plato_ids=plato_ids,
+            needed_by_map=plato_min_fecha,
+            hide_have=True,
+        )
+    )
+
+    sort_items_by_name(items)
 
     RUBROS_LABELS = {
     "verduleria": "Verdulería",
@@ -1209,6 +1279,7 @@ def compartir_lista(request, token):
     "almacen": "Almacén",
     "lacteos": "Lácteos",
     "bebidas": "Bebidas",
+    "insumos": "Insumos",
     "otro": "Otros",
     }
 
@@ -1245,66 +1316,65 @@ def api_toggle_item(request, token):
     try:
         payload = json.loads(request.body.decode("utf-8"))
     except Exception:
-        return JsonResponse({"ok": False, "error": "JSON inválido"}, status=400)
+        return JsonResponse(
+            {"ok": False, "error": "JSON inválido"},
+            status=400,
+        )
 
-    ing_id = payload.get("ingrediente_id", None)
+    # Nuevo protocolo tipado.
+    # ingrediente_id queda como fallback para clientes/colas viejas.
+    item_type = payload.get("item_type")
+    item_id = payload.get("item_id")
+
+    if item_type is None and payload.get("ingrediente_id") is not None:
+        item_type = "ingrediente"
+        item_id = payload.get("ingrediente_id")
+
     checked = payload.get("checked", None)
 
-    if ing_id is None or checked is None:
-        return JsonResponse({"ok": False, "error": "ingrediente_id y checked requeridos"}, status=400)
-
-    try:
-        ing_id = int(ing_id)
-    except Exception:
-        return JsonResponse({"ok": False, "error": "ingrediente_id inválido"}, status=400)
-
-    if not Ingrediente.objects.filter(pk=ing_id).exists():
-        return JsonResponse({"ok": False, "error": "Ingrediente no existe"}, status=404)
-
-    checked = bool(checked)
-
-    pi = (
-        ProfileIngrediente.objects
-        .filter(profile=perfil, ingrediente_id=ing_id)
-        .only("id", "comentario")
-        .first()
-    )
-    comentario = (pi.comentario or "").strip() if pi else ""
-
-    if checked:
-        obj, _ = ProfileIngrediente.objects.update_or_create(
-            profile=perfil,
-            ingrediente_id=ing_id,
-            defaults={"tengo": True, "last_bought_at": timezone.now()},
+    if item_type is None or item_id is None or checked is None:
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": (
+                    "item_type, item_id y checked son requeridos"
+                ),
+            },
+            status=400,
         )
-        return JsonResponse({
-            "ok": True,
-            "ingrediente_id": ing_id,
-            "tengo": True,
-            "last_bought_at": obj.last_bought_at.isoformat() if obj.last_bought_at else None,
-        })
 
-    # checked=False => "no tengo"
-    # Si no hay comentario, volvemos al default (sin registro)
-    if comentario == "":
-        ProfileIngrediente.objects.filter(profile=perfil, ingrediente_id=ing_id).delete()
-        return JsonResponse({"ok": True, "ingrediente_id": ing_id, "tengo": False, "last_bought_at": None})
-
-    # Si hay comentario, lo conservamos, pero marcamos tengo=False
-    obj, _ = ProfileIngrediente.objects.update_or_create(
-        profile=perfil,
-        ingrediente_id=ing_id,
-        defaults={"tengo": False},
+    result = set_pantry_have_state(
+        perfil=perfil,
+        item_type=item_type,
+        item_id=item_id,
+        tengo=bool(checked),
     )
-    return JsonResponse({
+
+    if not result.ok:
+        status = (
+            404
+            if "no existe" in (result.error or "").lower()
+            else 400
+        )
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": result.error or "Error",
+            },
+            status=status,
+        )
+
+    data = {
         "ok": True,
-        "ingrediente_id": ing_id,
-        "tengo": False,
-        "last_bought_at": obj.last_bought_at.isoformat() if obj.last_bought_at else None,
-    })
+        "item_type": result.item_type,
+        "item_id": result.item_id,
+        "tengo": bool(checked),
+    }
 
+    if result.item_type == "ingrediente":
+        data["ingrediente_id"] = result.item_id
 
-
+    return JsonResponse(data)
 
 
 class LugarDetail(DetailView):

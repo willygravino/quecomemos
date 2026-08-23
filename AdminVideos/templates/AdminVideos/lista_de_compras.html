@@ -160,9 +160,12 @@
                       <input
                         class="form-check-input me-1"
                         type="checkbox"
-                        id="ing-{{ item.ingrediente_id }}"
-                        name="ingrediente_a_comprar_id"
-                        value="{{ item.ingrediente_id }}"
+                        id="pantry-{{ item.pantry_key }}"
+                        name="pantry_a_comprar"
+                        value="{{ item.pantry_id }}"
+                        data-pantry-type="{{ item.pantry_type }}"
+                        data-pantry-id="{{ item.pantry_id }}"
+                        data-pantry-key="{{ item.pantry_key }}"
                         {% if item.estado == "no-tengo" %}checked{% endif %}
                       >
 
@@ -171,7 +174,7 @@
                           {% if item.estado == 'recien-comprado' %}
                             text-decoration-line-through text-muted
                           {% endif %}"
-                        for="ing-{{ item.ingrediente_id }}"
+                        for="pantry-{{ item.pantry_key }}"
                       >
                         {{ item.nombre }}
 
@@ -187,8 +190,12 @@
 
                       <input
                         type="text"
-                        name="comentario_{{ item.ingrediente_id }}"
+                        name="comentario_{{ item.pantry_key }}"
                         value="{{ item.comentario }}"
+                        data-pantry-comment="1"
+                        data-pantry-type="{{ item.pantry_type }}"
+                        data-pantry-id="{{ item.pantry_id }}"
+                        data-pantry-key="{{ item.pantry_key }}"
                         class="form-control"
                         placeholder="Comentario"
                       >
@@ -215,7 +222,7 @@
         {% else %}
 
           <div class="alert alert-info py-1 px-2 small">
-            No hay ingredientes para mostrar
+            No hay ingredientes ni insumos para mostrar
           </div>
         {% endif %}
 

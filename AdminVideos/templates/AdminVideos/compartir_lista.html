@@ -71,17 +71,21 @@
             <ul class="shopping-lista">
               {% for it in items_rubro %}
                 <li class="item-line"
-                    data-ing-id="{{ it.ingrediente_id }}"
+                    data-item-type="{{ it.pantry_type }}"
+                    data-item-id="{{ it.pantry_id }}"
+                    data-item-key="{{ it.pantry_key }}"
                     data-estado="{{ it.estado }}"
                     data-nombre="{{ it.nombre|escape }}">
 
                   <input class="form-check-input mt-1 flex-shrink-0 item-check"
                          type="checkbox"
-                         id="chk-{{ it.ingrediente_id }}"
-                         data-ing-id="{{ it.ingrediente_id }}"
+                         id="chk-{{ it.pantry_key }}"
+                         data-item-type="{{ it.pantry_type }}"
+                    data-item-id="{{ it.pantry_id }}"
+                    data-item-key="{{ it.pantry_key }}"
                          {% if it.estado == "tengo" or it.estado == "recien-comprado" %}checked{% endif %}>
 
-                  <label class="form-check-label flex-grow-1" for="chk-{{ it.ingrediente_id }}">
+                  <label class="form-check-label flex-grow-1" for="chk-{{ it.pantry_key }}">
                     <div class="fw-semibold item-nombre">
                       {{ it.nombre }}
                       {% if it.estado == "recien-comprado" %}
@@ -100,7 +104,7 @@
         {% endfor %}
       </div>
     {% else %}
-      <div class="small text-muted py-2">No hay ingredientes para comprar.</div>
+      <div class="small text-muted py-2">No hay ingredientes ni insumos para comprar.</div>
     {% endif %}
 
     {% if request.user.is_authenticated %}
@@ -120,7 +124,7 @@
 
 <script type="module">
   // Carga el módulo de sync offline y lo deja disponible en window
-  import { postToggleOfflineFirst, syncPendientes } from "{% static 'AdminVideos/lista_super/sync_offline_lista_super.js' %}?v=2";
+  import { postToggleOfflineFirst, syncPendientes } from "{% static 'AdminVideos/lista_super/sync_offline_lista_super.js' %}?v=3";
 
   // Exponemos funciones para poder usarlas desde tu script actual (que no es módulo).
   window.__listaSuperPostToggle = postToggleOfflineFirst;
@@ -136,16 +140,16 @@
 
   
   
- async function postToggle(ingrediente_id, checked) {
-    // Usa la versión offline-first: si no hay internet, queda en cola local
+ async function postToggle(itemType, itemId, checked) {
     const fn = window.__listaSuperPostToggle;
     if (!fn) return;
 
-    const r = await fn(API, ingrediente_id, checked);
+    const r = await fn(API, itemType, itemId, checked);
 
-    // Opcional: si quedó en cola, lo logueamos (podés mostrar un badge después)
     if (r && r.queued) {
-      console.log("📌 Guardado offline, se enviará cuando haya internet.");
+      console.log(
+        "📌 Guardado offline, se enviará cuando haya internet."
+      );
     }
   }
 
@@ -157,7 +161,8 @@
     const line = chk.closest(".item-line");
     if (!line) return;
 
-    const ingId = line.dataset.ingId;               // <-- data-ing-id del <li>
+    const itemType = line.dataset.itemType;
+    const itemId = line.dataset.itemId;
     const nombreEl = line.querySelector(".item-nombre"); // <-- SOLO el texto
 
     // --- UI inicial ---
@@ -171,7 +176,7 @@
       if (nombreEl) nombreEl.classList.toggle("striked", checked);
 
       // Persistir usando ID (más seguro que nombre)
-      postToggle(ingId, checked);
+      postToggle(itemType, itemId, checked);
     });
   });
 

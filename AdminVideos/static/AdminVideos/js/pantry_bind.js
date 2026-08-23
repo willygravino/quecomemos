@@ -1,53 +1,29 @@
-// static/js/pantry_bind.js
-// ==========================================================
-// PANTRY BIND (reutilizable)
-// Unifica la persistencia de "ingredientes del pantry" en:
-// - Lista de compras
-// - Modal de ingredientes del plato
-//
-// Convención de inputs:
-// - Checkbox:  name="ingrediente_a_comprar_id"  value="<ingrediente_id>"
-//   * checked   => "necesito comprar" => tengo=False
-//   * unchecked => "lo tengo"         => tengo=True
-//
-// - Comentario: name="comentario_<ingrediente_id>"
-//
-// Backend esperado (POST):
-// - post_origen=ingredientes
-// - toggle_ing_id / toggle_ing_checked / comentario_<id>  (para checkbox)
-// - comment_ing_id / comentario_<id>                      (para comentario)
-//
-// Requisito:
-// - El <form> contenedor debe tener action correcto (form.action)
-// - Debe existir csrfmiddlewaretoken dentro del form
-// ==========================================================
+// PANTRY BIND
+// Persistencia reutilizable para Ingredientes e Insumos.
+// checked => necesito comprar => tengo=False
+// unchecked => lo tengo => tengo=True
 
 (function () {
   "use strict";
 
-  // Evita doble carga del binder si el JS se incluye más de una vez
   if (document.__pantryBindLoaded) return;
   document.__pantryBindLoaded = true;
 
-  console.log("🧺 pantry_bind.js cargado");
-
-  // ----------------------------------------------------------
-  // Helper: contexto del form (action + csrf)
-  // ----------------------------------------------------------
   function getFormContext(el) {
     const form = el.closest("form");
     if (!form) return null;
 
-    const csrf = form.querySelector("input[name='csrfmiddlewaretoken']")?.value || "";
+    const csrf =
+      form.querySelector(
+        "input[name='csrfmiddlewaretoken']"
+      )?.value || "";
+
     const url = form.action;
     if (!url) return null;
 
     return { form, csrf, url };
   }
 
-  // ----------------------------------------------------------
-  // Helper: POST con FormData y validación de respuesta JSON
-  // ----------------------------------------------------------
   async function postFormData({ url, csrf, fd }) {
     const res = await fetch(url, {
       method: "POST",
@@ -59,82 +35,216 @@
       credentials: "same-origin",
     });
 
-    const ct = res.headers.get("content-type") || "";
-    if (!ct.includes("application/json")) {
+    const contentType =
+      res.headers.get("content-type") || "";
+
+    if (!contentType.includes("application/json")) {
       const text = await res.text();
-      console.error("❌ Respuesta no JSON:", res.status, text.slice(0, 300));
-      return;
+      throw new Error(
+        "Respuesta no JSON (" +
+          res.status +
+          "): " +
+          text.slice(0, 200)
+      );
     }
 
     const data = await res.json().catch(() => ({}));
-    if (!res.ok || data.success === false) {
-      console.error("❌ POST error:", res.status, data);
+
+    if (
+      !res.ok ||
+      data.success === false ||
+      data.ok === false
+    ) {
+      throw new Error(
+        data.error || "No se pudo guardar el estado."
+      );
     }
+
+    return data;
   }
 
-  // ==========================================================
-  // 1) Checkbox: "necesito comprar" (toggle tengo/no-tengo)
-  // ==========================================================
-  document.addEventListener("change", async (ev) => {
-    const chk = ev.target.closest("input[type='checkbox'][name='ingrediente_a_comprar_id']");
-    if (!chk) return;
+  function pantryIdentity(el) {
+    const type = (el.dataset.pantryType || "").trim();
+    const id = (el.dataset.pantryId || "").trim();
 
-    const ctx = getFormContext(chk);
-    if (!ctx) return;
-
-    const ingId = chk.value;
-    if (!ingId) return;
-
-    // checked => "1" = necesito comprar (tengo=False)
-    const toggleChecked = chk.checked ? "1" : "0";
-
-    // comentario actual (si existe)
-    const commentInput = ctx.form.querySelector(`input[name="comentario_${ingId}"]`);
-    const comentario = commentInput ? (commentInput.value || "") : "";
-
-    const fd = new FormData();
-    fd.append("post_origen", "ingredientes");
-    fd.append("toggle_ing_id", ingId);
-    fd.append("toggle_ing_checked", toggleChecked);
-    fd.append(`comentario_${ingId}`, comentario);
-
-    try {
-      await postFormData({ url: ctx.url, csrf: ctx.csrf, fd });
-    } catch (e) {
-      console.error("No se pudo persistir el toggle", e);
+    if (
+      (type === "ingrediente" || type === "insumo") &&
+      /^\d+$/.test(id)
+    ) {
+      return {
+        type,
+        id,
+        key:
+          el.dataset.pantryKey ||
+          type + "-" + id,
+      };
     }
-  });
 
-  // ==========================================================
-  // 2) Comentario: debounce mientras escribe
-  // ==========================================================
-  let t = null;
+    // Compatibilidad con markup viejo.
+    if (
+      el.matches?.(
+        "input[type='checkbox']" +
+          "[name='ingrediente_a_comprar_id']"
+      )
+    ) {
+      const legacyId = String(el.value || "").trim();
 
-  document.addEventListener("input", (ev) => {
-    const inp = ev.target.closest("input[name^='comentario_']");
-    if (!inp) return;
+      if (/^\d+$/.test(legacyId)) {
+        return {
+          type: "ingrediente",
+          id: legacyId,
+          key: "ingrediente-" + legacyId,
+        };
+      }
+    }
 
-    const ctx = getFormContext(inp);
-    if (!ctx) return;
+    return null;
+  }
 
-    const m = inp.name.match(/^comentario_(\d+)$/);
-    if (!m) return;
+  function findComment(form, identity) {
+    const generic = form.querySelector(
+      'input[data-pantry-comment="1"]' +
+        '[data-pantry-key="' +
+        identity.key +
+        '"]'
+    );
 
-    const ingId = m[1];
-    const comentario = inp.value || "";
+    if (generic) return generic;
 
-    clearTimeout(t);
-    t = setTimeout(async () => {
+    return form.querySelector(
+      'input[name="comentario_' +
+        identity.id +
+        '"]'
+    );
+  }
+
+  document.addEventListener(
+    "change",
+    async (event) => {
+      const checkbox = event.target.closest(
+        "input[type='checkbox']" +
+          "[data-pantry-type][data-pantry-id], " +
+          "input[type='checkbox']" +
+          "[name='ingrediente_a_comprar_id']"
+      );
+
+      if (!checkbox) return;
+
+      const identity = pantryIdentity(checkbox);
+      if (!identity) return;
+
+      const context = getFormContext(checkbox);
+      if (!context) return;
+
+      const commentInput = findComment(
+        context.form,
+        identity
+      );
+
       const fd = new FormData();
-      fd.append("post_origen", "ingredientes");
-      fd.append("comment_ing_id", ingId);
-      fd.append(`comentario_${ingId}`, comentario);
+      fd.append("post_origen", "pantry");
+      fd.append("pantry_item_type", identity.type);
+      fd.append("pantry_item_id", identity.id);
+      fd.append(
+        "pantry_item_checked",
+        checkbox.checked ? "1" : "0"
+      );
+      fd.append(
+        "pantry_comment",
+        commentInput ? commentInput.value || "" : ""
+      );
 
       try {
-        await postFormData({ url: ctx.url, csrf: ctx.csrf, fd });
-      } catch (e) {
-        console.error("No se pudo persistir el comentario", e);
+        await postFormData({
+          url: context.url,
+          csrf: context.csrf,
+          fd,
+        });
+      } catch (error) {
+        console.error(
+          "No se pudo persistir el estado del pantry",
+          error
+        );
       }
-    }, 450);
-  });
+    }
+  );
+
+  const timers = new Map();
+
+  document.addEventListener(
+    "input",
+    (event) => {
+      const input = event.target.closest(
+        'input[data-pantry-comment="1"], ' +
+          'input[name^="comentario_"]'
+      );
+
+      if (!input) return;
+
+      let identity = pantryIdentity(input);
+
+      if (!identity) {
+        const legacy = input.name.match(
+          /^comentario_(\d+)$/
+        );
+
+        if (legacy) {
+          identity = {
+            type: "ingrediente",
+            id: legacy[1],
+            key: "ingrediente-" + legacy[1],
+          };
+        }
+      }
+
+      if (!identity) return;
+
+      const context = getFormContext(input);
+      if (!context) return;
+
+      const timerKey =
+        context.url + "|" + identity.key;
+
+      if (timers.has(timerKey)) {
+        clearTimeout(timers.get(timerKey));
+      }
+
+      const timer = setTimeout(
+        async () => {
+          const fd = new FormData();
+          fd.append("post_origen", "pantry");
+          fd.append(
+            "pantry_item_type",
+            identity.type
+          );
+          fd.append(
+            "pantry_item_id",
+            identity.id
+          );
+          fd.append(
+            "pantry_comment",
+            input.value || ""
+          );
+
+          try {
+            await postFormData({
+              url: context.url,
+              csrf: context.csrf,
+              fd,
+            });
+          } catch (error) {
+            console.error(
+              "No se pudo persistir el comentario",
+              error
+            );
+          } finally {
+            timers.delete(timerKey);
+          }
+        },
+        450
+      );
+
+      timers.set(timerKey, timer);
+    }
+  );
 })();

@@ -666,6 +666,34 @@ class ProfileIngrediente(models.Model):
 
 
 
+
+class ProfileInsumo(models.Model):
+    profile = models.ForeignKey(
+        "Profile",
+        on_delete=models.CASCADE,
+        related_name="insumos_pantry",
+    )
+    insumo = models.ForeignKey(
+        "AdminVideos.Insumo",
+        on_delete=models.CASCADE,
+        related_name="en_pantry_de",
+    )
+
+    # Misma semántica que ProfileIngrediente:
+    # True = lo tengo / False = me falta.
+    tengo = models.BooleanField(default=False)
+    comentario = models.CharField(max_length=120, blank=True, default="")
+    updated_at = models.DateTimeField(auto_now=True)
+    last_bought_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ("profile", "insumo")
+
+    def __str__(self):
+        estado = "tengo" if self.tengo else "no tengo"
+        return f"{self.profile.user} - {self.insumo} - {self.comentario} ({estado})"
+
+
 class LoQueTengoPalabra(models.Model):
     profile = models.ForeignKey(
         "Profile",
