@@ -287,6 +287,7 @@
 
   // al iniciar el script (después de definir funciones básicas)
   ensureModalAtBody("ingredienteModal");
+  ensureModalAtBody("insumoModal");
   ensureModalAtBody("confirmDeleteVariedadModal");
   ensureModalAtBody("successModal");
 
@@ -321,45 +322,47 @@
 
 
   // ===== Select2 helpers =====
-  function buildSelect2Config(dropdownParent /* jQuery or null */) {
+  function buildSelect2Config(
+    dropdownParent,
+    {
+      url = "/api/ingredientes/",
+      placeholder = "Seleccioná un ingrediente",
+      closeOnSelect = true,
+    } = {}
+  ) {
     const cfg = {
-      placeholder: "Selecciona un ingrediente",
+      placeholder: placeholder,
       ajax: {
-        url: "/api/ingredientes/",
+        url: url,
         dataType: "json",
         delay: 250,
         data: (params) => ({ q: params.term || "" }),
 
-
-
-
-
         processResults: (data) => {
-          // Caso 1: API estilo Select2 => { results: [{id, text}, ...] }
           if (data && Array.isArray(data.results)) {
             return { results: data.results };
           }
 
-          // Caso 2: tu API vieja => [{id, nombre}, ...]
           if (Array.isArray(data)) {
             return {
-              results: data.map((item) => ({ id: item.id, text: item.nombre })),
+              results: data.map((item) => ({
+                id: item.id,
+                text: item.nombre,
+              })),
             };
           }
 
           return { results: [] };
         },
 
-
-
-
-
         cache: true,
       },
       minimumInputLength: 0,
       allowClear: true,
+      closeOnSelect: closeOnSelect,
       width: "style",
     };
+
     if (dropdownParent) cfg.dropdownParent = dropdownParent;
     return cfg;
   }
@@ -413,6 +416,8 @@
       if (hiddenNombre) hiddenNombre.value = data ? data.text ?? "" : "";
     });
   }
+
+
 
   // ===== Subcategorías por tipo =====
   const DETALLE_OPCIONES = {
@@ -871,6 +876,7 @@ ul.appendChild(li);
     if (modal) modal.hide();
   }
 
+
   // ===== Inicializador principal =====
   // context: `document` (página completa) o un contenedor dentro del modal (e.g., modalBody)
   function initPlatoForm(context) {
@@ -1019,6 +1025,8 @@ ul.appendChild(li);
       });
       guardarBtn.__bound = true;
     }
+
+
 
     // ===== Botón "Asociar" del modal componentes/platos asociados
     const guardarComponenteBtn =

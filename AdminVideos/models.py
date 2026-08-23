@@ -166,6 +166,19 @@ class TipoPlato(models.Model):
     def __str__(self):
         return self.nombre
     
+class Insumo(models.Model):
+    nombre = models.CharField(
+        max_length=100,
+        unique=True,
+    )
+
+    class Meta:
+        ordering = ["nombre"]
+
+    def __str__(self):
+        return self.nombre
+
+
 class Plato(models.Model):
     nombre_plato = models.CharField(max_length=30)
 
@@ -276,6 +289,13 @@ class Plato(models.Model):
        ]
 
     estacionalidad = models.CharField(max_length=20, choices=ESTACIONALIDAD_CHOICES, default=TODO_EL_AÑO,null=True)  
+
+    insumos = models.ManyToManyField(
+        Insumo,
+        blank=True,
+        related_name="platos",
+        help_text="Insumos o materiales necesarios para preparar el plato",
+    )
 
     componentes = models.ManyToManyField(
         "self",

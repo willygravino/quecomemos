@@ -188,6 +188,37 @@
 
 
 <section class="plato-form-section plato-form-section-ingredientes">
+
+  <div class="plato-form-section-header plato-form-section-header-actions flex-wrap"
+       data-ingredientes-section-header>
+    <span class="plato-form-section-icon" aria-hidden="true">
+      <i class="fa-solid fa-carrot"></i>
+    </span>
+
+    <div class="flex-grow-1">
+      <h2 class="plato-form-section-title">Ingredientes</h2>
+      <p class="plato-form-section-help">
+        Agregá los ingredientes del plato y organizalos por partes cuando haga falta.
+      </p>
+    </div>
+
+    <div class="d-flex align-items-center justify-content-end gap-2 ms-auto"
+         aria-label="Acciones de ingredientes">
+      <button type="button"
+              class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1 js-agregar-ingrediente-parte"
+              data-parte-clave=""
+              data-parte-nombre="Ingredientes">
+        <i class="fa-solid fa-plus" aria-hidden="true"></i>
+        <span>Ingrediente</span>
+      </button>
+
+      <button type="button"
+              class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1 js-agregar-parte-receta">
+        <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+        <span>Parte</span>
+      </button>
+    </div>
+  </div>
 {{ form.partes_receta_json }}
 
 {# Disparador interno: los botones de cada cuadro lo usan para abrir el modal. #}
@@ -199,7 +230,7 @@
         tabindex="-1"></button>
 
 <div data-partes-receta-controles>
-  <div class="partes-receta-toolbar d-flex flex-wrap justify-content-end gap-2 mb-3">
+  <div class="partes-receta-toolbar d-flex flex-wrap justify-content-end gap-2 mb-3 d-none">
     <button type="button" class="btn btn-sm btn-primary js-agregar-parte-receta">
       <i class="fa-solid fa-layer-group me-1" aria-hidden="true"></i>
       Agregar parte
@@ -321,6 +352,77 @@
 
 
 </section>
+
+
+                <section class="plato-form-section plato-form-section-insumos">
+                  <div class="plato-form-section-header">
+                    <span class="plato-form-section-icon" aria-hidden="true">
+                      <i class="fa-solid fa-box-open"></i>
+                    </span>
+                    <div>
+                      <h2 class="plato-form-section-title">Insumos</h2>
+                      <p class="plato-form-section-help">
+                        Materiales necesarios para preparar la receta.
+                      </p>
+                    </div>
+                  </div>
+
+                  {# Select real que Django recibe. Visualmente queda oculto. #}
+                  <select id="id_insumos"
+                          name="insumos"
+                          multiple
+                          class="d-none"
+                          aria-hidden="true">
+                    {% for insumo in form.insumos_seleccionados %}
+                      <option value="{{ insumo.id }}" selected>{{ insumo.nombre }}</option>
+                    {% endfor %}
+                  </select>
+
+                  <div id="insumos-list" class="mb-3">
+
+                    <div id="insumos-empty" class="parte-receta-vacia text-muted small{% if form.insumos_seleccionados %} d-none{% endif %}">
+                      Todavía no agregaste insumos.
+                    </div>
+
+                    <ul id="insumos-ul" class="list-group list-group-flush parte-receta-ingredientes">
+                      {% for insumo in form.insumos_seleccionados %}
+<li class="list-group-item ingrediente-compact-item"
+    data-insumo-row
+    data-insumo-id="{{ insumo.id }}">
+
+  <div class="d-flex align-items-center gap-1 ingrediente-compact-summary">
+    <button type="button"
+            class="btn btn-link btn-sm p-0 text-start ingrediente-summary-btn"
+            tabindex="-1"
+            aria-label="{{ insumo.nombre }}">
+      <span class="fw-semibold ingrediente-summary-nombre">
+        {{ insumo.nombre }}
+      </span>
+    </button>
+
+    <button type="button"
+            class="btn btn-sm btn-outline-danger py-0 px-2 eliminar-insumo"
+            title="Quitar insumo"
+            aria-label="Quitar {{ insumo.nombre }}">
+      ×
+    </button>
+  </div>
+</li>
+{% endfor %}
+                    </ul>
+
+                    <div class="d-flex justify-content-end gap-2 mb-3 mt-3 insumos-add-toolbar">
+<button type="button"
+                            class="btn btn-sm btn-outline-primary js-agregar-insumo"
+                            data-bs-toggle="modal"
+                            data-bs-target="#insumoModal">
+                      <i class="fa-solid fa-plus me-1" aria-hidden="true"></i>
+                      Agregar insumo
+                    </button>
+</div>
+
+                  </div>
+                </section>
 
                 <!-- Preparación -->
                 <section class="plato-form-section plato-form-section-preparacion">
@@ -753,6 +855,72 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
         <button type="button" class="btn btn-primary" id="guardarIngrediente">Guardar</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal insumos -->
+<div class="modal fade"
+     id="insumoModal"
+     tabindex="-1"
+     aria-labelledby="insumoModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="insumoModalLabel">Agregar insumo</h5>
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="mb-3">
+          <label for="modal-insumo" class="form-label">Insumo existente</label>
+          <select id="modal-insumo"
+                  class="form-select"
+                  style="width:100%"></select>
+        </div>
+
+        <hr class="my-3">
+
+        <small class="text-muted">
+          O bien, cargá un nuevo insumo:
+        </small>
+
+        <div class="border rounded p-3 bg-body-tertiary mt-3">
+          <label for="nuevo-insumo-nombre" class="form-label">Nombre</label>
+          <input type="text"
+                 id="nuevo-insumo-nombre"
+                 class="form-control"
+                 maxlength="100"
+                 autocomplete="off"
+                 placeholder="Ej.: Papel manteca">
+        </div>
+
+        <div id="nuevo-insumo-error"
+             class="alert alert-warning d-none mt-3 mb-0"></div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal">
+          Cancelar
+        </button>
+
+        <button type="button"
+                class="btn btn-primary"
+                id="guardarInsumo">
+          Guardar
+        </button>
       </div>
 
     </div>

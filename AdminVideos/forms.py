@@ -3,7 +3,7 @@ import json
 import re
 
 from django import forms
-from .models import Ingrediente, IngredienteEnPlato, Lugar, MenuItem, MenuItemExtra, Plato, TipoPlato
+from .models import Ingrediente, IngredienteEnPlato, Insumo, Lugar, MenuItem, MenuItemExtra, Plato, TipoPlato
 from django.contrib.auth.forms import AuthenticationForm
 
 
@@ -60,6 +60,13 @@ class PlatoForm(forms.ModelForm):
         widget=forms.MultipleHiddenInput,
     )
 
+    insumos = forms.ModelMultipleChoiceField(
+        queryset=Insumo.objects.none(),
+        required=False,
+        label="Insumos",
+        widget=forms.MultipleHiddenInput,
+    )
+
     partes_receta_json = forms.CharField(
         required=False,
         widget=forms.HiddenInput(attrs={"id": "partesRecetaJson"}),
@@ -71,6 +78,7 @@ class PlatoForm(forms.ModelForm):
             "nombre_plato",
             "receta",
             "ingredientes",
+            "insumos",
             "componentes",
             "porciones",
             "medios",
@@ -86,6 +94,30 @@ class PlatoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
+
+        # ✅ Insumos: sólo cargamos los IDs seleccionados.
+        # El catálogo completo se consulta por AJAX desde Select2.
+        self.insumos_seleccionados = []
+
+        if "insumos" in self.fields:
+            if self.is_bound:
+                ids_insumos = [
+                    valor for valor in self.data.getlist(self.add_prefix("insumos"))
+                    if str(valor).isdigit()
+                ]
+            elif self.instance and self.instance.pk:
+                ids_insumos = list(
+                    self.instance.insumos.values_list("pk", flat=True)
+                )
+            else:
+                ids_insumos = []
+
+            qs_insumos = Insumo.objects.filter(
+                pk__in=ids_insumos
+            ).order_by("nombre")
+
+            self.fields["insumos"].queryset = qs_insumos
+            self.insumos_seleccionados = list(qs_insumos)
 
         # ✅ Componentes: platos que se pueden asociar a este plato
         if "componentes" in self.fields:

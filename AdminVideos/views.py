@@ -9,7 +9,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
-from AdminVideos.models import ElementoCompartido, Amistad, ProfilePlatoCompra, HabitoSemanal, Ingrediente, IngredienteEnPlato, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente, LoQueTengoPalabra
+from AdminVideos.models import ElementoCompartido, Amistad, ProfilePlatoCompra, HabitoSemanal, Ingrediente, IngredienteEnPlato, Insumo, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente, LoQueTengoPalabra
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string   # ✅ ← ESTA ES LA CLAVE
 from django.http import Http404, HttpRequest, HttpResponseNotAllowed, JsonResponse
@@ -312,6 +312,62 @@ def obtener_parametros_sesion(request):
 
 def index(request):
     return redirect(reverse_lazy("filtro-de-platos"))
+
+
+@require_http_methods(["GET", "POST"])
+def api_insumos(request):
+    if request.method == "GET":
+        q = (request.GET.get("q") or "").strip()
+        qs = Insumo.objects.all()
+
+        if q:
+            qs = qs.filter(nombre__icontains=q)
+
+        insumos = qs.order_by("nombre")[:50]
+
+        return JsonResponse({
+            "results": [
+                {"id": insumo.id, "text": insumo.nombre}
+                for insumo in insumos
+            ]
+        })
+
+    try:
+        payload = json.loads(request.body.decode("utf-8"))
+    except Exception:
+        return JsonResponse({"error": "JSON inválido"}, status=400)
+
+    nombre = (payload.get("nombre") or "").strip()
+
+    if not nombre:
+        return JsonResponse(
+            {"errors": {"nombre": ["Requerido"]}},
+            status=400,
+        )
+
+    existente = Insumo.objects.filter(nombre__iexact=nombre).first()
+
+    if existente:
+        return JsonResponse({
+            "id": existente.id,
+            "nombre": existente.nombre,
+            "existed": True,
+        })
+
+    try:
+        insumo = Insumo(nombre=nombre)
+        insumo.full_clean()
+        insumo.save()
+    except ValidationError as exc:
+        return JsonResponse({"errors": exc.message_dict}, status=400)
+    except Exception as exc:
+        return JsonResponse({"error": str(exc)}, status=400)
+
+    return JsonResponse({
+        "id": insumo.id,
+        "nombre": insumo.nombre,
+    }, status=201)
+
 
 def about(request):
     return render(request, "AdminVideos/about.html")

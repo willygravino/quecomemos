@@ -120,10 +120,31 @@
 
   function crearSeccionParte(form, parte) {
     const esGeneral = !parte.clave;
+
+    // Los ingredientes sin parte pertenecen directamente a la sección
+    // Ingredientes. clave="" se conserva sólo como dato técnico.
+    if (esGeneral) {
+      const bloque = document.createElement("div");
+      bloque.className = "ingredientes-sueltos-bloque";
+      bloque.dataset.parteClave = "";
+
+      const lista = document.createElement("ul");
+      lista.className = "list-group list-group-flush parte-receta-ingredientes";
+      lista.dataset.parteLista = "";
+      bloque.appendChild(lista);
+
+      const vacio = document.createElement("div");
+      vacio.className = "parte-receta-vacia ingredientes-vacio-global text-muted small";
+      vacio.textContent = "Todavía no agregaste ingredientes.";
+      bloque.appendChild(vacio);
+
+      return bloque;
+    }
+
+    // Las partes reales sí se presentan como tarjetas.
     const seccion = document.createElement("section");
-    seccion.className =
-      "parte-receta-card" + (esGeneral ? " parte-receta-card-general" : "");
-    seccion.dataset.parteClave = parte.clave || "";
+    seccion.className = "parte-receta-card";
+    seccion.dataset.parteClave = parte.clave;
 
     const encabezado = document.createElement("div");
     encabezado.className = "parte-receta-card-header";
@@ -153,40 +174,38 @@
       "btn btn-sm btn-outline-primary js-agregar-ingrediente-parte",
       "fa-solid fa-plus"
     );
-    agregar.dataset.parteClave = parte.clave || "";
+    agregar.dataset.parteClave = parte.clave;
     agregar.dataset.parteNombre = parte.nombre;
     acciones.appendChild(agregar);
 
-    if (!esGeneral) {
-      const editar = crearBoton(
-        "Editar",
-        "btn btn-sm btn-outline-secondary js-editar-parte-receta",
-        "fa-regular fa-pen-to-square"
-      );
-      editar.dataset.parteClave = parte.clave;
-      acciones.appendChild(editar);
+    const editar = crearBoton(
+      "Editar",
+      "btn btn-sm btn-outline-secondary js-editar-parte-receta",
+      "fa-regular fa-pen-to-square"
+    );
+    editar.dataset.parteClave = parte.clave;
+    acciones.appendChild(editar);
 
-      const eliminar = crearBoton(
-        "Eliminar",
-        "btn btn-sm btn-outline-danger js-eliminar-parte-receta",
-        "fa-solid fa-trash-can"
-      );
-      eliminar.dataset.parteClave = parte.clave;
-      eliminar.setAttribute("data-bs-toggle", "modal");
-      eliminar.setAttribute("data-bs-target", "#confirmActionModal");
-      eliminar.dataset.confirmTitle = "Eliminar parte de la receta";
-      eliminar.dataset.confirmBtn = "Sí, eliminar";
-      eliminar.dataset.confirmHint = "Los cambios se aplicarán al guardar el plato.";
-      eliminar.dataset.confirmEvent = "partes-receta:eliminar";
-      acciones.appendChild(eliminar);
-    }
+    const eliminar = crearBoton(
+      "Eliminar",
+      "btn btn-sm btn-outline-danger js-eliminar-parte-receta",
+      "fa-solid fa-trash-can"
+    );
+    eliminar.dataset.parteClave = parte.clave;
+    eliminar.setAttribute("data-bs-toggle", "modal");
+    eliminar.setAttribute("data-bs-target", "#confirmActionModal");
+    eliminar.dataset.confirmTitle = "Eliminar parte de la receta";
+    eliminar.dataset.confirmBtn = "Sí, eliminar";
+    eliminar.dataset.confirmHint = "Los cambios se aplicarán al guardar el plato.";
+    eliminar.dataset.confirmEvent = "partes-receta:eliminar";
+    acciones.appendChild(eliminar);
 
     encabezado.appendChild(acciones);
     seccion.appendChild(encabezado);
 
     const lista = document.createElement("ul");
     lista.className = "list-group list-group-flush parte-receta-ingredientes";
-    lista.dataset.parteLista = parte.clave || "";
+    lista.dataset.parteLista = parte.clave;
     seccion.appendChild(lista);
 
     const vacio = document.createElement("div");
@@ -198,15 +217,49 @@
   }
 
   function actualizarVacios(root) {
-    root.querySelectorAll(".parte-receta-card").forEach(function (seccion) {
+    const secciones = Array.from(root.querySelectorAll("[data-parte-clave]"));
+
+    const partesReales = secciones.filter(function (seccion) {
+      return (seccion.dataset.parteClave || "") !== "";
+    });
+
+    secciones.forEach(function (seccion) {
+      const esGeneral = (seccion.dataset.parteClave || "") === "";
+
       const filasVisibles = Array.from(
         seccion.querySelectorAll("[data-ingrediente-row]")
       ).filter(function (fila) {
-        return fila.style.display !== "none" && fila.getAttribute("aria-hidden") !== "true";
+        return (
+          fila.style.display !== "none" &&
+          fila.getAttribute("aria-hidden") !== "true"
+        );
       });
 
+      const hayFilas = filasVisibles.length > 0;
+      const lista = seccion.querySelector("[data-parte-lista]");
       const vacio = seccion.querySelector(".parte-receta-vacia");
-      if (vacio) vacio.classList.toggle("d-none", filasVisibles.length > 0);
+
+      if (lista) {
+        lista.classList.toggle("d-none", !hayFilas);
+      }
+
+      if (esGeneral) {
+        // Si existen partes reales y no hay ingredientes sin parte,
+        // el bloque técnico clave="" desaparece por completo.
+        const ocultarBloqueGeneral = !hayFilas && partesReales.length > 0;
+        seccion.classList.toggle("d-none", ocultarBloqueGeneral);
+
+        if (vacio) {
+          // El mensaje global sólo aparece cuando no hay partes
+          // y tampoco hay ingredientes sueltos.
+          vacio.classList.toggle(
+            "d-none",
+            hayFilas || partesReales.length > 0
+          );
+        }
+      } else if (vacio) {
+        vacio.classList.toggle("d-none", hayFilas);
+      }
     });
   }
 
@@ -220,36 +273,49 @@
     filas.forEach(function (fila) {
       fila.remove();
     });
+
     root.replaceChildren();
 
     const partes = leerPartes(form);
-    const todas = [
-      {
-        clave: "",
-        nombre: "Ingredientes generales",
-        instrucciones: "Ingredientes que corresponden al plato completo.",
-      },
-    ].concat(partes);
-
     const listas = new Map();
 
-    todas.forEach(function (parte) {
+    // Contenedor técnico de ingredientes sin parte.
+    // No lleva título ni tarjeta visual.
+    const general = crearSeccionParte(form, {
+      clave: "",
+      nombre: "",
+      instrucciones: "",
+    });
+    root.appendChild(general);
+    listas.set("", general.querySelector("[data-parte-lista]"));
+
+    // Conservamos aquí el editor de partes.
+    // El viejo toolbar quedó oculto en el template.
+    if (controles) {
+      root.appendChild(controles);
+    }
+
+    // Sólo las partes reales se representan como partes.
+    partes.forEach(function (parte) {
       const seccion = crearSeccionParte(form, parte);
       root.appendChild(seccion);
-
-      if (!parte.clave && controles) {
-        root.appendChild(controles);
-      }
-
-      listas.set(parte.clave || "", seccion.querySelector("[data-parte-lista]"));
+      listas.set(
+        parte.clave,
+        seccion.querySelector("[data-parte-lista]")
+      );
     });
 
     filas.forEach(function (fila) {
       const clave = obtenerClaveFila(fila);
       const lista = listas.get(clave) || listas.get("");
 
-      if (!listas.has(clave)) asignarClaveFila(fila, "");
-      lista.appendChild(fila);
+      if (!listas.has(clave)) {
+        asignarClaveFila(fila, "");
+      }
+
+      if (lista) {
+        lista.appendChild(fila);
+      }
     });
 
     actualizarVacios(root);
@@ -462,7 +528,7 @@
 
         estado.activandoIngredienteDeParte = false;
         mostrarDestinoIngrediente(
-          agregarEnParte.dataset.parteNombre || "Ingredientes generales"
+          agregarEnParte.dataset.parteNombre || "Ingredientes"
         );
         return;
       }
@@ -472,7 +538,7 @@
         const estado = obtenerEstado(form);
         if (!estado.activandoIngredienteDeParte) {
           estado.parteObjetivo = "";
-          mostrarDestinoIngrediente("Ingredientes generales");
+          mostrarDestinoIngrediente("Ingredientes");
         }
       }
     });
@@ -505,7 +571,19 @@
     if (form && clave) eliminarParteConfirmada(form, clave);
   });
 
-  document.addEventListener("DOMContentLoaded", function () {
+    /* QC: refrescar vacío después de eliminar ingrediente */
+  document.addEventListener("click", function (event) {
+    const boton = event.target.closest?.(".eliminar-ingrediente");
+    if (!boton) return;
+
+    window.setTimeout(function () {
+      const form = boton.closest("#platoForm");
+      const root = form?.querySelector("[data-partes-receta-root]");
+      if (root) actualizarVacios(root);
+    }, 0);
+  });
+
+document.addEventListener("DOMContentLoaded", function () {
     iniciarTodos(document);
   });
 
