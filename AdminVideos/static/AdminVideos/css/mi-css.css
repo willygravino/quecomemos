@@ -2282,3 +2282,47 @@ body.filtro-platos-cambiando [data-listado-url] {
   border-radius: 1rem;
   object-fit: contain;
 }
+
+/* ===== QC: volver desde el formulario de platos ===== */
+.plato-form-back-btn {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: .32rem;
+  min-height: 2.1rem;
+  padding: .32rem .55rem;
+  color: var(--bs-secondary-color);
+  font-size: .74rem;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 999rem;
+  transition: color .15s ease, background-color .15s ease, border-color .15s ease;
+}
+
+.plato-form-back-btn:hover,
+.plato-form-back-btn:focus {
+  color: var(--bs-body-color);
+  background: var(--bs-secondary-bg);
+  border-color: var(--bs-secondary-color);
+}
+
+@media (max-width: 575.98px) {
+  .plato-form-section-header {
+    gap: .5rem;
+  }
+
+  .plato-form-back-btn {
+    width: 2rem;
+    height: 2rem;
+    min-height: 2rem;
+    padding: 0;
+  }
+
+  .plato-form-back-btn span {
+    display: none;
+  }
+}

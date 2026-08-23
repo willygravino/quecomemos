@@ -105,6 +105,7 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = 'nuestrotubo.wsgi.application'
 
 # --- Base de datos ---
