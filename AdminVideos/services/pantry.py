@@ -21,6 +21,9 @@ PANTRY_INGREDIENTE = "ingrediente"
 PANTRY_INSUMO = "insumo"
 PANTRY_TIPOS = {PANTRY_INGREDIENTE, PANTRY_INSUMO}
 
+# Marca técnica: sólo mantiene visible un ítem durante la compra.
+SHOPPING_VISIBILITY_WINDOW = timedelta(hours=1)
+
 
 @dataclass(frozen=True)
 class PantrySaveResult:
@@ -61,7 +64,7 @@ def pantry_estado(record) -> str:
 
     if (
         record.last_bought_at
-        and record.last_bought_at >= timezone.now() - timedelta(hours=3)
+        and record.last_bought_at >= timezone.now() - SHOPPING_VISIBILITY_WINDOW
     ):
         return "recien-comprado"
 
@@ -142,8 +145,9 @@ def persist_profile_pantry_from_post(
     if checked in ("0", "1"):
         tengo = checked == "0"
         defaults["tengo"] = tengo
-        if tengo:
-            defaults["last_bought_at"] = timezone.now()
+
+        # Preparar la lista no es comprar.
+        defaults["last_bought_at"] = None
 
     if comentario_present:
         defaults["comentario"] = comentario
@@ -430,7 +434,7 @@ def set_pantry_have_state(
         state_model.objects.update_or_create(
             profile=perfil,
             **{fk_name: item_id},
-            defaults={"tengo": False},
+            defaults={"tengo": False, "last_bought_at": None},
         )
 
     return PantrySaveResult(
@@ -443,6 +447,22 @@ def set_pantry_have_state(
         item_type=item_type,
         item_id=item_id,
     )
+
+
+def clear_expired_shopping_marks(*, perfil: Profile) -> None:
+    cutoff = timezone.now() - SHOPPING_VISIBILITY_WINDOW
+
+    ProfileIngrediente.objects.filter(
+        profile=perfil,
+        last_bought_at__isnull=False,
+        last_bought_at__lte=cutoff,
+    ).update(last_bought_at=None)
+
+    ProfileInsumo.objects.filter(
+        profile=perfil,
+        last_bought_at__isnull=False,
+        last_bought_at__lte=cutoff,
+    ).update(last_bought_at=None)
 
 
 def sort_items_by_name(items: List[dict]) -> None:

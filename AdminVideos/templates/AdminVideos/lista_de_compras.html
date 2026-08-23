@@ -155,7 +155,7 @@
                        
                         <!-- Convención:
                         - checked  => no-tengo (hay que comprar)
-                        - unchecked => tengo / recién comprado -->
+                        - unchecked => ya lo tengo / no necesito comprarlo -->
                       
                       <input
                         class="form-check-input me-1"
@@ -170,17 +170,10 @@
                       >
 
                       <label
-                        class="form-check-label small
-                          {% if item.estado == 'recien-comprado' %}
-                            text-decoration-line-through text-muted
-                          {% endif %}"
+                        class="form-check-label small"
                         for="pantry-{{ item.pantry_key }}"
                       >
                         {{ item.nombre }}
-
-                        {% if item.estado == "recien-comprado" %}
-                          <span class="badge bg-success ms-1">recién comprado</span>
-                        {% endif %}
                       </label>
 
                     </div>

@@ -40,6 +40,8 @@ from AdminVideos.services.pantry import (
     decorate_pantry_item,
     set_pantry_have_state,
     sort_items_by_name,
+    pantry_estado,
+    clear_expired_shopping_marks,
 )
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.db.models.expressions import OrderBy
@@ -460,50 +462,15 @@ def plato_ingredientes(request: HttpRequest, pk: int):
 
             return JsonResponse({"success": True})
 
-        # --------------------------------------------------
-        # 2.B) POST masivo del form completo
-        #     - Se usa cuando guardás toda la lista de una vez
-        # --------------------------------------------------
-        else:
-            # Los que vienen tildados son "a comprar" => tengo=False
-            to_buy_ids = set(
-                int(x) for x in request.POST.getlist("ingrediente_a_comprar_id") if x.isdigit()
-            )
-
-            for iep in ingredientes_directos:
-                ing = iep.ingrediente
-                if not ing:
-                    continue
-
-                ing_id = iep.ingrediente_id
-                if not ing_id:
-                    continue
-
-                # Si está en to_buy => NO lo tengo
-                tengo = (ing_id not in to_buy_ids)
-
-                defaults = {"tengo": tengo}
-
-                # Si lo tengo, registramos compra/actualización (opcional pero útil)
-                if tengo:
-                    defaults["last_bought_at"] = timezone.now()
-
-                # Comentario del ingrediente
-                comentario_key = f"comentario_{ing_id}"
-                if comentario_key in request.POST:
-                    defaults["comentario"] = (request.POST.get(comentario_key) or "").strip()
-
-                # Si NO lo tengo y no hay comentario, borramos el registro para no llenar la DB
-                if (not tengo) and defaults.get("comentario", "") == "":
-                    ProfileIngrediente.objects.filter(profile=perfil, ingrediente_id=ing_id).delete()
-                else:
-                    ProfileIngrediente.objects.update_or_create(
-                        profile=perfil,
-                        ingrediente_id=ing_id,
-                        defaults=defaults,
-                    )
-
-            return JsonResponse({"success": True})
+        # No hay guardado masivo: pantry_bind.js persiste
+        # cada cambio mediante el servicio común de pantry.
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "Origen POST de pantry inválido.",
+            },
+            status=400,
+        )
 
     # ======================================================
     # 3) GET: preparar items para renderizar el modal
@@ -632,6 +599,7 @@ def plato_ingredientes(request: HttpRequest, pk: int):
 
 def compartir_ing_plato(request, token, pk: int):
     share_user, perfil = _get_user_by_token_or_404(token)
+    clear_expired_shopping_marks(perfil=perfil)
     plato = get_object_or_404(Plato, pk=pk)
 
     # Ingredientes directos del plato
@@ -670,7 +638,6 @@ def compartir_ing_plato(request, token, pk: int):
     )
     pantry_map = {pi.ingrediente_id: pi for pi in pantry_qs}
 
-    now = timezone.now()
 
     items = []
     ingredientes_vistos = set()
@@ -685,14 +652,9 @@ def compartir_ing_plato(request, token, pk: int):
         pi = pantry_map.get(iep.ingrediente_id)
         comentario = (pi.comentario or "") if pi else ""
 
-        if pi and pi.tengo:
-            # Solo mostrar si es "recién comprado" (mismo criterio que compartir_lista)
-            if pi.last_bought_at and pi.last_bought_at >= now - timedelta(hours=3):
-                estado = "recien-comprado"
-            else:
-                continue  # tengo normal -> no mostrar
-        else:
-            estado = "no-tengo"
+        estado = pantry_estado(pi)
+        if estado == "tengo":
+            continue
 
         items.append({
             "ingrediente_id": iep.ingrediente_id,
@@ -742,6 +704,7 @@ def compartir_ing_plato(request, token, pk: int):
 def lista_de_compras(request):
     today = date.today()
     perfil = get_object_or_404(Profile, user=request.user)
+    clear_expired_shopping_marks(perfil=perfil)
 
     # =====================================================
     # Menús futuros + items prefetcheados (sin adapters)
@@ -999,22 +962,11 @@ def lista_de_compras(request):
     )
 
 
-    now = timezone.now()
 
     items = []
     for ing_id, data in agregados.items():
         p = pantry_map.get(ing_id)
-
-        # Default igual que hoy: si no hay registro => "no-tengo"
-        if not p:
-            estado = "no-tengo"
-        else:
-            if p.tengo is False:
-                estado = "no-tengo"
-            elif p.last_bought_at and p.last_bought_at >= now - timedelta(hours=3):
-                estado = "recien-comprado"
-            else:
-                estado = "tengo"
+        estado = pantry_estado(p)
 
         comentario = (p.comentario or "") if p else ""
 
@@ -1122,6 +1074,7 @@ def _get_user_by_token_or_404(token):
 
 def compartir_lista(request, token):
     share_user, perfil = _get_user_by_token_or_404(token)
+    clear_expired_shopping_marks(perfil=perfil)
 
     today = date.today()
 
@@ -1221,7 +1174,6 @@ def compartir_lista(request, token):
     )
     pantry_map = {pi.ingrediente_id: pi for pi in pantry_qs}
 
-    now = timezone.now()
 
     items = []
     for ing_id, data in agregados.items():
@@ -1229,15 +1181,9 @@ def compartir_lista(request, token):
 
         comentario = (pi.comentario or "") if pi else ""
 
-        if pi and pi.tengo:
-            # Solo mostrar si es reciente
-            if pi.last_bought_at and pi.last_bought_at >= now - timedelta(hours=3):
-                estado = "recien-comprado"
-            else:
-                continue
-        else:
-            # NO hay registro, o tengo=False => por defecto: falta comprar
-            estado = "no-tengo"
+        estado = pantry_estado(pi)
+        if estado == "tengo":
+            continue
 
         items.append({
             "ingrediente_id": ing_id,
