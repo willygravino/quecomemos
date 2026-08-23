@@ -1,0 +1,20 @@
+diff --git a/AdminVideos/templates/AdminVideos/lista_de_compras.html b/AdminVideos/templates/AdminVideos/lista_de_compras.html
+index 7a54721..5aa07b6 100644
+--- a/AdminVideos/templates/AdminVideos/lista_de_compras.html
++++ b/AdminVideos/templates/AdminVideos/lista_de_compras.html
+@@ -3,6 +3,15 @@
+ {% load static %}
+ {% block pestanias-menues-platos %}
+ 
++  <div class="px-2 pt-1 mb-2">
++    <a id="btn-volver-lista-compras"
++       href="{% url 'filtro-de-platos' %}"
++       class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1">
++      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
++      <span>Volver</span>
++    </a>
++  </div>
++
+ <!-- <form action="{% url 'menu-elegido' %}" method="post">  {# ⬅️ FORM INICIO #} -->
+ <form id="frm-menu" action="{% url 'menu-elegido' %}" method="post">
+ 

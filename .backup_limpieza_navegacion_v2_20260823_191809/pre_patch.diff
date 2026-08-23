@@ -1,0 +1,82 @@
+diff --git a/AdminVideos/templates/AdminVideos/base.html b/AdminVideos/templates/AdminVideos/base.html
+index fb9dcd8..58640e1 100644
+--- a/AdminVideos/templates/AdminVideos/base.html
++++ b/AdminVideos/templates/AdminVideos/base.html
+@@ -794,6 +794,8 @@ Root globl para modales cargados dinámicamente (AJAX)
+ </div>
+ 
+ 
++{% with current_url=request.resolver_match.url_name %}
++{% if current_url != 'menu-elegido' and current_url != 'videos-create' and current_url != 'videos-update' %}
+ {# Botón flotante: crear plato rápido según la sección actual #}
+ {% if user.is_authenticated %}
+   <a id="botonCrearPlatoFlotante"
+@@ -822,7 +824,7 @@ Root globl para modales cargados dinámicamente (AJAX)
+          class="btn btn-primary rounded-circle shadow position-fixed d-flex align-items-center justify-content-center"
+          style="right: 1rem; bottom: 5rem; width: 56px; height: 56px; z-index: 1050;"
+          title="Lista de compras"
+-         aria-label="Lista de compras">
++         aria-label="Lista de compras" onclick="try{sessionStorage.setItem('qc_lista_compras_origen', window.location.href);}catch(e){}">
+         <i class="fa-solid fa-cart-shopping"></i>
+       </a>
+ 
+@@ -836,8 +838,8 @@ Root globl para modales cargados dinámicamente (AJAX)
+     {% endif %}
+   {% endif %}
+ </div>
+-
+-
++{% endif %}
++{% endwith %}
+ 
+ <script>
+ /**
+diff --git a/AdminVideos/templates/AdminVideos/lista_de_compras.html b/AdminVideos/templates/AdminVideos/lista_de_compras.html
+index 7a54721..b6735e0 100644
+--- a/AdminVideos/templates/AdminVideos/lista_de_compras.html
++++ b/AdminVideos/templates/AdminVideos/lista_de_compras.html
+@@ -3,6 +3,44 @@
+ {% load static %}
+ {% block pestanias-menues-platos %}
+ 
++  <div class="px-2 pt-1 mb-2">
++    <a id="btn-volver-lista-compras"
++       href="{% url 'filtro-de-platos' %}"
++       class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1">
++      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
++      <span>Volver</span>
++    </a>
++<script id="volver-lista-compras-origen">
++(function () {
++  const KEY = "qc_lista_compras_origen";
++  const btn = document.getElementById("btn-volver-lista-compras");
++  if (!btn) return;
++
++  btn.addEventListener("click", function (event) {
++    let origen = "";
++    try {
++      origen = sessionStorage.getItem(KEY) || "";
++    } catch (error) {
++      return;
++    }
++
++    if (!origen) return;
++
++    try {
++      const destino = new URL(origen, window.location.origin);
++      if (destino.origin !== window.location.origin) return;
++
++      event.preventDefault();
++      sessionStorage.removeItem(KEY);
++      window.location.assign(destino.href);
++    } catch (error) {
++      // El href del botón queda como fallback seguro.
++    }
++  });
++})();
++</script>
++  </div>
++
+ <!-- <form action="{% url 'menu-elegido' %}" method="post">  {# ⬅️ FORM INICIO #} -->
+ <form id="frm-menu" action="{% url 'menu-elegido' %}" method="post">
+ 

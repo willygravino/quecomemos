@@ -1,0 +1,18 @@
+ M AdminVideos/templates/AdminVideos/base.html
+ M AdminVideos/templates/AdminVideos/lista_de_compras.html
+?? .backup_fix_template_volver_20260823_174727/
+?? .backup_limpieza_navegacion_20260823_191551/
+?? .backup_nav_principal_20260823_172129/
+?? .backup_ocultar_flotantes_20260823_172938/
+?? .backup_return_to_compras_20260823_174117/
+?? .backup_volver_browser_20260823_174525/
+?? .backup_volver_compras_20260823_172608/
+?? agregar_nav_inicio_compras.sh
+?? auditar_navegacion.sh
+?? auditoria_navegacion_20260823_191119.txt
+?? corregir_template_volver.sh
+?? corregir_volver_compras_con_origen_browser.sh
+?? ocultar_flotantes_en_compras_y_form_plato.sh
+?? ordenar_navegacion.sh
+?? revertir_nav_y_agregar_volver.sh
+?? volver_compras_al_origen.sh

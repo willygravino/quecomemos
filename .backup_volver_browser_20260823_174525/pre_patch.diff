@@ -1,0 +1,84 @@
+diff --git a/AdminVideos/templates/AdminVideos/base.html b/AdminVideos/templates/AdminVideos/base.html
+index fb9dcd8..e43df32 100644
+--- a/AdminVideos/templates/AdminVideos/base.html
++++ b/AdminVideos/templates/AdminVideos/base.html
+@@ -794,6 +794,8 @@ Root globl para modales cargados dinámicamente (AJAX)
+ </div>
+ 
+ 
++{% with current_url=request.resolver_match.url_name %}
++{% if current_url != 'menu-elegido' and current_url != 'videos-create' and current_url != 'videos-update' %}
+ {# Botón flotante: crear plato rápido según la sección actual #}
+ {% if user.is_authenticated %}
+   <a id="botonCrearPlatoFlotante"
+@@ -818,7 +820,7 @@ Root globl para modales cargados dinámicamente (AJAX)
+   {# Botón flotante: acceso rápido a la lista de compras #}
+   {% if user.is_authenticated %}
+     {% if hay_lista_de_compras %}
+-      <a href="{% url 'menu-elegido' %}"
++      <a href="{% url 'menu-elegido' %}?return_to={{ request.get_full_path|urlencode }}"
+          class="btn btn-primary rounded-circle shadow position-fixed d-flex align-items-center justify-content-center"
+          style="right: 1rem; bottom: 5rem; width: 56px; height: 56px; z-index: 1050;"
+          title="Lista de compras"
+@@ -836,8 +838,8 @@ Root globl para modales cargados dinámicamente (AJAX)
+     {% endif %}
+   {% endif %}
+ </div>
+-
+-
++{% endif %}
++{% endwith %}
+ 
+ <script>
+ /**
+diff --git a/AdminVideos/templates/AdminVideos/lista_de_compras.html b/AdminVideos/templates/AdminVideos/lista_de_compras.html
+index 7a54721..544aa40 100644
+--- a/AdminVideos/templates/AdminVideos/lista_de_compras.html
++++ b/AdminVideos/templates/AdminVideos/lista_de_compras.html
+@@ -3,8 +3,17 @@
+ {% load static %}
+ {% block pestanias-menues-platos %}
+ 
++  <div class="px-2 pt-1 mb-2">
++    <a id="btn-volver-lista-compras"
++       href="{{ return_to }}"
++       class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1">
++      <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
++      <span>Volver</span>
++    </a>
++  </div>
++
+ <!-- <form action="{% url 'menu-elegido' %}" method="post">  {# ⬅️ FORM INICIO #} -->
+-<form id="frm-menu" action="{% url 'menu-elegido' %}" method="post">
++<form id="frm-menu" action="{% url 'menu-elegido' %}?return_to={{ return_to|urlencode }}" method="post">
+ 
+   {% csrf_token %}
+ 
+diff --git a/AdminVideos/views.py b/AdminVideos/views.py
+index e2ec02a..81f7279 100644
+--- a/AdminVideos/views.py
++++ b/AdminVideos/views.py
+@@ -702,6 +702,14 @@ def compartir_ing_plato(request, token, pk: int):
+ 
+ @login_required
+ def lista_de_compras(request):
++    return_to = (request.GET.get("return_to") or request.POST.get("return_to") or "").strip()
++    if not return_to or not url_has_allowed_host_and_scheme(
++        return_to,
++        allowed_hosts={request.get_host()},
++        require_https=request.is_secure(),
++    ):
++        return_to = reverse("filtro-de-platos")
++
+     today = date.today()
+     perfil = get_object_or_404(Profile, user=request.user)
+     clear_expired_shopping_marks(perfil=perfil)
+@@ -887,6 +895,8 @@ def lista_de_compras(request):
+                 "menues": menues,
+                 "items_elegidos": items_elegidos,
+                 "share_url": share_url,
++        "return_to": return_to,
++                "return_to": return_to,
+                 "shopping": {"items": [], "summary": {"total": 0, "to_buy": 0, "fresh": 0, "have": 0}},
+             },
+         )

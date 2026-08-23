@@ -14,7 +14,7 @@
 
                   <div class="d-flex align-items-center gap-3">
 
-                      <a href="{{ request.GET.return_to|default:'/' }}"
+                      <a href="{{ return_to_url }}"
                         class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-2 flex-shrink-0 js-close-plato-form"
                         title="Volver"
                         aria-label="Volver">
@@ -101,7 +101,7 @@
 
                 <section class="plato-form-section plato-form-section-principal">
                   <div class="plato-form-section-header plato-form-section-header-actions flex-wrap">
-                    <!-- <a href="{{ request.GET.return_to|default:'/' }}"
+                    <!-- <a href="{{ return_to_url }}"
                        class="plato-form-back-btn js-close-plato-form"
                        title="Volver"
                        aria-label="Volver">
@@ -645,7 +645,7 @@
     {% if not form.instance.plato_padre_id %}
       <button type="button"
         class="btn btn-sm btn-primary js-open-variedad-modal"
-        data-url="{% url 'plato_variedad_create' form.instance.pk %}?return_to={{ request.GET.return_to|urlencode }}">
+        data-url="{% url 'plato_variedad_create' form.instance.pk %}?return_to={{ return_to_url|urlencode }}">
         + Agregar variedad
       </button>
    
@@ -684,7 +684,7 @@
 
             <button type="button"
               class="btn btn-sm btn-outline-secondary js-open-variedad-modal"
-              data-url="{% url 'plato_variedad_update' v.id %}?tipopag={{ tipopag }}&return_to={{ request.GET.return_to|urlencode }}">
+              data-url="{% url 'plato_variedad_update' v.id %}?tipopag={{ tipopag }}&return_to={{ return_to_url|urlencode }}">
               Editar
             </button>
 
@@ -717,7 +717,7 @@
 
 
   <div class="plato-form-footer d-flex flex-column flex-sm-row justify-content-end gap-2 mt-4">
-                    <a href="{{ request.GET.return_to|default:'/' }}"
+                    <a href="{{ return_to_url }}"
                        class="btn btn-outline-secondary js-close-plato-form">
                       Cancelar
                     </a>
@@ -727,7 +727,7 @@
                     </button>
                 </div>
 
-             <input type="hidden" name="return_to" value="{% firstof request.POST.return_to request.GET.return_to '/' %}">
+             <input type="hidden" name="return_to" value="{{ return_to_url }}">
 
   
 
@@ -751,7 +751,7 @@
             <div class="modal-footer">
                 <a class="btn btn-primary" href="{{ request.path }}?tipopag={{ request.GET.tipopag }}">Crear otro
                     plato</a>
-                <a class="btn btn-secondary" href="/">Ir a Home</a>
+                <a class="btn btn-secondary" href="{% url 'filtro-de-platos' %}">Volver</a>
             </div>
         </div>
     </div>

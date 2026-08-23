@@ -43,7 +43,7 @@ from AdminVideos.services.pantry import (
     pantry_estado,
     clear_expired_shopping_marks,
 )
-from django.utils.http import url_has_allowed_host_and_scheme
+from AdminVideos.navigation import get_safe_return_to
 from django.db.models.expressions import OrderBy
 from django.db.models import Case, When, IntegerField
 from django.views.generic.edit import FormView
@@ -1376,7 +1376,11 @@ def eliminar_plato(request, plato_id):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
 
-    return_to = request.POST.get("return_to") or request.GET.get("return_to")
+    return_to = get_safe_return_to(
+        request,
+        fallback_url_name="filtro-de-platos",
+        include_referer=False,
+    )
 
     with transaction.atomic():
         perfil = get_object_or_404(Profile, user=request.user)
@@ -1393,10 +1397,7 @@ def eliminar_plato(request, plato_id):
 
         plato.delete()
 
-    if return_to:
-        return redirect(return_to)
-
-    return redirect("filtro-de-platos")
+    return redirect(return_to)
 
 
 
@@ -1583,6 +1584,10 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["return_to_url"] = get_safe_return_to(
+            self.request,
+            fallback_url_name="filtro-de-platos",
+        )
         template_param = self.request.GET.get('tipopag')
         context['items'] = [k for (k, _) in Plato.TIPOS_CHOICES]
         context['tipopag'] = template_param
@@ -1646,15 +1651,7 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
         # ✅ NUEVO: resolver "return_to" (volver a la página origen)
         # y agregar guardado=ok para que aparezca el toast
         # ==========================================
-        return_to = (
-            self.request.POST.get("return_to")
-            or self.request.GET.get("return_to")
-            or self.request.META.get("HTTP_REFERER")
-            or ""
-        )
-
-        if return_to and not url_has_allowed_host_and_scheme(return_to, allowed_hosts={self.request.get_host()}):
-            return_to = ""
+        return_to = get_safe_return_to(self.request)
 
         # --- Si es un request AJAX (modal): devolvemos redirect_url ---
         if is_ajax:
@@ -1721,6 +1718,10 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["return_to_url"] = get_safe_return_to(
+            self.request,
+            fallback_url_name="filtro-de-platos",
+        )
 
         # --- Formset ingredientes (POST/GET) ---
         if self.request.method == "POST":
@@ -1800,16 +1801,10 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
             ingrediente_formset.save()
 
         # Resolver return_to (para volver a donde fue llamado)
-        return_to = (
-            self.request.POST.get("return_to")
-            or self.request.GET.get("return_to")
-            or self.request.META.get("HTTP_REFERER")
-            or "/"
+        return_to = get_safe_return_to(
+            self.request,
+            fallback_url_name="filtro-de-platos",
         )
-
-        # Seguridad: evitar redirecciones a otro dominio
-        if return_to and not url_has_allowed_host_and_scheme(return_to, allowed_hosts={self.request.get_host()}):
-            return_to = "/"
 
         redirect_url = _add_qs(return_to, msg="Modificado OK.", level="success")
 
@@ -3439,7 +3434,11 @@ def ajax_listado_platos(request):
         else None
     )
 
-    return_to_url = request.POST.get("return_to") or reverse("filtro-de-platos")
+    return_to_url = get_safe_return_to(
+        request,
+        fallback_url_name="filtro-de-platos",
+        include_referer=False,
+    )
 
     contexto = {
         "platos": platos_listado,

@@ -1,0 +1,65 @@
+diff --git a/AdminVideos/static/AdminVideos/js/menu_programado.js b/AdminVideos/static/AdminVideos/js/menu_programado.js
+index e86d4fc..23931bb 100644
+--- a/AdminVideos/static/AdminVideos/js/menu_programado.js
++++ b/AdminVideos/static/AdminVideos/js/menu_programado.js
+@@ -44,8 +44,6 @@
+       const doc = new DOMParser().parseFromString(html, "text/html");
+       const nuevoContenedor = doc.getElementById("contenedor-menu-programado-dias");
+       const nuevosTabsDias = doc.getElementById("diasTab");
+-      const carritoListaCompras = document.getElementById("botonListaComprasFlotanteWrap");
+-      const nuevoCarritoListaCompras = doc.getElementById("botonListaComprasFlotanteWrap");
+ 
+       if (!nuevoContenedor) {
+         throw new Error("No se encontró el menú programado actualizado");
+@@ -55,9 +53,6 @@
+         tabsDias.innerHTML = nuevosTabsDias.innerHTML;
+       }
+ 
+-      if (carritoListaCompras && nuevoCarritoListaCompras) {
+-        carritoListaCompras.innerHTML = nuevoCarritoListaCompras.innerHTML;
+-      }
+ 
+       contenedor.innerHTML = nuevoContenedor.innerHTML;
+     });
+diff --git a/AdminVideos/templates/AdminVideos/base.html b/AdminVideos/templates/AdminVideos/base.html
+index fb9dcd8..534330e 100644
+--- a/AdminVideos/templates/AdminVideos/base.html
++++ b/AdminVideos/templates/AdminVideos/base.html
+@@ -292,6 +292,8 @@
+ 
+             <!-- End of Topbar -->
+ 
++            {% include "AdminVideos/partials/_main_nav.html" %}
++
+ 
+ 
+             <ul class="nav nav-tabs flex-nowrap overflow-hidden border-0 w-100 justify-content-start" id="diasTab"
+@@ -814,28 +816,6 @@ Root globl para modales cargados dinámicamente (AJAX)
+ {% endif %}
+ 
+ 
+-<div id="botonListaComprasFlotanteWrap">
+-  {# Botón flotante: acceso rápido a la lista de compras #}
+-  {% if user.is_authenticated %}
+-    {% if hay_lista_de_compras %}
+-      <a href="{% url 'menu-elegido' %}"
+-         class="btn btn-primary rounded-circle shadow position-fixed d-flex align-items-center justify-content-center"
+-         style="right: 1rem; bottom: 5rem; width: 56px; height: 56px; z-index: 1050;"
+-         title="Lista de compras"
+-         aria-label="Lista de compras">
+-        <i class="fa-solid fa-cart-shopping"></i>
+-      </a>
+-
+-    {% else %}
+-      <span class="btn btn-primary rounded-circle shadow position-fixed d-flex align-items-center justify-content-center"
+-            style="right: 1rem; bottom: 5rem; width: 56px; height: 56px; z-index: 1050; opacity: 0.50; pointer-events: none;"
+-            title="No hay platos programados para comprar"
+-            aria-label="No hay platos programados para comprar">
+-        <i class="fa-solid fa-cart-shopping"></i>
+-      </span>
+-    {% endif %}
+-  {% endif %}
+-</div>
+ 
+ 
+ 

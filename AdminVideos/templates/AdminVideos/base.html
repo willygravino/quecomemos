@@ -794,6 +794,8 @@ Root globl para modales cargados dinámicamente (AJAX)
 </div>
 
 
+{% with current_url=request.resolver_match.url_name %}
+{% if current_url != 'menu-elegido' and current_url != 'videos-create' and current_url != 'videos-update' %}
 {# Botón flotante: crear plato rápido según la sección actual #}
 {% if user.is_authenticated %}
   <a id="botonCrearPlatoFlotante"
@@ -822,7 +824,7 @@ Root globl para modales cargados dinámicamente (AJAX)
          class="btn btn-primary rounded-circle shadow position-fixed d-flex align-items-center justify-content-center"
          style="right: 1rem; bottom: 5rem; width: 56px; height: 56px; z-index: 1050;"
          title="Lista de compras"
-         aria-label="Lista de compras">
+         aria-label="Lista de compras" data-nav-store-current="lista-compras">
         <i class="fa-solid fa-cart-shopping"></i>
       </a>
 
@@ -836,8 +838,8 @@ Root globl para modales cargados dinámicamente (AJAX)
     {% endif %}
   {% endif %}
 </div>
-
-
+{% endif %}
+{% endwith %}
 
 <script>
 /**
@@ -1810,6 +1812,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 </script>
 
+  <script src="{% static 'AdminVideos/js/navigation.js' %}"></script>
 </body>
 
 </html>
