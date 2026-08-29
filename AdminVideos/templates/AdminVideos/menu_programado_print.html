@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Menú programado</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: white;
+      color: #111;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    }
+
+    .print-page {
+      padding: 10px;
+    }
+
+    .print-title {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      border-bottom: 2px solid #111;
+      padding-bottom: 7px;
+      margin-bottom: 10px;
+    }
+
+    .print-title h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .week {
+      margin-bottom: 10px;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 6px;
+      align-items: stretch;
+    }
+
+    .day {
+      min-width: 0;
+      border: 1.3px solid #666;
+      border-radius: 6px;
+      overflow: hidden;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .day-head {
+      background: #f0f0f0;
+      border-bottom: 1px solid #aaa;
+      padding: 6px;
+      text-align: center;
+    }
+
+    .day-name {
+      display: block;
+      font-size: 12px;
+      font-weight: 750;
+      text-transform: uppercase;
+    }
+
+    .day-date {
+      display: block;
+      margin-top: 2px;
+      color: #555;
+      font-size: 10px;
+    }
+
+    .day-body {
+      padding: 6px;
+    }
+
+    .meal + .meal {
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px solid #ddd;
+    }
+
+    .meal h2 {
+      margin: 0 0 3px;
+      font-size: 11px;
+    }
+
+    .meal ul {
+      margin: 0;
+      padding-left: 15px;
+    }
+
+    .meal li {
+      margin: 0 0 2px;
+      line-height: 1.22;
+      overflow-wrap: anywhere;
+      font-size: 10px;
+    }
+
+    .place-label {
+      font-size: 8px;
+      color: #666;
+    }
+
+    .empty {
+      padding: 20px;
+      text-align: center;
+      color: #666;
+    }
+
+    @page {
+      size: A4 landscape;
+      margin: 8mm;
+    }
+
+    @media print {
+      .print-page { padding: 0; }
+
+      .week-grid {
+        gap: 2mm;
+      }
+
+      .print-title {
+        margin-bottom: 4mm;
+      }
+
+      .print-title h1 {
+        font-size: 15pt;
+      }
+
+      .day {
+        border-radius: 2mm;
+      }
+
+      .day-head {
+        padding: 2mm 1.5mm;
+      }
+
+      .day-name { font-size: 8pt; }
+      .day-date { font-size: 6.8pt; }
+      .day-body { padding: 2mm; }
+      .meal h2 { font-size: 7.5pt; }
+      .meal li { font-size: 7.5pt; }
+      .place-label { font-size: 6pt; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="print-page">
+    {% if semanas %}
+      <header class="print-title">
+        <h1>Menú programado</h1>
+      </header>
+
+      {% for semana in semanas %}
+        <section class="week">
+          <div class="week-grid">
+            {% for dia in semana.dias %}
+              <article class="day" style="grid-column: {{ dia.columna }};">
+                <header class="day-head">
+                  <span class="day-name">{{ dia.nombre }}</span>
+                  <span class="day-date">{{ dia.fecha }}</span>
+                </header>
+
+                <div class="day-body">
+                  {% for comida in dia.comidas %}
+                    <section class="meal">
+                      <h2>{{ comida.titulo }}</h2>
+                      <ul>
+                        {% for entrada in comida.entradas %}
+                          <li>
+                            {{ entrada.nombre }}
+                            {% if entrada.es_lugar %}
+                              <span class="place-label">(lugar)</span>
+                            {% endif %}
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    </section>
+                  {% endfor %}
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        </section>
+      {% endfor %}
+    {% else %}
+      <div class="empty">No hay días seleccionados para imprimir.</div>
+    {% endif %}
+  </main>
+
+  {% if auto_imprimir %}
+  <script>
+    window.addEventListener("load", function () {
+      window.setTimeout(function () {
+        window.print();
+      }, 150);
+    });
+  </script>
+  {% endif %}
+</body>
+</html>

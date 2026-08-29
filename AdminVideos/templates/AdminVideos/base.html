@@ -296,7 +296,9 @@
 
 
 
-            <ul class="nav nav-tabs flex-nowrap overflow-hidden border-0 w-100 justify-content-start" id="diasTab"
+            <!-- IMPRESION MENU: ICONO JUNTO A TABS -->
+<div class="d-flex align-items-start gap-1 menu-programado-tabs-row">
+<ul class="nav nav-tabs flex-nowrap overflow-hidden border-0 w-100 justify-content-start" id="diasTab"
                 role="tablist" style="white-space: nowrap;">
 
                 <!-- <span class="btn btn-outline-danger material-symbols-outlined ">wand_shine</span> -->
@@ -348,6 +350,35 @@
                 </li>
                 {% endfor %}
             </ul>
+  {% if platos_dia_x_dia %}
+  <button type="button"
+          class="btn btn-sm btn-outline-secondary flex-shrink-0 menu-programado-print-icon"
+          data-bs-toggle="modal"
+          data-bs-target="#modalImprimirMenuProgramado"
+          title="Imprimir menú"
+          aria-label="Imprimir menú">
+    <i class="fa-solid fa-print" aria-hidden="true"></i>
+    <span class="visually-hidden">Imprimir menú</span>
+  </button>
+  {% endif %}
+</div>
+<style>
+  .menu-programado-tabs-row > #diasTab {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-bottom: 0;
+  }
+
+  .menu-programado-print-icon {
+    width: 2.15rem;
+    height: 2.15rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
+<!-- /IMPRESION MENU: ICONO JUNTO A TABS -->
 
   <!-- PESTAÑAS - MENÚES PROGRAMADOS - PLATOS -->
 
