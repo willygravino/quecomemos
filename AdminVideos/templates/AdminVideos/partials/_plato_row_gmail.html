@@ -46,7 +46,7 @@
       </a>
 
       {% if plato.propietario == request.user %}
-        <a href="{% url 'videos-update' plato.id %}?return_to={{ return_to_url|urlencode }}{% if tipopag %}&tipopag={{ tipopag|urlencode }}{% endif %}"
+        <a data-plato-sheet-open href="{% url 'videos-update' plato.id %}?return_to={{ return_to_url|urlencode }}{% if tipopag %}&tipopag={{ tipopag|urlencode }}{% endif %}"
            class="btn plato-gmail-action-btn plato-gmail-action-editar"
            onclick="event.stopPropagation();"
            title="Editar"

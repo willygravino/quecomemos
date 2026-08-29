@@ -3,7 +3,7 @@
   <div class="{{ item_class }}">
     <!-- Nombre (link solo si NO es lugar) -->
     {% if not plato.es_lugar %}
-      <a href="{% url 'videos-update' plato.objeto_id %}" class="{{ nombre_class }}">
+      <a data-plato-sheet-open href="{% url 'videos-update' plato.objeto_id %}" class="{{ nombre_class }}">
         &nbsp; {{ plato.nombre }}
       </a>
     {% else %}

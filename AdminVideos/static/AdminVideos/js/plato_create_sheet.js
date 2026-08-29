@@ -1,3 +1,4 @@
+/* PLATO FORM SHEET: Crear + Editar comparten la misma hoja. */
 (function () {
   "use strict";
 
@@ -23,10 +24,13 @@
     );
   }
 
-  function esCrearPlato(trigger) {
-    if (!trigger || trigger.id !== "botonCrearPlatoFlotante") {
-      return false;
-    }
+  function esFormularioPlato(trigger) {
+    if (!trigger) return false;
+
+    const esCrear = trigger.id === "botonCrearPlatoFlotante";
+    const esEditar = trigger.hasAttribute("data-plato-sheet-open");
+
+    if (!esCrear && !esEditar) return false;
 
     if (trigger.classList.contains("disabled")) return false;
     if (trigger.getAttribute("aria-disabled") === "true") {
@@ -34,16 +38,26 @@
     }
 
     const href = trigger.getAttribute("href") || "";
-    const createBase = trigger.dataset.urlCrearPlato || "";
-
-    if (!href || !createBase) return false;
+    if (!href) return false;
 
     try {
       const destino = new URL(href, window.location.origin);
+
+      if (destino.origin !== window.location.origin) {
+        return false;
+      }
+
+      if (esEditar) {
+        return true;
+      }
+
+      const createBase = trigger.dataset.urlCrearPlato || "";
+      if (!createBase) return false;
+
       const crear = new URL(createBase, window.location.origin);
 
       return (
-        destino.origin === window.location.origin &&
+        destino.origin === crear.origin &&
         destino.pathname === crear.pathname
       );
     } catch (error) {
@@ -154,7 +168,7 @@
       renderForm(html, url, true);
     } catch (error) {
       console.warn(
-        "No se pudo abrir Crear plato como hoja. Uso la página normal.",
+        "No se pudo abrir el formulario de plato como hoja. Uso la página normal.",
         error
       );
       window.location.href = url;
@@ -175,7 +189,7 @@
   }
 
   function prefetchTrigger(trigger) {
-    if (!cache || !esCrearPlato(trigger)) return;
+    if (!cache || !esFormularioPlato(trigger)) return;
 
     const url = trigger.getAttribute("href");
 
@@ -189,13 +203,17 @@
   }
 
   document.addEventListener("click", function (event) {
-    const createTrigger = event.target.closest(
-      "#botonCrearPlatoFlotante"
+    const platoTrigger = event.target.closest(
+      "#botonCrearPlatoFlotante, [data-plato-sheet-open]"
     );
 
-    if (createTrigger && esCrearPlato(createTrigger)) {
+    if (platoTrigger && esFormularioPlato(platoTrigger)) {
       event.preventDefault();
-      abrir(createTrigger);
+      // CAPTURE: los links de edición pueden frenar el bubbling para no activar la fila.
+      if (platoTrigger.hasAttribute("data-plato-sheet-open")) {
+        event.stopPropagation();
+      }
+      abrir(platoTrigger);
       return;
     }
 
@@ -207,16 +225,15 @@
       event.preventDefault();
       cerrar();
     }
-  });
-
+  }, true);
   document.addEventListener(
     "pointerenter",
     function (event) {
       const trigger = event.target.closest?.(
-        "#botonCrearPlatoFlotante"
+        "#botonCrearPlatoFlotante, [data-plato-sheet-open]"
       );
 
-      if (trigger) prefetchTrigger(trigger);
+      if (trigger && esFormularioPlato(trigger)) prefetchTrigger(trigger);
     },
     true
   );
@@ -225,10 +242,10 @@
     "touchstart",
     function (event) {
       const trigger = event.target.closest?.(
-        "#botonCrearPlatoFlotante"
+        "#botonCrearPlatoFlotante, [data-plato-sheet-open]"
       );
 
-      if (trigger) prefetchTrigger(trigger);
+      if (trigger && esFormularioPlato(trigger)) prefetchTrigger(trigger);
     },
     { passive: true, capture: true }
   );

@@ -128,7 +128,7 @@
     {% if user.id == plato.propietario.id %}
 
       <div class="d-flex flex-wrap gap-2">
-        <a href="{% url 'videos-update' plato.id %}"
+        <a data-plato-sheet-open href="{% url 'videos-update' plato.id %}"
            class="btn btn-sm btn-outline-secondary">
           Editar
         </a>

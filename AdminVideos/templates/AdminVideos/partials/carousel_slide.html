@@ -4,7 +4,7 @@
     {% if platos %}
       {% for plato in platos %}
         <div class="mb-1 ms-1 d-flex align-items-center text-primary">
-          <a href="{% url 'videos-update' plato.plato_id %}" class="text-decoration-none me-2">
+          <a data-plato-sheet-open href="{% url 'videos-update' plato.plato_id %}" class="text-decoration-none me-2">
             &nbsp; {{ plato.nombre }}
           </a>
 

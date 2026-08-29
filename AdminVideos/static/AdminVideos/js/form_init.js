@@ -1172,12 +1172,11 @@ ul.appendChild(li);
     // ===== Guardado AJAX dentro del modal principal =====
     function setupAjaxSave(modalBody) {
       const form = modalBody.querySelector("form");
-      if (!form) return;
+      if (!form || !form.closest("#modalPlato")) return;
+      if (form.__ajaxBound) return;
+      form.__ajaxBound = true;
 
       form.addEventListener("submit", function (e) {
-        // Solo interceptar si el form está dentro del modal
-        if (!form.closest("#modalPlato")) return;
-
         e.preventDefault();
 
         // 🔹 Crear FormData con todos los inputs visibles y ocultos del modal
@@ -1218,9 +1217,8 @@ ul.appendChild(li);
 
 
               if (data.success) {
-                const modal = bootstrap.Modal.getInstance(form.closest("#modalPlato"));
-                if (modal) modal.hide();
-
+                // #modalPlato es el sheet custom de Crear/Editar, no un Bootstrap Modal.
+                // El redirect de backend resuelve el cierre y conserva el origen.
                 // ✅ volver a la página origen (lo manda el backend)
                 if (data.redirect_url) {
                   window.location.assign(data.redirect_url);

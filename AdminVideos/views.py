@@ -1776,7 +1776,15 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
         ingrediente_formset = context["ingrediente_formset"]
 
         if not ingrediente_formset.is_valid():
-            return self.render_to_response(self.get_context_data(form=form))
+            invalid_context = self.get_context_data(form=form)
+            if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                html = render_to_string(
+                    "AdminVideos/plato_form_inner.html",
+                    invalid_context,
+                    request=self.request,
+                )
+                return JsonResponse({"success": False, "html": html})
+            return self.render_to_response(invalid_context)
 
         # 🔒 Imagen: normalizar (si no viene nueva, no tocar la actual)
         uploaded = self.request.FILES.get("image")
@@ -1824,6 +1832,13 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
 
     def form_invalid(self, form):
         context = self.get_context_data(form=form)
+        if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            html = render_to_string(
+                "AdminVideos/plato_form_inner.html",
+                context,
+                request=self.request,
+            )
+            return JsonResponse({"success": False, "html": html})
         return self.render_to_response(context)
 
 
