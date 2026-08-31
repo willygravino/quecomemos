@@ -409,7 +409,7 @@ section > .d-flex {
   display: inline-flex;
   align-items: center;
   gap: .22rem;                    /* mínima separación entre iconos y texto */
-  line-height: .5;  
+  line-height: .5;
 
   box-shadow: 0 0 0 .08rem #fff;  /* halo MUY finito (tapa solo el bordecito) */
 }
@@ -1337,6 +1337,13 @@ body.filtro-platos-cambiando [data-listado-url] {
 [data-bs-theme="dark"] #diasTab .nav-item.show .nav-link {
   color: #fff !important;
   background-color: #4e73df !important;
+  border: 0 !important;
+}
+
+/* Día con menú programado activo en modo oscuro */
+[data-bs-theme="dark"] #diasTab .tiene-menu-programado .nav-link.active {
+  color: #fff !important;
+  background-color: #198754 !important;
   border: 0 !important;
 }
 
@@ -2453,3 +2460,130 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
 }
 
 /* ===== FIN JERARQUIA INGREDIENTES / PARTES ===== */
+
+/* === QC MATRIZ ESTADOS MENU PROGRAMADO ===
+   Semántica:
+   - vacío + inactivo      -> azul oscuro
+   - vacío + activo        -> azul claro
+   - programado + inactivo -> verde oscuro
+   - programado + activo   -> verde
+   El recuadro del contenido acompaña el estado activo.
+*/
+:root {
+  --qc-menu-vacio-inactivo: #3154b8;
+  --qc-menu-vacio-activo: #6f8eea;
+  --qc-menu-programado-inactivo: #17643a;
+  --qc-menu-programado-activo: #2b9d62;
+}
+
+[data-bs-theme="dark"] {
+  --qc-menu-vacio-inactivo: #2f3852;
+  --qc-menu-vacio-activo: #4e73df;
+  --qc-menu-programado-inactivo: #17412d;
+  --qc-menu-programado-activo: #198754;
+}
+
+/* Todos los días ocupan exactamente la misma porción disponible. */
+#diasTab > .nav-item {
+  flex: 1 1 0 !important;
+  min-width: 0;
+}
+
+/* Neutraliza el padding legado de cuando tilde/papelera vivían en cada tab. */
+#diasTab .nav-link,
+#diasTab .tiene-menu-programado .nav-link,
+#diasTab .tiene-menu-programado .nav-link.active {
+  width: 100%;
+  min-width: 0;
+  padding-left: .5rem !important;
+  padding-right: .5rem !important;
+}
+
+/* VACÍO + INACTIVO */
+#diasTab .nav-link:not(.menu-programado-dia-programado):not(.active) {
+  color: #fff !important;
+  background-color: var(--qc-menu-vacio-inactivo) !important;
+  border-color: transparent !important;
+}
+
+/* VACÍO + ACTIVO */
+#diasTab .nav-link:not(.menu-programado-dia-programado).active,
+#diasTab .nav-link:not(.menu-programado-dia-programado)[aria-selected="true"] {
+  color: #fff !important;
+  background-color: var(--qc-menu-vacio-activo) !important;
+  border-color: transparent !important;
+}
+
+/* PROGRAMADO + INACTIVO */
+#diasTab .menu-programado-dia-programado:not(.active) {
+  color: #fff !important;
+  background-color: var(--qc-menu-programado-inactivo) !important;
+  border-color: transparent !important;
+  font-weight: 600;
+}
+
+/* PROGRAMADO + ACTIVO */
+#diasTab .menu-programado-dia-programado.active,
+#diasTab .menu-programado-dia-programado[aria-selected="true"] {
+  color: #fff !important;
+  background-color: var(--qc-menu-programado-activo) !important;
+  border-color: transparent !important;
+  font-weight: 600;
+}
+
+/* Hover conserva la familia cromática del estado. */
+#diasTab .nav-link:not(.menu-programado-dia-programado):not(.active):hover,
+#diasTab .nav-link:not(.menu-programado-dia-programado):not(.active):focus-visible {
+  color: #fff !important;
+  background-color: color-mix(
+    in srgb,
+    var(--qc-menu-vacio-inactivo) 84%,
+    white
+  ) !important;
+}
+
+#diasTab .menu-programado-dia-programado:not(.active):hover,
+#diasTab .menu-programado-dia-programado:not(.active):focus-visible {
+  color: #fff !important;
+  background-color: color-mix(
+    in srgb,
+    var(--qc-menu-programado-inactivo) 84%,
+    white
+  ) !important;
+}
+
+/* El recuadro visible acompaña la pestaña activa. */
+#diasTabContent .menu-programado-contenido-solido {
+  border-width: 2px !important;
+  border-style: solid !important;
+  border-color: var(--qc-menu-vacio-activo) !important;
+  background-color: var(--bs-tertiary-bg) !important;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+#diasTabContent
+.menu-programado-contenido-solido.menu-programado-contenido-programado {
+  border-color: var(--qc-menu-programado-activo) !important;
+}
+
+/* Refuerzo visual muy leve sin teñir todo el contenido. */
+#diasTabContent
+.menu-programado-contenido-solido.menu-programado-contenido-programado {
+  box-shadow:
+    0 .125rem .25rem rgba(0, 0, 0, .075),
+    0 0 0 1px color-mix(
+      in srgb,
+      var(--qc-menu-programado-activo) 18%,
+      transparent
+    ) !important;
+}
+
+@media (max-width: 767.98px) {
+  #diasTab .nav-link,
+  #diasTab .tiene-menu-programado .nav-link,
+  #diasTab .tiene-menu-programado .nav-link.active {
+    padding-left: .2rem !important;
+    padding-right: .2rem !important;
+  }
+}
+/* === /QC MATRIZ ESTADOS MENU PROGRAMADO === */
