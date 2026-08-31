@@ -1,2 +1,0 @@
-?? .backup_nav_principal_20260823_172129/
-?? agregar_nav_inicio_compras.sh
