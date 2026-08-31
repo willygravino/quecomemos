@@ -2605,3 +2605,15 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
   }
 }
 /* === /QC MATRIZ ESTADOS MENU PROGRAMADO === */
+
+
+/* Acciones menu programado sin menu: visibles pero apagadas */
+.menu-programado-action-icon:disabled,
+.menu-programado-action-icon.disabled {
+  opacity: .35 !important;
+  cursor: not-allowed;
+  pointer-events: none;
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
