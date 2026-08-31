@@ -92,6 +92,7 @@
   <link rel="stylesheet" href="{% static 'AdminVideos/css/shopping_panel.css' %}?v=1">
   <link rel="stylesheet" href="{% static 'AdminVideos/css/plato_create_sheet.css' %}?v=1">
   <link rel="stylesheet" href="{% static 'AdminVideos/css/menu_print_sheet.css' %}?v=20260829_171105">
+  <link rel="stylesheet" href="{% static 'AdminVideos/css/mobile_action_bar.css' %}?v=20260831_104417">
 </head>
 
 <body id="page-top">
@@ -403,18 +404,7 @@
 
 
   <!-- End of Main Content -->
-
-            <!-- Footer -->
-            <footer class="sticky-footer bg-body-tertiary">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto">
-                        <span>Copyright ¿Qué comemos? V1.0© 2025</span>
-                    </div>
-                </div>
-            </footer>
-            <!-- End of Footer -->
-
-        </div>
+</div>
         <!-- End of Content Wrapper -->
     </div>
     <!-- End of Page Wrapper -->
@@ -914,6 +904,9 @@ Root globl para modales cargados dinámicamente (AJAX)
 
 {% with current_url=request.resolver_match.url_name %}
 {% if current_url != 'menu-elegido' and current_url != 'videos-create' and current_url != 'videos-update' %}
+<nav id="accionesRapidasBase"
+     class="qc-mobile-action-bar"
+     aria-label="Acciones rápidas">
 {# Botón flotante: crear plato rápido según la sección actual #}
 {% if user.is_authenticated %}
   <a id="botonCrearPlatoFlotante"
@@ -930,6 +923,7 @@ Root globl para modales cargados dinámicamente (AJAX)
     <span class="boton-crear-plato-texto">
       {% if tipopag == 'Todos' %}Elegí una categoría{% elif tipopag == 'Picada' %}Armar picada{% elif tipopag == 'Ingrediente de picada' %}Agregar ingrediente{% elif tipopag == 'Comerafuera' %}Agregar lugar{% elif tipopag == 'Delivery' %}Agregar delivery{% elif tipopag == 'Principal' or not tipopag %}Agregar plato principal{% else %}Agregar {{ tipopag|lower }}{% endif %}
     </span>
+    <span class="qc-mobile-action-label" aria-hidden="true">Agregar</span>
   </a>
 {% endif %}
 
@@ -943,7 +937,8 @@ Root globl para modales cargados dinámicamente (AJAX)
          style="right: 1rem; bottom: 5rem; width: 56px; height: 56px; z-index: 1050;"
          title="Lista de compras"
          aria-label="Lista de compras" data-nav-store-current="lista-compras" data-shopping-panel-open="1" aria-controls="shoppingPanel" aria-expanded="false">
-        <i class="fa-solid fa-cart-shopping"></i>
+        <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
+        <span class="qc-mobile-action-label" aria-hidden="true">Compras</span>
       </a>
 
     {% else %}
@@ -951,11 +946,14 @@ Root globl para modales cargados dinámicamente (AJAX)
             style="right: 1rem; bottom: 5rem; width: 56px; height: 56px; z-index: 1050; opacity: 0.50; pointer-events: none;"
             title="No hay platos programados para comprar"
             aria-label="No hay platos programados para comprar">
-        <i class="fa-solid fa-cart-shopping"></i>
+        <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
+        <span class="qc-mobile-action-label" aria-hidden="true">Compras</span>
       </span>
     {% endif %}
   {% endif %}
 </div>
+</nav>
+
 {% endif %}
 {% endwith %}
 

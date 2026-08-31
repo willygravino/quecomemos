@@ -1,0 +1,154 @@
+/*
+ * Barra inferior de acciones rápidas — universal.
+ *
+ * Reutiliza los mismos controles originales:
+ * - #botonCrearPlatoFlotante
+ * - #botonListaComprasFlotanteWrap
+ *
+ * Por lo tanto no duplica hrefs, listeners ni lógica de panel/sheet.
+ */
+
+.qc-mobile-action-label {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body:has(#accionesRapidasBase) {
+  padding-bottom: calc(5.1rem + env(safe-area-inset-bottom, 0px));
+}
+
+#accionesRapidasBase {
+  position: fixed;
+  z-index: 1040;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  display: grid;
+  grid-template-columns: repeat(2, minmax(9rem, 15rem));
+  justify-content: center;
+  align-items: stretch;
+  gap: 0.5rem;
+
+  min-height: 4.35rem;
+  padding:
+    0.4rem
+    max(0.75rem, env(safe-area-inset-right, 0px))
+    calc(0.4rem + env(safe-area-inset-bottom, 0px))
+    max(0.75rem, env(safe-area-inset-left, 0px));
+
+  border-top: 1px solid var(--bs-border-color);
+  background: rgba(var(--bs-body-bg-rgb), 0.94);
+  box-shadow: 0 -0.3rem 1rem rgba(0, 0, 0, 0.08);
+
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+#accionesRapidasBase #botonListaComprasFlotanteWrap {
+  display: block;
+  min-width: 0;
+}
+
+#accionesRapidasBase #botonCrearPlatoFlotante,
+#accionesRapidasBase #botonListaComprasFlotanteWrap > a,
+#accionesRapidasBase #botonListaComprasFlotanteWrap > span {
+  position: static !important;
+  inset: auto !important;
+
+  width: 100% !important;
+  height: 3.5rem !important;
+  min-width: 0;
+  min-height: 3.5rem;
+
+  margin: 0 !important;
+  padding: 0.35rem 0.65rem !important;
+
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.14rem;
+
+  border: 0 !important;
+  border-radius: 0.9rem !important;
+  background: transparent !important;
+  box-shadow: none !important;
+
+  line-height: 1.1;
+  text-decoration: none;
+}
+
+#accionesRapidasBase #botonCrearPlatoFlotante.btn-success {
+  color: var(--bs-success) !important;
+}
+
+#accionesRapidasBase #botonCrearPlatoFlotante.btn-secondary {
+  color: var(--bs-secondary-color) !important;
+  opacity: 0.55;
+}
+
+#accionesRapidasBase #botonListaComprasFlotanteWrap > a,
+#accionesRapidasBase #botonListaComprasFlotanteWrap > span {
+  color: var(--bs-primary) !important;
+}
+
+#accionesRapidasBase #botonCrearPlatoFlotante:not(.disabled):hover,
+#accionesRapidasBase #botonListaComprasFlotanteWrap > a:hover,
+#accionesRapidasBase #botonCrearPlatoFlotante:not(.disabled):focus-visible,
+#accionesRapidasBase #botonListaComprasFlotanteWrap > a:focus-visible,
+#accionesRapidasBase #botonCrearPlatoFlotante:not(.disabled):active,
+#accionesRapidasBase #botonListaComprasFlotanteWrap > a:active {
+  background: var(--bs-tertiary-bg) !important;
+}
+
+#accionesRapidasBase .boton-crear-plato-texto {
+  display: none !important;
+}
+
+#accionesRapidasBase i {
+  font-size: 1.12rem;
+  line-height: 1;
+}
+
+/*
+ * Cuando se abre un sheet/panel, la barra deja paso al overlay.
+ */
+body.shopping-panel-open #accionesRapidasBase,
+body.plato-create-sheet-open #accionesRapidasBase,
+body.menu-print-sheet-open #accionesRapidasBase {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(100%);
+}
+
+/* En mobile aprovechamos todo el ancho disponible. */
+@media (max-width: 768px) {
+  #accionesRapidasBase {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0.25rem;
+    padding-left: max(0.65rem, env(safe-area-inset-left, 0px));
+    padding-right: max(0.65rem, env(safe-area-inset-right, 0px));
+  }
+
+  #accionesRapidasBase #botonCrearPlatoFlotante,
+  #accionesRapidasBase #botonListaComprasFlotanteWrap > a,
+  #accionesRapidasBase #botonListaComprasFlotanteWrap > span {
+    padding-left: 0.4rem !important;
+    padding-right: 0.4rem !important;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #accionesRapidasBase {
+    transition:
+      opacity 160ms ease,
+      transform 180ms ease;
+  }
+}
