@@ -9,26 +9,26 @@
     <div class="text-body p-1 small">
       <div class="position-relative">
 
-        <div class="menu-programado-contenido-solido border border-2 border-primary rounded p-2 mt-2 bg-body-tertiary shadow-sm">
+        <div class="menu-programado-contenido-solido {% if dia in dias_programados %}menu-programado-contenido-programado{% else %}menu-programado-contenido-vacio{% endif %} border border-2 rounded p-2 mt-2 bg-body-tertiary shadow-sm">
           <div class="row align-items-start">
             <div class="col py-2">
 
               {% if dia in platos_dia_x_dia %}
 
-                
+
 
                 <!-- Si hay platos programados para este día, los mostramos -->
                 {% for dia_plato in platos_dia_x_dia.items %}
                   {% if dia_plato.0 == dia %}
 
-                   
+
              {# ========================= #}
 {# DESKTOP / TABLET: 4 columnas #}
 {# ========================= #}
 <div class="d-none d-md-block">
   <div class="row gx-0">
 
-    
+
     <!-- Desayuno -->
     <div class="col-md-3">
       {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Desayuno" platos=dia_plato.1.desayuno comida="desayuno" modo="desktop" %}
@@ -181,7 +181,7 @@
 
 
 
-  
+
         {% if messages %}
           {% for message in messages %}
             <div class="alert alert-info">{{ message }}</div>
@@ -208,7 +208,9 @@
          role="dialog"
          aria-modal="true"
          aria-labelledby="menuPrintSheetTitle"
-         aria-hidden="true">
+         aria-hidden="true"
+         data-menu-delete-url="{% url 'eliminar-menu-programado' %}"
+         data-menu-action-mode="print">
 
   <div class="plato-create-sheet-handle-wrap" aria-hidden="true">
     <div class="plato-create-sheet-handle"></div>
@@ -230,6 +232,10 @@
       <i class="fa-solid fa-xmark" aria-hidden="true"></i>
     </button>
   </header>
+  <div class="menu-delete-sheet-note d-none" data-menu-delete-note>
+    Seleccioná los días que querés limpiar. Los hábitos fijos se conservan.
+  </div>
+
 
   <div class="plato-create-sheet-body menu-print-sheet-body"
        data-menu-print-body>
@@ -345,7 +351,29 @@
 
   </div>
 
-  <footer class="menu-print-sheet-footer">
+
+  <div class="menu-delete-confirm d-none"
+       data-menu-delete-confirm
+       role="status"
+       aria-live="polite">
+    <div class="menu-delete-confirm-text" data-menu-delete-confirm-text>
+      ¿Eliminar los días seleccionados?
+    </div>
+    <div class="d-flex justify-content-end gap-2 mt-2">
+      <button type="button"
+              class="btn btn-outline-secondary"
+              data-menu-delete-cancel-confirm>
+        Volver
+      </button>
+      <button type="button"
+              class="btn btn-danger"
+              data-menu-delete-action>
+        Sí, eliminar
+      </button>
+    </div>
+  </div>
+
+<footer class="menu-print-sheet-footer">
     <button type="button"
             class="btn btn-outline-secondary"
             data-menu-print-sheet-close>
@@ -358,7 +386,15 @@
       <i class="fa-solid fa-print" aria-hidden="true"></i>
       <span>Imprimir seleccionados</span>
     </button>
-  </footer>
+
+    <button type="button"
+            class="btn btn-danger d-none"
+            data-menu-delete-prepare
+            disabled>
+      <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+      <span data-menu-delete-prepare-label>Elegí días</span>
+    </button>
+</footer>
 
 </section>
 

@@ -128,9 +128,176 @@
     bindGestures(getSheet());
   }
 
+
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    return parts.length === 2 ? parts.pop().split(";").shift() : "";
+  }
+
+  function selectedDates(sheet) {
+    if (!sheet) return [];
+    return Array.from(
+      sheet.querySelectorAll(".js-menu-print-day:checked")
+    ).map(function (input) {
+      return input.value;
+    }).filter(Boolean);
+  }
+
+  function setDeleteConfirmVisible(sheet, visible) {
+    if (!sheet) return;
+    const confirm = sheet.querySelector("[data-menu-delete-confirm]");
+    const prepare = sheet.querySelector("[data-menu-delete-prepare]");
+    if (confirm) confirm.classList.toggle("d-none", !visible);
+    if (prepare && sheet.dataset.menuActionMode === "delete") {
+      prepare.classList.toggle("d-none", visible);
+    }
+  }
+
+  function updateDeleteControls(sheet) {
+    if (!sheet || sheet.dataset.menuActionMode !== "delete") return;
+    const dates = selectedDates(sheet);
+    const prepare = sheet.querySelector("[data-menu-delete-prepare]");
+    const label = sheet.querySelector("[data-menu-delete-prepare-label]");
+    if (prepare) prepare.disabled = dates.length === 0;
+    if (label) {
+      label.textContent = !dates.length
+        ? "Elegí días"
+        : dates.length === 1
+          ? "Eliminar 1 día"
+          : `Eliminar ${dates.length} días`;
+    }
+    setDeleteConfirmVisible(sheet, false);
+  }
+
+  function configureActionMode(sheet, mode) {
+    if (!sheet) return;
+
+    const isDelete = mode === "delete";
+    sheet.dataset.menuActionMode = isDelete ? "delete" : "print";
+    sheet.classList.toggle("menu-action-mode-delete", isDelete);
+
+    const title = sheet.querySelector("#menuPrintSheetTitle");
+    const note = sheet.querySelector("[data-menu-delete-note]");
+    const printAction = sheet.querySelector("[data-menu-print-action]");
+    const deletePrepare = sheet.querySelector("[data-menu-delete-prepare]");
+
+    if (title) {
+      title.textContent = isDelete
+        ? "Eliminar menús programados"
+        : "Imprimir menú programado";
+    }
+    if (note) note.classList.toggle("d-none", !isDelete);
+    if (printAction) printAction.classList.toggle("d-none", isDelete);
+    if (deletePrepare) deletePrepare.classList.toggle("d-none", !isDelete);
+
+    setDeleteConfirmVisible(sheet, false);
+
+    if (isDelete) {
+      setAllDays(sheet, false);
+
+      const activeDate = (
+        (window.QCDiaActivo && window.QCDiaActivo.get()) || ""
+      );
+
+      if (activeDate) {
+        const activeInput = sheet.querySelector(
+          `.js-menu-print-day[value="${escapeCssValue(activeDate)}"]`
+        );
+        if (activeInput) {
+          activeInput.checked = true;
+          syncDayPreview(activeInput);
+        }
+      }
+      updateDeleteControls(sheet);
+    } else {
+      setAllDays(sheet, true);
+    }
+  }
+
+  function prepareDelete(sheet) {
+    const dates = selectedDates(sheet);
+    if (!dates.length) {
+      window.alert("Elegí al menos un día para eliminar.");
+      return;
+    }
+
+    const text = sheet.querySelector("[data-menu-delete-confirm-text]");
+    if (text) {
+      text.textContent = dates.length === 1
+        ? "¿Eliminar la programación manual de este día? Los hábitos fijos se conservarán."
+        : `¿Eliminar la programación manual de ${dates.length} días? Los hábitos fijos se conservarán.`;
+    }
+    setDeleteConfirmVisible(sheet, true);
+  }
+
+  async function deleteSelected(sheet, button) {
+    const dates = selectedDates(sheet);
+    const url = sheet && sheet.dataset.menuDeleteUrl;
+    if (!sheet || !url || !dates.length) return;
+
+    if (button) {
+      button.disabled = true;
+      button.setAttribute("aria-busy", "true");
+    }
+
+    const formData = new FormData();
+    dates.forEach(function (date) {
+      formData.append("fechas", date);
+    });
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        body: formData,
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken"),
+          "X-Requested-With": "XMLHttpRequest"
+        },
+        credentials: "same-origin",
+        cache: "no-store"
+      });
+
+      let data = null;
+      try {
+        data = await response.json();
+      } catch (error) {
+        data = null;
+      }
+
+      if (!response.ok || !data || data.status !== "ok") {
+        throw new Error(
+          (data && (data.error || data.message)) ||
+          "No se pudieron eliminar los menús seleccionados."
+        );
+      }
+
+      closeSheet(sheet);
+
+      if (typeof window.refrescarMenuProgramado === "function") {
+        await window.refrescarMenuProgramado();
+      }
+    } catch (error) {
+      console.error(error);
+      window.alert(error.message || "No se pudieron eliminar los menús.");
+    } finally {
+      if (button && document.contains(button)) {
+        button.disabled = false;
+        button.removeAttribute("aria-busy");
+      }
+    }
+  }
+
   function openSheet(trigger) {
     const sheet = getSheet();
     if (!sheet) return;
+
+    configureActionMode(
+      sheet,
+      trigger && trigger.matches("[data-menu-delete-sheet-open]")
+        ? "delete"
+        : "print"
+    );
 
     bindGestures(sheet);
     lastTrigger = trigger || document.activeElement;
@@ -316,7 +483,7 @@
   }
 
   document.addEventListener("click", function (event) {
-    const opener = event.target.closest?.("[data-menu-print-sheet-open]");
+    const opener = event.target.closest?.("[data-menu-print-sheet-open], [data-menu-delete-sheet-open]");
 
     if (opener) {
       event.preventDefault();
@@ -362,6 +529,36 @@
       return;
     }
 
+    const deletePrepare = event.target.closest?.(
+      "[data-menu-delete-prepare]"
+    );
+    if (deletePrepare && deletePrepare.closest("#menuPrintSheet")) {
+      event.preventDefault();
+      prepareDelete(deletePrepare.closest("#menuPrintSheet"));
+      return;
+    }
+
+    const deleteCancelConfirm = event.target.closest?.(
+      "[data-menu-delete-cancel-confirm]"
+    );
+    if (deleteCancelConfirm && deleteCancelConfirm.closest("#menuPrintSheet")) {
+      event.preventDefault();
+      setDeleteConfirmVisible(
+        deleteCancelConfirm.closest("#menuPrintSheet"),
+        false
+      );
+      return;
+    }
+
+    const deleteAction = event.target.closest?.(
+      "[data-menu-delete-action]"
+    );
+    if (deleteAction && deleteAction.closest("#menuPrintSheet")) {
+      event.preventDefault();
+      deleteSelected(deleteAction.closest("#menuPrintSheet"), deleteAction);
+      return;
+    }
+
     const printAction = event.target.closest?.(
       "[data-menu-print-action]"
     );
@@ -375,7 +572,13 @@
   document.addEventListener("change", function (event) {
     const input = event.target.closest?.(".js-menu-print-day");
     if (!input) return;
+
     syncDayPreview(input);
+
+    const sheet = input.closest("#menuPrintSheet");
+    if (sheet && sheet.dataset.menuActionMode === "delete") {
+      updateDeleteControls(sheet);
+    }
   });
 
   document.addEventListener("keydown", function (event) {

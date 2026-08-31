@@ -12,6 +12,7 @@
   function refrescarMenuProgramado() {
     const contenedor = document.getElementById("contenedor-menu-programado-dias");
     const tabsDias = document.getElementById("diasTab");
+    const accionesMenu = document.getElementById("menuProgramadoAcciones");
 
     if (!contenedor || !window.fetch || !window.DOMParser) {
       return Promise.resolve();
@@ -49,6 +50,7 @@
       const doc = new DOMParser().parseFromString(html, "text/html");
       const nuevoContenedor = doc.getElementById("contenedor-menu-programado-dias");
       const nuevosTabsDias = doc.getElementById("diasTab");
+      const nuevasAccionesMenu = doc.getElementById("menuProgramadoAcciones");
       const carritoListaCompras = document.getElementById("botonListaComprasFlotanteWrap");
       const nuevoCarritoListaCompras = doc.getElementById("botonListaComprasFlotanteWrap");
 
@@ -58,6 +60,10 @@
 
       if (tabsDias && nuevosTabsDias) {
         tabsDias.innerHTML = nuevosTabsDias.innerHTML;
+      }
+
+      if (accionesMenu && nuevasAccionesMenu) {
+        accionesMenu.innerHTML = nuevasAccionesMenu.innerHTML;
       }
 
       if (carritoListaCompras && nuevoCarritoListaCompras) {

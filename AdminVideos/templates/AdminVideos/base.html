@@ -46,7 +46,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <!-- mi css -->
-    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260823_153920" rel="stylesheet">  <!-- al final + bust de caché -->
+    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20260831_143337" rel="stylesheet">  <!-- al final + bust de caché -->
 
     <link rel="manifest" href="{% static 'AdminVideos/lista_super/manifest_lista_super.json' %}?v=1">
 
@@ -91,7 +91,7 @@
 
   <link rel="stylesheet" href="{% static 'AdminVideos/css/shopping_panel.css' %}?v=1">
   <link rel="stylesheet" href="{% static 'AdminVideos/css/plato_create_sheet.css' %}?v=1">
-  <link rel="stylesheet" href="{% static 'AdminVideos/css/menu_print_sheet.css' %}?v=20260829_171105">
+  <link rel="stylesheet" href="{% static 'AdminVideos/css/menu_print_sheet.css' %}?v=20260831_131631">
   <link rel="stylesheet" href="{% static 'AdminVideos/css/mobile_action_bar.css' %}?v=20260831_104417">
 </head>
 
@@ -311,7 +311,7 @@
 
                 <li class="nav-item flex-fill position-relative {% if dia in dias_programados %}tiene-menu-programado{% endif %}" role="presentation" style="flex: 1 0 auto;">
                     <button
-                        class="nav-link {% if dia_activo == dia|date:'Y-m-d' %}active{% elif forloop.first and not dia_activo %}active{% endif %} text-center px-2"
+                        class="nav-link {% if dia_activo == dia|date:'Y-m-d' %}active{% elif forloop.first and not dia_activo %}active{% endif %} text-center px-2 {% if dia in dias_programados %}menu-programado-dia-programado{% endif %}"
                         id="tab-{{ dia|date:'Y-m-d' }}" data-bs-toggle="tab"
                         data-bs-target="#tab-content-{{ dia|date:'Y-m-d' }}" type="button" role="tab"
                         aria-controls="tab-content-{{ dia|date:'Y-m-d' }}"
@@ -327,41 +327,33 @@
                             {{ dia|date:"D"|slice:":2"|upper }}<br>{{ dia|date:"j" }}
                         </span>
                     </button>
-
-                    {% if dia in dias_programados %}
-                    <span class="menu-programado-tab-acciones"
-                          aria-label="Este día tiene un menú programado">
-                        <i class="fa-solid fa-check menu-programado-tab-check"
-                           aria-hidden="true"></i>
-
-                        <button
-                            type="button"
-                            class="btn btn-danger menu-programado-tab-eliminar"
-                            data-bs-toggle="modal"
-                            data-bs-target="#confirmActionModal"
-                            data-confirm-title="Eliminar menú del día"
-                            data-confirm-body="¿Seguro querés borrar lo que comemos en este día?"
-                            data-confirm-action="{% url 'eliminar-menu-programado' %}"
-                            data-confirm-btn="Sí, borrar"
-                            title="Borrar menú del día"
-                            aria-label="Borrar menú del día">
-                            <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
-                        </button>
-                    </span>
-                    {% endif %}
                 </li>
                 {% endfor %}
             </ul>
-  {% if platos_dia_x_dia %}
-  <button data-menu-print-trigger type="button"
-          class="btn btn-sm btn-outline-secondary flex-shrink-0 menu-programado-print-icon"
-          data-menu-print-sheet-open
-          title="Imprimir menú"
-          aria-label="Imprimir menú">
-    <i class="fa-solid fa-print" aria-hidden="true"></i>
-    <span class="visually-hidden">Imprimir menú</span>
-  </button>
-  {% endif %}
+
+  <div id="menuProgramadoAcciones"
+       class="menu-programado-actions d-flex align-items-center flex-shrink-0">
+    {% if platos_dia_x_dia %}
+    <button type="button"
+            class="btn btn-sm btn-outline-secondary menu-programado-action-icon menu-programado-delete-icon"
+            data-menu-delete-sheet-open
+            title="Eliminar menús"
+            aria-label="Eliminar menús">
+      <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+      <span class="visually-hidden">Eliminar menús</span>
+    </button>
+
+    <button data-menu-print-trigger
+            type="button"
+            class="btn btn-sm btn-outline-secondary menu-programado-action-icon menu-programado-print-icon"
+            data-menu-print-sheet-open
+            title="Imprimir menús"
+            aria-label="Imprimir menús">
+      <i class="fa-solid fa-print" aria-hidden="true"></i>
+      <span class="visually-hidden">Imprimir menús</span>
+    </button>
+    {% endif %}
+  </div>
 </div>
 <style>
   .menu-programado-tabs-row > #diasTab {
@@ -392,6 +384,50 @@
     font-size: 1.05rem;
   }
 </style>
+
+<style id="menu-programado-tabs-compact-actions">
+  .menu-programado-actions {
+    gap: .12rem;
+  }
+
+  .menu-programado-action-icon {
+    width: 2.15rem;
+    height: 2.15rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-color: transparent;
+    background: transparent;
+  }
+
+  .menu-programado-delete-icon {
+    color: var(--bs-danger);
+  }
+
+  .menu-programado-delete-icon:hover,
+  .menu-programado-delete-icon:focus-visible {
+    color: var(--bs-danger-text-emphasis, var(--bs-danger));
+    background: var(--bs-danger-bg-subtle, rgba(220, 53, 69, .10));
+    border-color: var(--bs-danger-border-subtle, rgba(220, 53, 69, .25));
+  }
+
+  @media (max-width: 767.98px) {
+    .menu-programado-tabs-row {
+      gap: .15rem !important;
+    }
+
+    .menu-programado-tabs-row > #diasTab {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .menu-programado-actions {
+      gap: 0;
+    }
+  }
+</style>
+
 <!-- /IMPRESION MENU: ICONO JUNTO A TABS -->
 
   <!-- PESTAÑAS - MENÚES PROGRAMADOS - PLATOS -->
@@ -670,6 +706,15 @@ Root globl para modales cargados dinámicamente (AJAX)
           label: window.diaActivoLabelActual
         }
       }));
+    }
+
+    const contenedorMenu = document.getElementById("diasTabContent");
+
+    if (contenedorMenu) {
+      contenedorMenu.classList.toggle(
+        "menu-dia-programado-activo",
+        tab.classList.contains("menu-programado-dia-programado")
+      );
     }
 
     return dia;
@@ -1275,7 +1320,7 @@ document.addEventListener("click", function (e) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- Menú programado: asignar, hábitos y refresco AJAX -->
-<script src="{% static 'AdminVideos/js/menu_programado.js' %}?v=20260829_182224"></script>
+<script src="{% static 'AdminVideos/js/menu_programado.js' %}?v=20260831_131631"></script>
 
 <!-- Plugins que dependen de jQuery -->
 <script src="{% static 'AdminVideos/vendor/jquery-easing/jquery.easing.min.js' %}"></script>
@@ -1989,7 +2034,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="{% static 'AdminVideos/js/overlay_ui.js' %}?v=1"></script>
 <script src="{% static 'AdminVideos/js/shopping_panel.js' %}?v=1"></script>
 <script src="{% static 'AdminVideos/js/plato_create_sheet.js' %}?v=20260829_171826"></script>
-<script src="{% static 'AdminVideos/js/menu_print_sheet.js' %}?v=20260829_171105"></script>
+<script src="{% static 'AdminVideos/js/menu_print_sheet.js' %}?v=20260831_131631"></script>
 <script src="{% static 'AdminVideos/js/navigation.js' %}"></script>
 </body>
 

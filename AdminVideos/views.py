@@ -4796,59 +4796,160 @@ def random_dia(request, dia_nombre):
 
 
 
-@require_POST
-def eliminar_menu_programado(request):
-    dia_activo = request.session.get("dia_activo")
-    if not dia_activo:
-        messages.error(request, "No hay un día activo en la sesión.")
-        return redirect("filtro-de-platos")
-
-    try:
-        fecha = datetime.datetime.strptime(dia_activo, "%Y-%m-%d").date()
-    except ValueError:
-        messages.error(request, "Fecha inválida.")
-        return redirect("filtro-de-platos")
-
+def _eliminar_menu_programado_fecha(usuario, fecha):
+    # Elimina sólo programación manual; conserva hábitos fijos.
     menu_id = MenuDia.objects.filter(
-        propietario=request.user,
-        fecha=fecha
+        propietario=usuario,
+        fecha=fecha,
     ).values_list("id", flat=True).first()
 
     if not menu_id:
-        messages.warning(request, f"No había un menú programado para {dia_activo}.")
-        return redirect("filtro-de-platos")
+        return {
+            "fecha": fecha.isoformat(),
+            "encontrado": False,
+            "items_borrados": 0,
+        }
 
-    perfil = request.user.profile
+    perfil = usuario.profile
     dia_semana = fecha.weekday()
 
-    # Habitos del día de semana (NO hay herencia a variedades: solo ids exactos)
     habitos = HabitoSemanal.objects.filter(
         perfil=perfil,
         dia_semana=dia_semana,
     ).only("momento", "plato_id", "lugar_id")
 
     keep_q = Q()
-    for h in habitos:
-        if h.plato_id:
-            keep_q |= Q(momento=h.momento, plato_id=h.plato_id)
-        if getattr(h, "lugar_id", None):
-            keep_q |= Q(momento=h.momento, lugar_id=h.lugar_id)
+    for habito in habitos:
+        if habito.plato_id:
+            keep_q |= Q(
+                momento=habito.momento,
+                plato_id=habito.plato_id,
+            )
+        if getattr(habito, "lugar_id", None):
+            keep_q |= Q(
+                momento=habito.momento,
+                lugar_id=habito.lugar_id,
+            )
 
     with transaction.atomic():
         items_qs = MenuItem.objects.filter(menu_id=menu_id)
-
-        # Borramos TODO excepto lo que coincide EXACTO con un hábito
-        if keep_q:
-            qs_borrar = items_qs.exclude(keep_q)
-        else:
-            qs_borrar = items_qs
-
+        qs_borrar = items_qs.exclude(keep_q) if keep_q else items_qs
         borrados = qs_borrar.count()
         qs_borrar.delete()
-        # ✅ Tu signal (menu_id-based) borrará MenuDia si quedó sin items
 
-    messages.success(
-        request,
-        f"Se eliminó el menú programado del {dia_activo} (items borrados: {borrados})."
+    return {
+        "fecha": fecha.isoformat(),
+        "encontrado": True,
+        "items_borrados": borrados,
+    }
+
+
+@login_required
+@require_POST
+def eliminar_menu_programado(request):
+    fechas_post = [
+        valor.strip()
+        for valor in (
+            request.POST.getlist("fechas")
+            or request.POST.getlist("fechas[]")
+        )
+        if valor and valor.strip()
+    ]
+
+    es_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
+    if fechas_post:
+        _, dias_desde_hoy = obtener_dias_desde_hoy()
+        dias_validos = {
+            fecha.isoformat(): fecha
+            for fecha in dias_desde_hoy
+        }
+
+        fechas_unicas = list(dict.fromkeys(fechas_post))
+        invalidas = [
+            valor
+            for valor in fechas_unicas
+            if valor not in dias_validos
+        ]
+
+        if invalidas:
+            return JsonResponse(
+                {
+                    "status": "error",
+                    "error": "Hay fechas inválidas o fuera del período visible.",
+                    "fechas_invalidas": invalidas,
+                },
+                status=400,
+            )
+
+        resultados = [
+            _eliminar_menu_programado_fecha(
+                request.user,
+                dias_validos[valor],
+            )
+            for valor in fechas_unicas
+        ]
+
+        return JsonResponse({
+            "status": "ok",
+            "fechas": fechas_unicas,
+            "dias_procesados": len(fechas_unicas),
+            "dias_encontrados": sum(
+                1
+                for resultado in resultados
+                if resultado["encontrado"]
+            ),
+            "items_borrados": sum(
+                resultado["items_borrados"]
+                for resultado in resultados
+            ),
+        })
+
+    # Compatibilidad con el flujo anterior de un solo día.
+    dia_activo = request.session.get("dia_activo")
+    if not dia_activo:
+        if es_ajax:
+            return JsonResponse(
+                {
+                    "status": "error",
+                    "error": "No hay un día activo en la sesión.",
+                },
+                status=400,
+            )
+        messages.error(request, "No hay un día activo en la sesión.")
+        return redirect("filtro-de-platos")
+
+    try:
+        fecha = datetime.datetime.strptime(
+            dia_activo,
+            "%Y-%m-%d",
+        ).date()
+    except ValueError:
+        if es_ajax:
+            return JsonResponse(
+                {"status": "error", "error": "Fecha inválida."},
+                status=400,
+            )
+        messages.error(request, "Fecha inválida.")
+        return redirect("filtro-de-platos")
+
+    resultado = _eliminar_menu_programado_fecha(
+        request.user,
+        fecha,
     )
+
+    if not resultado["encontrado"]:
+        messages.warning(
+            request,
+            f"No había un menú programado para {dia_activo}.",
+        )
+    else:
+        messages.success(
+            request,
+            (
+                f"Se eliminó la programación manual del {dia_activo} "
+                f"(items borrados: {resultado['items_borrados']})."
+            ),
+        )
+
     return redirect("filtro-de-platos")

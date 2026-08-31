@@ -1266,7 +1266,7 @@ body.filtro-platos-cambiando [data-listado-url] {
 /* ===== Pestaña activa integrada al menú programado ===== */
 /* La unión se construye con un fondo sólido continuo, no con bordes. */
 #diasTab {
-  --menu-programado-solido: #4e73df;
+  --menu-programado-solido: var(--qc-menu-programado-activo);
   gap: .18rem;
   margin-bottom: 0 !important;
   background-color: transparent;
@@ -1303,10 +1303,14 @@ body.filtro-platos-cambiando [data-listado-url] {
 }
 
 #diasTabContent {
-  background-color: #4e73df !important;
+  background-color: var(--qc-menu-vacio-activo) !important;
   border: 0 !important;
   border-radius: 0 0 .65rem .65rem;
   padding: .45rem;
+}
+
+#diasTabContent.menu-dia-programado-activo {
+  background-color: var(--qc-menu-programado-activo) !important;
 }
 
 #diasTabContent .tab-pane > .text-body {
@@ -1341,9 +1345,16 @@ body.filtro-platos-cambiando [data-listado-url] {
 }
 
 /* Día con menú programado activo en modo oscuro */
-[data-bs-theme="dark"] #diasTab .tiene-menu-programado .nav-link.active {
+/* [data-bs-theme="dark"] #diasTab .tiene-menu-programado .nav-link.active {
   color: #fff !important;
   background-color: #198754 !important;
+  border: 0 !important;
+} */
+
+/* Día con menú programado activo en modo oscuro */
+[data-bs-theme="dark"] #diasTab .tiene-menu-programado .nav-link.active {
+  color: #fff !important;
+  background-color: var(--qc-menu-programado-activo) !important;
   border: 0 !important;
 }
 
@@ -2470,17 +2481,24 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
    El recuadro del contenido acompaña el estado activo.
 */
 :root {
+  /* MODO CLARO */
+  /* Paleta principal de estados de pestañas */
+  /* LA SIGUIENTE ES LA PESTAÁ INACTIVA SIN PLATOS */
   --qc-menu-vacio-inactivo: #3154b8;
-  --qc-menu-vacio-activo: #6f8eea;
-  --qc-menu-programado-inactivo: #17643a;
-  --qc-menu-programado-activo: #2b9d62;
+  /* --qc-menu-vacio-activo: #6f8eea; */
+  /* LA SIGUIENTE ES LA PESTAÑA ACTIVA SIN PLATOS */
+  --qc-menu-vacio-activo: #4e73df; 
+    /* LA SIGUIENTE ES LA PESTAÑA INACTIVA CON PLATOS PROGRAMADOS */
+  --qc-menu-programado-inactivo: #4c288d;
+/* LA SIGUIENTE ES LA PESTAÑA ACTIVA CON PLATOS PROGRAMADOS * */
+  --qc-menu-programado-activo: #6f42c1;
 }
 
 [data-bs-theme="dark"] {
   --qc-menu-vacio-inactivo: #2f3852;
   --qc-menu-vacio-activo: #4e73df;
-  --qc-menu-programado-inactivo: #17412d;
-  --qc-menu-programado-activo: #198754;
+  --qc-menu-programado-inactivo: #3b1f63;
+  --qc-menu-programado-activo: #6f42c1;
 }
 
 /* Todos los días ocupan exactamente la misma porción disponible. */
