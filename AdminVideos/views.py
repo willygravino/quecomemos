@@ -89,7 +89,7 @@ def eliminar_platos_masivo(request):
 
     return redirect("filtro-de-platos")
 
-    
+
 
 @login_required
 def eliminar_lugares_masivo(request):
@@ -212,7 +212,7 @@ def api_ingredientes(request):
     if request.method == "GET":
         q = (request.GET.get('q') or '').strip()
         qs = Ingrediente.objects.all()
-    
+
 
         if q:
             q_low = q.lower()
@@ -283,12 +283,26 @@ def api_ingredientes(request):
 
 
 def set_dia_activo(request):
-    if request.method == "POST":
-        dia = request.POST.get("dia_activo")
-        if dia:
-            request.session["dia_activo"] = dia
-            return JsonResponse({"status": "ok"})
-    return JsonResponse({"status": "error"}, status=400)
+    if request.method != "POST":
+        return JsonResponse({"status": "error"}, status=400)
+
+    dia = (request.POST.get("dia_activo") or "").strip()
+    _, dias_desde_hoy = obtener_dias_desde_hoy()
+    dias_validos = {fecha.isoformat() for fecha in dias_desde_hoy}
+
+    if dia not in dias_validos:
+        return JsonResponse(
+            {"status": "error", "error": "Día activo inválido."},
+            status=400,
+        )
+
+    request.session["dia_activo"] = dia
+    request.session.modified = True
+
+    return JsonResponse({
+        "status": "ok",
+        "dia_activo": dia,
+    })
 
 
 def obtener_parametros_sesion(request):
@@ -482,7 +496,7 @@ def plato_ingredientes(request: HttpRequest, pk: int):
         for iep in ingredientes_para_guardar
         if iep.ingrediente_id
     })
-    
+
     pantry_map = get_pantry_map(
     perfil=perfil,
     ing_ids=ing_ids,
@@ -749,8 +763,8 @@ def lista_de_compras(request):
     # =====================================================
     post_origen = request.POST.get("post_origen", "") if request.method == "POST" else ""
 
-    
-    
+
+
     # Guarda selección persistente de plato para lista de compras
     if request.method == "POST" and post_origen == "menu":
         plato_id = request.POST.get("toggle_plato_id")
@@ -1028,7 +1042,7 @@ def lista_de_compras(request):
         elegido=True,
     )
     .values_list("menu_id", "momento", "plato_id")
-    )   
+    )
 
     RUBROS_LABELS = {
     "verduleria": "Verdulería",
@@ -1055,7 +1069,7 @@ def lista_de_compras(request):
         "shopping": {"items": items, "summary": summary},
         "parametro": "lista-compras",
         "componentes_elegidos_keys": componentes_elegidos_keys,
-        "shopping_por_rubro": items_por_rubro, 
+        "shopping_por_rubro": items_por_rubro,
         "platos_elegidos_ids": platos_elegidos_ids,
            }
 
@@ -1244,7 +1258,7 @@ def compartir_lista(request, token):
     if not perfil.share_token:
         perfil.ensure_share_token()
 
-  
+
     return render(request, "AdminVideos/compartir_lista.html", {
         "items": items,
         "items_por_rubro": items_por_rubro,
@@ -1336,7 +1350,7 @@ class LugarDetail(DetailView):
         perfil = get_object_or_404(Profile, user=self.request.user)
 
         # Pasar la lista de amigues al contexto
-        context["amigues"] = obtener_usernames_amigues(self.request.user)        
+        context["amigues"] = obtener_usernames_amigues(self.request.user)
 
         return context
 
@@ -1827,7 +1841,7 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
 
         # 2️⃣ No-AJAX: volver a donde fue llamado con toast
         return redirect(redirect_url)
- 
+
 
 
     def form_invalid(self, form):
@@ -1885,19 +1899,19 @@ class PlatoDetail(DetailView):
 
 
 class PlatoVariedadCreate(PlatoCreate):
-    
+
 #     Crea un Plato hijo asociado a un Plato padre.
 #     Reusa template, form, formset y AJAX de PlatoCreate.
 #   else:
 #     form.fields['tipos'].choices = []
-#     form.fields['tipos'].initial = [] 
-# 
+#     form.fields['tipos'].initial = []
+#
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         # ✅ Para variedades, no queremos invalidar los checkboxes por falta de tipopag
         form.fields["tipos"].choices = Plato.TIPOS_CHOICES
-        return form 
+        return form
 
     def get_initial(self):
         initial = super().get_initial()
@@ -2378,7 +2392,7 @@ def filtrar_platos(
         Prefetch("variedades_hijas", queryset=variedades_qs)
     )
 
-    
+
     return {
         "platos": platos_qs,
     }
@@ -2478,20 +2492,30 @@ def asegurar_menus_desde_habitos(request, usuario, dias_desde_hoy, habitos):
 
 
 
-def obtener_dia_activo(request, dias_desde_hoy):
-    """
-    Devuelve un día activo válido para las pestañas.
-
-    Si la sesión no tiene día activo, o tiene un día viejo que ya no está
-    dentro del rango visible, usa el primer día disponible.
-    """
+def obtener_dia_activo(request, dias_desde_hoy, persistir_sesion=True):
+    # Fuente de verdad del día activo.
+    # El request actual manda sobre la sesión para evitar carreras AJAX.
     dias_validos = [dia.isoformat() for dia in dias_desde_hoy]
     primer_dia = dias_validos[0]
 
-    dia_activo = request.session.get("dia_activo")
+    dia_request = (
+        request.POST.get("dia_activo")
+        or request.GET.get("dia_activo")
+        or ""
+    ).strip()
+    dia_sesion = request.session.get("dia_activo")
 
-    if dia_activo not in dias_validos:
+    if dia_request in dias_validos:
+        dia_activo = dia_request
+    elif dia_sesion in dias_validos:
+        dia_activo = dia_sesion
+    else:
         dia_activo = primer_dia
+
+    if (
+        persistir_sesion
+        and request.session.get("dia_activo") != dia_activo
+    ):
         request.session["dia_activo"] = dia_activo
         request.session.modified = True
 
@@ -2501,10 +2525,6 @@ def obtener_dia_activo(request, dias_desde_hoy):
     ).date()
 
     return dia_activo, dia_activo_obj
-
-
-
-
 
 
 def obtener_fechas_existentes_menu(usuario, fecha_actual):
@@ -2923,7 +2943,7 @@ def obtener_platos_dia_x_dia(usuario, fechas_existentes, habitos_set):
 
 
 
-def obtener_estado_filtros_platos(request, dia_activo):
+def obtener_estado_filtros_platos(request, dia_activo, persistir_sesion=True):
     """
     Centraliza el estado de filtros de la pantalla de platos.
 
@@ -2969,7 +2989,8 @@ def obtener_estado_filtros_platos(request, dia_activo):
         tipopag = "Todos"
         lo_que_tengo_activo = True
 
-    request.session["lo_que_tengo_activo"] = lo_que_tengo_activo
+    if persistir_sesion:
+        request.session["lo_que_tengo_activo"] = lo_que_tengo_activo
 
     if request.method == "POST":
         form = PlatoFilterForm(request.POST)
@@ -2982,15 +3003,17 @@ def obtener_estado_filtros_platos(request, dia_activo):
         quecomemos = request.POST.get("quecomemos")
         misplatos = request.POST.get("misplatos")
 
-        request.session["medios_estable"] = medios
-        request.session["categoria_estable"] = categoria
-        request.session["dificultad_estable"] = dificultad
-        request.session["palabra_clave"] = palabra_clave
+        if persistir_sesion:
+            request.session["medios_estable"] = medios
+            request.session["categoria_estable"] = categoria
+            request.session["dificultad_estable"] = dificultad
+            request.session["palabra_clave"] = palabra_clave
 
-        request.session["quecomemos"] = quecomemos
-        request.session["misplatos"] = misplatos
+            request.session["quecomemos"] = quecomemos
+            request.session["misplatos"] = misplatos
 
-        request.session["dia_activo"] = dia_activo
+        # El día activo no pertenece al estado de filtros.
+        # Lo persiste exclusivamente su controlador específico.
 
     else:
         medios = medios_sesion
@@ -3316,7 +3339,7 @@ def FiltroDePlatos(request):
         return redirect("profile-create")
 
     habitos, habitos_set = obtener_habitos_usuario(perfil)
-    
+
     asegurar_menus_desde_habitos(request, usuario, dias_desde_hoy, habitos)
 
     dia_activo, dia_activo_obj = obtener_dia_activo(request, dias_desde_hoy)
@@ -3356,7 +3379,7 @@ def FiltroDePlatos(request):
     avatar = perfil.avatar_url
 
     contexto_compartidos = obtener_contexto_compartidos(usuario)
-    
+
 
     platos_dia_x_dia, dias_programados = obtener_platos_dia_x_dia(
         usuario,
@@ -3402,7 +3425,7 @@ def FiltroDePlatos(request):
                 "habitos_lookup": habitos_lookup,
             }
 
-    
+
     # tipopag = (request.GET.get("tipopag") or "Principal").strip()
     contexto["tipopag"] = tipopag
 
@@ -3417,9 +3440,17 @@ def ajax_listado_platos(request):
         return redirect("profile-create")
 
     fecha_actual, dias_desde_hoy = obtener_dias_desde_hoy()
-    dia_activo, dia_activo_obj = obtener_dia_activo(request, dias_desde_hoy)
+    dia_activo, dia_activo_obj = obtener_dia_activo(
+        request,
+        dias_desde_hoy,
+        persistir_sesion=False,
+    )
 
-    estado_filtros = obtener_estado_filtros_platos(request, dia_activo)
+    estado_filtros = obtener_estado_filtros_platos(
+        request,
+        dia_activo,
+        persistir_sesion=False,
+    )
 
     tipo_parametro = estado_filtros["tipo_parametro"]
     tipopag = estado_filtros["tipopag"]
@@ -4456,7 +4487,7 @@ class AsignarPlato(View):
                 if not lugar_id or not lugar_id.isdigit():
                     messages.error(request, "ID de lugar no válido.")
                     return redirect("filtro-de-platos")
-                
+
                 lugar = Lugar.objects.get(id=lugar_id)  # Buscar el lugar por el ID recibido
 
                 # Verifica que el objeto lugar está correcto

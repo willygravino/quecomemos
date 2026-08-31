@@ -20,9 +20,14 @@
     const url = new URL(window.location.href);
     url.searchParams.set("_menu_refresh", Date.now().toString());
     const diaSeleccionado = document.getElementById("diaSeleccionado");
+    const diaActivo = (
+      (window.QCDiaActivo && window.QCDiaActivo.get()) ||
+      (diaSeleccionado && diaSeleccionado.value) ||
+      ""
+    );
 
-    if (diaSeleccionado && diaSeleccionado.value) {
-      url.searchParams.set("dia_activo", diaSeleccionado.value);
+    if (diaActivo) {
+      url.searchParams.set("dia_activo", diaActivo);
     }
 
     return fetch(url.toString(), {
@@ -60,6 +65,12 @@
       }
 
       contenedor.innerHTML = nuevoContenedor.innerHTML;
+
+      if (window.QCDiaActivo) {
+        window.QCDiaActivo.syncFromDom({
+          actualizarUrl: true
+        });
+      }
     });
   }
 

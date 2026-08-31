@@ -24,6 +24,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (!form || !contenedor) return;
 
+  // Un único canal de render para listado + carousel + lugares.
+  // Si cambia el filtro mientras hay un request en vuelo, sólo el último
+  // puede pintar la pantalla.
+  let listadoAbortController = null;
+  let listadoRequestSeq = 0;
+  let filtroBarridoSeq = 0;
+
   // Sincronizar el botón de creación con la vista inicial.
   actualizarBotonCrearPlato(
     form.querySelector('input[name="tipopag"]')?.value || "Principal"
@@ -51,14 +58,42 @@ document.addEventListener("DOMContentLoaded", function () {
     const url = form.dataset.listadoUrl;
     const formData = new FormData(form);
 
+    const tabDiaActivo = document.querySelector(
+      "#diasTab .nav-link.active[data-dia-activo]"
+    );
+    const diaActivo = (
+      (window.QCDiaActivo && window.QCDiaActivo.get()) ||
+      (tabDiaActivo && tabDiaActivo.dataset.diaActivo) ||
+      ""
+    );
+
+    if (diaActivo) {
+      formData.set("dia_activo", diaActivo);
+    }
+
     formData.set("return_to", window.location.pathname + window.location.search);
 
-    fetch(url, {
+    const requestSeq = ++listadoRequestSeq;
+
+    if (listadoAbortController) {
+      listadoAbortController.abort();
+    }
+
+    const controller = new AbortController();
+    listadoAbortController = controller;
+
+    // IMPORTANTE: devolver la Promise. El controlador de barrido necesita
+    // esperar el AJAX real, no sólo la animación.
+    return fetch(url, {
       method: "POST",
       body: formData,
       headers: {
-        "X-Requested-With": "XMLHttpRequest"
-      }
+        "X-Requested-With": "XMLHttpRequest",
+        "X-QC-Stateless-Filters": "1"
+      },
+      credentials: "same-origin",
+      cache: "no-store",
+      signal: controller.signal
     })
       .then(function (response) {
         if (!response.ok) {
@@ -68,25 +103,48 @@ document.addEventListener("DOMContentLoaded", function () {
         return response.json();
       })
       .then(function (data) {
-        contenedor.innerHTML = data.html_listado || '';
+        // Un response viejo jamás puede sobrescribir un filtro más nuevo.
+        if (requestSeq !== listadoRequestSeq) {
+          return {
+            ignored: true,
+            reason: "stale-response"
+          };
+        }
+
+        contenedor.innerHTML = data.html_listado || "";
 
         const contenedorCarousel = document.getElementById("contenedor-carousel-platos");
         if (contenedorCarousel) {
-          contenedorCarousel.innerHTML = data.html_carousel || '';
+          contenedorCarousel.innerHTML = data.html_carousel || "";
           inicializarCarouselesPlatos(contenedorCarousel);
         }
 
         const contenedorLugares = document.getElementById("contenedor-listado-lugares");
         if (contenedorLugares) {
-          contenedorLugares.innerHTML = data.html_lugares || '';
+          contenedorLugares.innerHTML = data.html_lugares || "";
         }
 
         if (typeof initListadoPlatos === "function") {
           initListadoPlatos();
         }
+
+        return data;
       })
       .catch(function (error) {
+        if (error && error.name === "AbortError") {
+          return {
+            ignored: true,
+            reason: "aborted"
+          };
+        }
+
         console.error(error);
+        throw error;
+      })
+      .finally(function () {
+        if (listadoAbortController === controller) {
+          listadoAbortController = null;
+        }
       });
   }
 
@@ -445,6 +503,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function actualizarListadoPlatosConBarrido() {
+    const barridoSeq = ++filtroBarridoSeq;
     activarBarridoCambioFiltro();
 
     const esperaRender = esperarRenderCambioFiltro();
@@ -453,7 +512,9 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       resultado = actualizarListadoPlatos();
     } catch (error) {
-      desactivarBarridoCambioFiltro();
+      if (barridoSeq === filtroBarridoSeq) {
+        desactivarBarridoCambioFiltro();
+      }
       throw error;
     }
 
@@ -461,7 +522,12 @@ document.addEventListener("DOMContentLoaded", function () {
       ? resultado
       : Promise.resolve();
 
-    Promise.allSettled([esperaAjax, esperaRender]).then(() => {
+    Promise.allSettled([esperaAjax, esperaRender]).then(function () {
+      // Un request abortado/viejo no puede apagar el overlay del request nuevo.
+      if (barridoSeq !== filtroBarridoSeq) {
+        return;
+      }
+
       desactivarBarridoCambioFiltro();
     });
 
@@ -519,7 +585,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     boton.href = `${urlBase}?${params.toString()}`;
 
-    
+
     let titulo = "Agregar receta de plato principal";
     if (tipopag === "Picada") {
       titulo = "Armar picada";
