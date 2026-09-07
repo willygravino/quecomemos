@@ -2022,7 +2022,7 @@ body.filtro-platos-cambiando [data-listado-url] {
   border-bottom: 0;
 }
 
-.lo-que-tengo-global-mobile {
+.lo-que-tengo-global {
   display: none;
 }
 
@@ -2037,7 +2037,7 @@ body.filtro-platos-cambiando [data-listado-url] {
     display: block;
   }
 
-  .lo-que-tengo-global-mobile {
+  .lo-que-tengo-global {
     display: flex;
     min-width: 0;
     max-width: 8.8rem;
@@ -2045,19 +2045,19 @@ body.filtro-platos-cambiando [data-listado-url] {
     box-shadow: none;
   }
 
-  .lo-que-tengo-global-mobile .selector-lo-que-tengo {
+  .lo-que-tengo-global .selector-lo-que-tengo {
     min-width: 0;
     padding: .25rem .38rem;
     gap: .3rem;
   }
 
-  .lo-que-tengo-global-mobile .selector-lo-que-tengo-icon {
+  .lo-que-tengo-global .selector-lo-que-tengo-icon {
     width: 1.8rem;
     height: 1.8rem;
     min-width: 1.8rem;
   }
 
-  .lo-que-tengo-global-mobile .selector-lo-que-tengo-label {
+  .lo-que-tengo-global .selector-lo-que-tengo-label {
     max-width: 4rem;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2068,7 +2068,7 @@ body.filtro-platos-cambiando [data-listado-url] {
 
 
 
-  .lo-que-tengo-global-mobile .selector-lo-que-tengo-edit {
+  .lo-que-tengo-global .selector-lo-que-tengo-edit {
     width: 1.9rem;
     min-width: 1.9rem;
     font-size: .72rem;
@@ -2121,27 +2121,27 @@ body.filtro-platos-cambiando [data-listado-url] {
 }
 
 @media (max-width: 767.98px) {
-  .lo-que-tengo-global-mobile {
+  .lo-que-tengo-global {
     width: auto;
     max-width: none;
   }
 
-  .lo-que-tengo-global-mobile .selector-lo-que-tengo {
+  .lo-que-tengo-global .selector-lo-que-tengo {
     padding: .2rem .25rem;
   }
 
-  .lo-que-tengo-global-mobile .selector-lo-que-tengo-copy {
+  .lo-que-tengo-global .selector-lo-que-tengo-copy {
     display: none;
   }
 
-  .lo-que-tengo-global-mobile .selector-lo-que-tengo-icon {
+  .lo-que-tengo-global .selector-lo-que-tengo-icon {
     width: 1.65rem;
     height: 1.65rem;
     min-width: 1.65rem;
     flex-basis: 1.65rem;
   }
 
-  .lo-que-tengo-global-mobile .selector-lo-que-tengo-edit {
+  .lo-que-tengo-global .selector-lo-que-tengo-edit {
     width: 1.75rem;
     min-width: 1.75rem;
     flex-basis: 1.75rem;

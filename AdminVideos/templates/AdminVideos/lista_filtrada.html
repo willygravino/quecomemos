@@ -262,7 +262,7 @@
 </style>
 
 
-<div id="filtroPlatosMobileControls" class="filtro-platos-mobile-shell d-md-none mb-2">
+<div id="filtroPlatosMobileControls" class="filtro-platos-mobile-shell mb-2">
   <div class="d-flex align-items-stretch gap-2">
 
     <div class="input-group input-group-sm flex-grow-1 filtro-mobile-keyword-box {% if formulario.palabra_clave.value %}filtro-keyword-activo{% endif %}">
@@ -302,8 +302,30 @@
   <div id="filtroPlatosMobileSummary" class="filtro-platos-mobile-summary mt-2 d-none"></div>
 </div>
 
-<div class="filtro-platos-y-lo-que-tengo d-none d-md-flex align-items-stretch gap-2 mb-2">
-<div id="filtroPlatosInlineHome" class="flex-grow-1 min-w-0">
+
+
+
+<!-- Modal móvil para el filtro de platos.
+     Importante: no duplica el form; JS mueve #form-filtros-platos acá sólo en celular. -->
+<div
+  class="modal fade"
+  id="filtroPlatosModal"
+  tabindex="-1"
+  aria-labelledby="filtroPlatosModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-fullscreen-sm-down modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header py-2">
+        <h5 class="modal-title" id="filtroPlatosModalLabel">
+          <i class="fa-solid fa-sliders me-1"></i>
+          Filtros
+        </h5>
+
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <div id="filtroPlatosInlineHome" class="d-none"></div>
 
 <form
   method="POST"
@@ -380,33 +402,7 @@
   </div>
 </form>
 
-</div>
-
-{% include "AdminVideos/partials/_control_lo_que_tengo_global.html" with modo="desktop" %}
-</div>
-
-
-<!-- Modal móvil para el filtro de platos.
-     Importante: no duplica el form; JS mueve #form-filtros-platos acá sólo en celular. -->
-<div
-  class="modal fade"
-  id="filtroPlatosModal"
-  tabindex="-1"
-  aria-labelledby="filtroPlatosModalLabel"
-  aria-hidden="true">
-  <div class="modal-dialog modal-dialog-scrollable modal-fullscreen-sm-down modal-dialog-centered">
-    <div class="modal-content">
-
-      <div class="modal-header py-2">
-        <h5 class="modal-title" id="filtroPlatosModalLabel">
-          <i class="fa-solid fa-sliders me-1"></i>
-          Filtros
-        </h5>
-
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-
-      <div class="modal-body" id="filtroPlatosModalBody"></div>
+<div class="modal-body" id="filtroPlatosModalBody"></div>
 
       <div class="modal-footer py-2">
         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
@@ -478,9 +474,7 @@
 // No se clona el formulario. Se mueve el mismo #form-filtros-platos
 // para no duplicar IDs, eventos ni comportamiento AJAX.
 (function () {
-  const media = window.matchMedia("(max-width: 767.98px)");
-
-  function getForm() {
+function getForm() {
     return document.getElementById("form-filtros-platos");
   }
 
@@ -582,27 +576,16 @@
 
   function moverFormSegunPantalla() {
     const form = getForm();
-    const home = getHome();
     const modalBody = getModalBody();
 
-    if (!form || !home || !modalBody) return;
+    if (!form || !modalBody) return;
 
-    if (media.matches) {
-      if (form.parentElement !== modalBody) {
-        modalBody.appendChild(form);
-      }
-
-      form.classList.remove("mb-3");
-      form.classList.add("mb-0");
-    } else {
-      if (form.parentElement !== home) {
-        home.appendChild(form);
-      }
-
-      form.classList.add("mb-3");
-      form.classList.remove("mb-0");
-      ocultarModalFiltroSiHaceFalta();
+    if (form.parentElement !== modalBody) {
+      modalBody.appendChild(form);
     }
+
+    form.classList.remove("mb-3");
+    form.classList.add("mb-0");
 
     actualizarResumenMobile();
   }
@@ -700,14 +683,7 @@
   } else {
     initFiltroResponsiveMobile();
   }
-
-  if (media.addEventListener) {
-    media.addEventListener("change", moverFormSegunPantalla);
-  } else if (media.addListener) {
-    media.addListener(moverFormSegunPantalla);
-  }
-
-  document.addEventListener("shown.bs.modal", function (event) {
+document.addEventListener("shown.bs.modal", function (event) {
     if (event.target && event.target.id === "filtroPlatosModal") {
       actualizarResumenMobile();
     }
