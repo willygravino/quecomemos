@@ -49,6 +49,72 @@
   }
 
   /* Filtro móvil: botón + resumen cuando el formulario vive en modal */
+    .filtro-mobile-main-row .filtro-mobile-keyword-box {
+      min-width: 0;
+      width: 100%;
+    }
+
+    .filtro-mobile-main-row .filtro-mobile-filter-button {
+      width: 100%;
+      min-width: 0;
+      padding-left: .25rem;
+      padding-right: .25rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .filtro-mobile-main-row .filtro-mobile-filter-label {
+      display: none;
+    }
+
+    .filtro-mobile-main-row > .lo-que-tengo-global {
+      grid-column: 1 / -1;
+      width: 100%;
+    }
+  }
+
+  /* Layout mobile del filtro: búsqueda 95% + filtros 5%.
+     En desktop se conserva íntegramente el layout existente. */
+  @media (max-width: 767.98px) {
+    #filtroPlatosMobileControls > .d-flex {
+      display: grid !important;
+      grid-template-columns: minmax(0, 19fr) minmax(0, 1fr);
+      gap: .5rem;
+      width: 100%;
+      align-items: stretch;
+    }
+
+    #filtroPlatosMobileControls > .d-flex > .filtro-mobile-keyword-box {
+      min-width: 0;
+      width: 100%;
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    #filtroPlatosMobileControls > .d-flex > .filtro-mobile-filter-button {
+      grid-column: 2;
+      grid-row: 1;
+      width: 100%;
+      min-width: 0;
+      padding-left: .25rem;
+      padding-right: .25rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #filtroPlatosMobileControls > .d-flex > .filtro-mobile-filter-button .filtro-mobile-filter-label {
+      display: none;
+    }
+
+    #filtroPlatosMobileControls > .d-flex > .lo-que-tengo-global {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      width: 100%;
+    }
+  }
+
   .filtro-platos-mobile-shell {
     background: var(--bs-white, #fff);
     border-radius: .5rem;
@@ -262,50 +328,47 @@
 </style>
 
 
+
 <div id="filtroPlatosMobileControls" class="filtro-platos-mobile-shell mb-2">
-  <div class="d-flex align-items-stretch gap-2">
-
-    <div class="input-group input-group-sm flex-grow-1 filtro-mobile-keyword-box {% if formulario.palabra_clave.value %}filtro-keyword-activo{% endif %}">
-      <span class="input-group-text">
-        <i class="fa-solid fa-magnifying-glass"></i>
-      </span>
-
-      <input
-        type="text"
-        class="form-control {% if formulario.palabra_clave.value %}text-danger fw-semibold{% endif %}"
-        id="palabraClaveMobile"
-        value="{{ formulario.palabra_clave.value|default:'' }}"
-        placeholder="Buscar">
-
-      <button
-        type="button"
-        class="filtro-mobile-keyword-clear {% if not formulario.palabra_clave.value %}d-none{% endif %}"
-        id="limpiarPalabraClaveMobile"
-        aria-label="Borrar palabra clave">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
+  <div class="mobile-filters-row">
+    <!-- Buscador -->
+    <div class="mobile-search-wrapper">
+      <div class="input-group input-group-sm filtro-mobile-keyword-box {% if formulario.palabra_clave.value %}filtro-keyword-activo{% endif %}">
+        <span class="input-group-text">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </span>
+        <input
+          type="text"
+          class="form-control {% if formulario.palabra_clave.value %}text-danger fw-semibold{% endif %}"
+          id="palabraClaveMobile"
+          value="{{ formulario.palabra_clave.value|default:'' }}"
+          placeholder="Buscar">
+        <button
+          type="button"
+          class="filtro-mobile-keyword-clear {% if not formulario.palabra_clave.value %}d-none{% endif %}"
+          id="limpiarPalabraClaveMobile"
+          aria-label="Borrar palabra clave">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
     </div>
 
+    <!-- Botón Filtros -->
     <button
       type="button"
-      class="btn btn-primary btn-sm fw-semibold flex-shrink-0"
+      class="btn btn-primary btn-sm fw-semibold flex-shrink-0 mobile-filter-btn"
       data-bs-toggle="modal"
       data-bs-target="#filtroPlatosModal">
-      <i class="fa-solid fa-sliders me-1"></i>
-      Filtros
+      <i class="fa-solid fa-sliders"></i>
+      <span class="filter-text">Filtros</span>
     </button>
 
+    <!-- Toggle "Con lo que tengo" -->
     {% include "AdminVideos/partials/_control_lo_que_tengo_global.html" with modo="mobile" %}
-
   </div>
 
   <div id="filtroPlatosMobileSummary" class="filtro-platos-mobile-summary mt-2 d-none"></div>
-</div>
-
-
-
-
-<!-- Modal móvil para el filtro de platos.
+</div><!-- Modal móvil para el filtro de platos.
      Importante: no duplica el form; JS mueve #form-filtros-platos acá sólo en celular. -->
 <div
   class="modal fade"
@@ -353,7 +416,11 @@
             placeholder="Buscar por palabra clave"
             name="palabra_clave"
             value="{{ formulario.palabra_clave.value|default:'' }}">
-        </div>
+
+        <!-- Toggle Con lo que tengo (desktop) -->
+        {% include "AdminVideos/partials/_control_lo_que_tengo_global.html" with modo="desktop" %}
+        
+      </div>
 
         <input
           class="btn-check"
@@ -739,7 +806,7 @@ document.addEventListener("shown.bs.modal", function (event) {
 })();
 </script>
 
-<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=20260831_102713"></script>
+<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=20261018_1"></script>
 <script src="{% static 'AdminVideos/js/lo_que_tengo.js' %}?v=20260822172620"></script>
 
 {% endblock %}

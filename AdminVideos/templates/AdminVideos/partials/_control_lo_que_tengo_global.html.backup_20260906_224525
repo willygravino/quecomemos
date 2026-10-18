@@ -1,0 +1,28 @@
+{# Control global independiente del carrusel de categorías. #}
+<div class="lo-que-tengo-global js-lo-que-tengo-state-root {% if lo_que_tengo_activo %}lo-que-tengo-activo{% endif %} lo-que-tengo-global">
+  <a
+    class="selector-lo-que-tengo js-filtro-lo-que-tengo {% if lo_que_tengo_activo %}is-active{% endif %}"
+    href="{% url 'filtro-de-platos' %}?tipopag={{ tipopag|default:'Principal'|urlencode }}&lo_que_tengo={% if lo_que_tengo_activo %}0{% else %}1{% endif %}"
+    data-lo-que-tengo-activo="{% if lo_que_tengo_activo %}1{% else %}0{% endif %}"
+    role="switch"
+    aria-checked="{% if lo_que_tengo_activo %}true{% else %}false{% endif %}"
+    aria-pressed="{% if lo_que_tengo_activo %}true{% else %}false{% endif %}"
+    title="Activar Con lo que tengo">
+    <span class="selector-lo-que-tengo-icon icon-wrap" aria-hidden="true">
+      <i class="fa-solid fa-basket-shopping"></i>
+    </span>
+    <span class="selector-lo-que-tengo-copy">
+      <span class="selector-lo-que-tengo-label">Con lo que tengo</span>
+    </span>
+  </a>
+
+  <button
+    type="button"
+    class="selector-lo-que-tengo-edit"
+    data-bs-toggle="modal"
+    data-bs-target="#loQueTengoModal"
+    title="Agregar o editar palabras de Lo que tengo"
+    aria-label="Agregar o editar palabras de Lo que tengo">
+    <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i>
+  </button>
+</div>

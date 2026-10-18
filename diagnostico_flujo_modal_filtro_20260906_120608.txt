@@ -1,0 +1,1172 @@
+Archivo:
+AdminVideos/templates/AdminVideos/lista_filtrada.html
+
+Fecha:
+Sun Sep  6 12:06:08 -03 2026
+
+==============================================
+1) ESTRUCTURA MODAL
+==============================================
+79-    color: inherit;
+80-    font: inherit;
+81-    line-height: 1;
+82-    padding: 0 .1rem;
+83-    margin: 0;
+84-    cursor: pointer;
+85-    opacity: .8;
+86-  }
+87-
+88-  .filtro-chip-remove:hover,
+89-  .filtro-chip-remove:focus {
+90-    opacity: 1;
+91-    text-decoration: none;
+92-  }
+93-
+94-  .filtro-platos-mobile-summary .badge.text-bg-light {
+95-    background: #fff !important;
+96-    color: #2f3a4a !important;
+97-  }
+98-
+99-  .filtro-platos-mobile-summary .filtro-chip-light {
+100-    background: #fff !important;
+101-    color: #2f3a4a !important;
+102-    border-color: rgba(78, 115, 223, .22) !important;
+103-  }
+104-
+105-  .filtro-platos-mobile-summary .filtro-chip-success {
+106-    background: #4e73df !important;
+107-    color: #fff !important;
+108-    border-color: #4e73df !important;
+109-  }
+110-
+111-  .filtro-platos-mobile-summary:empty {
+112-    display: none;
+113-  }
+114-
+115-  .filtro-platos-mobile-summary.is-empty {
+116-    display: none;
+117-  }
+118-
+119:  #filtroPlatosModal .modal-body {
+120-    background: #f8f9fc;
+121-  }
+122-
+123:  #filtroPlatosModal #form-filtros-platos {
+124-    margin-bottom: 0 !important;
+125-  }
+126-
+127:  #filtroPlatosModal .filtros-platos-card {
+128-    box-shadow: none !important;
+129-  }
+130-  .filtro-mobile-keyword-box {
+131-    position: relative;
+132-  }
+133-
+134-  .filtro-mobile-keyword-box .form-control {
+135-    padding-right: 2rem;
+136-  }
+137-
+138-  .filtro-mobile-keyword-clear {
+139-    appearance: none;
+140-    border: 0;
+141-    background: transparent;
+142-    color: #6c757d;
+143-    width: 1.75rem;
+144-    height: 100%;
+145-    padding: 0;
+146-    margin: 0;
+147-    position: absolute;
+148-    top: 0;
+149-    right: 0;
+150-    z-index: 5;
+151-    display: inline-flex;
+152-    align-items: center;
+153-    justify-content: center;
+154-    cursor: pointer;
+155-  }
+156-
+157-  .filtro-mobile-keyword-clear:hover,
+158-  .filtro-mobile-keyword-clear:focus {
+159-    background: transparent;
+160-    color: var(--bs-danger, #dc3545);
+161-    outline: none;
+162-    box-shadow: none;
+163-  }
+164-
+165-  .filtro-mobile-keyword-box.filtro-keyword-activo .filtro-mobile-keyword-clear {
+166-    color: var(--bs-danger, #dc3545);
+167-    background: transparent;
+168-  }
+169-  .filtro-toggle-integrado {
+170-    display: inline-flex;
+171-    align-items: stretch;
+172-    max-width: 100%;
+173-    border: 1px solid rgba(78, 115, 223, .38);
+174-    border-radius: 999px;
+175-    overflow: hidden;
+176-    background: #fff;
+177-    color: #4e73df;
+178-    line-height: 1.15;
+179-    cursor: pointer;
+180-    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+181-    padding: 0;
+182-  }
+183-
+184-  .filtro-toggle-integrado:hover,
+185-  .filtro-toggle-integrado:focus {
+186-    color: #4e73df;
+187-    background: #fff;
+188-    outline: none;
+189-  }
+190-
+191-  .filtro-toggle-integrado-text {
+192-    display: inline-flex;
+193-    align-items: center;
+194-    justify-content: center;
+195-    gap: .35rem;
+196-    padding: .32rem .68rem;
+197-    font-size: .875rem;
+198-    font-weight: 650;
+199-    background: #fff;
+200-    color: #4e73df;
+201-  }
+202-
+203-  .filtro-toggle-integrado-state {
+204-    display: inline-flex;
+205-    align-items: center;
+206-    justify-content: center;
+207-    width: 2.15rem;
+208-    min-width: 2.15rem;
+209-    border-left: 1px solid rgba(78, 115, 223, .22);
+210-    background: #fff;
+211-    color: #4e73df;
+212-    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+213-  }
+214-
+215-  .filtro-toggle-integrado:hover .filtro-toggle-integrado-text,
+216-  .filtro-toggle-integrado:hover .filtro-toggle-integrado-state {
+217-    background: rgba(78, 115, 223, .08);
+218-  }
+219-
+220-  #quecomemos:checked + .filtro-toggle-integrado,
+221-  #misplatos:checked + .filtro-toggle-integrado {
+222-    border-color: rgba(220, 53, 69, .22);
+223-    background: rgba(220, 53, 69, .06);
+224-  }
+225-
+226-  #quecomemos:checked + .filtro-toggle-integrado .filtro-toggle-integrado-text,
+227-  #misplatos:checked + .filtro-toggle-integrado .filtro-toggle-integrado-text {
+228-    background: rgba(220, 53, 69, .06);
+229-    color: #4e73df;
+230-  }
+231-
+232-  #quecomemos:checked + .filtro-toggle-integrado:hover .filtro-toggle-integrado-text,
+233-  #quecomemos:checked + .filtro-toggle-integrado:focus .filtro-toggle-integrado-text,
+234-  #misplatos:checked + .filtro-toggle-integrado:hover .filtro-toggle-integrado-text,
+235-  #misplatos:checked + .filtro-toggle-integrado:focus .filtro-toggle-integrado-text {
+236-    background: rgba(78, 115, 223, .13);
+237-    color: #4e73df;
+238-  }
+239-
+240-  #quecomemos:checked + .filtro-toggle-integrado .filtro-toggle-integrado-state,
+241-  #misplatos:checked + .filtro-toggle-integrado .filtro-toggle-integrado-state {
+242-    border-left-color: #dc3545;
+243-    background: #dc3545;
+244-    color: #fff;
+245-  }
+246-
+247-  #quecomemos:focus-visible + .filtro-toggle-integrado,
+--
+253-  #misplatos:checked + .filtro-toggle-integrado .filtro-toggle-filter-icon {
+254-    display: none;
+255-  }
+256-
+257-  #quecomemos:not(:checked) + .filtro-toggle-integrado .filtro-toggle-check-icon,
+258-  #misplatos:not(:checked) + .filtro-toggle-integrado .filtro-toggle-check-icon {
+259-    display: none;
+260-  }
+261-
+262-</style>
+263-
+264-
+265-<div id="filtroPlatosMobileControls" class="filtro-platos-mobile-shell mb-2">
+266-  <div class="d-flex align-items-stretch gap-2">
+267-
+268-    <div class="input-group input-group-sm flex-grow-1 filtro-mobile-keyword-box {% if formulario.palabra_clave.value %}filtro-keyword-activo{% endif %}">
+269-      <span class="input-group-text">
+270-        <i class="fa-solid fa-magnifying-glass"></i>
+271-      </span>
+272-
+273-      <input
+274-        type="text"
+275-        class="form-control {% if formulario.palabra_clave.value %}text-danger fw-semibold{% endif %}"
+276-        id="palabraClaveMobile"
+277-        value="{{ formulario.palabra_clave.value|default:'' }}"
+278-        placeholder="Buscar">
+279-
+280-      <button
+281-        type="button"
+282-        class="filtro-mobile-keyword-clear {% if not formulario.palabra_clave.value %}d-none{% endif %}"
+283-        id="limpiarPalabraClaveMobile"
+284-        aria-label="Borrar palabra clave">
+285-        <i class="fa-solid fa-xmark"></i>
+286-      </button>
+287-    </div>
+288-
+289-    <button
+290-      type="button"
+291-      class="btn btn-primary btn-sm fw-semibold flex-shrink-0"
+292-      data-bs-toggle="modal"
+293:      data-bs-target="#filtroPlatosModal">
+294-      <i class="fa-solid fa-sliders me-1"></i>
+295-      Filtros
+296-    </button>
+297-
+298-    {% include "AdminVideos/partials/_control_lo_que_tengo_global.html" with modo="mobile" %}
+299-
+300-  </div>
+301-
+302-  <div id="filtroPlatosMobileSummary" class="filtro-platos-mobile-summary mt-2 d-none"></div>
+303-</div>
+304-
+305-
+306-
+307-
+308-<!-- Modal móvil para el filtro de platos.
+309-     Importante: no duplica el form; JS mueve #form-filtros-platos acá sólo en celular. -->
+310-<div
+311-  class="modal fade"
+312:  id="filtroPlatosModal"
+313-  tabindex="-1"
+314:  aria-labelledby="filtroPlatosModalLabel"
+315-  aria-hidden="true">
+316-  <div class="modal-dialog modal-dialog-scrollable modal-fullscreen-sm-down modal-dialog-centered">
+317-    <div class="modal-content">
+318-
+319-      <div class="modal-header py-2">
+320:        <h5 class="modal-title" id="filtroPlatosModalLabel">
+321-          <i class="fa-solid fa-sliders me-1"></i>
+322-          Filtros
+323-        </h5>
+324-
+325-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+326-      </div>
+327-
+328-      <div id="filtroPlatosInlineHome" class="d-none"></div>
+329-
+330:<div class="modal-body" id="filtroPlatosModalBody"></div>
+331-
+332-      <div class="modal-footer py-2">
+333-        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+334-          Cerrar
+335-        </button>
+336-      </div>
+337-
+338-    </div>
+339-  </div>
+340-</div>
+341-
+342-<div
+343-  class="modal fade"
+344-  id="loQueTengoModal"
+345-  tabindex="-1"
+346-  aria-labelledby="loQueTengoModalLabel"
+347-  aria-hidden="true"
+348-  data-palabras-url="{% url 'ajax-lo-que-tengo-palabras' %}"
+349-  data-agregar-url="{% url 'ajax-lo-que-tengo-agregar' %}"
+350-  data-sugerencias-url="{% url 'api_ingredientes' %}">
+351-  <div class="modal-dialog">
+352-    <div class="modal-content">
+353-
+354-      <div class="modal-header">
+355-        <h5 class="modal-title" id="loQueTengoModalLabel">
+356-          Lo que tengo
+357-        </h5>
+358-
+359-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+360-      </div>
+361-
+362-      <div class="modal-body">
+363-        <p class="small text-muted mb-2">
+364-          Agregá palabras clave para filtrar platos. Podés elegir ingredientes existentes o escribir texto libre.
+365-        </p>
+366-
+367-        <div class="input-group mb-2">
+368-          <select id="loQueTengoSelect" class="form-select" style="width: 100%;"></select>
+369-        </div>
+370-
+371-        <button type="button" class="btn btn-success btn-sm mb-3" id="loQueTengoAgregarBtn">
+372-          Agregar
+373-        </button>
+374-
+375-        <div class="alert alert-danger d-none small" id="loQueTengoError"></div>
+376-
+377-        <ul class="list-group" id="loQueTengoLista">
+378-          <li class="list-group-item text-muted small">
+379-            Cargando...
+380-          </li>
+381-        </ul>
+382-      </div>
+383-
+384-      <div class="modal-footer">
+385-        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+386-          Cerrar
+387-        </button>
+388-      </div>
+389-
+390-    </div>
+391-  </div>
+392-</div>
+393-
+394-
+395-
+396-<script>
+397-// FILTRO RESPONSIVE: INLINE EN DESKTOP, MODAL EN MÓVIL
+398-// ----------------------------------------------------
+399-// No se clona el formulario. Se mueve el mismo #form-filtros-platos
+400-// para no duplicar IDs, eventos ni comportamiento AJAX.
+401-(function () {
+402-  const media = window.matchMedia("(max-width: 767.98px)");
+403-
+404-  function getForm() {
+405-    return document.getElementById("form-filtros-platos");
+406-  }
+407-
+408-  function getHome() {
+409-    return document.getElementById("filtroPlatosInlineHome");
+410-  }
+411-
+412-  function getModalBody() {
+413:    return document.getElementById("filtroPlatosModalBody");
+414-  }
+415-
+416-  function escapeHTML(value) {
+417-    return String(value || "")
+418-      .replace(/&/g, "&amp;")
+419-      .replace(/</g, "&lt;")
+420-      .replace(/>/g, "&gt;")
+421-      .replace(/"/g, "&quot;")
+422-      .replace(/'/g, "&#039;");
+423-  }
+424-
+425-
+426-  function badge(texto, clase, filtro) {
+427-    const label = escapeHTML(texto);
+428-    const key = escapeHTML(filtro || "");
+429-
+430-    return ''
+431-      + '<span class="badge rounded-pill ' + clase + '">'
+432-      + '<span>' + label + '</span>'
+433-      + '<button type="button" class="filtro-chip-remove" '
+434-      + 'data-filtro-chip-remove="' + key + '" '
+435-      + 'aria-label="Quitar filtro ' + label + '">'
+436-      + '&times;'
+437-      + '</button>'
+438-      + '</span>';
+439-  }
+440-
+441-  function dispararCambioFiltro(input) {
+442-    if (!input) return;
+443-
+444-    input.dispatchEvent(new Event("input", { bubbles: true }));
+445-    input.dispatchEvent(new Event("change", { bubbles: true }));
+446-  }
+447-
+448-  function desactivarFiltroMobile(filtro) {
+449-    const form = getForm();
+450-    if (!form) return;
+451-
+452-    let input = null;
+453-
+454-    if (filtro === "quecomemos") {
+455-      input = form.querySelector('input[name="quecomemos"]');
+456-    }
+457-
+458-    if (filtro === "misplatos") {
+459-      input = form.querySelector('input[name="misplatos"]');
+460-    }
+461-
+462-    if (!input) return;
+463-
+464-    input.checked = false;
+465-    dispararCambioFiltro(input);
+466-    actualizarResumenMobile();
+467-  }
+468-
+469-  function actualizarResumenMobile() {
+470-    const form = getForm();
+471-    const summary = document.getElementById("filtroPlatosMobileSummary");
+472-
+473-    if (!form || !summary) return;
+474-
+475-    const chips = [];
+476-
+477-    const quecomemos = form.querySelector('input[name="quecomemos"]')?.checked;
+478-    const misplatos = form.querySelector('input[name="misplatos"]')?.checked;
+479-    if (quecomemos) {
+480-      chips.push(badge("Quecomemos", "filtro-chip-light", "quecomemos"));
+481-    }
+482-
+483-    if (misplatos) {
+484-      chips.push(badge("Mis platos", "filtro-chip-light", "misplatos"));
+485-    }
+486-
+487-    summary.innerHTML = chips.join(" ");
+488-    summary.classList.toggle("is-empty", chips.length === 0);
+489-    summary.classList.toggle("d-none", chips.length === 0);
+490-  }
+491-
+492-  function ocultarModalFiltroSiHaceFalta() {
+493:    const modalEl = document.getElementById("filtroPlatosModal");
+494-
+495-    if (!modalEl || !window.bootstrap || !bootstrap.Modal) return;
+496-
+497-    const instance = bootstrap.Modal.getInstance(modalEl);
+498-
+499-    if (instance && modalEl.classList.contains("show")) {
+500-      instance.hide();
+501-    }
+502-  }
+503-
+504-  function moverFormSegunPantalla() {
+505-    const form = getForm();
+506-    const home = getHome();
+507-    const modalBody = getModalBody();
+508-
+509-    if (!form || !home || !modalBody) return;
+510-
+511-    if (media.matches) {
+512-      if (form.parentElement !== modalBody) {
+513-        modalBody.appendChild(form);
+514-      }
+515-
+516-      form.classList.remove("mb-3");
+517-      form.classList.add("mb-0");
+518-    } else {
+519-      if (form.parentElement !== home) {
+520-        home.appendChild(form);
+521-      }
+522-
+523-      form.classList.add("mb-3");
+524-      form.classList.remove("mb-0");
+525-      ocultarModalFiltroSiHaceFalta();
+526-    }
+527-
+528-    actualizarResumenMobile();
+529-  }
+530-
+531-  function syncKeywordMobileDesdeReal() {
+532-    const form = getForm();
+533-    const mobile = document.getElementById("palabraClaveMobile");
+534-    const real = form ? form.querySelector('input[name="palabra_clave"]') : null;
+535-
+536-    if (!mobile || !real) return;
+537-
+538-    if (mobile.value !== real.value) {
+539-      mobile.value = real.value || "";
+540-    }
+541-
+542-    const activo = !!mobile.value.trim();
+543-
+544-    mobile.classList.toggle("text-danger", activo);
+545-    mobile.classList.toggle("fw-semibold", activo);
+546-
+547-    const box = mobile.closest(".filtro-mobile-keyword-box");
+548-    if (box) {
+549-      box.classList.toggle("filtro-keyword-activo", activo);
+550-    }
+551-
+552-    const clearBtn = document.getElementById("limpiarPalabraClaveMobile");
+553-    if (clearBtn) {
+554-      clearBtn.classList.toggle("d-none", !activo);
+555-    }
+556-  }
+557-
+558-  function syncKeywordRealDesdeMobile() {
+559-    const form = getForm();
+560-    const mobile = document.getElementById("palabraClaveMobile");
+561-    const real = form ? form.querySelector('input[name="palabra_clave"]') : null;
+562-
+563-    if (!mobile || !real) return;
+564-
+565-    real.value = mobile.value;
+566-    real.dispatchEvent(new Event("input", { bubbles: true }));
+567-    real.dispatchEvent(new Event("change", { bubbles: true }));
+568-
+569-    syncKeywordMobileDesdeReal();
+570-  }
+571-
+572-  function initFiltroResponsiveMobile() {
+573-    moverFormSegunPantalla();
+574-
+575-    const form = getForm();
+576-    const mobileKeyword = document.getElementById("palabraClaveMobile");
+577-
+578-    if (form && !form.dataset.resumenMobileBound) {
+579-      form.dataset.resumenMobileBound = "1";
+580-      form.addEventListener("change", function () {
+581-        syncKeywordMobileDesdeReal();
+582-        actualizarResumenMobile();
+583-      });
+584-      form.addEventListener("input", function () {
+585-        syncKeywordMobileDesdeReal();
+586-        actualizarResumenMobile();
+587-      });
+588-      form.addEventListener("submit", function () {
+589-        window.setTimeout(function () {
+590-          syncKeywordMobileDesdeReal();
+591-          actualizarResumenMobile();
+592-        }, 0);
+593-      });
+594-    }
+595-
+596-    if (mobileKeyword && !mobileKeyword.dataset.keywordMobileBound) {
+597-      mobileKeyword.dataset.keywordMobileBound = "1";
+598-
+599-      mobileKeyword.addEventListener("input", syncKeywordRealDesdeMobile);
+600-      mobileKeyword.addEventListener("change", syncKeywordRealDesdeMobile);
+601-
+602-      mobileKeyword.addEventListener("keydown", function (event) {
+603-        if (event.key !== "Enter") return;
+604-
+605-        event.preventDefault();
+606-        syncKeywordRealDesdeMobile();
+607-
+608-        const form = getForm();
+609-        if (form) {
+610-          form.requestSubmit ? form.requestSubmit() : form.submit();
+611-        }
+612-      });
+613-    }
+614-
+615-    syncKeywordMobileDesdeReal();
+616-    actualizarResumenMobile();
+617-  }
+618-
+619-  if (document.readyState === "loading") {
+620-    document.addEventListener("DOMContentLoaded", initFiltroResponsiveMobile);
+621-  } else {
+622-    initFiltroResponsiveMobile();
+623-  }
+624-
+625-  if (media.addEventListener) {
+626-    media.addEventListener("change", moverFormSegunPantalla);
+627-  } else if (media.addListener) {
+628-    media.addListener(moverFormSegunPantalla);
+629-  }
+630-
+631-  document.addEventListener("shown.bs.modal", function (event) {
+632:    if (event.target && event.target.id === "filtroPlatosModal") {
+633-      actualizarResumenMobile();
+634-    }
+635-  });
+636-
+637-  document.addEventListener("hidden.bs.modal", function (event) {
+638:    if (event.target && event.target.id === "filtroPlatosModal") {
+639-      actualizarResumenMobile();
+640-    }
+641-  });
+642-
+643-  document.addEventListener("click", function (event) {
+644-    const clearKeywordBtn = event.target.closest("#limpiarPalabraClaveMobile");
+645-    if (!clearKeywordBtn) return;
+646-
+647-    event.preventDefault();
+648-    event.stopPropagation();
+649-
+650-    const mobile = document.getElementById("palabraClaveMobile");
+651-    if (!mobile) return;
+652-
+653-    mobile.value = "";
+654-    syncKeywordRealDesdeMobile();
+655-
+656-    const form = getForm();
+657-    if (form) {
+658-      form.requestSubmit ? form.requestSubmit() : form.submit();
+659-    }
+660-  });
+661-
+662-  document.addEventListener("click", function (event) {
+663-    const removeBtn = event.target.closest("[data-filtro-chip-remove]");
+664-    if (!removeBtn) return;
+665-
+666-    event.preventDefault();
+667-    event.stopPropagation();
+668-
+669-    desactivarFiltroMobile(removeBtn.dataset.filtroChipRemove);
+670-  });
+671-
+672-  // Si desde el modal de filtros se abre "Lo que tengo", cerramos primero filtros.
+673-  document.addEventListener("click", function (event) {
+674-    const triggerLoQueTengo = event.target.closest('[data-bs-target="#loQueTengoModal"]');
+675-
+676-    if (!triggerLoQueTengo) return;
+677-
+678:    const filtroModal = document.getElementById("filtroPlatosModal");
+679-
+680-    if (filtroModal && filtroModal.classList.contains("show")) {
+681-      window.setTimeout(ocultarModalFiltroSiHaceFalta, 0);
+682-    }
+683-  });
+684-})();
+685-</script>
+686-
+687-<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=20260831_102713"></script>
+688-<script src="{% static 'AdminVideos/js/lo_que_tengo.js' %}?v=20260822172620"></script>
+689-
+690-{% endblock %}
+
+==============================================
+2) FORMULARIO Y ANCLAS
+==============================================
+103-  }
+104-
+105-  .filtro-platos-mobile-summary .filtro-chip-success {
+106-    background: #4e73df !important;
+107-    color: #fff !important;
+108-    border-color: #4e73df !important;
+109-  }
+110-
+111-  .filtro-platos-mobile-summary:empty {
+112-    display: none;
+113-  }
+114-
+115-  .filtro-platos-mobile-summary.is-empty {
+116-    display: none;
+117-  }
+118-
+119-  #filtroPlatosModal .modal-body {
+120-    background: #f8f9fc;
+121-  }
+122-
+123:  #filtroPlatosModal #form-filtros-platos {
+124-    margin-bottom: 0 !important;
+125-  }
+126-
+127-  #filtroPlatosModal .filtros-platos-card {
+128-    box-shadow: none !important;
+129-  }
+130-  .filtro-mobile-keyword-box {
+131-    position: relative;
+132-  }
+133-
+134-  .filtro-mobile-keyword-box .form-control {
+135-    padding-right: 2rem;
+136-  }
+137-
+138-  .filtro-mobile-keyword-clear {
+139-    appearance: none;
+140-    border: 0;
+141-    background: transparent;
+142-    color: #6c757d;
+143-    width: 1.75rem;
+--
+289-    <button
+290-      type="button"
+291-      class="btn btn-primary btn-sm fw-semibold flex-shrink-0"
+292-      data-bs-toggle="modal"
+293-      data-bs-target="#filtroPlatosModal">
+294-      <i class="fa-solid fa-sliders me-1"></i>
+295-      Filtros
+296-    </button>
+297-
+298-    {% include "AdminVideos/partials/_control_lo_que_tengo_global.html" with modo="mobile" %}
+299-
+300-  </div>
+301-
+302-  <div id="filtroPlatosMobileSummary" class="filtro-platos-mobile-summary mt-2 d-none"></div>
+303-</div>
+304-
+305-
+306-
+307-
+308-<!-- Modal móvil para el filtro de platos.
+309:     Importante: no duplica el form; JS mueve #form-filtros-platos acá sólo en celular. -->
+310-<div
+311-  class="modal fade"
+312-  id="filtroPlatosModal"
+313-  tabindex="-1"
+314-  aria-labelledby="filtroPlatosModalLabel"
+315-  aria-hidden="true">
+316-  <div class="modal-dialog modal-dialog-scrollable modal-fullscreen-sm-down modal-dialog-centered">
+317-    <div class="modal-content">
+318-
+319-      <div class="modal-header py-2">
+320-        <h5 class="modal-title" id="filtroPlatosModalLabel">
+321-          <i class="fa-solid fa-sliders me-1"></i>
+322-          Filtros
+323-        </h5>
+324-
+325-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+326-      </div>
+327-
+328:      <div id="filtroPlatosInlineHome" class="d-none"></div>
+329-
+330:<div class="modal-body" id="filtroPlatosModalBody"></div>
+331-
+332-      <div class="modal-footer py-2">
+333-        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+334-          Cerrar
+335-        </button>
+336-      </div>
+337-
+338-    </div>
+339-  </div>
+340-</div>
+341-
+342-<div
+343-  class="modal fade"
+344-  id="loQueTengoModal"
+345-  tabindex="-1"
+346-  aria-labelledby="loQueTengoModalLabel"
+347-  aria-hidden="true"
+348-  data-palabras-url="{% url 'ajax-lo-que-tengo-palabras' %}"
+349-  data-agregar-url="{% url 'ajax-lo-que-tengo-agregar' %}"
+350-  data-sugerencias-url="{% url 'api_ingredientes' %}">
+--
+379-            Cargando...
+380-          </li>
+381-        </ul>
+382-      </div>
+383-
+384-      <div class="modal-footer">
+385-        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+386-          Cerrar
+387-        </button>
+388-      </div>
+389-
+390-    </div>
+391-  </div>
+392-</div>
+393-
+394-
+395-
+396-<script>
+397-// FILTRO RESPONSIVE: INLINE EN DESKTOP, MODAL EN MÓVIL
+398-// ----------------------------------------------------
+399:// No se clona el formulario. Se mueve el mismo #form-filtros-platos
+400-// para no duplicar IDs, eventos ni comportamiento AJAX.
+401-(function () {
+402-  const media = window.matchMedia("(max-width: 767.98px)");
+403-
+404-  function getForm() {
+405:    return document.getElementById("form-filtros-platos");
+406-  }
+407-
+408-  function getHome() {
+409:    return document.getElementById("filtroPlatosInlineHome");
+410-  }
+411-
+412-  function getModalBody() {
+413:    return document.getElementById("filtroPlatosModalBody");
+414-  }
+415-
+416-  function escapeHTML(value) {
+417-    return String(value || "")
+418-      .replace(/&/g, "&amp;")
+419-      .replace(/</g, "&lt;")
+420-      .replace(/>/g, "&gt;")
+421-      .replace(/"/g, "&quot;")
+422-      .replace(/'/g, "&#039;");
+423-  }
+424-
+425-
+426-  function badge(texto, clase, filtro) {
+427-    const label = escapeHTML(texto);
+428-    const key = escapeHTML(filtro || "");
+429-
+430-    return ''
+431-      + '<span class="badge rounded-pill ' + clase + '">'
+432-      + '<span>' + label + '</span>'
+433-      + '<button type="button" class="filtro-chip-remove" '
+
+==============================================
+3) FUNCION MOVIMIENTO FORMULARIO
+==============================================
+484-      chips.push(badge("Mis platos", "filtro-chip-light", "misplatos"));
+485-    }
+486-
+487-    summary.innerHTML = chips.join(" ");
+488-    summary.classList.toggle("is-empty", chips.length === 0);
+489-    summary.classList.toggle("d-none", chips.length === 0);
+490-  }
+491-
+492-  function ocultarModalFiltroSiHaceFalta() {
+493-    const modalEl = document.getElementById("filtroPlatosModal");
+494-
+495-    if (!modalEl || !window.bootstrap || !bootstrap.Modal) return;
+496-
+497-    const instance = bootstrap.Modal.getInstance(modalEl);
+498-
+499-    if (instance && modalEl.classList.contains("show")) {
+500-      instance.hide();
+501-    }
+502-  }
+503-
+504:  function moverFormSegunPantalla() {
+505-    const form = getForm();
+506-    const home = getHome();
+507-    const modalBody = getModalBody();
+508-
+509-    if (!form || !home || !modalBody) return;
+510-
+511-    if (media.matches) {
+512-      if (form.parentElement !== modalBody) {
+513-        modalBody.appendChild(form);
+514-      }
+515-
+516-      form.classList.remove("mb-3");
+517-      form.classList.add("mb-0");
+518-    } else {
+519-      if (form.parentElement !== home) {
+520-        home.appendChild(form);
+521-      }
+522-
+523-      form.classList.add("mb-3");
+524-      form.classList.remove("mb-0");
+525-      ocultarModalFiltroSiHaceFalta();
+526-    }
+527-
+528-    actualizarResumenMobile();
+529-  }
+530-
+531-  function syncKeywordMobileDesdeReal() {
+532-    const form = getForm();
+533-    const mobile = document.getElementById("palabraClaveMobile");
+534-    const real = form ? form.querySelector('input[name="palabra_clave"]') : null;
+535-
+536-    if (!mobile || !real) return;
+537-
+538-    if (mobile.value !== real.value) {
+539-      mobile.value = real.value || "";
+540-    }
+541-
+542-    const activo = !!mobile.value.trim();
+543-
+544-    mobile.classList.toggle("text-danger", activo);
+545-    mobile.classList.toggle("fw-semibold", activo);
+546-
+547-    const box = mobile.closest(".filtro-mobile-keyword-box");
+548-    if (box) {
+549-      box.classList.toggle("filtro-keyword-activo", activo);
+550-    }
+551-
+552-    const clearBtn = document.getElementById("limpiarPalabraClaveMobile");
+553-    if (clearBtn) {
+554-      clearBtn.classList.toggle("d-none", !activo);
+555-    }
+556-  }
+557-
+558-  function syncKeywordRealDesdeMobile() {
+559-    const form = getForm();
+560-    const mobile = document.getElementById("palabraClaveMobile");
+561-    const real = form ? form.querySelector('input[name="palabra_clave"]') : null;
+562-
+563-    if (!mobile || !real) return;
+564-
+565-    real.value = mobile.value;
+566-    real.dispatchEvent(new Event("input", { bubbles: true }));
+567-    real.dispatchEvent(new Event("change", { bubbles: true }));
+568-
+569-    syncKeywordMobileDesdeReal();
+570-  }
+571-
+572-  function initFiltroResponsiveMobile() {
+573:    moverFormSegunPantalla();
+574-
+575-    const form = getForm();
+576-    const mobileKeyword = document.getElementById("palabraClaveMobile");
+577-
+578-    if (form && !form.dataset.resumenMobileBound) {
+579-      form.dataset.resumenMobileBound = "1";
+580-      form.addEventListener("change", function () {
+581-        syncKeywordMobileDesdeReal();
+582-        actualizarResumenMobile();
+583-      });
+584-      form.addEventListener("input", function () {
+585-        syncKeywordMobileDesdeReal();
+586-        actualizarResumenMobile();
+587-      });
+588-      form.addEventListener("submit", function () {
+589-        window.setTimeout(function () {
+590-          syncKeywordMobileDesdeReal();
+591-          actualizarResumenMobile();
+592-        }, 0);
+593-      });
+594-    }
+595-
+596-    if (mobileKeyword && !mobileKeyword.dataset.keywordMobileBound) {
+597-      mobileKeyword.dataset.keywordMobileBound = "1";
+598-
+599-      mobileKeyword.addEventListener("input", syncKeywordRealDesdeMobile);
+600-      mobileKeyword.addEventListener("change", syncKeywordRealDesdeMobile);
+601-
+602-      mobileKeyword.addEventListener("keydown", function (event) {
+603-        if (event.key !== "Enter") return;
+604-
+605-        event.preventDefault();
+606-        syncKeywordRealDesdeMobile();
+607-
+608-        const form = getForm();
+609-        if (form) {
+610-          form.requestSubmit ? form.requestSubmit() : form.submit();
+611-        }
+612-      });
+613-    }
+614-
+615-    syncKeywordMobileDesdeReal();
+616-    actualizarResumenMobile();
+617-  }
+618-
+619-  if (document.readyState === "loading") {
+620-    document.addEventListener("DOMContentLoaded", initFiltroResponsiveMobile);
+621-  } else {
+622-    initFiltroResponsiveMobile();
+623-  }
+624-
+625-  if (media.addEventListener) {
+626:    media.addEventListener("change", moverFormSegunPantalla);
+627-  } else if (media.addListener) {
+628:    media.addListener(moverFormSegunPantalla);
+629-  }
+630-
+631-  document.addEventListener("shown.bs.modal", function (event) {
+632-    if (event.target && event.target.id === "filtroPlatosModal") {
+633-      actualizarResumenMobile();
+634-    }
+635-  });
+636-
+637-  document.addEventListener("hidden.bs.modal", function (event) {
+638-    if (event.target && event.target.id === "filtroPlatosModal") {
+639-      actualizarResumenMobile();
+640-    }
+641-  });
+642-
+643-  document.addEventListener("click", function (event) {
+644-    const clearKeywordBtn = event.target.closest("#limpiarPalabraClaveMobile");
+645-    if (!clearKeywordBtn) return;
+646-
+647-    event.preventDefault();
+648-    event.stopPropagation();
+649-
+650-    const mobile = document.getElementById("palabraClaveMobile");
+651-    if (!mobile) return;
+652-
+653-    mobile.value = "";
+654-    syncKeywordRealDesdeMobile();
+655-
+656-    const form = getForm();
+657-    if (form) {
+658-      form.requestSubmit ? form.requestSubmit() : form.submit();
+659-    }
+660-  });
+661-
+662-  document.addEventListener("click", function (event) {
+663-    const removeBtn = event.target.closest("[data-filtro-chip-remove]");
+664-    if (!removeBtn) return;
+665-
+666-    event.preventDefault();
+667-    event.stopPropagation();
+668-
+669-    desactivarFiltroMobile(removeBtn.dataset.filtroChipRemove);
+670-  });
+671-
+672-  // Si desde el modal de filtros se abre "Lo que tengo", cerramos primero filtros.
+673-  document.addEventListener("click", function (event) {
+674-    const triggerLoQueTengo = event.target.closest('[data-bs-target="#loQueTengoModal"]');
+675-
+676-    if (!triggerLoQueTengo) return;
+677-
+678-    const filtroModal = document.getElementById("filtroPlatosModal");
+679-
+680-    if (filtroModal && filtroModal.classList.contains("show")) {
+681-      window.setTimeout(ocultarModalFiltroSiHaceFalta, 0);
+682-    }
+683-  });
+684-})();
+685-</script>
+686-
+687-<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=20260831_102713"></script>
+688-<script src="{% static 'AdminVideos/js/lo_que_tengo.js' %}?v=20260822172620"></script>
+689-
+690-{% endblock %}
+
+==============================================
+4) REFERENCIAS JAVASCRIPT FILTRO
+==============================================
+491-
+492-  function ocultarModalFiltroSiHaceFalta() {
+493-    const modalEl = document.getElementById("filtroPlatosModal");
+494-
+495-    if (!modalEl || !window.bootstrap || !bootstrap.Modal) return;
+496-
+497-    const instance = bootstrap.Modal.getInstance(modalEl);
+498-
+499-    if (instance && modalEl.classList.contains("show")) {
+500-      instance.hide();
+501-    }
+502-  }
+503-
+504-  function moverFormSegunPantalla() {
+505-    const form = getForm();
+506-    const home = getHome();
+507-    const modalBody = getModalBody();
+508-
+509-    if (!form || !home || !modalBody) return;
+510-
+511:    if (media.matches) {
+512-      if (form.parentElement !== modalBody) {
+513:        modalBody.appendChild(form);
+514-      }
+515-
+516-      form.classList.remove("mb-3");
+517-      form.classList.add("mb-0");
+518-    } else {
+519-      if (form.parentElement !== home) {
+520:        home.appendChild(form);
+521-      }
+522-
+523-      form.classList.add("mb-3");
+524-      form.classList.remove("mb-0");
+525-      ocultarModalFiltroSiHaceFalta();
+526-    }
+527-
+528-    actualizarResumenMobile();
+529-  }
+530-
+531-  function syncKeywordMobileDesdeReal() {
+532-    const form = getForm();
+533-    const mobile = document.getElementById("palabraClaveMobile");
+534-    const real = form ? form.querySelector('input[name="palabra_clave"]') : null;
+535-
+536-    if (!mobile || !real) return;
+537-
+538-    if (mobile.value !== real.value) {
+539-      mobile.value = real.value || "";
+540-    }
+541-
+542-    const activo = !!mobile.value.trim();
+543-
+544-    mobile.classList.toggle("text-danger", activo);
+545-    mobile.classList.toggle("fw-semibold", activo);
+546-
+547-    const box = mobile.closest(".filtro-mobile-keyword-box");
+548-    if (box) {
+549-      box.classList.toggle("filtro-keyword-activo", activo);
+550-    }
+551-
+552-    const clearBtn = document.getElementById("limpiarPalabraClaveMobile");
+553-    if (clearBtn) {
+554-      clearBtn.classList.toggle("d-none", !activo);
+555-    }
+556-  }
+557-
+558-  function syncKeywordRealDesdeMobile() {
+559-    const form = getForm();
+560-    const mobile = document.getElementById("palabraClaveMobile");
+561-    const real = form ? form.querySelector('input[name="palabra_clave"]') : null;
+562-
+563-    if (!mobile || !real) return;
+564-
+565-    real.value = mobile.value;
+566-    real.dispatchEvent(new Event("input", { bubbles: true }));
+567-    real.dispatchEvent(new Event("change", { bubbles: true }));
+568-
+569-    syncKeywordMobileDesdeReal();
+570-  }
+571-
+572:  function initFiltroResponsiveMobile() {
+573-    moverFormSegunPantalla();
+574-
+575-    const form = getForm();
+576-    const mobileKeyword = document.getElementById("palabraClaveMobile");
+577-
+578-    if (form && !form.dataset.resumenMobileBound) {
+579-      form.dataset.resumenMobileBound = "1";
+580-      form.addEventListener("change", function () {
+581-        syncKeywordMobileDesdeReal();
+582-        actualizarResumenMobile();
+583-      });
+584-      form.addEventListener("input", function () {
+585-        syncKeywordMobileDesdeReal();
+586-        actualizarResumenMobile();
+587-      });
+588-      form.addEventListener("submit", function () {
+589-        window.setTimeout(function () {
+590-          syncKeywordMobileDesdeReal();
+591-          actualizarResumenMobile();
+592-        }, 0);
+593-      });
+594-    }
+595-
+596-    if (mobileKeyword && !mobileKeyword.dataset.keywordMobileBound) {
+597-      mobileKeyword.dataset.keywordMobileBound = "1";
+598-
+599-      mobileKeyword.addEventListener("input", syncKeywordRealDesdeMobile);
+600-      mobileKeyword.addEventListener("change", syncKeywordRealDesdeMobile);
+601-
+602-      mobileKeyword.addEventListener("keydown", function (event) {
+603-        if (event.key !== "Enter") return;
+604-
+605-        event.preventDefault();
+606-        syncKeywordRealDesdeMobile();
+607-
+608-        const form = getForm();
+609-        if (form) {
+610-          form.requestSubmit ? form.requestSubmit() : form.submit();
+611-        }
+612-      });
+613-    }
+614-
+615-    syncKeywordMobileDesdeReal();
+616-    actualizarResumenMobile();
+617-  }
+618-
+619-  if (document.readyState === "loading") {
+620:    document.addEventListener("DOMContentLoaded", initFiltroResponsiveMobile);
+621-  } else {
+622:    initFiltroResponsiveMobile();
+623-  }
+624-
+625-  if (media.addEventListener) {
+626-    media.addEventListener("change", moverFormSegunPantalla);
+627-  } else if (media.addListener) {
+628-    media.addListener(moverFormSegunPantalla);
+629-  }
+630-
+631-  document.addEventListener("shown.bs.modal", function (event) {
+632-    if (event.target && event.target.id === "filtroPlatosModal") {
+633-      actualizarResumenMobile();
+634-    }
+635-  });
+636-
+637-  document.addEventListener("hidden.bs.modal", function (event) {
+638-    if (event.target && event.target.id === "filtroPlatosModal") {
+639-      actualizarResumenMobile();
+640-    }
+641-  });
+642-
+643-  document.addEventListener("click", function (event) {
+644-    const clearKeywordBtn = event.target.closest("#limpiarPalabraClaveMobile");
+645-    if (!clearKeywordBtn) return;
+646-
+647-    event.preventDefault();
+648-    event.stopPropagation();
+649-
+650-    const mobile = document.getElementById("palabraClaveMobile");
+651-    if (!mobile) return;
+652-
+653-    mobile.value = "";
+654-    syncKeywordRealDesdeMobile();
+655-
+656-    const form = getForm();
+657-    if (form) {
+658-      form.requestSubmit ? form.requestSubmit() : form.submit();
+659-    }
+660-  });
+661-
+662-  document.addEventListener("click", function (event) {
+
+==============================================
+ FIN
+==============================================

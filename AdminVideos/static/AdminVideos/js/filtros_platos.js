@@ -208,7 +208,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const nuevaUrl = new URL(window.location.href);
     nuevaUrl.searchParams.set("tipopag", tipopag);
-    nuevaUrl.searchParams.delete("lo_que_tengo");
+    nuevaUrl.searchParams.set("lo_que_tengo", "0");
 
     window.history.replaceState(
       { tipopag: tipopag, loQueTengoActivo: false },
@@ -723,7 +723,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (activar) {
       nuevaUrl.searchParams.set("lo_que_tengo", "1");
     } else {
-      nuevaUrl.searchParams.delete("lo_que_tengo");
+      nuevaUrl.searchParams.set("lo_que_tengo", "0");
     }
 
     window.history.pushState(
@@ -768,7 +768,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (estaActivoLoQueTengo()) {
       nuevaUrl.searchParams.set("lo_que_tengo", "1");
     } else {
-      nuevaUrl.searchParams.delete("lo_que_tengo");
+      nuevaUrl.searchParams.set("lo_que_tengo", "0");
     }
 
     window.history.pushState(

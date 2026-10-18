@@ -1,0 +1,58 @@
+Fecha:
+Sun Sep  6 12:10:53 -03 2026
+
+==============================================
+1) TODAS LAS REFERENCIAS form-filtros-platos
+==============================================
+AdminVideos/static/AdminVideos/css/mi-css.css:1992:.filtro-platos-y-lo-que-tengo #form-filtros-platos {
+AdminVideos/static/AdminVideos/css/mi-css.css.backup_lo_que_tengo_unico_20260906_115252:1992:.filtro-platos-y-lo-que-tengo #form-filtros-platos {
+AdminVideos/static/AdminVideos/js/filtros_platos.js:22:  const form = document.getElementById("form-filtros-platos");
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_lo_que_tengo_unificado_20260906_114213:123:  #filtroPlatosModal #form-filtros-platos {
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_lo_que_tengo_unificado_20260906_114213:309:     Importante: no duplica el form; JS mueve #form-filtros-platos acá sólo en celular. -->
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_lo_que_tengo_unificado_20260906_114213:397:// No se clona el formulario. Se mueve el mismo #form-filtros-platos
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_lo_que_tengo_unificado_20260906_114213:403:    return document.getElementById("form-filtros-platos");
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_modal_filtro_20260906_115840:123:  #filtroPlatosModal #form-filtros-platos {
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_modal_filtro_20260906_115840:309:     Importante: no duplica el form; JS mueve #form-filtros-platos acá sólo en celular. -->
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_modal_filtro_20260906_115840:397:// No se clona el formulario. Se mueve el mismo #form-filtros-platos
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_modal_filtro_20260906_115840:403:    return document.getElementById("form-filtros-platos");
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_filtro_modal_unico_20260906_120801:123:  #filtroPlatosModal #form-filtros-platos {
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_filtro_modal_unico_20260906_120801:309:     Importante: no duplica el form; JS mueve #form-filtros-platos acá sólo en celular. -->
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_filtro_modal_unico_20260906_120801:399:// No se clona el formulario. Se mueve el mismo #form-filtros-platos
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_filtro_modal_unico_20260906_120801:405:    return document.getElementById("form-filtros-platos");
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_lo_que_tengo_unificado_20260906_114037:123:  #filtroPlatosModal #form-filtros-platos {
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_lo_que_tengo_unificado_20260906_114037:309:     Importante: no duplica el form; JS mueve #form-filtros-platos acá sólo en celular. -->
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_lo_que_tengo_unificado_20260906_114037:397:// No se clona el formulario. Se mueve el mismo #form-filtros-platos
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_lo_que_tengo_unificado_20260906_114037:403:    return document.getElementById("form-filtros-platos");
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_ancla_filtro_robusta_20260906_120227:123:  #filtroPlatosModal #form-filtros-platos {
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_ancla_filtro_robusta_20260906_120227:309:     Importante: no duplica el form; JS mueve #form-filtros-platos acá sólo en celular. -->
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_ancla_filtro_robusta_20260906_120227:399:// No se clona el formulario. Se mueve el mismo #form-filtros-platos
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_ancla_filtro_robusta_20260906_120227:405:    return document.getElementById("form-filtros-platos");
+AdminVideos/templates/AdminVideos/lista_filtrada.html:123:  #filtroPlatosModal #form-filtros-platos {
+AdminVideos/templates/AdminVideos/lista_filtrada.html:309:     Importante: no duplica el form; JS mueve #form-filtros-platos acá sólo en celular. -->
+AdminVideos/templates/AdminVideos/lista_filtrada.html:399:// No se clona el formulario. Se mueve el mismo #form-filtros-platos
+AdminVideos/templates/AdminVideos/lista_filtrada.html:403:    return document.getElementById("form-filtros-platos");
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_filtro_mobile_20260906_113420:123:  #filtroPlatosModal #form-filtros-platos {
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_filtro_mobile_20260906_113420:310:  id="form-filtros-platos"
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_filtro_mobile_20260906_113420:390:     Importante: no duplica el form; JS mueve #form-filtros-platos acá sólo en celular. -->
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_filtro_mobile_20260906_113420:478:// No se clona el formulario. Se mueve el mismo #form-filtros-platos
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_filtro_mobile_20260906_113420:484:    return document.getElementById("form-filtros-platos");
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_ancla_filtro_robusta_20260906_115931:123:  #filtroPlatosModal #form-filtros-platos {
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_ancla_filtro_robusta_20260906_115931:309:     Importante: no duplica el form; JS mueve #form-filtros-platos acá sólo en celular. -->
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_ancla_filtro_robusta_20260906_115931:397:// No se clona el formulario. Se mueve el mismo #form-filtros-platos
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_ancla_filtro_robusta_20260906_115931:403:    return document.getElementById("form-filtros-platos");
+
+==============================================
+2) INCLUDES DE FILTROS
+==============================================
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_lo_que_tengo_unificado_20260906_114213:685:<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=20260831_102713"></script>
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_modal_filtro_20260906_115840:685:<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=20260831_102713"></script>
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_filtro_modal_unico_20260906_120801:687:<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=20260831_102713"></script>
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_lo_que_tengo_unificado_20260906_114037:685:<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=20260831_102713"></script>
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_ancla_filtro_robusta_20260906_120227:687:<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=20260831_102713"></script>
+AdminVideos/templates/AdminVideos/lista_filtrada.html:667:<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=20260831_102713"></script>
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_filtro_mobile_20260906_113420:766:<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=20260831_102713"></script>
+AdminVideos/templates/AdminVideos/lista_filtrada.html.backup_ancla_filtro_robusta_20260906_115931:685:<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=20260831_102713"></script>
+
+==============================================
+FIN
+==============================================

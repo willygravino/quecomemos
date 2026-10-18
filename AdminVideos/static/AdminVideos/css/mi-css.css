@@ -2617,3 +2617,208 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
   border-color: transparent !important;
   box-shadow: none !important;
 }
+
+/* ========================================
+   REORDENAMIENTO BARRA DE FILTROS MOBILE
+   ======================================== */
+
+@media (max-width: 767.98px) {
+  .filtro-platos-mobile-shell .d-flex {
+    flex-wrap: wrap !important;
+  }
+
+  .filtro-mobile-keyword-box {
+    flex: 1 1 100% !important;
+    max-width: 100% !important;
+    min-width: 0;
+  }
+
+  .filtro-platos-mobile-shell .btn-primary {
+    flex: 0 0 auto;
+    order: 1;
+    margin-left: auto;
+  }
+
+  .lo-que-tengo-mobile-wrapper {
+    flex: 0 0 100% !important;
+    order: 2 !important;
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  .lo-que-tengo-mobile-wrapper .lo-que-tengo-global {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+/* =============================================
+   NUEVO LAYOUT PARA MOBILE (reemplazo completo)
+   ============================================= */
+
+/* Contenedor principal: en desktop todo en una fila */
+.mobile-filters-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: nowrap; /* forzamos que no wrap en desktop */
+}
+
+/* El buscador ocupa espacio flexible, pero no todo */
+.mobile-search-wrapper {
+  flex: 1 1 auto;
+  min-width: 120px;
+}
+
+/* El botón Filtros: en desktop muestra texto, en mobile solo ícono */
+.mobile-filter-btn .filter-text {
+  display: inline; /* visible en desktop */
+}
+
+/* El wrapper del toggle: en desktop está en la misma línea */
+.mobile-toggle-wrapper {
+  flex: 0 0 auto;
+}
+
+/* ------- MÓVIL (ancho < 768px) ------- */
+@media (max-width: 767.98px) {
+  .mobile-filters-row {
+    flex-wrap: wrap; /* permitimos wrap solo en mobile */
+  }
+
+  /* El buscador ocupa toda la primera línea */
+  .mobile-search-wrapper {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  /* El botón Filtros: solo ícono, texto oculto */
+  .mobile-filter-btn .filter-text {
+    display: none !important;
+  }
+
+  /* El toggle baja a la segunda línea */
+  .mobile-toggle-wrapper {
+    flex: 0 0 100%;
+    order: 2;
+    margin-top: 0.5rem;
+  }
+
+  /* Ajuste interno del toggle para que ocupe todo el ancho */
+  .mobile-toggle-wrapper .lo-que-tengo-global {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+/* =============================================
+   COMPORTAMIENTO DEL TOGGLE "CON LO QUE TENGO"
+   ============================================= */
+
+/* En desktop: inline-flex, no ocupa todo el ancho */
+.modo-desktop.lo-que-tengo-global {
+  display: inline-flex !important;
+  width: auto !important;
+  background: transparent !important;
+  padding: 0 !important;
+  border: none !important;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.modo-desktop .selector-lo-que-tengo {
+  display: inline-flex !important;
+  white-space: nowrap;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.modo-desktop .selector-lo-que-tengo-edit {
+  display: inline-flex !important;
+}
+
+/* En mobile: ocupa todo el ancho (como antes) */
+.modo-mobile.lo-que-tengo-global {
+  width: 100% !important;
+  justify-content: flex-start;
+}
+
+.modo-mobile .selector-lo-que-tengo {
+  display: flex;
+  align-items: center;
+}
+
+/* Ajustes para el contenedor mobile */
+.filtro-platos-mobile-shell .mobile-filters-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (max-width: 767.98px) {
+  .filtro-platos-mobile-shell .mobile-filters-row {
+    flex-wrap: wrap;
+  }
+
+  .mobile-search-wrapper {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .mobile-filter-btn .filter-text {
+    display: none !important;
+  }
+
+  .modo-mobile.lo-que-tengo-global {
+    flex: 0 0 100% !important;
+    order: 2;
+    margin-top: 0.5rem;
+    width: 100% !important;
+  }
+}
+
+/* =============================================
+   MOSTRAR TOGGLE "CON LO QUE TENGO" EN DESKTOP
+   ============================================= */
+
+/* El contenedor principal en desktop debe ser inline-flex */
+.modo-desktop.lo-que-tengo-global {
+  display: inline-flex !important;
+  width: auto !important;
+  background: transparent !important;
+  padding: 0 !important;
+  border: none !important;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+/* El enlace del toggle debe ser inline-flex */
+.modo-desktop .selector-lo-que-tengo {
+  display: inline-flex !important;
+  white-space: nowrap;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* El botón de editar también en línea */
+.modo-desktop .selector-lo-que-tengo-edit {
+  display: inline-flex !important;
+  margin-left: 0.25rem;
+}
+
+/* Asegurar que el contenedor desktop no oculte elementos */
+.d-flex.align-items-center.gap-2.flex-wrap {
+  flex-wrap: nowrap !important;
+}
+
+/* El input de búsqueda no debe ocupar todo el ancho */
+.filtro-keyword-box {
+  max-width: 220px !important;
+  flex-shrink: 1 !important;
+}

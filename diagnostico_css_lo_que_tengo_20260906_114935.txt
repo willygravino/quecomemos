@@ -1,0 +1,70 @@
+Fecha:
+Sun Sep  6 11:49:35 -03 2026
+
+==============================================
+1) BUSQUEDA DE CLASES EN TODO EL PROYECTO
+==============================================
+AdminVideos/static/AdminVideos/css/mi-css.css:1718:.selector-lo-que-tengo-wrap {
+AdminVideos/static/AdminVideos/css/mi-css.css:1728:.selector-lo-que-tengo {
+AdminVideos/static/AdminVideos/css/mi-css.css:1740:.selector-lo-que-tengo:hover,
+AdminVideos/static/AdminVideos/css/mi-css.css:1741:.selector-lo-que-tengo:focus {
+AdminVideos/static/AdminVideos/css/mi-css.css:1746:.selector-lo-que-tengo-icon {
+AdminVideos/static/AdminVideos/css/mi-css.css:1758:.selector-lo-que-tengo-copy {
+AdminVideos/static/AdminVideos/css/mi-css.css:1767:.selector-lo-que-tengo-label {
+AdminVideos/static/AdminVideos/css/mi-css.css:1773:.selector-lo-que-tengo.is-active .selector-lo-que-tengo-icon {
+AdminVideos/static/AdminVideos/css/mi-css.css:1779:.selector-lo-que-tengo-edit {
+AdminVideos/static/AdminVideos/css/mi-css.css:1791:.selector-lo-que-tengo-edit:hover,
+AdminVideos/static/AdminVideos/css/mi-css.css:1792:.selector-lo-que-tengo-edit:focus {
+AdminVideos/static/AdminVideos/css/mi-css.css:1881:.selector-platos-shell.lo-que-tengo-activo .selector-platos-item.is-active {
+AdminVideos/static/AdminVideos/css/mi-css.css:1888:.selector-platos-shell.lo-que-tengo-activo .selector-platos-item.is-active .icon-wrap {
+AdminVideos/static/AdminVideos/css/mi-css.css:1916:[data-bs-theme="dark"] .selector-lo-que-tengo-wrap,
+AdminVideos/static/AdminVideos/css/mi-css.css:1935:[data-bs-theme="dark"] .selector-platos-shell.lo-que-tengo-activo .selector-platos-item.is-active {
+AdminVideos/static/AdminVideos/css/mi-css.css:1942:[data-bs-theme="dark"] .selector-platos-shell.lo-que-tengo-activo .selector-platos-item.is-active .icon-wrap {
+AdminVideos/static/AdminVideos/css/mi-css.css:1955:  .selector-lo-que-tengo-wrap {
+AdminVideos/static/AdminVideos/css/mi-css.css:2013:.lo-que-tengo-global .selector-lo-que-tengo {
+AdminVideos/static/AdminVideos/css/mi-css.css:2019:.lo-que-tengo-global .selector-lo-que-tengo-edit {
+AdminVideos/static/AdminVideos/css/mi-css.css:2025:.lo-que-tengo-global-mobile {
+AdminVideos/static/AdminVideos/css/mi-css.css:2040:  .lo-que-tengo-global-mobile {
+AdminVideos/static/AdminVideos/css/mi-css.css:2048:  .lo-que-tengo-global-mobile .selector-lo-que-tengo {
+AdminVideos/static/AdminVideos/css/mi-css.css:2054:  .lo-que-tengo-global-mobile .selector-lo-que-tengo-icon {
+AdminVideos/static/AdminVideos/css/mi-css.css:2060:  .lo-que-tengo-global-mobile .selector-lo-que-tengo-label {
+AdminVideos/static/AdminVideos/css/mi-css.css:2071:  .lo-que-tengo-global-mobile .selector-lo-que-tengo-edit {
+AdminVideos/static/AdminVideos/css/mi-css.css:2084:.lo-que-tengo-global .selector-lo-que-tengo {
+AdminVideos/static/AdminVideos/css/mi-css.css:2089:.lo-que-tengo-global .selector-lo-que-tengo-copy {
+AdminVideos/static/AdminVideos/css/mi-css.css:2093:.lo-que-tengo-global .selector-lo-que-tengo-icon {
+AdminVideos/static/AdminVideos/css/mi-css.css:2101:.lo-que-tengo-global .selector-lo-que-tengo-label {
+AdminVideos/static/AdminVideos/css/mi-css.css:2107:.lo-que-tengo-global .selector-lo-que-tengo.is-active {
+AdminVideos/static/AdminVideos/css/mi-css.css:2112:.lo-que-tengo-global .selector-lo-que-tengo.is-active .selector-lo-que-tengo-icon {
+AdminVideos/static/AdminVideos/css/mi-css.css:2118:.lo-que-tengo-global .selector-lo-que-tengo-edit {
+AdminVideos/static/AdminVideos/css/mi-css.css:2124:  .lo-que-tengo-global-mobile {
+AdminVideos/static/AdminVideos/css/mi-css.css:2129:  .lo-que-tengo-global-mobile .selector-lo-que-tengo {
+AdminVideos/static/AdminVideos/css/mi-css.css:2133:  .lo-que-tengo-global-mobile .selector-lo-que-tengo-copy {
+AdminVideos/static/AdminVideos/css/mi-css.css:2137:  .lo-que-tengo-global-mobile .selector-lo-que-tengo-icon {
+AdminVideos/static/AdminVideos/css/mi-css.css:2144:  .lo-que-tengo-global-mobile .selector-lo-que-tengo-edit {
+AdminVideos/static/AdminVideos/css/mi-css.css:2194:.selector-platos-shell.lo-que-tengo-activo .selector-platos-item.is-active,
+AdminVideos/static/AdminVideos/css/mi-css.css:2202:.selector-platos-shell.lo-que-tengo-activo .selector-platos-item.is-active .icon-wrap,
+AdminVideos/static/AdminVideos/js/filtros_platos.js:164:      root.classList.toggle("lo-que-tengo-activo", activo);
+AdminVideos/templates/AdminVideos/partials/_selector_horizontal_platos.html:4:  class="selector-platos-shell js-lo-que-tengo-state-root {% if lo_que_tengo_activo %}lo-que-tengo-activo{% endif %}"
+AdminVideos/templates/AdminVideos/partials/_control_lo_que_tengo_global.html:2:<div class="lo-que-tengo-global js-lo-que-tengo-state-root {% if lo_que_tengo_activo %}lo-que-tengo-activo{% endif %} {% if modo == 'mobile' %}lo-que-tengo-global-mobile{% else %}lo-que-tengo-global-desktop{% endif %}">
+AdminVideos/templates/AdminVideos/partials/_control_lo_que_tengo_global.html:4:    class="selector-lo-que-tengo js-filtro-lo-que-tengo {% if lo_que_tengo_activo %}is-active{% endif %}"
+AdminVideos/templates/AdminVideos/partials/_control_lo_que_tengo_global.html:6:    data-lo-que-tengo-activo="{% if lo_que_tengo_activo %}1{% else %}0{% endif %}"
+AdminVideos/templates/AdminVideos/partials/_control_lo_que_tengo_global.html:11:    <span class="selector-lo-que-tengo-icon icon-wrap" aria-hidden="true">
+AdminVideos/templates/AdminVideos/partials/_control_lo_que_tengo_global.html:14:    <span class="selector-lo-que-tengo-copy">
+AdminVideos/templates/AdminVideos/partials/_control_lo_que_tengo_global.html:15:      <span class="selector-lo-que-tengo-label">Con lo que tengo</span>
+AdminVideos/templates/AdminVideos/partials/_control_lo_que_tengo_global.html:21:    class="selector-lo-que-tengo-edit"
+
+==============================================
+2) ARCHIVOS CSS RELACIONADOS
+==============================================
+AdminVideos/static/AdminVideos/css/bootstrap.min.css
+AdminVideos/static/AdminVideos/css/mi-css.css
+AdminVideos/static/AdminVideos/css/menu_print_sheet.css
+AdminVideos/static/AdminVideos/css/shopping_panel.css
+AdminVideos/static/AdminVideos/css/mobile_action_bar.css
+AdminVideos/static/AdminVideos/css/plato_create_sheet.css
+AdminVideos/static/AdminVideos/css/sb-admin-2.min.css
+AdminVideos/static/AdminVideos/css/sb-admin-2.css
+
+==============================================
+ FIN DEL REPORTE
+==============================================

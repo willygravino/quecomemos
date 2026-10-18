@@ -1,0 +1,307 @@
+Archivo:
+AdminVideos/templates/AdminVideos/lista_filtrada.html
+
+==============================================
+FORMULARIO
+==============================================
+103-  }
+104-
+105-  .filtro-platos-mobile-summary .filtro-chip-success {
+106-    background: #4e73df !important;
+107-    color: #fff !important;
+108-    border-color: #4e73df !important;
+109-  }
+110-
+111-  .filtro-platos-mobile-summary:empty {
+112-    display: none;
+113-  }
+114-
+115-  .filtro-platos-mobile-summary.is-empty {
+116-    display: none;
+117-  }
+118-
+119-  #filtroPlatosModal .modal-body {
+120-    background: #f8f9fc;
+121-  }
+122-
+123:  #filtroPlatosModal #form-filtros-platos {
+124-    margin-bottom: 0 !important;
+125-  }
+126-
+127-  #filtroPlatosModal .filtros-platos-card {
+128-    box-shadow: none !important;
+129-  }
+130-  .filtro-mobile-keyword-box {
+131-    position: relative;
+132-  }
+133-
+134-  .filtro-mobile-keyword-box .form-control {
+135-    padding-right: 2rem;
+136-  }
+137-
+138-  .filtro-mobile-keyword-clear {
+139-    appearance: none;
+140-    border: 0;
+141-    background: transparent;
+142-    color: #6c757d;
+143-    width: 1.75rem;
+144-    height: 100%;
+145-    padding: 0;
+146-    margin: 0;
+147-    position: absolute;
+148-    top: 0;
+149-    right: 0;
+150-    z-index: 5;
+151-    display: inline-flex;
+152-    align-items: center;
+153-    justify-content: center;
+--
+289-    <button
+290-      type="button"
+291-      class="btn btn-primary btn-sm fw-semibold flex-shrink-0"
+292-      data-bs-toggle="modal"
+293-      data-bs-target="#filtroPlatosModal">
+294-      <i class="fa-solid fa-sliders me-1"></i>
+295-      Filtros
+296-    </button>
+297-
+298-    {% include "AdminVideos/partials/_control_lo_que_tengo_global.html" with modo="mobile" %}
+299-
+300-  </div>
+301-
+302-  <div id="filtroPlatosMobileSummary" class="filtro-platos-mobile-summary mt-2 d-none"></div>
+303-</div>
+304-
+305-
+306-
+307-
+308-<!-- Modal móvil para el filtro de platos.
+309:     Importante: no duplica el form; JS mueve #form-filtros-platos acá sólo en celular. -->
+310-<div
+311-  class="modal fade"
+312-  id="filtroPlatosModal"
+313-  tabindex="-1"
+314-  aria-labelledby="filtroPlatosModalLabel"
+315-  aria-hidden="true">
+316-  <div class="modal-dialog modal-dialog-scrollable modal-fullscreen-sm-down modal-dialog-centered">
+317-    <div class="modal-content">
+318-
+319-      <div class="modal-header py-2">
+320-        <h5 class="modal-title" id="filtroPlatosModalLabel">
+321-          <i class="fa-solid fa-sliders me-1"></i>
+322-          Filtros
+323-        </h5>
+324-
+325-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+326-      </div>
+327-
+328-      <div id="filtroPlatosInlineHome" class="d-none"></div>
+329-
+330-<div class="modal-body" id="filtroPlatosModalBody"></div>
+331-
+332-      <div class="modal-footer py-2">
+333-        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+334-          Cerrar
+335-        </button>
+336-      </div>
+337-
+338-    </div>
+339-  </div>
+--
+379-            Cargando...
+380-          </li>
+381-        </ul>
+382-      </div>
+383-
+384-      <div class="modal-footer">
+385-        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+386-          Cerrar
+387-        </button>
+388-      </div>
+389-
+390-    </div>
+391-  </div>
+392-</div>
+393-
+394-
+395-
+396-<script>
+397-// FILTRO RESPONSIVE: INLINE EN DESKTOP, MODAL EN MÓVIL
+398-// ----------------------------------------------------
+399:// No se clona el formulario. Se mueve el mismo #form-filtros-platos
+400-// para no duplicar IDs, eventos ni comportamiento AJAX.
+401-(function () {
+402-function getForm() {
+403:    return document.getElementById("form-filtros-platos");
+404-  }
+405-
+406-  function getHome() {
+407-    return document.getElementById("filtroPlatosInlineHome");
+408-  }
+409-
+410-  function getModalBody() {
+411-    return document.getElementById("filtroPlatosModalBody");
+412-  }
+413-
+414-  function escapeHTML(value) {
+415-    return String(value || "")
+416-      .replace(/&/g, "&amp;")
+417-      .replace(/</g, "&lt;")
+418-      .replace(/>/g, "&gt;")
+419-      .replace(/"/g, "&quot;")
+420-      .replace(/'/g, "&#039;");
+421-  }
+422-
+423-
+424-  function badge(texto, clase, filtro) {
+425-    const label = escapeHTML(texto);
+426-    const key = escapeHTML(filtro || "");
+427-
+428-    return ''
+429-      + '<span class="badge rounded-pill ' + clase + '">'
+430-      + '<span>' + label + '</span>'
+431-      + '<button type="button" class="filtro-chip-remove" '
+432-      + 'data-filtro-chip-remove="' + key + '" '
+433-      + 'aria-label="Quitar filtro ' + label + '">'
+
+==============================================
+INCLUDES / CONTENEDORES FILTRO
+==============================================
+308-<!-- Modal móvil para el filtro de platos.
+309-     Importante: no duplica el form; JS mueve #form-filtros-platos acá sólo en celular. -->
+310-<div
+311-  class="modal fade"
+312-  id="filtroPlatosModal"
+313-  tabindex="-1"
+314-  aria-labelledby="filtroPlatosModalLabel"
+315-  aria-hidden="true">
+316-  <div class="modal-dialog modal-dialog-scrollable modal-fullscreen-sm-down modal-dialog-centered">
+317-    <div class="modal-content">
+318-
+319-      <div class="modal-header py-2">
+320-        <h5 class="modal-title" id="filtroPlatosModalLabel">
+321-          <i class="fa-solid fa-sliders me-1"></i>
+322-          Filtros
+323-        </h5>
+324-
+325-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+326-      </div>
+327-
+328:      <div id="filtroPlatosInlineHome" class="d-none"></div>
+329-
+330:<div class="modal-body" id="filtroPlatosModalBody"></div>
+331-
+332-      <div class="modal-footer py-2">
+333-        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+334-          Cerrar
+335-        </button>
+336-      </div>
+337-
+338-    </div>
+339-  </div>
+340-</div>
+341-
+342-<div
+343-  class="modal fade"
+344-  id="loQueTengoModal"
+345-  tabindex="-1"
+346-  aria-labelledby="loQueTengoModalLabel"
+347-  aria-hidden="true"
+348-  data-palabras-url="{% url 'ajax-lo-que-tengo-palabras' %}"
+349-  data-agregar-url="{% url 'ajax-lo-que-tengo-agregar' %}"
+350-  data-sugerencias-url="{% url 'api_ingredientes' %}">
+351-  <div class="modal-dialog">
+352-    <div class="modal-content">
+353-
+354-      <div class="modal-header">
+355-        <h5 class="modal-title" id="loQueTengoModalLabel">
+356-          Lo que tengo
+357-        </h5>
+358-
+359-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+360-      </div>
+--
+387-        </button>
+388-      </div>
+389-
+390-    </div>
+391-  </div>
+392-</div>
+393-
+394-
+395-
+396-<script>
+397-// FILTRO RESPONSIVE: INLINE EN DESKTOP, MODAL EN MÓVIL
+398-// ----------------------------------------------------
+399-// No se clona el formulario. Se mueve el mismo #form-filtros-platos
+400-// para no duplicar IDs, eventos ni comportamiento AJAX.
+401-(function () {
+402-function getForm() {
+403-    return document.getElementById("form-filtros-platos");
+404-  }
+405-
+406-  function getHome() {
+407:    return document.getElementById("filtroPlatosInlineHome");
+408-  }
+409-
+410-  function getModalBody() {
+411:    return document.getElementById("filtroPlatosModalBody");
+412-  }
+413-
+414-  function escapeHTML(value) {
+415-    return String(value || "")
+416-      .replace(/&/g, "&amp;")
+417-      .replace(/</g, "&lt;")
+418-      .replace(/>/g, "&gt;")
+419-      .replace(/"/g, "&quot;")
+420-      .replace(/'/g, "&#039;");
+421-  }
+422-
+423-
+424-  function badge(texto, clase, filtro) {
+425-    const label = escapeHTML(texto);
+426-    const key = escapeHTML(filtro || "");
+427-
+428-    return ''
+429-      + '<span class="badge rounded-pill ' + clase + '">'
+430-      + '<span>' + label + '</span>'
+431-      + '<button type="button" class="filtro-chip-remove" '
+432-      + 'data-filtro-chip-remove="' + key + '" '
+433-      + 'aria-label="Quitar filtro ' + label + '">'
+434-      + '&times;'
+435-      + '</button>'
+436-      + '</span>';
+437-  }
+438-
+439-  function dispararCambioFiltro(input) {
+440-    if (!input) return;
+441-
+--
+647-    event.stopPropagation();
+648-
+649-    desactivarFiltroMobile(removeBtn.dataset.filtroChipRemove);
+650-  });
+651-
+652-  // Si desde el modal de filtros se abre "Lo que tengo", cerramos primero filtros.
+653-  document.addEventListener("click", function (event) {
+654-    const triggerLoQueTengo = event.target.closest('[data-bs-target="#loQueTengoModal"]');
+655-
+656-    if (!triggerLoQueTengo) return;
+657-
+658-    const filtroModal = document.getElementById("filtroPlatosModal");
+659-
+660-    if (filtroModal && filtroModal.classList.contains("show")) {
+661-      window.setTimeout(ocultarModalFiltroSiHaceFalta, 0);
+662-    }
+663-  });
+664-})();
+665-</script>
+666-
+667:<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=20260831_102713"></script>
+668-<script src="{% static 'AdminVideos/js/lo_que_tengo.js' %}?v=20260822172620"></script>
+669-
+670-{% endblock %}
+
+==============================================
+FIN
+==============================================

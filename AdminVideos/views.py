@@ -2978,7 +2978,7 @@ def obtener_estado_filtros_platos(request, dia_activo, persistir_sesion=True):
     elif "lo_que_tengo" in request.GET:
         valor_lo_que_tengo = request.GET.get("lo_que_tengo", "0")
     else:
-        valor_lo_que_tengo = request.session.get("lo_que_tengo_activo", False)
+        valor_lo_que_tengo = False  # Sin parametro GET, no reactivar desde sesion.
 
     lo_que_tengo_activo = str(valor_lo_que_tengo).strip().lower() in {
         "1", "true", "on", "yes"
