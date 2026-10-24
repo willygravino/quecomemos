@@ -30,6 +30,27 @@
     return esSingular ? opciones[0] : opciones[1];
   }
 
+  function setFormSubmitting(form, submitting) {
+    if (!form) return;
+    form.querySelectorAll('button[type="submit"]').forEach(function (btn) {
+      if (submitting) {
+        if (!btn.dataset.originalHtml) {
+          btn.dataset.originalHtml = btn.innerHTML;
+        }
+        btn.disabled = true;
+        btn.classList.add('disabled');
+        btn.innerHTML = 'Guardando...';
+      } else {
+        btn.disabled = false;
+        btn.classList.remove('disabled');
+        if (btn.dataset.originalHtml) {
+          btn.innerHTML = btn.dataset.originalHtml;
+          delete btn.dataset.originalHtml;
+        }
+      }
+    });
+  }
+
   // AUTO-REFRESH AL VOLVER DESDE LISTA COMPARTIDA
 
   // Este snippet refresca la página al volver desde la lista compartida.
@@ -1179,6 +1200,10 @@ ul.appendChild(li);
       form.addEventListener("submit", function (e) {
         e.preventDefault();
 
+        if (form.__isSubmitting) return;
+        form.__isSubmitting = true;
+        setFormSubmitting(form, true);
+
         // 🔹 Crear FormData con todos los inputs visibles y ocultos del modal
         const formData = new FormData(form);
 
@@ -1233,6 +1258,8 @@ ul.appendChild(li);
                 initPlatoForm(modalBody);
 
               } else {
+                form.__isSubmitting = false;
+                setFormSubmitting(form, false);
                 console.error("⚠️ Respuesta JSON inesperada:", data);
               }
 
@@ -1240,11 +1267,15 @@ ul.appendChild(li);
               const text = await response.text();
               console.error("❌ La respuesta no es JSON. Posible error en el backend:");
               console.error(text); // Mostramos el HTML que causó el fallo
+              form.__isSubmitting = false;
+              setFormSubmitting(form, false);
               alert("Error inesperado del servidor. Revisa la consola para más información.");
             }
           })
           .catch(err => {
             console.error("❌ Error en el fetch:", err);
+            form.__isSubmitting = false;
+            setFormSubmitting(form, false);
             alert("Ocurrió un error al intentar guardar. Revisá la consola para más detalles.");
           });
 
