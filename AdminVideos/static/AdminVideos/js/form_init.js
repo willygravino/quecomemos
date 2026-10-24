@@ -1355,6 +1355,11 @@ ul.appendChild(li);
         innerForm.addEventListener("submit", async function (e) {
           e.preventDefault();
 
+          if (innerForm.__isSubmitting) return;
+          innerForm.__isSubmitting = true;
+          setFormSubmitting(innerForm, true);
+
+          try {
           const formData = new FormData(innerForm);
 
           // Asegurar formset ingredientes dentro del modal de variedad
@@ -1385,6 +1390,8 @@ ul.appendChild(li);
           if (!ct.includes("application/json")) {
             const text = await resp.text();
             console.error("❌ Respuesta no JSON en variedad:", text);
+            innerForm.__isSubmitting = false;
+            setFormSubmitting(innerForm, false);
             alert("Error inesperado del servidor (variedad). Revisá la consola.");
             return;
           }
@@ -1413,6 +1420,16 @@ ul.appendChild(li);
           if (payload.html) {
             modalBody.innerHTML = payload.html;
             if (window.initPlatoForm) window.initPlatoForm(modalBody);
+            return;
+          }
+
+          innerForm.__isSubmitting = false;
+          setFormSubmitting(innerForm, false);
+          } catch (err) {
+            console.error("❌ Error al guardar variedad:", err);
+            innerForm.__isSubmitting = false;
+            setFormSubmitting(innerForm, false);
+            alert("Error inesperado al guardar variedad. Revisá la consola.");
           }
         });
 
