@@ -3082,6 +3082,11 @@ def obtener_estado_filtros_platos(request, dia_activo, persistir_sesion=True):
             "palabra_clave": palabra_clave,
         })
 
+    # FEATURE FLAG: Toggles Quecomemos/MisPlatos ocultos en la UI.
+    # Forzamos "misplatos" para que el listado nunca quede vacío.
+    quecomemos = None
+    misplatos = "misplatos"
+
     return {
         "form": form,
         "tipo_parametro": tipopag,
