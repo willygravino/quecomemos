@@ -1,7 +1,0 @@
-CORRECCION APLICADA - CON LO QUE TENGO
-Fecha: 2026-10-18T20:38:40
-Backup: backups_fix_lo_que_tengo/20261018_203838_432929
-Archivos: filtros_platos.js, views.py, lista_filtrada.html (version del JS)
-Verificaciones: node --check (si disponible); python manage.py check
-Cambio de comportamiento: en GET sin lo_que_tengo, el filtro inicia APAGADO.
-GET con lo_que_tengo=1 sigue activo. LoQueTengo legado se conserva.
