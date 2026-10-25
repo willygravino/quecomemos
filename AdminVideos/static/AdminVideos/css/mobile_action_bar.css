@@ -108,8 +108,25 @@ body:has(#accionesRapidasBase) {
   background: var(--bs-tertiary-bg) !important;
 }
 
-#accionesRapidasBase .boton-crear-plato-texto {
-  display: none !important;
+/* Desktop: mostrar texto largo, ocultar corto (para el boton crear plato) */
+@media (min-width: 768px) {
+  #botonCrearPlatoFlotante .boton-crear-plato-texto {
+    display: inline !important;
+  }
+  #botonCrearPlatoFlotante .qc-mobile-action-label {
+    display: none !important;
+  }
+}
+
+/* Mobile: ocultar texto largo, mostrar corto (para el boton crear plato) */
+@media (max-width: 767.98px) {
+  #accionesRapidasBase .boton-crear-plato-texto,
+  #botonCrearPlatoFlotante .boton-crear-plato-texto {
+    display: none !important;
+  }
+  #botonCrearPlatoFlotante .qc-mobile-action-label {
+    display: block !important;
+  }
 }
 
 #accionesRapidasBase i {

@@ -92,7 +92,7 @@
   <link rel="stylesheet" href="{% static 'AdminVideos/css/shopping_panel.css' %}?v=1">
   <link rel="stylesheet" href="{% static 'AdminVideos/css/plato_create_sheet.css' %}?v=1">
   <link rel="stylesheet" href="{% static 'AdminVideos/css/menu_print_sheet.css' %}?v=20260831_131631">
-  <link rel="stylesheet" href="{% static 'AdminVideos/css/mobile_action_bar.css' %}?v=20260831_104417">
+  <link rel="stylesheet" href="{% static 'AdminVideos/css/mobile_action_bar.css' %}?v=20261025_114748">
 </head>
 
 <body id="page-top">
@@ -966,9 +966,11 @@ Root globl para modales cargados dinámicamente (AJAX)
      tabindex="{% if tipopag == 'Todos' %}-1{% else %}0{% endif %}">
     <i class="fa-solid fa-plus boton-crear-plato-icono" aria-hidden="true"></i>
     <span class="boton-crear-plato-texto">
-      {% if tipopag == 'Todos' %}Elegí una categoría{% elif tipopag == 'Picada' %}Armar picada{% elif tipopag == 'Ingrediente de picada' %}Agregar ingrediente{% elif tipopag == 'Comerafuera' %}Agregar lugar{% elif tipopag == 'Delivery' %}Agregar delivery{% elif tipopag == 'Principal' or not tipopag %}Agregar plato principal{% else %}Agregar {{ tipopag|lower }}{% endif %}
+      {% if tipopag == 'Todos' %}Elegí una categoría{% elif tipopag == 'Picada' %}Agregar receta de picada armada{% elif tipopag == 'Ingrediente de picada' %}Agregar receta de ingrediente de picada{% elif tipopag == 'Comerafuera' %}Agregar lugar para comer afuera{% elif tipopag == 'Delivery' %}Agregar delivery{% elif tipopag == 'Principal' or not tipopag %}Agregar receta de plato principal{% else %}Agregar receta de {{ tipopag|lower }}{% endif %}
     </span>
-    <span class="qc-mobile-action-label" aria-hidden="true">Agregar</span>
+    <span class="qc-mobile-action-label" aria-hidden="true">
+      {% if tipopag == 'Todos' %}Elegí una categoría{% elif tipopag == 'Picada' %}Agregar picada{% elif tipopag == 'Ingrediente de picada' %}Agregar ingrediente{% elif tipopag == 'Comerafuera' %}Agregar lugar{% elif tipopag == 'Delivery' %}Agregar delivery{% elif tipopag == 'Principal' or not tipopag %}Agregar plato{% else %}Agregar {{ tipopag|lower }}{% endif %}
+    </span>
   </a>
 {% endif %}
 

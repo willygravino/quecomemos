@@ -588,9 +588,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let titulo = "Agregar receta de plato principal";
     if (tipopag === "Picada") {
-      titulo = "Armar picada";
+      titulo = "Agregar receta de picada armada";
     } else if (tipopag === "Ingrediente de picada") {
-      titulo = "Agregar ingrediente de picada";
+      titulo = "Agregar receta de ingrediente de picada";
     } else if (tipopag === "Guarnicion") {
       titulo = "Agregar receta de guarnición";
     } else if (tipopag === "Comerafuera") {
@@ -609,9 +609,13 @@ document.addEventListener("DOMContentLoaded", function () {
     boton.title = titulo;
     boton.setAttribute("aria-label", titulo);
     if (textoBoton) {
-      textoBoton.textContent = titulo
-        .replace("Agregar receta de ", "Agregar ")
-        .replace("Agregar ingrediente de picada", "Agregar ingrediente");
+      textoBoton.textContent = titulo;
+    }
+
+    // El label mobile tambien tiene que reflejar el tipo actual.
+    const textoBotonMobile = boton.querySelector(".qc-mobile-action-label");
+    if (textoBotonMobile) {
+      textoBotonMobile.textContent = titulo;
     }
   }
 
