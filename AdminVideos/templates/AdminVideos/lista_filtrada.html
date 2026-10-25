@@ -408,7 +408,7 @@
     <div class="card-body px-3 py-2">
       <div class="d-flex align-items-center gap-2 flex-wrap">
 
-        <div class="input-group input-group-sm w-auto flex-grow-1 filtro-keyword-box {% if formulario.palabra_clave.value %}filtro-keyword-activo{% endif %}" style="max-width: 360px;">
+        <div class="input-group input-group-sm w-auto flex-grow-1 filtro-keyword-box {% if formulario.palabra_clave.value %}filtro-keyword-activo{% endif %}">
           <span class="input-group-text">
             <i class="fa-solid fa-magnifying-glass"></i>
           </span>
@@ -420,10 +420,10 @@
             name="palabra_clave"
             value="{{ formulario.palabra_clave.value|default:'' }}">
 
-        <!-- Toggle Con lo que tengo (desktop) -->
-        {% include "AdminVideos/partials/_control_lo_que_tengo_global.html" with modo="desktop" %}
-        
       </div>
+
+      <!-- Toggle Con lo que tengo (desktop) -->
+      {% include "AdminVideos/partials/_control_lo_que_tengo_global.html" with modo="desktop" %}
 
         <!-- FEATURE FLAG: Toggles ocultos. Para reactivar, quitar la clase "d-none" -->
     <div class="d-none" id="toggles-quecomemos-misplatos">
@@ -478,9 +478,9 @@
             autocomplete="off"
             {% if ver_cotidiano_ck %}checked{% endif %}
           >
-          <label class="btn btn-sm btn-filtro-plato" for="ver_cotidiano">
-            <i class="fa-solid fa-bowl-food me-1" aria-hidden="true"></i>
-            Cotidianos
+          <label class="btn btn-sm btn-filtro-plato filtro-icono-btn" for="ver_cotidiano">
+            <i class="fa-solid fa-bowl-food" aria-hidden="true"></i>
+            <span class="filtro-icono-texto">Cotidianos</span>
           </label>
 
           <input
@@ -492,9 +492,9 @@
             autocomplete="off"
             {% if ver_especial_ck %}checked{% endif %}
           >
-          <label class="btn btn-sm btn-filtro-plato" for="ver_especial">
-            <i class="fa-solid fa-star me-1" aria-hidden="true"></i>
-            Especiales
+          <label class="btn btn-sm btn-filtro-plato filtro-icono-btn" for="ver_especial">
+            <i class="fa-solid fa-star" aria-hidden="true"></i>
+            <span class="filtro-icono-texto">Especiales</span>
           </label>
         </div>
 

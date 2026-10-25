@@ -2812,15 +2812,12 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
   margin-left: 0.25rem;
 }
 
-/* Asegurar que el contenedor desktop no oculte elementos */
-.d-flex.align-items-center.gap-2.flex-wrap {
-  flex-wrap: nowrap !important;
-}
-
-/* El input de búsqueda no debe ocupar todo el ancho */
+/* Buscador de palabra clave: flexible con límites sensatos.
+   Crece hasta 520px, no se achica debajo de 240px, permite shrink. */
 .filtro-keyword-box {
-  max-width: 220px !important;
-  flex-shrink: 1 !important;
+  flex: 1 1 240px;
+  max-width: 520px;
+  min-width: 0;
 }
 
 
@@ -2846,4 +2843,58 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
   #filtroPlatosInlineHome.filtro-platos-inline-shell {
     display: none !important;
   }
+}
+
+
+/* ============================================================
+   Filtros: botones de ícono (Cotidianos/Especiales)
+   Muestra solo el ícono. El texto aparece en hover/focus.
+   Sin fondo ni borde. Se adapta a claro/oscuro via variables BS.
+   ============================================================ */
+
+.filtro-icono-btn {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  box-shadow: none !important;
+  color: var(--bs-secondary-color) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 0.375rem 0.5rem !important;
+  border-radius: 0.375rem !important;
+  transition: all 0.2s ease-in-out !important;
+  text-decoration: none;
+}
+
+.filtro-icono-btn i {
+  font-size: 1.15rem;
+  transition: color 0.2s ease;
+}
+
+.filtro-icono-texto {
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  opacity: 0;
+  transition: max-width 0.25s ease, opacity 0.25s ease, margin-left 0.25s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--bs-body-color);
+}
+
+/* Mostrar texto en hover o focus */
+.filtro-icono-btn:hover .filtro-icono-texto,
+.filtro-icono-btn:focus-visible .filtro-icono-texto {
+  max-width: 120px;
+  opacity: 1;
+  margin-left: 0.4rem;
+}
+
+/* Fondo sutil al pasar el mouse (sin borde) */
+.filtro-icono-btn:hover {
+  background-color: var(--bs-tertiary-bg) !important;
+}
+
+/* Estado activo (checked) */
+.btn-check:checked + .filtro-icono-btn i {
+  color: var(--bs-primary);
 }
