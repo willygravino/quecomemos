@@ -389,3 +389,32 @@ Cada estado debe verse bien en desktop y mobile.
 
 ### Regla nueva
 - **Al actualizar Django de versión menor** (ej. 5.0 → 5.2): correr `pip install -r requirements.txt` y luego `pip check`, `manage.py check`, y arrancar el server. Los conflictos más comunes son pins viejos de **dependencias transitivas** (`asgiref`, `certifi`, `sqlparse`) que Django nuevo exige más nuevos. Actualizar el pin conflictivo uno por uno hasta que `pip install` pase.
+
+
+## 26. Feature flags activos (funcionalidades ocultas temporalmente)
+
+> Registro de features **implementadas y funcionales** pero **ocultas en la UI** deliberadamente. El código sigue vivo, los datos se siguen procesando, solo no se muestra el control. Cuando se necesiten, se reactivan siguiendo las instrucciones de cada una.
+
+### 26.1 Toggles "Sugerencias Quecomemos" y "Mis platos"
+
+**Estado**: ocultos desde 2026-10-25 (sesión de filtros responsive).
+
+**Motivo**: el usuario no usa esas dos fuentes de platos actualmente. Se ocultan para simplificar la barra de filtros, sin remover el mecanismo.
+
+**Qué hace cada uno** (cuando están visibles):
+- **Mis platos**: muestra solo los platos del usuario logueado (`propietario=usuario`).
+- **Sugerencias Quecomemos**: muestra los platos del usuario `quecomemos` (catálogo curado), filtrando los "descartados" del usuario.
+- Se pueden combinar: los dos tildados = unión de ambos.
+- **Regla del backend**: si ninguno está tildado, `filtrar_platos` devuelve lista vacía. Por eso el feature flag fuerza `misplatos`.
+
+**Cómo están ocultos** (2 lugares, hay que revertir ambos):
+
+1. **HTML** en `AdminVideos/templates/AdminVideos/lista_filtrada.html` (~L429):
+   ```html
+   <!-- FEATURE FLAG: Toggles ocultos. Para reactivar, quitar la clase "d-none" -->
+   <div class="d-none" id="toggles-quecomemos-misplatos">
+     <input ... name="quecomemos" ...>
+     <label ... for="quecomemos">...</label>
+     <input ... name="misplatos" ...>
+     <label ... for="misplatos">...</label>
+   </div>
