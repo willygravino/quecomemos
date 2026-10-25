@@ -122,6 +122,7 @@
 - Los **templates `.html`** y los **partials `_*.html`** NO se cachean: no hace falta bumpear.
 - Al bumpear varios JS en el mismo cambio, usar el **mismo timestamp** para todos.
 - Localizar las líneas exactas con `grep -n "\.js' %}" AdminVideos/templates/AdminVideos/base.html`.
+- **Excepción importante**: algunos JS no se cargan desde `base.html`, sino desde el template que los usa. Ejemplo: `filtros_platos.js` y `lo_que_tengo.js` se bumpean en `lista_filtrada.html`. Buscar siempre con `grep -rn "\.js' %}" AdminVideos/templates/` antes de asumir que está en `base.html`.
 
 ## 8. Filosofía: sin parches, causa raíz
 
@@ -214,6 +215,9 @@ python manage.py test AdminVideos -v 2   # cuando existan tests
 | `base.html` | `<script ... ?v=YYYYMMDD_HHMMSS>` | Versionado de JS. |
 | `base.html` | `{% include "_confirm_action_modal.html" %}` (~L1309) | Inclusión del modal genérico. |
 | `base.html` | `{% include "_toast_msg.html" %}` (~L1714) | Inclusión del toast. |
+| `views.py` | `obtener_estado_filtros_platos` (~L2982) | Lee `ver_cotidiano`/`ver_especial` de POST/GET. Default: ambos `True`. |
+| `views.py` | `filtrar_platos` (~L2313) | Filtro de categoría con `categoria__in` incluyendo `Ambos` en ambos modos. |
+| `filtros_platos.js` | Bloqueo toggles categoría (~L670) | Impide dejar 0 categorías marcadas (revierte + aviso 2.5s). |
 
 
 ## 16. Categorías del dominio
@@ -280,6 +284,8 @@ Cada estado debe verse bien en desktop y mobile.
 - [x] `beforeunload` para cierre de pestaña/volver
 - [x] `_fieldKey` para soportar checkboxes múltiples (bug de `tipos`)
 - [x] `CONTEXTO_IA.md` (este archivo)
+- [x] Filtro Cotidianos/Especiales (2 checkboxes independientes, default ambos ON = ver todo)
+- [x] Backend `categoria__in` respeta `Ambos` en ambos modos; bloqueo del último en JS; URL persistente
 
 ### Próximos pasos posibles
 - [ ] Recorrer `views.py` y mapear vistas por dominio (candidato a refactor).
@@ -295,3 +301,49 @@ Cada estado debe verse bien en desktop y mobile.
 - El sheet de crear/editar plato NO es un Bootstrap Modal: es un sheet custom con clase `is-open`. Todos los cierres pasan por `cerrar()`.
 - El form de variedades SÍ es un Bootstrap Modal, anidado dentro del sheet.
 - `#modalPlato` es el sheet custom. El form de variedades está en `#variedadModal` (Bootstrap).
+## 23. Actualización post-sesión (25/10 - tarde/noche)
+
+### Cambios estructurales realizados
+- **`nombre_plato` ampliado**: de `max_length=30` a `100` (migración `0102_alter_nombre_plato_100`). *Nota: Railway corre las migraciones mediante el **Pre-Deploy Command** configurado en el panel, no por `nixpacks.toml`.*
+- **Limpieza masiva**: se eliminaron 68 archivos residuales (scripts `.sh`, reportes `.txt`, backups viejos) que estaban trackeados en git. Todo recuperable por git o en el tarball local.
+
+### Reglas nuevas en el formulario de platos
+- **Sincronización de Tipos**: el backend (`PlatoCreate.get_form`) y el frontend (`get_context_data -> items`) ahora usan exactamente la misma fuente: el diccionario `TIPOS_POR_TEMPLATE` en `views.py`. **Regla**: si agregás un tipo a un template, modificalo *solo* en ese diccionario; ambos lados se actualizan solos.
+- **Validación AJAX (form_invalid)**: `PlatoCreate` y `PlatoUpdate` ahora tienen `form_invalid`. Si el request es AJAX y el form falla, devuelven `{"success": false, "html": "..."}` con `status=400`. Esto evita el `alert()` genérico y muestra los errores inline. El JS (`form_init.js`) ya sabe manejar esta respuesta.
+- **Al menos un tipo**: `form_init.js` tiene un listener `change` global que impide destildar el último checkbox de `tipos`. Si el usuario lo intenta, se revierte y muestra un mensaje inline por 2.5s.
+
+### Puntos críticos actualizados (reemplaza la sección 15 para estos archivos)
+| Archivo | Punto | Qué hace |
+|---|---|---|
+| `views.py` | `PlatoCreate.get_form` | Filtra tipos según `TIPOS_POR_TEMPLATE`. |
+| `views.py` | `PlatoCreate.get_context_data` | Pasa `items` filtrado igual que el form. |
+| `views.py` | `PlatoCreate.form_invalid` | Maneja errores AJAX devolviendo JSON. |
+| `views.py` | `PlatoUpdate.form_invalid` | Ídem para edición. |
+| `form_init.js` | Listener `tipos` (~L1290) | Impide dejar cero tipos marcados. |
+
+### Pendiente de explorar (actualizado)
+- **`views.py`** sigue siendo un candidato a refactor (ahora ~5.000 líneas).
+- **El bug del `alert()` genérico** que ocultaba errores de validación ya está resuelto. Ahora los errores se ven inline.
+
+
+## 24. Sesión 2026-10-25 (tarde) — filtros Cotidianos/Especiales
+
+### Implementado
+- **Dos checkboxes independientes**: `ver_cotidiano`, `ver_especial`. Default al abrir pantalla: **ambos tildados** (= ver todo: cotidianos + especiales + ambos).
+- **Backend**: `filtrar_platos` recibe los flags. Aplica `categoria__in=[COTIDIANO, INDISTINTO]` si solo cotidiano; `[ESPECIAL, INDISTINTO]` si solo especial. Los `Ambos` aparecen siempre.
+- **Bloqueo client-side**: no se pueden destildar los dos. Revierte y muestra aviso inline 2.5s. Patrón idéntico al de `tipos` en el form de plato (§23).
+- **`popstate` + `pushState`**: la URL persiste `ver_cotidiano=0/1` y `ver_especial=0/1`. Atrás/adelante sincroniza los checkboxes.
+
+### Lección de diseño
+- Toggles de **estados combinables** (Cotidiano + Especial pueden estar los dos activos): usar **checkboxes independientes con bloqueo del último**, NO un solo radio. El radio no puede representar "los dos a la vez" ni "ninguno".
+- **Ojo con el `?v=`**: el de `filtros_platos.js` y `lo_que_tengo.js` vive en `lista_filtrada.html`, no en `base.html`. La regla de §7 aplica al archivo que **realmente carga** el JS.
+
+### Deuda visual pendiente (no funcional, NO tocar hasta que se pida)
+- Alineación / borde rojo al `:checked` / color de los 2 checkboxes nuevos, para que igualen a los otros botones de la barra.
+- Legibilidad del icono en modo oscuro.
+- Encaje en mobile dentro del modal Filtros (los 2 checkboxes nuevos).
+
+### Pendiente funcional (próximas sesiones, los irá marcando el usuario)
+- `palabra_clave`, `quecomemos`, `misplatos` **no** se persisten en la URL (solo `tipopag`, `lo_que_tengo`, `ver_cotidiano`, `ver_especial` sí).
+- `medios`, `dificultad`, `categoria` como campos libres en `PlatoFilterForm` no tienen UI (posible legacy).
+- Aplicar el toggle Cotidianos/Especiales en otras pantallas (menú, historial) cuando el usuario lo pida.

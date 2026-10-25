@@ -2318,7 +2318,9 @@ def filtrar_platos(
     medios,
     categoria,
     dificultad,
-    palabra_clave
+    palabra_clave,
+    ver_cotidiano=True,
+    ver_especial=True,
 ):
     # Si no se selecciona ninguna de las dos opciones, no mostrar nada
     if quecomemos != "quecomemos" and misplatos != "misplatos":
@@ -2363,8 +2365,14 @@ def filtrar_platos(
     if medios and medios != "-":
         platos_qs = platos_qs.filter(medios=medios)
 
-    if categoria and categoria != "-":
-        platos_qs = platos_qs.filter(categoria=categoria)
+    if ver_cotidiano and ver_especial:
+        pass
+    elif ver_cotidiano:
+        platos_qs = platos_qs.filter(categoria__in=[Plato.COTIDIANO, Plato.INDISTINTO])
+    elif ver_especial:
+        platos_qs = platos_qs.filter(categoria__in=[Plato.ESPECIAL, Plato.INDISTINTO])
+    else:
+        platos_qs = platos_qs.none()
 
     if dificultad and dificultad != "-":
         platos_qs = platos_qs.filter(dificultad=dificultad)
@@ -3035,6 +3043,11 @@ def obtener_estado_filtros_platos(request, dia_activo, persistir_sesion=True):
         quecomemos = request.POST.get("quecomemos")
         misplatos = request.POST.get("misplatos")
 
+        # Toggles de categoria (dos checkboxes).
+        # En POST, si un checkbox no viene, esta destildado.
+        ver_cotidiano = request.POST.get("ver_cotidiano") in {"1", "on", "true", "yes"}
+        ver_especial = request.POST.get("ver_especial") in {"1", "on", "true", "yes"}
+
         if persistir_sesion:
             request.session["medios_estable"] = medios
             request.session["categoria_estable"] = categoria
@@ -3056,6 +3069,12 @@ def obtener_estado_filtros_platos(request, dia_activo, persistir_sesion=True):
         quecomemos = quecomemos_sesion
         misplatos = misplatos_sesion
 
+        # Toggles de categoria: default ambos ON si la URL no los trae.
+        valor_vc = request.GET.get("ver_cotidiano")
+        valor_ve = request.GET.get("ver_especial")
+        ver_cotidiano = True if valor_vc is None else (valor_vc not in {"0", "false", "off", "no"})
+        ver_especial = True if valor_ve is None else (valor_ve not in {"0", "false", "off", "no"})
+
         form = PlatoFilterForm(initial={
             "medios": medios,
             "categoria": categoria,
@@ -3069,6 +3088,8 @@ def obtener_estado_filtros_platos(request, dia_activo, persistir_sesion=True):
         "tipopag": tipopag,
         "quecomemos": quecomemos,
         "misplatos": misplatos,
+        "ver_cotidiano": ver_cotidiano,
+        "ver_especial": ver_especial,
         "lo_que_tengo_activo": lo_que_tengo_activo,
         "medios": medios,
         "categoria": categoria,
@@ -3118,6 +3139,8 @@ def obtener_resultados_principales(
     dificultad,
     palabra_clave,
     lo_que_tengo_activo=False,
+    ver_cotidiano=True,
+    ver_especial=True,
 ):
 
 
@@ -3169,6 +3192,8 @@ def obtener_resultados_principales(
         categoria=categoria,
         dificultad=dificultad,
         palabra_clave=palabra_clave,
+        ver_cotidiano=ver_cotidiano,
+        ver_especial=ver_especial,
     )
 
     platos = resultado_filtro["platos"]
@@ -3382,6 +3407,8 @@ def FiltroDePlatos(request):
     tipopag = estado_filtros["tipopag"]
     quecomemos = estado_filtros["quecomemos"]
     misplatos = estado_filtros["misplatos"]
+    ver_cotidiano = estado_filtros["ver_cotidiano"]
+    ver_especial = estado_filtros["ver_especial"]
     medios = estado_filtros["medios"]
     categoria = estado_filtros["categoria"]
     dificultad = estado_filtros["dificultad"]
@@ -3398,6 +3425,8 @@ def FiltroDePlatos(request):
         dificultad=dificultad,
         palabra_clave=palabra_clave,
         lo_que_tengo_activo=lo_que_tengo_activo,
+        ver_cotidiano=ver_cotidiano,
+        ver_especial=ver_especial,
     )
 
 
@@ -3444,6 +3473,8 @@ def FiltroDePlatos(request):
                 "dias_programados": dias_programados,
                 "quecomemos_ck": quecomemos,
                 "misplatos_ck": misplatos,
+                "ver_cotidiano_ck": ver_cotidiano,
+                "ver_especial_ck": ver_especial,
                 "lo_que_tengo_activo": lo_que_tengo_activo,
                 "amigues": amigues,
                 "parametro_activo": tipo_parametro,
@@ -3488,6 +3519,8 @@ def ajax_listado_platos(request):
     tipopag = estado_filtros["tipopag"]
     quecomemos = estado_filtros["quecomemos"]
     misplatos = estado_filtros["misplatos"]
+    ver_cotidiano = estado_filtros["ver_cotidiano"]
+    ver_especial = estado_filtros["ver_especial"]
     medios = estado_filtros["medios"]
     categoria = estado_filtros["categoria"]
     dificultad = estado_filtros["dificultad"]
@@ -3504,6 +3537,8 @@ def ajax_listado_platos(request):
         dificultad=dificultad,
         palabra_clave=palabra_clave,
         lo_que_tengo_activo=lo_que_tengo_activo,
+        ver_cotidiano=ver_cotidiano,
+        ver_especial=ver_especial,
     )
 
     platos_agrupados_lo_que_tengo = (

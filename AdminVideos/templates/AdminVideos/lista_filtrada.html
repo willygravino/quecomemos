@@ -462,6 +462,36 @@
           </span>
         </label>
 
+        <div class="btn-group" role="group" aria-label="Categorías visibles">
+          <input
+            class="btn-check"
+            type="checkbox"
+            name="ver_cotidiano"
+            id="ver_cotidiano"
+            value="1"
+            autocomplete="off"
+            {% if ver_cotidiano_ck %}checked{% endif %}
+          >
+          <label class="btn btn-sm btn-filtro-plato" for="ver_cotidiano">
+            <i class="fa-solid fa-bowl-food me-1" aria-hidden="true"></i>
+            Cotidianos
+          </label>
+
+          <input
+            class="btn-check"
+            type="checkbox"
+            name="ver_especial"
+            id="ver_especial"
+            value="1"
+            autocomplete="off"
+            {% if ver_especial_ck %}checked{% endif %}
+          >
+          <label class="btn btn-sm btn-filtro-plato" for="ver_especial">
+            <i class="fa-solid fa-star me-1" aria-hidden="true"></i>
+            Especiales
+          </label>
+        </div>
+
 
 
       </div>
@@ -806,7 +836,7 @@ document.addEventListener("shown.bs.modal", function (event) {
 })();
 </script>
 
-<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=20261018_1"></script>
+<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=20261025_110405"></script>
 <script src="{% static 'AdminVideos/js/lo_que_tengo.js' %}?v=20260822172620"></script>
 
 {% endblock %}

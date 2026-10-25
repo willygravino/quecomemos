@@ -667,6 +667,48 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
+  // 5.a Impedir que queden los dos toggles de categoría destildados.
+  // Se corre en fase capture para adelantarse al listener genérico y no
+  // disparar un fetch inútil con la lista vacía.
+  const checkboxesCategoria = form.querySelectorAll(
+    'input[name="ver_cotidiano"], input[name="ver_especial"]'
+  );
+  let avisoCategoriaTimer = null;
+
+  function mostrarAvisoCategoriaVacia() {
+    const grupo = form.querySelector('[aria-label="Categorías visibles"]');
+    if (!grupo) return;
+
+    let aviso = document.getElementById("aviso-categoria-vacia");
+    if (!aviso) {
+      aviso = document.createElement("div");
+      aviso.id = "aviso-categoria-vacia";
+      aviso.className = "small text-danger mt-1";
+      aviso.textContent = "Tenés que elegir al menos una categoría.";
+      grupo.parentNode.insertBefore(aviso, grupo.nextSibling);
+    }
+
+    aviso.style.display = "";
+    window.clearTimeout(avisoCategoriaTimer);
+    avisoCategoriaTimer = window.setTimeout(function () {
+      aviso.style.display = "none";
+    }, 2500);
+  }
+
+  checkboxesCategoria.forEach(function (checkbox) {
+    checkbox.addEventListener("change", function (event) {
+      const algunoMarcado = Array.from(checkboxesCategoria).some(function (c) {
+        return c.checked;
+      });
+
+      if (!algunoMarcado) {
+        checkbox.checked = true;
+        mostrarAvisoCategoriaVacia();
+        event.stopImmediatePropagation();
+      }
+    }, true);
+  });
+
   // ============================================================
   // 5.b Desplazar el selector horizontal con sus flechas
   // ============================================================
@@ -726,6 +768,11 @@ document.addEventListener("DOMContentLoaded", function () {
       nuevaUrl.searchParams.set("lo_que_tengo", "0");
     }
 
+    const cbCat1 = form.querySelector('input[name="ver_cotidiano"]');
+    const cbEsp1 = form.querySelector('input[name="ver_especial"]');
+    if (cbCat1) nuevaUrl.searchParams.set("ver_cotidiano", cbCat1.checked ? "1" : "0");
+    if (cbEsp1) nuevaUrl.searchParams.set("ver_especial", cbEsp1.checked ? "1" : "0");
+
     window.history.pushState(
       { tipopag: tipopag, loQueTengoActivo: activar },
       "",
@@ -770,6 +817,11 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       nuevaUrl.searchParams.set("lo_que_tengo", "0");
     }
+
+    const cbCat2 = form.querySelector('input[name="ver_cotidiano"]');
+    const cbEsp2 = form.querySelector('input[name="ver_especial"]');
+    if (cbCat2) nuevaUrl.searchParams.set("ver_cotidiano", cbCat2.checked ? "1" : "0");
+    if (cbEsp2) nuevaUrl.searchParams.set("ver_especial", cbEsp2.checked ? "1" : "0");
 
     window.history.pushState(
       { tipopag: tipopag, loQueTengoActivo: estaActivoLoQueTengo() },
@@ -824,6 +876,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     inputTipopag.value = tipopag;
     inputLoQueTengo.value = loQueTengoActivo ? "1" : "0";
+
+    const vcUrl = params.get("ver_cotidiano");
+    const veUrl = params.get("ver_especial");
+    const cbCatPop = form.querySelector('input[name="ver_cotidiano"]');
+    const cbEspPop = form.querySelector('input[name="ver_especial"]');
+    if (cbCatPop) cbCatPop.checked = vcUrl === null ? true : vcUrl !== "0";
+    if (cbEspPop) cbEspPop.checked = veUrl === null ? true : veUrl !== "0";
 
     actualizarSelectorHorizontalActivo(tipopag);
     actualizarTituloSugerencias(tipopag);
