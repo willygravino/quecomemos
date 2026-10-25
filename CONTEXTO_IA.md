@@ -347,3 +347,41 @@ Cada estado debe verse bien en desktop y mobile.
 - `palabra_clave`, `quecomemos`, `misplatos` **no** se persisten en la URL (solo `tipopag`, `lo_que_tengo`, `ver_cotidiano`, `ver_especial` sí).
 - `medios`, `dificultad`, `categoria` como campos libres en `PlatoFilterForm` no tienen UI (posible legacy).
 - Aplicar el toggle Cotidianos/Especiales en otras pantallas (menú, historial) cuando el usuario lo pida.
+
+
+## 25. Actualización de dependencias (2026-10-25, sesión seguridad)
+
+### Qué se actualizó
+| Paquete | Antes | Después | Motivo |
+|---|---|---|---|
+| Django | 5.0.3 | **5.2.18** | LTS. Corrige SQL injection críticas (CVE-2026-1207/1285/1287) + DoS |
+| Pillow | 9.5.0 | **13.0.0** | DoS + memory corruption |
+| requests | 2.28.2 | **2.33.0** | CVE-2026-25645 |
+| urllib3 | 1.26.15 | **2.8.0** | CVE-2026-44431 |
+| asgiref | 3.7.2 | **3.13.0** | Requerido por Django 5.2 |
+| certifi | 2022.12.7 | **2026.10.23** | Requerido por requests 2.33 |
+
+### Resultado
+- **Dependabot: 74 → 12 vulnerabilidades** (0 critical, 6 high, 6 moderate).
+- Las 4 críticas originales (SQL injection Django x2, DoS, memory corruption Pillow) resueltas.
+- `STORAGES` ya estaba configurado en `nuestrotubo/settings.py` (Django 4.2+ style) → **no hubo que migrar** el viejo `DEFAULT_FILE_STORAGE`/`STATICFILES_STORAGE`.
+- `pip check` + `manage.py check` limpios. Sin migraciones pendientes.
+
+### Deuda explícita (importante)
+- **Pillow 13 NO se probó con subida real de imágenes** (el usuario no usa esa feature actualmente). Cuando se empiece a usar, **probar crear plato con imagen** antes de dar por cerrado. Si falla, sospechosos típicos:
+  - `Image.ANTIALIAS` removido (deprecado en 9.x, eliminado en 10.x) — buscar en `views.py` o donde se procesen imágenes.
+  - Cambios en `ImageOps` / `Image.Resampling`.
+  - Fallback: bajar a `Pillow==11.3.0` (sigue parcheado contra las CVEs críticas, con menos cambios de API).
+- **12 vulnerabilidades restantes** (6 high, 6 moderate) son de dependencias transitivas y vendorizadas. Candidatos para una sesión futura:
+  - Bumps de bajo riesgo: `babel`, `charset-normalizer`, `idna`, `packaging`, `gunicorn`, `whitenoise`, `django-cors-headers`.
+  - **Riesgo medio**: `dj-database-url 0.5.0 → 3.1.2` (cambió API entre versiones, revisar parseo de `DATABASE_URL` en Railway).
+  - jQuery/Bootstrap vendorizados: actualización manual (bajar versión nueva y reemplazar en `vendor/`).
+
+### Verificación en producción
+- Deploy a Railway OK (commit `512e35f`).
+- Dependabot recalculó a **12 vulnerabilidades** en el push.
+- Login + listado + filtros verificados manualmente.
+- **No verificado**: subida de imagen (ver deuda arriba).
+
+### Regla nueva
+- **Al actualizar Django de versión menor** (ej. 5.0 → 5.2): correr `pip install -r requirements.txt` y luego `pip check`, `manage.py check`, y arrancar el server. Los conflictos más comunes son pins viejos de **dependencias transitivas** (`asgiref`, `certifi`, `sqlparse`) que Django nuevo exige más nuevos. Actualizar el pin conflictivo uno por uno hasta que `pip install` pase.
