@@ -180,7 +180,7 @@ class Insumo(models.Model):
 
 
 class Plato(models.Model):
-    nombre_plato = models.CharField(max_length=30)
+    nombre_plato = models.CharField(max_length=100)
 
     nombre_grupo = models.CharField(
         max_length=50,
