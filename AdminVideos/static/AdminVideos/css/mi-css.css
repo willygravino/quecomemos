@@ -2875,3 +2875,22 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
     padding: 0.375rem 0.75rem !important;
   }
 }
+
+
+/* ============================================================
+   MOSTRAR TEXTO LO QUE TENGO EN MOBILE
+   El CSS mobile ocultaba .selector-lo-que-tengo-copy porque estaba
+   pensado para la barra mini (ya eliminada). Ahora el form es inline
+   en mobile también y queremos el texto completo.
+   ============================================================ */
+@media (max-width: 767.98px) {
+  .modo-desktop .selector-lo-que-tengo-copy {
+    display: inline-block !important;
+  }
+
+  .modo-desktop .selector-lo-que-tengo-label {
+    max-width: none !important;
+    font-size: .74rem !important;
+    white-space: nowrap !important;
+  }
+}
