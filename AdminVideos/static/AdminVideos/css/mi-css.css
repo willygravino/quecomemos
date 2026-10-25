@@ -2894,3 +2894,28 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
     white-space: nowrap !important;
   }
 }
+
+
+/* ============================================================
+   Indicadores del carousel de platos
+   Bootstrap los hace blancos (pensados para fondo oscuro).
+   Los adaptamos a claro/oscuro para que se vean sobre bg-body-secondary.
+   ============================================================ */
+.carousel-indicators button,
+.carousel-indicators li {
+  background-color: var(--bs-secondary-color) !important;
+  opacity: 0.45;
+  border: 0;
+  transition: opacity 0.2s ease;
+}
+
+.carousel-indicators button.active,
+.carousel-indicators li.active {
+  background-color: var(--bs-body-color) !important;
+  opacity: 1;
+}
+
+.carousel-indicators button:hover,
+.carousel-indicators li:hover {
+  opacity: 0.85;
+}
