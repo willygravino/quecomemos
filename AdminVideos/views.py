@@ -1603,7 +1603,11 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             fallback_url_name="filtro-de-platos",
         )
         template_param = self.request.GET.get('tipopag')
-        context['items'] = [k for (k, _) in Plato.TIPOS_CHOICES]
+        opciones = self.TIPOS_POR_TEMPLATE.get(template_param, [])
+        if opciones:
+            context['items'] = [k for (k, _) in Plato.TIPOS_CHOICES if k in opciones]
+        else:
+            context['items'] = [k for (k, _) in Plato.TIPOS_CHOICES]
         context['tipopag'] = template_param
         context["titulo_formulario"] = titulo_formulario_plato(template_param, accion="Agregar")
 
@@ -1689,6 +1693,19 @@ class PlatoCreate(LoginRequiredMixin, CreateView):
             tail = _add_qs("", msg="Guardado OK.", level="success")
         return redirect(f"{reverse('videos-create')}{tail}")
 
+    def form_invalid(self, form):
+        if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            context = self.get_context_data(form=form)
+            if "ingrediente_formset" not in context:
+                context["ingrediente_formset"] = IngredienteEnPlatoFormSet(self.request.POST)
+            html = render_to_string(
+                "AdminVideos/plato_form_inner.html",
+                context,
+                request=self.request,
+            )
+            return JsonResponse({"success": False, "html": html}, status=400)
+        return super().form_invalid(form)
+
 
 class PlatoUpdate(LoginRequiredMixin, UpdateView):
     model = Plato
@@ -1716,6 +1733,21 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
             return JsonResponse({"html": html})
 
         return self.render_to_response(context)
+
+    def form_invalid(self, form):
+        if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            context = self.get_context_data(form=form)
+            if "ingrediente_formset" not in context:
+                context["ingrediente_formset"] = IngredienteEnPlatoFormSet(
+                    self.request.POST, instance=self.object
+                )
+            html = render_to_string(
+                "AdminVideos/plato_form_inner.html",
+                context,
+                request=self.request,
+            )
+            return JsonResponse({"success": False, "html": html}, status=400)
+        return super().form_invalid(form)
 
     # 👉 TIPOS: ofrecer TODOS y marcar los que tenga el plato
     def get_form(self, form_class=None):

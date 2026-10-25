@@ -1286,6 +1286,37 @@ ul.appendChild(li);
       });
     }
 
+    // === Restriccion: siempre al menos un checkbox de tipos marcado ===
+    if (!window.__tiposBoundGlobal) {
+      window.__tiposBoundGlobal = true;
+      document.addEventListener("change", function (e) {
+        const cb = e.target && e.target.closest && e.target.closest('input[type="checkbox"][name="tipos"]');
+        if (!cb) return;
+        if (cb.checked) return;
+        const form = cb.closest("form");
+        if (!form) return;
+        const todos = form.querySelectorAll('input[type="checkbox"][name="tipos"]');
+        if (todos.length === 0) return;
+        const algunoMarcado = Array.prototype.some.call(todos, function (c) { return c.checked; });
+        if (algunoMarcado) return;
+        cb.checked = true;
+        const box = cb.closest(".plato-form-tipos-box");
+        if (!box) return;
+        let msg = box.querySelector(".js-tipos-min-uno-msg");
+        if (!msg) {
+          msg = document.createElement("div");
+          msg.className = "text-danger small mt-2 js-tipos-min-uno-msg";
+          msg.textContent = "Debe haber al menos un tipo seleccionado.";
+          box.appendChild(msg);
+        }
+        msg.style.display = "block";
+        clearTimeout(msg.__hideTimer);
+        msg.__hideTimer = setTimeout(function () {
+          msg.style.display = "none";
+        }, 2500);
+      });
+    }
+
     // Llamar a setupAjaxSave cuando se inicializa el form
     setupAjaxSave(context);
     log("✅ initPlatoForm completado para el contexto:", context);
