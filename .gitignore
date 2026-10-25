@@ -135,3 +135,5 @@ dmypy.json
 .pyre/
 
 backups_fix_doble_submit/
+
+backups_confirm_dialog/
