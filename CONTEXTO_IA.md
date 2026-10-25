@@ -1,0 +1,297 @@
+# CONTEXTO_IA.md — Qué Comemos
+
+> Este archivo es la fuente de verdad del proyecto para trabajar con IA.
+> **Cualquier IA o colaborador DEBE leerlo completo antes de proponer o ejecutar cambios.**
+> Última actualización: 2026-10-25 (sesión doble-submit + confirmDialog + inventario).
+
+## 1. Identidad del proyecto
+
+- Nombre: **Qué Comemos**
+- Tipo: app web de gestión de platos, ingredientes, menús programados, lista de compras y red social gastronómica.
+- Estado: **en producción** (deploy en Railway). Los cambios NO son libres.
+- Dueño del producto: yo. La IA es asistente, no decide.
+- Local: Mac, VS Code, entorno `.venv`.
+
+## 2. Stack
+
+- Django 5, Python 3.12
+- Templates Django (no React/Vue)
+- JavaScript vanilla (no frameworks)
+- CSS propio + Bootstrap
+- Deploy: Railway
+
+## 3. Estructura
+
+- App principal: `AdminVideos/`
+- Templates: `AdminVideos/templates/AdminVideos/`
+- Partiales: `AdminVideos/templates/AdminVideos/partials/`
+- CSS: `AdminVideos/static/AdminVideos/css/`
+- JS: `AdminVideos/static/AdminVideos/js/`
+- Vendor (NO tocar): `AdminVideos/static/AdminVideos/vendor/`
+
+## 4. Mapa de archivos (inventario 2026-10-25)
+
+> Total ~176k líneas, de las cuales **~130k son librerías vendorizadas** (jQuery, Bootstrap, FontAwesome, Chart.js, DataTables). **El código propio es ~46k líneas.**
+
+### Backend Python (top)
+| Archivo | Líneas | Notas |
+|---|---|---|
+| `views.py` | **4.955** | Archivo enorme, candidato a refactor futuro |
+| `models.py` | 932 | |
+| `services/pantry.py` | 471 | Capa de servicios (buena arquitectura) |
+| `forms.py` | 342 | |
+| `admin.py` | 178 | |
+| `navigation.py` | 41 | |
+| `context_processors.py` | 24 | |
+| `signals.py` | 16 | |
+| `tests.py` | **3** | Casi sin tests |
+
+### Templates principales
+| Archivo | Líneas |
+|---|---|
+| `base.html` | **2.041** |
+| `video_list_base.html` | 1.294 |
+| `plato_form_inner.html` | 985 |
+| `lista_filtrada.html` | 812 |
+| `_menu_programado_dias.html` | 403 |
+| `_confirm_action_modal.html` | 314 |
+| `_plato_card_detalle.html` | 292 |
+| `lista_de_compras.html` | 264 |
+| `compartir_lista.html` | 225 |
+
+### JS propios (sin vendor)
+| Archivo | Líneas | Rol |
+|---|---|---|
+| `form_init.js` | **1.541** | Init form plato + guardado AJAX + variedades |
+| `filtros_platos.js` | 839 | Filtros del listado |
+| `menu_print_sheet.js` | 618 | Hoja imprimible del menú |
+| `partes_receta.js` | 609 | Partes de receta |
+| `overlay_ui.js` | 421 | Swipe/wheel dismiss, UI |
+| `insumos_form.js` | 399 | Insumos del form |
+| `plato_create_sheet.js` | 371 | Sheet crear/editar plato |
+| `lo_que_tengo.js` | 365 | Control de disponibilidad |
+| `menu_programado.js` | 275 | Menú semanal |
+| `pantry_bind.js` | 250 | Binding de pantry |
+| `shopping_panel.js` | 241 | Panel de lista de compras |
+| `lista_super/idb_cola_offline.js` | 141 | Cola offline (IndexedDB) |
+| `lista_super/sync_offline_lista_super.js` | 131 | Sync offline |
+| `lista_super/sw_lista_super.js` | 72 | Service Worker |
+| `lista_de_compras.js` | 90 | |
+| `navigation.js` | 67 | |
+
+### CSS propios
+| Archivo | Líneas |
+|---|---|
+| `mi-css.css` | **2.824** |
+| `menu_print_sheet.css` | 368 |
+| `mobile_action_bar.css` | 154 |
+| `shopping_panel.css` | 118 |
+| `plato_create_sheet.css` | 117 |
+
+## 5. Dominios funcionales
+
+1. **Platos** — crear, editar, categorizar, variedades, ingredientes, insumos, partes de receta, imágenes.
+2. **Menús programados** — semanal, días, impresión, estados.
+3. **Lista de compras** — con soporte **offline** (IndexedDB + service worker + sync).
+4. **Lugares** — listado, detalle, compartir.
+5. **Amigues / chat** — panel, solicitudes, chat modal.
+6. **Pantry** — control de "lo que tengo", servicio en `services/pantry.py`.
+7. **Auth** — signup, login, forgot password.
+8. **Historial**.
+9. **Delivery / comer afuera** — vistas propias.
+
+## 6. Reglas NO negociables
+
+1. **Modo oscuro**: cada cambio visual se verifica en claro Y oscuro. Sin colores hardcodeados.
+2. **Responsive**: cada cambio se verifica en desktop y mobile. No romper breakpoints.
+3. **No romper JS**: si un template depende de `id`, `class` o `data-attribute` que consume JS, NO renombrarlo sin actualizar el JS en el mismo cambio.
+4. **No duplicar componentes**: si existe un partial (`_*.html`), reutilizarlo.
+5. **Reutilizar lógica existente**: antes de escribir código nuevo, buscar si ya está implementado.
+6. **Cambios quirúrgicos**: diff mínimo. No reescribir archivos completos salvo pedido explícito.
+7. **No tocar `vendor/`** salvo actualización explícita de librería.
+8. **Prohibido en producción sin rama y backup**: migraciones, cambios de modelos, refactors de `base.html`.
+
+## 7. Reglas de versionado de JS (obligatorio)
+
+**Cada vez que se modifica un `.js`, hay que bumpear su versión en `base.html`.**
+
+- Formato: `?v=YYYYMMDD_HHMMSS`
+- Ubicación: `AdminVideos/templates/AdminVideos/base.html`, en el `<script src="{% static '...' %}?v=...">`.
+- **Si no se bumpea, el navegador usa el JS viejo cacheado** y los cambios "no se ven" en producción.
+- En local, `Cmd+Shift+R` fuerza recarga. Para producción, el bump es obligatorio.
+- Los **templates `.html`** y los **partials `_*.html`** NO se cachean: no hace falta bumpear.
+- Al bumpear varios JS en el mismo cambio, usar el **mismo timestamp** para todos.
+- Localizar las líneas exactas con `grep -n "\.js' %}" AdminVideos/templates/AdminVideos/base.html`.
+
+## 8. Filosofía: sin parches, causa raíz
+
+- Si un fix "tapa" el síntoma sin explicar **por qué** falla, **no se aplica**.
+- Flujo obligatorio ante un bug no trivial:
+  1. **Instrumentar** (logs, `console.table`) para ver el estado real.
+  2. **Reproducir** en el navegador con DevTools abierto.
+  3. **Leer el log**: entender qué pasa exactamente.
+  4. **Identificar la causa raíz** (no el síntoma).
+  5. **Diseñar el fix** sobre la causa raíz.
+  6. **Quitar la instrumentación** antes de commitear.
+- Ejemplo real (2026-10-25): "el modal pregunta aunque no toqué nada". Se iba a resolver con un flag `_formDirty` (parche). Al instrumentar `hayCambios()`, se vio que había **colisión de claves por `name`** en checkboxes múltiples (`name="tipos"`). El fix correcto fue `_fieldKey(el)` con clave única por elemento, sin flags.
+- Si una solución requiere "una bandera más" o "un caso especial más", probablemente no es la solución.
+
+## 9. Reutilización: buscar antes de crear
+
+- Antes de crear un componente nuevo, **buscar si ya existe** algo parecido.
+- Si existe algo 80% útil, **extenderlo**. Si es inservible, crear nuevo y documentar por qué.
+- Buscar con `grep -rn "palabra_clave" AdminVideos/templates/AdminVideos/partials/ AdminVideos/static/AdminVideos/js/`.
+
+### Componentes reutilizables existentes
+- **`_confirm_action_modal.html`** → modal genérico de confirmación.
+  - API declarativa: botón con `data-bs-toggle="modal"` + `data-confirm-*`.
+  - API programática: `await window.confirmDialog({title, body, hint, confirmText, cancelText, confirmClass}) -> Promise<boolean>`.
+  - **Usar SIEMPRE este para preguntar sí/no. No crear otro.**
+- **`_toast_msg.html`** → toast para **informar** (`?msg=...&level=success|danger|warning|info`).
+  - Autohide 2.5s, **no bloquea**, no tiene botones de acción.
+  - **NO sirve para confirmar.** Solo para notificar.
+
+## 10. Flujo de trabajo con IA (obligatorio)
+
+1. **Investigar**: decir en qué archivo(s) está implementada la funcionalidad y qué se ve afectado.
+2. **Proponer plan**: enumerar pasos (3-6). Si es grande, cómo partirlo.
+3. **Esperar aprobación** del plan (no escribir código todavía).
+4. **Ejecutar en pasos pequeños**: un cambio por paso.
+5. **Verificar**: `python manage.py check` después de cada paso.
+6. **Probar en navegador** con `Cmd+Shift+R` antes de commitear.
+7. **Commit sugerido** al cerrar cada paso.
+
+Si la IA no puede seguir este flujo, debe decirlo y detenerse.
+
+## 11. Comandos de verificación
+
+```bash
+source .venv/bin/activate
+python manage.py check
+python manage.py test AdminVideos -v 2   # cuando existan tests
+
+## 12. Lecciones de bash y edición de archivos
+
+- **`>>` para agregar, `>` para sobrescribir**. Nunca `>` si el archivo puede existir. Verificar con `cat archivo` o `ls` antes.
+- **Backup antes de cada cambio quirúrgico**: `cp archivo backups_XXX/archivo.antes_descripcion`.
+- **Scripts con asserts** (`assert s.count(anchor) == 1`) que abortan si el ancla no existe o no es única. Si el script falla, **no escribe nada** — nunca deja archivos a medio modificar.
+- Usar `python3 - <<'PY'` con pathlib para cambios quirúrgicos, no `sed -i` ni regex amplios.
+- **Dry-run antes de borrar**: `git clean -nd` antes de `git clean -fd`; `git stash list` antes de `git stash drop`.
+
+## 13. Lecciones de git
+
+- **`git stash` en vez de `git reset --hard`** cuando puede haber cambios recuperables. Es reversible.
+- **`git reset --hard` NO borra untracked**: para esos, `git clean`. Comandos distintos.
+- **Commits chiquitos**, un fix por commit. Si algo falla, revertir solo ese commit.
+- **`python manage.py check`** antes de cada commit.
+- **Probar en navegador ANTES de commitear**, con `Cmd+Shift+R`.
+- **Backups en `backups_*/`**: agregar al `.gitignore`, no borrar hasta confirmar que el fix anda.
+
+## 14. Lecciones de debugging
+
+- **Instrumentar antes de arreglar**: `console.table(diffs)` para ver qué campos difieren.
+- **Reproducir el bug en el navegador con DevTools abierto** antes de hipotetizar.
+- **Quitar la instrumentación al commitear**.
+- **No asumir "no lo vi fallar = no puede fallar"**. El código sin protección puede fallar aunque el timing lo oculte.
+- Un bug de "falso positivo" casi siempre es un problema de **comparación** o **estado inicial**, no del feature en sí.
+
+## 15. Puntos críticos del sistema (mapa de intervención)
+
+> Líneas aproximadas al 2026-10-25. Verificar con `grep` antes de tocar.
+
+| Archivo | Punto | Qué hace |
+|---|---|---|
+| `plato_create_sheet.js` | `cerrar()` (~L133) | Punto único de cierre del sheet. `async`, consulta cambios. |
+| `plato_create_sheet.js` | `_fieldKey()` (~L107) | Clave única por elemento (checkbox/radio: `name::value`; resto: `name`). |
+| `plato_create_sheet.js` | `snapshotForm()`, `hayCambios()` (~L112-155) | Detección de cambios. |
+| `plato_create_sheet.js` | `renderForm()` (~L162) | Inyecta form y llama `snapshotForm()`. |
+| `plato_create_sheet.js` | `beforeunload` (~L323) | Aviso al cerrar pestaña/volver. |
+| `form_init.js` | `setFormSubmitting(form, bool)` (~L33) | Deshabilita/habilita submit (anti-doble-submit). |
+| `form_init.js` | `setupAjaxSave()` (~L1201) | Handler del form principal (alta/edición). |
+| `form_init.js` | Handler async de variedades (~L1330) | Guardado AJAX de variedades. |
+| `_confirm_action_modal.html` | `window.confirmDialog(opts)` (~L143) | Modal genérico de confirmación. Promise<boolean>. |
+| `_toast_msg.html` | `bootstrap.Toast` | Solo informar (no confirmar). |
+| `base.html` | `<script ... ?v=YYYYMMDD_HHMMSS>` | Versionado de JS. |
+| `base.html` | `{% include "_confirm_action_modal.html" %}` (~L1309) | Inclusión del modal genérico. |
+| `base.html` | `{% include "_toast_msg.html" %}` (~L1714) | Inclusión del toast. |
+
+
+## 16. Categorías del dominio
+
+- Platos principales
+- Guarniciones
+- Picadas
+- Ingredientes de picada
+- Delivery
+- Comer afuera
+
+## 17. Entidades del dominio
+
+- **Plato**: nombre, ingredientes, insumos, preparación, imágenes, categoría, tipos.
+- **Menú programado**: asignación de platos a días, organización semanal, impresión, eliminación.
+- **Lista de compras**: con soporte offline.
+- **Lugar**: punto de venta/compra, con compartir.
+
+## 18. Estados visuales que NUNCA se deben romper
+
+- Día con menú
+- Día sin menú
+- Día activo
+- Modo claro
+- Modo oscuro
+
+Cada estado debe verse bien en desktop y mobile.
+
+## 19. Cosas que NO hacer
+
+- No pegar grandes bloques de código en la terminal (usar scripts `.sh` o heredocs **chicos**, o editar en VS Code).
+- No modificar `.venv/`, `migrations/` ni archivos de deploy sin pedido explícito.
+- No instalar dependencias nuevas sin justificar y preguntar.
+- No "limpiar" código por iniciativa propia: si ves algo raro, reportarlo, no borrarlo.
+- No reescribir un archivo entero para cambiar 3 líneas.
+- No asumir: si no encuentra dónde está algo, decir "no lo encontré" en lugar de inventar.
+- **No tocar `vendor/`**.
+- **No crear un segundo modal de confirmación**: usar `_confirm_action_modal.html`.
+- **No usar el toast para confirmar**: solo informar.
+- **No aplicar parches**: buscar causa raíz (ver sección 8).
+
+## 20. Pendiente de explorar (no inventariado aún)
+
+- Interior de `views.py` (4.955 líneas) — vistas por dominio, AJAX vs HTML.
+- `models.py` (932 líneas) — entidades, relaciones, migraciones pendientes.
+- `forms.py` (342 líneas) — formsets y validaciones.
+- Sistema offline de `lista_super/` (IndexedDB, service worker, sync).
+- `services/pantry.py` — lógica de "lo que tengo".
+- Sistema de amigos/chat (`_panel_amigues.html`, `_chat_modal_content.html`).
+- Sistema de lugares (`lugar_detail.html`, `_listado_lugares.html`).
+- Sistema de historial.
+- `video_list_base.html` (1.294 líneas) — base de listados.
+- `filtros_platos.js` (839 líneas) — filtros.
+- `menu_print_sheet.js` (618 líneas) — flujo de impresión.
+- **Tests**: prácticamente no hay (`tests.py` = 3 líneas). **Deuda técnica.**
+
+## 21. Estado actual / próximos pasos
+
+### Completado (sesión 2026-10-25)
+- [x] Fix doble submit en form principal (Commit `ee5b45d`)
+- [x] Fix doble submit en variedades (Commit `cbe5352`)
+- [x] `_confirm_action_modal.html` extendido con `window.confirmDialog()` (Commit `6905e0b`)
+- [x] Confirmación al cerrar sheet con cambios sin guardar (Commit `8be9a97`)
+- [x] `beforeunload` para cierre de pestaña/volver
+- [x] `_fieldKey` para soportar checkboxes múltiples (bug de `tipos`)
+- [x] `CONTEXTO_IA.md` (este archivo)
+
+### Próximos pasos posibles
+- [ ] Recorrer `views.py` y mapear vistas por dominio (candidato a refactor).
+- [ ] Escribir los primeros tests de caracterización.
+- [ ] Recorrer el sistema offline de `lista_super/`.
+- [ ] Recorrer el sistema de menús (programado + print).
+- [ ] Ir completando la sección 20 con hallazgos.
+
+## 22. Notas de diseño
+
+- Los partials `_*.html` se incluyen desde templates mayores; no son páginas completas.
+- Los JS de menú (`menu_programado.js`, `menu_print_sheet.js`) comparten estado; cambios en uno suelen requerir revisar el otro.
+- El sheet de crear/editar plato NO es un Bootstrap Modal: es un sheet custom con clase `is-open`. Todos los cierres pasan por `cerrar()`.
+- El form de variedades SÍ es un Bootstrap Modal, anidado dentro del sheet.
+- `#modalPlato` es el sheet custom. El form de variedades está en `#variedadModal` (Bootstrap).
