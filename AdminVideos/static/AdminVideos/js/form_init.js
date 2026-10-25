@@ -1245,6 +1245,7 @@ ul.appendChild(li);
                 // #modalPlato es el sheet custom de Crear/Editar, no un Bootstrap Modal.
                 // El redirect de backend resuelve el cierre y conserva el origen.
                 // ✅ volver a la página origen (lo manda el backend)
+                window.__platoFormSaved = true;
                 if (data.redirect_url) {
                   window.location.assign(data.redirect_url);
                   return;
@@ -1401,6 +1402,8 @@ ul.appendChild(li);
           if (payload.success) {
             const modalEl2 = modalEl;
             const inst = bootstrap.Modal.getInstance(modalEl2);
+
+            window.__platoFormSaved = true;
 
             const go = () => {
               if (payload.redirect_url) {

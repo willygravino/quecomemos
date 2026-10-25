@@ -95,7 +95,20 @@
     if (el.type === "checkbox" || el.type === "radio") {
       return el.checked ? "1" : "0";
     }
+    if (el.tagName === "SELECT" && el.multiple) {
+      return Array.from(el.selectedOptions)
+        .map(function (o) { return o.value; })
+        .sort()
+        .join("\u0001");
+    }
     return el.value == null ? "" : String(el.value);
+  }
+
+  function _fieldKey(el) {
+    if (el.type === "checkbox" || el.type === "radio") {
+      return el.name + "::" + (el.value || "");
+    }
+    return el.name;
   }
 
   function snapshotForm() {
@@ -105,7 +118,7 @@
     form.querySelectorAll("input, textarea, select").forEach(function (el) {
       if (!el.name) return;
       if (el.type === "submit" || el.type === "button" || el.type === "file") return;
-      _formSnapshot[el.name] = _snapshotValue(el);
+      _formSnapshot[_fieldKey(el)] = _snapshotValue(el);
     });
     window.__platoFormSaved = false;
   }
@@ -119,9 +132,10 @@
       if (changed) return;
       if (!el.name) return;
       if (el.type === "submit" || el.type === "button" || el.type === "file") return;
+      const key = _fieldKey(el);
       const curr = _snapshotValue(el);
-      const prev = Object.prototype.hasOwnProperty.call(_formSnapshot, el.name)
-        ? _formSnapshot[el.name]
+      const prev = Object.prototype.hasOwnProperty.call(_formSnapshot, key)
+        ? _formSnapshot[key]
         : undefined;
       if (prev !== curr) {
         changed = true;
@@ -130,7 +144,18 @@
     return changed;
   }
 
-  function cerrar() {
+  async function cerrar() {
+    if (hayCambios() && !window.__platoFormSaved) {
+      const ok = await window.confirmDialog({
+        title: "Salir sin guardar",
+        body: "Vas a perder los cambios del formulario.",
+        hint: "",
+        confirmText: "Salir sin guardar",
+        cancelText: "Seguir editando",
+        confirmClass: "btn-warning"
+      });
+      if (!ok) return;
+    }
     setOpen(false);
 
     window.setTimeout(function () {
@@ -307,6 +332,14 @@
     if (document.querySelector(".modal.show")) return;
 
     cerrar();
+  });
+
+  window.addEventListener("beforeunload", function (e) {
+    if (!sheet.classList.contains("is-open")) return;
+    if (window.__platoFormSaved) return;
+    if (!hayCambios()) return;
+    e.preventDefault();
+    e.returnValue = "";
   });
 
   if (UI) {
