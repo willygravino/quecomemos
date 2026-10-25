@@ -1,5 +1,5 @@
 {# Control global independiente del carrusel de categorías. #}
-<div class="lo-que-tengo-global js-lo-que-tengo-state-root {% if lo_que_tengo_activo|default:False %}lo-que-tengo-activo{% endif %} lo-que-tengo-global" modo-{{ modo|default:"mobile" }}">
+<div class="lo-que-tengo-global js-lo-que-tengo-state-root {% if lo_que_tengo_activo|default:False %}lo-que-tengo-activo{% endif %} lo-que-tengo-global modo-{{ modo|default:'mobile' }}">
   <a
     class="selector-lo-que-tengo js-filtro-lo-que-tengo {% if lo_que_tengo_activo|default:False %}is-active{% endif %}"
     href="{% url 'filtro-de-platos' %}?tipopag={{ tipopag|default:"Principal"|urlencode }}&lo_que_tengo={% if lo_que_tengo_activo|default:False %}0{% else %}1{% endif %}"
