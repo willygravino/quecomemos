@@ -418,6 +418,7 @@ Cada estado debe verse bien en desktop y mobile.
      <input ... name="misplatos" ...>
      <label ... for="misplatos">...</label>
    </div>
+```
 
 
 ## 27. Deudas tecnicas de filtros (no urgentes, para atacar en sesion aparte)
@@ -435,8 +436,37 @@ Cada estado debe verse bien en desktop y mobile.
 
 **Riesgo**: si cambia un texto (ej. "picada armada"), hay que editar 4 lugares o queda inconsistente. Es el mismo tipo de bug que se resolvio con `TIPOS_POR_TEMPLATE` en §23, pero aca no se aplico.
 
-**Solucion propuesta**: custom template tag `{% etiqueta_boton_crear tipopag %}` que devuelva el texto, y que el JS lo lea de un `data-*` en el boton. Una sola fuente.
+**Solucion propuesta**: custom template tag que devuelva el texto, y que el JS lo lea de un `data-*` en el boton. Una sola fuente.
 
 ### 27.2 Mapa de etiquetas de tipos duplicado en JS
 
-**Problema**: `filtros_platos.js` tiene `etiquetaSugerenciasTipopag()` con un objeto hardcodeado:
+**Problema**: `filtros_platos.js` tiene `etiquetaSugerenciasTipopag()` con un objeto hardcodeado con las etiquetas de cada tipo ("Platos principales", "Guarniciones", etc.). Esto repite `TIPOS_POR_TEMPLATE` del backend (`views.py`).
+
+**Riesgo**: si se agrega un tipo nuevo (ej. "Snack"), el backend lo conoce pero el JS no -> el titulo queda desactualizado sin error visible.
+
+**Solucion propuesta**: pasar el mapa completo desde el contexto del backend como JSON embebido en el HTML, y que el JS lo lea.
+
+### 27.3 Persistencia incompleta en URL
+
+**Problema**: hoy persisten en la URL: `tipopag`, `lo_que_tengo`, `ver_cotidiano`, `ver_especial`.
+**No persisten**: `palabra_clave`, `quecomemos`, `misplatos`.
+
+**Riesgo**: el usuario escribe "pollo" en el buscador, navega atras, y la busqueda desaparece. Lo mismo con Quecomemos/Mis platos (aunque estan ocultos hoy por feature flag, se van a reactivar).
+
+**Solucion propuesta**: agregar `searchParams.set("palabra_clave", ...)` en los 3 `pushState`/`replaceState` existentes, y leer el valor en `popstate`. ~10 lineas de JS.
+
+---
+
+### Lo que NO vale la pena tocar (dejarlo como esta)
+
+- Partir `filtros_platos.js` en varios archivos: no agrega valor.
+- Sistema de barrido visual: es elegante, nadie nota si se simplifica. Dejarlo.
+- `!important` en CSS: es feo pero no rompe. Esperar a una sesion de limpieza general.
+- Header `X-QC-Stateless-Filters: 1`: misterioso. Investigar solo si se confirma que alguien lo lee.
+- Tests: es una deuda separada (§20), no de esta sesion.
+
+### Prioridad recomendada (cuando se ataquen)
+
+1. §27.3 Persistencia URL (~10 min, impacto directo al usuario).
+2. §27.1 Template tag del boton crear (~30 min, evita bugs futuros).
+3. §27.2 Mapa de tipos desde backend (~20 min, identico al fix de §23).
