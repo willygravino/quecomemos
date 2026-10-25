@@ -45,6 +45,11 @@
     let clientEventName = null;
     let clientEventTrigger = null;
 
+    // === Modo programatico (confirmDialog) ===
+    let dialogMode = false;
+    let dialogResolve = null;
+    let dialogOriginalBtnClass = null;
+
     if (!modalEl || !titleEl || !bodyEl || !btnEl || !formEl) return;
 
     function buildPanelMessage(message, level) {
@@ -125,7 +130,71 @@
       }
     });
 
+    // === API programatica: window.confirmDialog(opts) -> Promise<boolean> ===
+    // Uso:
+    //   const ok = await window.confirmDialog({
+    //     title: "Salir sin guardar",
+    //     body: "Vas a perder los cambios.",
+    //     hint: "",
+    //     confirmText: "Salir",
+    //     cancelText: "Seguir editando",
+    //     confirmClass: "btn-warning"
+    //   });
+    window.confirmDialog = function (opts) {
+      opts = opts || {};
+      return new Promise(function (resolve) {
+        // Si ya habia un dialogo pendiente, resolverlo como cancelado
+        if (dialogResolve) {
+          try { dialogResolve(false); } catch (e) {}
+        }
+
+        dialogMode = true;
+        dialogResolve = resolve;
+
+        titleEl.textContent = opts.title || "Confirmar";
+        bodyEl.innerHTML = opts.body || "¿Seguro?";
+        btnEl.textContent = opts.confirmText || "Sí, continuar";
+
+        // El boton de cancelar (segundo del footer) tambien puede cambiar texto
+        const cancelBtn = modalEl.querySelector('.modal-footer [data-bs-dismiss="modal"]');
+        if (cancelBtn) {
+          if (!cancelBtn.dataset.originalText) {
+            cancelBtn.dataset.originalText = cancelBtn.textContent;
+          }
+          cancelBtn.textContent = opts.cancelText || cancelBtn.dataset.originalText;
+        }
+
+        if (opts.hint === null || opts.hint === undefined || opts.hint === "") {
+          hintEl.classList.add("d-none");
+        } else {
+          hintEl.textContent = opts.hint;
+          hintEl.classList.remove("d-none");
+        }
+
+        // Guardar la clase original del boton para restaurar al cerrar
+        if (!dialogOriginalBtnClass) {
+          dialogOriginalBtnClass = btnEl.className;
+        }
+        btnEl.className = "btn " + (opts.confirmClass || "btn-primary");
+        btnEl.disabled = false;
+
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+      });
+    };
+
     btnEl.addEventListener("click", function () {
+      // Modo programatico: resolver true y cerrar
+      if (dialogMode) {
+        const r = dialogResolve;
+        dialogResolve = null;
+        dialogMode = false;
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+        if (r) r(true);
+        return;
+      }
+
       if (submitMode === "bulk-delete") {
         if (!bulkDeleteForm) return;
         bulkDeleteForm.submit();
@@ -220,6 +289,27 @@
       }
 
       formEl.submit();
+    });
+
+    // === Cierre por X / backdrop / Escape / cancelar en modo programatico ===
+    modalEl.addEventListener("hidden.bs.modal", function () {
+      if (!dialogMode) {
+        return;
+      }
+      const r = dialogResolve;
+      dialogResolve = null;
+      dialogMode = false;
+      if (dialogOriginalBtnClass) {
+        btnEl.className = dialogOriginalBtnClass;
+        dialogOriginalBtnClass = null;
+      }
+      // Restaurar texto del boton cancelar
+      const cancelBtn = modalEl.querySelector('.modal-footer [data-bs-dismiss="modal"]');
+      if (cancelBtn && cancelBtn.dataset.originalText) {
+        cancelBtn.textContent = cancelBtn.dataset.originalText;
+        delete cancelBtn.dataset.originalText;
+      }
+      if (r) r(false);
     });
   })();
 </script>

@@ -88,6 +88,48 @@
     body.innerHTML = placeholder("Cargando formulario…");
   }
 
+  // === Deteccion de cambios sin guardar ===
+  let _formSnapshot = null;
+
+  function _snapshotValue(el) {
+    if (el.type === "checkbox" || el.type === "radio") {
+      return el.checked ? "1" : "0";
+    }
+    return el.value == null ? "" : String(el.value);
+  }
+
+  function snapshotForm() {
+    _formSnapshot = {};
+    const form = body.querySelector("form");
+    if (!form) return;
+    form.querySelectorAll("input, textarea, select").forEach(function (el) {
+      if (!el.name) return;
+      if (el.type === "submit" || el.type === "button" || el.type === "file") return;
+      _formSnapshot[el.name] = _snapshotValue(el);
+    });
+    window.__platoFormSaved = false;
+  }
+
+  function hayCambios() {
+    if (!_formSnapshot) return false;
+    const form = body.querySelector("form");
+    if (!form) return false;
+    let changed = false;
+    form.querySelectorAll("input, textarea, select").forEach(function (el) {
+      if (changed) return;
+      if (!el.name) return;
+      if (el.type === "submit" || el.type === "button" || el.type === "file") return;
+      const curr = _snapshotValue(el);
+      const prev = Object.prototype.hasOwnProperty.call(_formSnapshot, el.name)
+        ? _formSnapshot[el.name]
+        : undefined;
+      if (prev !== curr) {
+        changed = true;
+      }
+    });
+    return changed;
+  }
+
   function cerrar() {
     setOpen(false);
 
@@ -131,6 +173,8 @@
         detail: { root: body, url: url },
       })
     );
+
+    snapshotForm();
 
     if (!focusName) return;
 
