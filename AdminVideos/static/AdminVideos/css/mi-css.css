@@ -2822,3 +2822,28 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
   max-width: 220px !important;
   flex-shrink: 1 !important;
 }
+
+
+/* ============================================================
+   Filtros de platos: inline en desktop, modal en mobile.
+   Desktop (>= 768px): form vive en #filtroPlatosInlineHome,
+                       se oculta la barra mobile.
+   Mobile  (< 768px):  form vive en #filtroPlatosModalBody,
+                       se oculta el home inline.
+   El JS de #form-filtros-platos decide dónde appendear el form.
+   ============================================================ */
+
+@media (min-width: 768px) {
+  #filtroPlatosMobileControls {
+    display: none !important;
+  }
+  #filtroPlatosInlineHome.filtro-platos-inline-shell {
+    display: block !important;
+  }
+}
+
+@media (max-width: 767.98px) {
+  #filtroPlatosInlineHome.filtro-platos-inline-shell {
+    display: none !important;
+  }
+}

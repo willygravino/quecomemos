@@ -111,7 +111,7 @@
 7. **No tocar `vendor/`** salvo actualización explícita de librería.
 8. **Prohibido en producción sin rama y backup**: migraciones, cambios de modelos, refactors de `base.html`.
 
-## 7. Reglas de versionado de JS (obligatorio)
+## 7. Reglas de versionado de JS y CSS (obligatorio)
 
 **Cada vez que se modifica un `.js`, hay que bumpear su versión en `base.html`.**
 
@@ -122,6 +122,10 @@
 - Los **templates `.html`** y los **partials `_*.html`** NO se cachean: no hace falta bumpear.
 - Al bumpear varios JS en el mismo cambio, usar el **mismo timestamp** para todos.
 - Localizar las líneas exactas con `grep -n "\.js' %}" AdminVideos/templates/AdminVideos/base.html`.
+- **CSS también se cachea**: cada vez que se modifica un `.css` propio, hay que bumpear su `?v=` en `base.html`. Los navegadores cachean CSS agresivamente y los cambios "no se ven".
+- **Trampa del `{% static %}`**: el `?v=` va **afuera** del tag. 
+  - ✅ Correcto: `<link href="{% static 'css/mi-css.css' %}?v=123">`
+  - ❌ Incorrecto: `<link href="{% static 'css/mi-css.css?v=123' %}">` (Django busca un archivo con ese nombre y falla o sirve mal).
 - **Excepción importante**: algunos JS no se cargan desde `base.html`, sino desde el template que los usa. Ejemplo: `filtros_platos.js` y `lo_que_tengo.js` se bumpean en `lista_filtrada.html`. Buscar siempre con `grep -rn "\.js' %}" AdminVideos/templates/` antes de asumir que está en `base.html`.
 
 ## 8. Filosofía: sin parches, causa raíz

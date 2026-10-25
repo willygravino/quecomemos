@@ -368,7 +368,11 @@
   </div>
 
   <div id="filtroPlatosMobileSummary" class="filtro-platos-mobile-summary mt-2 d-none"></div>
-</div><!-- Modal móvil para el filtro de platos.
+</div>
+
+<div id="filtroPlatosInlineHome" class="d-none filtro-platos-inline-shell"></div>
+
+<!-- Modal móvil para el filtro de platos.
      Importante: no duplica el form; JS mueve #form-filtros-platos acá sólo en celular. -->
 <div
   class="modal fade"
@@ -388,7 +392,6 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
 
-      <div id="filtroPlatosInlineHome" class="d-none"></div>
 
 <form
   method="POST"
@@ -673,16 +676,29 @@ function getForm() {
 
   function moverFormSegunPantalla() {
     const form = getForm();
+    const inlineHome = getHome();
     const modalBody = getModalBody();
 
-    if (!form || !modalBody) return;
+    if (!form || !inlineHome || !modalBody) return;
 
-    if (form.parentElement !== modalBody) {
-      modalBody.appendChild(form);
+    const esDesktop = window.matchMedia("(min-width: 768px)").matches;
+    const destino = esDesktop ? inlineHome : modalBody;
+
+    if (form.parentElement !== destino) {
+      destino.appendChild(form);
     }
 
     form.classList.remove("mb-3");
     form.classList.add("mb-0");
+
+    if (esDesktop) {
+      // Si el modal estaba abierto en mobile y cambió a desktop, cerrarlo.
+      const modalEl = document.getElementById("filtroPlatosModal");
+      if (modalEl && window.bootstrap && bootstrap.Modal) {
+        const inst = bootstrap.Modal.getInstance(modalEl);
+        if (inst && modalEl.classList.contains("show")) inst.hide();
+      }
+    }
 
     actualizarResumenMobile();
   }
@@ -730,6 +746,20 @@ function getForm() {
 
   function initFiltroResponsiveMobile() {
     moverFormSegunPantalla();
+
+    // Re-mover el form si cambia el breakpoint (rotación de tablet,
+    // cambio de zoom, resize de ventana).
+    if (!window.__filtroPlatosMatchMediaBound) {
+      window.__filtroPlatosMatchMediaBound = true;
+      const mqDesktop = window.matchMedia("(min-width: 768px)");
+      const remover = function () { moverFormSegunPantalla(); };
+      if (mqDesktop.addEventListener) {
+        mqDesktop.addEventListener("change", remover);
+      } else if (mqDesktop.addListener) {
+        // Fallback para navegadores muy viejos
+        mqDesktop.addListener(remover);
+      }
+    }
 
     const form = getForm();
     const mobileKeyword = document.getElementById("palabraClaveMobile");
