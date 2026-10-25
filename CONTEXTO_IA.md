@@ -418,3 +418,25 @@ Cada estado debe verse bien en desktop y mobile.
      <input ... name="misplatos" ...>
      <label ... for="misplatos">...</label>
    </div>
+
+
+## 27. Deudas tecnicas de filtros (no urgentes, para atacar en sesion aparte)
+
+> Identificadas en la sesion 2026-10-25 (responsive + limpieza del filtro). No son urgentes, pero conviene atacarlas antes de que el sistema crezca.
+
+### 27.1 Triplicacion del texto del boton "crear plato"
+
+**Problema**: la logica de "si tipopag es X, mostrar texto Y" esta escrita en 4 lugares sincronizados:
+- `base.html` -> atributo `title` (tooltip)
+- `base.html` -> atributo `aria-label`
+- `base.html` -> `<span class="boton-crear-plato-texto">` (visible desktop)
+- `base.html` -> `<span class="qc-mobile-action-label">` (visible mobile)
+- `filtros_platos.js` -> funcion `actualizarBotonCrearPlato()` (actualiza en AJAX)
+
+**Riesgo**: si cambia un texto (ej. "picada armada"), hay que editar 4 lugares o queda inconsistente. Es el mismo tipo de bug que se resolvio con `TIPOS_POR_TEMPLATE` en §23, pero aca no se aplico.
+
+**Solucion propuesta**: custom template tag `{% etiqueta_boton_crear tipopag %}` que devuelva el texto, y que el JS lo lea de un `data-*` en el boton. Una sola fuente.
+
+### 27.2 Mapa de etiquetas de tipos duplicado en JS
+
+**Problema**: `filtros_platos.js` tiene `etiquetaSugerenciasTipopag()` con un objeto hardcodeado:
