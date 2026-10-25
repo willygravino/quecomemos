@@ -2623,21 +2623,11 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
    ======================================== */
 
 @media (max-width: 767.98px) {
-  .filtro-platos-mobile-shell .d-flex {
-    flex-wrap: wrap !important;
-  }
+  
 
-  .filtro-mobile-keyword-box {
-    flex: 1 1 100% !important;
-    max-width: 100% !important;
-    min-width: 0;
-  }
+  
 
-  .filtro-platos-mobile-shell .btn-primary {
-    flex: 0 0 auto;
-    order: 1;
-    margin-left: auto;
-  }
+  
 
   .lo-que-tengo-mobile-wrapper {
     flex: 0 0 100% !important;
@@ -2658,23 +2648,13 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
    ============================================= */
 
 /* Contenedor principal: en desktop todo en una fila */
-.mobile-filters-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: nowrap; /* forzamos que no wrap en desktop */
-}
+
 
 /* El buscador ocupa espacio flexible, pero no todo */
-.mobile-search-wrapper {
-  flex: 1 1 auto;
-  min-width: 120px;
-}
+
 
 /* El botón Filtros: en desktop muestra texto, en mobile solo ícono */
-.mobile-filter-btn .filter-text {
-  display: inline; /* visible en desktop */
-}
+
 
 /* El wrapper del toggle: en desktop está en la misma línea */
 .mobile-toggle-wrapper {
@@ -2683,20 +2663,13 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
 
 /* ------- MÓVIL (ancho < 768px) ------- */
 @media (max-width: 767.98px) {
-  .mobile-filters-row {
-    flex-wrap: wrap; /* permitimos wrap solo en mobile */
-  }
+  
 
   /* El buscador ocupa toda la primera línea */
-  .mobile-search-wrapper {
-    flex: 0 0 100%;
-    max-width: 100%;
-  }
+  
 
   /* El botón Filtros: solo ícono, texto oculto */
-  .mobile-filter-btn .filter-text {
-    display: none !important;
-  }
+  
 
   /* El toggle baja a la segunda línea */
   .mobile-toggle-wrapper {
@@ -2750,26 +2723,14 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
 }
 
 /* Ajustes para el contenedor mobile */
-.filtro-platos-mobile-shell .mobile-filters-row {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: 0.5rem;
-}
+
 
 @media (max-width: 767.98px) {
-  .filtro-platos-mobile-shell .mobile-filters-row {
-    flex-wrap: wrap;
-  }
+  
 
-  .mobile-search-wrapper {
-    flex: 0 0 100%;
-    max-width: 100%;
-  }
+  
 
-  .mobile-filter-btn .filter-text {
-    display: none !important;
-  }
+  
 
   .modo-mobile.lo-que-tengo-global {
     flex: 0 0 100% !important;
@@ -2825,24 +2786,11 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
    Filtros de platos: inline en desktop, modal en mobile.
    Desktop (>= 768px): form vive en #filtroPlatosInlineHome,
                        se oculta la barra mobile.
-   Mobile  (< 768px):  form vive en #filtroPlatosModalBody,
-                       se oculta el home inline.
-   El JS de #form-filtros-platos decide dónde appendear el form.
-   ============================================================ */
-
-@media (min-width: 768px) {
-  #filtroPlatosMobileControls {
-    display: none !important;
-  }
-  #filtroPlatosInlineHome.filtro-platos-inline-shell {
-    display: block !important;
-  }
+   Mobile  (< 768px):  form vive en 
 }
 
 @media (max-width: 767.98px) {
-  #filtroPlatosInlineHome.filtro-platos-inline-shell {
-    display: none !important;
-  }
+  
 }
 
 
@@ -2897,4 +2845,33 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
 /* Estado activo (checked) */
 .btn-check:checked + .filtro-icono-btn i {
   color: var(--bs-primary);
+}
+
+
+#filtroPlatosInlineHome.filtro-platos-inline-shell { display: block !important; }
+
+
+/* ============================================================
+   Ajustes Mobile para el Formulario Inline
+   ============================================================ */
+
+@media (max-width: 767.98px) {
+  /* El buscador ocupa toda la fila */
+  .filtro-keyword-box {
+    flex: 1 1 100% !important;
+    max-width: 100% !important;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Mostrar el texto de los íconos siempre en mobile (no hay hover) */
+  .filtro-icono-texto {
+    max-width: 120px !important;
+    opacity: 1 !important;
+    margin-left: 0.4rem !important;
+  }
+
+  /* Ajustar un poco el padding de los botones de ícono */
+  .filtro-icono-btn {
+    padding: 0.375rem 0.75rem !important;
+  }
 }
