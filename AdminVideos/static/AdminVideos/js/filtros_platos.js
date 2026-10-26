@@ -656,6 +656,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
       timeoutBusquedaPalabraClave = setTimeout(function () {
         actualizarListadoPlatosConBarrido();
+
+        // Persistir palabra_clave en URL (replaceState: no llena historial)
+        const urlKw = new URL(window.location.href);
+        const kw = inputPalabraClave.value.trim();
+        if (kw) urlKw.searchParams.set("palabra_clave", kw);
+        else urlKw.searchParams.delete("palabra_clave");
+        window.history.replaceState(window.history.state || {}, "", urlKw.toString());
       }, 400);
     });
 
@@ -668,6 +675,20 @@ document.addEventListener("DOMContentLoaded", function () {
   form.querySelectorAll("input[type='checkbox']").forEach(function (checkbox) {
     checkbox.addEventListener("change", function () {
       actualizarListadoPlatosConBarrido();
+
+      // Persistir todos los filtros en URL (pushState)
+      const urlCb = new URL(window.location.href);
+      const fdCb = new FormData(form);
+      const kwCb = fdCb.get("palabra_clave") || "";
+      if (kwCb) urlCb.searchParams.set("palabra_clave", kwCb);
+      else urlCb.searchParams.delete("palabra_clave");
+      if (fdCb.get("quecomemos")) urlCb.searchParams.set("quecomemos", "quecomemos");
+      else urlCb.searchParams.delete("quecomemos");
+      if (fdCb.get("misplatos")) urlCb.searchParams.set("misplatos", "misplatos");
+      else urlCb.searchParams.delete("misplatos");
+      urlCb.searchParams.set("ver_cotidiano", fdCb.get("ver_cotidiano") ? "1" : "0");
+      urlCb.searchParams.set("ver_especial", fdCb.get("ver_especial") ? "1" : "0");
+      window.history.pushState(window.history.state || {}, "", urlCb.toString());
     });
   });
 
@@ -777,6 +798,16 @@ document.addEventListener("DOMContentLoaded", function () {
     if (cbCat1) nuevaUrl.searchParams.set("ver_cotidiano", cbCat1.checked ? "1" : "0");
     if (cbEsp1) nuevaUrl.searchParams.set("ver_especial", cbEsp1.checked ? "1" : "0");
 
+    // Persistir tambien palabra_clave / quecomemos / misplatos
+    const fdLqt = new FormData(form);
+    const kwLqt = fdLqt.get("palabra_clave") || "";
+    if (kwLqt) nuevaUrl.searchParams.set("palabra_clave", kwLqt);
+    else nuevaUrl.searchParams.delete("palabra_clave");
+    if (fdLqt.get("quecomemos")) nuevaUrl.searchParams.set("quecomemos", "quecomemos");
+    else nuevaUrl.searchParams.delete("quecomemos");
+    if (fdLqt.get("misplatos")) nuevaUrl.searchParams.set("misplatos", "misplatos");
+    else nuevaUrl.searchParams.delete("misplatos");
+
     window.history.pushState(
       { tipopag: tipopag, loQueTengoActivo: activar },
       "",
@@ -826,6 +857,16 @@ document.addEventListener("DOMContentLoaded", function () {
     const cbEsp2 = form.querySelector('input[name="ver_especial"]');
     if (cbCat2) nuevaUrl.searchParams.set("ver_cotidiano", cbCat2.checked ? "1" : "0");
     if (cbEsp2) nuevaUrl.searchParams.set("ver_especial", cbEsp2.checked ? "1" : "0");
+
+    // Persistir tambien palabra_clave / quecomemos / misplatos
+    const fdTyp = new FormData(form);
+    const kwTyp = fdTyp.get("palabra_clave") || "";
+    if (kwTyp) nuevaUrl.searchParams.set("palabra_clave", kwTyp);
+    else nuevaUrl.searchParams.delete("palabra_clave");
+    if (fdTyp.get("quecomemos")) nuevaUrl.searchParams.set("quecomemos", "quecomemos");
+    else nuevaUrl.searchParams.delete("quecomemos");
+    if (fdTyp.get("misplatos")) nuevaUrl.searchParams.set("misplatos", "misplatos");
+    else nuevaUrl.searchParams.delete("misplatos");
 
     window.history.pushState(
       { tipopag: tipopag, loQueTengoActivo: estaActivoLoQueTengo() },
@@ -887,6 +928,19 @@ document.addEventListener("DOMContentLoaded", function () {
     const cbEspPop = form.querySelector('input[name="ver_especial"]');
     if (cbCatPop) cbCatPop.checked = vcUrl === null ? true : vcUrl !== "0";
     if (cbEspPop) cbEspPop.checked = veUrl === null ? true : veUrl !== "0";
+
+    // Restaurar palabra_clave
+    const palabraPop = params.get("palabra_clave") || "";
+    if (inputPalabraClave && inputPalabraClave.value !== palabraPop) {
+      inputPalabraClave.value = palabraPop;
+      actualizarVisualPalabraClave();
+    }
+
+    // Restaurar quecomemos / misplatos
+    const cbQuePop = form.querySelector('input[name="quecomemos"]');
+    const cbMisPop = form.querySelector('input[name="misplatos"]');
+    if (cbQuePop) cbQuePop.checked = params.get("quecomemos") === "quecomemos";
+    if (cbMisPop) cbMisPop.checked = params.get("misplatos") === "misplatos";
 
     actualizarSelectorHorizontalActivo(tipopag);
     actualizarTituloSugerencias(tipopag);
