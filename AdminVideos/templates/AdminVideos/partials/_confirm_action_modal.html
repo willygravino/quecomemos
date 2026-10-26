@@ -196,8 +196,20 @@
       }
 
       if (submitMode === "bulk-delete") {
-        if (!bulkDeleteForm) return;
-        bulkDeleteForm.submit();
+        // BUGFIX 2026-10-26: buscar el form en el DOM al momento del submit,
+        // no usar la referencia cacheada al cargar la pagina. El AJAX de
+        // filtros reemplaza el listado (y con el, el form), dejando la
+        // referencia cacheada apuntando a un nodo desconectado.
+        // Error original: "Form submission canceled because the form is not connected".
+        const form = document.getElementById("bulk-delete-form");
+        if (!form) {
+          console.error("[confirmDialog] bulk-delete-form no encontrado en el DOM");
+          return;
+        }
+        if (!form.isConnected) {
+          document.body.appendChild(form);
+        }
+        form.submit();
         return;
       }
 
