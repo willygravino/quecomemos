@@ -485,3 +485,11 @@ Cada estado debe verse bien en desktop y mobile.
 - `_listado_lugares.html:111` (endpoint `eliminar-lugares-masivo`)
 - `getElementById` devuelve el primero (platos). **Borrado masivo en Lugares/Delivery probablemente usa endpoint equivocado.**
 - **Verificar** si al borrar lugares desde el listado falla. Si sí: renombrar IDs a `bulk-delete-form-platos` y `bulk-delete-form-lugares`, actualizar `data-confirm-submit-form` en `initListadoPlatos` y en `_confirm_action_modal.html`.
+
+
+### 28.8 Regex peligroso en CSS (lección 2026-10-26)
+
+- **Nunca usar `[\s\S]*?` en regex para "encontrar bloques" de CSS.** Un regex como `/* =+[\s\S]*?filtro-keyword-clear...` puede matchear desde el **PRIMER** `/* ===` del archivo hasta el bloque buscado, borrando **TODO el CSS intermedio**.
+- **Síntoma**: `git --no-pager diff --stat` muestra "~2900 líneas borradas" en `mi-css.css`. La página se rompe con layout caótico (inputs superpuestos, colores mal, todo desalineado).
+- **Regla**: cuando se modifica un `.css` grande, **append al final** (seguro) o **reemplazo por bloque exacto** con `s.count(anchor) == 1`. **Nunca** regex con wildcards amplios.
+- **Rollback inmediato**: `git checkout HEAD -- <archivo>`. Vuelve al estado del último commit sin perder cambios ya commiteados.
