@@ -298,6 +298,9 @@ Cada estado debe verse bien en desktop y mobile.
 - [ ] Recorrer el sistema de menús (programado + print).
 - [ ] Ir completando la sección 20 con hallazgos.
 
+- [x] Fix búsqueda: word boundary + unaccent (pollo no trae repollo, atun trae atún)
+- [x] Fix bulk delete con AJAX previo (form desconectado por innerHTML del listado)
+
 ## 22. Notas de diseño
 
 - Los partials `_*.html` se incluyen desde templates mayores; no son páginas completas.
@@ -467,3 +470,18 @@ Cada estado debe verse bien en desktop y mobile.
 1. ~~§27.3 Persistencia URL~~ (completado 2026-10-26).
 2. §27.1 Template tag del boton crear (~30 min, evita bugs futuros).
 3. §27.2 Mapa de tipos desde backend (~20 min, identico al fix de §23).
+
+### 27.4 Búsqueda por palabra: word boundary + sin acentos
+**RESUELTO el 2026-10-26**. Bug: "pollo" traía "repollo" (substring sin boundary) y "atun" no encontraba "atún".
+- **Fix**: `django.contrib.postgres` + `UnaccentExtension` (migración `0103`) + lookup `__unaccent__iregex`.
+- **Patrón**: `_patron_busqueda(texto)` en `views.py` — normaliza tildes con `unicodedata`, escapa con `re.escape`, prefija con `\m` (word boundary al inicio).
+- **Aplicado en**: `filtrar_platos`, `filtrar_platos_por_lo_que_tengo`, `obtener_resultados_principales` (Delivery y Comerafuera).
+- **Comportamiento**: `\mpollo` matchea Pollo/Pollos/Pollería; NO repollo. Permite plurales y derivados. Frase exacta (no AND de palabras).
+- **Tests pasados**: pollo→7 platos sin repollo; atun→atún; POLLO==pollo; atún==atun.
+
+### 27.5 Bug detectado: `bulk-delete-form` ID duplicado
+**DETECTADO el 2026-10-26**. Hay 2 `<form id="bulk-delete-form">` en la misma página:
+- `_listado_platos.html:83` (endpoint `eliminar-platos-masivo`)
+- `_listado_lugares.html:111` (endpoint `eliminar-lugares-masivo`)
+- `getElementById` devuelve el primero (platos). **Borrado masivo en Lugares/Delivery probablemente usa endpoint equivocado.**
+- **Verificar** si al borrar lugares desde el listado falla. Si sí: renombrar IDs a `bulk-delete-form-platos` y `bulk-delete-form-lugares`, actualizar `data-confirm-submit-form` en `initListadoPlatos` y en `_confirm_action_modal.html`.
