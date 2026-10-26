@@ -446,15 +446,11 @@ Cada estado debe verse bien en desktop y mobile.
 
 **Solucion propuesta**: pasar el mapa completo desde el contexto del backend como JSON embebido en el HTML, y que el JS lo lea.
 
-### 27.3 Persistencia incompleta en URL
-
-**Problema**: hoy persisten en la URL: `tipopag`, `lo_que_tengo`, `ver_cotidiano`, `ver_especial`.
-**No persisten**: `palabra_clave`, `quecomemos`, `misplatos`.
-
-**Riesgo**: el usuario escribe "pollo" en el buscador, navega atras, y la busqueda desaparece. Lo mismo con Quecomemos/Mis platos (aunque estan ocultos hoy por feature flag, se van a reactivar).
-
-**Solucion propuesta**: agregar `searchParams.set("palabra_clave", ...)` en los 3 `pushState`/`replaceState` existentes, y leer el valor en `popstate`. ~10 lineas de JS.
-
+### 27.3 Persistencia en URL
+**RESUELTO el 2026-10-26**. Ahora persisten en la URL todos los filtros:
+`tipopag`, `lo_que_tengo`, `ver_cotidiano`, `ver_especial`, `palabra_clave`, `quecomemos`, `misplatos`.
+- Implementado en `filtros_platos.js` (debounce `replaceState` para palabra clave, `pushState` para el resto).
+- `popstate` restaura el estado completo.
 ---
 
 ### Lo que NO vale la pena tocar (dejarlo como esta)
@@ -465,8 +461,9 @@ Cada estado debe verse bien en desktop y mobile.
 - Header `X-QC-Stateless-Filters: 1`: misterioso. Investigar solo si se confirma que alguien lo lee.
 - Tests: es una deuda separada (§20), no de esta sesion.
 
+
 ### Prioridad recomendada (cuando se ataquen)
 
-1. §27.3 Persistencia URL (~10 min, impacto directo al usuario).
+1. ~~§27.3 Persistencia URL~~ (completado 2026-10-26).
 2. §27.1 Template tag del boton crear (~30 min, evita bugs futuros).
 3. §27.2 Mapa de tipos desde backend (~20 min, identico al fix de §23).
