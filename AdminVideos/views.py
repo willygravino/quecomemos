@@ -2977,7 +2977,14 @@ def obtener_platos_dia_x_dia(usuario, fechas_existentes, habitos_set):
                 "es_lugar": True,
             })
 
-    return dict(platos_dia_x_dia), dias_programados
+    # Días con almuerzo Y cena: menú "completo" del día.
+    # El resto (solo almuerzo, solo cena, solo desayuno, etc.) = "parcial".
+    dias_completos = set()
+    for fec, momentos in platos_dia_x_dia.items():
+        if momentos.get("almuerzo") and momentos.get("cena"):
+            dias_completos.add(fec)
+
+    return dict(platos_dia_x_dia), dias_programados, dias_completos
 
 
 
@@ -3447,7 +3454,7 @@ def FiltroDePlatos(request):
     contexto_compartidos = obtener_contexto_compartidos(usuario)
 
 
-    platos_dia_x_dia, dias_programados = obtener_platos_dia_x_dia(
+    platos_dia_x_dia, dias_programados, dias_completos = obtener_platos_dia_x_dia(
         usuario,
         fechas_existentes,
         habitos_set
@@ -3476,6 +3483,7 @@ def FiltroDePlatos(request):
                 "carousel_items": platos_carousel,
                 "dias_desde_hoy": dias_desde_hoy,
                 "dias_programados": dias_programados,
+                "dias_completos": dias_completos,
                 "quecomemos_ck": quecomemos,
                 "misplatos_ck": misplatos,
                 "ver_cotidiano_ck": ver_cotidiano,

@@ -2919,3 +2919,51 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
 .carousel-indicators li:hover {
   opacity: 0.85;
 }
+
+
+/* ============================================================
+   Día con menú PARCIAL (solo almuerzo o solo cena, no ambos).
+   Gradiente violeta -> azul: comunica de un vistazo que el día
+   está a medio programar. Fondo completo (texto blanco legible).
+   ============================================================ */
+/* ============================================================
+   Pestañas PARCIALES (gradiente horizontal violeta -> azul)
+   - Activa: Violeta -> #4e73df (se integra con el recuadro).
+   - Inactivas: Violeta apagado -> color de pestaña inactiva.
+   ============================================================ */
+
+/* --- ACTIVA (cualquier modo) --- */
+#diasTab .nav-link.menu-dia-parcial.active {
+  background: linear-gradient(
+    to top,
+    var(--menu-programado-solido) 0%,
+    var(--menu-programado-solido) 15%,
+    #4e73df 85%,
+    #4e73df 100%
+  ) !important;
+  color: #fff !important;
+}
+
+/* --- INACTIVA (Modo Claro) --- */
+#diasTab .nav-link.menu-dia-parcial:not(.active) {
+  background: linear-gradient(
+    to top,
+    var(--qc-menu-programado-inactivo) 0%,
+    var(--qc-menu-programado-inactivo) 15%,
+    #3154b8 85%,
+    #3154b8 100%
+  ) !important;
+  color: #fff !important;
+}
+
+/* --- INACTIVA (Modo Oscuro) --- */
+[data-bs-theme="dark"] #diasTab .nav-link.menu-dia-parcial:not(.active) {
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--menu-programado-solido) 55%, #000) 0%,
+    color-mix(in srgb, var(--menu-programado-solido) 55%, #000) 15%,
+    #2f3852 85%,
+    #2f3852 100%
+  ) !important;
+  color: #fff !important;
+}
