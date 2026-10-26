@@ -47,6 +47,7 @@ from AdminVideos.navigation import get_safe_return_to
 from django.db.models.expressions import OrderBy
 from django.db.models import Case, When, IntegerField
 from django.views.generic.edit import FormView
+import re
 
 
 # Paso 8.1: eliminar varios platos seleccionados con la misma lógica que eliminar_plato
@@ -2310,6 +2311,26 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
 
 
 
+
+def _patron_busqueda(texto):
+    """
+    Normaliza el texto (quita tildes) y arma un patron regex
+    con word boundary al inicio (\m) para buscar como palabra.
+
+    Ejemplos:
+    - "pollo" -> \mpollo  (matchea Pollo, Pollos, Polleria; NO repollo)
+    - "atun"  -> \matun   (matchea atun, Atun, Atunes)
+    - "POLLO" -> \mpollo  (gracias a unaccent + iregex)
+    """
+    if not texto:
+        return ""
+    normalizado = unicodedata.normalize("NFKD", texto)
+    normalizado = "".join(c for c in normalizado if not unicodedata.combining(c))
+    escapado = re.escape(normalizado.strip())
+    if not escapado:
+        return ""
+    return r"\m" + escapado
+
 def filtrar_platos(
     usuario,
     tipo_parametro,
@@ -2378,11 +2399,13 @@ def filtrar_platos(
         platos_qs = platos_qs.filter(dificultad=dificultad)
 
     if palabra_clave:
-        platos_qs = platos_qs.filter(
-            Q(nombre_plato__icontains=palabra_clave) |
-            Q(ingredientes__icontains=palabra_clave) |
-            Q(ingredientes_en_plato__ingrediente__nombre__icontains=palabra_clave)
-        ).distinct()
+        _patron = _patron_busqueda(palabra_clave)
+        if _patron:
+            platos_qs = platos_qs.filter(
+                Q(nombre_plato__unaccent__iregex=_patron) |
+                Q(ingredientes__unaccent__iregex=_patron) |
+                Q(ingredientes_en_plato__ingrediente__nombre__unaccent__iregex=_patron)
+            ).distinct()
 
     # Orden de prioridad de los platos:
     # 1) Nunca programados históricamente primero.
@@ -3134,9 +3157,12 @@ def filtrar_platos_por_lo_que_tengo(platos, usuario, activo):
     condicion = Q()
 
     for palabra in palabras:
-        condicion |= Q(nombre_plato__icontains=palabra)
-        condicion |= Q(ingredientes__icontains=palabra)
-        condicion |= Q(ingredientes_en_plato__ingrediente__nombre__icontains=palabra)
+        _patron = _patron_busqueda(palabra)
+        if not _patron:
+            continue
+        condicion |= Q(nombre_plato__unaccent__iregex=_patron)
+        condicion |= Q(ingredientes__unaccent__iregex=_patron)
+        condicion |= Q(ingredientes_en_plato__ingrediente__nombre__unaccent__iregex=_patron)
 
     return platos.filter(condicion).distinct()
 
@@ -3163,9 +3189,11 @@ def obtener_resultados_principales(
         )
 
         if palabra_clave:
-            lugares = lugares.filter(
-                Q(nombre__icontains=palabra_clave)
-            )
+            _patron_lugar = _patron_busqueda(palabra_clave)
+            if _patron_lugar:
+                lugares = lugares.filter(
+                    Q(nombre__unaccent__iregex=_patron_lugar)
+                )
 
         platos = ""
         platos_carousel = ""
@@ -3181,9 +3209,11 @@ def obtener_resultados_principales(
         )
 
         if palabra_clave:
-            lugares = lugares.filter(
-                Q(nombre__icontains=palabra_clave)
-            )
+            _patron_lugar = _patron_busqueda(palabra_clave)
+            if _patron_lugar:
+                lugares = lugares.filter(
+                    Q(nombre__unaccent__iregex=_patron_lugar)
+                )
 
         platos = ""
         platos_carousel = ""
