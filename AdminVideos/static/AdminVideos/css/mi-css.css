@@ -2967,3 +2967,23 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
   ) !important;
   color: #fff !important;
 }
+
+/* ============================================================
+   Comida del menú programado SIN platos asignados.
+   Se ve atenuada para no competir visualmente con las que sí
+   tienen contenido. Solo apaga: no oculta nada.
+   ============================================================ */
+
+.menu-programado-comida-vacia {
+  opacity: 0.45;
+  transition: opacity 0.15s ease;
+}
+
+.menu-programado-comida-vacia h6 {
+  background-color: var(--bs-secondary-bg) !important;
+  color: var(--bs-secondary-color) !important;
+}
+
+.menu-programado-comida-vacia:hover {
+  opacity: 0.7;
+}
