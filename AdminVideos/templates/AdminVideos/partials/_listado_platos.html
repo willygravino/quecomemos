@@ -69,6 +69,17 @@
           {% include "AdminVideos/partials/_plato_row_gmail.html" %}
         {% endfor %}
       {% endfor %}
+    {% elif platos_agrupados_carta %}
+      {% for grupo in platos_agrupados_carta %}
+        <div class="plato-grupo-header">
+          <span class="plato-grupo-titulo">{{ grupo.titulo }}</span>
+          <span class="plato-grupo-count">{{ grupo.platos|length }}</span>
+        </div>
+
+        {% for plato in grupo.platos %}
+          {% include "AdminVideos/partials/_plato_row_gmail.html" %}
+        {% endfor %}
+      {% endfor %}
     {% else %}
       {% for plato in platos %}
         {% include "AdminVideos/partials/_plato_row_gmail.html" %}

@@ -1,6 +1,6 @@
 from collections import defaultdict
 from urllib.parse import parse_qs, parse_qsl, urlencode, urlparse, urlunparse
-from django.db.models import Count
+from django.db.models import Count, Case, When, Value, IntegerField
 import json
 import unicodedata
 from django import forms
@@ -9,7 +9,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
-from AdminVideos.models import ElementoCompartido, Amistad, ProfilePlatoCompra, HabitoSemanal, Ingrediente, IngredienteEnPlato, Insumo, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente, LoQueTengoPalabra
+from AdminVideos.models import ElementoCompartido, Amistad, ProfilePlatoCompra, HabitoSemanal, Ingrediente, IngredienteEnPlato, Insumo, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente, LoQueTengoPalabra, SUBTIPO_CARTA_CHOICES, SUBTIPO_CARTA_ORDEN
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string   # ✅ ← ESTA ES LA CLAVE
 from django.http import Http404, HttpRequest, HttpResponseNotAllowed, JsonResponse
@@ -2100,7 +2100,7 @@ class PlatoVariedadCreate(PlatoCreate):
                         break
 
             if not hay_al_menos_uno:
-                from .models import IngredienteEnPlato  # ajustá si tu import es distinto
+                from .models import IngredienteEnPlato
 
                 IngredienteEnPlato.objects.bulk_create([
                     IngredienteEnPlato(
@@ -2439,6 +2439,7 @@ def filtrar_platos(
         "-id",
     )
 
+    # Anotaciones comunes
     platos_qs = platos_qs.annotate(
         programaciones_count=Count(
             "en_menus__menu__fecha",
@@ -2450,10 +2451,30 @@ def filtrar_platos(
             filter=filtro_programaciones_historicas,
         ),
         variedades_count=Count("variedades_hijas", distinct=True),
-    ).order_by(
-        OrderBy(F("ultima_programacion"), descending=False, nulls_first=True),
-        "-id",
-    ).prefetch_related(
+    )
+
+    # Orden condicional:
+    # - Principal: por subtipo_carta (orden carta) + nombre alfabetico
+    # - Otras tabs: por historial de programacion (comportamiento actual)
+    if tipo_parametro == "Principal":
+        when_clauses = [
+            When(subtipo_carta=codigo, then=Value(orden))
+            for orden, codigo in enumerate(SUBTIPO_CARTA_ORDEN)
+        ]
+        platos_qs = platos_qs.annotate(
+            subtipo_orden=Case(
+                *when_clauses,
+                default=Value(999),
+                output_field=IntegerField(),
+            )
+        ).order_by("subtipo_orden", "nombre_plato")
+    else:
+        platos_qs = platos_qs.order_by(
+            OrderBy(F("ultima_programacion"), descending=False, nulls_first=True),
+            "-id",
+        )
+
+    platos_qs = platos_qs.prefetch_related(
         Prefetch("variedades_hijas", queryset=variedades_qs)
     )
 
@@ -3324,6 +3345,35 @@ def obtener_postres(usuario):
         .order_by("nombre_plato")
     )
 
+
+def agrupar_platos_para_carta(platos):
+    """Agrupa platos Principal por subtipo_carta respetando el orden de la carta."""
+    titulos = dict(SUBTIPO_CARTA_CHOICES)
+    grupos = {}
+    sin_clasificar = []
+    for plato in platos:
+        codigo = plato.subtipo_carta or ""
+        if not codigo:
+            sin_clasificar.append(plato)
+        else:
+            grupos.setdefault(codigo, []).append(plato)
+    resultado = []
+    for codigo in SUBTIPO_CARTA_ORDEN:
+        if codigo and codigo in grupos:
+            resultado.append({
+                "codigo": codigo,
+                "titulo": titulos.get(codigo, codigo.replace("_", " ").title()),
+                "platos": grupos[codigo],
+            })
+    if sin_clasificar:
+        resultado.append({
+            "codigo": "sin_clasificar",
+            "titulo": "Sin clasificar",
+            "platos": sin_clasificar,
+        })
+    return resultado
+
+
 def obtener_extras_platos(usuario):
     guarniciones = (
         Plato.objects
@@ -3516,6 +3566,12 @@ def FiltroDePlatos(request):
         else None
     )
 
+    platos_agrupados_carta = (
+        agrupar_platos_para_carta(platos_listado)
+        if tipopag == "Principal"
+        else None
+    )
+
     return_to_url = request.get_full_path()
 
     contexto = {
@@ -3523,6 +3579,7 @@ def FiltroDePlatos(request):
                 'platos': platos_listado,
                 "return_to_url": return_to_url,
                 "platos_agrupados_lo_que_tengo": platos_agrupados_lo_que_tengo,
+                "platos_agrupados_carta": platos_agrupados_carta,
                 "carousel_items": platos_carousel,
                 "dias_desde_hoy": dias_desde_hoy,
                 "dias_programados": dias_programados,
@@ -3604,6 +3661,12 @@ def ajax_listado_platos(request):
         else None
     )
 
+    platos_agrupados_carta = (
+        agrupar_platos_para_carta(platos_listado)
+        if tipopag == "Principal"
+        else None
+    )
+
     return_to_url = get_safe_return_to(
         request,
         fallback_url_name="filtro-de-platos",
@@ -3614,6 +3677,7 @@ def ajax_listado_platos(request):
         "platos": platos_listado,
         "return_to_url": return_to_url,
         "platos_agrupados_lo_que_tengo": platos_agrupados_lo_que_tengo,
+                "platos_agrupados_carta": platos_agrupados_carta,
         "carousel_items": platos_carousel,
         "lugares": lugares,
         "amigues": obtener_usernames_amigues(request.user),

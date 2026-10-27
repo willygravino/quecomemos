@@ -2987,3 +2987,54 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
 .menu-programado-comida-vacia:hover {
   opacity: 0.7;
 }
+
+/* ============================================================
+   Headers de grupo para la "carta de restaurante" (tab Principal).
+   Separan visualmente los subtipos (Carnes rojas, Aves, etc.)
+   dentro del listado tipo Gmail.
+   ============================================================ */
+
+.plato-grupo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.55rem 0.85rem;
+  margin-top: 0.4rem;
+  background: var(--bs-tertiary-bg);
+  border-left: 4px solid var(--bs-primary);
+  border-radius: 0 0.4rem 0.4rem 0;
+  color: var(--bs-emphasis-color);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.plato-grupo-header:first-child {
+  margin-top: 0;
+}
+
+.plato-grupo-titulo {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plato-grupo-count {
+  flex-shrink: 0;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--bs-secondary-bg);
+  color: var(--bs-secondary-color);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Modo oscuro: borde y fondo ligeramente más marcados */
+[data-bs-theme="dark"] .plato-grupo-header {
+  background: rgba(111, 66, 193, 0.18);
+  border-left-color: var(--bs-primary);
+}
