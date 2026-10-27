@@ -3314,6 +3314,16 @@ def agrupar_platos_para_lo_que_tengo(platos):
     return grupos
 
 
+
+def obtener_postres(usuario):
+    """Postres del usuario para el modal de asignar plato."""
+    return (
+        Plato.objects
+        .filter(propietario=usuario)
+        .filter(tipos__icontains="Postre")
+        .order_by("nombre_plato")
+    )
+
 def obtener_extras_platos(usuario):
     guarniciones = (
         Plato.objects
@@ -3498,6 +3508,7 @@ def FiltroDePlatos(request):
 
 
     guarniciones, salsas = obtener_extras_platos(usuario)
+    postres = obtener_postres(usuario)
 
     platos_agrupados_lo_que_tengo = (
         agrupar_platos_para_lo_que_tengo(platos_listado)
@@ -3528,6 +3539,7 @@ def FiltroDePlatos(request):
                 'dia_activo_obj': dia_activo_obj,
                 "guarniciones": guarniciones,
                 "salsas": salsas,
+                "postres": postres,
                 "platos_dia_x_dia": platos_dia_x_dia,
                 "lugares": lugares,
                 "habitos_lookup": habitos_lookup,
