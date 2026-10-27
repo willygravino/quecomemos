@@ -237,7 +237,9 @@ def api_ingredientes(request):
             from django.db.models import Q
             cond = Q()
             for t in terms:
-                cond |= Q(nombre__icontains=t)
+                _patron = _patron_busqueda(t)
+                if _patron:
+                    cond |= Q(nombre__unaccent__iregex=_patron)
 
             qs = qs.filter(cond)
 
@@ -2313,7 +2315,7 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
 
 
 def _patron_busqueda(texto):
-    """
+    r"""
     Normaliza el texto (quita tildes) y arma un patron regex
     con word boundary al inicio (\m) para buscar como palabra.
 
