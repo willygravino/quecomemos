@@ -179,6 +179,38 @@ class Insumo(models.Model):
         return self.nombre
 
 
+# Subtipo de carta para platos Principales.
+# Se usa para agrupar el listado como una carta de restaurante.
+SUBTIPO_CARTA_CHOICES = [
+    ("", "— Sin clasificar —"),
+    ("carnes_rojas", "Carnes rojas"),
+    ("aves", "Aves"),
+    ("cerdo", "Cerdo"),
+    ("pescados", "Pescados y mariscos"),
+    ("embutidos", "Embutidos"),
+    ("pastas", "Pastas"),
+    ("masas", "Masas y tartas"),
+    ("guisos", "Guisos y minutas"),
+    ("vegetarianos", "Vegetarianos"),
+    ("otros", "Otros"),
+]
+
+# Orden de aparición en la carta
+SUBTIPO_CARTA_ORDEN = [
+    "carnes_rojas",
+    "aves",
+    "cerdo",
+    "pescados",
+    "embutidos",
+    "pastas",
+    "masas",
+    "guisos",
+    "vegetarianos",
+    "otros",
+    "",
+]
+
+
 class Plato(models.Model):
     nombre_plato = models.CharField(max_length=100)
 
@@ -186,6 +218,14 @@ class Plato(models.Model):
         max_length=50,
         blank=True,
         help_text="Nombre del grupo de variedades (ej: Empanadas)"
+    )
+
+    subtipo_carta = models.CharField(
+        max_length=30,
+        blank=True,
+        default="",
+        choices=SUBTIPO_CARTA_CHOICES,
+        help_text="Solo para platos Principales. Agrupa el listado como carta de restaurante."
     )
 
     receta = models.TextField(blank=True)

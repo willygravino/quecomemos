@@ -481,6 +481,19 @@
                       {{ form.categoria|add_class:"form-select" }}
                   </div>
 
+                  <div class="mb-3">
+                      <label for="{{ form.subtipo_carta.id_for_label }}" class="form-label">
+                          Subtipo de carta
+                          <small class="text-muted fw-normal">(solo para platos principales)</small>
+                      </label>
+                      {{ form.subtipo_carta|add_class:"form-select" }}
+                      {% if form.subtipo_carta.errors %}
+                          <div class="invalid-feedback d-block">
+                              {% for error in form.subtipo_carta.errors %}{{ error }}{% endfor %}
+                          </div>
+                      {% endif %}
+                  </div>
+
 
 
 
