@@ -539,26 +539,13 @@ Cada estado debe verse bien en desktop y mobile.
   { echo "=== A ==="; grep -rn "algo" dir/; echo "=== B ==="; sed -n 'X,Yp' file; } > diagnostico.txt
 
 
-### 28.2 `--no-pager` obligatorio en comandos git
-- Todo comando `git` debe llevar `--no-pager` (`log`, `diff`, `show`, `status`).
-- **Razón**: sin `--no-pager`, la terminal abre `less` y hay que apretar `q`, rompiendo el flujo.
+### 28.6 Cierre: un solo bloque para todo el paso
+- Si un paso incluye **script + verificación + commit + push** → va todo en **un bloque**.
+- Excepción: si requiere **decisión del dueño entre medio**, se parte en 2 bloques.
 
-### 28.3 Bump del `?v=` también para CSS
-- Cada vez que se modifica un `.css` propio, **bumpear el `?v=`** en el template que lo carga.
-- Buscar con: `grep -rn "\.css' %}" AdminVideos/templates/ | grep -v backup`
-- Misma lógica que §7 para JS.
+### 28.7 Regla general
+> El dueño copia, pega, ejecuta. **Minimizar la fricción** es la regla de oro.
 
-### 28.4 Código extenso: archivos `.sh` o `.py` (no heredoc)
-- **Nunca** pasar más de ~20 líneas de Python/bash/markdown directo a la terminal.
-- Los heredocs con `<<'PY'` o `<<EOF` se rompen con backticks, `<div>`, markdown o bloques de código. **Es el problema más recurrente.**
-- **En cambio**: escribir el script en un archivo (`.sh` o `.py`) en VS Code y ejecutarlo con `bash script.sh` o `python3 script.py`.
-- **Excepción**: cambios chicos de Python (1-2 anchors, sin backticks), heredoc con `<<'PY'` es aceptable.
-
-### 28.5 Diagnósticos: archivos `.txt` en vez de pegar output
-- Dar **un solo comando** que redirija el output a un `.txt`:
-  ```bash
-  { echo "=== A ==="; grep -rn "algo" dir/; echo "=== B ==="; sed -n 'X,Yp' file; } > diagnostico.txt
-  
 
 ### 28.8 Regex peligroso en CSS (lección 2026-10-26)
 
@@ -566,3 +553,53 @@ Cada estado debe verse bien en desktop y mobile.
 - **Síntoma**: `git --no-pager diff --stat` muestra "~2900 líneas borradas" en `mi-css.css`. La página se rompe con layout caótico (inputs superpuestos, colores mal, todo desalineado).
 - **Regla**: cuando se modifica un `.css` grande, **append al final** (seguro) o **reemplazo por bloque exacto** con `s.count(anchor) == 1`. **Nunca** regex con wildcards amplios.
 - **Rollback inmediato**: `git checkout HEAD -- <archivo>`. Vuelve al estado del último commit sin perder cambios ya commiteados.
+
+
+## 29. Carta de restaurante (subtipo_carta + agrupación)
+
+### Motivación
+El listado de platos estaba mezclado, ordenado por historial de programación (bueno para "¿qué cocino?", malo para "leer una carta"). El dueño pidió un sistema que agrupe los platos como una carta real.
+
+### Modelo (migración 0104)
+- **Campo nuevo** `Plato.subtipo_carta` (CharField, choices, blank, default="").
+- **Choices** (`SUBTIPO_CARTA_CHOICES` en `models.py`): `carnes_rojas`, `aves`, `cerdo`, `pescados`, `embutidos`, `pastas`, `masas`, `guisos`, `vegetarianos`, `otros`, `""`.
+- **Orden de aparición** (`SUBTIPO_CARTA_ORDEN` en `models.py`): lista con el orden de la carta.
+- **Solo aplica a "Principal"**. Otras tabs siguen sin subtipo.
+
+### Form (crear/editar plato)
+- `PlatoForm.fields` incluye `subtipo_carta`.
+- `<select>` visible en la sección "Clasificación" del form, debajo de "Categoría".
+- Guía visual: "(solo para platos principales)".
+
+### Orden en `filtrar_platos`
+- **Tab Principal**: `order_by` por `subtipo_orden` (Case/When con `SUBTIPO_CARTA_ORDEN`) + `nombre_plato` (alfabético).
+- **Otras tabs**: order_by por historial de programación (sin cambios).
+
+### Agrupación (`agrupar_platos_para_carta`)
+- Función en `views.py` que devuelve `[{codigo, titulo, platos}, ...]` respetando el orden de la carta.
+- Platos sin subtipo: al final en un grupo "Sin clasificar".
+- Se calcula en `FiltroDePlatos` y `ajax_listado_platos`, se pasa como `platos_agrupados_carta`.
+
+### Template (`_listado_platos.html`)
+- Nuevo bloque `{% elif platos_agrupados_carta %}`:
+  - Header: `<div class="plato-grupo-header">` con nombre + contador.
+  - Iteración de platos del grupo (reusa `_plato_row_gmail.html`).
+
+### CSS
+- `.plato-grupo-header`: borde izquierdo violeta, fondo `--bs-tertiary-bg`, uppercase + letter-spacing.
+- `.plato-grupo-count`: pill con cantidad de platos.
+- Dark mode: fondo violeta suave, borde primario.
+- Estilos al final de `mi-css.css` (regla §28.8).
+
+### Clasificación masiva inicial
+- Script one-shot aplicó subtipo a los 67 principales por palabras clave del nombre.
+- Resultado: 69/69 principales clasificados.
+- Para platos nuevos: usar el `<select>` en el form.
+
+### Deudas futuras (no urgentes)
+- **Clasificaciones imperfectas**: "Mondongo" → guisos, "Torre de panqueques" duplicado.
+- **Aplicar subtipo a Guarniciones y Postres**. Hoy solo Principal.
+- **Color por subtipo** en el header.
+- **Colapsar/expandir grupos** con click.
+- **Bulk edit**: reasignar subtipo a varios platos a la vez.
+
