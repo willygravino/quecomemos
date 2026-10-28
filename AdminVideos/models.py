@@ -183,6 +183,7 @@ class Insumo(models.Model):
 # Se usa para agrupar el listado como una carta de restaurante.
 SUBTIPO_CARTA_CHOICES = [
     ("", "— Sin clasificar —"),
+    # --- Platos principales ---
     ("carnes_rojas", "Carnes rojas"),
     ("aves", "Aves"),
     ("cerdo", "Cerdo"),
@@ -191,8 +192,13 @@ SUBTIPO_CARTA_CHOICES = [
     ("pastas", "Pastas"),
     ("masas", "Masas y tartas"),
     ("guisos", "Guisos y minutas"),
+    ("ensaladas", "Ensaladas"),
     ("vegetarianos", "Vegetarianos"),
     ("otros", "Otros"),
+    # --- Postres ---
+    ("tortas_budines", "Tortas y budines"),
+    ("postres", "Postres"),
+    ("facturas_masas_dulces", "Facturas y masas dulces"),
 ]
 
 # Orden de aparición en la carta
@@ -205,8 +211,16 @@ SUBTIPO_CARTA_ORDEN = [
     "pastas",
     "masas",
     "guisos",
+    "ensaladas",
     "vegetarianos",
     "otros",
+    "",
+]
+
+SUBTIPO_POSTRE_ORDEN = [
+    "tortas_budines",
+    "postres",
+    "facturas_masas_dulces",
     "",
 ]
 

@@ -9,7 +9,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
-from AdminVideos.models import ElementoCompartido, Amistad, ProfilePlatoCompra, HabitoSemanal, Ingrediente, IngredienteEnPlato, Insumo, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente, LoQueTengoPalabra, SUBTIPO_CARTA_CHOICES, SUBTIPO_CARTA_ORDEN
+from AdminVideos.models import ElementoCompartido, Amistad, ProfilePlatoCompra, HabitoSemanal, Ingrediente, IngredienteEnPlato, Insumo, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente, LoQueTengoPalabra, SUBTIPO_CARTA_CHOICES, SUBTIPO_CARTA_ORDEN, SUBTIPO_POSTRE_ORDEN
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string   # ✅ ← ESTA ES LA CLAVE
 from django.http import Http404, HttpRequest, HttpResponseNotAllowed, JsonResponse
@@ -2456,10 +2456,11 @@ def filtrar_platos(
     # Orden condicional:
     # - Principal: por subtipo_carta (orden carta) + nombre alfabetico
     # - Otras tabs: por historial de programacion (comportamiento actual)
-    if tipo_parametro == "Principal":
+    if tipo_parametro in ("Principal", "Postre"):
+        _orden_activo = SUBTIPO_POSTRE_ORDEN if tipo_parametro == "Postre" else SUBTIPO_CARTA_ORDEN
         when_clauses = [
             When(subtipo_carta=codigo, then=Value(orden))
-            for orden, codigo in enumerate(SUBTIPO_CARTA_ORDEN)
+            for orden, codigo in enumerate(_orden_activo)
         ]
         platos_qs = platos_qs.annotate(
             subtipo_orden=Case(
@@ -3346,9 +3347,11 @@ def obtener_postres(usuario):
     )
 
 
-def agrupar_platos_para_carta(platos):
-    """Agrupa platos Principal por subtipo_carta respetando el orden de la carta."""
+def agrupar_platos_para_carta(platos, orden=None):
+    """Agrupa platos por subtipo_carta respetando el orden de la carta."""
     titulos = dict(SUBTIPO_CARTA_CHOICES)
+    if orden is None:
+        orden = SUBTIPO_CARTA_ORDEN
     grupos = {}
     sin_clasificar = []
     for plato in platos:
@@ -3358,7 +3361,7 @@ def agrupar_platos_para_carta(platos):
         else:
             grupos.setdefault(codigo, []).append(plato)
     resultado = []
-    for codigo in SUBTIPO_CARTA_ORDEN:
+    for codigo in orden:
         if codigo and codigo in grupos:
             resultado.append({
                 "codigo": codigo,
@@ -3566,11 +3569,12 @@ def FiltroDePlatos(request):
         else None
     )
 
-    platos_agrupados_carta = (
-        agrupar_platos_para_carta(platos_listado)
-        if tipopag == "Principal"
-        else None
-    )
+    if tipopag == "Principal":
+        platos_agrupados_carta = agrupar_platos_para_carta(platos_listado, orden=SUBTIPO_CARTA_ORDEN)
+    elif tipopag == "Postre":
+        platos_agrupados_carta = agrupar_platos_para_carta(platos_listado, orden=SUBTIPO_POSTRE_ORDEN)
+    else:
+        platos_agrupados_carta = None
 
     return_to_url = request.get_full_path()
 
@@ -3661,11 +3665,12 @@ def ajax_listado_platos(request):
         else None
     )
 
-    platos_agrupados_carta = (
-        agrupar_platos_para_carta(platos_listado)
-        if tipopag == "Principal"
-        else None
-    )
+    if tipopag == "Principal":
+        platos_agrupados_carta = agrupar_platos_para_carta(platos_listado, orden=SUBTIPO_CARTA_ORDEN)
+    elif tipopag == "Postre":
+        platos_agrupados_carta = agrupar_platos_para_carta(platos_listado, orden=SUBTIPO_POSTRE_ORDEN)
+    else:
+        platos_agrupados_carta = None
 
     return_to_url = get_safe_return_to(
         request,
