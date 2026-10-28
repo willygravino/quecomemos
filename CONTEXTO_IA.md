@@ -487,6 +487,58 @@ Cada estado debe verse bien en desktop y mobile.
 - **Verificar** si al borrar lugares desde el listado falla. Si sí: renombrar IDs a `bulk-delete-form-platos` y `bulk-delete-form-lugares`, actualizar `data-confirm-submit-form` en `initListadoPlatos` y en `_confirm_action_modal.html`.
 
 
+
+### 27.6 Postres faltaba en el contexto del modal `#asignarPlatoModal`
+**RESUELTO el 2026-10-27**. El botón "+ Postre" abría el modal con el `<select id="tplPostre">` vacío.
+- **Causa**: `FiltroDePlatos` pasaba `salsas` y `guarniciones` al contexto, pero no `postres`.
+- **Fix**: nueva función `obtener_postres(usuario)` + cálculo en `FiltroDePlatos` + `"postres": postres` en el dict del contexto.
+- **Deuda futura**: el modal vive en `base.html` (todas las vistas) pero solo `FiltroDePlatos` pasa `postres`/`salsas`/`guarniciones`. En otras vistas los `<select>` quedan vacíos. Fix arquitectónico: mover a `context_processor`.
+
+### 27.7 Botones "+ Salsa", "+ Guarnición", "+ Postre" en menú programado
+**IMPLEMENTADO el 2026-10-27**. En cada plato Principal del menú programado (por comida), hay 3 botones que abren `#asignarPlatoModal` con el plato precargado + la fila del extra ya agregada.
+- **`_menu_programado_item.html`**: botones con `data-extra-tipo`, `data-extra-plato-id`, `data-extra-plato-nombre`, `data-extra-dia`, `data-extra-comida` (sin `id=` para evitar duplicados en almuerzo/cena).
+- **`_menu_programado_comida.html`**: pasa `dia=dia` al include.
+- **`menu_programado.js`**: handler `.js-asignar-extra` que setea hidden inputs del modal, hace `await setPlatoInfo(...)`, `addExtraRow(tipo)` y abre el modal.
+- **Reutiliza**: el modal, `addExtraRow`, y el view `AsignarPlato` (que ya procesa `extra_tipo`/`extra_id`).
+- **Sin migración**. Bump de `menu_programado.js` en el template que lo carga.
+
+### 27.8 Muteo de comidas vacías en menú programado
+**IMPLEMENTADO el 2026-10-27**. Comidas sin platos se ven atenuadas.
+- **`_menu_programado_comida.html`**: wrapper `.menu-programado-comida-wrapper` con clase `.menu-programado-comida-vacia` si `not platos`.
+- **`mi-css.css`**: `.menu-programado-comida-wrapper.menu-programado-comida-vacia` → `opacity: 0.45`, `h6` gris con `--bs-secondary-bg`. Hover sube a `0.7`.
+- **JS intacto**: `data-menu-dia`/`data-menu-comida` siguen en el `<div>` interno.
+- Solo apaga, no oculta.
+
+## 28. Reglas de comunicación y trabajo con el dueño
+
+> Reglas de formato y comunicación acordadas por el dueño. **Aplican siempre, sin excepción.**
+
+### 28.1 Terminal: un solo bloque por paso
+- **Todos los comandos que se pidan van en UN SOLO bloque de código**, no en varios mensajes.
+- Si son pasos múltiples, van separados con `echo "=== Paso X ==="` dentro del mismo bloque.
+- El dueño copia una vez y ejecuta.
+
+### 28.2 `--no-pager` obligatorio en comandos git
+- Todo comando `git` debe llevar `--no-pager` (`log`, `diff`, `show`, `status`).
+- **Razón**: sin `--no-pager`, la terminal abre `less` y hay que apretar `q`, rompiendo el flujo.
+
+### 28.3 Bump del `?v=` también para CSS
+- Cada vez que se modifica un `.css` propio, **bumpear el `?v=`** en el template que lo carga.
+- Buscar con: `grep -rn "\.css' %}" AdminVideos/templates/ | grep -v backup`
+- Misma lógica que §7 para JS.
+
+### 28.4 Código extenso: archivos `.sh` o `.py` (no heredoc)
+- **Nunca** pasar más de ~20 líneas de Python/bash/markdown directo a la terminal.
+- Los heredocs con `<<'PY'` o `<<EOF` se rompen con backticks, `<div>`, markdown o bloques de código. **Es el problema más recurrente.**
+- **En cambio**: escribir el script en un archivo (`.sh` o `.py`) en VS Code y ejecutarlo con `bash script.sh` o `python3 script.py`.
+- **Excepción**: cambios chicos de Python (1-2 anchors, sin backticks), heredoc con `<<'PY'` es aceptable.
+
+### 28.5 Diagnósticos: archivos `.txt` en vez de pegar output
+- Dar **un solo comando** que redirija el output a un `.txt`:
+  ```bash
+  { echo "=== A ==="; grep -rn "algo" dir/; echo "=== B ==="; sed -n 'X,Yp' file; } > diagnostico.txt
+
+
 ### 28.8 Regex peligroso en CSS (lección 2026-10-26)
 
 - **Nunca usar `[\s\S]*?` en regex para "encontrar bloques" de CSS.** Un regex como `/* =+[\s\S]*?filtro-keyword-clear...` puede matchear desde el **PRIMER** `/* ===` del archivo hasta el bloque buscado, borrando **TODO el CSS intermedio**.
