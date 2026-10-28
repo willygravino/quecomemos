@@ -38,13 +38,29 @@
   <!-- Extras solo si NO es lugar y es Principal -->
   {% if not plato.es_lugar and 'Principal' in plato.tipo %}
     <div class="{{ extras_class }}">
-      <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
-              id="agregar-salsa-{{ plato.objeto_id }}">
+      <button class="btn btn-link p-0 text-success js-asignar-extra" type="button" style="font-size: 10px;"
+              data-extra-tipo="Salsa"
+              data-extra-plato-id="{{ plato.objeto_id }}"
+              data-extra-plato-nombre="{{ plato.nombre|escape }}"
+              data-extra-dia="{{ dia|date:'Y-m-d' }}"
+              data-extra-comida="{{ comida }}">
         + Salsa
       </button>
-      <button class="btn btn-link p-0 text-success" type="button" style="font-size: 10px;"
-              id="agregar-guarnicion-{{ plato.objeto_id }}">
+      <button class="btn btn-link p-0 text-success js-asignar-extra" type="button" style="font-size: 10px;"
+              data-extra-tipo="Guarnicion"
+              data-extra-plato-id="{{ plato.objeto_id }}"
+              data-extra-plato-nombre="{{ plato.nombre|escape }}"
+              data-extra-dia="{{ dia|date:'Y-m-d' }}"
+              data-extra-comida="{{ comida }}">
         + Guarnición
+      </button>
+      <button class="btn btn-link p-0 text-success js-asignar-extra" type="button" style="font-size: 10px;"
+              data-extra-tipo="Postre"
+              data-extra-plato-id="{{ plato.objeto_id }}"
+              data-extra-plato-nombre="{{ plato.nombre|escape }}"
+              data-extra-dia="{{ dia|date:'Y-m-d' }}"
+              data-extra-comida="{{ comida }}">
+        + Postre
       </button>
     </div>
   {% endif %}

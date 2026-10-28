@@ -2470,10 +2470,9 @@ def filtrar_platos(
             )
         ).order_by("subtipo_orden", "nombre_plato")
     else:
-        platos_qs = platos_qs.order_by(
-            OrderBy(F("ultima_programacion"), descending=False, nulls_first=True),
-            "-id",
-        )
+        # Tabs sin agrupación por subtipo: alfabético simple.
+        # (Antes: por historial de programación — se cambió a pedido del dueño.)
+        platos_qs = platos_qs.order_by("nombre_plato")
 
     platos_qs = platos_qs.prefetch_related(
         Prefetch("variedades_hijas", queryset=variedades_qs)

@@ -272,4 +272,48 @@
       link.classList.remove("pe-none");
     });
   }, true);
+
+  /* ============================================================
+     ASIGNAR EXTRA DESDE EL MENÚ (+ Salsa / + Guarnición)
+     Abre el modal existente con el plato precargado y la fila
+     del extra ya agregada.
+     ============================================================ */
+  document.addEventListener("click", async function (event) {
+    const btn = event.target.closest(".js-asignar-extra");
+    if (!btn) return;
+    event.preventDefault();
+
+    const tipoExtra = btn.dataset.extraTipo || "";
+    const platoId = btn.dataset.extraPlatoId || "";
+    const platoNombre = btn.dataset.extraPlatoNombre || "";
+    const dia = btn.dataset.extraDia || "";
+    const comida = btn.dataset.extraComida || "";
+
+    if (!tipoExtra || !platoId) return;
+
+    const modalEl = document.getElementById("asignarPlatoModal");
+    if (!modalEl) return;
+
+    // Setear día y comida en el modal
+    const diaInput = document.getElementById("diaSeleccionado");
+    if (diaInput) diaInput.value = dia;
+
+    const comidaSel = document.getElementById("comidaSeleccionada");
+    if (comidaSel) comidaSel.value = comida;
+
+    // Preparar el modal (carga tipos, muestra bloqueExtras si es Principal)
+    if (typeof window.setPlatoInfo === "function") {
+      await window.setPlatoInfo(platoId, "plato", platoNombre);
+    }
+
+    // Agregar la fila del extra clickeado (Salsa o Guarnicion)
+    if (typeof window.addExtraRow === "function") {
+      window.addExtraRow(tipoExtra);
+    }
+
+    // Abrir el modal
+    if (window.bootstrap && bootstrap.Modal) {
+      bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    }
+  }, true);
 })();
