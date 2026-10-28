@@ -539,6 +539,27 @@ Cada estado debe verse bien en desktop y mobile.
   { echo "=== A ==="; grep -rn "algo" dir/; echo "=== B ==="; sed -n 'X,Yp' file; } > diagnostico.txt
 
 
+### 28.2 `--no-pager` obligatorio en comandos git
+- Todo comando `git` debe llevar `--no-pager` (`log`, `diff`, `show`, `status`).
+- **Razón**: sin `--no-pager`, la terminal abre `less` y hay que apretar `q`, rompiendo el flujo.
+
+### 28.3 Bump del `?v=` también para CSS
+- Cada vez que se modifica un `.css` propio, **bumpear el `?v=`** en el template que lo carga.
+- Buscar con: `grep -rn "\.css' %}" AdminVideos/templates/ | grep -v backup`
+- Misma lógica que §7 para JS.
+
+### 28.4 Código extenso: archivos `.sh` o `.py` (no heredoc)
+- **Nunca** pasar más de ~20 líneas de Python/bash/markdown directo a la terminal.
+- Los heredocs con `<<'PY'` o `<<EOF` se rompen con backticks, `<div>`, markdown o bloques de código. **Es el problema más recurrente.**
+- **En cambio**: escribir el script en un archivo (`.sh` o `.py`) en VS Code y ejecutarlo con `bash script.sh` o `python3 script.py`.
+- **Excepción**: cambios chicos de Python (1-2 anchors, sin backticks), heredoc con `<<'PY'` es aceptable.
+
+### 28.5 Diagnósticos: archivos `.txt` en vez de pegar output
+- Dar **un solo comando** que redirija el output a un `.txt`:
+  ```bash
+  { echo "=== A ==="; grep -rn "algo" dir/; echo "=== B ==="; sed -n 'X,Yp' file; } > diagnostico.txt
+  
+
 ### 28.8 Regex peligroso en CSS (lección 2026-10-26)
 
 - **Nunca usar `[\s\S]*?` en regex para "encontrar bloques" de CSS.** Un regex como `/* =+[\s\S]*?filtro-keyword-clear...` puede matchear desde el **PRIMER** `/* ===` del archivo hasta el bloque buscado, borrando **TODO el CSS intermedio**.
