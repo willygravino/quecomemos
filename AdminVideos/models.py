@@ -228,12 +228,6 @@ SUBTIPO_POSTRE_ORDEN = [
 class Plato(models.Model):
     nombre_plato = models.CharField(max_length=100)
 
-    nombre_grupo = models.CharField(
-        max_length=50,
-        blank=True,
-        help_text="Nombre del grupo de variedades (ej: Empanadas)"
-    )
-
     subtipo_carta = models.CharField(
         max_length=30,
         blank=True,
@@ -363,26 +357,6 @@ class Plato(models.Model):
 
     image = models.ImageField("Subí una imagen que identifique al plato (o un fotograma del mismo)", upload_to="videos/", null=True, blank=True)
     # fecha_video= models.DateTimeField("Fecha de captura del video:")
-
-    # variedades = models.JSONField(null=True, blank=True)
-
-    plato_padre = models.ForeignKey(
-    "self",
-    null=True,
-    blank=True,
-    related_name="variedades_hijas",  # 👈 cambia esto
-    on_delete=models.SET_NULL,
-)
-
-    @property
-    def nombre_para_front(self):
-        if self.variedades_hijas.exists():
-            return self.nombre_grupo or f"{self.nombre_plato} (grupo)"
-        return self.nombre_plato
-
-
-    def es_variedad(self):
-        return self.plato_padre_id is not None
 
     # @property
     # def image_url(self):

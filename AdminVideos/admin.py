@@ -54,19 +54,14 @@ class IngredienteEnPlatoInline(admin.TabularInline):
 
 @admin.register(Plato)
 class PlatoAdmin(admin.ModelAdmin):
-    list_display = ("id", "nombre_plato", "propietario", "plato_padre", "cant_ingredientes", "cant_variedades")
+    list_display = ("id", "nombre_plato", "propietario", "cant_ingredientes")
     list_filter = ("propietario", "categoria", "estacionalidad")
-    search_fields = ("nombre_plato", "nombre_grupo", "propietario__username")
-    autocomplete_fields = ("plato_padre",)
+    search_fields = ("nombre_plato", "propietario__username")
     inlines = [IngredienteEnPlatoInline]
 
     def cant_ingredientes(self, obj):
         return obj.ingredientes_en_plato.count()
     cant_ingredientes.short_description = "Ingredientes"
-
-    def cant_variedades(self, obj):
-        return obj.variedades_hijas.count()
-    cant_variedades.short_description = "Variedades"
 
 
 # =====================================================

@@ -80,9 +80,6 @@ def eliminar_platos_masivo(request):
             if plato.id_original and plato.id_original in perfil.sugeridos_importados:
                 perfil.sugeridos_importados.remove(plato.id_original)
 
-            # Si es plato padre: borrar variedades hijas
-            Plato.objects.filter(plato_padre=plato, propietario=request.user).delete()
-
             # Borrar plato
             plato.delete()
 
@@ -1410,8 +1407,6 @@ def eliminar_plato(request, plato_id):
 
         perfil.save()
 
-        Plato.objects.filter(plato_padre=plato, propietario=request.user).delete()
-
         plato.delete()
 
     return redirect(return_to)
@@ -1509,9 +1504,6 @@ def titulo_formulario_plato(tipopag, accion="Agregar"):
 
     if accion == "Editar":
         return "Editar plato"
-
-    if accion == "Agregar variedad":
-        return "Agregar variedad"
 
     return f"{accion} plato"
 
@@ -1809,13 +1801,6 @@ class PlatoUpdate(LoginRequiredMixin, UpdateView):
         # 3) si no hay origen, NO inventamos nada
         context["tipopag"] = tipopag  # puede ser ""
 
-        # ✅ Variedades (hijos) en orden fijo
-        context["variedades"] = (
-            Plato.objects
-            .filter(plato_padre=self.object)
-            .order_by("id")
-        )
-
         return context
 
 
@@ -1907,12 +1892,6 @@ class PlatoDetail(DetailView):
         else:
             context["tipos_lista"] = []
 
-        # Variedades hijas
-        context["variedades"] = plato.variedades_hijas.all().order_by("nombre_plato")
-
-        # Padre, si este plato es una variedad
-        context["plato_padre"] = plato.plato_padre
-
         return context
 
     def get(self, request, *args, **kwargs):
@@ -1933,338 +1912,6 @@ class PlatoDetail(DetailView):
 
 
 
-class PlatoVariedadCreate(PlatoCreate):
-
-#     Crea un Plato hijo asociado a un Plato padre.
-#     Reusa template, form, formset y AJAX de PlatoCreate.
-#   else:
-#     form.fields['tipos'].choices = []
-#     form.fields['tipos'].initial = []
-#
-
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        # ✅ Para variedades, no queremos invalidar los checkboxes por falta de tipopag
-        form.fields["tipos"].choices = Plato.TIPOS_CHOICES
-        return form
-
-    def get_initial(self):
-        initial = super().get_initial()
-
-        p = self.padre
-
-        # Sugerencia de nombre
-        initial["nombre_plato"] = f"{p.nombre_plato} (variedad)"
-
-        # Copiar campos “normales”
-        initial["receta"] = p.receta
-        initial["partes_receta_json"] = json.dumps(p.partes_receta or [], ensure_ascii=False)
-        initial["porciones"] = p.porciones
-        initial["medios"] = p.medios
-        initial["elaboracion"] = p.elaboracion
-        initial["coccion"] = p.coccion
-        initial["categoria"] = p.categoria
-        initial["estacionalidad"] = p.estacionalidad
-        initial["enlace"] = p.enlace
-
-        # Tipos: tu form usa MultipleChoiceField; el padre guarda CSV
-        initial["tipos"] = [t.strip() for t in (p.tipos or "").split(",") if t.strip()]
-
-        return initial
-
-    def dispatch(self, request, *args, **kwargs):
-
-
-
-        self.padre = get_object_or_404(Plato, pk=kwargs["padre_id"])
-
-        # regla: NO variedades de variedades
-        if self.padre.plato_padre_id is not None:
-            raise PermissionDenied("No se pueden crear variedades de una variedad.")
-
-        # seguridad: mismo propietario
-        if self.padre.propietario_id != request.user.id:
-            raise PermissionDenied()
-
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_template_names(self):
-        """
-        Mantener el mismo look & feel que el padre.
-        Si viene tipopag por GET lo respeta; si no, intenta inferir desde el padre.
-        """
-        tipopag = self.request.GET.get("tipopag")
-
-        if not tipopag:
-            # tu campo 'tipos' es CSV; tomamos el primero como "tipopag" razonable
-            raw = (self.padre.tipos or "").split(",")[0].strip()
-            tipopag = raw or "Principal"
-
-        # hack simple: reutiliza tu mapping interno de PlatoCreate.get_template_names
-        self.request.GET._mutable = True
-        self.request.GET["tipopag"] = tipopag
-        self.request.GET._mutable = False
-
-        return super().get_template_names()
-
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        context["items"] = [k for (k, _) in Plato.TIPOS_CHOICES]
-
-        tipopag = self.request.GET.get("tipopag")
-        if not tipopag:
-            raw = (self.padre.tipos or "").split(",")[0].strip()
-            tipopag = raw or "Principal"
-        context["tipopag"] = tipopag
-
-        context["plato_padre_obj"] = self.padre
-        context["titulo_formulario"] = f"Agregar variedad de {self.padre.nombre_plato}"
-
-        if self.request.method == "POST":
-            context["ingrediente_formset"] = IngredienteEnPlatoFormSet(self.request.POST)
-            return context
-
-        # GET: clonar ingredientes del padre
-        inicial = []
-        for rel in self.padre.ingredientes_en_plato.select_related("ingrediente").all():
-            inicial.append({
-                "ingrediente": rel.ingrediente_id,
-                "nombre_ingrediente": rel.ingrediente.nombre if rel.ingrediente else "",
-                "cantidad": rel.cantidad,
-                "unidad": rel.unidad,
-                "parte_clave": rel.parte_clave,
-            })
-
-        # 👇 CLAVE: si tu formset es inlineformset, necesita extra >= len(inicial)
-        context["ingrediente_formset"] = IngredienteEnPlatoFormSet(
-            initial=inicial,
-            queryset=self.padre.ingredientes_en_plato.none(),  # opcional, evita traer del padre
-        )
-        context["ingrediente_formset"].extra = len(inicial)
-
-        return context
-
-
-
-    def form_valid(self, form):
-        context = self.get_context_data()
-        ingrediente_formset = context["ingrediente_formset"]
-
-
-        # --- Validación del formset ---
-        if not ingrediente_formset.is_valid():
-            if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
-                html = render_to_string("AdminVideos/plato_form_inner.html", context, request=self.request)
-                return JsonResponse({"success": False, "html": html})
-            return self.render_to_response(self.get_context_data(form=form))
-
-        # --- Manejo de imagen (idéntico a tu create) ---
-        uploaded = self.request.FILES.get("image")
-        if not uploaded:
-            form.instance.image = None
-        else:
-            if not getattr(uploaded, "name", None):
-                uploaded.name = "upload.jpg"
-
-        with transaction.atomic():
-            plato = form.save(commit=False)
-            plato.propietario = self.request.user
-
-            # ✅ CLAVE: asociar variedad al padre
-            plato.plato_padre = self.padre
-
-            # ✅ (1) RESTAURAR: reconstruir string "ingredientes" ANTES del save
-            lista_ingredientes = []
-            for ing_form in ingrediente_formset:
-                if ing_form.cleaned_data and not ing_form.cleaned_data.get("DELETE", False):
-                    nombre = ing_form.cleaned_data.get("nombre_ingrediente")
-                    texto = (nombre or "").strip()
-                    if texto:
-                        lista_ingredientes.append(texto)
-            plato.ingredientes = ", ".join(lista_ingredientes)
-
-            plato.save()
-            form.save_m2m()
-
-            ingrediente_formset.instance = plato
-
-            # Si no vinieron ingredientes en el POST, clonarlos del padre
-            hay_al_menos_uno = False
-            for f in ingrediente_formset.forms:
-                if f.cleaned_data and not f.cleaned_data.get("DELETE", False):
-                    nombre = (f.cleaned_data.get("nombre_ingrediente") or "").strip()
-                    if nombre:
-                        hay_al_menos_uno = True
-                        break
-
-            if not hay_al_menos_uno:
-                from .models import IngredienteEnPlato
-
-                IngredienteEnPlato.objects.bulk_create([
-                    IngredienteEnPlato(
-                        plato=plato,
-                        ingrediente=rel.ingrediente,
-                        cantidad=rel.cantidad,
-                        unidad=rel.unidad,
-                        parte_clave=rel.parte_clave,
-                    )
-                    for rel in self.padre.ingredientes_en_plato.select_related("ingrediente").all()
-                    if rel.ingrediente_id
-                ])
-
-                nombres = [
-                    rel.ingrediente.nombre
-                    for rel in self.padre.ingredientes_en_plato.select_related("ingrediente").all()
-                    if rel.ingrediente_id and rel.ingrediente and rel.ingrediente.nombre
-                ]
-                plato.ingredientes = ", ".join(nombres)
-                plato.save(update_fields=["ingredientes"])
-            else:
-                ingrediente_formset.save()
-
-            # ✅ (2) NO volver a guardar si ya se guardó en el else
-            # (si no hay_al_menos_uno == False, usamos bulk_create arriba; si True, ya hicimos save)
-            # ingrediente_formset.save()  <- eliminado
-
-        # --- destino: volver al padre, preservando return_to + toast ---
-        return_to = (
-            self.request.POST.get("return_to")
-            or self.request.GET.get("return_to")
-            or ""
-        )
-
-        tipopag = (self.request.GET.get("tipopag") or self.request.POST.get("tipopag") or "").strip()
-
-        parent_url = reverse("videos-update", kwargs={"pk": self.padre.id})
-
-        if return_to:
-            parent_url = _add_qs(parent_url, return_to=return_to)
-
-        if tipopag:
-            parent_url = _add_qs(parent_url, tipopag=tipopag)
-
-        parent_url = _add_qs(parent_url, msg="Variedad OK.", level="success")
-
-        # AJAX (modal)
-        if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return JsonResponse({
-                "success": True,
-                "redirect_url": parent_url,
-                "nombre": plato.nombre_plato,
-                "id": plato.id,
-            })
-
-        # pantalla completa
-        return redirect(parent_url)
-
-
-    def form_invalid(self, form):
-        # Si es AJAX, devolvemos JSON con el HTML del form + errores
-        if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            context = self.get_context_data(form=form)
-
-            # IMPORTANTE: si el POST venía con formset también, pásalo para que se renderice
-            if "ingrediente_formset" not in context:
-                context["ingrediente_formset"] = IngredienteEnPlatoFormSet(self.request.POST)
-
-            html = render_to_string(
-                "AdminVideos/plato_form_inner.html",
-                context,
-                request=self.request
-            )
-            return JsonResponse({"success": False, "html": html}, status=400)
-
-        # No-AJAX: comportamiento normal
-        return super().form_invalid(form)
-
-class PlatoVariedadUpdate(PlatoUpdate):
-    def dispatch(self, request, *args, **kwargs):
-        self.object = self.get_object()
-
-        if self.object.plato_padre_id is None:
-            raise PermissionDenied("Este plato no es una variedad.")
-
-        if self.object.propietario_id != request.user.id:
-            raise PermissionDenied()
-
-        self.padre = self.object.plato_padre
-
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_success_url(self):
-        # cuando se guarda una VARIEDAD, el "éxito" debe volver al PADRE
-        url = reverse("videos-update", kwargs={"pk": self.padre.id})
-
-        rt = self.request.GET.get("return_to")
-        if rt:
-            url += "?" + urlencode({"return_to": rt})
-
-        return url
-
-    def _parent_url(self):
-        """
-        URL final al padre, preservando return_to y tipopag
-        (mismo espíritu que tu create).
-        """
-        url = reverse("videos-update", kwargs={"pk": self.padre.id})
-
-        rt = (self.request.POST.get("return_to") or self.request.GET.get("return_to") or "").strip()
-        tp = (self.request.POST.get("tipopag") or self.request.GET.get("tipopag") or "").strip()
-
-        params = {}
-        if rt:
-            params["return_to"] = rt
-        if tp:
-            params["tipopag"] = tp
-
-        if params:
-            url += "?" + urlencode(params)
-
-        return url
-
-    def form_valid(self, form):
-        # usa la lógica de guardado del update normal
-        super().form_valid(form)
-
-        parent_url = self._parent_url()
-
-        # ✅ si es AJAX (modal), devolver JSON con redirect_url al PADRE
-        # (NO devolvemos el resp del super(), porque ese suele apuntar a la principal)
-        if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return JsonResponse({"success": True, "redirect_url": parent_url})
-
-        # ✅ pantalla completa: volver al padre
-        return redirect(parent_url)
-
-
-
-class PlatoVariedadDelete(LoginRequiredMixin, DeleteView):
-    model = Plato
-
-    def dispatch(self, request, *args, **kwargs):
-        self.object = self.get_object()
-
-        if self.object.plato_padre_id is None:
-            raise PermissionDenied("Este plato no es una variedad.")
-        if self.object.propietario_id != request.user.id:
-            raise PermissionDenied()
-
-        self.padre = self.object.plato_padre
-        return super().dispatch(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        self.padre = self.object.plato_padre
-        self.object.delete()
-
-        # si lo llamás por AJAX
-        if request.headers.get("x-requested-with") == "XMLHttpRequest":
-            return JsonResponse({"success": True})
-
-        # pantalla completa: volver al padre
-        return redirect(reverse("videos-update", kwargs={"pk": self.padre.id}))
 
 
 class Login(LoginView):
@@ -2358,7 +2005,6 @@ def filtrar_platos(
     if misplatos == "misplatos":
         qs_misplatos = Plato.objects.filter(
             propietario=usuario,
-            plato_padre__isnull=True
         )
         platos_qs = platos_qs | qs_misplatos
 
@@ -2369,7 +2015,6 @@ def filtrar_platos(
             platos_descartados = usuario.profile.sugeridos_descartados or []
             qs_quecomemos = Plato.objects.filter(
                 propietario=usuario_quecomemos,
-                plato_padre__isnull=True
             ).exclude(id__in=platos_descartados)
             platos_qs = platos_qs | qs_quecomemos
 
@@ -2423,22 +2068,6 @@ def filtrar_platos(
         & Q(en_menus__menu__fecha__lte=hoy)
     )
 
-    # queryset ANOTADO para variedades (hijas) del usuario "usuario"
-    variedades_qs = Plato.objects.annotate(
-        programaciones_count=Count(
-            "en_menus__menu__fecha",
-            filter=filtro_programaciones_historicas,
-            distinct=True,
-        ),
-        ultima_programacion=Max(
-            "en_menus__menu__fecha",
-            filter=filtro_programaciones_historicas,
-        ),
-    ).order_by(
-        OrderBy(F("ultima_programacion"), descending=False, nulls_first=True),
-        "-id",
-    )
-
     # Anotaciones comunes
     platos_qs = platos_qs.annotate(
         programaciones_count=Count(
@@ -2450,7 +2079,6 @@ def filtrar_platos(
             "en_menus__menu__fecha",
             filter=filtro_programaciones_historicas,
         ),
-        variedades_count=Count("variedades_hijas", distinct=True),
     )
 
     # Orden condicional:
@@ -2473,10 +2101,6 @@ def filtrar_platos(
         # Tabs sin agrupación por subtipo: alfabético simple.
         # (Antes: por historial de programación — se cambió a pedido del dueño.)
         platos_qs = platos_qs.order_by("nombre_plato")
-
-    platos_qs = platos_qs.prefetch_related(
-        Prefetch("variedades_hijas", queryset=variedades_qs)
-    )
 
 
     return {
@@ -2540,7 +2164,7 @@ def asegurar_menus_desde_habitos(request, usuario, dias_desde_hoy, habitos):
                 if habito.plato_id:
                     plato = habito.plato
 
-                    platos_a_asignar = [plato] + list(plato.variedades_hijas.all())
+                    platos_a_asignar = [plato]
 
                     creados = 0
 
@@ -3282,11 +2906,6 @@ def obtener_resultados_principales(
         p.dias_desde_ultima = (
             hoy - p.ultima_programacion
         ).days if getattr(p, "ultima_programacion", None) else None
-
-        for v in p.variedades_hijas.all():
-            v.dias_desde_ultima = (
-                hoy - v.ultima_programacion
-            ).days if getattr(v, "ultima_programacion", None) else None
 
     platos_carousel = adjuntar_compartidos_enviados_a_platos(platos_carousel, usuario)
     platos_listado = adjuntar_compartidos_enviados_a_platos(platos_listado, usuario)
@@ -4358,7 +3977,6 @@ def copiar_plato_para_usuario(plato_original, usuario):
     """
     nuevo_plato = Plato.objects.create(
         nombre_plato=plato_original.nombre_plato,
-        nombre_grupo=plato_original.nombre_grupo,
         receta=plato_original.receta,
         partes_receta=plato_original.partes_receta,
         ingredientes=plato_original.ingredientes,
@@ -4518,7 +4136,6 @@ def agregar_a_mi_lista(request, plato_id):
     # ✅ Clonar SOLO el plato clickeado y dejarlo independiente
     nuevo_plato = Plato.objects.create(
         nombre_plato=nombre_copia,
-        nombre_grupo="",          # 👈 evita "grupo" suelto
         receta=plato_original.receta,
         partes_receta=plato_original.partes_receta,
         ingredientes="",          # se reconstruye luego
@@ -4534,7 +4151,6 @@ def agregar_a_mi_lista(request, plato_id):
         image=plato_original.image,
         proviene_de=proviene_de_str,
         id_original=plato_original.id,
-        plato_padre=None,         # 👈 clave: si era variedad, ahora queda como “padre”
     )
 
     # Mantener los platos componentes asociados al original.
@@ -4596,19 +4212,7 @@ class AsignarPlato(View):
                 # plato “en juego”
                 plato_base = Plato.objects.get(id=objeto_id)
 
-                # ✅ Si el form manda platos_ids, asignamos solo esos (padre y/o hijas)
-                ids_post = [x for x in request.POST.getlist("platos_ids") if x.isdigit()]
-
-                if ids_post:
-                    allowed_ids = set(
-                        [plato_base.id] +
-                        list(plato_base.variedades_hijas.values_list("id", flat=True))
-                    )
-                    selected_ids = [int(x) for x in ids_post if int(x) in allowed_ids]
-                    platos_a_asignar = list(Plato.objects.filter(id__in=selected_ids))
-                else:
-                    # fallback: padre + todas sus hijas
-                    platos_a_asignar = [plato_base] + list(plato_base.variedades_hijas.all())
+                platos_a_asignar = [plato_base]
 
                 creados = 0
                 for p in platos_a_asignar:
@@ -4727,12 +4331,6 @@ def plato_opciones_asignar(request, pk):
         "id": plato.id,
         "nombre": plato.nombre_plato,
     }]
-
-    for v in plato.variedades_hijas.all():
-        opciones.append({
-            "id": v.id,
-            "nombre": v.nombre_plato,
-        })
 
     return JsonResponse({
         "opciones": opciones,          # lo que ya devolvías
