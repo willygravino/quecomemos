@@ -417,6 +417,21 @@ document.addEventListener("DOMContentLoaded", function () {
     return overlay;
   }
 
+  // Reposicionar overlay al scrollear/resizear (evita que se despegue del contenido)
+  let barridoScrollRaf = null;
+  function reposicionarBarridoEnScroll() {
+    if (barridoScrollRaf) return;
+    barridoScrollRaf = requestAnimationFrame(() => {
+      barridoScrollRaf = null;
+      const overlay = document.getElementById('filtroPlatosBarridoOverlay');
+      if (overlay && overlay.classList.contains('is-active')) {
+        posicionarBarridoCambioFiltro();
+      }
+    });
+  }
+  window.addEventListener('scroll', reposicionarBarridoEnScroll, { passive: true });
+  window.addEventListener('resize', reposicionarBarridoEnScroll, { passive: true });
+
   function activarBarridoCambioFiltro() {
     window.clearTimeout(filtroBarridoHideTimer);
 
