@@ -2918,9 +2918,10 @@ def obtener_resultados_principales(
 ORDEN_GRUPOS_LO_QUE_TENGO = [
     ("Principal", "Platos Principales", ("Principal",)),
     ("Entrada", "Entradas", ("Entrada",)),
-    ("Dip", "Dips y Salsas", ("Dip", "Salsa")),
     ("Guarnicion", "Guarniciones", ("Guarnicion", "Guarnición")),
+    ("Dip", "Dips y Salsas", ("Dip", "Salsa")),
     ("Picada", "Picadas", ("Picada",)),
+    ("Ingrediente de picada", "Ingredientes de picada", ("Ingrediente de picada",)),
     ("Postre", "Postres / Reposterías", ("Postre", "Torta")),
     ("Trago", "Bebidas / Tragos", ("Trago",)),
 ]
@@ -2930,6 +2931,7 @@ def agrupar_platos_para_lo_que_tengo(platos):
     platos_lista = list(platos)
     usados = set()
     grupos = []
+    titulos_subtipo = dict(SUBTIPO_CARTA_CHOICES)
 
     for codigo, titulo, tipos_grupo in ORDEN_GRUPOS_LO_QUE_TENGO:
         platos_grupo = []
@@ -2944,11 +2946,47 @@ def agrupar_platos_para_lo_que_tengo(platos):
                 platos_grupo.append(plato)
                 usados.add(plato.id)
 
-        if platos_grupo:
+        if not platos_grupo:
+            continue
+
+        tiene_subtipo = any((p.subtipo_carta or "").strip() for p in platos_grupo)
+
+        if tiene_subtipo:
+            orden = SUBTIPO_POSTRE_ORDEN if codigo == "Postre" else SUBTIPO_CARTA_ORDEN
+            subgrupos = {}
+            sin_clasificar = []
+            for p in platos_grupo:
+                c = (p.subtipo_carta or "").strip()
+                if c:
+                    subgrupos.setdefault(c, []).append(p)
+                else:
+                    sin_clasificar.append(p)
+            subgrupos_lista = []
+            for c in orden:
+                if c and c in subgrupos:
+                    subgrupos_lista.append({
+                        "codigo": c,
+                        "titulo": titulos_subtipo.get(c, c),
+                        "platos": subgrupos[c],
+                    })
+            if sin_clasificar:
+                subgrupos_lista.append({
+                    "codigo": "sin_clasificar",
+                    "titulo": "Sin clasificar",
+                    "platos": sin_clasificar,
+                })
             grupos.append({
                 "codigo": codigo,
                 "titulo": titulo,
                 "platos": platos_grupo,
+                "subgrupos": subgrupos_lista,
+            })
+        else:
+            grupos.append({
+                "codigo": codigo,
+                "titulo": titulo,
+                "platos": platos_grupo,
+                "subgrupos": None,
             })
 
     return grupos

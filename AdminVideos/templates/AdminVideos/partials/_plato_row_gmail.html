@@ -22,6 +22,18 @@
     </div>
 
     <div class="plato-gmail-actions flex-shrink-0" aria-label="Acciones del plato">
+      {% if plato.enlace %}
+        <a href="{{ plato.enlace }}"
+           class="btn plato-gmail-action-btn plato-gmail-action-enlace"
+           target="_blank"
+           rel="noopener noreferrer"
+           onclick="event.stopPropagation();"
+           title="Abrir enlace"
+           aria-label="Abrir enlace relacionado de {{ plato.nombre_plato|escape }}">
+          <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+        </a>
+      {% endif %}
+
       <a href="#"
          class="btn plato-gmail-action-btn plato-gmail-action-programar btn-programar"
          data-bs-toggle="modal"
@@ -41,6 +53,18 @@
         <i class="fa-solid fa-list-check" aria-hidden="true"></i>
       </a>
 
+      {% if amigues %}
+        <a href="#"
+           class="btn plato-gmail-action-btn plato-gmail-action-compartir"
+           data-bs-toggle="modal"
+           data-bs-target="#compartirModal"
+           onclick="event.preventDefault(); event.stopPropagation(); setPlatoInfo('{{ plato.id }}', 'plato', '{{ plato.nombre_plato|escapejs }}')"
+           title="Compartir"
+           aria-label="Compartir {{ plato.nombre_plato|escape }}">
+          <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
+        </a>
+      {% endif %}
+
       {% if plato.propietario == request.user %}
         <a data-plato-sheet-open href="{% url 'videos-update' plato.id %}?return_to={{ return_to_url|urlencode }}{% if tipopag %}&tipopag={{ tipopag|urlencode }}{% endif %}"
            class="btn plato-gmail-action-btn plato-gmail-action-editar"
@@ -56,6 +80,21 @@
            title="Duplicar plato"
            aria-label="Duplicar {{ plato.nombre_plato|escape }}">
           <i class="fa-regular fa-clone" aria-hidden="true"></i>
+        </a>
+
+        <a href="#"
+           class="btn plato-gmail-action-btn plato-gmail-action-eliminar"
+           data-bs-toggle="modal"
+           data-bs-target="#confirmActionModal"
+           data-confirm-title="Eliminar plato"
+           data-confirm-body="¿Seguro que querés borrar {{ plato.nombre_plato|escape }}?"
+           data-confirm-hint="También se borrarán las programaciones de este plato. Esta acción no se puede deshacer."
+           data-confirm-action="{% url 'eliminar-plato' plato.id %}?return_to={{ return_to_url|urlencode }}"
+           data-confirm-btn="Sí, borrar"
+           onclick="event.stopPropagation();"
+           title="Eliminar"
+           aria-label="Eliminar {{ plato.nombre_plato|escape }}">
+          <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
         </a>
       {% endif %}
     </div>

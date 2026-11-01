@@ -61,13 +61,32 @@
 
     {% if platos_agrupados_lo_que_tengo %}
       {% for grupo in platos_agrupados_lo_que_tengo %}
-        <div class="list-group-item bg-primary text-white fw-bold small text-uppercase px-3 py-2 border-0 shadow-sm">
-          <i class="fa-solid fa-layer-group me-2"></i>{{ grupo.titulo }}
-        </div>
+        <details class="plato-grupo-acordeon" open data-grupo="{{ grupo.codigo }}">
+          <summary class="plato-grupo-nivel1">
+            <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+            <span class="plato-grupo-nivel1-titulo">{{ grupo.titulo }}</span>
+            {% if grupo.platos %}<span class="plato-grupo-count">{{ grupo.platos|length }}</span>{% endif %}
+            <i class="fa-solid fa-chevron-down plato-grupo-chevron" aria-hidden="true"></i>
+          </summary>
 
-        {% for plato in grupo.platos %}
-          {% include "AdminVideos/partials/_plato_row_gmail.html" %}
-        {% endfor %}
+          {% if grupo.subgrupos %}
+            {% for subgrupo in grupo.subgrupos %}
+              <div class="plato-subgrupo-bloque">
+                <div class="plato-grupo-header">
+                  <span class="plato-grupo-titulo">{{ subgrupo.titulo }}</span>
+                  <span class="plato-grupo-count">{{ subgrupo.platos|length }}</span>
+                </div>
+                {% for plato in subgrupo.platos %}
+                  {% include "AdminVideos/partials/_plato_row_gmail.html" %}
+                {% endfor %}
+              </div>
+            {% endfor %}
+          {% else %}
+            {% for plato in grupo.platos %}
+              {% include "AdminVideos/partials/_plato_row_gmail.html" %}
+            {% endfor %}
+          {% endif %}
+        </details>
       {% endfor %}
     {% elif platos_agrupados_carta %}
       {% for grupo in platos_agrupados_carta %}

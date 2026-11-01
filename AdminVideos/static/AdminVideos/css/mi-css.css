@@ -1016,11 +1016,11 @@ body.filtro-platos-cambiando [data-listado-url] {
 }
 
 .plato-row.is-carousel-active {
-  box-shadow: inset 0 0 0 1px rgba(78, 115, 223, .28);
+  box-shadow: none;
 }
 
 .plato-row.is-selected.is-carousel-active {
-  box-shadow: inset 0 0 0 1px rgba(13, 110, 253, .36);
+  box-shadow: none;
 }
 
 /* =====================================================
@@ -2949,7 +2949,7 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
   justify-content: space-between;
   gap: 0.5rem;
   padding: 0.55rem 0.85rem;
-  margin-top: 0.4rem;
+  margin-top: 0;
   background: var(--bs-tertiary-bg);
   border-left: 4px solid var(--bs-primary);
   border-radius: 0 0.4rem 0.4rem 0;
@@ -2960,9 +2960,6 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
   text-transform: uppercase;
 }
 
-.plato-grupo-header:first-child {
-  margin-top: 0;
-}
 
 .plato-grupo-titulo {
   overflow: hidden;
@@ -3019,5 +3016,190 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
 
 [data-bs-theme="dark"] .selector-platos-sep-fuerte {
   background: rgba(255, 255, 255, .35);
+}/* Acordeón de grupos en "Todos" */
+.plato-grupo-acordeon {
+  display: block;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.plato-grupo-acordeon > summary {
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.plato-grupo-acordeon > summary::-webkit-details-marker {
+  display: none;
+}
+.plato-grupo-acordeon > summary::marker {
+  content: "";
+}
+.plato-grupo-summary {
+  margin: 0;
+}
+.plato-grupo-summary .plato-grupo-chevron {
+  flex-shrink: 0;
+  transition: transform .16s ease;
+  color: var(--bs-secondary-color);
+  font-size: .7rem;
+}
+.plato-grupo-acordeon[open] > summary .plato-grupo-chevron {
+  transform: rotate(180deg);
+}
+.plato-grupo-summary:hover {
+  filter: brightness(1.06);
+}
+.plato-grupo-summary:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
+}
+/* Nivel 1 (tipo): fondo sólido diferenciado */
+.plato-grupo-nivel1 {
+  background: var(--bs-secondary-bg) !important;
+  color: var(--bs-emphasis-color);
+  border-bottom: 1px solid var(--bs-border-color) !important;
+}
+.plato-grupo-nivel1 .plato-grupo-count {
+  margin-left: .5rem;
+}
+.plato-grupo-nivel1 .plato-grupo-chevron {
+  color: var(--bs-emphasis-color);
+  opacity: .7;
+}
+[data-bs-theme="dark"] .plato-grupo-nivel1 {
+  background: rgba(255, 255, 255, .06) !important;
+}
+[data-bs-theme="dark"] .plato-grupo-nivel1 .plato-grupo-chevron {
+  color: rgba(255, 255, 255, .85);
+}
+/* =====================================================
+   Carta de restaurante: jerarquía en "Todos" (2026-11-01)
+   Nivel 1: banda oscura fuerte
+   Nivel 2: susurro tipográfico con sangría
+   Items: anidados bajo wrapper con línea vertical
+   ===================================================== */
+
+/* Nivel 1: tipo (Platos Principales, Postres, etc.) */
+.plato-grupo-acordeon > .plato-grupo-nivel1 {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  background: var(--bs-secondary-bg) !important;
+  color: var(--bs-emphasis-color) !important;
+  font-size: 0.8rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.07em !important;
+  text-transform: uppercase;
+  padding: 0.7rem 1rem !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--bs-border-color) !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+}
+.plato-grupo-acordeon > .plato-grupo-nivel1::-webkit-details-marker { display: none; }
+.plato-grupo-acordeon > .plato-grupo-nivel1::marker { content: ""; }
+.plato-grupo-nivel1 .plato-grupo-nivel1-titulo {
+  flex: 1 1 auto;
+}
+.plato-grupo-nivel1 .plato-grupo-count {
+  background: var(--bs-body-bg) !important;
+  color: var(--bs-emphasis-color) !important;
+  font-size: 0.68rem !important;
+  font-weight: 600 !important;
+  padding: 0.08rem 0.55rem !important;
+  border-radius: 999rem !important;
+  letter-spacing: 0 !important;
+}
+.plato-grupo-nivel1 .plato-grupo-chevron {
+  flex-shrink: 0 !important;
+  font-size: 0.72rem !important;
+  color: var(--bs-emphasis-color) !important;
+  opacity: 0.7 !important;
+  transition: transform 0.16s ease;
+}
+.plato-grupo-acordeon[open] > .plato-grupo-nivel1 .plato-grupo-chevron {
+  transform: rotate(180deg);
+}
+[data-bs-theme="dark"] .plato-grupo-acordeon > .plato-grupo-nivel1 {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
+}
+[data-bs-theme="dark"] .plato-grupo-nivel1 .plato-grupo-count {
+  background: rgba(255, 255, 255, 0.16) !important;
+}
+
+/* Nivel 2 (subtipo) + Principal: mismo estilo susurro */
+.plato-grupo-header {
+  background: transparent !important;
+  border-left: 0 !important;
+  border-radius: 0 !important;
+  color: var(--bs-secondary-color) !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em !important;
+  padding: 0.45rem 0.75rem 0.45rem 1rem !important;
+}
+.plato-grupo-header .plato-grupo-count {
+  background: transparent !important;
+  color: var(--bs-secondary-color) !important;
+  font-size: 0.66rem !important;
+  font-weight: 500 !important;
+  padding: 0 !important;
+  border: none !important;
+}
+[data-bs-theme="dark"] .plato-grupo-header {
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+[data-bs-theme="dark"] .plato-grupo-header .plato-grupo-count {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Wrapper que anida items bajo el subtipo */
+.plato-subgrupo-bloque {
+  margin-left: 0.75rem;
+  padding-left: 0.25rem;
+  border-left: 0 !important;
+  margin-bottom: 0;
+}
+.plato-subgrupo-bloque:not(:last-child) {
+  margin-bottom: 0.3rem;
+}
+
+/* Fix bordes: items dentro de details (incluye subgrupo-bloque) */
+.plato-grupo-acordeon .list-group-item:not(summary) {
+  border-width: 0 0 1px !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  border-radius: 0 !important;
+}
+.plato-grupo-acordeon:last-child .list-group-item:last-child:not(summary) {
+  border-bottom-width: 0 !important;
+}
+/* Sin raya lateral en filas tipo gmail (2026-11-01) */
+.list-group-item.plato-row,
+.list-group-item.plato-row-procedencia-propia,
+.list-group-item.plato-row-procedencia-importada,
+.list-group-item.plato-row-procedencia-ajena {
+  border-left: 0 !important;
+  border-top: 0 !important;
+}
+/* Bulletproof: sin líneas residuales en listado (2026-11-01) */
+.list-group-flush > .plato-grupo-header,
+.list-group-flush > .plato-grupo-header:first-child,
+.list-group-flush > .plato-grupo-header:last-child {
+  border-top: 0 !important;
+  border-bottom: 0 !important;
+}
+.list-group-flush > .plato-grupo-header + .list-group-item,
+.list-group-flush > .plato-grupo-header + .plato-row {
+  border-top: 0 !important;
+}
+.plato-subgrupo-bloque,
+.plato-subgrupo-bloque > .plato-grupo-header {
+  border-top: 0 !important;
+  border-bottom: 0 !important;
 }
 
