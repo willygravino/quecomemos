@@ -659,7 +659,6 @@
 // ----------------------------------------------------
 // - Click en una fila: mueve #platosCarousel al plato.
 // - Cambio de slide: marca la fila activa.
-// - NO toca los checkboxes .js-plato-select ni acciones masivas.
 (function () {
   function getCarouselEl() {
     return document.getElementById("platosCarousel");
@@ -718,11 +717,6 @@
   }
 
   document.addEventListener("click", function (event) {
-    // Importante: el checkbox sigue siendo sólo para selección masiva.
-    if (event.target.closest(".js-plato-select")) {
-      return;
-    }
-
     if (event.target.closest("a, button, input, label, select, textarea")) {
       return;
     }
@@ -739,9 +733,6 @@
       return;
     }
 
-    if (event.target.closest(".js-plato-select")) {
-      return;
-    }
 
     if (event.target.closest("a, button, input, label, select, textarea")) {
       return;
@@ -779,261 +770,13 @@
 </script>
 
 
-<script>
-// ==========================================
-// FILAS TIPO GMAIL (selección de platos)
-// - Cuando tildás/destildás el checkbox de un plato,
-//   marca/desmarca visualmente toda la fila.
-// - Se apoya en una clase de estado: "is-selected"
-//   (para que el CSS pinte el fondo).
-// - Usa delegación de eventos: funciona aunque la lista
-//   se renderice/inserte por AJAX.
-// - Inicializa el estado al cargar (por si hay checks ya marcados).
-// ==========================================
-(function () {
-  function sync(chk) {
-    const row = chk.closest("[data-row]");
-    if (!row) return;
-    row.classList.toggle("is-selected", chk.checked);
-  }
-
-  // Inicializa el estado visual al cargar
-  document.querySelectorAll("input.js-plato-select").forEach(sync);
-
-  // Cambios de checkbox (delegado)
-  document.addEventListener("change", (ev) => {
-    const chk = ev.target.closest("input.js-plato-select");
-    if (!chk) return;
-    sync(chk);
-  });
-})();
-
-</script>
-
-<!-- Paso 3: seleccionar/deseleccionar todos y mostrar cuántos platos están seleccionados -->
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  const masterCheckbox = document.getElementById('chk-platos-all');
-  const rowCheckboxes = document.querySelectorAll('.js-plato-select');
-  const selectedCountBadge = document.getElementById('platos-selected-count');
-
-  function updateSelectedCount() {
-    const selected = Array.from(rowCheckboxes).filter(function (checkbox) {
-      return checkbox.checked;
-    }).length;
-
-    if (!selectedCountBadge) return;
-
-    if (selected > 0) {
-      selectedCountBadge.classList.remove('d-none');
-      selectedCountBadge.textContent = `${selected} seleccionado${selected > 1 ? 's' : ''}`;
-    } else {
-      selectedCountBadge.classList.add('d-none');
-      selectedCountBadge.textContent = '0 seleccionados';
-    }
-  }
-
-  if (masterCheckbox) {
-    masterCheckbox.addEventListener('change', function () {
-      rowCheckboxes.forEach(function (checkbox) {
-        checkbox.checked = masterCheckbox.checked;
-      });
-      updateSelectedCount();
-    });
-  }
-
-  rowCheckboxes.forEach(function (checkbox) {
-    checkbox.addEventListener('change', function () {
-      updateSelectedCount();
-    });
-  });
-
-  updateSelectedCount();
-});
-</script>
 
 
 
-<!-- =========================================================
-     LISTADO DE PLATOS - SELECCIÓN MASIVA
-     ---------------------------------------------------------
-     Qué hace:
-     - Inicializa los checkboxes del listado tipo Gmail.
-     - Marca visualmente las filas seleccionadas.
-     - Actualiza el contador de platos seleccionados.
-     - Habilita/deshabilita el botón de acciones masivas.
-     - Prepara el formulario oculto para eliminación masiva.
-     - Se puede volver a ejecutar después de actualizar la lista por AJAX.
 
-     Importante:
-     - Esta función debe llamarse al cargar la página.
-     - También debe llamarse después de reemplazar
-       #contenedor-listado-platos con HTML nuevo por AJAX.
-========================================================= -->
-<script>
-function initListadoPlatos() {
-  const masterCheckbox = document.getElementById('chk-platos-all');
-  const rowCheckboxes = document.querySelectorAll('.js-plato-select');
-  const selectedCountBadge = document.getElementById('platos-selected-count');
-  const bulkDeleteBtn = document.getElementById('bulk-delete');
-  const bulkDeleteForm = document.getElementById('bulk-delete-form');
-  const bulkDeleteInputs = document.getElementById('bulk-delete-inputs');
 
-  function getSelectedIds() {
-    return Array.from(rowCheckboxes)
-      .filter(function (checkbox) {
-        return checkbox.checked;
-      })
-      .map(function (checkbox) {
-        return checkbox.value;
-      });
-  }
 
-  function updateSelectedCount() {
-    const total = rowCheckboxes.length;
-    const selected = Array.from(rowCheckboxes).filter(function (checkbox) {
-      return checkbox.checked;
-    }).length;
 
-    if (selectedCountBadge) {
-      if (selected > 0) {
-        selectedCountBadge.classList.remove('d-none');
-        selectedCountBadge.textContent = `${selected} seleccionado${selected > 1 ? 's' : ''}`;
-      } else {
-        selectedCountBadge.classList.add('d-none');
-        selectedCountBadge.textContent = '0 seleccionados';
-      }
-    }
-
-    if (bulkDeleteBtn) {
-      bulkDeleteBtn.disabled = selected === 0;
-    }
-
-    if (masterCheckbox) {
-      if (selected === 0) {
-        masterCheckbox.checked = false;
-        masterCheckbox.indeterminate = false;
-      } else if (selected === total) {
-        masterCheckbox.checked = true;
-        masterCheckbox.indeterminate = false;
-      } else {
-        masterCheckbox.checked = false;
-        masterCheckbox.indeterminate = true;
-      }
-    }
-  }
-
-  if (masterCheckbox) {
-    masterCheckbox.addEventListener('change', function () {
-      rowCheckboxes.forEach(function (checkbox) {
-        checkbox.checked = masterCheckbox.checked;
-
-        const row = checkbox.closest("[data-row]");
-        if (row) {
-          row.classList.toggle("is-selected", checkbox.checked);
-        }
-      });
-
-      updateSelectedCount();
-    });
-  }
-
-  rowCheckboxes.forEach(function (checkbox) {
-    checkbox.addEventListener('change', function () {
-      const row = checkbox.closest("[data-row]");
-      if (row) {
-        row.classList.toggle("is-selected", checkbox.checked);
-      }
-
-      updateSelectedCount();
-    });
-  });
-
-  if (bulkDeleteBtn) {
-    bulkDeleteBtn.addEventListener('click', function () {
-      const idsSeleccionados = getSelectedIds();
-      if (!idsSeleccionados.length) return;
-
-      const cantidad = idsSeleccionados.length;
-
-      if (bulkDeleteInputs) {
-        bulkDeleteInputs.innerHTML = '';
-      }
-
-      idsSeleccionados.forEach(function (id) {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'ids';
-        input.value = id;
-        bulkDeleteInputs.appendChild(input);
-      });
-
-      const trigger = document.createElement('button');
-      trigger.type = 'button';
-      trigger.style.display = 'none';
-      trigger.setAttribute('data-bs-toggle', 'modal');
-      trigger.setAttribute('data-bs-target', '#confirmActionModal');
-
-      const singular = bulkDeleteForm?.dataset.bulkLabelSingular || 'plato';
-      const plural = bulkDeleteForm?.dataset.bulkLabelPlural || 'platos';
-      const hint = bulkDeleteForm?.dataset.bulkHint || `También se borrarán las programaciones de esos ${plural}. Esta acción no se puede deshacer.`;
-
-      trigger.setAttribute('data-confirm-title', `Eliminar ${plural} seleccionados`);
-      trigger.setAttribute(
-        'data-confirm-body',
-        `¿Seguro que querés borrar <strong>${cantidad}</strong> ${cantidad === 1 ? singular : plural} seleccionado${cantidad === 1 ? '' : 's'}?`
-      );
-      trigger.setAttribute('data-confirm-hint', hint);
-      trigger.setAttribute('data-confirm-action', '#');
-      trigger.setAttribute('data-confirm-submit-form', 'bulk-delete-form');
-      trigger.setAttribute('data-confirm-btn', 'Sí, borrar');
-
-      document.body.appendChild(trigger);
-      trigger.click();
-      trigger.remove();
-    });
-  }
-
-  updateSelectedCount();
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-  initListadoPlatos();
-});
-
-/* Sticky bar: top dinámico calculado sobre la altura real del carousel sticky.
-   - ResizeObserver: recalcula si el carousel cambia de tamaño (resize, imagen).
-   - MutationObserver: recalcula después de cada AJAX del listado. */
-(function () {
-  function updateStickyOffset() {
-    var carousel = document.getElementById('contenedor-carousel-platos');
-    if (!carousel) return;
-    var h = carousel.getBoundingClientRect().height;
-    if (h > 0) {
-      document.documentElement.style.setProperty('--qc-carousel-height', h + 'px');
-    }
-  }
-
-  function init() {
-    updateStickyOffset();
-    var carousel = document.getElementById('contenedor-carousel-platos');
-    if (carousel && typeof ResizeObserver !== 'undefined') {
-      new ResizeObserver(updateStickyOffset).observe(carousel);
-    }
-    window.addEventListener('resize', updateStickyOffset);
-    var listado = document.getElementById('contenedor-listado-platos');
-    if (listado && typeof MutationObserver !== 'undefined') {
-      new MutationObserver(updateStickyOffset).observe(listado, { childList: true });
-    }
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-})();
-</script>
 
 
 

@@ -3146,11 +3146,5 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
 #content-wrapper {
   overflow: clip !important;
 }
-/* Sticky bar de acciones masivas: top dinámico debajo del carousel */
-.platos-acciones-bar {
-  position: sticky;
-  top: var(--qc-carousel-height, 350px);
-  z-index: 9;
-  background: var(--bs-body-bg);
-}
+
 

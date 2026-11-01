@@ -3,43 +3,6 @@
 <!-- LISTA TIPO GMAIL (PLATOS) -->
 <section class="w-100 text-body bg-body-tertiary rounded shadow-sm">
 
-  <!-- Header opcional (tipo Gmail: checkbox + títulos) -->
-  <div class="px-2 py-2 border-bottom d-flex align-items-center justify-content-between gap-2 text-body flex-wrap platos-acciones-bar w-100">
-
-    <div class="d-flex align-items-center gap-2">
-      <!-- Seleccionar todos -->
-      <div class="form-check m-0">
-        <input class="form-check-input" type="checkbox" id="chk-platos-all" aria-label="Seleccionar todos">
-      </div>
-
-      <!-- Contador de seleccionados (al lado del checkbox) -->
-      <span id="platos-selected-count" class="badge rounded-pill bg-primary d-none">0 seleccionados</span>
-    </div>
-
-    <!-- Acciones masivas: 2 iconos (a la derecha) -->
-    <div class="d-flex align-items-center gap-1" role="group" aria-label="Acciones masivas">
-    {% if amigues %}
-    <button class="btn btn-sm btn-outline-primary"
-            type="button"
-            id="bulk-share"
-            disabled
-            title="Compartir seleccionados (próximamente)"
-            aria-label="Compartir seleccionados (próximamente)">
-      <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
-    </button>
-    {% endif %}
-    <button class="btn btn-sm btn-outline-danger"
-            type="button"
-            id="bulk-delete"
-            disabled
-            title="Eliminar seleccionados"
-            aria-label="Eliminar seleccionados">
-      <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
-    </button>
-  </div>
-
-</div>
-
   <div class="list-group list-group-flush">
 
     {% if platos_agrupados_lo_que_tengo %}
@@ -92,16 +55,5 @@
   </div>
 </section>
 
-<!-- formulario oculto para enviar por POST los platos seleccionados a eliminación masiva -->
-<form id="bulk-delete-form"
-      method="post"
-      action="{% url 'eliminar-platos-masivo' %}"
-      class="d-none"
-      data-bulk-input-name="platos_selected"
-      data-bulk-label-singular="plato"
-      data-bulk-label-plural="platos"
-      data-bulk-hint="También se borrarán las programaciones de esos platos. Esta acción no se puede deshacer.">
-  {% csrf_token %}
-  <div id="bulk-delete-inputs"></div>
-</form>
+
 {% endif %}

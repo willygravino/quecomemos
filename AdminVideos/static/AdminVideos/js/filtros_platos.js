@@ -123,9 +123,6 @@ document.addEventListener("DOMContentLoaded", function () {
           contenedorLugares.innerHTML = data.html_lugares || "";
         }
 
-        if (typeof initListadoPlatos === "function") {
-          initListadoPlatos();
-        }
 
         return data;
       })
