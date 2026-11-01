@@ -49,6 +49,14 @@
            aria-label="Editar {{ plato.nombre_plato|escape }}">
           <i class="fa-regular fa-pen-to-square" aria-hidden="true"></i>
         </a>
+
+        <a href="{% url 'agregar-a-mi-lista' plato.id %}?duplicar=true"
+           class="btn plato-gmail-action-btn plato-gmail-action-duplicar"
+           onclick="event.stopPropagation();"
+           title="Duplicar plato"
+           aria-label="Duplicar {{ plato.nombre_plato|escape }}">
+          <i class="fa-regular fa-clone" aria-hidden="true"></i>
+        </a>
       {% endif %}
     </div>
 

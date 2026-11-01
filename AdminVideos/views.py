@@ -4124,7 +4124,7 @@ def agregar_a_mi_lista(request, plato_id):
 
     # Nombre de la copia
     nombre_base = plato_original.nombre_plato
-    nombre_copia = f"Copia de {nombre_base}" if duplicar else nombre_base
+    nombre_copia = f"{nombre_base} (copia)" if duplicar else nombre_base
 
     # proviene_de (string)
     proviene_de_str = (
@@ -4172,12 +4172,17 @@ def agregar_a_mi_lista(request, plato_id):
     nuevo_plato.ingredientes = ", ".join(ingredientes_texto)
     nuevo_plato.save(update_fields=["ingredientes"])
 
-    # Marcar como importado (sin duplicados)
-    if plato_original.id not in profile.sugeridos_importados:
-        profile.sugeridos_importados.append(plato_original.id)
-        profile.save(update_fields=["sugeridos_importados"])
+    # Platos propios: duplicado normal, sin descartar sugeridos ni marcar importado.
+    if plato_original.propietario_id != request.user.id:
+        # Importación de otro usuario (o de "quecomemos"): flujo original.
+        if plato_original.id not in profile.sugeridos_importados:
+            profile.sugeridos_importados.append(plato_original.id)
+            profile.save(update_fields=["sugeridos_importados"])
+        return redirect("descartar-sugerido", plato_id=plato_id)
 
-    return redirect("descartar-sugerido", plato_id=plato_id)
+    messages.success(request, f"Plato duplicado como «{nuevo_plato.nombre_plato}».")
+    return_to = get_safe_return_to(request, fallback_url_name="filtro-de-platos")
+    return redirect(return_to)
 
 
 

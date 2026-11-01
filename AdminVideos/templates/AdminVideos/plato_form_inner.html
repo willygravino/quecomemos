@@ -117,29 +117,6 @@
                       <p class="plato-form-section-help">Identificá el plato y resumí su preparación.</p>
                     </div>
 
-                    <div class="d-flex align-items-center justify-content-end gap-2 ms-auto"
-                         aria-label="Acciones del plato">
-                      {% if form.instance.pk %}
-                        <a href="{% url 'agregar-a-mi-lista' form.instance.pk %}?duplicar=true"
-                           class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
-                           title="Duplicar plato"
-                           aria-label="Duplicar plato">
-                          <i class="fa-regular fa-copy" aria-hidden="true"></i>
-                          <span class="d-none d-lg-inline">Duplicar</span>
-                        </a>
-
-                        <a href="#"
-                           class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1 js-plato-ingredientes"
-                           data-url="{% url 'plato_ingredientes' form.instance.pk %}"
-                           title="Ver ingredientes"
-                           aria-label="Ver ingredientes">
-                          <i class="fa-solid fa-list-check" aria-hidden="true"></i>
-                          <span class="d-none d-lg-inline">Ingredientes</span>
-                        </a>
-                      {% endif %}
-
-                    
-                    </div>
                   </div>
 
                 <!-- Nombre del Plato -->
