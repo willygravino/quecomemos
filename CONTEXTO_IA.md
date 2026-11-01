@@ -790,3 +790,92 @@ Antes había 2-4 botones según caso. Ahora hay **hasta 7** en este orden:
 
 **Rollback**: si en el futuro se quiere volver al diseño anterior del selector, `git revert 3dbcc56` revierte todo el rediseño (sin migraciones, solo CSS + HTML de tabs).
 
+### 30.7 Sesión 2026-11-01 (cont.) — Jerarquía tipo carta + acordeón en "Todos"
+
+#### Cambios principales
+
+**Tab "Todos" ahora tiene 3 niveles jerárquicos:**
+
+1. **Nivel 1** (tipo): `Platos Principales`, `Entradas`, `Guarniciones`, `Dips y Salsas`, `Picadas`, `Ingredientes de picada`, `Postres / Reposterías`, `Bebidas / Tragos`.
+   - Banda con `background: var(--bs-secondary-bg)`, texto bold uppercase con tracking.
+   - Chevron + badge count + acordeón colapsable (persistente en localStorage).
+2. **Nivel 2** (subtipo_carta, solo en Principal/Postre): `Carnes rojas`, `Aves`, `Pastas`, etc.
+   - Susurro tipográfico: texto muted, chico, sin fondo.
+3. **Items**: indentados bajo subgrupo, sin líneas verticales.
+
+**Persistencia del acordeón:**
+- `localStorage.qc_grupos_abiertos` = `{codigo: bool}`.
+- `MutationObserver` en `#contenedor-listado-platos` re-aplica el estado después de cada AJAX (crítico: el refresco por filtros reemplaza todo el DOM).
+
+**Defensa en código:**
+- `tiene_subtipo` solo se evalúa si `codigo in ("Principal", "Postre")` (evita que un dato sucio como "salsa roja" con `subtipo=carnes_rojas` genere un "Carnes rojas" espurio).
+- Dato limpiado: id=347 "salsa roja" perdió `subtipo_carta="carnes_rojas"` (deuda del script one-shot de §29).
+
+**Limpieza CSS:**
+- `.plato-row` sin `border-left` (raya de procedencia) ni `border-top`.
+- `.plato-row.is-carousel-active` sin `box-shadow: inset` (era la "raya" entre header y primer plato).
+- `.plato-grupo-acordeon` con `margin: 0; padding: 0` (details por defecto del browser).
+
+**Puntos críticos nuevos (§15):**
+| Archivo | Punto | Qué hace |
+|---|---|---|
+| `views.py` | `ORDEN_GRUPOS_LO_QUE_TENGO` | 8 grupos: Principal, Entrada, Guarnicion, Dip, Picada, Ingrediente de picada, Postre, Trago. |
+| `views.py` | `agrupar_platos_para_lo_que_tengo` | Subgrupos por `subtipo_carta` SOLO en Principal/Postre. |
+| `grupos_acordeon.js` | `observarContenedor` | MutationObserver que re-aplica localStorage después de cada AJAX. |
+| `mi-css.css` | `.plato-grupo-nivel1` (~L####) | Banda nivel 1 con `secondary-bg`. |
+| `mi-css.css` | `.plato-grupo-header` | Nivel 2 susurro, sin border. |
+| `mi-css.css` | `.plato-subgrupo-bloque` | Wrapper de anidación de items. |
+
+**Deuda pendiente:**
+- Limpiar `backups_variedades/` (untracked, no molesta).
+- `rm -rf backups_variedades/` está en `.gitignore`.
+
+
+
+### 30.8 Sesión 2026-11-01 (cont.) — Carrusel sticky, spinner, limpieza de filas
+
+**Commits**: `622f268` (el commit final de esta iteración, -493 líneas).
+
+#### 30.8.1 Carrusel de platos sticky
+
+**Objetivo**: la card de detalle (imagen + botones Programar/Ingredientes/Editar/Duplicar/Eliminar) queda **fija arriba** al scrollear; el listado se desliza debajo.
+
+**Implementación**:
+- `#contenedor-carousel-platos` con `position: sticky; top: 0; z-index: 10; background: var(--bs-body-bg)`.
+- **Mobile** (`max-width: 767.98px`): `max-height: 60vh; overflow-y: auto` (para no tapar todo el listado).
+
+#### 30.8.2 Fix del `overflow` que rompía sticky
+
+**Problema**: `position: sticky` no funciona si algún ancestro tiene `overflow-x: hidden` (comportamiento viejo de `#content-wrapper`).
+
+**Solución**:
+```css
+#content-wrapper {
+  overflow: clip !important;
+}
+
+
+### 30.9 Sesión 2026-11-02 — Eliminación total del sistema de acciones masivas
+
+**Motivación**: El dueño notó que la cantidad de platos en el sistema nunca va a justificar "seleccionar varios para borrar en masa". Es complejidad innecesaria. Si se necesita más adelante, se reinstala.
+
+#### 30.9.1 Qué se eliminó
+- **Backend**: `eliminar_platos_masivo` y `eliminar_lugares_masivo` (`views.py`) + sus URLs.
+- **Templates Platos y Lugares**: barras superiores con checkbox master, badge "N seleccionados", iconos de bulk, y forms ocultos (`bulk-delete-form`).
+- **Filas**: checkboxes individuales en `_plato_row_gmail.html` y `_listado_lugares.html`.
+- **JS**: función `initListadoPlatos` + todos sus helpers (`getSelectedIds`, `updateSelectedCount`, handlers de checkboxes). **-5569 chars** en `video_list_base.html`. Además se eliminaron **3 scripts huérfanos** (uno de ellos roto, con `DOMContentLoaded, );`).
+- **CSS**: `.platos-acciones-bar`.
+
+#### 30.9.2 Cómo se hacen ahora las acciones individuales
+- Como las filas son limpias y el carrusel sticky siempre está visible arriba, las acciones se hacen **haciendo click en la fila** (que cambia el carrusel al plato correspondiente) y luego usando los botones grandes del carrusel (Programar, Ingredientes, Editar, Duplicar, Eliminar).
+
+#### 30.9.3 Puntos críticos actualizados
+- `_listado_platos.html`: ya no tiene `platos-acciones-bar` ni `checkbox`.
+- `video_list_base.html`: mucho más liviano (-5.5k chars).
+- `_confirm_action_modal.html`: limpio, ya no tiene lógica para `submitMode === "bulk-delete"`.
+- **Deuda técnica saldada**: se arregló el bug histórico (§27.5) de IDs duplicados en `bulk-delete-form` entre Platos y Lugares, simplemente eliminándolos.
+
+#### 30.9.4 Limpieza de `.DS_Store`
+- Los archivos `.DS_Store` (basura de macOS) se colaron en el commit `01ced8a`.
+- **Acción**: `git rm --cached` para todos y agregar al `.gitignore` global para que no vuelvan a entrar.
+
