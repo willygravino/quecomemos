@@ -603,3 +603,79 @@ El listado de platos estaba mezclado, ordenado por historial de programación (b
 - **Colapsar/expandir grupos** con click.
 - **Bulk edit**: reasignar subtipo a varios platos a la vez.
 
+## 30. Sesión 2026-10-31 — Refactor variedades cerrado + Feature "Duplicar plato"
+
+### 30.1 Refactor "remove-variedades" — cerrado y deployado
+
+**Estado**: mergeado a `main` (`ebc74d7`) y **deployado a Railway**. Producción sin variedades.
+
+**Lo que se eliminó** (modelo + vistas + UI):
+- `Plato.plato_padre`, `Plato.nombre_grupo`, `Plato.nombre_para_front`, `Plato.es_variedad()`.
+- `ElegirPlatoForm` completa.
+- `PlatoVariedadCreate/Update/Delete` + 3 URLs.
+- UI de "Variedades" en `plato_form_inner.html`, `plato_detail_content.html`, `_plato_row_gmail.html`, `_plato_card_detalle.html`.
+- Modal `#variedadModal` (template + inyección dinámica en `form_init.js`).
+- Migración `0106_remove_variedades_fields` (2 `RemoveField`).
+- ~750 líneas propias netas.
+
+**Backup**: `backups_variedades/platos_campos_variedades.json` (121 platos, 7 con `nombre_grupo`).
+**Histórico**: migraciones `0065`, `0068`, `0074` NO se tocan (historia).
+
+### 30.2 Intentó "Carpetas de variedades" — DESCARTADO, rama de respaldo
+
+**Idea inicial**: agrupar platos como "Milanesas" con viñetas adentro. Se implementó (modelo `Carpeta`, FK `Plato.carpeta`, endpoint "crear variedad", agrupación en menú programado). **Se revirtió** por:
+- El feature agregaba complejidad sin resolver un problema real.
+- "No es lo mismo una milanesa que otra" (carne ≠ berenjena ≠ pollo).
+- `subtipo_carta` (§29) ya agrupa mejor (Carnes rojas, Vegetarianos, Aves).
+- El Paso 5 modificó el **menú programado** por error, cuando el pedido era el **listado tipo Gmail**.
+
+**Rama de respaldo**: `carpetas-wip` (5 commits). Si en el futuro se retoma, `git checkout carpetas-wip`. **No está deployada**. Prod sigue en `ebc74d7`.
+
+**Lección**: cuando el dueño dice "menú", preguntar si es "menú programado" o "listado". Y no construir agrupaciones sobre `subtipo_carta` sin validar que no dupliquen la funcionalidad.
+
+### 30.3 Feature "Duplicar plato" — implementado (commit `dd1a26f`)
+
+**Objetivo**: hacer visible la función "duplicar plato" en el listado Gmail y en el card detalle. Sacarla del form (ruido). Fixear bug de `descartar-sugerido`.
+
+**Cambios**:
+
+1. **Fix bug `agregar_a_mi_lista`** (`views.py`):
+   - **Antes**: duplicar un plato propio lo marcaba como `sugerido_importado` y hacía `descartar-sugerido`. Efecto: el original desaparecía del listado.
+   - **Ahora**: si `plato_original.propietario == request.user` → duplicado normal, `messages.success("Plato duplicado como «X (copia)»")`, redirect a `return_to`. El original **sigue visible**.
+   - Si `propietario != request.user` → flujo original de importación (marca `sugeridos_importados`, descarta sugerido).
+   - **Formato del nombre**: `"{nombre_original} (copia)"` (antes era `"Copia de {nombre}"`). El nuevo formato ordena alfabéticamente junto al original: "Milanesa", "Milanesa (copia)", "Milanesa de pollo".
+
+2. **Botón "Duplicar"** en `_plato_row_gmail.html` (listado Gmail):
+   - Ícono `fa-clone` (`fa-regular`), clase `plato-gmail-action-btn`.
+   - Solo si `plato.propietario == request.user`.
+   - Link GET a `{% url 'agregar-a-mi-lista' plato.id %}?duplicar=true`.
+   - Sin confirmación.
+
+3. **Botón "Duplicar"** en `_plato_card_detalle.html` (card + carousel):
+   - `btn-sm btn-outline-secondary` con texto "Duplicar".
+   - Al lado de "Editar". Solo si propio.
+
+4. **Limpieza del form** (`plato_form_inner.html`):
+   - **Sacado** el botón "Duplicar" (provocaba confusión: "¿se cierra el form actual? ¿se abre otro?").
+   - **Sacado** el botón "Ingredientes" (redundante: ya está en listado Gmail con `fa-list-check` y en card detalle con `js-plato-ingredientes`).
+   - El `<div aria-label="Acciones del plato">` que los contenía se eliminó completo.
+
+5. **El botón "Duplicar" del detalle** (`plato_detail_content.html`) **se mantiene** — no tiene el problema del form y es un lugar natural.
+
+**Sin migración. Sin JS nuevo. Sin bump de CSS.**
+
+**Puntos críticos actualizados** (§15):
+| Archivo | Punto | Qué hace |
+|---|---|---|
+| `views.py` | `agregar_a_mi_lista` (~L4120) | Duplicar plato propio vs importar ajeno. Formato `"{nombre} (copia)"`. |
+| `_plato_row_gmail.html` | `plato-gmail-action-duplicar` (~L46) | Ícono `fa-clone`. Solo propio. |
+| `_plato_card_detalle.html` | botón "Duplicar" (~L170) | Al lado de Editar. Solo propio. |
+| `plato_form_inner.html` | `Datos principales` (~L113) | Ya no tiene botones "Duplicar" ni "Ingredientes". |
+
+### 30.4 Deuda pendiente
+
+- `git config --global user.email/name`: el warning de commits sin identidad persiste. No bloquea. Arreglar cuando se quiera.
+- `.DS_Store` untracked en varios directorios: ruido macOS. Considerar agregar a `.gitignore` en una sesión de limpieza.
+- Rama `carpetas-wip`: borrar (`git branch -D carpetas-wip`) o conservar. Si se conserva, no molesta.
+- `backups_variedades/` en `.gitignore`: los archivos están untracked, sin riesgo. Deuda de limpieza.
+
