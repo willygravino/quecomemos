@@ -3146,5 +3146,11 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
 #content-wrapper {
   overflow: clip !important;
 }
-
+/* Viñeta para cada plato en el listado */
+.plato-row-nombre::before {
+  content: "•";
+  color: var(--bs-primary);
+  margin-right: 0.45rem;
+  font-weight: bold;
+}
 
