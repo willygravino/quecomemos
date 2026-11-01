@@ -383,20 +383,6 @@ section > .d-flex {
 }
 
 
-/* Zócalo del carousel: muestra un tilde verde minimalista al lado del link cuando tiene plato (.has-plato) */
-
-.meal-link.has-plato::after{
-  content: "";
-  display: inline-block;
-  width: 6px;
-  height: 10px;
-  margin-left: 5px;
-  border-right: 2px solid #198754;
-  border-bottom: 2px solid #198754;
-  transform: rotate(45deg);
-  position: relative;
-  top: -1px;
-}
 
 /* Menú programado */
 /* Píldora blanca bien ceñida (solo para tapar el borde detrás) */
@@ -3037,4 +3023,13 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
 [data-bs-theme="dark"] .plato-grupo-header {
   background: rgba(111, 66, 193, 0.18);
   border-left-color: var(--bs-primary);
+}
+
+/* Zócalo del carousel: mutea los indicadores de comidas sin plato programado */
+.meal-link:not(.has-plato) {
+  opacity: 0.45;
+}
+.meal-link:not(.has-plato):hover,
+.meal-link:not(.has-plato):focus-visible {
+  opacity: 0.7;
 }
