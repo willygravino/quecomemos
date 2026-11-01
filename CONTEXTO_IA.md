@@ -751,3 +751,42 @@ Antes había 2-4 botones según caso. Ahora hay **hasta 7** en este orden:
 | `filtros_platos.js` | `reposicionarBarridoEnScroll` | Reposiciona el overlay shimmer al scrollear/resizear. rAF con debounce natural. |
 
 **Alternativa evaluada y descartada**: reemplazar el shimmer por un spinner centrado (overlay con ícono `fa-spinner fa-spin`). Se descartó porque el shimmer gustaba y el costo del fix era menor. Si en algún momento se quiere migrar a spinner, la función a reemplazar es `activarBarridoCambioFiltro` / `desactivarBarridoCambioFiltro` + el bloque CSS `.filtro-platos-barrido-overlay*` en `mi-css.css`.
+
+### 30.6 Selector de categorías rediseñado (`3dbcc56`)
+
+**Motivación**: el dueño reportó sobrecarga visual del estado activo (fondo + borde + glow + redondel en el ícono + desplazamiento) y pidió integrar el selector al bloque de platos.
+
+**Cambios aplicados:**
+
+1. **Consolidación de reglas `.is-active`**: había 2 reglas duplicadas (light) + 2 (dark) que se contradecían. Ahora:
+   - **Light**: fondo azul suave `rgba(78,115,223,0.14)` + texto/ícono `var(--bs-primary)`. Sin borde, sin glow.
+   - **Dark**: fondo `rgba(78,115,223,0.20)` + texto `#a3b8f0`. Sin borde, sin glow.
+   - **Rojo "lo que tengo"**: mismo esquema con `#dc3545` (light) y `#ff7f8c` (dark). Se eliminó la duplicada.
+
+2. **Redondel del ícono eliminado**: `.selector-platos-item .icon-wrap` ya no tiene `background` ni `border`. Solo el ícono centrado. El único caso que conserva redondel es el activo rojo (visualmente necesario).
+
+3. **Hover simplificado**: sin `border-color`, sin `transform: translateY(-1px)`, sin `text-decoration`. Solo `background: var(--bs-secondary-bg)` + `color: var(--bs-body-color)`.
+
+4. **Shell transparente (opción B)**: `.selector-platos-shell` ya no tiene `background`, `border`, `box-shadow`, `border-radius`. Ahora flota integrado al bloque de platos. Se eliminó `[data-bs-theme="dark"] .selector-platos-shell`.
+
+5. **Agrupación semántica + separadores**:
+   - Grupos visuales: `[Todos] | [Principales] [Entradas] [Guarniciones] | [Dips] [Salsas] | [Picadas] [Ingredientes de picada] | [Postres] | [Bebidas y tragos] | [Delivery] [Comer afuera]`.
+   - `.selector-platos-sep`: línea vertical 1px entre grupos (`var(--bs-border-color)` light, `rgba(255,255,255,.15)` dark).
+   - `.selector-platos-sep-fuerte`: 2px + `var(--bs-secondary-color)` después de "Todos" para destacarlo.
+   - Guarniciones se movió de "Extras" al grupo "Platos" (es importante, cerca de Entradas).
+
+**Puntos críticos nuevos (§15)**:
+| Archivo | Punto | Qué hace |
+|---|---|---|
+| `_selector_horizontal_platos.html` | `<span class="selector-platos-sep">` | Separadores entre grupos. 1 fuerte (después de Todos) + 5 sutiles. |
+| `mi-css.css` | `.selector-platos-shell` (~L1690) | Ahora transparente, sin borde/sombra. |
+| `mi-css.css` | `.selector-platos-item:hover` | Solo `background: var(--bs-secondary-bg)`, sin borde/transform/underline. |
+| `mi-css.css` | `.selector-platos-item.is-active` | Fondo suave + texto primary. Sin glow/redondel. |
+| `mi-css.css` | `.selector-platos-sep` + `-fuerte` | Separadores verticales con dark mode. |
+
+**Deuda pendiente**:
+- **Probar Opción C**: mover el selector adentro del wrapper del bloque de platos. Requiere tocar `pre-base.html` (wrapper nuevo) + `mi-css.css` (mover fondo del listado al wrapper). No urgente — la opción B ya integra visualmente.
+- **Ajuste fino del gap** entre selector y bloque de platos (hoy `m-2` en el wrapper del listado). Se puede ajustar a `mt-0` si se siente mucho.
+
+**Rollback**: si en el futuro se quiere volver al diseño anterior del selector, `git revert 3dbcc56` revierte todo el rediseño (sin migraciones, solo CSS + HTML de tabs).
+
