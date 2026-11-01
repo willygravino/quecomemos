@@ -679,3 +679,43 @@ El listado de platos estaba mezclado, ordenado por historial de programación (b
 - Rama `carpetas-wip`: borrar (`git branch -D carpetas-wip`) o conservar. Si se conserva, no molesta.
 - `backups_variedades/` en `.gitignore`: los archivos están untracked, sin riesgo. Deuda de limpieza.
 
+
+### 30.5 Sesión 2026-10-31 (continuación) — Botones completos en listado Gmail + muteo de carousel
+
+**Commits**: `dd1a26f` (botones Gmail + fix bug) y `44ed2b3` (muteo carousel). Deployados a Railway.
+
+#### 30.5.1 Botones en `_plato_row_gmail.html` (listado tipo Gmail)
+
+Antes había 2-4 botones según caso. Ahora hay **hasta 7** en este orden:
+
+| Botón | Cuándo aparece | Ícono | Acción |
+|---|---|---|---|
+| Ver enlace | `plato.enlace` | `fa-arrow-up-right-from-square` | Link externo, pestaña nueva |
+| Programar | Siempre | `fa-calendar-plus` | Abre `#asignarPlatoModal` |
+| Ingredientes | Siempre | `fa-list-check` | Abre modal ingredientes (AJAX) |
+| Compartir | `amigues` | `fa-share-nodes` | Abre `#compartirModal` (sin dropdown de historial) |
+| Editar | `propietario` | `fa-pen-to-square` | Abre sheet de edición |
+| Duplicar | `propietario` | `fa-clone` | Crea copia (ver §30.3) |
+| Eliminar | `propietario` | `fa-trash-can` | `confirmDialog` + `eliminar-plato` |
+
+**Importante:** todos los botones tienen `onclick="event.stopPropagation();"` para **no disparar el click del row** (que abre el detalle).
+
+**El dropdown de historial de compartidos NO se replica en el listado** — son ~90 líneas HTML por plato × 121 platos = ~11k de HTML extra. Se accede desde el card detalle. Si en el futuro se necesita, evaluar alternativa (lazy load, ajax, etc.).
+
+**CSS**: reutiliza `.plato-gmail-action-btn` (no se agregó CSS nuevo). Sin bump de JS.
+
+#### 30.5.2 Muteo de indicadores del carousel (`_menu_programado_dias.html` + `mi-css.css`)
+
+**Motivación**: en el carousel mobile de comidas (Desayuno · Almuerzo · Merienda · Cena), los indicadores de comidas sin plato programado se veían igual que los que sí tenían. El dueño pidió atenuarlos, igual que §27.8 (wrapper de comida vacía).
+
+**Cambios:**
+- **Eliminado**: la regla `.meal-link.has-plato::after` que dibujaba un **tilde verde** (`✓`) al lado del link. Redundante: el contraste apagado/activo ya es suficiente.
+- **Agregado** al final de `mi-css.css`:
+  ```css
+  .meal-link:not(.has-plato) {
+    opacity: 0.45;
+  }
+  .meal-link:not(.has-plato):hover,
+  .meal-link:not(.has-plato):focus-visible {
+    opacity: 0.7;
+  }
