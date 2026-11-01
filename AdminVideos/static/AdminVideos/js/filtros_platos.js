@@ -29,7 +29,6 @@ document.addEventListener("DOMContentLoaded", function () {
   // puede pintar la pantalla.
   let listadoAbortController = null;
   let listadoRequestSeq = 0;
-  let filtroBarridoSeq = 0;
 
   // Sincronizar el botón de creación con la vista inicial.
   actualizarBotonCrearPlato(
@@ -82,7 +81,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const controller = new AbortController();
     listadoAbortController = controller;
 
-    // IMPORTANTE: devolver la Promise. El controlador de barrido necesita
+    // IMPORTANTE: devolver la Promise. El spinner de carga necesita saber cuándo termina.
     // esperar el AJAX real, no sólo la animación.
     return fetch(url, {
       method: "POST",
@@ -217,7 +216,7 @@ document.addEventListener("DOMContentLoaded", function () {
     );
 
     actualizarSelectorHorizontalActivo(tipopag);
-    actualizarListadoPlatosConBarrido();
+    actualizarListadoPlatosConSpinner();
   });
 
   function actualizarSelectorHorizontalActivo(tipopag) {
@@ -295,241 +294,35 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
   // ============================================================
-  // 3.a.1 Barrido visual mientras cambia el filtro por AJAX
+  // 3.a.1 Spinner de carga al cambiar el filtro por AJAX
   // ============================================================
-  let filtroBarridoHideTimer = null;
-  let filtroBarridoInicio = 0;
-
-  const FILTRO_BARRIDO_MIN_MS = 320;
-  const FILTRO_BARRIDO_MAX_MS = 5000;
-  const FILTRO_BARRIDO_DOM_QUIETO_MS = 180;
-
-  function obtenerNodosBarridoCambioFiltro() {
-    const selectores = [
-      ".sugerencias-platos-titulo-bar",
-      "#filtrosPlatosForm",
-      "#filtros-platos-form",
-      ".filtros-platos-panel",
-      ".filtros-platos-wrapper",
-      ".filtros-activos-wrap",
-      "[data-listado-url]",
-      "#contenedor-carousel-platos",
-      "#contenedor-listado-platos",
-      "#contenedor-listado-lugares",
-      "#contenedor-lugares",
-      "#contenedor-delivery",
-      "#contenedor-comer-afuera",
-    ];
-
-    const nodos = [];
-
-    selectores.forEach((selector) => {
-      document.querySelectorAll(selector).forEach((nodo) => {
-        if (!nodos.includes(nodo)) {
-          nodos.push(nodo);
-        }
-      });
-    });
-
-    return nodos.filter((nodo) => {
-      const rect = nodo.getBoundingClientRect();
-      return rect.width > 0 && rect.height > 0;
-    });
-  }
-
-  function obtenerNodosRenderCambioFiltro() {
-    const selectores = [
-      "#contenedor-carousel-platos",
-      "#contenedor-listado-platos",
-      "#contenedor-listado-lugares",
-      "#contenedor-lugares",
-      "#contenedor-delivery",
-      "#contenedor-comer-afuera",
-      "[data-listado-url]",
-    ];
-
-    const nodos = [];
-
-    selectores.forEach((selector) => {
-      document.querySelectorAll(selector).forEach((nodo) => {
-        if (!nodos.includes(nodo)) {
-          nodos.push(nodo);
-        }
-      });
-    });
-
-    return nodos.filter((nodo) => nodo.isConnected);
-  }
-
-  function calcularRectBarridoCambioFiltro() {
-    const nodos = obtenerNodosBarridoCambioFiltro();
-
-    if (!nodos.length) {
-      return null;
-    }
-
-    const rects = nodos.map((nodo) => nodo.getBoundingClientRect());
-
-    const top = Math.min(...rects.map((rect) => rect.top));
-    const left = Math.min(...rects.map((rect) => rect.left));
-    const right = Math.max(...rects.map((rect) => rect.right));
-    const bottom = Math.max(...rects.map((rect) => rect.bottom));
-
-    const margen = 6;
-    const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
-    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-
-    return {
-      top: Math.max(0, top - margen),
-      left: Math.max(0, left - margen),
-      width: Math.min(viewportWidth, right + margen) - Math.max(0, left - margen),
-      height: Math.min(viewportHeight, bottom + margen) - Math.max(0, top - margen),
-    };
-  }
-
-  function obtenerOverlayBarridoCambioFiltro() {
-    let overlay = document.getElementById("filtroPlatosBarridoOverlay");
-
-    if (!overlay) {
-      overlay = document.createElement("div");
-      overlay.id = "filtroPlatosBarridoOverlay";
-      overlay.className = "filtro-platos-barrido-overlay";
-      overlay.setAttribute("aria-hidden", "true");
-      document.body.appendChild(overlay);
-    }
-
-    return overlay;
-  }
-
-  function posicionarBarridoCambioFiltro() {
-    const overlay = obtenerOverlayBarridoCambioFiltro();
-    const rect = calcularRectBarridoCambioFiltro();
-
-    if (!rect) {
-      return overlay;
-    }
-
-    overlay.style.top = `${rect.top}px`;
-    overlay.style.left = `${rect.left}px`;
-    overlay.style.width = `${rect.width}px`;
-    overlay.style.height = `${rect.height}px`;
-
-    return overlay;
-  }
-
-  // Reposicionar overlay al scrollear/resizear (evita que se despegue del contenido)
-  let barridoScrollRaf = null;
-  function reposicionarBarridoEnScroll() {
-    if (barridoScrollRaf) return;
-    barridoScrollRaf = requestAnimationFrame(() => {
-      barridoScrollRaf = null;
-      const overlay = document.getElementById('filtroPlatosBarridoOverlay');
-      if (overlay && overlay.classList.contains('is-active')) {
-        posicionarBarridoCambioFiltro();
-      }
-    });
-  }
-  window.addEventListener('scroll', reposicionarBarridoEnScroll, { passive: true });
-  window.addEventListener('resize', reposicionarBarridoEnScroll, { passive: true });
-
-  function activarBarridoCambioFiltro() {
-    window.clearTimeout(filtroBarridoHideTimer);
-
-    filtroBarridoInicio = Date.now();
+  function mostrarSpinnerCarga() {
     document.body.classList.add("filtro-platos-cambiando");
-
-    const overlay = posicionarBarridoCambioFiltro();
-    overlay.classList.remove("is-hiding");
-
-    requestAnimationFrame(() => {
-      posicionarBarridoCambioFiltro();
-      overlay.classList.add("is-active");
-    });
-  }
-
-  function esperarRenderCambioFiltro() {
-    const nodos = obtenerNodosRenderCambioFiltro();
-
-    if (!nodos.length || typeof MutationObserver === "undefined") {
-      return new Promise((resolve) => {
-        window.setTimeout(resolve, 650);
-      });
+    let back = document.getElementById("filtrosLoadingBackdrop");
+    if (!back) {
+      back = document.createElement("div");
+      back.id = "filtrosLoadingBackdrop";
+      back.className = "filtros-loading-backdrop";
+      back.setAttribute("aria-hidden", "true");
+      back.innerHTML = '<span class="spinner-border text-primary" role="status" aria-label="Cargando"></span>';
+      document.body.appendChild(back);
     }
-
-    return new Promise((resolve) => {
-      let finalizado = false;
-      let quietTimer = null;
-
-      const finalizar = () => {
-        if (finalizado) {
-          return;
-        }
-
-        finalizado = true;
-        window.clearTimeout(quietTimer);
-        window.clearTimeout(maxTimer);
-        observer.disconnect();
-        resolve();
-      };
-
-      const observer = new MutationObserver(() => {
-        window.clearTimeout(quietTimer);
-        posicionarBarridoCambioFiltro();
-
-        quietTimer = window.setTimeout(() => {
-          finalizar();
-        }, FILTRO_BARRIDO_DOM_QUIETO_MS);
-      });
-
-      const maxTimer = window.setTimeout(() => {
-        finalizar();
-      }, FILTRO_BARRIDO_MAX_MS);
-
-      nodos.forEach((nodo) => {
-        observer.observe(nodo, {
-          childList: true,
-          subtree: true,
-          attributes: true,
-          characterData: true,
-        });
-      });
-    });
   }
 
-  function desactivarBarridoCambioFiltro() {
-    const overlay = document.getElementById("filtroPlatosBarridoOverlay");
-    const elapsed = Date.now() - filtroBarridoInicio;
-    const delay = Math.max(0, FILTRO_BARRIDO_MIN_MS - elapsed);
-
-    window.setTimeout(() => {
-      document.body.classList.remove("filtro-platos-cambiando");
-
-      if (!overlay) {
-        return;
-      }
-
-      overlay.classList.add("is-hiding");
-      overlay.classList.remove("is-active");
-
-      filtroBarridoHideTimer = window.setTimeout(() => {
-        overlay.remove();
-      }, 180);
-    }, delay);
+  function ocultarSpinnerCarga() {
+    document.body.classList.remove("filtro-platos-cambiando");
+    const back = document.getElementById("filtrosLoadingBackdrop");
+    if (back) back.remove();
   }
 
-  function actualizarListadoPlatosConBarrido() {
-    const barridoSeq = ++filtroBarridoSeq;
-    activarBarridoCambioFiltro();
+  function actualizarListadoPlatosConSpinner() {
+    mostrarSpinnerCarga();
 
-    const esperaRender = esperarRenderCambioFiltro();
     let resultado = null;
-
     try {
       resultado = actualizarListadoPlatos();
     } catch (error) {
-      if (barridoSeq === filtroBarridoSeq) {
-        desactivarBarridoCambioFiltro();
-      }
+      ocultarSpinnerCarga();
       throw error;
     }
 
@@ -537,13 +330,10 @@ document.addEventListener("DOMContentLoaded", function () {
       ? resultado
       : Promise.resolve();
 
-    Promise.allSettled([esperaAjax, esperaRender]).then(function () {
-      // Un request abortado/viejo no puede apagar el overlay del request nuevo.
-      if (barridoSeq !== filtroBarridoSeq) {
-        return;
-      }
-
-      desactivarBarridoCambioFiltro();
+    Promise.resolve(esperaAjax).then(function () {
+      ocultarSpinnerCarga();
+    }).catch(function () {
+      ocultarSpinnerCarga();
     });
 
     return resultado;
@@ -639,7 +429,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // ============================================================
   form.addEventListener("submit", function (event) {
     event.preventDefault();
-    actualizarListadoPlatosConBarrido();
+    actualizarListadoPlatosConSpinner();
   });
 
   // ============================================================
@@ -670,7 +460,7 @@ document.addEventListener("DOMContentLoaded", function () {
       clearTimeout(timeoutBusquedaPalabraClave);
 
       timeoutBusquedaPalabraClave = setTimeout(function () {
-        actualizarListadoPlatosConBarrido();
+        actualizarListadoPlatosConSpinner();
 
         // Persistir palabra_clave en URL (replaceState: no llena historial)
         const urlKw = new URL(window.location.href);
@@ -689,7 +479,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // ============================================================
   form.querySelectorAll("input[type='checkbox']").forEach(function (checkbox) {
     checkbox.addEventListener("change", function () {
-      actualizarListadoPlatosConBarrido();
+      actualizarListadoPlatosConSpinner();
 
       // Persistir todos los filtros en URL (pushState)
       const urlCb = new URL(window.location.href);
@@ -830,7 +620,7 @@ document.addEventListener("DOMContentLoaded", function () {
     );
 
     actualizarBotonCrearPlato(tipopag);
-    actualizarListadoPlatosConBarrido();
+    actualizarListadoPlatosConSpinner();
   });
 
   document.addEventListener("click", function (event) {
@@ -900,7 +690,7 @@ document.addEventListener("DOMContentLoaded", function () {
       bootstrap.Dropdown.getOrCreateInstance(dropdownToggle).hide();
     }
 
-    actualizarListadoPlatosConBarrido();
+    actualizarListadoPlatosConSpinner();
   });
 
   // 7. Soportar botón atrás / adelante del navegador
@@ -960,7 +750,7 @@ document.addEventListener("DOMContentLoaded", function () {
     actualizarSelectorHorizontalActivo(tipopag);
     actualizarTituloSugerencias(tipopag);
     actualizarBotonCrearPlato(tipopag);
-    actualizarListadoPlatosConBarrido();
+    actualizarListadoPlatosConSpinner();
   });
 
   const tipopagInicial = (

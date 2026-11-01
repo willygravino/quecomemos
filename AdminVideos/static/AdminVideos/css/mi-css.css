@@ -495,79 +495,6 @@ button.btn-programar:active {
   color: #fff;
 }
 
-.plato-gmail-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: .22rem;
-}
-
-.plato-gmail-action-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.65rem;
-  height: 1.65rem;
-  padding: 0;
-  border: 1px solid currentColor;
-  border-radius: 999px;
-  background: transparent;
-  text-decoration: none;
-  transition: background-color .15s ease, color .15s ease, transform .15s ease;
-}
-
-.plato-gmail-action-btn:hover,
-.plato-gmail-action-btn:focus {
-  color: #fff;
-  text-decoration: none;
-  transform: translateY(-.02rem);
-}
-
-.plato-gmail-action-programar {
-  color: #6f42c1;
-  background: rgba(111, 66, 193, .08);
-}
-
-.plato-gmail-action-programar:hover,
-.plato-gmail-action-programar:focus {
-  background: #6f42c1;
-}
-
-.plato-gmail-action-ingredientes {
-  color: var(--bs-primary);
-  background: rgba(var(--bs-primary-rgb), .08);
-}
-
-.plato-gmail-action-ingredientes:hover,
-.plato-gmail-action-ingredientes:focus {
-  background: var(--bs-primary);
-}
-
-.plato-gmail-action-editar {
-  color: var(--bs-body-color);
-  background: var(--bs-tertiary-bg);
-}
-
-.plato-gmail-action-editar:hover,
-.plato-gmail-action-editar:focus {
-  background: var(--bs-body-color);
-  color: var(--bs-body-bg);
-}
-
-.plato-gmail-action-btn i {
-  font-size: .78rem;
-  line-height: 1;
-}
-
-@media (max-width: 575.98px) {
-  .plato-gmail-actions {
-    gap: .12rem;
-  }
-
-  .plato-gmail-action-btn {
-    width: 1.55rem;
-    height: 1.55rem;
-  }
-}
 
 /* === PARTES DE LA RECETA === */
 .parte-receta-editor {
@@ -658,51 +585,32 @@ button.btn-programar:active {
 }
 
 /* =====================================================
-   Barrido visual al cambiar filtros de platos
-   Overlay calculado por JS sobre título + filtros + carousel + listado.
+   Spinner de carga al cambiar filtros (2026-11-01)
+   Overlay fixed con spinner centrado. Se crea/elimina dinámicamente por JS.
 ===================================================== */
-.filtro-platos-barrido-overlay {
+.filtros-loading-backdrop {
   position: fixed;
-  pointer-events: none;
-  z-index: 1045;
-  border-radius: 0;
-  overflow: hidden;
-  opacity: 0;
-  background: rgba(255, 255, 255, .06);
-  box-shadow: none;
-  transition: opacity .14s ease, transform .14s ease;
-  transform: scale(.995);
-  -webkit-mask-image: radial-gradient(ellipse at center, #000 55%, transparent 95%);
-  mask-image: radial-gradient(ellipse at center, #000 55%, transparent 95%);
-}
-
-.filtro-platos-barrido-overlay.is-active {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.filtro-platos-barrido-overlay.is-hiding {
-  opacity: 0;
-}
-
-.filtro-platos-barrido-overlay::before {
-  content: "";
-  position: absolute;
   inset: 0;
-  background: linear-gradient(
-    105deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, .10) 35%,
-    rgba(255, 255, 255, .42) 50%,
-    rgba(255, 255, 255, .10) 65%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  transform: translateX(-120%);
-  animation: filtroPlatosBarrido 1.05s ease-in-out infinite;
+  z-index: 1045;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.15);
+  pointer-events: none;
+}
+
+.filtros-loading-backdrop .spinner-border {
+  width: 3rem;
+  height: 3rem;
+  border-width: 0.3rem;
+}
+
+[data-bs-theme="dark"] .filtros-loading-backdrop {
+  background: rgba(0, 0, 0, 0.35);
 }
 
 body.filtro-platos-cambiando .sugerencias-platos-titulo-bar {
-  filter: brightness(1.08);
+  filter: brightness(1.06);
 }
 
 body.filtro-platos-cambiando #contenedor-carousel-platos,
@@ -725,22 +633,7 @@ body.filtro-platos-cambiando [data-listado-url] {
   transition: opacity .18s ease, filter .18s ease;
 }
 
-@keyframes filtroPlatosBarrido {
-  0% {
-    transform: translateX(-120%);
-  }
-
-  100% {
-    transform: translateX(120%);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .filtro-platos-barrido-overlay::before {
-    animation: none;
-    transform: none;
-  }
-
   body.filtro-platos-cambiando #contenedor-carousel-platos,
   body.filtro-platos-cambiando #contenedor-listado-platos,
   body.filtro-platos-cambiando #contenedor-lugares,
@@ -750,6 +643,7 @@ body.filtro-platos-cambiando [data-listado-url] {
     opacity: .70;
   }
 }
+
 /* =====================================================
    Compartir: split button + historial scrolleable
    ===================================================== */
@@ -3201,5 +3095,62 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
 .plato-subgrupo-bloque > .plato-grupo-header {
   border-top: 0 !important;
   border-bottom: 0 !important;
+}
+/* =====================================================
+   Íconos de fila Gmail: hover-only + ocultar al seleccionar
+   (2026-11-01)
+   ===================================================== */
+
+/* Ocultos por defecto en desktop */
+.plato-gmail-actions {
+  opacity: 0;
+  transition: opacity .15s ease;
+}
+
+/* Visibles al hover o focus (a11y teclado) */
+.plato-row:hover .plato-gmail-actions,
+.plato-row:focus-within .plato-gmail-actions {
+  opacity: 1;
+}
+
+/* Ocultos si la fila está tildada (el usuario va a usar acciones masivas) */
+.plato-row:has(.js-plato-select:checked) .plato-gmail-actions {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+/* Touch (sin hover): siempre visibles */
+@media (hover: none) {
+  .plato-gmail-actions { opacity: 1; }
+}
+/* Card de detalle sticky en el listado (2026-11-01) */
+#contenedor-carousel-platos {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bs-body-bg);
+  margin-bottom: 0.5rem;
+}
+
+/* En mobile la card es alta: la limitamos para que no tape todo el listado */
+@media (max-width: 767.98px) {
+  #contenedor-carousel-platos {
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+}
+/* Fix sticky: #content-wrapper tiene overflow-x:hidden de vendor que rompe sticky.
+   Usamos overflow: clip (ambos ejes) porque:
+   - No crea scroll container (sticky funciona).
+   - Evita el artifact de puntitos que aparece con "clip visible". */
+#content-wrapper {
+  overflow: clip !important;
+}
+/* Sticky bar de acciones masivas: top dinámico debajo del carousel */
+.platos-acciones-bar {
+  position: sticky;
+  top: var(--qc-carousel-height, 350px);
+  z-index: 9;
+  background: var(--bs-body-bg);
 }
 

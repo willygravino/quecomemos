@@ -4,55 +4,38 @@
 <section class="w-100 text-body bg-body-tertiary rounded shadow-sm">
 
   <!-- Header opcional (tipo Gmail: checkbox + títulos) -->
-  <div class="px-2 py-2 border-bottom d-flex align-items-center gap-2 text-body flex-wrap">
+  <div class="px-2 py-2 border-bottom d-flex align-items-center justify-content-between gap-2 text-body flex-wrap platos-acciones-bar w-100">
 
-  <!-- Seleccionar todos -->
-  <div class="form-check m-0">
-    <input class="form-check-input" type="checkbox" id="chk-platos-all" aria-label="Seleccionar todos">
-  </div>
+    <div class="d-flex align-items-center gap-2">
+      <!-- Seleccionar todos -->
+      <div class="form-check m-0">
+        <input class="form-check-input" type="checkbox" id="chk-platos-all" aria-label="Seleccionar todos">
+      </div>
 
-  <!-- Título / contador -->
-  <div class="flex-grow-1 d-flex align-items-center gap-2 min-w-0">
-    <span class="small text-muted mb-0">
-      {% if tipopag == 'Picada' %}
-        Picadas armadas
-      {% elif tipopag == 'Ingrediente de picada' %}
-        Ingredientes de picada
-      {% else %}
-        Platos
-      {% endif %}
-    </span>
-    <span id="platos-selected-count" class="badge rounded-pill bg-primary d-none">0 seleccionados</span>
-  </div>
+      <!-- Contador de seleccionados (al lado del checkbox) -->
+      <span id="platos-selected-count" class="badge rounded-pill bg-primary d-none">0 seleccionados</span>
+    </div>
 
-  <!-- Acciones masivas -->
-  <div class="dropdown">
-    <button
-      class="btn btn-sm btn-outline-secondary dropdown-toggle"
-      type="button"
-      id="bulkPlatosActionsBtn"
-      data-bs-toggle="dropdown"
-      aria-expanded="false"
-      disabled>
-      Acciones masivas
+    <!-- Acciones masivas: 2 iconos (a la derecha) -->
+    <div class="d-flex align-items-center gap-1" role="group" aria-label="Acciones masivas">
+    {% if amigues %}
+    <button class="btn btn-sm btn-outline-primary"
+            type="button"
+            id="bulk-share"
+            disabled
+            title="Compartir seleccionados (próximamente)"
+            aria-label="Compartir seleccionados (próximamente)">
+      <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
     </button>
-
-    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="bulkPlatosActionsBtn">
-
-      {% if amigues %}
-      <li>
-        <button class="dropdown-item" type="button" id="bulk-share">
-          <i class="fa-solid fa-share-nodes me-2"></i>Compartir seleccionados
-        </button>
-      </li>
-      {% endif %}
-
-      <li>
-        <button class="dropdown-item text-danger" type="button" id="bulk-delete">
-          <i class="fa-solid fa-trash-can me-2"></i>Eliminar seleccionados
-        </button>
-      </li>
-    </ul>
+    {% endif %}
+    <button class="btn btn-sm btn-outline-danger"
+            type="button"
+            id="bulk-delete"
+            disabled
+            title="Eliminar seleccionados"
+            aria-label="Eliminar seleccionados">
+      <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+    </button>
   </div>
 
 </div>

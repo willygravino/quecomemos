@@ -875,7 +875,6 @@ function initListadoPlatos() {
   const masterCheckbox = document.getElementById('chk-platos-all');
   const rowCheckboxes = document.querySelectorAll('.js-plato-select');
   const selectedCountBadge = document.getElementById('platos-selected-count');
-  const bulkActionsBtn = document.getElementById('bulkPlatosActionsBtn');
   const bulkDeleteBtn = document.getElementById('bulk-delete');
   const bulkDeleteForm = document.getElementById('bulk-delete-form');
   const bulkDeleteInputs = document.getElementById('bulk-delete-inputs');
@@ -906,8 +905,8 @@ function initListadoPlatos() {
       }
     }
 
-    if (bulkActionsBtn) {
-      bulkActionsBtn.disabled = selected === 0;
+    if (bulkDeleteBtn) {
+      bulkDeleteBtn.disabled = selected === 0;
     }
 
     if (masterCheckbox) {
@@ -1001,6 +1000,39 @@ function initListadoPlatos() {
 document.addEventListener('DOMContentLoaded', function () {
   initListadoPlatos();
 });
+
+/* Sticky bar: top dinámico calculado sobre la altura real del carousel sticky.
+   - ResizeObserver: recalcula si el carousel cambia de tamaño (resize, imagen).
+   - MutationObserver: recalcula después de cada AJAX del listado. */
+(function () {
+  function updateStickyOffset() {
+    var carousel = document.getElementById('contenedor-carousel-platos');
+    if (!carousel) return;
+    var h = carousel.getBoundingClientRect().height;
+    if (h > 0) {
+      document.documentElement.style.setProperty('--qc-carousel-height', h + 'px');
+    }
+  }
+
+  function init() {
+    updateStickyOffset();
+    var carousel = document.getElementById('contenedor-carousel-platos');
+    if (carousel && typeof ResizeObserver !== 'undefined') {
+      new ResizeObserver(updateStickyOffset).observe(carousel);
+    }
+    window.addEventListener('resize', updateStickyOffset);
+    var listado = document.getElementById('contenedor-listado-platos');
+    if (listado && typeof MutationObserver !== 'undefined') {
+      new MutationObserver(updateStickyOffset).observe(listado, { childList: true });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
 </script>
 
 
