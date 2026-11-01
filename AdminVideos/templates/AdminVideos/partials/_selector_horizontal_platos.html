@@ -20,6 +20,8 @@
         <span class="icon-wrap"><i class="fa-solid fa-border-all"></i></span>
         <span class="item-text">Todos</span>
       </a>
+      <span class="selector-platos-sep selector-platos-sep-fuerte" aria-hidden="true"></span>
+
 
       <a class="selector-platos-item js-filtro-tipopag {% if tipopag == 'Principal' %}is-active{% endif %}"
          href="{% url 'filtro-de-platos' %}?tipopag=Principal{% if lo_que_tengo_activo %}&lo_que_tengo=1{% endif %}"
@@ -33,7 +35,14 @@
          data-tipopag="Entrada">
         <span class="icon-wrap"><i class="fa-solid fa-shrimp"></i></span>
         <span class="item-text">Entradas</span>
+      </a><a class="selector-platos-item js-filtro-tipopag {% if tipopag == 'Guarnicion' %}is-active{% endif %}"
+         href="{% url 'filtro-de-platos' %}?tipopag=Guarnicion{% if lo_que_tengo_activo %}&lo_que_tengo=1{% endif %}"
+         data-tipopag="Guarnicion">
+        <span class="icon-wrap"><i class="fa-solid fa-plate-wheat"></i></span>
+        <span class="item-text">Guarniciones</span>
       </a>
+      <span class="selector-platos-sep" aria-hidden="true"></span>
+
 
       <a class="selector-platos-item js-filtro-tipopag {% if tipopag == 'Dip' %}is-active{% endif %}"
          href="{% url 'filtro-de-platos' %}?tipopag=Dip{% if lo_que_tengo_activo %}&lo_que_tengo=1{% endif %}"
@@ -48,13 +57,10 @@
         <span class="icon-wrap"><i class="fa-solid fa-droplet"></i></span>
         <span class="item-text">Salsas</span>
       </a>
+      <span class="selector-platos-sep" aria-hidden="true"></span>
 
-      <a class="selector-platos-item js-filtro-tipopag {% if tipopag == 'Guarnicion' %}is-active{% endif %}"
-         href="{% url 'filtro-de-platos' %}?tipopag=Guarnicion{% if lo_que_tengo_activo %}&lo_que_tengo=1{% endif %}"
-         data-tipopag="Guarnicion">
-        <span class="icon-wrap"><i class="fa-solid fa-plate-wheat"></i></span>
-        <span class="item-text">Guarniciones</span>
-      </a>
+      
+
 
       <a class="selector-platos-item js-filtro-tipopag {% if tipopag == 'Picada' %}is-active{% endif %}"
          href="{% url 'filtro-de-platos' %}?tipopag=Picada{% if lo_que_tengo_activo %}&lo_que_tengo=1{% endif %}"
@@ -69,6 +75,8 @@
         <span class="icon-wrap"><i class="fa-solid fa-carrot"></i></span>
         <span class="item-text">Ingredientes de picada</span>
       </a>
+      <span class="selector-platos-sep" aria-hidden="true"></span>
+
 
       <a class="selector-platos-item js-filtro-tipopag {% if tipopag == 'Postre' %}is-active{% endif %}"
          href="{% url 'filtro-de-platos' %}?tipopag=Postre{% if lo_que_tengo_activo %}&lo_que_tengo=1{% endif %}"
@@ -76,6 +84,8 @@
         <span class="icon-wrap"><i class="fa-solid fa-ice-cream"></i></span>
         <span class="item-text">Postres</span>
       </a>
+      <span class="selector-platos-sep" aria-hidden="true"></span>
+
 
       <a class="selector-platos-item js-filtro-tipopag {% if tipopag == 'Trago' %}is-active{% endif %}"
          href="{% url 'filtro-de-platos' %}?tipopag=Trago{% if lo_que_tengo_activo %}&lo_que_tengo=1{% endif %}"
@@ -83,6 +93,8 @@
         <span class="icon-wrap"><i class="fa-solid fa-martini-glass-citrus"></i></span>
         <span class="item-text">Bebidas y tragos</span>
       </a>
+      <span class="selector-platos-sep" aria-hidden="true"></span>
+
 
       <a class="selector-platos-item js-filtro-tipopag {% if tipopag == 'Delivery' %}is-active{% endif %}"
          href="{% url 'filtro-de-platos' %}?tipopag=Delivery{% if lo_que_tengo_activo %}&lo_que_tengo=1{% endif %}"
