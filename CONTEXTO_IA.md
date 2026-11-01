@@ -719,3 +719,22 @@ Antes había 2-4 botones según caso. Ahora hay **hasta 7** en este orden:
   .meal-link:not(.has-plato):focus-visible {
     opacity: 0.7;
   }
+  ```
+
+- **HTML**: sin cambios. La clase `has-plato` ya existía en `_menu_programado_dias.html` (`{% if dia_plato.1.X %}has-plato{% endif %}`).
+- **Modo oscuro**: las reglas `[data-bs-theme="dark"] .meal-link` ya existentes cubren el color. La opacidad aplica en ambos modos.
+- **Bump**: `mi-css.css` → `?v=20261031_220000` en `base.html` L49.
+
+#### 30.5.3 Puntos críticos actualizados (§15)
+
+| Archivo | Punto | Qué hace |
+|---|---|---|
+| `_plato_row_gmail.html` | bloque `.plato-gmail-actions` (~L25-100) | 7 botones en orden. Cada uno con `stopPropagation`. |
+| `mi-css.css` | `.meal-link:not(.has-plato)` (~L3029) | Muteo de indicadores de comida sin programar. |
+| `mi-css.css` | `[data-bs-theme="dark"] .meal-link` (~L1213) | Color en modo oscuro. |
+
+#### 30.5.4 Deuda nueva / consideraciones
+
+- **Dropdown de historial de compartir en el listado**: no replicado (§30.5.1). Si se necesita, es un mini-proyecto aparte (lazy load o modal).
+- **`_plato_card_detalle.html` (card/carousel del listado)**: tiene los mismos 7 botones pero con **texto** (`btn-sm btn-outline-secondary`), no solo íconos. Estilos diferentes entre listado y card por diseño. No unificar sin pedido explícito.
+- **Ver enlace en el card** solo aparece si `plato.enlace`; el card lo muestra con texto "Ver enlace" y el listado con ícono. Coherente con el resto.
