@@ -738,3 +738,16 @@ Antes había 2-4 botones según caso. Ahora hay **hasta 7** en este orden:
 - **Dropdown de historial de compartir en el listado**: no replicado (§30.5.1). Si se necesita, es un mini-proyecto aparte (lazy load o modal).
 - **`_plato_card_detalle.html` (card/carousel del listado)**: tiene los mismos 7 botones pero con **texto** (`btn-sm btn-outline-secondary`), no solo íconos. Estilos diferentes entre listado y card por diseño. No unificar sin pedido explícito.
 - **Ver enlace en el card** solo aparece si `plato.enlace`; el card lo muestra con texto "Ver enlace" y el listado con ícono. Coherente con el resto.
+
+#### 30.5.5 Fix barrido que se despegaba al scrollear (`5f3d8c5`)
+
+**Bug reportado**: el overlay shimmer del filtro (`.filtro-platos-barrido-overlay`) se posicionaba una sola vez con `getBoundingClientRect()`. Al scrollear durante la carga, el listado se movía pero el overlay quedaba en el `top/left` viejo → visualmente despegado.
+
+**Fix** (`filtros_platos.js`, ~15 líneas): listener `scroll` + `resize` que, solo si el overlay tiene `.is-active`, recalcula la posición vía `requestAnimationFrame` (con flag para evitar doble rAF por frame).
+
+**Punto crítico nuevo (§15)**:
+| Archivo | Punto | Qué hace |
+|---|---|---|
+| `filtros_platos.js` | `reposicionarBarridoEnScroll` | Reposiciona el overlay shimmer al scrollear/resizear. rAF con debounce natural. |
+
+**Alternativa evaluada y descartada**: reemplazar el shimmer por un spinner centrado (overlay con ícono `fa-spinner fa-spin`). Se descartó porque el shimmer gustaba y el costo del fix era menor. Si en algún momento se quiere migrar a spinner, la función a reemplazar es `activarBarridoCambioFiltro` / `desactivarBarridoCambioFiltro` + el bloque CSS `.filtro-platos-barrido-overlay*` en `mi-css.css`.
