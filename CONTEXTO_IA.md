@@ -990,3 +990,117 @@ Después:
 
 - .filtros-platos-card > .card-body ahora depende de la regla :not(.filtros-platos-card > .card-body). Si en el futuro se agrega otro .card-body dentro del filtro (anidado), NO estará excluido (porque el selector es para hijos directos). A tener en cuenta.
 
+### 31. Idea futura: Plantillas de menú semanal (2026-11-02)
+
+> **Estado**: idea capturada, no implementada. Pendiente de diseño detallado y aprobación. Idea del dueño, discutida al final de la sesión del 2026-11-02.
+
+#### 31.1 Motivación
+
+El menú semanal actual (lun-dom) requiere que el usuario **cargue plato por plato** cada comida, cada día. Es tedioso. La idea es permitir **plantillas**: semanas pre-armadas con **slots tipados** que describen el **tipo** de plato que va en cada comida, no el plato concreto.
+
+El usuario elige una plantilla → la app muestra la semana con **filtros** en lugar de platos → el usuario recorre item por item eligiendo de entre las opciones que matchean → la semana queda armada.
+
+
+#### 31.2 Modelo conceptual
+
+Cada **slot** de la plantilla (día + comida) tiene un **criterio/filtro** que describe qué tipo de plato va ahí:
+
+| Ejemplo de slot | Interpretación del criterio |
+|---|---|
+| "Un plato de carne roja" | `subtipo_carta=carnes_rojas` |
+| "Plato vegetariano" | `subtipo_carta=vegetarianos` |
+| "Rápida preparación" | `(elaboracion + coccion) <= 30` |
+| "Guarnición vegetariana" | `tipos incluye Guarnicion AND subtipo_carta=vegetarianos` |
+| "Guiso con legumbres" | combinación de `tipo` + ingredientes |
+| "Comida liviana para la noche" | combinación de `categoria` + `medios` + `estacionalidad` |
+
+El usuario elige un plato de entre los que matchean, y el slot queda materializado.
+
+#### 31.3 Campos del modelo que ya sirven como filtro
+
+Casi todo el "filtro" ya está en `Plato`:
+- `tipos` (CSV de tipos: Principal, Guarnicion, Entrada, etc.)
+- `categoria` (Cotidiano / Especial / Ambos)
+- `subtipo_carta` (Carnes rojas, Aves, Vegetarianos, Pastas, etc.)
+- `elaboracion` + `coccion` (minutos, para "rápida preparación")
+- `medios` (Horno, Cocina, Parrilla, Wok, Sin cocción)
+- `estacionalidad` (Todo el año, Verano, Invierno, etc.)
+- `ingredientes_en_plato` (relación con `Ingrediente`, para "con legumbres")
+
+**Falta definir**: cómo se **combinan** esos campos en un criterio. Opciones:
+- **Simple**: campo `CriterioSlot.tipo` (uno solo de los anteriores) + valor.
+- **Complejo**: `CriterioSlot.filtros_json` (JSON con condiciones AND/OR).
+- **Medio**: campos explícitos (`tipos`, `subtipos`, `categoria`) que se ANDean.
+
+
+#### 31.4 Decisiones arquitectónicas pendientes
+
+**1. ¿Plantilla vive en un modelo paralelo o en `MenuDia` directo?**
+
+- **Opción A**: modelo `PlantillaSemana` + `PlantillaSlot` + `MenuItem.plato` nullable. El slot vacío indica "sin elegir". No se materializa hasta que el usuario elige.
+  - Pro: no ensucia `MenuDia`.
+  - Con: hay que sincronizar plantilla con la semana real.
+
+- **Opción B**: `MenuDia` con `MenuItem.plato` nullable + `MenuItem.criterio`. La semana ya es la plantilla, sin modelo intermedio.
+  - Pro: más simple.
+  - Con: `MenuItem` mezcla "elegido" con "pendiente".
+
+- **Opción C**: la plantilla vive aparte (`PlantillaSemana`), y al elegirla se **copia** a `MenuDia` (con `plato=null` y `criterio`). El usuario va eligiendo platos y los `MenuItem` se van completando.
+  - Pro: separa "plantilla" de "semana en curso".
+  - Con: duplicación (¿se re-sincroniza si la plantilla cambia?).
+
+**Mi voto (anotado, no decidido): Opción A**. La plantilla es un objeto separado; se materializa en `MenuDia` cuando el usuario elige cada slot.
+
+**2. ¿Cómo se materializa?**
+
+- Opción A: cada click del usuario crea un `MenuItem` en la semana real (`plato=<id>`).
+- Opción B: la semana muestra los slots pendientes con dropdowns, y recién al elegir todos se "confirma" la semana y se crea `MenuDia`.
+- Opción C: mixto — al elegir la plantilla se crea `MenuDia` con `MenuItem.plato=null`; cada click llena uno.
+
+**Mi voto: C**. La semana ya existe apenas se elige la plantilla (visible en el menú), y cada slot se va llenando.
+
+**3. Plantillas del sistema vs plantillas del usuario**
+
+Ya existe el patrón para `Plato`:
+- `propietario` (FK User) + `proviene_de` (string, marca de origen si se importó).
+- Platos del user "quecomemos" son "sugerencias" del sistema.
+
+Reusar el mismo patrón:
+- `PlantillaSemana.propietario` (FK User nullable).
+- Plantillas del sistema: `propietario=quecomemos` (o `NULL` con flag `es_sistema=True`).
+- Plantillas del usuario: `propietario=<user>`.
+
+**Mi voto: reusar el patrón existente.**
+
+
+#### 31.5 Ejemplos de plantillas
+
+- **"Semana de platos especiales"** — todos los almuerzos/cenas con `categoria=Especial`.
+- **"Semana vegetariana"** — todos los platos con `subtipo_carta=vegetarianos`.
+- **"Comidas livianas a la noche"** — cenas con `medios` en (Wok, Sin cocción) o con `elaboracion+coccion <= 20`.
+- **"Semana sin harinas"** — filtro por ingredientes excluyentes (no trigo, no arroz, no pastas).
+- **"Semana sin repeticiones"** — el usuario elige el plato en cada slot, pero la app **no permite repetir** un plato que ya está en otro slot.
+
+**Filtros más complejos** (a definir si se implementan en fase 1 o después):
+- Rangos de ingredientes específicos.
+- Combinaciones AND/OR.
+- Orden por estacionalidad (preferir platos de la estación actual).
+
+#### 31.6 Estado actual
+
+**Nada implementado**. Esto es una idea capturada para retomar en una sesión futura.
+
+**Antes de implementar, hace falta:**
+1. **Decidir las 3 arquitecturas de §31.4.**
+2. **Diseñar el modelo de datos** (`PlantillaSemana` + `CriterioSlot`).
+3. **Diseñar la UI**: cómo se ve una semana con slots pendientes.
+4. **Diseñar el flujo**: elegir plantilla → llenar slots → confirmar.
+
+**No empezar a codear hasta tener un plan aprobado.** Es un feature grande (~1000+ líneas entre modelo, migración, vistas, templates, JS). Requiere el flujo de §10 (investigar → plan → aprobación → ejecutar) paso a paso.
+
+#### 31.7 Consideraciones extra
+
+- **Interacción con `carpetas-wip`** (feature descartado): sin relación directa.
+- **Interacción con `subtipo_carta`** (§29): es el filtro más natural, ya está implementado.
+- **Interacción con "Lo que tengo"** (§30): una plantilla podría filtrar también por lo que tiene el usuario. Sería poderoso pero suma complejidad.
+
