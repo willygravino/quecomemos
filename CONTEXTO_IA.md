@@ -879,3 +879,52 @@ Antes había 2-4 botones según caso. Ahora hay **hasta 7** en este orden:
 - Los archivos `.DS_Store` (basura de macOS) se colaron en el commit `01ced8a`.
 - **Acción**: `git rm --cached` para todos y agregar al `.gitignore` global para que no vuelvan a entrar.
 
+
+### 30.11 Sesión 2026-11-02 (cont.) — Fix dark mode filtro + shell transparente
+
+#### 30.11.1 Bug del doble contenedor en dark mode
+
+**Síntoma**: en light mode el filtro se veía con 1 sola caja (shell suave). En dark mode aparecían 2 cajas superpuestas (shell gris + card oscuro adentro).
+
+**Causa raíz**: en mi-css.css (L1007-1020) hay una regla global:
+
+[data-bs-theme="dark"] .card,
+[data-bs-theme="dark"] .card-body,
+... {
+  background-color: var(--bs-body-bg) !important;
+}
+
+Esa regla pisaba el bg-transparent del card (que sí funcionaba en light porque no hay regla equivalente). Por eso en dark volvía el fondo oscuro del card → doble caja.
+
+**Diagnóstico preciso**: document.elementsFromPoint() + getComputedStyle en cada nivel. Se identificó:
+- Shell: rgb(43,48,53) (gris oscuro, el fondito suave)
+- Card: rgb(33,37,41) (casi negro, debería ser transparente)
+- Card-body: rgb(33,37,41) (idem)
+- Form: rgba(0,0,0,0) (OK)
+
+Y una regla [data-bs-theme="dark"] .card, .card-body, ... con !important que ganaba por especificidad.
+
+#### 30.11.2 Fix aplicado
+
+**Modificar la regla global** (no agregar parches):
+
+Antes:
+[data-bs-theme="dark"] .card,
+[data-bs-theme="dark"] .card-body,
+... { background-color: var(--bs-body-bg) !important; }
+
+Después:
+[data-bs-theme="dark"] .card:not(.filtros-platos-card),
+[data-bs-theme="dark"] .card-body:not(.filtros-platos-card > .card-body),
+... { background-color: var(--bs-body-bg) !important; }
+
+**Por qué funciona**: al excluir .filtros-platos-card (y su .card-body directo), la regla global deja de aplicar sobre el filtro. El shell queda como único contenedor visual → 1 sola caja en light y dark.
+
+**Bonus**: se corrigió un typo histórico en la misma regla (.album,git p → .album,). El selector inválido era ignorado por el navegador, sin efecto funcional.
+
+**Riesgo**: la regla global afecta a modales, dropdowns, list-groups, etc. Se verificó que ningún otro componente dependa del fondo del .card del filtro específicamente. En dark mode el resto sigue igual.
+
+#### 30.11.3 Deuda nueva
+
+- .filtros-platos-card > .card-body ahora depende de la regla :not(.filtros-platos-card > .card-body). Si en el futuro se agrega otro .card-body dentro del filtro (anidado), NO estará excluido (porque el selector es para hijos directos). A tener en cuenta.
+
