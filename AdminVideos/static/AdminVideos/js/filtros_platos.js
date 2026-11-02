@@ -733,3 +733,45 @@ document.addEventListener("DOMContentLoaded", function () {
   actualizarSelectorHorizontalActivo(tipopagInicial);
 
 });
+
+// ============================================================
+// BOTÓN X PARA LIMPIAR LA BÚSQUEDA (2026-11-02)
+// - Aparece solo cuando el input de palabra clave tiene texto.
+// - Click limpia el input y dispara el filtro automáticamente.
+// - Funciona en mobile (donde el navegador no muestra el X nativo).
+// ============================================================
+(function () {
+  function initClearSearch() {
+    const form = document.getElementById("form-filtros-platos");
+    if (!form) return;
+
+    const input = form.querySelector('input[name="palabra_clave"]');
+    const btn = form.querySelector(".btn-clear-search");
+    if (!input || !btn || btn.__clearBound) return;
+
+    function updateVisibility() {
+      const hasValue = (input.value || "").trim().length > 0;
+      btn.classList.toggle("is-visible", hasValue);
+    }
+
+    input.addEventListener("input", updateVisibility);
+
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      input.value = "";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      updateVisibility();
+      input.focus();
+    });
+
+    updateVisibility();
+    btn.__clearBound = true;
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initClearSearch);
+  } else {
+    initClearSearch();
+  }
+})();
+

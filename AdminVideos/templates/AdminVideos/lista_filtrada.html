@@ -140,6 +140,12 @@
             placeholder="Buscar por palabra clave"
             name="palabra_clave"
             value="{{ formulario.palabra_clave.value|default:'' }}">
+          <button type="button"
+                  class="input-group-text btn-clear-search"
+                  aria-label="Limpiar búsqueda"
+                  title="Limpiar búsqueda">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+          </button>
 
       </div>
 
@@ -283,7 +289,7 @@
   </div>
 </div>
 
-<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=20261102_290000"></script>
+<script src="{% static 'AdminVideos/js/filtros_platos.js' %}?v=20261102_235000"></script>
 <script src="{% static 'AdminVideos/js/lo_que_tengo.js' %}?v=20260822172620"></script>
 
 {% endblock %}
