@@ -494,45 +494,22 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // 5.a Impedir que queden los dos toggles de categoría destildados.
-  // Se corre en fase capture para adelantarse al listener genérico y no
-  // disparar un fetch inútil con la lista vacía.
+  // 5.a Toggle cruzado: al apagar uno de los dos checkboxes de categoría,
+  // se enciende el otro automáticamente. Se permite tener ambos ON (ver todo)
+  // o uno solo, pero nunca ambos OFF (lista vacía).
+  // Se corre en fase capture para que el toggle ocurra ANTES de que el
+  // listener genérico lea el estado del form y dispare el fetch.
   const checkboxesCategoria = form.querySelectorAll(
     'input[name="ver_cotidiano"], input[name="ver_especial"]'
   );
-  let avisoCategoriaTimer = null;
-
-  function mostrarAvisoCategoriaVacia() {
-    const grupo = form.querySelector('[aria-label="Categorías visibles"]');
-    if (!grupo) return;
-
-    let aviso = document.getElementById("aviso-categoria-vacia");
-    if (!aviso) {
-      aviso = document.createElement("div");
-      aviso.id = "aviso-categoria-vacia";
-      aviso.className = "small text-danger mt-1";
-      aviso.textContent = "Tenés que elegir al menos una categoría.";
-      grupo.parentNode.insertBefore(aviso, grupo.nextSibling);
-    }
-
-    aviso.style.display = "";
-    window.clearTimeout(avisoCategoriaTimer);
-    avisoCategoriaTimer = window.setTimeout(function () {
-      aviso.style.display = "none";
-    }, 2500);
-  }
 
   checkboxesCategoria.forEach(function (checkbox) {
-    checkbox.addEventListener("change", function (event) {
-      const algunoMarcado = Array.from(checkboxesCategoria).some(function (c) {
-        return c.checked;
-      });
+    checkbox.addEventListener("change", function () {
+      if (checkbox.checked) return;
 
-      if (!algunoMarcado) {
-        checkbox.checked = true;
-        mostrarAvisoCategoriaVacia();
-        event.stopImmediatePropagation();
-      }
+      checkboxesCategoria.forEach(function (otro) {
+        if (otro !== checkbox) otro.checked = true;
+      });
     }, true);
   });
 
