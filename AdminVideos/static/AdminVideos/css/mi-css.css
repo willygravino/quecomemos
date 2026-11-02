@@ -2622,6 +2622,7 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
   flex: 1 1 240px;
   max-width: 520px;
   min-width: 0;
+  position: relative;
 }
 
 
@@ -3649,5 +3650,75 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
 [data-bs-theme="dark"] .filtros-platos-card .filtro-keyword-box.filtro-keyword-activo .form-control {
   color: var(--bs-danger, #dc3545) !important;
   border-color: var(--bs-danger, #dc3545) !important;
+}
+
+/* =====================================================
+   Botón X para limpiar búsqueda (2026-11-02)
+   ===================================================== */
+.btn-clear-search {
+  position: absolute;
+  right: 0.4rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none !important;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0 !important;
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--bs-body-color) !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  transition: color 0.15s ease;
+  z-index: 5;
+}
+
+.btn-clear-search.is-visible {
+  display: inline-flex !important;
+}
+
+.btn-clear-search:hover,
+.btn-clear-search:focus {
+  color: var(--bs-danger, #dc3545) !important;
+  outline: none;
+}
+
+.btn-clear-search i {
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+/* Cuando el input-group está activo (con palabra), el X sigue neutral */
+.filtro-keyword-activo .btn-clear-search {
+  color: var(--bs-body-color) !important;
+}
+
+/* Dark mode: mantener contraste con el fondo */
+[data-bs-theme="dark"] .btn-clear-search {
+  color: var(--bs-body-color) !important;
+}
+
+[data-bs-theme="dark"] .btn-clear-search:hover,
+[data-bs-theme="dark"] .btn-clear-search:focus {
+  color: var(--bs-danger, #dc3545) !important;
+}
+
+[data-bs-theme="dark"] .filtro-keyword-activo .btn-clear-search {
+  color: var(--bs-body-color) !important;
+}
+
+/* Ocultar el X nativo del navegador (usamos el custom para consistencia) */
+input[type="search"].form-control::-webkit-search-cancel-button,
+input[type="search"].form-control::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
+/* Reservar espacio en el input para que el texto no pise el X */
+.filtro-keyword-box:has(.btn-clear-search.is-visible) .form-control {
+  padding-right: 2.25rem !important;
 }
 
