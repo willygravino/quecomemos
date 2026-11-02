@@ -1004,15 +1004,15 @@ body.filtro-platos-cambiando [data-listado-url] {
   color: var(--bs-body-color) !important;
 }
 
-[data-bs-theme="dark"] .card,
-[data-bs-theme="dark"] .card-body,
+[data-bs-theme="dark"] .card:not(.filtros-platos-card),
+[data-bs-theme="dark"] .card-body:not(.filtros-platos-card > .card-body),
 [data-bs-theme="dark"] .modal-content,
 [data-bs-theme="dark"] .modal-body,
 [data-bs-theme="dark"] .dropdown-menu,
 [data-bs-theme="dark"] .list-group,
 [data-bs-theme="dark"] .list-group-item,
 [data-bs-theme="dark"] .tab-content,
-[data-bs-theme="dark"] .album,git p
+[data-bs-theme="dark"] .album,
 [data-bs-theme="dark"] .plato-form {
   background-color: var(--bs-body-bg) !important;
   color: var(--bs-body-color) !important;
