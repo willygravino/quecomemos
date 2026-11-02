@@ -2074,7 +2074,7 @@ body.filtro-platos-cambiando [data-listado-url] {
 
 @media (max-width: 575.98px) {
   .categoria-actual-bar {
-    justify-content: flex-start;
+    justify-content: center;
     padding: .38rem .55rem;
   }
 
