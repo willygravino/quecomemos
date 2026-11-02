@@ -3644,3 +3644,10 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
   margin-bottom: 0;
 }
 
+/* Dark: replicar el rojo del input activo (light lo tiene, dark lo pisaba con !important) */
+[data-bs-theme="dark"] .filtros-platos-card .filtro-keyword-box.filtro-keyword-activo .input-group-text,
+[data-bs-theme="dark"] .filtros-platos-card .filtro-keyword-box.filtro-keyword-activo .form-control {
+  color: var(--bs-danger, #dc3545) !important;
+  border-color: var(--bs-danger, #dc3545) !important;
+}
+
