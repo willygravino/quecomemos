@@ -3617,3 +3617,23 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
   }
 }
 
+/* =====================================================
+   Shell suave alrededor del panel de filtros (2026-11-02)
+   Usa variables Bootstrap → se adapta automático a light/dark.
+   Sin !important. Sin wrapper HTML nuevo.
+   ===================================================== */
+.filtro-platos-inline-shell {
+  background: var(--bs-tertiary-bg);
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+/* En mobile: un poco más compacto */
+@media (max-width: 767.98px) {
+  .filtro-platos-inline-shell {
+    padding: 0.4rem 0.5rem;
+    border-radius: 0.6rem;
+  }
+}
+

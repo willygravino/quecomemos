@@ -118,7 +118,6 @@
 <form
   method="POST"
   id="form-filtros-platos"
-  class="mb-2"
   data-listado-url="{% url 'ajax_listado_platos' %}">
 
   {% csrf_token %}
@@ -126,7 +125,7 @@
   <input type="hidden" name="tipopag" value="{{ tipopag }}">
   <input type="hidden" name="lo_que_tengo_activo" value="{% if lo_que_tengo_activo %}1{% else %}0{% endif %}">
 
-  <div class="card border-0 shadow-sm rounded-3 bg-body filtros-platos-card">
+  <div class="card border-0 rounded-3 bg-transparent filtros-platos-card">
     <div class="card-body px-3 py-2">
       <div class="d-flex align-items-center gap-2 flex-wrap">
 
@@ -144,6 +143,7 @@
 
       </div>
 
+      <div class="filtros-iconos-row">
       <!-- Toggle Con lo que tengo (desktop) -->
       {% include "AdminVideos/partials/_control_lo_que_tengo_global.html" with modo="desktop" %}
 
@@ -219,6 +219,7 @@
             <span class="filtro-icono-texto">Especiales</span>
           </label>
         </div>
+      </div>
 
 
 
