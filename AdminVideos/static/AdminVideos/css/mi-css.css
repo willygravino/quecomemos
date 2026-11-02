@@ -3637,3 +3637,10 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
   }
 }
 
+/* Fix: eliminar margin-bottom de Bootstrap (label { margin-bottom: 0.5rem })
+   en los filtros. Con align-items:center, ese margen desplazaba 4px hacia
+   arriba los labels, desalineándolos del wrapper de la casa. */
+.filtro-icono-btn {
+  margin-bottom: 0;
+}
+
