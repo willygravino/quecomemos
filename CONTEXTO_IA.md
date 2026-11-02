@@ -880,6 +880,68 @@ Antes había 2-4 botones según caso. Ahora hay **hasta 7** en este orden:
 - **Acción**: `git rm --cached` para todos y agregar al `.gitignore` global para que no vuelvan a entrar.
 
 
+
+### 30.10 Sesión 2026-11-02 — Carrusel sticky, spinner de carga, viñeta y limpieza
+
+#### 30.10.1 Carrusel de platos sticky + dots
+
+- **Sticky**: `#contenedor-carousel-platos` con `position: sticky; top: 0; z-index: 10; background: var(--bs-body-bg)`.
+- **Fix crítico para que sticky funcione**: `#content-wrapper { overflow: clip !important }`. El vendor `sb-admin-2` ponía `overflow-x: hidden` que rompe sticky. `overflow: clip` resuelve y evita el artifact de "puntitos" que aparecía con `clip visible`.
+- **Dots minimalistas**: 5px, `var(--bs-secondary-color)` con 0.35 opacidad, activo `var(--bs-primary)`.
+- **Dots ocultos en mobile**: con 20+ slides son inútiles en touch. Navegación: swipe + flechas prev/next.
+- **Dots al final del card con flexbox** (importante): el HTML tiene `.carousel-indicators` ANTES de `.carousel-inner`. Para que aparezcan abajo: `.carousel { display: flex; flex-direction: column }`, `.carousel-inner { order: 1 }`, `.carousel-indicators { order: 2; position: static }`.
+- **Imagen en mobile**: `height: 70px; object-fit: cover` (era 225px).
+
+
+#### 30.10.2 Spinner de carga (reemplazo del barrido/shimmer)
+
+- **Problema**: el barrido del filtro (overlay con animación shimmer) se "despegaba" al scrollear.
+- **Solución**: spinner de Bootstrap creado dinámicamente por JS en `<body>`.
+- **`mostrarSpinnerCarga()`** → crea `<div id="filtrosLoadingBackdrop">` con `<span class="spinner-border">`. Lo agrega al body.
+- **`ocultarSpinnerCarga()`** → lo elimina.
+- **CSS**: `.filtros-loading-backdrop { position: fixed; inset: 0; z-index: 1045; background: rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center }`.
+- **Eliminado completamente**: `.filtro-platos-barrido-overlay`, `@keyframes filtroPlatosBarrido`, `reposicionarBarridoEnScroll`, todos los helpers `*Barrido*` (~-2000 líneas de JS).
+
+**Importante**: el spinner se crea en `<body>`, no en el template, porque el AJAX reemplaza `#contenedor-listado-platos` con `innerHTML`. Si estuviera en el template, desaparecería en cada refresh.
+
+#### 30.10.3 Viñeta azul en cada plato
+
+- `.plato-row-nombre::before { content: "•"; color: var(--bs-primary); margin-right: 0.45rem; font-weight: bold }`.
+- Punto azul a la izquierda de cada plato. Simple, sin tocar HTML.
+
+
+#### 30.10.4 Filtros: layout mobile + íconos
+
+- **Input full-width** en mobile (fila 1).
+- **Íconos alineados en fila 2** con wrapper `.filtros-iconos-row`: casa + lápiz + tazón + estrella, todos centrados.
+- **Ícono "Con lo que tengo"**: cambiado de `fa-basket-shopping` (canasto → remitía a "comprar") a **`fa-house`** (casa → remite a "lo que tengo en casa").
+- **Casa + lápiz agrupados en píldora** con divisor: `[🏠|✏️]` como un solo control (la casa activa, el lápiz edita).
+- **Altura uniforme** de los 4 íconos: `height: 2.25rem; padding: 0.375rem 0.5rem; align-items: center; line-height: 1`.
+
+#### 30.10.5 Shell suave alrededor del panel
+
+- `.filtro-platos-inline-shell { background: var(--bs-tertiary-bg); border-radius: 0.75rem; padding: 0.5rem 0.75rem; margin-bottom: 0.5rem }`.
+- Card adentro transparente (`bg-transparent` en HTML) → una sola caja visual.
+- Eliminado `mb-2` del `<form>` para padding simétrico arriba/abajo.
+
+
+#### 30.10.6 Fix puntas negras (bug histórico)
+
+**Síntoma**: en las esquinas redondeadas del `.filtros-platos-card` aparecían triángulos oscuros.
+
+**Causa**: `<div class="shadow bg-dark p-0">` en `pre-base.html:52` (envolviendo `{% block filtro %}`). El `bg-dark` de Bootstrap pintaba el fondo gris oscuro (`rgb(90,92,105)`), que asomaba por las esquinas donde el card (con `border-radius: 8px`) no lo cubría.
+
+**Diagnóstico**: `document.elementsFromPoint()` en las 4 esquinas exactas del card. Los últimos elementos de la pila revelaron el wrapper oscuro.
+
+**Fix**: eliminado el wrapper completo en `pre-base.html`. Sin CSS nuevo, sin `!important`.
+
+#### 30.10.7 Deudas técnicas pendientes
+
+1. **502 `!important`** en `mi-css.css`. Muchos de esta sesión. Candidatos a limpieza.
+2. **5 bloques duplicados** de `.modo-desktop.lo-que-tengo-global` (L2536, 2591, 3431, 3546, 3559).
+3. **35 bloques `@media`** dispersos. Consolidar.
+4. **Rama `carpetas-wip`** (feature descartado, decidir borrar o conservar).
+
 ### 30.11 Sesión 2026-11-02 (cont.) — Fix dark mode filtro + shell transparente
 
 #### 30.11.1 Bug del doble contenedor en dark mode
