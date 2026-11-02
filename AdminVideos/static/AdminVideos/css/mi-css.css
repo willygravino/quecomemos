@@ -3132,17 +3132,8 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
   margin-bottom: 0.5rem;
 }
 
-/* En mobile la card es alta: la limitamos para que no tape todo el listado */
-@media (max-width: 767.98px) {
-  #contenedor-carousel-platos {
-    max-height: 60vh;
-    overflow-y: auto;
-  }
-}
-/* Fix sticky: #content-wrapper tiene overflow-x:hidden de vendor que rompe sticky.
-   Usamos overflow: clip (ambos ejes) porque:
-   - No crea scroll container (sticky funciona).
-   - Evita el artifact de puntitos que aparece con "clip visible". */
+
+
 #content-wrapper {
   overflow: clip !important;
 }
@@ -3152,5 +3143,256 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
   color: var(--bs-primary);
   margin-right: 0.45rem;
   font-weight: bold;
+}
+
+#contenedor-carousel-platos {
+  position: sticky; /* Asegura contexto para absolute */
+}
+
+
+
+
+
+
+
+
+/* 1) Eliminar el mb-5 (48px de hueco) del wrapper del card */
+
+
+
+#contenedor-carousel-platos {
+  padding-bottom: 1.8rem;
+}
+
+
+
+
+[data-bs-theme="dark"] 
+
+/* 4) Cada punto: 5px, blanco semi-transparente */
+
+
+[data-bs-theme="dark"] 
+
+/* 5) Punto activo: azul primary + ligeramente más grande */
+
+/* =====================================================
+   Carrusel de platos: puntos minimalistas + imagen ajustada
+   (2026-11-02 - versión limpia)
+   ===================================================== */
+
+/* 1) Eliminar el mb-5 (48px de hueco) del wrapper del card */
+
+
+/* 2) Espacio abajo en el card-body para que los puntos no pisen los botones */
+
+
+/* 3) Los puntos: chiquitos, grises, azules cuando activos, abajo del card */
+
+
+
+
+
+
+/* 4) En mobile: recuperar imagen pero achicada (100px) */
+@media (max-width: 767.98px) {
+  #contenedor-carousel-platos .plato-carousel-thumb {
+    display: block !important;
+    height: 100px !important;
+    overflow: hidden;
+  }
+
+  #contenedor-carousel-platos .plato-carousel-thumb img {
+    display: block !important;
+    height: 100% !important;
+    width: 100% !important;
+    object-fit: cover;
+  }
+
+  /* Achicar un poco el título y botones en mobile para que entre todo */
+  
+
+  #contenedor-carousel-platos .btn {
+    padding: 0.2rem 0.45rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  #contenedor-carousel-platos .d-flex.flex-wrap {
+    gap: 0.3rem !important;
+  }
+}
+
+/* =====================================================
+   Carrusel de platos: layout limpio (2026-11-02)
+   ===================================================== */
+
+/* 1) Eliminar el hueco de 48px del mb-5 */
+#contenedor-carousel-platos .carousel-item > .d-flex.mb-5 {
+  margin-bottom: 0 !important;
+}
+
+/* 2) Contenedor de los puntos: en flujo normal, debajo del card */
+
+
+/* Ocultar la barra de scroll en Chrome/Safari */
+#contenedor-carousel-platos .carousel-indicators::-webkit-scrollbar {
+  display: none;
+}
+
+/* 3) Puntos individuales */
+#contenedor-carousel-platos .carousel-indicators [data-bs-target] {
+  flex: 0 0 auto !important;
+  width: 5px !important;
+  height: 5px !important;
+  min-width: 5px !important;
+  border-radius: 50% !important;
+  background-color: var(--bs-secondary-color) !important;
+  opacity: 0.35 !important;
+  border: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+/* 4) Punto activo */
+#contenedor-carousel-platos .carousel-indicators .active {
+  background-color: var(--bs-primary) !important;
+  opacity: 1 !important;
+}
+
+/* 5) En mobile: achicar un poco el contenedor para que no haya aire de más */
+@media (max-width: 767.98px) {
+  /* La imagen ya no la tocamos acá, la recuperamos con CSS aparte */
+  #contenedor-carousel-platos .card-body h3 {
+    font-size: 1.15rem !important;
+    margin-bottom: 0.4rem !important;
+  }
+
+  #contenedor-carousel-platos .btn {
+    padding: 0.2rem 0.45rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  #contenedor-carousel-platos .d-flex.flex-wrap {
+    gap: 0.3rem !important;
+  }
+}
+
+/* =====================================================
+   Dots del carrusel: abajo del card con flexbox.
+   El HTML tiene .carousel-indicators ANTES de .carousel-inner.
+   Usamos flex+order para que queden al final. (2026-11-02)
+   ===================================================== */
+
+/* 1) Contenedor del carousel: flex column */
+#contenedor-carousel-platos .carousel {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* 2) Los items van primero */
+#contenedor-carousel-platos .carousel-inner {
+  order: 1 !important;
+}
+
+/* 3) Los dots van después de los items */
+#contenedor-carousel-platos .carousel-indicators {
+  position: static !important;
+  order: 2 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  width: 100% !important;
+  margin: 0.5rem 0 0.75rem 0 !important;
+  padding: 0 1rem !important;
+  gap: 0.25rem !important;
+  scrollbar-width: none;
+}
+
+#contenedor-carousel-platos .carousel-indicators::-webkit-scrollbar {
+  display: none;
+}
+
+/* 4) Los controles (prev/next) van sobre los items, no en el flujo */
+#contenedor-carousel-platos .carousel-control-prev,
+#contenedor-carousel-platos .carousel-control-next {
+  position: absolute !important;
+  top: 0 !important;
+  bottom: auto !important;
+  height: calc(100% - 1.25rem) !important;
+}
+
+/* 5) El punto activo y los inactivos: ya tenés reglas, no las toco */
+
+/* =====================================================
+   MOBILE: carrusel ultra compacto (2026-11-02 v3)
+   ===================================================== */
+@media (max-width: 767.98px) {
+  /* 1) Imagen: bien chica (franja) */
+  #contenedor-carousel-platos .plato-carousel-thumb {
+    display: block !important;
+    height: 70px !important;
+    overflow: hidden;
+  }
+
+  #contenedor-carousel-platos .plato-carousel-thumb img {
+    display: block !important;
+    height: 100% !important;
+    width: 100% !important;
+    object-fit: cover;
+  }
+
+  /* 2) Título más chico */
+  #contenedor-carousel-platos .card-body h3,
+  #contenedor-carousel-platos .card-body h5 {
+    font-size: 1rem !important;
+    margin-bottom: 0.3rem !important;
+    margin-top: 0.3rem !important;
+  }
+
+  /* 3) Botones muy compactos */
+  #contenedor-carousel-platos .btn {
+    padding: 0.15rem 0.35rem !important;
+    font-size: 0.7rem !important;
+    gap: 0 !important;
+  }
+
+  #contenedor-carousel-platos .btn i {
+    font-size: 0.75rem !important;
+  }
+
+  /* 4) Gap mínimo entre botones */
+  #contenedor-carousel-platos .d-flex.flex-wrap {
+    gap: 0.25rem !important;
+  }
+
+  /* 5) Padding mínimo del card-body */
+  #contenedor-carousel-platos .card-body {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+
+  /* 6) Dots pegados */
+  #contenedor-carousel-platos .carousel-indicators {
+    margin: 0.25rem 0 0.4rem 0 !important;
+  }
+}
+
+/* Mobile: ocultar dots del carrusel (no aportan valor con 20+ slides) */
+@media (max-width: 767.98px) {
+  #contenedor-carousel-platos .carousel-indicators {
+    display: none !important;
+  }
+}
+
+/* Mobile: quitar el padding-bottom huérfano (era para los dots ocultos) */
+@media (max-width: 767.98px) {
+  #contenedor-carousel-platos {
+    padding-bottom: 0 !important;
+  }
 }
 
