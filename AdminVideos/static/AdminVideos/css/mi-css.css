@@ -3396,3 +3396,157 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
   }
 }
 
+/* =====================================================
+   Filtros: layout mobile definitivo (2026-11-02 v4)
+   - Input fila 1 (100%)
+   - Iconos fila 2 (casa + lápiz + tazón + estrella) centrados
+   - Casa con mismo estilo que cotidianos/especiales
+   - Lápiz de edición VISIBLE (no se pierde funcionalidad)
+   ===================================================== */
+
+@media (max-width: 767.98px) {
+  /* Input ocupa la fila completa */
+  .filtro-keyword-box {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* Wrapper de iconos: fila completa, centrado */
+  .filtros-iconos-row {
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Ocultar solo el TEXTO "Con lo que tengo" (mantener el ícono y el lápiz) */
+  .filtros-iconos-row .modo-desktop .selector-lo-que-tengo-copy {
+    display: none !important;
+  }
+
+  /* Casa: resetear todo el chrome (borde/fondo/sombra del bloque desktop) */
+  .filtros-iconos-row .modo-desktop.lo-que-tengo-global {
+    min-width: 0 !important;
+    width: auto !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    gap: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Link de la casa: mismo estilo que los otros botones */
+  .filtros-iconos-row .modo-desktop .selector-lo-que-tengo {
+    padding: 0.375rem 0.5rem !important;
+    border-radius: 0.375rem !important;
+    background: transparent !important;
+    color: var(--bs-secondary-color) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+
+  /* Ícono de la casa: mismo tamaño que tazón/estrella */
+  .filtros-iconos-row .modo-desktop .selector-lo-que-tengo-icon {
+    width: auto !important;
+    height: auto !important;
+    min-width: auto !important;
+    flex-basis: auto !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    font-size: 1.15rem !important;
+  }
+
+  /* Lápiz de editar: MANTENER VISIBLE, chiquito, al lado de la casa */
+  .filtros-iconos-row .modo-desktop .selector-lo-que-tengo-edit {
+    width: 1.75rem !important;
+    min-width: 1.75rem !important;
+    flex-basis: 1.75rem !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: var(--bs-secondary-color) !important;
+    font-size: 0.85rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+}
+
+/* Desktop: el wrapper no interfiere con el layout original */
+@media (min-width: 768px) {
+  .filtros-iconos-row {
+    display: contents !important;
+  }
+}
+
+/* Alinear los 4 íconos del panel de filtros (mobile) */
+@media (max-width: 767.98px) {
+  /* 1) Wrapper: alto uniforme, centrado vertical */
+  .filtros-iconos-row {
+    min-height: 2.25rem;
+  }
+
+  /* 2) Todos los botones: mismo padding vertical y horizontal */
+  .filtros-iconos-row .modo-desktop .selector-lo-que-tengo,
+  .filtros-iconos-row .filtro-icono-btn {
+    padding: 0.375rem 0.5rem !important;
+    height: 2.25rem !important;
+    min-height: 2.25rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 3) Íconos dentro de cada botón: mismo tamaño */
+  .filtros-iconos-row .modo-desktop .selector-lo-que-tengo-icon,
+  .filtros-iconos-row .modo-desktop .selector-lo-que-tengo-icon i,
+  .filtros-iconos-row .filtro-icono-btn i {
+    font-size: 1.15rem !important;
+    line-height: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+    height: auto !important;
+  }
+
+  /* 4) Lápiz: mismo alto/padding, ícono levemente más chico pero centrado */
+  .filtros-iconos-row .modo-desktop .selector-lo-que-tengo-edit {
+    width: 2.25rem !important;
+    min-width: 2.25rem !important;
+    flex-basis: 2.25rem !important;
+    height: 2.25rem !important;
+    min-height: 2.25rem !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    box-sizing: border-box !important;
+  }
+
+  .filtros-iconos-row .modo-desktop .selector-lo-que-tengo-edit i {
+    font-size: 1rem !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+
+  /* 5) Asegurar que el gap entre casa y lápiz sea chico */
+  .filtros-iconos-row .modo-desktop.lo-que-tengo-global {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0 !important;
+  }
+}
+
