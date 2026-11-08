@@ -583,4 +583,149 @@
     });
   }, true);
 
+  /* ============================================================
+     §31 E3: editar slot (lápiz en el chip)
+     - Click lápiz → GET → precargar modal → show.
+     - Change preset → autocompletar tiempos/medios desde JSON.
+     - Submit → POST → close → refresh.
+     ============================================================ */
+
+  var _editarSlotPresets = null;
+  function _getEditarSlotPresets() {
+    if (_editarSlotPresets !== null) return _editarSlotPresets;
+    var tag = document.getElementById("editarSlotPresetsData");
+    if (!tag) { _editarSlotPresets = {}; return _editarSlotPresets; }
+    try { _editarSlotPresets = JSON.parse(tag.textContent || "{}"); }
+    catch (e) { _editarSlotPresets = {}; }
+    return _editarSlotPresets;
+  }
+
+  function _aplicarCriterioAlModal(criterio) {
+    // Medios
+    var medios = (criterio && criterio.medios) || [];
+    document.querySelectorAll('#editarSlotForm input[name="medios"]').forEach(function (cb) {
+      cb.checked = medios.indexOf(cb.value) !== -1;
+    });
+    // Tiempos
+    var elab = document.getElementById("editarSlotElabInput");
+    if (elab) elab.value = (criterio && criterio.elaboracion_max != null) ? criterio.elaboracion_max : "";
+    var cocc = document.getElementById("editarSlotCoccInput");
+    if (cocc) cocc.value = (criterio && criterio.coccion_max != null) ? criterio.coccion_max : "";
+  }
+
+  // Click lápiz
+  document.addEventListener("click", function (event) {
+    var btn = event.target.closest(".js-editar-slot");
+    if (!btn) return;
+    event.preventDefault();
+    event.stopPropagation();
+
+    var slotId = btn.dataset.slotId || "";
+    var modalEl = document.getElementById("editarSlotModal");
+    if (!slotId || !modalEl || !window.fetch) return;
+
+    var getUrlTemplate = modalEl.dataset.getSlotUrlTemplate || "";
+    if (!getUrlTemplate) return;
+    var getUrl = getUrlTemplate.replace("/0/", "/" + slotId + "/");
+
+    document.getElementById("editarSlotIdInput").value = slotId;
+
+    // Reset visual mientras carga
+    document.getElementById("editarSlotPresetSelect").value = "";
+    _aplicarCriterioAlModal({});
+
+    if (window.bootstrap && bootstrap.Modal) {
+      bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    }
+
+    fetch(getUrl, {
+      method: "GET",
+      headers: { "X-Requested-With": "XMLHttpRequest" },
+      credentials: "same-origin"
+    })
+    .then(function (response) {
+      if (!response.ok) throw new Error("Error al cargar slot");
+      return response.json();
+    })
+    .then(function (data) {
+      if (!data.ok) throw new Error("Respuesta inválida");
+      var slot = data.slot;
+      document.getElementById("editarSlotPresetSelect").value = slot.preset || "";
+      _aplicarCriterioAlModal(slot.criterio || {});
+    })
+    .catch(function (error) {
+      console.error(error);
+    });
+  }, true);
+
+  // Change preset → autocompletar tiempos/medios
+  document.addEventListener("change", function (event) {
+    var sel = event.target.closest("#editarSlotPresetSelect");
+    if (!sel) return;
+    var key = sel.value || "";
+    var presets = _getEditarSlotPresets();
+    if (!key || !presets[key]) return;
+    _aplicarCriterioAlModal(presets[key].criterio || {});
+  });
+
+  // Submit del form
+  document.addEventListener("submit", function (event) {
+    var form = event.target.closest("#editarSlotForm");
+    if (!form) return;
+    event.preventDefault();
+
+    var slotId = document.getElementById("editarSlotIdInput").value || "";
+    var modalEl = document.getElementById("editarSlotModal");
+    if (!slotId || !modalEl || !window.fetch) return;
+
+    var editUrlTemplate = modalEl.dataset.editarSlotUrlTemplate || "";
+    if (!editUrlTemplate) return;
+    var editUrl = editUrlTemplate.replace("/0/", "/" + slotId + "/");
+
+    var saveBtn = document.getElementById("editarSlotSaveBtn");
+    if (saveBtn) saveBtn.disabled = true;
+
+    // Armar body con preset + tiempos + medios
+    var body = new URLSearchParams();
+    body.set("preset", document.getElementById("editarSlotPresetSelect").value || "");
+    body.set("elaboracion_max", document.getElementById("editarSlotElabInput").value || "");
+    body.set("coccion_max", document.getElementById("editarSlotCoccInput").value || "");
+    form.querySelectorAll('input[name="medios"]:checked').forEach(function (cb) {
+      body.append("medios", cb.value);
+    });
+
+    fetch(editUrl, {
+      method: "POST",
+      body: body.toString(),
+      headers: {
+        "X-CSRFToken": getCSRFToken(),
+        "X-Requested-With": "XMLHttpRequest",
+        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+      },
+      credentials: "same-origin"
+    })
+    .then(function (response) {
+      if (!response.ok) {
+        return response.json().then(function (d) {
+          throw new Error(d.error || "Error al editar slot");
+        });
+      }
+      return response.json();
+    })
+    .then(function (data) {
+      if (!data.ok) throw new Error("Respuesta inválida");
+      if (window.bootstrap && bootstrap.Modal) {
+        bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+      }
+      if (window.refrescarMenuProgramado) return window.refrescarMenuProgramado();
+    })
+    .catch(function (error) {
+      console.error(error);
+      alert(error.message || "Error al editar slot");
+    })
+    .finally(function () {
+      if (saveBtn) saveBtn.disabled = false;
+    });
+  });
+
 })();

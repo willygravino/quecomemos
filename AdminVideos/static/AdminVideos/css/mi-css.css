@@ -4066,3 +4066,25 @@ body:not(.qc-slots-off) #diasTab .nav-link.menu-dia-parcial:not(.active):focus-v
   opacity: 0.45;
 }
 
+
+/* §31 E3: botón ✏️ en el chip de slot (entre el área clickeable y el ✕) */
+.menu-slot-editar-btn {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  padding: 0 .15rem;
+  margin: 0;
+  cursor: pointer;
+  opacity: .7;
+  transition: opacity .12s, color .12s;
+  font-size: .8rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+.menu-slot-editar-btn:hover,
+.menu-slot-editar-btn:focus-visible {
+  opacity: 1;
+  color: var(--qc-slot-fuerte);
+  outline: none;
+}

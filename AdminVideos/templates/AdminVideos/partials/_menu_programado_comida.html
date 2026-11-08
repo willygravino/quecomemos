@@ -29,6 +29,14 @@
             <span class="menu-slot-pendiente-label">Pendiente: {{ slot.preset_label }}</span>
           </button>
           <button type="button"
+                  class="menu-slot-editar-btn js-editar-slot"
+                  data-slot-id="{{ slot.id }}"
+                  data-slot-label="{{ slot.preset_label|escape }}"
+                  aria-label="Editar slot"
+                  title="Editar slot">
+            <i class="fa-solid fa-pencil" aria-hidden="true"></i>
+          </button>
+          <button type="button"
                   class="menu-slot-borrar-btn js-borrar-slot"
                   data-slot-id="{{ slot.id }}"
                   data-slot-label="{{ slot.preset_label|escape }}"
