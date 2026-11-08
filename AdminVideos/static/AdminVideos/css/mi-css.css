@@ -3829,6 +3829,7 @@ button.menu-slot-pendiente:focus-visible {
   --qc-slot-medio:  #d63384;
   --qc-slot-chip:   #821b53;
   --qc-slot-btn:    #771a4d;
+  --qc-slot-tab-inactivo: #3d0e27;
   --qc-slot-fuerte: #b9246e;
 }
 [data-bs-theme="dark"] {
@@ -3838,6 +3839,7 @@ button.menu-slot-pendiente:focus-visible {
   --qc-slot-medio:  #f06aab;
   --qc-slot-chip:   #ba7c9d;
   --qc-slot-btn:    #a16e91;
+  --qc-slot-tab-inactivo: #3f2837;
   --qc-slot-fuerte: #ff85c0;
 }
 
@@ -4028,11 +4030,11 @@ body:not(.qc-slots-off) #diasTab .nav-link.active:not(.menu-programado-dia-progr
 
 /* VACÍO + INACTIVO (segundo plano): magenta apagado (--qc-slot-btn) */
 body:not(.qc-slots-off) #diasTab .nav-link:not(.menu-programado-dia-programado):not(.active) {
-  background-color: var(--qc-slot-btn) !important;
+  background-color: var(--qc-slot-tab-inactivo) !important;
 }
 body:not(.qc-slots-off) #diasTab .nav-link:not(.menu-programado-dia-programado):not(.active):hover,
 body:not(.qc-slots-off) #diasTab .nav-link:not(.menu-programado-dia-programado):not(.active):focus-visible {
-  background-color: color-mix(in srgb, var(--qc-slot-btn) 84%, white) !important;
+  background-color: color-mix(in srgb, var(--qc-slot-tab-inactivo) 96%, white) !important;
 }
 
 /* VACÍO + ACTIVO hover: aclara el magenta principal */
@@ -4058,8 +4060,8 @@ body:not(.qc-slots-off) #diasTab .nav-link.menu-dia-parcial:not(.active) {
     to top,
     var(--qc-menu-programado-inactivo) 0%,
     var(--qc-menu-programado-inactivo) 15%,
-    var(--qc-slot-btn) 85%,
-    var(--qc-slot-btn) 100%
+    var(--qc-slot-tab-inactivo) 85%,
+    var(--qc-slot-tab-inactivo) 100%
   ) !important;
 }
 
@@ -4069,7 +4071,7 @@ body:not(.qc-slots-off) [data-bs-theme="dark"] #diasTab .nav-link.menu-dia-parci
     to top,
     color-mix(in srgb, var(--menu-programado-solido) 55%, #000) 0%,
     color-mix(in srgb, var(--menu-programado-solido) 55%, #000) 15%,
-    var(--qc-slot-btn) 85%,
-    var(--qc-slot-btn) 100%
+    var(--qc-slot-tab-inactivo) 85%,
+    var(--qc-slot-tab-inactivo) 100%
   ) !important;
 }
