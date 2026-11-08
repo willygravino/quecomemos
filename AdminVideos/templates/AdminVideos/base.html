@@ -333,10 +333,13 @@
 
   <div id="menuProgramadoAcciones"
        class="menu-programado-actions d-flex align-items-center flex-shrink-0">
-    <div class="form-check form-switch qc-slots-toggle d-flex align-items-center m-0 me-2" title="Mostrar/ocultar slots">
-      <input class="form-check-input mt-0" type="checkbox" role="switch" id="qcSlotsToggle" checked>
-      <label class="form-check-label small ms-1 text-muted" for="qcSlotsToggle" style="white-space:nowrap;">Slots</label>
-    </div>
+    <button type="button"
+            id="qcSlotsToggle"
+            class="btn btn-sm qc-slots-toggle-btn me-2"
+            title="Mostrar/ocultar slots"
+            aria-label="Mostrar/ocultar slots"
+            aria-pressed="true"
+            data-slots-enabled="1">S</button>
     <button type="button"
             class="btn btn-sm btn-outline-secondary menu-programado-action-icon menu-programado-delete-icon{% if not platos_dia_x_dia %} disabled{% endif %}"
             {% if not platos_dia_x_dia %}disabled{% endif %}

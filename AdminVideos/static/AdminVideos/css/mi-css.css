@@ -3945,3 +3945,51 @@ body.qc-slots-off .plato-desde-slot {
   box-shadow: none !important;
   padding-left: 0 !important;
 }
+
+/* §31 D1c: botón circular "S" para toggle de slots */
+.qc-slots-toggle-btn {
+  width: 2.15rem;
+  height: 2.15rem;
+  padding: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  font-family: inherit;
+  line-height: 1;
+  border: 1px solid var(--qc-slot-borde);
+  background: transparent;
+  color: var(--qc-slot-btn);
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  flex-shrink: 0;
+}
+.qc-slots-toggle-btn:hover,
+.qc-slots-toggle-btn:focus-visible {
+  border-color: var(--qc-slot-medio);
+  color: var(--qc-slot-medio);
+  outline: none;
+}
+.qc-slots-toggle-btn[aria-pressed="true"] {
+  background: var(--qc-slot-medio);
+  color: #ffffff;
+  border-color: var(--qc-slot-medio);
+}
+.qc-slots-toggle-btn[aria-pressed="true"]:hover,
+.qc-slots-toggle-btn[aria-pressed="true"]:focus-visible {
+  background: var(--qc-slot-fuerte);
+  border-color: var(--qc-slot-fuerte);
+  color: #ffffff;
+}
+[data-bs-theme="dark"] .qc-slots-toggle-btn[aria-pressed="true"] {
+  background: var(--qc-slot-chip);
+  color: #1a0d14;
+  border-color: var(--qc-slot-chip);
+}
+[data-bs-theme="dark"] .qc-slots-toggle-btn[aria-pressed="true"]:hover,
+[data-bs-theme="dark"] .qc-slots-toggle-btn[aria-pressed="true"]:focus-visible {
+  background: var(--qc-slot-fuerte);
+  color: #1a0d14;
+  border-color: var(--qc-slot-fuerte);
+}
