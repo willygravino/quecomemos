@@ -3830,7 +3830,7 @@ button.menu-slot-pendiente:focus-visible {
   --qc-slot-borde:  #e8a0c0;
   --qc-slot-texto:  #8f1a52;
   --qc-slot-medio:  #d63384;
-  --qc-slot-chip:   #b5276b;
+  --qc-slot-chip:   #a32268;
   --qc-slot-fuerte: #b9246e;
 }
 [data-bs-theme="dark"] {
@@ -3838,7 +3838,7 @@ button.menu-slot-pendiente:focus-visible {
   --qc-slot-borde:  #8f3d6b;
   --qc-slot-texto:  #ffc4dd;
   --qc-slot-medio:  #f06aab;
-  --qc-slot-chip:   #f597c4;
+  --qc-slot-chip:   #e89bc4;
   --qc-slot-fuerte: #ff85c0;
 }
 
@@ -3852,13 +3852,33 @@ button.menu-slot-pendiente:focus-visible {
 }
 
 
-/* §31 C8: "+ Slot" en magenta, siempre con el mismo brillo (no depende del wrapper) */
+/* §31 C9: "+ Slot" como botón pill magenta (fondo suave + borde + texto) */
 .menu-programado-comida-wrapper .btn.js-crear-slot {
   color: var(--qc-slot-medio);
+  background-color: rgba(214, 51, 132, 0.10);
+  border: 1px solid var(--qc-slot-borde);
+  border-radius: 1rem;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.8rem;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
   opacity: 1;
+  transition: background-color 0.12s, border-color 0.12s, color 0.12s;
 }
 .menu-programado-comida-wrapper .btn.js-crear-slot:hover,
 .menu-programado-comida-wrapper .btn.js-crear-slot:focus-visible {
   color: var(--qc-slot-fuerte);
+  background-color: rgba(214, 51, 132, 0.18);
+  border-color: var(--qc-slot-medio);
   opacity: 1;
+  text-decoration: none;
+}
+[data-bs-theme="dark"] .menu-programado-comida-wrapper .btn.js-crear-slot {
+  background-color: rgba(240, 106, 171, 0.15);
+}
+[data-bs-theme="dark"] .menu-programado-comida-wrapper .btn.js-crear-slot:hover,
+[data-bs-theme="dark"] .menu-programado-comida-wrapper .btn.js-crear-slot:focus-visible {
+  background-color: rgba(240, 106, 171, 0.25);
 }
