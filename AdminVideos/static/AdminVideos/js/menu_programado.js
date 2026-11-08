@@ -103,46 +103,28 @@
     return getCookie("csrftoken");
   }
 
-  /* §31 E4: helpers para evitar corrupción de estado de modales Bootstrap.
-     Síntomas que arreglan:
-     - Modal abre y se cierra al instante (backdrop residual captura el click).
-     - Página "colgada" (body.modal-open no removido).
-     - Segundo modal no abre porque body.modal-open sigue puesto.
-     */
-  function _qcPrepararModalAntesDeAbrir(modalEl) {
-    // Si el modal objetivo ya está visible, no tocar nada.
-    if (modalEl && modalEl.classList.contains("show")) return;
+  /* §31 E6: helpers para estado de modales Bootstrap (versión "idle-only").
+     Regla de oro: SOLO limpiar backdrops + modal-open si NO hay ningún
+     modal .show ni .d-block. Si hay un modal abriéndose o abierto, NO tocar.
+     Esto evita el bug E4/E5: el setTimeout de cerrar un modal borraba el
+     backdrop del modal siguiente que ya estaba abierto. */
 
-    // Si hay OTROS modales visibles (posibles zombies), cerrarlos primero.
-    var otros = document.querySelectorAll(".modal.show");
-    for (var i = 0; i < otros.length; i++) {
-      var m = otros[i];
-      if (m === modalEl) continue;
-      try {
-        var inst = bootstrap.Modal.getInstance(m);
-        if (inst) inst.hide();
-      } catch (e) {}
-    }
-
-    // Cleanup forzado SIEMPRE (Bootstrap re-crea backdrop + modal-open en show()).
-    var backdrops = document.querySelectorAll(".modal-backdrop");
-    for (var j = 0; j < backdrops.length; j++) {
-      try { backdrops[j].remove(); } catch (e) {}
-    }
+  function _qcCleanupIfIdle() {
+    if (document.querySelector(".modal.show")) return;
+    if (document.querySelector(".modal.d-block")) return;
+    document.querySelectorAll(".modal-backdrop").forEach(function (b) {
+      try { b.remove(); } catch (e) {}
+    });
     document.body.classList.remove("modal-open");
     document.body.style.removeProperty("overflow");
     document.body.style.removeProperty("padding-right");
-
-    // Modales en estado intermedio "d-block sin show" (zombie de transición).
-    var medioAbiertos = document.querySelectorAll(".modal.d-block:not(.show)");
-    for (var k = 0; k < medioAbiertos.length; k++) {
-      var z = medioAbiertos[k];
-      z.classList.remove("d-block");
-      z.style.removeProperty("display");
-      z.setAttribute("aria-hidden", "true");
-      z.removeAttribute("aria-modal");
-    }
   }
+
+  function _qcPrepararModalAntesDeAbrir(modalEl) {
+    if (modalEl && modalEl.classList.contains("show")) return;
+    _qcCleanupIfIdle();
+  }
+
   function _qcCerrarModalLimpiamente(modalEl, onHidden) {
     if (!modalEl) { if (onHidden) onHidden(); return; }
     var inst = null;
@@ -153,10 +135,7 @@
       if (fired) return;
       fired = true;
       modalEl.removeEventListener("hidden.bs.modal", handler);
-      document.querySelectorAll(".modal-backdrop").forEach(function (b) { try { b.remove(); } catch (e) {} });
-      document.body.classList.remove("modal-open");
-      document.body.style.removeProperty("overflow");
-      document.body.style.removeProperty("padding-right");
+      _qcCleanupIfIdle();
       if (onHidden) onHidden();
     };
     modalEl.addEventListener("hidden.bs.modal", handler);
@@ -165,17 +144,24 @@
       if (fired) return;
       fired = true;
       modalEl.removeEventListener("hidden.bs.modal", handler);
-      try { inst.dispose(); } catch (e) {}
-      document.querySelectorAll(".modal-backdrop").forEach(function (b) { try { b.remove(); } catch (e) {} });
-      document.body.classList.remove("modal-open");
-      document.body.style.removeProperty("overflow");
-      document.body.style.removeProperty("padding-right");
+      _qcCleanupIfIdle();
       if (onHidden) onHidden();
     }, 500);
   }
 
+  /* §31 E6: watchdog. Cada 500ms, si hay body.modal-open pero no hay
+     ningún modal visible, limpiar. Esto resuelve el estado huérfano
+     incluso si algo inesperado lo dejó pegado. */
+  if (typeof setInterval === "function") {
+    setInterval(function () {
+      if (!document.body || !document.body.classList.contains("modal-open")) return;
+      if (document.querySelector(".modal.show")) return;
+      if (document.querySelector(".modal.d-block")) return;
+      _qcCleanupIfIdle();
+    }, 500);
+  }
 
-    /* ============================================================
+  /* ============================================================
         QUITAR ITEM PROGRAMADO POR AJAX
         ============================================================ */
     document.addEventListener("click", function (event) {
