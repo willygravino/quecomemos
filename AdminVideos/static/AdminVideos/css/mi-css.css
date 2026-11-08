@@ -3994,9 +3994,15 @@ body.qc-slots-off .plato-desde-slot {
   border-color: var(--qc-slot-fuerte);
 }
 
-/* §31 D2: con slots ON, el borde celeste del recuadro (vacío / día activo
-   sin platos) pasa a magenta. Con slots OFF, se queda con el celeste actual.
-   El recuadro con platos (-programado, verde) y las tabs (violeta) no se tocan. */
-body:not(.qc-slots-off) #diasTabContent .menu-programado-contenido-solido:not(.menu-programado-contenido-programado) {
-  border-color: var(--qc-slot-medio) !important;
+
+/* §31 D2b: con slots ON, el "recuadro exterior" celeste (#diasTabContent) y
+   la tab activa pasan a magenta cuando el día activo está VACÍO (sin platos
+   programados). Si tiene platos (parcial o completo), se mantienen los
+   colores actuales (verde/violeta).
+   Con slots OFF, quedan como estaban (celeste). */
+body:not(.qc-slots-off) #diasTabContent:not(.menu-dia-programado-activo) {
+  background-color: var(--qc-slot-medio) !important;
+}
+body:not(.qc-slots-off) #diasTab .nav-link.active:not(.menu-programado-dia-programado) {
+  background-color: var(--qc-slot-medio) !important;
 }
