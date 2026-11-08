@@ -597,6 +597,11 @@ class MenuItem(models.Model):
     lugar = models.ForeignKey("Lugar", null=True, blank=True,
                           on_delete=models.CASCADE, related_name="en_menus")
 
+    slot_origen = models.ForeignKey(
+        "SlotSemanal", null=True, blank=True,
+        on_delete=models.SET_NULL, related_name="menuitems_generados",
+    )
+
     # plato = models.ForeignKey("Plato", null=True, blank=True, on_delete=models.CASCADE, related_name="en_menus")
     # lugar = models.ForeignKey("Lugar", null=True, blank=True, on_delete=models.CASCADE, related_name="en_menus")
 
@@ -958,3 +963,27 @@ class Mensaje(models.Model):
         destinatario = self.destinatario.username if self.destinatario else "Sin destinatario"
 
         return f"{self.id} - Mensaje de {remitente} a {destinatario}"
+
+
+class SlotSemanal(models.Model):
+    DIAS_SEMANA = HabitoSemanal.DIAS_SEMANA
+    MOMENTOS = HabitoSemanal.MOMENTOS
+
+    propietario = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="slots_semanales",
+    )
+    dia_semana = models.IntegerField(choices=DIAS_SEMANA)
+    momento = models.CharField(max_length=20, choices=MOMENTOS)
+    preset = models.CharField(max_length=40, blank=True)
+    criterio = models.JSONField(default=dict)
+    orden = models.PositiveSmallIntegerField(default=0)
+    creado_el = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["dia_semana", "momento", "orden", "id"]
+        indexes = [
+            models.Index(fields=["propietario", "dia_semana", "momento"]),
+        ]
+
+    def __str__(self):
+        return f"Slot {self.get_dia_semana_display()} {self.get_momento_display()} ({self.preset or 'sin preset'})"

@@ -3722,3 +3722,99 @@ input[type="search"].form-control::-webkit-search-decoration {
   padding-right: 2.25rem !important;
 }
 
+
+
+/* ============================================================
+   §31-reformulado: slots pendientes en el menú programado
+   ============================================================ */
+.menu-slot-pendiente {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .2rem .5rem;
+  margin: .3rem 0 0 .5rem;
+  font-size: .8rem;
+  color: var(--bs-secondary-color);
+  background: var(--bs-tertiary-bg);
+  border: 1px dashed var(--bs-border-color);
+  border-radius: .35rem;
+}
+.menu-slot-pendiente .menu-slot-pendiente-label {
+  font-weight: 500;
+}
+[data-bs-theme="dark"] .menu-slot-pendiente {
+  color: var(--bs-secondary-color);
+  background: rgba(255, 255, 255, .03);
+  border-color: rgba(255, 255, 255, .15);
+}
+
+/* §31 C4a: chip slot pendiente como botón clickeable */
+button.menu-slot-pendiente {
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background .12s, border-color .12s;
+}
+button.menu-slot-pendiente:hover,
+button.menu-slot-pendiente:focus-visible {
+  background: var(--bs-secondary-bg);
+  border-color: var(--bs-primary);
+  outline: none;
+}
+[data-bs-theme="dark"] button.menu-slot-pendiente:hover,
+[data-bs-theme="dark"] button.menu-slot-pendiente:focus-visible {
+  background: rgba(255, 255, 255, .06);
+  border-color: var(--bs-primary);
+}
+
+/* §31 C4b: chip slot -> div con dos buttons (elegir + borrar) */
+.menu-slot-pendiente-accion {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  cursor: pointer;
+  flex: 1;
+  text-align: left;
+  min-width: 0;
+}
+.menu-slot-pendiente-accion:hover,
+.menu-slot-pendiente-accion:focus-visible {
+  outline: none;
+  text-decoration: underline;
+}
+
+.menu-slot-borrar-btn {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  padding: 0 .15rem;
+  margin: 0;
+  cursor: pointer;
+  opacity: .7;
+  transition: opacity .12s, color .12s;
+  font-size: .8rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+.menu-slot-borrar-btn:hover,
+.menu-slot-borrar-btn:focus-visible {
+  opacity: 1;
+  color: var(--bs-danger);
+  outline: none;
+}
+
+/* §31 C4b: plato que vino de un slot (violeta tenue, sin romper layout) */
+.plato-desde-slot {
+  box-shadow: inset 3px 0 0 #6f42c1;
+  padding-left: .35rem;
+}
+[data-bs-theme="dark"] .plato-desde-slot {
+  box-shadow: inset 3px 0 0 #a78bfa;
+}

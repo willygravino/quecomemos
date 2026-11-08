@@ -9,7 +9,14 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
-from AdminVideos.models import ElementoCompartido, Amistad, ProfilePlatoCompra, HabitoSemanal, Ingrediente, IngredienteEnPlato, Insumo, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente, LoQueTengoPalabra, SUBTIPO_CARTA_CHOICES, SUBTIPO_CARTA_ORDEN, SUBTIPO_POSTRE_ORDEN
+from AdminVideos.models import ElementoCompartido, Amistad, ProfilePlatoCompra, HabitoSemanal, Ingrediente, IngredienteEnPlato, Insumo, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente, LoQueTengoPalabra, SlotSemanal, SUBTIPO_CARTA_CHOICES, SUBTIPO_CARTA_ORDEN, SUBTIPO_POSTRE_ORDEN
+
+
+from AdminVideos.services.plantillas import (
+    PRESETS,
+    criterio_desde_preset,
+    filtrar_platos_por_criterio,
+)
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string   # ✅ ← ESTA ES LA CLAVE
 from django.http import Http404, HttpRequest, HttpResponseNotAllowed, JsonResponse
@@ -2563,6 +2570,7 @@ def obtener_platos_dia_x_dia(usuario, fechas_existentes, habitos_set):
                 "fijo": fijo,
                 "tipo": item.plato.tipos,
                 "es_lugar": False,
+                "slot_origen_id": item.slot_origen_id,
             })
 
         elif item.lugar:
@@ -2580,6 +2588,7 @@ def obtener_platos_dia_x_dia(usuario, fechas_existentes, habitos_set):
                 "tipo": "",
                 "fijo": fijo,
                 "es_lugar": True,
+                "slot_origen_id": item.slot_origen_id,
             })
 
     # Días con almuerzo Y cena: menú "completo" del día.
@@ -3149,6 +3158,7 @@ def FiltroDePlatos(request):
 
 
     habitos_lookup = obtener_habitos_lookup(habitos)
+    slots_por_comida = obtener_slots_por_comida(usuario, dias_desde_hoy)
 
 
     guarniciones, salsas = obtener_extras_platos(usuario)
@@ -3195,6 +3205,8 @@ def FiltroDePlatos(request):
                 "platos_dia_x_dia": platos_dia_x_dia,
                 "lugares": lugares,
                 "habitos_lookup": habitos_lookup,
+                "slots_por_comida": slots_por_comida,
+                "presets": PRESETS,
             }
 
 
@@ -4166,6 +4178,7 @@ class AsignarPlato(View):
         objeto_id = request.POST.get("plato_id")
         dia = request.POST.get("dia") or request.session.get("dia_activo")
         momento = request.POST.get("comida")
+        slot_origen_id = request.POST.get("slot_origen_id")
         es_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
 
         if not dia:
@@ -4193,8 +4206,14 @@ class AsignarPlato(View):
                 platos_a_asignar = [plato_base]
 
                 creados = 0
+                slot_origen = None
+                if slot_origen_id and str(slot_origen_id).isdigit():
+                    slot_origen = SlotSemanal.objects.filter(
+                        id=int(slot_origen_id),
+                        propietario=request.user,
+                    ).first()
                 for p in platos_a_asignar:
-                    _, created = MenuItem.objects.get_or_create(
+                    item, created = MenuItem.objects.get_or_create(
                         menu=menu_dia,
                         momento=momento,
                         plato=p,
@@ -4202,6 +4221,9 @@ class AsignarPlato(View):
                     )
                     if created:
                         creados += 1
+                    if slot_origen and not item.slot_origen_id:
+                        item.slot_origen = slot_origen
+                        item.save(update_fields=["slot_origen"])
 
                 # ===== Extras (0..N) validados por tipo =====
                 def _tiene_tipo(plato: Plato, tipo_txt: str) -> bool:
@@ -4721,3 +4743,190 @@ def eliminar_menu_programado(request):
         )
 
     return redirect("filtro-de-platos")
+
+
+# =====================================================
+# §31-reformulado: endpoints AJAX de slots semanales
+# =====================================================
+
+@login_required
+def ajax_crear_slot(request):
+    """Crea un SlotSemanal para el usuario. Idempotente: si ya existe
+    un slot con mismo (propietario, dia_semana, momento, preset), lo devuelve."""
+    if request.method != "POST":
+        return JsonResponse({"ok": False, "error": "Método no permitido"}, status=405)
+
+    dia_semana_raw = request.POST.get("dia_semana")
+    momento = request.POST.get("momento")
+    preset = (request.POST.get("preset") or "").strip()
+
+    try:
+        dia_semana = int(dia_semana_raw)
+    except (TypeError, ValueError):
+        return JsonResponse({"ok": False, "error": "dia_semana inválido"}, status=400)
+
+    valid_dias = {d[0] for d in SlotSemanal.DIAS_SEMANA}
+    if dia_semana not in valid_dias:
+        return JsonResponse({"ok": False, "error": "dia_semana fuera de rango"}, status=400)
+
+    valid_momentos = {m[0] for m in SlotSemanal.MOMENTOS}
+    if momento not in valid_momentos:
+        return JsonResponse({"ok": False, "error": "momento inválido"}, status=400)
+
+    if preset not in PRESETS:
+        return JsonResponse({"ok": False, "error": "preset desconocido"}, status=400)
+
+    # Idempotente (QB4=C)
+    slot = SlotSemanal.objects.filter(
+        propietario=request.user,
+        dia_semana=dia_semana,
+        momento=momento,
+        preset=preset,
+    ).first()
+
+    if slot is None:
+        # orden = max(orden)+1 para ese (user, dia, momento)
+        max_orden = (
+            SlotSemanal.objects
+            .filter(propietario=request.user, dia_semana=dia_semana, momento=momento)
+            .order_by("-orden")
+            .values_list("orden", flat=True)
+            .first()
+        ) or 0
+        slot = SlotSemanal.objects.create(
+            propietario=request.user,
+            dia_semana=dia_semana,
+            momento=momento,
+            preset=preset,
+            criterio=criterio_desde_preset(preset),
+            orden=max_orden + 1,
+        )
+
+    return JsonResponse({
+        "ok": True,
+        "slot": {
+            "id": slot.id,
+            "dia_semana": slot.dia_semana,
+            "momento": slot.momento,
+            "preset": slot.preset,
+            "orden": slot.orden,
+        },
+    })
+
+
+@login_required
+def ajax_borrar_slot(request, pk):
+    """Borra un SlotSemanal del usuario. Los MenuItem huérfanos quedan con
+    slot_origen=NULL (on_delete=SET_NULL)."""
+    if request.method != "POST":
+        return JsonResponse({"ok": False, "error": "Método no permitido"}, status=405)
+
+    slot = SlotSemanal.objects.filter(pk=pk, propietario=request.user).first()
+    if slot is None:
+        return JsonResponse({"ok": False, "error": "Slot no encontrado"}, status=404)
+
+    slot.delete()
+    return JsonResponse({"ok": True})
+
+
+@login_required
+def ajax_platos_para_slot(request, pk):
+    """Devuelve los platos del usuario que matchean el criterio del slot.
+    QB3=A: solo platos propios por ahora."""
+    if request.method != "GET":
+        return JsonResponse({"ok": False, "error": "Método no permitido"}, status=405)
+
+    slot = SlotSemanal.objects.filter(pk=pk, propietario=request.user).first()
+    if slot is None:
+        return JsonResponse({"ok": False, "error": "Slot no encontrado"}, status=404)
+
+    base_qs = Plato.objects.filter(propietario=request.user).order_by("nombre_plato")
+    platos_qs = filtrar_platos_por_criterio(slot.criterio, base_qs)
+
+    return JsonResponse({
+        "ok": True,
+        "slot": {"id": slot.id, "preset": slot.preset},
+        "platos": [
+            {
+                "id": p.id,
+                "nombre": p.nombre_plato,
+                "tipo": p.tipos or "",
+            }
+            for p in platos_qs
+        ],
+    })
+
+
+# =====================================================
+# §31-reformulado: slots semanales en el menú programado
+# =====================================================
+def obtener_slots_por_comida(usuario, fechas):
+    """Devuelve {fecha: {momento: [slot_dict]}} para los SlotSemanal del usuario
+    que caen en cada fecha de `fechas` (rolling week).
+
+    Cada slot_dict incluye:
+      - id, preset, preset_label, orden
+      - pendiente (True si no hay MenuItem con slot_origen_id en esa fecha/momento)
+      - menuitem_id, plato_id, plato_nombre (si resuelto)
+
+    Slots sin fecha en `fechas` se omiten.
+    """
+    fechas_set = set(fechas)
+    if not fechas_set:
+        return {}
+
+    slots_qs = SlotSemanal.objects.filter(propietario=usuario)
+    slots = list(slots_qs)
+    if not slots:
+        return {}
+
+    slot_ids = [s.id for s in slots]
+
+    # MenuItems ya resueltos con slot_origen
+    resueltos_qs = (
+        MenuItem.objects
+        .filter(
+            menu__propietario=usuario,
+            menu__fecha__in=fechas_set,
+            slot_origen_id__in=slot_ids,
+        )
+        .select_related("menu", "plato", "lugar")
+    )
+    resueltos = {}
+    for item in resueltos_qs:
+        resueltos[(item.slot_origen_id, item.menu.fecha, item.momento)] = item
+
+    resultado = {}
+    for fecha in sorted(fechas_set):
+        dia_semana = fecha.weekday()
+        for slot in slots:
+            if slot.dia_semana != dia_semana:
+                continue
+            momento = slot.momento
+            key = (slot.id, fecha, momento)
+            resuelto = resueltos.get(key)
+
+            preset_label = (PRESETS.get(slot.preset) or {}).get("label", slot.preset or "")
+
+            info = {
+                "id": slot.id,
+                "preset": slot.preset,
+                "preset_label": preset_label,
+                "orden": slot.orden,
+                "pendiente": resuelto is None,
+                "menuitem_id": (resuelto.id if resuelto else None),
+                "plato_id": (resuelto.plato.id if (resuelto and resuelto.plato) else None),
+                "plato_nombre": (
+                    resuelto.plato.nombre_plato
+                    if (resuelto and resuelto.plato)
+                    else None
+                ),
+            }
+
+            resultado.setdefault(fecha, {}).setdefault(momento, []).append(info)
+
+    for fecha, momentos in resultado.items():
+        for momento, slots_momento in momentos.items():
+            slots_momento.sort(key=lambda x: (x["orden"], x["id"]))
+
+    return resultado
