@@ -16,6 +16,7 @@ from AdminVideos.services.plantillas import (
     PRESETS,
     criterio_desde_preset,
     filtrar_platos_por_criterio,
+    label_preset,
 )
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string   # ✅ ← ESTA ES LA CLAVE
@@ -4906,7 +4907,7 @@ def obtener_slots_por_comida(usuario, fechas):
             key = (slot.id, fecha, momento)
             resuelto = resueltos.get(key)
 
-            preset_label = (PRESETS.get(slot.preset) or {}).get("label", slot.preset or "")
+            preset_label = label_preset(slot.preset)
 
             info = {
                 "id": slot.id,
@@ -4930,3 +4931,93 @@ def obtener_slots_por_comida(usuario, fechas):
             slots_momento.sort(key=lambda x: (x["orden"], x["id"]))
 
     return resultado
+
+
+# =====================================================
+# §31 E1: editor de slots (GET precarga, POST actualiza)
+# =====================================================
+
+@login_required
+def ajax_get_slot(request, pk):
+    """Devuelve los datos del slot para precargar el modal de edición."""
+    if request.method != "GET":
+        return JsonResponse({"ok": False, "error": "Método no permitido"}, status=405)
+    slot = SlotSemanal.objects.filter(pk=pk, propietario=request.user).first()
+    if slot is None:
+        return JsonResponse({"ok": False, "error": "Slot no encontrado"}, status=404)
+    criterio = slot.criterio or {}
+    return JsonResponse({
+        "ok": True,
+        "slot": {
+            "id": slot.id,
+            "preset": slot.preset or "",
+            "preset_label": label_preset(slot.preset),
+            "criterio": criterio,
+            "elaboracion_max": criterio.get("elaboracion_max"),
+            "coccion_max": criterio.get("coccion_max"),
+            "medios": criterio.get("medios") or [],
+        }
+    })
+
+
+@login_required
+def ajax_editar_slot(request, pk):
+    """Edita el preset y criterios manuales (tiempos, medios) de un slot."""
+    if request.method != "POST":
+        return JsonResponse({"ok": False, "error": "Método no permitido"}, status=405)
+    slot = SlotSemanal.objects.filter(pk=pk, propietario=request.user).first()
+    if slot is None:
+        return JsonResponse({"ok": False, "error": "Slot no encontrado"}, status=404)
+
+    preset = (request.POST.get("preset") or "").strip()
+    if preset and preset not in PRESETS:
+        return JsonResponse({"ok": False, "error": "Preset desconocido"}, status=400)
+
+    def parse_int(v):
+        if v is None or v == "":
+            return None
+        try:
+            n = int(v)
+            if n < 0:
+                raise ValueError
+            return n
+        except (TypeError, ValueError):
+            return "INVALID"
+
+    elab = parse_int(request.POST.get("elaboracion_max"))
+    cocc = parse_int(request.POST.get("coccion_max"))
+    if elab == "INVALID" or cocc == "INVALID":
+        return JsonResponse({"ok": False, "error": "Los tiempos deben ser números enteros ≥ 0"}, status=400)
+
+    valid_medios = {c[0] for c in Plato.MEDIOS_CHOICES}
+    medios_raw = request.POST.getlist("medios")
+    medios = [m for m in medios_raw if m in valid_medios]
+    if len(medios) != len(medios_raw):
+        return JsonResponse({"ok": False, "error": "Medio inválido"}, status=400)
+
+    criterio = {}
+    if preset:
+        criterio.update(PRESETS[preset]["criterio"])
+    if elab is not None:
+        criterio["elaboracion_max"] = elab
+    if cocc is not None:
+        criterio["coccion_max"] = cocc
+    if medios:
+        criterio["medios"] = medios
+
+    if not criterio:
+        return JsonResponse({"ok": False, "error": "Elegí un preset o al menos un filtro"}, status=400)
+
+    slot.preset = preset
+    slot.criterio = criterio
+    slot.save(update_fields=["preset", "criterio"])
+
+    return JsonResponse({
+        "ok": True,
+        "slot": {
+            "id": slot.id,
+            "preset": slot.preset,
+            "preset_label": label_preset(slot.preset),
+            "criterio": criterio,
+        }
+    })

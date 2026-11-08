@@ -71,3 +71,11 @@ def filtrar_platos_por_criterio(criterio, platos_qs=None):
         qs = qs.filter(coccion__isnull=False, coccion__lte=cocc_max)
 
     return qs
+
+
+def label_preset(preset: str) -> str:
+    """Devuelve el label visible del preset. 'Personalizado' si preset vacío."""
+    if not preset:
+        return "Personalizado"
+    entry = PRESETS.get(preset)
+    return entry["label"] if entry else preset

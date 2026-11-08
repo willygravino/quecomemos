@@ -19,7 +19,7 @@ from django.urls import path
 
 from AdminVideos.views import ajax_mensajes_usuario, ajax_eliminar_mensaje_chat, agregar_lugar_compartido, descartar_elemento_compartido, ajax_eliminar_programado, ajax_listado_platos, ajax_lo_que_tengo_palabras, ajax_lo_que_tengo_agregar, ajax_lo_que_tengo_eliminar, CrearLugar, EnviarMensaje, LugarDetail, LugarUpdate, PlatoDetail, agregar_a_mi_lista, agregar_plato_compartido, ajax_panel_amigues, ajax_solicitudes_amistad, amigue_borrar, api_ingredientes, api_insumos, api_toggle_item, compartir_elemento, compartir_ing_plato, descartar_sugerido, eliminar_lugar, eliminar_menu_programado, eliminar_plato, eliminar_programado, fijar_o_eliminar_habito, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, lista_de_compras, FiltroDePlatos, plato_ingredientes, plato_opciones_asignar, random_dia, set_dia_activo, sumar_amigue, user_logout, SolicitarAmistad, AsignarPlato, compartir_lista
 
-from AdminVideos.views import ajax_crear_slot, ajax_borrar_slot, ajax_platos_para_slot
+from AdminVideos.views import ajax_crear_slot, ajax_borrar_slot, ajax_platos_para_slot, ajax_editar_slot, ajax_get_slot
 from django.conf.urls.static import static
 from django.conf import settings
 
@@ -83,6 +83,8 @@ urlpatterns = [
     path('asignar/plato', AsignarPlato.as_view(), name="asignar-plato"), # type: ignore
     path("slot/crear/", ajax_crear_slot, name="ajax_crear_slot"),
     path("slot/<int:pk>/borrar/", ajax_borrar_slot, name="ajax_borrar_slot"),
+    path("slot/<int:pk>/editar/", ajax_editar_slot, name="ajax_editar_slot"),
+    path("slot/<int:pk>/", ajax_get_slot, name="ajax_get_slot"),
     path("slot/<int:pk>/platos/", ajax_platos_para_slot, name="ajax_platos_para_slot"),
     path("set-dia-activo/", set_dia_activo, name="set-dia-activo"),
     path("platos/<int:pk>/ingredientes/", plato_ingredientes, name="plato_ingredientes"),
