@@ -3734,7 +3734,7 @@ input[type="search"].form-control::-webkit-search-decoration {
   padding: .2rem .5rem;
   margin: .3rem 0 0 .5rem;
   font-size: .8rem;
-  color: var(--qc-slot-medio);
+  color: var(--qc-slot-texto);
   background: transparent;
   border: 1px dashed var(--qc-slot-borde);
   border-radius: .35rem;
@@ -3813,8 +3813,11 @@ button.menu-slot-pendiente:focus-visible {
 
 /* §31 C5b: título de comida con slot pendiente (violeta apagado, NO primary) */
 .menu-programado-comida-wrapper.menu-programado-comida-solo-slot > h6 {
-  background-color: var(--qc-slot-suave) !important;
+  background-color: rgba(214, 51, 132, 0.18) !important;
   color: var(--bs-body-color) !important;
+}
+[data-bs-theme="dark"] .menu-programado-comida-wrapper.menu-programado-comida-solo-slot > h6 {
+  background-color: rgba(240, 106, 171, 0.22) !important;
 }
 
 /* ============================================================
@@ -3842,4 +3845,9 @@ button.menu-slot-pendiente:focus-visible {
 .btn.js-crear-slot:hover,
 .btn.js-crear-slot:focus-visible {
   color: var(--qc-slot-fuerte);
+}
+
+/* §31 C7: wrapper -solo-slot apagado como -vacia (0.55 vs 0.45), para no competir visualmente */
+.menu-programado-comida-wrapper.menu-programado-comida-solo-slot {
+  opacity: 0.55;
 }
