@@ -17,16 +17,27 @@
 
     {% for slot in slots %}
       {% if slot.pendiente %}
-        <button type="button"
-                class="menu-slot-pendiente js-abrir-elegir-plato"
-                data-slot-id="{{ slot.id }}"
-                data-slot-label="{{ slot.preset_label|escape }}"
-                data-menu-dia="{{ dia|date:'Y-m-d' }}"
-                data-menu-comida="{{ comida }}"
-                data-slot-preset="{{ slot.preset }}">
-          <i class="fa-solid fa-hourglass-half" aria-hidden="true"></i>
-          <span class="menu-slot-pendiente-label">Pendiente: {{ slot.preset_label }}</span>
-        </button>
+        <div class="menu-slot-pendiente">
+          <button type="button"
+                  class="menu-slot-pendiente-accion js-abrir-elegir-plato"
+                  data-slot-id="{{ slot.id }}"
+                  data-slot-label="{{ slot.preset_label|escape }}"
+                  data-menu-dia="{{ dia|date:'Y-m-d' }}"
+                  data-menu-comida="{{ comida }}"
+                  data-slot-preset="{{ slot.preset }}">
+            <i class="fa-solid fa-hourglass-half" aria-hidden="true"></i>
+            <span class="menu-slot-pendiente-label">Pendiente: {{ slot.preset_label }}</span>
+          </button>
+          <button type="button"
+                  class="menu-slot-borrar-btn js-borrar-slot"
+                  data-slot-id="{{ slot.id }}"
+                  data-slot-label="{{ slot.preset_label|escape }}"
+                  data-borrar-url="{% url 'ajax_borrar_slot' pk=slot.id %}"
+                  aria-label="Borrar slot"
+                  title="Borrar slot">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+          </button>
+        </div>
       {% endif %}
     {% endfor %}
 

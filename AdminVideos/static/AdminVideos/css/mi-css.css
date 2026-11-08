@@ -3766,3 +3766,55 @@ button.menu-slot-pendiente:focus-visible {
   background: rgba(255, 255, 255, .06);
   border-color: var(--bs-primary);
 }
+
+/* §31 C4b: chip slot -> div con dos buttons (elegir + borrar) */
+.menu-slot-pendiente-accion {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  cursor: pointer;
+  flex: 1;
+  text-align: left;
+  min-width: 0;
+}
+.menu-slot-pendiente-accion:hover,
+.menu-slot-pendiente-accion:focus-visible {
+  outline: none;
+  text-decoration: underline;
+}
+
+.menu-slot-borrar-btn {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  padding: 0 .15rem;
+  margin: 0;
+  cursor: pointer;
+  opacity: .7;
+  transition: opacity .12s, color .12s;
+  font-size: .8rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+.menu-slot-borrar-btn:hover,
+.menu-slot-borrar-btn:focus-visible {
+  opacity: 1;
+  color: var(--bs-danger);
+  outline: none;
+}
+
+/* §31 C4b: plato que vino de un slot (violeta tenue, sin romper layout) */
+.plato-desde-slot {
+  box-shadow: inset 3px 0 0 #6f42c1;
+  padding-left: .35rem;
+}
+[data-bs-theme="dark"] .plato-desde-slot {
+  box-shadow: inset 3px 0 0 #a78bfa;
+}

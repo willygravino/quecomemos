@@ -529,4 +529,58 @@
     });
   }, true);
 
+  /* ============================================================
+     SLOTS SEMANALES: borrar slot con confirmación
+     ============================================================ */
+
+  document.addEventListener("click", async function (event) {
+    const btn = event.target.closest(".js-borrar-slot");
+    if (!btn) return;
+    event.preventDefault();
+    event.stopPropagation();
+
+    const slotId = btn.dataset.slotId || "";
+    const slotLabel = btn.dataset.slotLabel || "";
+    const borrarUrl = btn.dataset.borrarUrl || "";
+
+    if (!slotId || !borrarUrl || !window.fetch) return;
+
+    const mensaje = '¿Borrar el slot "' + slotLabel + '"?';
+    const confirmar = window.confirmDialog
+      ? await window.confirmDialog({
+          title: "Borrar slot",
+          body: mensaje,
+          confirmText: "Borrar",
+          confirmClass: "btn-danger"
+        })
+      : window.confirm(mensaje);
+
+    if (!confirmar) return;
+
+    btn.disabled = true;
+
+    fetch(borrarUrl, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": getCSRFToken(),
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      credentials: "same-origin"
+    })
+    .then(function (response) {
+      if (!response.ok) throw new Error("Error al borrar slot");
+      return response.json();
+    })
+    .then(function (data) {
+      if (!data.ok) throw new Error("Respuesta inválida al borrar slot");
+      return refrescarMenuProgramado();
+    })
+    .catch(function (error) {
+      console.error(error);
+    })
+    .finally(function () {
+      btn.disabled = false;
+    });
+  }, true);
+
 })();
