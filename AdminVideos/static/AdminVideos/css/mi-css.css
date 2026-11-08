@@ -4006,3 +4006,70 @@ body:not(.qc-slots-off) #diasTabContent:not(.menu-dia-programado-activo) {
 body:not(.qc-slots-off) #diasTab .nav-link.active:not(.menu-programado-dia-programado) {
   background-color: var(--qc-slot-medio) !important;
 }
+
+/* ============================================================
+   §31 D2c: eliminar el borde interior de .menu-programado-contenido-solido
+   (el border 2px + el anillo de 1px del box-shadow no tenían función).
+   Se mantiene la sombra suave (0 .125rem .25rem) para profundidad.
+   Aplica a TODOS los estados: vacío, parcial, programado. Light y dark.
+   ============================================================ */
+#diasTabContent .menu-programado-contenido-solido,
+#diasTabContent .menu-programado-contenido-solido.menu-programado-contenido-programado {
+  border: 0 !important;
+  box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075) !important;
+}
+
+/* ============================================================
+   §31 D2c: con slots ON, todos los "celestes" de los estados
+   vacío y parcial (activo/inactivo) pasan a magenta, incluidos
+   los degradés. Estados "programados" (violeta) no se tocan.
+   Con slots OFF, todo queda como estaba.
+   ============================================================ */
+
+/* VACÍO + INACTIVO (segundo plano): magenta apagado (--qc-slot-btn) */
+body:not(.qc-slots-off) #diasTab .nav-link:not(.menu-programado-dia-programado):not(.active) {
+  background-color: var(--qc-slot-btn) !important;
+}
+body:not(.qc-slots-off) #diasTab .nav-link:not(.menu-programado-dia-programado):not(.active):hover,
+body:not(.qc-slots-off) #diasTab .nav-link:not(.menu-programado-dia-programado):not(.active):focus-visible {
+  background-color: color-mix(in srgb, var(--qc-slot-btn) 84%, white) !important;
+}
+
+/* VACÍO + ACTIVO hover: aclara el magenta principal */
+body:not(.qc-slots-off) #diasTab .nav-link.active:not(.menu-programado-dia-programado):hover,
+body:not(.qc-slots-off) #diasTab .nav-link.active:not(.menu-programado-dia-programado):focus-visible {
+  background-color: color-mix(in srgb, var(--qc-slot-medio) 84%, white) !important;
+}
+
+/* PARCIAL + ACTIVO: degradé violeta -> magenta (reemplaza #4e73df) */
+body:not(.qc-slots-off) #diasTab .nav-link.menu-dia-parcial.active {
+  background: linear-gradient(
+    to top,
+    var(--menu-programado-solido) 0%,
+    var(--menu-programado-solido) 15%,
+    var(--qc-slot-medio) 85%,
+    var(--qc-slot-medio) 100%
+  ) !important;
+}
+
+/* PARCIAL + INACTIVO light: #3154b8 -> magenta apagado */
+body:not(.qc-slots-off) #diasTab .nav-link.menu-dia-parcial:not(.active) {
+  background: linear-gradient(
+    to top,
+    var(--qc-menu-programado-inactivo) 0%,
+    var(--qc-menu-programado-inactivo) 15%,
+    var(--qc-slot-btn) 85%,
+    var(--qc-slot-btn) 100%
+  ) !important;
+}
+
+/* PARCIAL + INACTIVO dark: #2f3852 -> magenta apagado */
+body:not(.qc-slots-off) [data-bs-theme="dark"] #diasTab .nav-link.menu-dia-parcial:not(.active) {
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--menu-programado-solido) 55%, #000) 0%,
+    color-mix(in srgb, var(--menu-programado-solido) 55%, #000) 15%,
+    var(--qc-slot-btn) 85%,
+    var(--qc-slot-btn) 100%
+  ) !important;
+}
