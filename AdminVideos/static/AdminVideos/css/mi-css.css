@@ -3734,9 +3734,10 @@ input[type="search"].form-control::-webkit-search-decoration {
   padding: .2rem .5rem;
   margin: .3rem 0 0 .5rem;
   font-size: .8rem;
-  color: var(--qc-slot-medio);
+  color: var(--qc-slot-chip);
   background: transparent;
   border: 1px dashed var(--qc-slot-borde);
+  opacity: 1;
   border-radius: .35rem;
 }
 .menu-slot-pendiente .menu-slot-pendiente-label {
@@ -3815,6 +3816,7 @@ button.menu-slot-pendiente:focus-visible {
 .menu-programado-comida-wrapper.menu-programado-comida-solo-slot > h6 {
   background-color: rgba(214, 51, 132, 0.18) !important;
   color: var(--bs-body-color) !important;
+  opacity: 0.55;
 }
 [data-bs-theme="dark"] .menu-programado-comida-wrapper.menu-programado-comida-solo-slot > h6 {
   background-color: rgba(240, 106, 171, 0.22) !important;
@@ -3828,6 +3830,7 @@ button.menu-slot-pendiente:focus-visible {
   --qc-slot-borde:  #e8a0c0;
   --qc-slot-texto:  #8f1a52;
   --qc-slot-medio:  #d63384;
+  --qc-slot-chip:   #b5276b;
   --qc-slot-fuerte: #b9246e;
 }
 [data-bs-theme="dark"] {
@@ -3835,6 +3838,7 @@ button.menu-slot-pendiente:focus-visible {
   --qc-slot-borde:  #8f3d6b;
   --qc-slot-texto:  #ffc4dd;
   --qc-slot-medio:  #f06aab;
+  --qc-slot-chip:   #f597c4;
   --qc-slot-fuerte: #ff85c0;
 }
 
@@ -3847,7 +3851,14 @@ button.menu-slot-pendiente:focus-visible {
   color: var(--qc-slot-fuerte);
 }
 
-/* §31 C7: wrapper -solo-slot apagado como -vacia (0.55 vs 0.45), para no competir visualmente */
-.menu-programado-comida-wrapper.menu-programado-comida-solo-slot {
-  opacity: 0.55;
+
+/* §31 C8: "+ Slot" en magenta, siempre con el mismo brillo (no depende del wrapper) */
+.menu-programado-comida-wrapper .btn.js-crear-slot {
+  color: var(--qc-slot-medio);
+  opacity: 1;
+}
+.menu-programado-comida-wrapper .btn.js-crear-slot:hover,
+.menu-programado-comida-wrapper .btn.js-crear-slot:focus-visible {
+  color: var(--qc-slot-fuerte);
+  opacity: 1;
 }
