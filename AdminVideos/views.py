@@ -4789,8 +4789,10 @@ def ajax_crear_slot(request):
         max_orden = (
             SlotSemanal.objects
             .filter(propietario=request.user, dia_semana=dia_semana, momento=momento)
-            .aggregate(m=models.Max("orden"))["m"] or 0
-        )
+            .order_by("-orden")
+            .values_list("orden", flat=True)
+            .first()
+        ) or 0
         slot = SlotSemanal.objects.create(
             propietario=request.user,
             dia_semana=dia_semana,
