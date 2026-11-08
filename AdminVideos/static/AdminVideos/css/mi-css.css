@@ -3734,18 +3734,13 @@ input[type="search"].form-control::-webkit-search-decoration {
   padding: .2rem .5rem;
   margin: .3rem 0 0 .5rem;
   font-size: .8rem;
-  color: var(--bs-secondary-color);
-  background: var(--bs-tertiary-bg);
-  border: 1px dashed var(--bs-border-color);
+  color: var(--qc-slot-texto);
+  background: var(--qc-slot-suave);
+  border: 1px dashed var(--qc-slot-borde);
   border-radius: .35rem;
 }
 .menu-slot-pendiente .menu-slot-pendiente-label {
   font-weight: 500;
-}
-[data-bs-theme="dark"] .menu-slot-pendiente {
-  color: var(--bs-secondary-color);
-  background: rgba(255, 255, 255, .03);
-  border-color: rgba(255, 255, 255, .15);
 }
 
 /* §31 C4a: chip slot pendiente como botón clickeable */
@@ -3812,19 +3807,39 @@ button.menu-slot-pendiente:focus-visible {
 
 /* §31 C4b: plato que vino de un slot (violeta tenue, sin romper layout) */
 .plato-desde-slot {
-  box-shadow: inset 3px 0 0 #6f42c1;
+  box-shadow: inset 3px 0 0 var(--qc-slot-medio);
   padding-left: .35rem;
-}
-[data-bs-theme="dark"] .plato-desde-slot {
-  box-shadow: inset 3px 0 0 #a78bfa;
 }
 
 /* §31 C5b: título de comida con slot pendiente (violeta apagado, NO primary) */
 .menu-programado-comida-wrapper.menu-programado-comida-solo-slot > h6 {
-  background-color: #7b5bbf !important;
-  color: #ffffff !important;
+  background-color: var(--qc-slot-suave) !important;
+  color: var(--qc-slot-texto) !important;
 }
-[data-bs-theme="dark"] .menu-programado-comida-wrapper.menu-programado-comida-solo-slot > h6 {
-  background-color: #5a3fa3 !important;
-  color: #e9e5ff !important;
+
+/* ============================================================
+   §31 C5c: paleta magenta para "slots" (identidad visual única)
+   ============================================================ */
+:root {
+  --qc-slot-suave:  #fbe6ef;
+  --qc-slot-borde:  #e8a0c0;
+  --qc-slot-texto:  #8f1a52;
+  --qc-slot-medio:  #d63384;
+  --qc-slot-fuerte: #b9246e;
+}
+[data-bs-theme="dark"] {
+  --qc-slot-suave:  #3a1a2b;
+  --qc-slot-borde:  #8f3d6b;
+  --qc-slot-texto:  #ffc4dd;
+  --qc-slot-medio:  #f06aab;
+  --qc-slot-fuerte: #ff85c0;
+}
+
+/* §31 C5c: botón "+ Slot" en magenta (btn-link hereda primary) */
+.btn.js-crear-slot {
+  color: var(--qc-slot-medio);
+}
+.btn.js-crear-slot:hover,
+.btn.js-crear-slot:focus-visible {
+  color: var(--qc-slot-fuerte);
 }
