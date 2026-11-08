@@ -3734,7 +3734,7 @@ input[type="search"].form-control::-webkit-search-decoration {
   padding: .2rem .5rem;
   margin: .3rem 0 0 .5rem;
   font-size: .8rem;
-  color: var(--qc-slot-texto);
+  color: var(--qc-slot-medio);
   background: transparent;
   border: 1px dashed var(--qc-slot-borde);
   border-radius: .35rem;
