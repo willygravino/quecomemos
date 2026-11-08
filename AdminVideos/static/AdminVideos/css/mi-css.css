@@ -3829,7 +3829,7 @@ button.menu-slot-pendiente:focus-visible {
   --qc-slot-medio:  #d63384;
   --qc-slot-chip:   #821b53;
   --qc-slot-btn:    #771a4d;
-  --qc-slot-tab-inactivo: #e5c5d6;
+  --qc-slot-tab-inactivo: #a06a84;
   --qc-slot-fuerte: #b9246e;
 }
 [data-bs-theme="dark"] {
@@ -4034,7 +4034,7 @@ body:not(.qc-slots-off) #diasTab .nav-link:not(.menu-programado-dia-programado):
 }
 body:not(.qc-slots-off) #diasTab .nav-link:not(.menu-programado-dia-programado):not(.active):hover,
 body:not(.qc-slots-off) #diasTab .nav-link:not(.menu-programado-dia-programado):not(.active):focus-visible {
-  background-color: color-mix(in srgb, var(--qc-slot-tab-inactivo) 96%, white) !important;
+  background-color: color-mix(in srgb, var(--qc-slot-tab-inactivo) 85%, white) !important;
 }
 
 /* VACÍO + ACTIVO hover: aclara el magenta principal */
