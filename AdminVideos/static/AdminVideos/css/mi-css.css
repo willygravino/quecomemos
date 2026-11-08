@@ -3829,7 +3829,7 @@ button.menu-slot-pendiente:focus-visible {
   --qc-slot-medio:  #d63384;
   --qc-slot-chip:   #821b53;
   --qc-slot-btn:    #771a4d;
-  --qc-slot-tab-inactivo: #3d0e27;
+  --qc-slot-tab-inactivo: #e5c5d6;
   --qc-slot-fuerte: #b9246e;
 }
 [data-bs-theme="dark"] {
