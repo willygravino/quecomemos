@@ -3818,3 +3818,13 @@ button.menu-slot-pendiente:focus-visible {
 [data-bs-theme="dark"] .plato-desde-slot {
   box-shadow: inset 3px 0 0 #a78bfa;
 }
+
+/* §31 C5b: título de comida con slot pendiente (violeta apagado, NO primary) */
+.menu-programado-comida-wrapper.menu-programado-comida-solo-slot > h6 {
+  background-color: #7b5bbf !important;
+  color: #ffffff !important;
+}
+[data-bs-theme="dark"] .menu-programado-comida-wrapper.menu-programado-comida-solo-slot > h6 {
+  background-color: #5a3fa3 !important;
+  color: #e9e5ff !important;
+}

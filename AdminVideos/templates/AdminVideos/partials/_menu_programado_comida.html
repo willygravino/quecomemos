@@ -1,6 +1,6 @@
 {# Renderiza una comida del menú programado: título, items y estado vacío #}
 
-<div class="menu-programado-comida-wrapper{% if not platos and not slots %} menu-programado-comida-vacia{% endif %}">
+<div class="menu-programado-comida-wrapper{% if not platos and not slots %} menu-programado-comida-vacia{% elif not platos and slots %} menu-programado-comida-solo-slot{% endif %}">
 
   <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">{{ titulo }}</h6>
 
