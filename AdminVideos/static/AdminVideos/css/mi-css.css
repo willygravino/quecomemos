@@ -2819,7 +2819,6 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
    ============================================================ */
 
 .menu-programado-comida-vacia {
-  opacity: 0.45;
   transition: opacity 0.15s ease;
 }
 
@@ -2828,9 +2827,7 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
   color: var(--bs-secondary-color) !important;
 }
 
-.menu-programado-comida-vacia:hover {
-  opacity: 0.7;
-}
+
 
 /* ============================================================
    Headers de grupo para la "carta de restaurante" (tab Principal).
