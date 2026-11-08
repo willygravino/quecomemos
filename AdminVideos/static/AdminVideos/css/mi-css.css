@@ -3890,7 +3890,7 @@ button.menu-slot-pendiente:focus-visible {
 .menu-programado-comida-wrapper .btn.js-crear-slot.btn-link:focus-visible,
 [data-bs-theme="dark"] .menu-programado-comida-wrapper .btn.js-crear-slot:hover,
 [data-bs-theme="dark"] .menu-programado-comida-wrapper .btn.js-crear-slot:focus-visible {
-  color: var(--qc-slot-medio) !important;
+  color: var(--qc-slot-fuerte) !important;
   background: transparent !important;
   border: none !important;
   opacity: 1;
