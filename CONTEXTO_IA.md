@@ -1104,3 +1104,118 @@ Reusar el mismo patrón:
 - **Interacción con `subtipo_carta`** (§29): es el filtro más natural, ya está implementado.
 - **Interacción con "Lo que tengo"** (§30): una plantilla podría filtrar también por lo que tiene el usuario. Sería poderoso pero suma complejidad.
 
+
+---
+
+## 32. Slots semanales + sistema de colores de tabs (implementado 2026-11-08)
+
+> Feature implementado en 15 commits (`0835aec`..`f36f714`). Deployado a Railway. Documentado acá para no re-investigar el sistema de colores de las tabs cada vez que se quiera ajustar.
+
+### 32.1 Modelo
+
+- **`SlotSemanal`** (`models.py`): preferencia recurrente por `(propietario, dia_semana, momento)`. Campos: `preset`, `criterio` (JSON), `orden`, `creado_el`. Sin unique constraint → **múltiples slots por comida permitidos**.
+- **`MenuItem.slot_origen`**: FK nullable `SET_NULL` al `SlotSemanal` que originó ese ítem. Se setea cuando el usuario elige un plato para un slot pendiente. Si el slot se borra, el `MenuItem` queda con `slot_origen=NULL` (P6: borrar slot no borra el plato).
+- **Migración `0107_slotsemanal_menuitem_slot_origen_and_more`**. Aplicada en prod vía Railway Pre-Deploy Command.
+
+### 32.2 Servicios (`services/plantillas.py`)
+
+- **`PRESETS`**: dict de 9 presets fijos (`carne_roja`, `aves`, `cerdo`, `pescado`, `pasta`, `vegetariano`, `rapido`, `guarnicion`, `postre`). Cada uno con `label` + `criterio` (JSON).
+- **`criterio_desde_preset(preset)`**: devuelve el `criterio` del preset.
+- **`filtrar_platos_por_criterio(criterio, qs)`**: aplica AND entre claves, OR dentro de listas. Claves: `tipos`, `subtipo_carta`, `categoria`, `medios`, `estacionalidad`, `elaboracion_max`, `coccion_max`. Claves desconocidas se ignoran.
+
+### 32.3 Endpoints AJAX
+
+| URL | Método | Qué hace |
+|---|---|---|
+| `/slot/crear/` (`ajax_crear_slot`) | POST | Crea `SlotSemanal`. Idempotente por `(user, dia_semana, momento, preset)`. |
+| `/slot/<pk>/borrar/` (`ajax_borrar_slot`) | POST | Borra `SlotSemanal` del user. Huérfanos quedan `slot_origen=NULL`. |
+| `/slot/<pk>/platos/` (`ajax_platos_para_slot`) | GET | JSON `{ok, slot, platos:[{id, nombre, tipo}]}` filtrados por `slot.criterio`. |
+| `/asignar/plato` (`AsignarPlato.post`) | POST | Acepta `slot_origen_id` opcional. Si viene, asocia el `MenuItem` al slot. |
+
+### 32.4 UI
+
+- **Chip "⌛ Pendiente: X"** (en `_menu_programado_comida.html`): `<div class="menu-slot-pendiente">` con 2 `<button>` hermanos (elegir + ✕). **Nunca `<button>` anidado** (HTML inválido).
+- **Modal `#crearSlotModal`**: lista de presets, POST → refresh.
+- **Modal `#elegirPlatoSlotModal`**: GET `/slot/<id>/platos/` → lista de platos → click → POST `/asignar/plato` con `slot_origen_id`.
+- **Toggle "Slots on/off"** (botón circular con ícono `fa-filter` en `#menuProgramadoAcciones`): alterna `body.qc-slots-off`. Persiste en `localStorage.qc_slots_enabled`. Handler **delegado** + `MutationObserver` (sobrevive al refresh AJAX del menú).
+- **Plato que vino de slot**: clase `plato-desde-slot` (borde izquierdo magenta).
+
+### 32.5 Matriz de estados de las tabs del menú programado
+
+> Clases en el `<button class="nav-link ...">`. Los estados "con platos" usan `.menu-programado-dia-programado`. Los "parciales" (1 plato, no almuerzo+cena) suman `.menu-dia-parcial`. El estado activo lo maneja Bootstrap (`.active`).
+
+| Estado | Selector | Light | Dark |
+|---|---|---|---|
+| **Vacío + Inactivo** | `.nav-link:not(.menu-programado-dia-programado):not(.active)` | `--qc-slot-tab-inactivo` `#8f5876` (con slots ON) o `#3154b8` (OFF) | `--qc-slot-tab-inactivo` `#3f2837` (ON) o `#2f3852` (OFF) |
+| **Vacío + Activo** | `.nav-link:not(.menu-programado-dia-programado).active` | `--qc-slot-medio` `#d63384` (ON) o `#4e73df` (OFF) | `--qc-slot-medio` `#e83e8c` (ON) o `#4e73df` (OFF) |
+| **Parcial + Activo** | `.nav-link.menu-dia-parcial.active` | degradé `to top`: violeta `0-15%` → `--qc-slot-medio` `85-100%` | igual |
+| **Parcial + Inactivo** | `.nav-link.menu-dia-parcial:not(.active)` | degradé: violeta-osc `0-15%` → `--qc-slot-tab-inactivo` `85-100%` | degradé: mix violeta+negro → `--qc-slot-tab-inactivo` |
+| **Completo + Activo** | `.menu-programado-dia-programado.active` | `--qc-menu-programado-activo` `#6f42c1` (no cambia con toggle) | igual |
+| **Completo + Inactivo** | `.menu-programado-dia-programado:not(.active)` | `--qc-menu-programado-inactivo` `#4c288d` | `#3b1f63` |
+| **Recuadro exterior vacío** | `#diasTabContent:not(.menu-dia-programado-activo)` | `--qc-slot-medio` (ON) o `--qc-menu-vacio-activo` `#4e73df` (OFF) | `--qc-slot-medio` `#e83e8c` (ON) o `#4e73df` (OFF) |
+| **Recuadro exterior con platos** | `#diasTabContent.menu-dia-programado-activo` | `--qc-menu-programado-activo` (no cambia) | igual |
+
+**Borde interior del bloque `.menu-programado-contenido-solido`**: **eliminado en D2c** (no tenía función). Solo queda la sombra suave.
+
+### 32.6 Variables `--qc-slot-*` (definidas en `mi-css.css` cerca de L2330)
+
+| Variable | Light | Dark | Rol |
+|---|---|---|---|
+| `--qc-slot-suave` | `#fbe6ef` | `#3a1a2b` | Fondo suave (legacy, poco uso tras C5d) |
+| `--qc-slot-borde` | `#e8a0c0` | `#8f3d6b` | Borde del chip / botón S |
+| `--qc-slot-texto` | `#8f1a52` | `#ffc4dd` | Texto apagado (legacy) |
+| `--qc-slot-medio` | `#d63384` | `#e83e8c` | Tab activa, borde `plato-desde-slot`, recuadro exterior, ícono filtro |
+| `--qc-slot-chip` | `#821b53` | `#ba7c9d` | Chip "Pendiente" (no se usa para fondo de tabs) |
+| `--qc-slot-btn` | `#771a4d` | `#a16e91` | Texto "+ Slot" en reposo |
+| `--qc-slot-tab-inactivo` | `#8f5876` | `#3f2837` | Fondo de tabs vacías inactivas |
+| `--qc-slot-fuerte` | `#b9246e` | `#ff85c0` | **Hover** de chip y "+ Slot" |
+
+### 32.7 Overrides por fase (orden de cascada)
+
+| Fase | Selector | Qué hace |
+|---|---|---|
+| D1 | `body.qc-slots-off .menu-slot-pendiente` (y otros) | `display: none !important` → oculta todo lo relacionado con slots |
+| D2 | (revertido en D2b) | — |
+| D2b | `body:not(.qc-slots-off) #diasTabContent:not(.menu-dia-programado-activo)` | Recuadro exterior vacío → magenta |
+| D2b | `body:not(.qc-slots-off) #diasTab .nav-link.active:not(.menu-programado-dia-programado)` | Tab vacía activa → magenta |
+| D2c | `#diasTabContent .menu-programado-contenido-solido` (+ `-programado`) | `border: 0` + box-shadow suave (elimina borde interior) |
+| D2c | `body:not(.qc-slots-off) #diasTab .nav-link.menu-dia-parcial.active` | Degradé parcial activo → violeta → `--qc-slot-medio` |
+| D2c | `body:not(.qc-slots-off) #diasTab .nav-link.menu-dia-parcial:not(.active)` (light) | Degradé parcial inactivo → violeta-osc → `--qc-slot-tab-inactivo` |
+| D2c | `body:not(.qc-slots-off) [data-bs-theme="dark"] #diasTab .nav-link.menu-dia-parcial:not(.active)` | Idem dark |
+| D2c | `body:not(.qc-slots-off) #diasTab .nav-link:not(.menu-programado-dia-programado):not(.active)` | Tab vacía inactiva → `--qc-slot-tab-inactivo` |
+| D2h | `.menu-dia-parcial:not(.active):hover` (light + dark) | Repite gradiente con color de abajo aclarado (`85%+15% white`) |
+
+**Regla general**: `body:not(.qc-slots-off)` = slots ON. Con OFF, todos los overrides dejan de aplicar y vuelven los colores originales.
+
+### 32.8 Hovers
+
+| Elemento | Hover | Notas |
+|---|---|---|
+| **Tab activa** | **SIN hover** (D2g) | Antes aclaraba el fondo → rompía la ilusión de unidad con el borde. No re-agregar. |
+| **Tab inactiva vacía** | `color-mix(--qc-slot-tab-inactivo, white 15%)` | 15% aclarado, notorio. |
+| **Tab parcial inactiva** | Repite gradiente con color de abajo aclarado | `background-color` no funciona sobre `background: linear-gradient` → hay que repetir el gradiente. |
+| **Chip "Pendiente"** | `color: --qc-slot-fuerte`, **sin underline** | D2n (mismo patrón que "+ Slot"). |
+| **"+ Slot"** | `color: --qc-slot-fuerte`, **sin underline** | D2o. |
+| **✕ borrar chip** | `color: --bs-danger`, sin underline | Acción destructiva. |
+| **Título / texto "No hay platos"** | **SIN hover** (D2m) | No son clickeables. Antes subían de 0.45 a 0.7. |
+
+### 32.9 Lecciones de esta sesión
+
+1. **`read -p` no funciona en zsh -l**. En scripts `.sh`, usar comandos separados o `git push` directo. (Es opción de bash, no de zsh).
+2. **`<button>` no puede anidar `<button>`**. El chip "Pendiente" es un `<div>` con 2 `<button>` hermanos (elegir + borrar). HTML inválido si se anidan.
+3. **`\?v=` (backslash antes del `?`) rompe la URL**. El navegador pide `slots_toggle.js/?v=...` → 404. El `?v=` va **fuera** del `{% static %}`, sin backslash. Es la trampa de §7 con un backslash colado.
+4. **`models.Max` requiere `from django.db import models`**. `views.py` no lo tiene, solo imports específicos. Usar `from django.db.models import Max` explícito o queries directas (`order_by('-orden').values_list('orden', flat=True).first()`).
+5. **Handlers sobre HTML refrescable → delegados**. `refrescarMenuProgramado()` reemplaza `#menuProgramadoAcciones.innerHTML`. El toggle "S" perdía el `addEventListener` directo. Solución: `document.addEventListener("click", ...)` + `MutationObserver` para re-aplicar `aria-pressed` tras cada refresh.
+6. **Doble commit duplica CSS**. C13 se commiteó 2 veces (`cb2bd2f` + `31963d1`). El bloque C13 quedó duplicado y D2l solo eliminó una copia. Antes de commitear, verificar `git log --oneline -3` que no haya commits repetidos. Si se repite, `git commit --amend`.
+7. **`background: linear-gradient` tapa `background-color`**. Si el hover usa `background-color` pero la regla base usa `background: linear-gradient(...)`, el hover no se ve. Solución: repetir el gradiente con el color cambiado.
+8. **`opacity` en wrapper atenúa TODO**. `.menu-programado-comida-vacia { opacity: 0.45 }` también atenuaba el botón "+ Slot" y los chips. Solución: mover la opacity a los hijos específicos (`> h6`, `> [data-menu-dia] > p`).
+9. **`confirmDialog` antes de borrar**. Borrar un slot (✕) usa `window.confirmDialog` (§9), no `window.confirm`. El fallback `window.confirm` es solo para casos raros.
+10. **Migración `0107` aplicada en prod vía Railway Pre-Deploy Command**. No hay que hacer nada manual, solo pushear a `main`. Railway la corre sola antes de reiniciar.
+
+### 32.10 Próximos pasos / deudas
+
+- **Ajustar colores** (el dueño dijo "los seguiré emprolijando"). Los valores actuales están en §32.6.
+- **Consolidar variables**: hoy hay 8 `--qc-slot-*`. Algunas (`--qc-slot-suave`, `--qc-slot-texto`) quedaron con poco uso. Revisar si se pueden eliminar.
+- **Aplicar slots a otras pantallas**: hoy solo menú programado. Historial, listado, etc. no muestran slots.
+- **Cross-device**: el toggle "S" persiste en `localStorage` (por navegador). Si se quiere cross-device, migrar a campo `Profile`.
+- **Tests**: siguen sin haber tests del feature. Deuda general §20.
