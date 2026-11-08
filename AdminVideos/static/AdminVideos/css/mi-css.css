@@ -4069,3 +4069,29 @@ body:not(.qc-slots-off) [data-bs-theme="dark"] #diasTab .nav-link.menu-dia-parci
     var(--qc-slot-tab-inactivo) 100%
   ) !important;
 }
+
+/* §31 D2h: hover en tabs PARCIALES INACTIVAS.
+   La regla genérica de hover (background-color) no se ve porque el
+   degradé (background: linear-gradient) tapa el background-color.
+   Acá repetimos el degradé con el color de abajo aclarado (85% + 15% white,
+   misma lógica que el resto de los hovers). */
+body:not(.qc-slots-off) #diasTab .nav-link.menu-dia-parcial:not(.active):hover,
+body:not(.qc-slots-off) #diasTab .nav-link.menu-dia-parcial:not(.active):focus-visible {
+  background: linear-gradient(
+    to top,
+    var(--qc-menu-programado-inactivo) 0%,
+    var(--qc-menu-programado-inactivo) 15%,
+    color-mix(in srgb, var(--qc-slot-tab-inactivo) 85%, white) 85%,
+    color-mix(in srgb, var(--qc-slot-tab-inactivo) 85%, white) 100%
+  ) !important;
+}
+[data-bs-theme="dark"] body:not(.qc-slots-off) #diasTab .nav-link.menu-dia-parcial:not(.active):hover,
+[data-bs-theme="dark"] body:not(.qc-slots-off) #diasTab .nav-link.menu-dia-parcial:not(.active):focus-visible {
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--menu-programado-solido) 55%, #000) 0%,
+    color-mix(in srgb, var(--menu-programado-solido) 55%, #000) 15%,
+    color-mix(in srgb, var(--qc-slot-tab-inactivo) 85%, white) 85%,
+    color-mix(in srgb, var(--qc-slot-tab-inactivo) 85%, white) 100%
+  ) !important;
+}
