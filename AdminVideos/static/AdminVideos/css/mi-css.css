@@ -3734,8 +3734,8 @@ input[type="search"].form-control::-webkit-search-decoration {
   padding: .2rem .5rem;
   margin: .3rem 0 0 .5rem;
   font-size: .8rem;
-  color: var(--qc-slot-texto);
-  background: var(--qc-slot-suave);
+  color: var(--qc-slot-medio);
+  background: transparent;
   border: 1px dashed var(--qc-slot-borde);
   border-radius: .35rem;
 }
@@ -3814,7 +3814,7 @@ button.menu-slot-pendiente:focus-visible {
 /* §31 C5b: título de comida con slot pendiente (violeta apagado, NO primary) */
 .menu-programado-comida-wrapper.menu-programado-comida-solo-slot > h6 {
   background-color: var(--qc-slot-suave) !important;
-  color: var(--qc-slot-texto) !important;
+  color: var(--bs-body-color) !important;
 }
 
 /* ============================================================
