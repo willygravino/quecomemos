@@ -3948,15 +3948,15 @@ body.qc-slots-off .plato-desde-slot {
 
 /* §31 D1c: botón circular "S" para toggle de slots */
 .qc-slots-toggle-btn {
-  width: 2.15rem;
-  height: 2.15rem;
+  width: 1.75rem;
+  height: 1.75rem;
   padding: 0;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.8rem;
   font-family: inherit;
   line-height: 1;
   border: 1px solid var(--qc-slot-borde);
@@ -3992,4 +3992,11 @@ body.qc-slots-off .plato-desde-slot {
   background: var(--qc-slot-fuerte);
   color: #1a0d14;
   border-color: var(--qc-slot-fuerte);
+}
+
+/* §31 D2: con slots ON, el borde celeste del recuadro (vacío / día activo
+   sin platos) pasa a magenta. Con slots OFF, se queda con el celeste actual.
+   El recuadro con platos (-programado, verde) y las tabs (violeta) no se tocan. */
+body:not(.qc-slots-off) #diasTabContent .menu-programado-contenido-solido:not(.menu-programado-contenido-programado) {
+  border-color: var(--qc-slot-medio) !important;
 }
