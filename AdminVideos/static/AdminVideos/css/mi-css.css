@@ -3920,3 +3920,28 @@ button.menu-slot-pendiente:focus-visible {
 .menu-programado-comida-wrapper.menu-programado-comida-vacia:hover > [data-menu-dia] > p {
   opacity: 0.7;
 }
+
+/* ============================================================
+   §31 D1: modo "slots off" (toggle del header del menú)
+   Oculta chips, botón "+ Slot", ✕, modales relacionados y
+   neutraliza el color magenta del título y del borde del plato.
+   ============================================================ */
+body.qc-slots-off .menu-slot-pendiente,
+body.qc-slots-off .btn.js-crear-slot,
+body.qc-slots-off .js-borrar-slot,
+body.qc-slots-off .js-abrir-elegir-plato {
+  display: none !important;
+}
+
+/* Comida que era "solo slot": al apagar slots, se ve como comida vacía */
+body.qc-slots-off .menu-programado-comida-wrapper.menu-programado-comida-solo-slot > h6 {
+  background-color: var(--bs-secondary-bg) !important;
+  color: var(--bs-secondary-color) !important;
+  opacity: 0.45 !important;
+}
+
+/* Plato que vino de slot: sin borde magenta */
+body.qc-slots-off .plato-desde-slot {
+  box-shadow: none !important;
+  padding-left: 0 !important;
+}

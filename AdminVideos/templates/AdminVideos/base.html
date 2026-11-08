@@ -46,7 +46,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <!-- mi css -->
-    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20261108_104658" rel="stylesheet">  <!-- al final + bust de caché -->
+    <link href="{% static 'AdminVideos/css/mi-css.css' %}?v=20261108_105255" rel="stylesheet">  <!-- al final + bust de caché -->
 
     <link rel="manifest" href="{% static 'AdminVideos/lista_super/manifest_lista_super.json' %}?v=1">
 
@@ -333,6 +333,10 @@
 
   <div id="menuProgramadoAcciones"
        class="menu-programado-actions d-flex align-items-center flex-shrink-0">
+    <div class="form-check form-switch qc-slots-toggle d-flex align-items-center m-0 me-2" title="Mostrar/ocultar slots">
+      <input class="form-check-input mt-0" type="checkbox" role="switch" id="qcSlotsToggle" checked>
+      <label class="form-check-label small ms-1 text-muted" for="qcSlotsToggle" style="white-space:nowrap;">Slots</label>
+    </div>
     <button type="button"
             class="btn btn-sm btn-outline-secondary menu-programado-action-icon menu-programado-delete-icon{% if not platos_dia_x_dia %} disabled{% endif %}"
             {% if not platos_dia_x_dia %}disabled{% endif %}
@@ -1323,6 +1327,7 @@ document.addEventListener("click", function (e) {
 
 <!-- Menú programado: asignar, hábitos y refresco AJAX -->
 <script src="{% static 'AdminVideos/js/menu_programado.js' %}?v=20261108_094054"></script>
+<script src="{% static 'AdminVideos/js/slots_toggle.js' %}\?v=20261108_105255"></script>
 
 <!-- Plugins que dependen de jQuery -->
 <script src="{% static 'AdminVideos/vendor/jquery-easing/jquery.easing.min.js' %}"></script>
