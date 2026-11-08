@@ -1,0 +1,72 @@
+{# §31 E2: modal para editar el preset y criterios manuales de un slot #}
+<div class="modal fade" id="editarSlotModal" tabindex="-1"
+     aria-labelledby="editarSlotLabel" aria-hidden="true"
+     data-editar-slot-url-template="{% url 'ajax_editar_slot' pk=0 %}"
+     data-get-slot-url-template="{% url 'ajax_get_slot' pk=0 %}">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <form id="editarSlotForm" novalidate>
+        {% csrf_token %}
+        <input type="hidden" id="editarSlotIdInput" value="">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editarSlotLabel">Editar slot</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="editarSlotPresetSelect" class="form-label">Tipo de plato</label>
+            <select id="editarSlotPresetSelect" class="form-select">
+              <option value="">Personalizado</option>
+              {% for key, info in presets.items %}
+                <option value="{{ key }}">{{ info.label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col">
+              <label for="editarSlotElabInput" class="form-label">Elaboración máx (min)</label>
+              <input type="number" min="0" step="1" id="editarSlotElabInput" class="form-control" placeholder="—">
+            </div>
+            <div class="col">
+              <label for="editarSlotCoccInput" class="form-label">Cocción máx (min)</label>
+              <input type="number" min="0" step="1" id="editarSlotCoccInput" class="form-control" placeholder="—">
+            </div>
+          </div>
+          <fieldset class="mb-2">
+            <legend class="form-label fs-6 mb-2">Medios de cocción</legend>
+            <div class="d-flex flex-wrap gap-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="medios" value="Horno" id="editarMedioHorno">
+                <label class="form-check-label" for="editarMedioHorno">Horno</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="medios" value="Cocina" id="editarMedioCocina">
+                <label class="form-check-label" for="editarMedioCocina">Cocina</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="medios" value="Parrilla" id="editarMedioParrilla">
+                <label class="form-check-label" for="editarMedioParrilla">Parrilla</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="medios" value="Wok" id="editarMedioWok">
+                <label class="form-check-label" for="editarMedioWok">Wok</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="medios" value="Sin coccion" id="editarMedioSinCoccion">
+                <label class="form-check-label" for="editarMedioSinCoccion">Sin cocción</label>
+              </div>
+            </div>
+          </fieldset>
+          <p class="text-muted small mb-0">
+            El preset define la base. Los tiempos y medios se suman al criterio del slot.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" id="editarSlotSaveBtn" class="btn btn-primary">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{{ presets|json_script:"editarSlotPresetsData" }}
