@@ -9,7 +9,13 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
-from AdminVideos.models import ElementoCompartido, Amistad, ProfilePlatoCompra, HabitoSemanal, Ingrediente, IngredienteEnPlato, Insumo, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente, LoQueTengoPalabra, SUBTIPO_CARTA_CHOICES, SUBTIPO_CARTA_ORDEN, SUBTIPO_POSTRE_ORDEN
+from AdminVideos.models import ElementoCompartido, Amistad, ProfilePlatoCompra, HabitoSemanal, Ingrediente, IngredienteEnPlato, Insumo, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente, LoQueTengoPalabra, SlotSemanal, SUBTIPO_CARTA_CHOICES, SUBTIPO_CARTA_ORDEN, SUBTIPO_POSTRE_ORDEN
+
+
+from AdminVideos.services.plantillas import (
+    criterio_desde_preset,
+    filtrar_platos_por_criterio,
+)
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string   # ✅ ← ESTA ES LA CLAVE
 from django.http import Http404, HttpRequest, HttpResponseNotAllowed, JsonResponse
@@ -4166,6 +4172,7 @@ class AsignarPlato(View):
         objeto_id = request.POST.get("plato_id")
         dia = request.POST.get("dia") or request.session.get("dia_activo")
         momento = request.POST.get("comida")
+        slot_origen_id = request.POST.get("slot_origen_id")
         es_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
 
         if not dia:
@@ -4193,8 +4200,14 @@ class AsignarPlato(View):
                 platos_a_asignar = [plato_base]
 
                 creados = 0
+                slot_origen = None
+                if slot_origen_id and str(slot_origen_id).isdigit():
+                    slot_origen = SlotSemanal.objects.filter(
+                        id=int(slot_origen_id),
+                        propietario=request.user,
+                    ).first()
                 for p in platos_a_asignar:
-                    _, created = MenuItem.objects.get_or_create(
+                    item, created = MenuItem.objects.get_or_create(
                         menu=menu_dia,
                         momento=momento,
                         plato=p,
@@ -4202,6 +4215,9 @@ class AsignarPlato(View):
                     )
                     if created:
                         creados += 1
+                    if slot_origen and not item.slot_origen_id:
+                        item.slot_origen = slot_origen
+                        item.save(update_fields=["slot_origen"])
 
                 # ===== Extras (0..N) validados por tipo =====
                 def _tiene_tipo(plato: Plato, tipo_txt: str) -> bool:
@@ -4721,3 +4737,113 @@ def eliminar_menu_programado(request):
         )
 
     return redirect("filtro-de-platos")
+
+
+# =====================================================
+# §31-reformulado: endpoints AJAX de slots semanales
+# =====================================================
+
+@login_required
+def ajax_crear_slot(request):
+    """Crea un SlotSemanal para el usuario. Idempotente: si ya existe
+    un slot con mismo (propietario, dia_semana, momento, preset), lo devuelve."""
+    if request.method != "POST":
+        return JsonResponse({"ok": False, "error": "Método no permitido"}, status=405)
+
+    dia_semana_raw = request.POST.get("dia_semana")
+    momento = request.POST.get("momento")
+    preset = (request.POST.get("preset") or "").strip()
+
+    try:
+        dia_semana = int(dia_semana_raw)
+    except (TypeError, ValueError):
+        return JsonResponse({"ok": False, "error": "dia_semana inválido"}, status=400)
+
+    valid_dias = {d[0] for d in SlotSemanal.DIAS_SEMANA}
+    if dia_semana not in valid_dias:
+        return JsonResponse({"ok": False, "error": "dia_semana fuera de rango"}, status=400)
+
+    valid_momentos = {m[0] for m in SlotSemanal.MOMENTOS}
+    if momento not in valid_momentos:
+        return JsonResponse({"ok": False, "error": "momento inválido"}, status=400)
+
+    if preset not in PRESETS:
+        return JsonResponse({"ok": False, "error": "preset desconocido"}, status=400)
+
+    # Idempotente (QB4=C)
+    slot = SlotSemanal.objects.filter(
+        propietario=request.user,
+        dia_semana=dia_semana,
+        momento=momento,
+        preset=preset,
+    ).first()
+
+    if slot is None:
+        # orden = max(orden)+1 para ese (user, dia, momento)
+        max_orden = (
+            SlotSemanal.objects
+            .filter(propietario=request.user, dia_semana=dia_semana, momento=momento)
+            .aggregate(m=models.Max("orden"))["m"] or 0
+        )
+        slot = SlotSemanal.objects.create(
+            propietario=request.user,
+            dia_semana=dia_semana,
+            momento=momento,
+            preset=preset,
+            criterio=criterio_desde_preset(preset),
+            orden=max_orden + 1,
+        )
+
+    return JsonResponse({
+        "ok": True,
+        "slot": {
+            "id": slot.id,
+            "dia_semana": slot.dia_semana,
+            "momento": slot.momento,
+            "preset": slot.preset,
+            "orden": slot.orden,
+        },
+    })
+
+
+@login_required
+def ajax_borrar_slot(request, pk):
+    """Borra un SlotSemanal del usuario. Los MenuItem huérfanos quedan con
+    slot_origen=NULL (on_delete=SET_NULL)."""
+    if request.method != "POST":
+        return JsonResponse({"ok": False, "error": "Método no permitido"}, status=405)
+
+    slot = SlotSemanal.objects.filter(pk=pk, propietario=request.user).first()
+    if slot is None:
+        return JsonResponse({"ok": False, "error": "Slot no encontrado"}, status=404)
+
+    slot.delete()
+    return JsonResponse({"ok": True})
+
+
+@login_required
+def ajax_platos_para_slot(request, pk):
+    """Devuelve los platos del usuario que matchean el criterio del slot.
+    QB3=A: solo platos propios por ahora."""
+    if request.method != "GET":
+        return JsonResponse({"ok": False, "error": "Método no permitido"}, status=405)
+
+    slot = SlotSemanal.objects.filter(pk=pk, propietario=request.user).first()
+    if slot is None:
+        return JsonResponse({"ok": False, "error": "Slot no encontrado"}, status=404)
+
+    base_qs = Plato.objects.filter(propietario=request.user).order_by("nombre_plato")
+    platos_qs = filtrar_platos_por_criterio(slot.criterio, base_qs)
+
+    return JsonResponse({
+        "ok": True,
+        "slot": {"id": slot.id, "preset": slot.preset},
+        "platos": [
+            {
+                "id": p.id,
+                "nombre": p.nombre_plato,
+                "tipo": p.tipos or "",
+            }
+            for p in platos_qs
+        ],
+    })
