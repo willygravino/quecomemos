@@ -1219,3 +1219,84 @@ Reusar el mismo patrón:
 - **Aplicar slots a otras pantallas**: hoy solo menú programado. Historial, listado, etc. no muestran slots.
 - **Cross-device**: el toggle "S" persiste en `localStorage` (por navegador). Si se quiere cross-device, migrar a campo `Profile`.
 - **Tests**: siguen sin haber tests del feature. Deuda general §20.
+
+### 32.11 Overrides de colores de tabs/recuadro — cómo quitarlos o reactivarlos (2026-11-08)
+
+**Estado actual (2026-11-08)**: **APLICADOS**. Las tabs del menú programado y el recuadro exterior (`#diasTabContent`) cambian a magenta con slots ON. Documentado en §32.5 y §32.7.
+
+**Decisión pendiente del dueño**: está evaluando **quitarlos** ("es un cocoliche sumar más colores"). Pero por ahora se mantienen. Esta sección deja documentado **cómo hacerlo** cuando se decida, sin tener que re-investigar el mapa.
+
+#### Para QUITAR los overrides (volver a colores originales en tabs/recuadro)
+
+**Solo afecta tabs y recuadro exterior.** Lo demás (chips, botón toggle, "+ Slot", borde del plato, hovers) **no se toca**.
+
+**Paso 1**: eliminar los **9 bloques `body:not(.qc-slots-off) ...`** del final de `mi-css.css` (L3967-4051 aprox al 2026-11-08):
+
+| Línea aprox | Selector | Qué pinta |
+|---|---|---|
+| 3967 | `body:not(.qc-slots-off) #diasTabContent:not(.menu-dia-programado-activo)` | Recuadro exterior vacío |
+| 3970 | `body:not(.qc-slots-off) #diasTab .nav-link.active:not(.menu-programado-dia-programado)` | Tab vacía activa |
+| 3994 | `body:not(.qc-slots-off) #diasTab .nav-link:not(.menu-programado-dia-programado):not(.active)` | Tab vacía inactiva |
+| 3997-3998 | `...:hover` + `...:focus-visible` | Hover tab vacía inactiva |
+| 4003 | `body:not(.qc-slots-off) #diasTab .nav-link.menu-dia-parcial.active` | Tab parcial activa (degradé) |
+| 4014 | `body:not(.qc-slots-off) #diasTab .nav-link.menu-dia-parcial:not(.active)` | Tab parcial inactiva light |
+| 4025 | `body:not(.qc-slots-off) [data-bs-theme="dark"] ...menu-dia-parcial:not(.active)` | Tab parcial inactiva dark |
+| 4040-4041 | `...:hover` + `...:focus-visible` | Hover tab parcial inactiva |
+| 4050-4051 | `[data-bs-theme="dark"] ...:hover` + `...:focus-visible` | Hover dark tab parcial inactiva |
+
+Comando útil para localizarlos rápido:
+
+    grep -n "body:not(.qc-slots-off)" AdminVideos/static/AdminVideos/css/mi-css.css
+
+**Paso 2**: eliminar las variables que quedan huérfanas:
+
+    --qc-slot-suave:  #fbe6ef;       (light)
+    --qc-slot-suave:  #3a1a2b;       (dark)
+    --qc-slot-texto:  #8f1a52;       (light)
+    --qc-slot-texto:  #ffc4dd;       (dark)
+    --qc-slot-tab-inactivo: #8f5876; (light)
+    --qc-slot-tab-inactivo: #3f2837; (dark)
+
+Están en `:root` y `[data-bs-theme="dark"]` cerca de L2330. Las otras (`--qc-slot-borde`, `--qc-slot-medio`, `--qc-slot-chip`, `--qc-slot-btn`, `--qc-slot-fuerte`) **siguen en uso**.
+
+**Paso 3**: bump `?v=` de `mi-css.css` en `base.html`.
+
+**Paso 4**: probar en navegador con `Cmd+Shift+R` (light + dark):
+- Tabs: vuelven a celeste activo / azul inactivo / degradé violeta / violeta completos.
+- Recuadro exterior: celeste o violeta (según corresponda).
+- Chips, toggle, "+ Slot", borde del plato: **siguen funcionando igual**.
+
+#### Para REACTIVAR los overrides
+
+Están en `git log` en las fases D2b..D2i. Comandos `git show`:
+
+    git show 435f9eb -- AdminVideos/static/AdminVideos/css/mi-css.css   # D2b: recuadro exterior + tab vacía activa
+    git show 65bb110 -- AdminVideos/static/AdminVideos/css/mi-css.css   # D2c: parciales + tab vacía inactiva + eliminar borde interior
+    git show 94140a6 -- AdminVideos/static/AdminVideos/css/mi-css.css   # D2d: inactivo más oscuro
+    git show 8279bf7 -- AdminVideos/static/AdminVideos/css/mi-css.css   # D2e: light más suave
+    git show db486cf -- AdminVideos/static/AdminVideos/css/mi-css.css   # D2f: fondo medio + hover notorio
+    git show 0835aec -- AdminVideos/static/AdminVideos/css/mi-css.css   # D2g: quitar hover del activo + oscurecer inactivo
+    git show e6e4e9c -- AdminVideos/static/AdminVideos/css/mi-css.css   # D2h: hover parciales inactivas
+    git show eeb6074 -- AdminVideos/static/AdminVideos/css/mi-css.css   # D2i: magenta dark más vibrante
+
+**Recomendación para reactivar**: no restaurar los 8 commits tal cual (son 8 fases de tweaks). En cambio, **empezar de cero con reglas simples** (1-2 selectores por estado, con variables claras) y documentar la decisión como nueva fase.
+
+#### Qué se mantiene igual (no se toca con esta limpieza)
+
+- `body.qc-slots-off ...` (D1): ocultar chips, botón, ✕, `plato-desde-slot` cuando toggle OFF.
+- Chip "Pendiente: X" (colores en §32.6).
+- Botón toggle "filtro" (§32.4).
+- Botón "+ Slot".
+- Borde izquierdo del plato que vino de slot (`--qc-slot-medio`).
+- Hovers de chip y "+ Slot" (`--qc-slot-fuerte`).
+- Modal crear slot + modal elegir plato.
+
+#### Nota para el futuro
+
+Si el dueño decide reactivar, preferir **una sola regla por estado** (no 8 fases superpuestas). El sistema actual funciona pero tiene ~150 líneas de overrides con 5 variables distintas. Se puede simplificar a 2-3 selectores:
+
+    body:not(.qc-slots-off) #diasTabContent:not(.menu-dia-programado-activo) { background: var(--qc-slot-medio); }
+    body:not(.qc-slots-off) #diasTab .nav-link:not(.menu-programado-dia-programado):not(.active) { background: var(--qc-slot-tab-inactivo); }
+    body:not(.qc-slots-off) #diasTab .nav-link.active:not(.menu-programado-dia-programado) { background: var(--qc-slot-medio); }
+
+Eso cubre 3 estados. Los parciales (degradé) son los que necesitan más líneas por el `linear-gradient` (ver §32.9 lección 7).
