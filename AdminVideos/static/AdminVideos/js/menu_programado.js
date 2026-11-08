@@ -103,6 +103,58 @@
     return getCookie("csrftoken");
   }
 
+  /* §31 E4: helpers para evitar corrupción de estado de modales Bootstrap.
+     Síntomas que arreglan:
+     - Modal abre y se cierra al instante (backdrop residual captura el click).
+     - Página "colgada" (body.modal-open no removido).
+     - Segundo modal no abre porque body.modal-open sigue puesto.
+     */
+  function _qcPrepararModalAntesDeAbrir() {
+    if (document.querySelector(".modal.show")) return;
+    document.querySelectorAll(".modal-backdrop").forEach(function (b) {
+      try { b.remove(); } catch (e) {}
+    });
+    document.body.classList.remove("modal-open");
+    document.body.style.removeProperty("overflow");
+    document.body.style.removeProperty("padding-right");
+    document.querySelectorAll(".modal.d-block:not(.show)").forEach(function (m) {
+      m.classList.remove("d-block");
+      m.style.removeProperty("display");
+      m.setAttribute("aria-hidden", "true");
+      m.removeAttribute("aria-modal");
+    });
+  }
+  function _qcCerrarModalLimpiamente(modalEl, onHidden) {
+    if (!modalEl) { if (onHidden) onHidden(); return; }
+    var inst = null;
+    try { inst = bootstrap.Modal.getInstance(modalEl); } catch (e) {}
+    if (!inst) { if (onHidden) onHidden(); return; }
+    var fired = false;
+    var handler = function () {
+      if (fired) return;
+      fired = true;
+      modalEl.removeEventListener("hidden.bs.modal", handler);
+      document.querySelectorAll(".modal-backdrop").forEach(function (b) { try { b.remove(); } catch (e) {} });
+      document.body.classList.remove("modal-open");
+      document.body.style.removeProperty("overflow");
+      document.body.style.removeProperty("padding-right");
+      if (onHidden) onHidden();
+    };
+    modalEl.addEventListener("hidden.bs.modal", handler);
+    try { inst.hide(); } catch (e) {}
+    setTimeout(function () {
+      if (fired) return;
+      fired = true;
+      modalEl.removeEventListener("hidden.bs.modal", handler);
+      try { inst.dispose(); } catch (e) {}
+      document.querySelectorAll(".modal-backdrop").forEach(function (b) { try { b.remove(); } catch (e) {} });
+      document.body.classList.remove("modal-open");
+      document.body.style.removeProperty("overflow");
+      document.body.style.removeProperty("padding-right");
+      if (onHidden) onHidden();
+    }, 500);
+  }
+
 
     /* ============================================================
         QUITAR ITEM PROGRAMADO POR AJAX
@@ -338,6 +390,7 @@
     momentoInput.value = momento;
 
     if (window.bootstrap && bootstrap.Modal) {
+      _qcPrepararModalAntesDeAbrir();
       bootstrap.Modal.getOrCreateInstance(modalEl).show();
     }
   }, true);
@@ -392,10 +445,7 @@
     })
     .then(function (data) {
       if (!data.ok) throw new Error("Respuesta inválida al crear slot");
-      if (window.bootstrap && bootstrap.Modal) {
-        bootstrap.Modal.getOrCreateInstance(modalEl).hide();
-      }
-      return refrescarMenuProgramado();
+      _qcCerrarModalLimpiamente(modalEl, refrescarMenuProgramado);
     })
     .catch(function (error) {
       console.error(error);
@@ -437,6 +487,7 @@
     lista.innerHTML = '<p class="text-muted small mb-0">Cargando...</p>';
 
     if (window.bootstrap && bootstrap.Modal) {
+      _qcPrepararModalAntesDeAbrir();
       bootstrap.Modal.getOrCreateInstance(modalEl).show();
     }
 
@@ -516,10 +567,7 @@
     })
     .then(function (data) {
       if (!data.ok) throw new Error("Respuesta inválida al asignar plato");
-      if (window.bootstrap && bootstrap.Modal) {
-        bootstrap.Modal.getOrCreateInstance(modalEl).hide();
-      }
-      return refrescarMenuProgramado();
+      _qcCerrarModalLimpiamente(modalEl, refrescarMenuProgramado);
     })
     .catch(function (error) {
       console.error(error);
@@ -635,6 +683,7 @@
     _aplicarCriterioAlModal({});
 
     if (window.bootstrap && bootstrap.Modal) {
+      _qcPrepararModalAntesDeAbrir();
       bootstrap.Modal.getOrCreateInstance(modalEl).show();
     }
 
@@ -714,10 +763,9 @@
     })
     .then(function (data) {
       if (!data.ok) throw new Error("Respuesta inválida");
-      if (window.bootstrap && bootstrap.Modal) {
-        bootstrap.Modal.getOrCreateInstance(modalEl).hide();
-      }
-      if (window.refrescarMenuProgramado) return window.refrescarMenuProgramado();
+      _qcCerrarModalLimpiamente(modalEl, function () {
+        if (window.refrescarMenuProgramado) window.refrescarMenuProgramado();
+      });
     })
     .catch(function (error) {
       console.error(error);
