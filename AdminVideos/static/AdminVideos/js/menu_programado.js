@@ -405,4 +405,128 @@
     });
   }, true);
 
+  /* ============================================================
+     SLOTS SEMANALES: elegir plato para un slot pendiente
+     ============================================================ */
+
+  // Click en chip "Pendiente: X" → abre modal con platos filtrados
+  document.addEventListener("click", function (event) {
+    const btn = event.target.closest(".js-abrir-elegir-plato");
+    if (!btn) return;
+    event.preventDefault();
+
+    const slotId = btn.dataset.slotId || "";
+    const slotLabel = btn.dataset.slotLabel || "";
+    const dia = btn.dataset.menuDia || "";
+    const comida = btn.dataset.menuComida || "";
+    const modalEl = document.getElementById("elegirPlatoSlotModal");
+
+    if (!slotId || !modalEl || !window.fetch) return;
+
+    const urlTemplate = modalEl.dataset.platosUrlTemplate || "";
+    if (!urlTemplate) return;
+    // Reemplazar "/0/" (pk=0 dummy) por el id real
+    const url = urlTemplate.replace("/0/", "/" + slotId + "/");
+
+    document.getElementById("elegirPlatoSlotIdInput").value = slotId;
+    document.getElementById("elegirPlatoSlotDiaInput").value = dia;
+    document.getElementById("elegirPlatoSlotComidaInput").value = comida;
+    document.getElementById("elegirPlatoSlotPreset").textContent = slotLabel || "slot";
+
+    const lista = document.getElementById("elegirPlatoSlotLista");
+    lista.innerHTML = '<p class="text-muted small mb-0">Cargando...</p>';
+
+    if (window.bootstrap && bootstrap.Modal) {
+      bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    }
+
+    fetch(url, {
+      method: "GET",
+      headers: { "X-Requested-With": "XMLHttpRequest" },
+      credentials: "same-origin"
+    })
+    .then(function (response) {
+      if (!response.ok) throw new Error("Error al cargar platos del slot");
+      return response.json();
+    })
+    .then(function (data) {
+      if (!data.ok) throw new Error("Respuesta inválida");
+      if (!data.platos || data.platos.length === 0) {
+        lista.innerHTML = '<p class="text-muted small mb-0">No hay platos que matcheen este filtro. Probá con otro slot.</p>';
+        return;
+      }
+      lista.innerHTML = "";
+      data.platos.forEach(function (p) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "list-group-item list-group-item-action js-elegir-plato-slot d-flex justify-content-between align-items-center";
+        b.dataset.platoId = p.id;
+        b.dataset.platoNombre = p.nombre;
+        b.innerHTML = '<span>' + p.nombre + '</span>'
+          + (p.tipo ? ' <small class="text-muted">' + p.tipo + '</small>' : '');
+        lista.appendChild(b);
+      });
+    })
+    .catch(function (error) {
+      console.error(error);
+      lista.innerHTML = '<p class="text-danger small mb-0">Error al cargar platos.</p>';
+    });
+  }, true);
+
+  // Click en un plato del modal → POST /asignar/plato con slot_origen_id
+  document.addEventListener("click", function (event) {
+    const btn = event.target.closest(".js-elegir-plato-slot");
+    if (!btn) return;
+    event.preventDefault();
+
+    const platoId = btn.dataset.platoId || "";
+    const slotId = document.getElementById("elegirPlatoSlotIdInput").value;
+    const dia = document.getElementById("elegirPlatoSlotDiaInput").value;
+    const comida = document.getElementById("elegirPlatoSlotComidaInput").value;
+    const modalEl = document.getElementById("elegirPlatoSlotModal");
+
+    if (!platoId || !slotId || !dia || !comida || !modalEl) return;
+
+    const asignarUrl = modalEl.dataset.asignarUrl || "";
+    if (!asignarUrl || !window.fetch) return;
+
+    btn.disabled = true;
+
+    const body = new URLSearchParams({
+      tipo_elemento: "plato",
+      plato_id: platoId,
+      dia: dia,
+      comida: comida,
+      slot_origen_id: slotId
+    });
+
+    fetch(asignarUrl, {
+      method: "POST",
+      body: body.toString(),
+      headers: {
+        "X-CSRFToken": getCSRFToken(),
+        "X-Requested-With": "XMLHttpRequest",
+        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+      },
+      credentials: "same-origin"
+    })
+    .then(function (response) {
+      if (!response.ok) throw new Error("Error al asignar plato al slot");
+      return response.json();
+    })
+    .then(function (data) {
+      if (!data.ok) throw new Error("Respuesta inválida al asignar plato");
+      if (window.bootstrap && bootstrap.Modal) {
+        bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+      }
+      return refrescarMenuProgramado();
+    })
+    .catch(function (error) {
+      console.error(error);
+    })
+    .finally(function () {
+      btn.disabled = false;
+    });
+  }, true);
+
 })();

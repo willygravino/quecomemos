@@ -17,14 +17,16 @@
 
     {% for slot in slots %}
       {% if slot.pendiente %}
-        <div class="menu-slot-pendiente"
-             data-slot-id="{{ slot.id }}"
-             data-menu-dia="{{ dia|date:'Y-m-d' }}"
-             data-menu-comida="{{ comida }}"
-             data-slot-preset="{{ slot.preset }}">
+        <button type="button"
+                class="menu-slot-pendiente js-abrir-elegir-plato"
+                data-slot-id="{{ slot.id }}"
+                data-slot-label="{{ slot.preset_label|escape }}"
+                data-menu-dia="{{ dia|date:'Y-m-d' }}"
+                data-menu-comida="{{ comida }}"
+                data-slot-preset="{{ slot.preset }}">
           <i class="fa-solid fa-hourglass-half" aria-hidden="true"></i>
           <span class="menu-slot-pendiente-label">Pendiente: {{ slot.preset_label }}</span>
-        </div>
+        </button>
       {% endif %}
     {% endfor %}
 

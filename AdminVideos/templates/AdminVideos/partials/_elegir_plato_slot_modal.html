@@ -1,0 +1,24 @@
+{# §31-reformulado: modal para elegir plato que satisface el criterio de un slot #}
+<div class="modal fade" id="elegirPlatoSlotModal" tabindex="-1"
+     aria-labelledby="elegirPlatoSlotLabel" aria-hidden="true"
+     data-platos-url-template="{% url 'ajax_platos_para_slot' pk=0 %}"
+     data-asignar-url="{% url 'asignar-plato' %}">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="elegirPlatoSlotLabel">
+          Elegir plato para <span id="elegirPlatoSlotPreset">slot</span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="elegirPlatoSlotIdInput" value="">
+        <input type="hidden" id="elegirPlatoSlotDiaInput" value="">
+        <input type="hidden" id="elegirPlatoSlotComidaInput" value="">
+        <div id="elegirPlatoSlotLista" class="list-group">
+          <p class="text-muted small mb-0">Cargando...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

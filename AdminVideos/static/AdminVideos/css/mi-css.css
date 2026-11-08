@@ -3747,3 +3747,22 @@ input[type="search"].form-control::-webkit-search-decoration {
   background: rgba(255, 255, 255, .03);
   border-color: rgba(255, 255, 255, .15);
 }
+
+/* §31 C4a: chip slot pendiente como botón clickeable */
+button.menu-slot-pendiente {
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background .12s, border-color .12s;
+}
+button.menu-slot-pendiente:hover,
+button.menu-slot-pendiente:focus-visible {
+  background: var(--bs-secondary-bg);
+  border-color: var(--bs-primary);
+  outline: none;
+}
+[data-bs-theme="dark"] button.menu-slot-pendiente:hover,
+[data-bs-theme="dark"] button.menu-slot-pendiente:focus-visible {
+  background: rgba(255, 255, 255, .06);
+  border-color: var(--bs-primary);
+}
