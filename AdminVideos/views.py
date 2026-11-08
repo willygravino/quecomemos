@@ -3206,6 +3206,7 @@ def FiltroDePlatos(request):
                 "lugares": lugares,
                 "habitos_lookup": habitos_lookup,
                 "slots_por_comida": slots_por_comida,
+                "presets": PRESETS,
             }
 
 

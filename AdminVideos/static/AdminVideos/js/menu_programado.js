@@ -316,4 +316,93 @@
       bootstrap.Modal.getOrCreateInstance(modalEl).show();
     }
   }, true);
+  /* ============================================================
+     SLOTS SEMANALES: crear slot desde el menú
+     ============================================================ */
+
+  // Click "+ Slot" → abre el modal de presets con día/momento precargados
+  document.addEventListener("click", function (event) {
+    const btn = event.target.closest(".js-crear-slot");
+    if (!btn) return;
+    event.preventDefault();
+
+    const dia = btn.dataset.dia || "";
+    const momento = btn.dataset.momento || "";
+    const diaInput = document.getElementById("slotDiaInput");
+    const momentoInput = document.getElementById("slotMomentoInput");
+    const modalEl = document.getElementById("crearSlotModal");
+
+    if (!dia || !momento || !diaInput || !momentoInput || !modalEl) return;
+
+    diaInput.value = dia;
+    momentoInput.value = momento;
+
+    if (window.bootstrap && bootstrap.Modal) {
+      bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    }
+  }, true);
+
+  // Click preset en el modal → POST crear slot + refresh + close
+  document.addEventListener("click", function (event) {
+    const btn = event.target.closest(".js-elegir-preset");
+    if (!btn) return;
+    event.preventDefault();
+
+    const preset = btn.dataset.preset || "";
+    const diaInput = document.getElementById("slotDiaInput");
+    const momentoInput = document.getElementById("slotMomentoInput");
+    const modalEl = document.getElementById("crearSlotModal");
+
+    if (!preset || !diaInput || !momentoInput || !modalEl) return;
+
+    const dia = diaInput.value;
+    const momento = momentoInput.value;
+    if (!dia || !momento) return;
+
+    const url = modalEl.dataset.crearSlotUrl || "";
+    if (!url || !window.fetch) return;
+
+    // Convertir YYYY-MM-DD → dia_semana Django (0=lunes ... 6=domingo)
+    const partes = dia.split("-");
+    const fecha = new Date(Number(partes[0]), Number(partes[1]) - 1, Number(partes[2]));
+    const jsDay = fecha.getDay();            // 0=domingo, 1=lunes, ..., 6=sábado
+    const diaSemanaDjango = (jsDay + 6) % 7; // 0=lunes, ..., 6=domingo
+
+    btn.disabled = true;
+
+    const body = new URLSearchParams({
+      dia_semana: String(diaSemanaDjango),
+      momento: momento,
+      preset: preset
+    });
+
+    fetch(url, {
+      method: "POST",
+      body: body.toString(),
+      headers: {
+        "X-CSRFToken": getCSRFToken(),
+        "X-Requested-With": "XMLHttpRequest",
+        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+      },
+      credentials: "same-origin"
+    })
+    .then(function (response) {
+      if (!response.ok) throw new Error("Error al crear slot");
+      return response.json();
+    })
+    .then(function (data) {
+      if (!data.ok) throw new Error("Respuesta inválida al crear slot");
+      if (window.bootstrap && bootstrap.Modal) {
+        bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+      }
+      return refrescarMenuProgramado();
+    })
+    .catch(function (error) {
+      console.error(error);
+    })
+    .finally(function () {
+      btn.disabled = false;
+    });
+  }, true);
+
 })();
