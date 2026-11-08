@@ -3779,7 +3779,7 @@ button.menu-slot-pendiente:focus-visible {
 .menu-slot-pendiente-accion:hover,
 .menu-slot-pendiente-accion:focus-visible {
   outline: none;
-  text-decoration: underline;
+  color: var(--qc-slot-fuerte);
 }
 
 .menu-slot-borrar-btn {
