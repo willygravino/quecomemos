@@ -109,20 +109,39 @@
      - Página "colgada" (body.modal-open no removido).
      - Segundo modal no abre porque body.modal-open sigue puesto.
      */
-  function _qcPrepararModalAntesDeAbrir() {
-    if (document.querySelector(".modal.show")) return;
-    document.querySelectorAll(".modal-backdrop").forEach(function (b) {
-      try { b.remove(); } catch (e) {}
-    });
+  function _qcPrepararModalAntesDeAbrir(modalEl) {
+    // Si el modal objetivo ya está visible, no tocar nada.
+    if (modalEl && modalEl.classList.contains("show")) return;
+
+    // Si hay OTROS modales visibles (posibles zombies), cerrarlos primero.
+    var otros = document.querySelectorAll(".modal.show");
+    for (var i = 0; i < otros.length; i++) {
+      var m = otros[i];
+      if (m === modalEl) continue;
+      try {
+        var inst = bootstrap.Modal.getInstance(m);
+        if (inst) inst.hide();
+      } catch (e) {}
+    }
+
+    // Cleanup forzado SIEMPRE (Bootstrap re-crea backdrop + modal-open en show()).
+    var backdrops = document.querySelectorAll(".modal-backdrop");
+    for (var j = 0; j < backdrops.length; j++) {
+      try { backdrops[j].remove(); } catch (e) {}
+    }
     document.body.classList.remove("modal-open");
     document.body.style.removeProperty("overflow");
     document.body.style.removeProperty("padding-right");
-    document.querySelectorAll(".modal.d-block:not(.show)").forEach(function (m) {
-      m.classList.remove("d-block");
-      m.style.removeProperty("display");
-      m.setAttribute("aria-hidden", "true");
-      m.removeAttribute("aria-modal");
-    });
+
+    // Modales en estado intermedio "d-block sin show" (zombie de transición).
+    var medioAbiertos = document.querySelectorAll(".modal.d-block:not(.show)");
+    for (var k = 0; k < medioAbiertos.length; k++) {
+      var z = medioAbiertos[k];
+      z.classList.remove("d-block");
+      z.style.removeProperty("display");
+      z.setAttribute("aria-hidden", "true");
+      z.removeAttribute("aria-modal");
+    }
   }
   function _qcCerrarModalLimpiamente(modalEl, onHidden) {
     if (!modalEl) { if (onHidden) onHidden(); return; }
@@ -390,7 +409,7 @@
     momentoInput.value = momento;
 
     if (window.bootstrap && bootstrap.Modal) {
-      _qcPrepararModalAntesDeAbrir();
+      _qcPrepararModalAntesDeAbrir(modalEl);
       bootstrap.Modal.getOrCreateInstance(modalEl).show();
     }
   }, true);
@@ -487,7 +506,7 @@
     lista.innerHTML = '<p class="text-muted small mb-0">Cargando...</p>';
 
     if (window.bootstrap && bootstrap.Modal) {
-      _qcPrepararModalAntesDeAbrir();
+      _qcPrepararModalAntesDeAbrir(modalEl);
       bootstrap.Modal.getOrCreateInstance(modalEl).show();
     }
 
@@ -683,7 +702,7 @@
     _aplicarCriterioAlModal({});
 
     if (window.bootstrap && bootstrap.Modal) {
-      _qcPrepararModalAntesDeAbrir();
+      _qcPrepararModalAntesDeAbrir(modalEl);
       bootstrap.Modal.getOrCreateInstance(modalEl).show();
     }
 
