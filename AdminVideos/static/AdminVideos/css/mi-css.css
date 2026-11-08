@@ -3830,8 +3830,8 @@ button.menu-slot-pendiente:focus-visible {
   --qc-slot-borde:  #e8a0c0;
   --qc-slot-texto:  #8f1a52;
   --qc-slot-medio:  #d63384;
-  --qc-slot-chip:   #a32268;
-  --qc-slot-btn:    #952160;
+  --qc-slot-chip:   #821b53;
+  --qc-slot-btn:    #771a4d;
   --qc-slot-fuerte: #b9246e;
 }
 [data-bs-theme="dark"] {
@@ -3839,8 +3839,8 @@ button.menu-slot-pendiente:focus-visible {
   --qc-slot-borde:  #8f3d6b;
   --qc-slot-texto:  #ffc4dd;
   --qc-slot-medio:  #f06aab;
-  --qc-slot-chip:   #e89bc4;
-  --qc-slot-btn:    #c98ab5;
+  --qc-slot-chip:   #ba7c9d;
+  --qc-slot-btn:    #a16e91;
   --qc-slot-fuerte: #ff85c0;
 }
 
