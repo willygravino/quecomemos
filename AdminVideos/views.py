@@ -13,6 +13,7 @@ from AdminVideos.models import ElementoCompartido, Amistad, ProfilePlatoCompra, 
 
 
 from AdminVideos.services.plantillas import (
+    PRESETS,
     criterio_desde_preset,
     filtrar_platos_por_criterio,
 )
@@ -3155,6 +3156,7 @@ def FiltroDePlatos(request):
 
 
     habitos_lookup = obtener_habitos_lookup(habitos)
+    slots_por_comida = obtener_slots_por_comida(usuario, dias_desde_hoy)
 
 
     guarniciones, salsas = obtener_extras_platos(usuario)
@@ -3201,6 +3203,7 @@ def FiltroDePlatos(request):
                 "platos_dia_x_dia": platos_dia_x_dia,
                 "lugares": lugares,
                 "habitos_lookup": habitos_lookup,
+                "slots_por_comida": slots_por_comida,
             }
 
 
@@ -4847,3 +4850,78 @@ def ajax_platos_para_slot(request, pk):
             for p in platos_qs
         ],
     })
+
+
+# =====================================================
+# §31-reformulado: slots semanales en el menú programado
+# =====================================================
+def obtener_slots_por_comida(usuario, fechas):
+    """Devuelve {fecha: {momento: [slot_dict]}} para los SlotSemanal del usuario
+    que caen en cada fecha de `fechas` (rolling week).
+
+    Cada slot_dict incluye:
+      - id, preset, preset_label, orden
+      - pendiente (True si no hay MenuItem con slot_origen_id en esa fecha/momento)
+      - menuitem_id, plato_id, plato_nombre (si resuelto)
+
+    Slots sin fecha en `fechas` se omiten.
+    """
+    fechas_set = set(fechas)
+    if not fechas_set:
+        return {}
+
+    slots_qs = SlotSemanal.objects.filter(propietario=usuario)
+    slots = list(slots_qs)
+    if not slots:
+        return {}
+
+    slot_ids = [s.id for s in slots]
+
+    # MenuItems ya resueltos con slot_origen
+    resueltos_qs = (
+        MenuItem.objects
+        .filter(
+            menu__propietario=usuario,
+            menu__fecha__in=fechas_set,
+            slot_origen_id__in=slot_ids,
+        )
+        .select_related("menu", "plato", "lugar")
+    )
+    resueltos = {}
+    for item in resueltos_qs:
+        resueltos[(item.slot_origen_id, item.menu.fecha, item.momento)] = item
+
+    resultado = {}
+    for fecha in sorted(fechas_set):
+        dia_semana = fecha.weekday()
+        for slot in slots:
+            if slot.dia_semana != dia_semana:
+                continue
+            momento = slot.momento
+            key = (slot.id, fecha, momento)
+            resuelto = resueltos.get(key)
+
+            preset_label = (PRESETS.get(slot.preset) or {}).get("label", slot.preset or "")
+
+            info = {
+                "id": slot.id,
+                "preset": slot.preset,
+                "preset_label": preset_label,
+                "orden": slot.orden,
+                "pendiente": resuelto is None,
+                "menuitem_id": (resuelto.id if resuelto else None),
+                "plato_id": (resuelto.plato.id if (resuelto and resuelto.plato) else None),
+                "plato_nombre": (
+                    resuelto.plato.nombre_plato
+                    if (resuelto and resuelto.plato)
+                    else None
+                ),
+            }
+
+            resultado.setdefault(fecha, {}).setdefault(momento, []).append(info)
+
+    for fecha, momentos in resultado.items():
+        for momento, slots_momento in momentos.items():
+            slots_momento.sort(key=lambda x: (x["orden"], x["id"]))
+
+    return resultado
