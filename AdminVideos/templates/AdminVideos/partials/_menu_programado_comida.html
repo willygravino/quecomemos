@@ -1,6 +1,6 @@
 {# Renderiza una comida del menú programado: título, items y estado vacío #}
 
-<div class="menu-programado-comida-wrapper{% if not platos %} menu-programado-comida-vacia{% endif %}">
+<div class="menu-programado-comida-wrapper{% if not platos and not slots %} menu-programado-comida-vacia{% endif %}">
 
   <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">{{ titulo }}</h6>
 
@@ -13,7 +13,22 @@
           {% include "AdminVideos/partials/_menu_programado_item.html" with comida=comida dia=dia item_class="mb-1 ms-1 d-flex align-items-center text-primary" nombre_class="text-decoration-none me-2" span_class="me-2" iconos_class="d-flex" pin_link_class="" pin_icon_extra_class="ms-2" extras_class="ms-4" %}
         {% endif %}
       {% endfor %}
-    {% else %}
+    {% endif %}
+
+    {% for slot in slots %}
+      {% if slot.pendiente %}
+        <div class="menu-slot-pendiente"
+             data-slot-id="{{ slot.id }}"
+             data-menu-dia="{{ dia|date:'Y-m-d' }}"
+             data-menu-comida="{{ comida }}"
+             data-slot-preset="{{ slot.preset }}">
+          <i class="fa-solid fa-hourglass-half" aria-hidden="true"></i>
+          <span class="menu-slot-pendiente-label">Pendiente: {{ slot.preset_label }}</span>
+        </div>
+      {% endif %}
+    {% endfor %}
+
+    {% if not platos and not slots %}
       <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
     {% endif %}
   </div>

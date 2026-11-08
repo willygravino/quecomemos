@@ -3722,3 +3722,28 @@ input[type="search"].form-control::-webkit-search-decoration {
   padding-right: 2.25rem !important;
 }
 
+
+
+/* ============================================================
+   §31-reformulado: slots pendientes en el menú programado
+   ============================================================ */
+.menu-slot-pendiente {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .2rem .5rem;
+  margin: .3rem 0 0 .5rem;
+  font-size: .8rem;
+  color: var(--bs-secondary-color);
+  background: var(--bs-tertiary-bg);
+  border: 1px dashed var(--bs-border-color);
+  border-radius: .35rem;
+}
+.menu-slot-pendiente .menu-slot-pendiente-label {
+  font-weight: 500;
+}
+[data-bs-theme="dark"] .menu-slot-pendiente {
+  color: var(--bs-secondary-color);
+  background: rgba(255, 255, 255, .03);
+  border-color: rgba(255, 255, 255, .15);
+}

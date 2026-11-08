@@ -1,3 +1,4 @@
+{% load slots_extras %}
 
 <!-- Tab Content -->
 <div class="tab-content bg-body" id="diasTabContent">
@@ -20,6 +21,7 @@
                 <!-- Si hay platos programados para este día, los mostramos -->
                 {% for dia_plato in platos_dia_x_dia.items %}
                   {% if dia_plato.0 == dia %}
+                  {% with slots_del_dia=slots_por_comida|get_dia:dia_plato.0 %}
 
 
              {# ========================= #}
@@ -31,25 +33,25 @@
 
     <!-- Desayuno -->
     <div class="col-md-3">
-      {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Desayuno" platos=dia_plato.1.desayuno comida="desayuno" modo="desktop" %}
+      {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Desayuno" platos=dia_plato.1.desayuno comida="desayuno" modo="desktop" slots=slots_del_dia|get_momento:"desayuno" %}
     </div>
 
 
 
     <!-- Almuerzo -->
     <div class="col-md-3">
-      {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Almuerzo" platos=dia_plato.1.almuerzo comida="almuerzo" modo="desktop" %}
+      {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Almuerzo" platos=dia_plato.1.almuerzo comida="almuerzo" modo="desktop" slots=slots_del_dia|get_momento:"almuerzo" %}
     </div>
 
 
     <!-- Merienda -->
     <div class="col-md-3">
-      {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Merienda" platos=dia_plato.1.merienda comida="merienda" modo="desktop" %}
+      {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Merienda" platos=dia_plato.1.merienda comida="merienda" modo="desktop" slots=slots_del_dia|get_momento:"merienda" %}
     </div>
 
     <!-- Cena -->
     <div class="col-md-3">
-      {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Cena" platos=dia_plato.1.cena comida="cena" modo="desktop" %}
+      {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Cena" platos=dia_plato.1.cena comida="cena" modo="desktop" slots=slots_del_dia|get_momento:"cena" %}
     </div>
 
 
@@ -76,28 +78,28 @@
       <!-- Slide 1: Desayuno-->
       <div class="carousel-item">
         <div class="px-5">
-          {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Desayuno" platos=dia_plato.1.desayuno comida="desayuno" modo="mobile" %}
+          {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Desayuno" platos=dia_plato.1.desayuno comida="desayuno" modo="mobile" slots=slots_del_dia|get_momento:"desayuno" %}
         </div>
       </div>
 
       <!-- Slide 2: Almuerzo -->
       <div class="carousel-item active">
         <div class="px-5">
-          {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Almuerzo" platos=dia_plato.1.almuerzo comida="almuerzo" modo="mobile" %}
+          {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Almuerzo" platos=dia_plato.1.almuerzo comida="almuerzo" modo="mobile" slots=slots_del_dia|get_momento:"almuerzo" %}
         </div>
       </div>
 
       <!-- Slide 3: Merienda -->
       <div class="carousel-item">
         <div class="px-5">
-          {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Merienda" platos=dia_plato.1.merienda comida="merienda" modo="mobile" %}
+          {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Merienda" platos=dia_plato.1.merienda comida="merienda" modo="mobile" slots=slots_del_dia|get_momento:"merienda" %}
         </div>
       </div>
 
       <!-- Slide 4: Cena -->
       <div class="carousel-item">
         <div class="px-5">
-          {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Cena" platos=dia_plato.1.cena comida="cena" modo="mobile" %}
+          {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Cena" platos=dia_plato.1.cena comida="cena" modo="mobile" slots=slots_del_dia|get_momento:"cena" %}
         </div>
       </div>
 
@@ -166,12 +168,44 @@
 
 
 
+                  {% endwith %}
                   {% endif %}
                 {% endfor %}
               {% else %}
-                <h3 class="text-muted text-center mt-1" style="font-size: 1rem;">
-                  Aún no programaste ningún plato para este día.
-                </h3>
+                {% with slots_del_dia=slots_por_comida|get_dia:dia %}
+                  {% if slots_del_dia %}
+                    <div class="text-body p-1 small">
+                      <div class="position-relative">
+                        <div class="menu-programado-contenido-solido menu-programado-contenido-programado border border-2 rounded p-2 mt-2 bg-body-tertiary shadow-sm">
+                          <div class="row align-items-start">
+                            <div class="col py-2">
+                              <div class="d-none d-md-block">
+                                <div class="row gx-0">
+                                  <div class="col-md-3">
+                                    {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Desayuno" platos="" comida="desayuno" modo="desktop" slots=slots_del_dia|get_momento:"desayuno" %}
+                                  </div>
+                                  <div class="col-md-3">
+                                    {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Almuerzo" platos="" comida="almuerzo" modo="desktop" slots=slots_del_dia|get_momento:"almuerzo" %}
+                                  </div>
+                                  <div class="col-md-3">
+                                    {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Merienda" platos="" comida="merienda" modo="desktop" slots=slots_del_dia|get_momento:"merienda" %}
+                                  </div>
+                                  <div class="col-md-3">
+                                    {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Cena" platos="" comida="cena" modo="desktop" slots=slots_del_dia|get_momento:"cena" %}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {% else %}
+                    <h3 class="text-muted text-center mt-1" style="font-size: 1rem;">
+                      Aún no programaste ningún plato para este día.
+                    </h3>
+                  {% endif %}
+                {% endwith %}
               {% endif %}
 
             </div>

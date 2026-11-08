@@ -2570,6 +2570,7 @@ def obtener_platos_dia_x_dia(usuario, fechas_existentes, habitos_set):
                 "fijo": fijo,
                 "tipo": item.plato.tipos,
                 "es_lugar": False,
+                "slot_origen_id": item.slot_origen_id,
             })
 
         elif item.lugar:
@@ -2587,6 +2588,7 @@ def obtener_platos_dia_x_dia(usuario, fechas_existentes, habitos_set):
                 "tipo": "",
                 "fijo": fijo,
                 "es_lugar": True,
+                "slot_origen_id": item.slot_origen_id,
             })
 
     # Días con almuerzo Y cena: menú "completo" del día.
