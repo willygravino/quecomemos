@@ -3896,32 +3896,6 @@ button.menu-slot-pendiente:focus-visible {
   opacity: 1;
 }
 
-/* §31 C13: opacity en hijos específicos del wrapper -vacia, NO en el wrapper.
-   Así "+ Slot" (que vive dentro) mantiene brillo constante en comida vacía
-   o con plato. El título y el "No hay platos" siguen apagados. */
-.menu-programado-comida-wrapper.menu-programado-comida-vacia > h6,
-.menu-programado-comida-wrapper.menu-programado-comida-vacia > [data-menu-dia] > p {
-  opacity: 0.45;
-  transition: opacity 0.15s;
-}
-.menu-programado-comida-wrapper.menu-programado-comida-vacia:hover > h6,
-.menu-programado-comida-wrapper.menu-programado-comida-vacia:hover > [data-menu-dia] > p {
-  opacity: 0.7;
-}
-
-/* §31 C13: opacity en hijos específicos del wrapper -vacia, NO en el wrapper.
-   Así "+ Slot" (que vive dentro) mantiene brillo constante en comida vacía
-   o con plato. El título y el "No hay platos" siguen apagados. */
-.menu-programado-comida-wrapper.menu-programado-comida-vacia > h6,
-.menu-programado-comida-wrapper.menu-programado-comida-vacia > [data-menu-dia] > p {
-  opacity: 0.45;
-  transition: opacity 0.15s;
-}
-.menu-programado-comida-wrapper.menu-programado-comida-vacia:hover > h6,
-.menu-programado-comida-wrapper.menu-programado-comida-vacia:hover > [data-menu-dia] > p {
-  opacity: 0.7;
-}
-
 /* ============================================================
    §31 D1: modo "slots off" (toggle del header del menú)
    Oculta chips, botón "+ Slot", ✕, modales relacionados y
@@ -4083,3 +4057,12 @@ body:not(.qc-slots-off) #diasTab .nav-link.menu-dia-parcial:not(.active):focus-v
     color-mix(in srgb, var(--qc-slot-tab-inactivo) 85%, white) 100%
   ) !important;
 }
+
+/* §31 C13+D2m: opacity fija en hijos específicos del wrapper -vacia.
+   El título y "No hay platos" quedan apagados sin hover (no son clickeables).
+   "+ Slot" mantiene brillo constante. */
+.menu-programado-comida-wrapper.menu-programado-comida-vacia > h6,
+.menu-programado-comida-wrapper.menu-programado-comida-vacia > [data-menu-dia] > p {
+  opacity: 0.45;
+}
+
