@@ -3950,15 +3950,15 @@ body.qc-slots-off .plato-desde-slot {
 
 /* §31 D1c: botón circular "S" para toggle de slots */
 .qc-slots-toggle-btn {
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 1.5rem;
+  height: 1.5rem;
   padding: 0;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-family: inherit;
   line-height: 1;
   border: 1px solid var(--qc-slot-borde);
@@ -3983,17 +3983,6 @@ body.qc-slots-off .plato-desde-slot {
   background: var(--qc-slot-fuerte);
   border-color: var(--qc-slot-fuerte);
   color: #ffffff;
-}
-[data-bs-theme="dark"] .qc-slots-toggle-btn[aria-pressed="true"] {
-  background: var(--qc-slot-chip);
-  color: #1a0d14;
-  border-color: var(--qc-slot-chip);
-}
-[data-bs-theme="dark"] .qc-slots-toggle-btn[aria-pressed="true"]:hover,
-[data-bs-theme="dark"] .qc-slots-toggle-btn[aria-pressed="true"]:focus-visible {
-  background: var(--qc-slot-fuerte);
-  color: #1a0d14;
-  border-color: var(--qc-slot-fuerte);
 }
 
 
