@@ -3910,3 +3910,16 @@ button.menu-slot-pendiente:focus-visible {
 .menu-programado-comida-wrapper.menu-programado-comida-vacia:hover > [data-menu-dia] > p {
   opacity: 0.7;
 }
+
+/* §31 C13: opacity en hijos específicos del wrapper -vacia, NO en el wrapper.
+   Así "+ Slot" (que vive dentro) mantiene brillo constante en comida vacía
+   o con plato. El título y el "No hay platos" siguen apagados. */
+.menu-programado-comida-wrapper.menu-programado-comida-vacia > h6,
+.menu-programado-comida-wrapper.menu-programado-comida-vacia > [data-menu-dia] > p {
+  opacity: 0.45;
+  transition: opacity 0.15s;
+}
+.menu-programado-comida-wrapper.menu-programado-comida-vacia:hover > h6,
+.menu-programado-comida-wrapper.menu-programado-comida-vacia:hover > [data-menu-dia] > p {
+  opacity: 0.7;
+}
