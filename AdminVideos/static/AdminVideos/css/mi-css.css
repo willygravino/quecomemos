@@ -3854,11 +3854,28 @@ button.menu-slot-pendiente:focus-visible {
 }
 
 
-/* §31 C10: "+ Slot" sin fondo, texto magenta apagado (un poco más que el chip) */
-.menu-programado-comida-wrapper .btn.js-crear-slot {
-  color: var(--qc-slot-btn);
-  background: transparent;
-  border: none;
+/* §31 C11: "+ Slot" sin fondo, texto magenta apagado.
+   Bootstrap 5 .btn-link define --bs-btn-color: var(--bs-link-color) (azul) y
+   aplica color: var(--bs-btn-color). Para pisarlo:
+   - Setear --bs-btn-color (y hover/active) en la regla.
+   - color con prioridad alta por si una regla [data-bs-theme="dark"] .btn-link
+     gana en especificidad.
+   - Cubrir ambos modos con selectores especificos. */
+.menu-programado-comida-wrapper .btn.js-crear-slot,
+.menu-programado-comida-wrapper .btn.js-crear-slot.btn-link,
+[data-bs-theme="dark"] .menu-programado-comida-wrapper .btn.js-crear-slot,
+[data-bs-theme="light"] .menu-programado-comida-wrapper .btn.js-crear-slot {
+  --bs-btn-color: var(--qc-slot-btn);
+  --bs-btn-hover-color: var(--qc-slot-medio);
+  --bs-btn-active-color: var(--qc-slot-fuerte);
+  --bs-btn-bg: transparent;
+  --bs-btn-hover-bg: transparent;
+  --bs-btn-active-bg: transparent;
+  --bs-btn-border-color: transparent;
+  --bs-btn-hover-border-color: transparent;
+  color: var(--qc-slot-btn) !important;
+  background: transparent !important;
+  border: none !important;
   padding: 0.1rem 0;
   font-size: 0.8rem;
   text-decoration: none;
@@ -3869,10 +3886,14 @@ button.menu-slot-pendiente:focus-visible {
   transition: color 0.12s;
 }
 .menu-programado-comida-wrapper .btn.js-crear-slot:hover,
-.menu-programado-comida-wrapper .btn.js-crear-slot:focus-visible {
-  color: var(--qc-slot-medio);
-  background: transparent;
-  border: none;
+.menu-programado-comida-wrapper .btn.js-crear-slot:focus-visible,
+.menu-programado-comida-wrapper .btn.js-crear-slot.btn-link:hover,
+.menu-programado-comida-wrapper .btn.js-crear-slot.btn-link:focus-visible,
+[data-bs-theme="dark"] .menu-programado-comida-wrapper .btn.js-crear-slot:hover,
+[data-bs-theme="dark"] .menu-programado-comida-wrapper .btn.js-crear-slot:focus-visible {
+  color: var(--qc-slot-medio) !important;
+  background: transparent !important;
+  border: none !important;
   opacity: 1;
   text-decoration: underline;
 }
