@@ -9,6 +9,7 @@ from .models import (
     ProfilePlatoCompra,
     ElementoCompartido,
     Amistad,
+    SlotSemanal,
 )
 
 # =====================================================
@@ -170,4 +171,14 @@ class LoQueTengoPalabraAdmin(admin.ModelAdmin):
     def usuario(self, obj):
         return obj.profile.user.username
     usuario.short_description = "Usuario"
+
+# =====================================================
+# §31-reformulado: slots semanales
+# =====================================================
+@admin.register(SlotSemanal)
+class SlotSemanalAdmin(admin.ModelAdmin):
+    list_display = ("id", "propietario", "dia_semana", "momento", "preset", "orden")
+    list_filter = ("dia_semana", "momento", "preset", "propietario")
+    search_fields = ("propietario__username", "preset")
+    ordering = ("propietario", "dia_semana", "momento", "orden")
 
