@@ -3894,7 +3894,6 @@ button.menu-slot-pendiente:focus-visible {
   background: transparent !important;
   border: none !important;
   opacity: 1;
-  text-decoration: underline;
 }
 
 /* §31 C13: opacity en hijos específicos del wrapper -vacia, NO en el wrapper.
