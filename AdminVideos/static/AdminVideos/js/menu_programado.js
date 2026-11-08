@@ -103,26 +103,30 @@
     return getCookie("csrftoken");
   }
 
-  /* §31 E6: helpers para estado de modales Bootstrap (versión "idle-only").
-     Regla de oro: SOLO limpiar backdrops + modal-open si NO hay ningún
-     modal .show ni .d-block. Si hay un modal abriéndose o abierto, NO tocar.
-     Esto evita el bug E4/E5: el setTimeout de cerrar un modal borraba el
-     backdrop del modal siguiente que ya estaba abierto. */
+  /* §31 E7: helpers de modales — versión simplificada.
+     Regla de oro: NO limpiar backdrops mientras haya modales en
+     transición (el watchdog de E6 corría en el gap entre show() y
+     .show y borraba el backdrop del modal nuevo).
 
-  function _qcCleanupIfIdle() {
+     Solo dos operaciones:
+     - _qcPrepararModalAntesDeAbrir: si nadie está abriendo/abierto,
+       limpiar huérfanos de sesiones anteriores.
+     - _qcCerrarModalLimpiamente: hide + onHidden en hidden.bs.modal.
+       SIN timeout, SIN watchdog, SIN cleanup blanket. */
+
+  function _qcPrepararModalAntesDeAbrir(modalEl) {
+    if (modalEl && modalEl.classList.contains("show")) return;
+    // Si hay otro modal visible, no tocar.
     if (document.querySelector(".modal.show")) return;
+    // Si hay uno en transición (.d-block sin .show), no tocar.
     if (document.querySelector(".modal.d-block")) return;
+    // Nadie está abriendo/cerrando: limpiar huérfanos.
     document.querySelectorAll(".modal-backdrop").forEach(function (b) {
       try { b.remove(); } catch (e) {}
     });
     document.body.classList.remove("modal-open");
     document.body.style.removeProperty("overflow");
     document.body.style.removeProperty("padding-right");
-  }
-
-  function _qcPrepararModalAntesDeAbrir(modalEl) {
-    if (modalEl && modalEl.classList.contains("show")) return;
-    _qcCleanupIfIdle();
   }
 
   function _qcCerrarModalLimpiamente(modalEl, onHidden) {
@@ -135,30 +139,10 @@
       if (fired) return;
       fired = true;
       modalEl.removeEventListener("hidden.bs.modal", handler);
-      _qcCleanupIfIdle();
       if (onHidden) onHidden();
     };
     modalEl.addEventListener("hidden.bs.modal", handler);
     try { inst.hide(); } catch (e) {}
-    setTimeout(function () {
-      if (fired) return;
-      fired = true;
-      modalEl.removeEventListener("hidden.bs.modal", handler);
-      _qcCleanupIfIdle();
-      if (onHidden) onHidden();
-    }, 500);
-  }
-
-  /* §31 E6: watchdog. Cada 500ms, si hay body.modal-open pero no hay
-     ningún modal visible, limpiar. Esto resuelve el estado huérfano
-     incluso si algo inesperado lo dejó pegado. */
-  if (typeof setInterval === "function") {
-    setInterval(function () {
-      if (!document.body || !document.body.classList.contains("modal-open")) return;
-      if (document.querySelector(".modal.show")) return;
-      if (document.querySelector(".modal.d-block")) return;
-      _qcCleanupIfIdle();
-    }, 500);
   }
 
   /* ============================================================
