@@ -13,7 +13,7 @@
       <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
     </button>
 
-    <nav id="selectorPlatosRail" class="selector-platos-rail" aria-label="Tipos de platos">
+    <div class="selector-platos-fixed" role="group" aria-label="Filtro fijo">
       <a class="selector-platos-item js-filtro-tipopag {% if tipopag == 'Todos' %}is-active{% endif %}"
          href="{% url 'filtro-de-platos' %}?tipopag=Todos{% if lo_que_tengo_activo %}&lo_que_tengo=1{% endif %}"
          data-tipopag="Todos">
@@ -21,8 +21,9 @@
         <span class="item-text">Todos</span>
       </a>
       <span class="selector-platos-sep selector-platos-sep-fuerte" aria-hidden="true"></span>
+    </div>
 
-
+    <nav id="selectorPlatosRail" class="selector-platos-rail" aria-label="Tipos de platos">
       <a class="selector-platos-item js-filtro-tipopag {% if tipopag == 'Principal' %}is-active{% endif %}"
          href="{% url 'filtro-de-platos' %}?tipopag=Principal{% if lo_que_tengo_activo %}&lo_que_tengo=1{% endif %}"
          data-tipopag="Principal">

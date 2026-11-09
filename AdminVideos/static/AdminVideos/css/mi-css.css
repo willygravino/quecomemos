@@ -1678,9 +1678,24 @@ body.filtro-platos-cambiando [data-listado-url] {
 
 .selector-platos-categorias-wrap {
   display: grid;
-  grid-template-columns: 2rem minmax(0, 1fr) 2rem;
+  grid-template-columns: 2rem auto minmax(0, 1fr) 2rem;
   align-items: stretch;
   min-width: 0;
+  gap: .38rem;
+}
+
+/* "Todos" fijo a la izquierda, fuera del rail scrollable */
+.selector-platos-fixed {
+  display: flex;
+  align-items: stretch;
+  flex-shrink: 0;
+  background: var(--bs-body-bg);
+  padding-right: .2rem;
+  position: relative;
+  z-index: 1;
+}
+[data-bs-theme="dark"] .selector-platos-fixed {
+  background: var(--bs-body-bg);
 }
 
 .selector-platos-rail {
@@ -4089,27 +4104,3 @@ body:not(.qc-slots-off) #diasTab .nav-link.menu-dia-parcial:not(.active):focus-v
   outline: none;
 }
 
-/* ============================================================
-   §33: "Todos" fijo en el selector horizontal (sticky a la izquierda)
-   Los demás items scrollean normalmente. El botón queda pegado al
-   borde izquierdo del rail con fondo para no transparentarse.
-   ============================================================ */
-.selector-platos-rail .selector-platos-item[data-tipopag="Todos"] {
-  position: sticky;
-  left: 0;
-  z-index: 2;
-  background: var(--bs-body-bg);
-  /* Sombras tenues a la derecha para separar visualmente al scrollear */
-  box-shadow: 4px 0 8px -4px rgba(0, 0, 0, 0.10);
-}
-.selector-platos-rail .selector-platos-item[data-tipopag="Todos"].is-active {
-  /* Si "Todos" está activo, mantener el highlight */
-  background: rgba(78, 115, 223, 0.14);
-}
-[data-bs-theme="dark"] .selector-platos-rail .selector-platos-item[data-tipopag="Todos"] {
-  background: var(--bs-body-bg);
-  box-shadow: 4px 0 8px -4px rgba(0, 0, 0, 0.40);
-}
-[data-bs-theme="dark"] .selector-platos-rail .selector-platos-item[data-tipopag="Todos"].is-active {
-  background: rgba(78, 115, 223, 0.20);
-}

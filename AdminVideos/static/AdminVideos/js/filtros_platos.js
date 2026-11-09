@@ -234,7 +234,7 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    const activo = Array.from(rail.querySelectorAll(".js-filtro-tipopag")).find(
+    const activo = Array.from(document.querySelectorAll(".js-filtro-tipopag")).find(
       function (link) {
         return link.dataset.tipopag === tipopag;
       }
