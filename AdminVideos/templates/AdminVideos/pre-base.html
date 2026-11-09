@@ -21,32 +21,6 @@
 {% block compartidos_recibidos %}{% endblock %}
 
 <div class="rounded p-2 position-relative m-2">
-  <div class="sugerencias-platos-titulo-bar categoria-actual-bar mb-2" aria-live="polite">
-    <span class="categoria-actual-eyebrow">Carta de</span>
-    <h5 class="categoria-actual-titulo mb-0">
-      <span id="sugerenciasPlatosTituloTipo"
-            data-tipopag-actual="{{ tipopag|default:'Principal' }}">
-        {% if tipopag == "Principal" %}
-          Platos principales
-        {% elif tipopag == "Guarnicion" %}
-          Guarniciones
-        {% elif tipopag == "Picada" %}
-          Picadas
-        {% elif tipopag == "Ingrediente de picada" %}
-          Ingredientes de picada
-        {% elif tipopag == "Comerafuera" %}
-          Comer afuera
-        {% elif tipopag == "Delivery" %}
-          Delivery
-        {% elif tipopag == "Todos" %}
-          Todos los platos
-        {% else %}
-          {{ tipopag }}
-        {% endif %}
-      </span>
-    </h5>
-  </div>
-
 
     {% block filtro %}{% endblock %}
 

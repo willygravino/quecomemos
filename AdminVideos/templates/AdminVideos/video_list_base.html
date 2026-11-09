@@ -44,11 +44,13 @@
 
 {% block lista_platos %}
 
-<div id="contenedor-carousel-platos">
-  {% include "AdminVideos/partials/_carousel_platos.html" %}
-</div>
+<div class="qc-sticky-header">
+  <div id="contenedor-carousel-platos">
+    {% include "AdminVideos/partials/_carousel_platos.html" %}
+  </div>
 
-{% include "AdminVideos/partials/_selector_horizontal_platos.html" %}
+  {% include "AdminVideos/partials/_selector_horizontal_platos.html" %}
+</div>
 
 <div id="contenedor-listado-platos">
   {% include "AdminVideos/partials/_listado_platos.html" %}

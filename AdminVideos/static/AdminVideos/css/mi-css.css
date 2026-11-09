@@ -4104,3 +4104,24 @@ body:not(.qc-slots-off) #diasTab .nav-link.menu-dia-parcial:not(.active):focus-v
   outline: none;
 }
 
+
+/* §34: wrapper sticky de carousel + selector */
+.qc-sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bs-body-bg);
+}
+
+.qc-sticky-header > #contenedor-carousel-platos {
+  position: static !important;
+  z-index: auto !important;
+}
+
+@media (max-width: 767.98px) {
+  .qc-sticky-header {
+    max-height: 50vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}
