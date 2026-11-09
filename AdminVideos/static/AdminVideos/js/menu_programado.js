@@ -103,48 +103,6 @@
     return getCookie("csrftoken");
   }
 
-  /* §31 E7: helpers de modales — versión simplificada.
-     Regla de oro: NO limpiar backdrops mientras haya modales en
-     transición (el watchdog de E6 corría en el gap entre show() y
-     .show y borraba el backdrop del modal nuevo).
-
-     Solo dos operaciones:
-     - _qcPrepararModalAntesDeAbrir: si nadie está abriendo/abierto,
-       limpiar huérfanos de sesiones anteriores.
-     - _qcCerrarModalLimpiamente: hide + onHidden en hidden.bs.modal.
-       SIN timeout, SIN watchdog, SIN cleanup blanket. */
-
-  function _qcPrepararModalAntesDeAbrir(modalEl) {
-    if (modalEl && modalEl.classList.contains("show")) return;
-    // Si hay otro modal visible, no tocar.
-    if (document.querySelector(".modal.show")) return;
-    // Si hay uno en transición (.d-block sin .show), no tocar.
-    if (document.querySelector(".modal.d-block")) return;
-    // Nadie está abriendo/cerrando: limpiar huérfanos.
-    document.querySelectorAll(".modal-backdrop").forEach(function (b) {
-      try { b.remove(); } catch (e) {}
-    });
-    document.body.classList.remove("modal-open");
-    document.body.style.removeProperty("overflow");
-    document.body.style.removeProperty("padding-right");
-  }
-
-  function _qcCerrarModalLimpiamente(modalEl, onHidden) {
-    if (!modalEl) { if (onHidden) onHidden(); return; }
-    var inst = null;
-    try { inst = bootstrap.Modal.getInstance(modalEl); } catch (e) {}
-    if (!inst) { if (onHidden) onHidden(); return; }
-    var fired = false;
-    var handler = function () {
-      if (fired) return;
-      fired = true;
-      modalEl.removeEventListener("hidden.bs.modal", handler);
-      if (onHidden) onHidden();
-    };
-    modalEl.addEventListener("hidden.bs.modal", handler);
-    try { inst.hide(); } catch (e) {}
-  }
-
   /* ============================================================
         QUITAR ITEM PROGRAMADO POR AJAX
         ============================================================ */
@@ -379,7 +337,6 @@
     momentoInput.value = momento;
 
     if (window.bootstrap && bootstrap.Modal) {
-      _qcPrepararModalAntesDeAbrir(modalEl);
       bootstrap.Modal.getOrCreateInstance(modalEl).show();
     }
   }, true);
@@ -434,7 +391,10 @@
     })
     .then(function (data) {
       if (!data.ok) throw new Error("Respuesta inválida al crear slot");
-      _qcCerrarModalLimpiamente(modalEl, refrescarMenuProgramado);
+      if (window.bootstrap && bootstrap.Modal) {
+        bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+      }
+      return refrescarMenuProgramado();
     })
     .catch(function (error) {
       console.error(error);
@@ -476,7 +436,6 @@
     lista.innerHTML = '<p class="text-muted small mb-0">Cargando...</p>';
 
     if (window.bootstrap && bootstrap.Modal) {
-      _qcPrepararModalAntesDeAbrir(modalEl);
       bootstrap.Modal.getOrCreateInstance(modalEl).show();
     }
 
@@ -556,7 +515,10 @@
     })
     .then(function (data) {
       if (!data.ok) throw new Error("Respuesta inválida al asignar plato");
-      _qcCerrarModalLimpiamente(modalEl, refrescarMenuProgramado);
+      if (window.bootstrap && bootstrap.Modal) {
+        bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+      }
+      return refrescarMenuProgramado();
     })
     .catch(function (error) {
       console.error(error);
@@ -672,7 +634,6 @@
     _aplicarCriterioAlModal({});
 
     if (window.bootstrap && bootstrap.Modal) {
-      _qcPrepararModalAntesDeAbrir(modalEl);
       bootstrap.Modal.getOrCreateInstance(modalEl).show();
     }
 
@@ -752,9 +713,10 @@
     })
     .then(function (data) {
       if (!data.ok) throw new Error("Respuesta inválida");
-      _qcCerrarModalLimpiamente(modalEl, function () {
-        if (window.refrescarMenuProgramado) window.refrescarMenuProgramado();
-      });
+      if (window.bootstrap && bootstrap.Modal) {
+        bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+      }
+      if (window.refrescarMenuProgramado) return window.refrescarMenuProgramado();
     })
     .catch(function (error) {
       console.error(error);
