@@ -10,10 +10,6 @@
      REFRESCAR MENÚ PROGRAMADO
      ============================================================ */
   function refrescarMenuProgramado() {
-    console.log("[QC-DEBUG] REFRESH-START", {
-      anyShow: document.querySelectorAll(".modal.show").length,
-      anyDblock: document.querySelectorAll(".modal.d-block").length,
-    });
     const contenedor = document.getElementById("contenedor-menu-programado-dias");
     const tabsDias = document.getElementById("diasTab");
     const accionesMenu = document.getElementById("menuProgramadoAcciones");
@@ -119,18 +115,6 @@
        SIN timeout, SIN watchdog, SIN cleanup blanket. */
 
   function _qcPrepararModalAntesDeAbrir(modalEl) {
-    var _inst = modalEl ? bootstrap.Modal.getInstance(modalEl) : null;
-    console.log("[QC-DEBUG] PREPARAR", {
-      targetId: modalEl ? modalEl.id : null,
-      targetShow: modalEl ? modalEl.classList.contains("show") : null,
-      targetDblock: modalEl ? modalEl.classList.contains("d-block") : null,
-      bodyOpen: document.body.classList.contains("modal-open"),
-      backdrops: document.querySelectorAll(".modal-backdrop").length,
-      anyShow: document.querySelectorAll(".modal.show").length,
-      anyDblock: document.querySelectorAll(".modal.d-block").length,
-      instIsShown: _inst ? _inst._isShown : null,
-      instIsTrans: _inst ? _inst._isTransitioning : null,
-    });
     if (modalEl && modalEl.classList.contains("show")) return;
     // Si hay otro modal visible, no tocar.
     if (document.querySelector(".modal.show")) return;
@@ -146,15 +130,6 @@
   }
 
   function _qcCerrarModalLimpiamente(modalEl, onHidden) {
-    var _instC = modalEl ? bootstrap.Modal.getInstance(modalEl) : null;
-    console.log("[QC-DEBUG] CERRAR", {
-      targetId: modalEl ? modalEl.id : null,
-      instExists: !!_instC,
-      instIsShown: _instC ? _instC._isShown : null,
-      instIsTrans: _instC ? _instC._isTransitioning : null,
-      bodyOpen: document.body.classList.contains("modal-open"),
-      backdrops: document.querySelectorAll(".modal-backdrop").length,
-    });
     if (!modalEl) { if (onHidden) onHidden(); return; }
     var inst = null;
     try { inst = bootstrap.Modal.getInstance(modalEl); } catch (e) {}
@@ -163,11 +138,6 @@
     var handler = function () {
       if (fired) return;
       fired = true;
-      console.log("[QC-DEBUG] HIDDEN-FIRED", {
-        targetId: modalEl.id,
-        bodyOpen: document.body.classList.contains("modal-open"),
-        backdrops: document.querySelectorAll(".modal-backdrop").length,
-      });
       modalEl.removeEventListener("hidden.bs.modal", handler);
       if (onHidden) onHidden();
     };
@@ -410,13 +380,6 @@
 
     if (window.bootstrap && bootstrap.Modal) {
       _qcPrepararModalAntesDeAbrir(modalEl);
-      var _instBefore = bootstrap.Modal.getInstance(modalEl);
-      console.log("[QC-DEBUG] SHOW-CALL", {
-        targetId: modalEl.id,
-        instExists: !!_instBefore,
-        instIsShown: _instBefore ? _instBefore._isShown : null,
-        instIsTrans: _instBefore ? _instBefore._isTransitioning : null,
-      });
       bootstrap.Modal.getOrCreateInstance(modalEl).show();
     }
   }, true);
@@ -514,13 +477,6 @@
 
     if (window.bootstrap && bootstrap.Modal) {
       _qcPrepararModalAntesDeAbrir(modalEl);
-      var _instBefore = bootstrap.Modal.getInstance(modalEl);
-      console.log("[QC-DEBUG] SHOW-CALL", {
-        targetId: modalEl.id,
-        instExists: !!_instBefore,
-        instIsShown: _instBefore ? _instBefore._isShown : null,
-        instIsTrans: _instBefore ? _instBefore._isTransitioning : null,
-      });
       bootstrap.Modal.getOrCreateInstance(modalEl).show();
     }
 
@@ -717,13 +673,6 @@
 
     if (window.bootstrap && bootstrap.Modal) {
       _qcPrepararModalAntesDeAbrir(modalEl);
-      var _instBefore = bootstrap.Modal.getInstance(modalEl);
-      console.log("[QC-DEBUG] SHOW-CALL", {
-        targetId: modalEl.id,
-        instExists: !!_instBefore,
-        instIsShown: _instBefore ? _instBefore._isShown : null,
-        instIsTrans: _instBefore ? _instBefore._isTransitioning : null,
-      });
       bootstrap.Modal.getOrCreateInstance(modalEl).show();
     }
 
@@ -817,100 +766,5 @@
   });
 
 
-  /* ============================================================
-     §31 DEBUG v2: instrumentación de eventos de modales.
-     TEMPORAL. Se quita cuando se identifique la causa raíz.
-     ============================================================ */
-  (function _qcDebugInstrumentacion() {
-    function _log(evento, modalEl, extra) {
-      var info = {
-        evento: evento,
-        modalId: modalEl ? modalEl.id : "(?)",
-        bodyOpen: document.body.classList.contains("modal-open"),
-        backdrops: document.querySelectorAll(".modal-backdrop").length,
-        anyShow: document.querySelectorAll(".modal.show").length,
-        anyDblock: document.querySelectorAll(".modal.d-block").length,
-        stack: (new Error()).stack.split("\n").slice(2, 5).join(" | "),
-      };
-      if (extra) info = Object.assign(info, extra);
-      console.log("[QC-MODAL-EVENT]", info);
-    }
-
-    function _attachAll() {
-      document.querySelectorAll(".modal").forEach(function (m) {
-        if (m.__qcDebugAttached) return;
-        m.__qcDebugAttached = true;
-        ["show.bs.modal", "shown.bs.modal", "hide.bs.modal", "hidden.bs.modal", "hidePrevented.bs.modal"].forEach(function (evt) {
-          m.addEventListener(evt, function (e) {
-            _log(evt, m);
-          });
-        });
-      });
-    }
-
-    // Attach al inicio
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", _attachAll);
-    } else {
-      _attachAll();
-    }
-
-    // MutationObserver: detecta si un modal es removido del DOM
-    var observer = new MutationObserver(function (mutations) {
-      mutations.forEach(function (mutation) {
-        mutation.removedNodes.forEach(function (node) {
-          if (node.nodeType !== 1) return;
-          if (node.classList && node.classList.contains("modal")) {
-            console.log("[QC-MODAL-REMOVED]", {
-              modalId: node.id || "(sin id)",
-              bodyOpen: document.body.classList.contains("modal-open"),
-              backdrops: document.querySelectorAll(".modal-backdrop").length,
-            });
-          }
-          if (node.querySelectorAll) {
-            node.querySelectorAll(".modal").forEach(function (m) {
-              console.log("[QC-MODAL-REMOVED-NESTED]", {
-                modalId: m.id || "(sin id)",
-                parentId: node.id || node.className || node.tagName,
-              });
-            });
-          }
-        });
-        // También si un modal es agregado (para detectar duplicados)
-        mutation.addedNodes.forEach(function (node) {
-          if (node.nodeType !== 1) return;
-          if (node.classList && node.classList.contains("modal")) {
-            console.log("[QC-MODAL-ADDED]", {
-              modalId: node.id || "(sin id)",
-            });
-          }
-        });
-      });
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-    console.log("[QC-DEBUG] Instrumentación v2 activa (eventos + MutationObserver)");
-
-    // Log en el fetch del GET del editar slot (para saber si cargó datos)
-    var _origFetch = window.fetch;
-    window.fetch = function() {
-      var args = arguments;
-      var url = typeof args[0] === "string" ? args[0] : (args[0] && args[0].url) || "";
-      var esSlotGet = url.indexOf("/slot/") !== -1 && url.indexOf("/editar/") === -1 && url.indexOf("/platos/") === -1 && url.indexOf("/borrar/") === -1;
-      if (esSlotGet) {
-        console.log("[QC-FETCH-START]", { url: url });
-      }
-      return _origFetch.apply(this, args).then(function (response) {
-        if (esSlotGet) {
-          console.log("[QC-FETCH-RESPONSE]", { url: url, status: response.status, ok: response.ok });
-        }
-        return response;
-      }).catch(function (err) {
-        if (esSlotGet) {
-          console.log("[QC-FETCH-ERROR]", { url: url, error: String(err) });
-        }
-        throw err;
-      });
-    };
-  })();
 
 })();

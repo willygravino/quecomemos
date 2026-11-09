@@ -1317,6 +1317,10 @@ document.addEventListener("click", function (e) {
  <!-- ESTO PODRÍA CARGARSE SOLO CUANDO SE NECESITA, CON UN SISTEMA DE BLOCK-ENDBLOCK -->
 {% include "AdminVideos/partials/_confirm_action_modal.html" %}
 
+<!-- §31 E8: modales de slot. Viven fuera de #content-wrapper y del área
+     refreshable del menú programado para no ser removidos por refrescos AJAX. -->
+{% block qc_slot_modales %}{% endblock %}
+
 
 
 
@@ -1329,7 +1333,7 @@ document.addEventListener("click", function (e) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- Menú programado: asignar, hábitos y refresco AJAX -->
-<script src="{% static 'AdminVideos/js/menu_programado.js' %}?v=20261109_084551"></script>
+<script src="{% static 'AdminVideos/js/menu_programado.js' %}?v=20261109_090047"></script>
 <script src="{% static 'AdminVideos/js/slots_toggle.js' %}?v=20261108_163659"></script>
 
 <!-- Plugins que dependen de jQuery -->
