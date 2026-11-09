@@ -10,6 +10,10 @@
      REFRESCAR MENÚ PROGRAMADO
      ============================================================ */
   function refrescarMenuProgramado() {
+    console.log("[QC-DEBUG] REFRESH-START", {
+      anyShow: document.querySelectorAll(".modal.show").length,
+      anyDblock: document.querySelectorAll(".modal.d-block").length,
+    });
     const contenedor = document.getElementById("contenedor-menu-programado-dias");
     const tabsDias = document.getElementById("diasTab");
     const accionesMenu = document.getElementById("menuProgramadoAcciones");
@@ -115,6 +119,18 @@
        SIN timeout, SIN watchdog, SIN cleanup blanket. */
 
   function _qcPrepararModalAntesDeAbrir(modalEl) {
+    var _inst = modalEl ? bootstrap.Modal.getInstance(modalEl) : null;
+    console.log("[QC-DEBUG] PREPARAR", {
+      targetId: modalEl ? modalEl.id : null,
+      targetShow: modalEl ? modalEl.classList.contains("show") : null,
+      targetDblock: modalEl ? modalEl.classList.contains("d-block") : null,
+      bodyOpen: document.body.classList.contains("modal-open"),
+      backdrops: document.querySelectorAll(".modal-backdrop").length,
+      anyShow: document.querySelectorAll(".modal.show").length,
+      anyDblock: document.querySelectorAll(".modal.d-block").length,
+      instIsShown: _inst ? _inst._isShown : null,
+      instIsTrans: _inst ? _inst._isTransitioning : null,
+    });
     if (modalEl && modalEl.classList.contains("show")) return;
     // Si hay otro modal visible, no tocar.
     if (document.querySelector(".modal.show")) return;
@@ -130,6 +146,15 @@
   }
 
   function _qcCerrarModalLimpiamente(modalEl, onHidden) {
+    var _instC = modalEl ? bootstrap.Modal.getInstance(modalEl) : null;
+    console.log("[QC-DEBUG] CERRAR", {
+      targetId: modalEl ? modalEl.id : null,
+      instExists: !!_instC,
+      instIsShown: _instC ? _instC._isShown : null,
+      instIsTrans: _instC ? _instC._isTransitioning : null,
+      bodyOpen: document.body.classList.contains("modal-open"),
+      backdrops: document.querySelectorAll(".modal-backdrop").length,
+    });
     if (!modalEl) { if (onHidden) onHidden(); return; }
     var inst = null;
     try { inst = bootstrap.Modal.getInstance(modalEl); } catch (e) {}
@@ -138,6 +163,11 @@
     var handler = function () {
       if (fired) return;
       fired = true;
+      console.log("[QC-DEBUG] HIDDEN-FIRED", {
+        targetId: modalEl.id,
+        bodyOpen: document.body.classList.contains("modal-open"),
+        backdrops: document.querySelectorAll(".modal-backdrop").length,
+      });
       modalEl.removeEventListener("hidden.bs.modal", handler);
       if (onHidden) onHidden();
     };
@@ -380,6 +410,13 @@
 
     if (window.bootstrap && bootstrap.Modal) {
       _qcPrepararModalAntesDeAbrir(modalEl);
+      var _instBefore = bootstrap.Modal.getInstance(modalEl);
+      console.log("[QC-DEBUG] SHOW-CALL", {
+        targetId: modalEl.id,
+        instExists: !!_instBefore,
+        instIsShown: _instBefore ? _instBefore._isShown : null,
+        instIsTrans: _instBefore ? _instBefore._isTransitioning : null,
+      });
       bootstrap.Modal.getOrCreateInstance(modalEl).show();
     }
   }, true);
@@ -477,6 +514,13 @@
 
     if (window.bootstrap && bootstrap.Modal) {
       _qcPrepararModalAntesDeAbrir(modalEl);
+      var _instBefore = bootstrap.Modal.getInstance(modalEl);
+      console.log("[QC-DEBUG] SHOW-CALL", {
+        targetId: modalEl.id,
+        instExists: !!_instBefore,
+        instIsShown: _instBefore ? _instBefore._isShown : null,
+        instIsTrans: _instBefore ? _instBefore._isTransitioning : null,
+      });
       bootstrap.Modal.getOrCreateInstance(modalEl).show();
     }
 
@@ -673,6 +717,13 @@
 
     if (window.bootstrap && bootstrap.Modal) {
       _qcPrepararModalAntesDeAbrir(modalEl);
+      var _instBefore = bootstrap.Modal.getInstance(modalEl);
+      console.log("[QC-DEBUG] SHOW-CALL", {
+        targetId: modalEl.id,
+        instExists: !!_instBefore,
+        instIsShown: _instBefore ? _instBefore._isShown : null,
+        instIsTrans: _instBefore ? _instBefore._isTransitioning : null,
+      });
       bootstrap.Modal.getOrCreateInstance(modalEl).show();
     }
 
