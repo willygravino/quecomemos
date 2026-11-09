@@ -4164,3 +4164,29 @@ body:not(.qc-slots-off) #diasTab .nav-link.menu-dia-parcial:not(.active):focus-v
     line-height: 1.05;
   }
 }
+
+/* ============================================================================
+   §34.2: reducir gap entre carousel y selector (desktop y mobile)
+   Antes: carousel padding-bottom 28.8px + margin 8px + selector margin-top
+   7px + padding-top 8.8px = ~53px entre contenido del carousel y "Todos".
+   Nuevo: ~15px. Los dots del carousel (que viven en padding-bottom) tienen
+   espacio suficiente con 0.6rem, siguen visibles.
+   ============================================================================ */
+.qc-sticky-header > #contenedor-carousel-platos {
+  margin-bottom: 0 !important;
+  padding-bottom: 0.6rem !important;
+}
+
+.qc-sticky-header > #selectorHorizontalPlatos {
+  margin-top: 0 !important;
+  padding-top: 0.3rem !important;
+}
+
+@media (max-width: 767.98px) {
+  .qc-sticky-header > #contenedor-carousel-platos {
+    padding-bottom: 0.4rem !important;
+  }
+  .qc-sticky-header > #selectorHorizontalPlatos {
+    padding-top: 0.2rem !important;
+  }
+}
