@@ -1300,3 +1300,84 @@ Si el dueño decide reactivar, preferir **una sola regla por estado** (no 8 fase
     body:not(.qc-slots-off) #diasTab .nav-link.active:not(.menu-programado-dia-programado) { background: var(--qc-slot-medio); }
 
 Eso cubre 3 estados. Los parciales (degradé) son los que necesitan más líneas por el `linear-gradient` (ver §32.9 lección 7).
+
+### 32.12 Editor de slots (E1-E8, 2026-11-09)
+
+> Feature implementado: los chips "Pendiente: X" ahora tienen un lápiz para editar el criterio del slot sin borrarlo. Alineado con P1=A (MVP: preset + tiempos + medios), Q2=A (dropdown autocompleta), Q3=A (label auto).
+
+#### Backend (`views.py`, `services/plantillas.py`, `urls.py`)
+
+- **`label_preset(preset)`** (`services/plantillas.py`): devuelve `"Personalizado"` si `preset=""`, sino `PRESETS[preset].label`. Reemplaza el cálculo inline de `obtener_slots_por_comida`.
+- **`ajax_get_slot(request, pk)`** (GET `/slot/<pk>/`): devuelve `{ok, slot: {id, preset, preset_label, criterio, elaboracion_max, coccion_max, medios}}`. Solo slots del user (404 si es ajeno).
+- **`ajax_editar_slot(request, pk)`** (POST `/slot/<pk>/editar/`): valida `preset` (en PRESETS), `elaboracion_max` y `coccion_max` (int ≥ 0), `medios` (en `Plato.MEDIOS_CHOICES`). Reconstruye `criterio` como `preset.criterio` + overrides. Rechaza con 400 si el criterio final queda vacío. Actualiza `slot.preset` + `slot.criterio`.
+
+#### UI
+
+- **`_editar_slot_modal.html`** (nuevo partial): modal con dropdown preset (Personalizado + 9), inputs numéricos de tiempos, 5 checkboxes de medios. Incluye `{{ presets|json_script:"editarSlotPresetsData" }}` para que JS autocomplete. URLs embebidas como `data-*`.
+- **`_menu_programado_comida.html`**: botón ✏️ (`js-editar-slot`) entre el chip clickeable y el ✕. Icono `fa-pencil`.
+- **`menu_programado.js`**: 3 handlers delegados:
+  - Click ✏️ → GET → precarga modal → show.
+  - Change preset → autocompleta tiempos/medios desde `editarSlotPresetsData`.
+  - Submit → POST → close → refresh.
+- **`mi-css.css`**: `.menu-slot-editar-btn` (hover magenta `--qc-slot-fuerte`).
+
+#### Extensión a P1=D (deuda futura)
+
+Para agregar los campos que faltan del D completo:
+- **Tipos** (`tipos` CSV en `Plato`): checkboxes múltiples.
+- **Subtipo de carta** (`subtipo_carta`): checkboxes.
+- **Categoría** (`categoria`): checkboxes (Cotidiano/Especial/Ambos).
+- **Estacionalidad** (`estacionalidad`): checkboxes.
+
+`filtrar_platos_por_criterio` ya procesa todos esos campos. Solo falta UI + validación en `ajax_editar_slot`. Estructura lista.
+
+### 32.13 Bug estructural de modales (E4-E8) — lección
+
+**Síntoma**: al editar un slot (o elegir plato, o crear slot), el modal aparecía, luego se iba solo y la página quedaba trabada (pantalla oscurecida, sin scroll).
+
+#### Diagnóstico
+
+1. 4 parches fallidos (E4-E7): cada uno atacó una hipótesis (backdrop huérfano, timeout de hide, watchdog, gap de transición) sin confirmar la causa raíz. Error de método — violación de §8.
+
+2. Instrumentación quirúrgica: logs [QC-DEBUG] en cada helper, listeners en todos los eventos Bootstrap Modal con stack trace (3 frames), MutationObserver en document.body con childList+subtree, wrapper de fetch.
+
+3. Dato revelador (logs):
+
+```
+shown.bs.modal    (editarSlotModal)
+FETCH-RESPONSE 200
+QC-MODAL-REMOVED {editarSlotModal, bodyOpen: true, backdrops: 1}
+QC-MODAL-REMOVED-NESTED {loQueTengoModal, parentId: rounded p-2 position-relative m-2}
+QC-MODAL-ADDED   {editarSlotModal}
+```
+
+Los modales eran removidos y clonados en medio de su uso. La instancia de Bootstrap quedaba apuntando a un elemento muerto. getInstance() devolvía null. body.modal-open y backdrop quedaban pegados.
+
+#### Causa raíz
+
+Los 3 modales de slot estaban en pre-base.html dentro del {% block pestanias-menues-platos %}. Algún AJAX del menú programado removía el contenedor ancestral (probablemente el div.rounded.p-2.position-relative.m-2 de pre-base.html, L27) cuando refrescaba el listado.
+
+#### Fix estructural (E8, commit 1699c9d)
+
+- base.html: nuevo {% block qc_slot_modales %}{% endblock %} al lado de {% include _confirm_action_modal.html %} (L1318 aprox). Fuera de #content-wrapper y del área refreshable.
+- pre-base.html: quitar los 3 includes de su posición original; agregar {% block qc_slot_modales %} al final del archivo con los 3 includes.
+- Los modales se renderizan una sola vez, en la zona de modales globales (junto a asignarPlatoModal, confirmDialog), protegidos de cualquier refresh interno.
+
+#### Limpieza (commit b3474b1)
+
+Eliminados los helpers _qcPrepararModalAntesDeAbrir y _qcCerrarModalLimpiamente de E4-E7. E8 resolvió la causa raíz; los helpers eran código defensivo que podía ocultar problemas futuros. Se restauró el patrón original (.hide() + refrescarMenuProgramado() / .show() directo). JS: 770 -> 732 líneas.
+
+#### Síntoma secundario resuelto
+
+El 400 en /ajax/eliminar-programado/ (intermitente) era probablemente un doble POST causado por el backdrop huérfano: el click caía en el overlay residual + en el botón real. El primer POST borraba; el segundo fallaba con 400 porque el ítem ya no existía. Con E8, el backdrop huérfano desapareció, el 400 ya no se reproduce.
+
+#### Lecciones agregadas a §32.9
+
+11. Bootstrap Modals + DOM removal AJAX = corrupción de estado. Si un modal vive dentro de un contenedor que se reemplaza por AJAX, la instancia de Bootstrap queda huérfana y body.modal-open + backdrop quedan pegados. Los modales deben vivir fuera del área refreshable (patrón: junto a confirmDialog, asignarPlatoModal, etc., al final de base.html).
+12. MutationObserver es la herramienta para diagnosticar DOM removal. Con childList: true, subtree: true detectás qué se remueve/agrega en cada cambio. Es lo que reveló que los modales eran removidos.
+13. getInstance() devuelve null si el elemento DOM fue reemplazado. La instancia de Bootstrap existe internamente pero está asociada al elemento viejo. getOrCreateInstance() crea una nueva para el elemento nuevo, pero la vieja queda zombie.
+14. Después de 2 parches fallidos, PARAR y diagnosticar. 4 parches (E4-E7) atacaron 4 hipótesis distintas sin confirmar la causa. Cuando el método es probar a ver si funciona, es señal de falta de diagnóstico. Instrumentar con stack traces + MutationObserver antes del tercer parche.
+15. read -p en zsh -l falla. En scripts .sh ejecutados desde zsh, read -p no funciona (es opción de bash). Usar comandos separados o git push directo.
+16. grep -c con || echo 0 duplica el 0. grep -c con 0 matches tiene exit 1. Con || echo 0 se agrega un 0 extra. Fix: if grep -q 'patron' file; then ...; fi.
+17. Heredocs bash con backticks + code fences se rompen. Aunque uses heredoc con delimitador quoted, si el contenido tiene triple backtick anidado + indentación que se pierde al pegar en VS Code, el delimitador de cierre puede quedar mal. Usar Python con listas de strings o escritura línea por línea.
+
