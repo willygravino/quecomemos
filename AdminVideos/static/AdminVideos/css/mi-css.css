@@ -4125,3 +4125,42 @@ body:not(.qc-slots-off) #diasTab .nav-link.menu-dia-parcial:not(.active):focus-v
     overflow-x: hidden;
   }
 }
+
+/* §34.1: mobile — selector en una sola fila (Todos + rail scrollable) */
+@media (max-width: 767.98px) {
+  /* Forzar 2 columnas: [Todos fijo] [rail scrollable] */
+  .selector-platos-categorias-wrap {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: .3rem;
+  }
+
+  .selector-platos-fixed {
+    padding-right: .15rem;
+  }
+
+  /* Achicar items (Todos + rail) para que entren en una fila */
+  .selector-platos-fixed .selector-platos-item,
+  .selector-platos-rail .selector-platos-item {
+    min-width: 3.4rem;
+    max-width: 5.2rem;
+    min-height: 3rem;
+    padding: .25rem .3rem;
+  }
+
+  .selector-platos-fixed .selector-platos-item .icon-wrap,
+  .selector-platos-rail .selector-platos-item .icon-wrap {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .selector-platos-fixed .selector-platos-item .icon-wrap i,
+  .selector-platos-rail .selector-platos-item .icon-wrap i {
+    font-size: .85rem;
+  }
+
+  .selector-platos-fixed .selector-platos-item .item-text,
+  .selector-platos-rail .selector-platos-item .item-text {
+    font-size: .58rem;
+    line-height: 1.05;
+  }
+}
