@@ -22,14 +22,18 @@
               {% endfor %}
             </select>
           </div>
-          <div class="row g-2 mb-3">
-            <div class="col">
-              <label for="editarSlotElabInput" class="form-label">Elaboración máx (min)</label>
-              <input type="number" min="0" step="1" id="editarSlotElabInput" class="form-control" placeholder="—">
+          <div class="mb-3">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="editarSlotElabRapidaCheck">
+              <label class="form-check-label" for="editarSlotElabRapidaCheck">
+                Elaboración rápida <small class="text-muted">(&lt; 30 min)</small>
+              </label>
             </div>
-            <div class="col">
-              <label for="editarSlotCoccInput" class="form-label">Cocción máx (min)</label>
-              <input type="number" min="0" step="1" id="editarSlotCoccInput" class="form-control" placeholder="—">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="editarSlotCoccRapidaCheck">
+              <label class="form-check-label" for="editarSlotCoccRapidaCheck">
+                Cocción rápida <small class="text-muted">(&lt; 30 min)</small>
+              </label>
             </div>
           </div>
           <fieldset class="mb-2">

@@ -20,7 +20,7 @@ PRESETS = {
     "pescado":      {"label": "Pescado",        "criterio": {"subtipo_carta": ["pescados"]}},
     "pasta":        {"label": "Pasta",          "criterio": {"subtipo_carta": ["pastas"]}},
     "vegetariano":  {"label": "Vegetariano",    "criterio": {"subtipo_carta": ["vegetarianos"]}},
-    "rapido":       {"label": "Rápido",         "criterio": {"elaboracion_max": 30, "coccion_max": 20}},
+    "rapido":       {"label": "Rápido",         "criterio": {"elaboracion_max": 30, "coccion_max": 30}},
     "guarnicion":   {"label": "Guarnición",     "criterio": {"tipos": ["Guarnicion"]}},
     "postre":       {"label": "Postre",         "criterio": {"tipos": ["Postre"]}},
 }

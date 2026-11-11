@@ -605,11 +605,11 @@
     document.querySelectorAll('#editarSlotForm input[name="medios"]').forEach(function (cb) {
       cb.checked = medios.indexOf(cb.value) !== -1;
     });
-    // Tiempos
-    var elab = document.getElementById("editarSlotElabInput");
-    if (elab) elab.value = (criterio && criterio.elaboracion_max != null) ? criterio.elaboracion_max : "";
-    var cocc = document.getElementById("editarSlotCoccInput");
-    if (cocc) cocc.value = (criterio && criterio.coccion_max != null) ? criterio.coccion_max : "";
+    // Duración: checkboxes "rápida"
+    var elabChk = document.getElementById("editarSlotElabRapidaCheck");
+    if (elabChk) elabChk.checked = !!(criterio && criterio.elaboracion_max != null);
+    var coccChk = document.getElementById("editarSlotCoccRapidaCheck");
+    if (coccChk) coccChk.checked = !!(criterio && criterio.coccion_max != null);
   }
 
   // Click lápiz
@@ -687,8 +687,10 @@
     // Armar body con preset + tiempos + medios
     var body = new URLSearchParams();
     body.set("preset", document.getElementById("editarSlotPresetSelect").value || "");
-    body.set("elaboracion_max", document.getElementById("editarSlotElabInput").value || "");
-    body.set("coccion_max", document.getElementById("editarSlotCoccInput").value || "");
+    var elabChk = document.getElementById("editarSlotElabRapidaCheck");
+    body.set("elaboracion_max", (elabChk && elabChk.checked) ? "30" : "");
+    var coccChk = document.getElementById("editarSlotCoccRapidaCheck");
+    body.set("coccion_max", (coccChk && coccChk.checked) ? "30" : "");
     form.querySelectorAll('input[name="medios"]:checked').forEach(function (cb) {
       body.append("medios", cb.value);
     });
