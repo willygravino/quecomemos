@@ -124,7 +124,13 @@ document.addEventListener("DOMContentLoaded", function () {
           };
         }
 
-        contenedor.innerHTML = data.html_listado || "";
+        // §45d: resolver contenedor dinámicamente. Si el DOM lo reemplazó
+        // (tras asignar plato), el 'contenedor' del closure queda stale.
+        // El carousel ya se resuelve dinámicamente, por eso SÍ se actualizaba.
+        const _contenedorListado = document.getElementById("contenedor-listado-platos");
+        if (_contenedorListado) {
+          _contenedorListado.innerHTML = data.html_listado || "";
+        }
 
         const contenedorCarousel = document.getElementById("contenedor-carousel-platos");
         if (contenedorCarousel) {
