@@ -194,6 +194,7 @@ SUBTIPO_CARTA_CHOICES = [
     ("guisos", "Guisos y minutas"),
     ("ensaladas", "Ensaladas"),
     ("vegetarianos", "Vegetarianos"),
+    ("veganos", "Veganos"),
     ("otros", "Otros"),
     # --- Postres ---
     ("tortas_budines", "Tortas y budines"),

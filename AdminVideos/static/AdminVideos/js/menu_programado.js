@@ -334,7 +334,6 @@
     document.getElementById("editarSlotIdInput").value = "";
     document.getElementById("editarSlotDiaInput").value = dia;
     document.getElementById("editarSlotMomentoInput").value = momento;
-    document.getElementById("editarSlotPresetSelect").value = "";
     _aplicarCriterioAlModal({});
     document.getElementById("editarSlotLabel").textContent = "Agregar slot";
 
@@ -539,9 +538,19 @@
   }
 
   function _aplicarCriterioAlModal(criterio) {
+    // Tipos
+    var tipos = (criterio && criterio.tipos) || [];
+    document.querySelectorAll('#editarSlotForm input[name="tipos"]').forEach(function(cb) {
+      cb.checked = tipos.indexOf(cb.value) !== -1;
+    });
+    // Subtipo de carta
+    var subtipos = (criterio && criterio.subtipo_carta) || [];
+    document.querySelectorAll('#editarSlotForm input[name="subtipo_carta"]').forEach(function(cb) {
+      cb.checked = subtipos.indexOf(cb.value) !== -1;
+    });
     // Medios
     var medios = (criterio && criterio.medios) || [];
-    document.querySelectorAll('#editarSlotForm input[name="medios"]').forEach(function (cb) {
+    document.querySelectorAll('#editarSlotForm input[name="medios"]').forEach(function(cb) {
       cb.checked = medios.indexOf(cb.value) !== -1;
     });
     // Duración: checkboxes "rápida"
@@ -572,7 +581,6 @@
     document.getElementById("editarSlotLabel").textContent = "Editar slot";
 
     // Reset visual mientras carga
-    document.getElementById("editarSlotPresetSelect").value = "";
     _aplicarCriterioAlModal({});
 
     if (window.bootstrap && bootstrap.Modal) {
@@ -591,23 +599,12 @@
     .then(function (data) {
       if (!data.ok) throw new Error("Respuesta inválida");
       var slot = data.slot;
-      document.getElementById("editarSlotPresetSelect").value = slot.preset || "";
       _aplicarCriterioAlModal(slot.criterio || {});
     })
     .catch(function (error) {
       console.error(error);
     });
   }, true);
-
-  // Change preset → autocompletar tiempos/medios
-  document.addEventListener("change", function (event) {
-    var sel = event.target.closest("#editarSlotPresetSelect");
-    if (!sel) return;
-    var key = sel.value || "";
-    var presets = _getEditarSlotPresets();
-    if (!key || !presets[key]) return;
-    _aplicarCriterioAlModal(presets[key].criterio || {});
-  });
 
   // Submit del form
   document.addEventListener("submit", function (event) {
@@ -633,17 +630,21 @@
     var saveBtn = document.getElementById("editarSlotSaveBtn");
     if (saveBtn) saveBtn.disabled = true;
 
-    // Armar body con preset + tiempos + medios
+    // Armar body con tipos/subtipo/duración/medios
     var body = new URLSearchParams();
-    body.set("preset", document.getElementById("editarSlotPresetSelect").value || "");
+    form.querySelectorAll('input[name="tipos"]:checked').forEach(function (cb) {
+      body.append("tipos", cb.value);
+    });
+    form.querySelectorAll('input[name="subtipo_carta"]:checked').forEach(function (cb) {
+      body.append("subtipo_carta", cb.value);
+    });
     var elabChk = document.getElementById("editarSlotElabRapidaCheck");
-    body.set("elaboracion_max", (elabChk && elabChk.checked) ? "30" : "");
+    if (elabChk && elabChk.checked) body.set("elaboracion_rapida", "1");
     var coccChk = document.getElementById("editarSlotCoccRapidaCheck");
-    body.set("coccion_max", (coccChk && coccChk.checked) ? "30" : "");
+    if (coccChk && coccChk.checked) body.set("coccion_rapida", "1");
     form.querySelectorAll('input[name="medios"]:checked').forEach(function (cb) {
       body.append("medios", cb.value);
     });
-
     if (isCreate) {
       body.set("dia", document.getElementById("editarSlotDiaInput").value || "");
       body.set("momento", document.getElementById("editarSlotMomentoInput").value || "");

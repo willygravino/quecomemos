@@ -14,8 +14,11 @@ from AdminVideos.models import ElementoCompartido, Amistad, ProfilePlatoCompra, 
 
 from AdminVideos.services.plantillas import (
     PRESETS,
+    SUBTIPO_SLOT_CHOICES,
+    TIPOS_SLOT_CHOICES,
     criterio_desde_preset,
     filtrar_platos_por_criterio,
+    label_criterio,
     label_preset,
 )
 from django.views.decorators.csrf import csrf_exempt
@@ -3208,6 +3211,8 @@ def FiltroDePlatos(request):
                 "habitos_lookup": habitos_lookup,
                 "slots_por_comida": slots_por_comida,
                 "presets": PRESETS,
+                "tipos_slot_choices": TIPOS_SLOT_CHOICES,
+                "subtipo_slot_choices": SUBTIPO_SLOT_CHOICES,
             }
 
 
@@ -4750,10 +4755,40 @@ def eliminar_menu_programado(request):
 # §31-reformulado: endpoints AJAX de slots semanales
 # =====================================================
 
+def _build_criterio_from_request(request):
+    """Helper §41: construye criterio desde los nuevos checkboxes + compat
+    con preset legacy. Devuelve (criterio, preset)."""
+    criterio = {}
+    preset = (request.POST.get("preset") or "").strip()
+    if preset and preset in PRESETS:
+        criterio.update(PRESETS[preset]["criterio"])
+
+    valid_tipos = {k for k, _ in TIPOS_SLOT_CHOICES}
+    tipos = [t for t in request.POST.getlist("tipos") if t in valid_tipos]
+    if tipos:
+        criterio["tipos"] = tipos
+
+    valid_subtipos = {k for k, _ in SUBTIPO_SLOT_CHOICES}
+    subtipos = [s for s in request.POST.getlist("subtipo_carta") if s in valid_subtipos]
+    if subtipos:
+        criterio["subtipo_carta"] = subtipos
+
+    if request.POST.get("elaboracion_rapida") == "1":
+        criterio["elaboracion_max"] = 30
+    if request.POST.get("coccion_rapida") == "1":
+        criterio["coccion_max"] = 30
+
+    valid_medios = {c[0] for c in Plato.MEDIOS_CHOICES}
+    medios = [m for m in request.POST.getlist("medios") if m in valid_medios]
+    if medios:
+        criterio["medios"] = medios
+
+    return criterio, preset
+
 @login_required
 def ajax_crear_slot(request):
-    """Crea un SlotSemanal. Mismos parámetros que ajax_editar_slot
-    (preset, elaboracion_max, coccion_max, medios) + dia (YYYY-MM-DD) + momento."""
+    """§41: crea SlotSemanal con criterio compuesto desde checkboxes
+    (tipos, subtipo_carta, elaboracion_rapida, coccion_rapida, medios)."""
     if request.method != "POST":
         return JsonResponse({"ok": False, "error": "Método no permitido"}, status=405)
 
@@ -4765,50 +4800,15 @@ def ajax_crear_slot(request):
     except (ValueError, TypeError):
         return JsonResponse({"ok": False, "error": "Día inválido"}, status=400)
 
-    dia_semana = fecha.weekday()  # 0=lunes ... 6=domingo
+    dia_semana = fecha.weekday()
 
     valid_momentos = {m[0] for m in SlotSemanal.MOMENTOS}
     if momento not in valid_momentos:
         return JsonResponse({"ok": False, "error": "Momento inválido"}, status=400)
 
-    preset = (request.POST.get("preset") or "").strip()
-    if preset and preset not in PRESETS:
-        return JsonResponse({"ok": False, "error": "Preset desconocido"}, status=400)
-
-    def parse_int(v):
-        if v is None or v == "":
-            return None
-        try:
-            n = int(v)
-            if n < 0:
-                raise ValueError
-            return n
-        except (TypeError, ValueError):
-            return "INVALID"
-
-    elab = parse_int(request.POST.get("elaboracion_max"))
-    cocc = parse_int(request.POST.get("coccion_max"))
-    if elab == "INVALID" or cocc == "INVALID":
-        return JsonResponse({"ok": False, "error": "Los tiempos deben ser números enteros >= 0"}, status=400)
-
-    valid_medios = {c[0] for c in Plato.MEDIOS_CHOICES}
-    medios_raw = request.POST.getlist("medios")
-    medios = [m for m in medios_raw if m in valid_medios]
-    if len(medios) != len(medios_raw):
-        return JsonResponse({"ok": False, "error": "Medio inválido"}, status=400)
-
-    criterio = {}
-    if preset:
-        criterio.update(PRESETS[preset]["criterio"])
-    if elab is not None:
-        criterio["elaboracion_max"] = elab
-    if cocc is not None:
-        criterio["coccion_max"] = cocc
-    if medios:
-        criterio["medios"] = medios
-
+    criterio, preset = _build_criterio_from_request(request)
     if not criterio:
-        return JsonResponse({"ok": False, "error": "Elegí un preset o al menos un filtro"}, status=400)
+        return JsonResponse({"ok": False, "error": "Elegí al menos un filtro"}, status=400)
 
     max_orden = (
         SlotSemanal.objects
@@ -4822,7 +4822,7 @@ def ajax_crear_slot(request):
         propietario=request.user,
         dia_semana=dia_semana,
         momento=momento,
-        preset=preset,
+        preset="",
         criterio=criterio,
         orden=max_orden + 1,
     )
@@ -4833,8 +4833,8 @@ def ajax_crear_slot(request):
             "id": slot.id,
             "dia_semana": slot.dia_semana,
             "momento": slot.momento,
-            "preset": slot.preset,
-            "preset_label": label_preset(slot.preset),
+            "preset": "",
+            "preset_label": label_criterio(criterio),
             "criterio": criterio,
             "orden": slot.orden,
         },
@@ -4932,7 +4932,16 @@ def obtener_slots_por_comida(usuario, fechas):
             key = (slot.id, fecha, momento)
             resuelto = resueltos.get(key)
 
-            preset_label = label_preset(slot.preset)
+            if slot.preset:
+
+
+                preset_label = label_preset(slot.preset)
+
+
+            else:
+
+
+                preset_label = label_criterio(slot.criterio)
 
             info = {
                 "id": slot.id,
@@ -4978,6 +4987,8 @@ def ajax_get_slot(request, pk):
             "preset": slot.preset or "",
             "preset_label": label_preset(slot.preset),
             "criterio": criterio,
+            "tipos": criterio.get("tipos") or [],
+            "subtipo_carta": criterio.get("subtipo_carta") or [],
             "elaboracion_max": criterio.get("elaboracion_max"),
             "coccion_max": criterio.get("coccion_max"),
             "medios": criterio.get("medios") or [],
@@ -4987,53 +4998,18 @@ def ajax_get_slot(request, pk):
 
 @login_required
 def ajax_editar_slot(request, pk):
-    """Edita el preset y criterios manuales (tiempos, medios) de un slot."""
+    """§41: edita slot con criterio compuesto desde checkboxes."""
     if request.method != "POST":
         return JsonResponse({"ok": False, "error": "Método no permitido"}, status=405)
     slot = SlotSemanal.objects.filter(pk=pk, propietario=request.user).first()
     if slot is None:
         return JsonResponse({"ok": False, "error": "Slot no encontrado"}, status=404)
 
-    preset = (request.POST.get("preset") or "").strip()
-    if preset and preset not in PRESETS:
-        return JsonResponse({"ok": False, "error": "Preset desconocido"}, status=400)
-
-    def parse_int(v):
-        if v is None or v == "":
-            return None
-        try:
-            n = int(v)
-            if n < 0:
-                raise ValueError
-            return n
-        except (TypeError, ValueError):
-            return "INVALID"
-
-    elab = parse_int(request.POST.get("elaboracion_max"))
-    cocc = parse_int(request.POST.get("coccion_max"))
-    if elab == "INVALID" or cocc == "INVALID":
-        return JsonResponse({"ok": False, "error": "Los tiempos deben ser números enteros ≥ 0"}, status=400)
-
-    valid_medios = {c[0] for c in Plato.MEDIOS_CHOICES}
-    medios_raw = request.POST.getlist("medios")
-    medios = [m for m in medios_raw if m in valid_medios]
-    if len(medios) != len(medios_raw):
-        return JsonResponse({"ok": False, "error": "Medio inválido"}, status=400)
-
-    criterio = {}
-    if preset:
-        criterio.update(PRESETS[preset]["criterio"])
-    if elab is not None:
-        criterio["elaboracion_max"] = elab
-    if cocc is not None:
-        criterio["coccion_max"] = cocc
-    if medios:
-        criterio["medios"] = medios
-
+    criterio, preset = _build_criterio_from_request(request)
     if not criterio:
-        return JsonResponse({"ok": False, "error": "Elegí un preset o al menos un filtro"}, status=400)
+        return JsonResponse({"ok": False, "error": "Elegí al menos un filtro"}, status=400)
 
-    slot.preset = preset
+    slot.preset = ""
     slot.criterio = criterio
     slot.save(update_fields=["preset", "criterio"])
 
@@ -5041,8 +5017,8 @@ def ajax_editar_slot(request, pk):
         "ok": True,
         "slot": {
             "id": slot.id,
-            "preset": slot.preset,
-            "preset_label": label_preset(slot.preset),
+            "preset": "",
+            "preset_label": label_criterio(criterio),
             "criterio": criterio,
         }
     })
