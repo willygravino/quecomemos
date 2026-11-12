@@ -19,7 +19,17 @@ document.addEventListener("DOMContentLoaded", function () {
   // ============================================================
   // 1. Elementos base de la pantalla
   // ============================================================
-  const form = document.getElementById("form-filtros-platos");
+  // §45: helper dinámico. El form se resuelve en cada uso, así sobrevive
+  // si el DOM lo reemplaza (bug confirmado: tras asignar un plato, el form
+  // del closure quedaba stale y todos los handlers escribían en el viejo).
+  function getForm() {
+    return document.getElementById("form-filtros-platos");
+  }
+
+  // Referencia mutable por compatibilidad con handlers existentes.
+  // Se mantiene actualizada por MutationObserver al final del IIFE.
+  let form = getForm();
+
   const contenedor = document.getElementById("contenedor-listado-platos");
 
   if (!form || !contenedor) return;
@@ -424,7 +434,9 @@ document.addEventListener("DOMContentLoaded", function () {
   // ============================================================
   // 4. Buscar por palabra clave sin recargar
   // ============================================================
-  form.addEventListener("submit", function (event) {
+  // §45: submit delegado en document (sobrevive al reemplazo del form).
+  document.addEventListener("submit", function (event) {
+    if (event.target !== getForm()) return;
     event.preventDefault();
     actualizarListadoPlatosConSpinner();
   });
@@ -432,66 +444,80 @@ document.addEventListener("DOMContentLoaded", function () {
   // ============================================================
   // 4.b Buscar por palabra clave mientras se escribe
   // ============================================================
-  const inputPalabraClave = form.querySelector('input[name="palabra_clave"]');
   let timeoutBusquedaPalabraClave = null;
 
-  function actualizarVisualPalabraClave() {
-    if (!inputPalabraClave) {
-      return;
+  function actualizarVisualPalabraClave(inputKwParam) {
+    let inp = inputKwParam;
+    if (!inp) {
+      const _f = getForm();
+      inp = _f ? _f.querySelector('input[name="palabra_clave"]') : null;
     }
+    if (!inp) return;
 
-    const grupo = inputPalabraClave.closest(".filtro-keyword-box");
-    const activo = inputPalabraClave.value.trim().length > 0;
+    const grupo = inp.closest(".filtro-keyword-box");
+    const activo = inp.value.trim().length > 0;
 
     if (grupo) {
       grupo.classList.toggle("filtro-keyword-activo", activo);
     }
 
-    inputPalabraClave.classList.toggle("text-danger", activo);
-    inputPalabraClave.classList.toggle("fw-semibold", activo);
+    inp.classList.toggle("text-danger", activo);
+    inp.classList.toggle("fw-semibold", activo);
   }
 
-  if (inputPalabraClave) {
-    inputPalabraClave.addEventListener("input", function () {
-      actualizarVisualPalabraClave();
-      clearTimeout(timeoutBusquedaPalabraClave);
+  // §45: input delegado en document. Resuelve el input dinámicamente cada vez.
+  document.addEventListener("input", function (event) {
+    if (!event.target.matches('#form-filtros-platos input[name="palabra_clave"]')) return;
 
-      timeoutBusquedaPalabraClave = setTimeout(function () {
-        actualizarListadoPlatosConSpinner();
+    const inputKw = event.target;
+    actualizarVisualPalabraClave(inputKw);
+    clearTimeout(timeoutBusquedaPalabraClave);
 
-        // Persistir palabra_clave en URL (replaceState: no llena historial)
-        const urlKw = new URL(window.location.href);
-        const kw = inputPalabraClave.value.trim();
-        if (kw) urlKw.searchParams.set("palabra_clave", kw);
-        else urlKw.searchParams.delete("palabra_clave");
-        window.history.replaceState(window.history.state || {}, "", urlKw.toString());
-      }, 400);
-    });
+    timeoutBusquedaPalabraClave = setTimeout(function () {
+      actualizarListadoPlatosConSpinner();
 
-    actualizarVisualPalabraClave();
-  }
+      // Persistir palabra_clave en URL (replaceState: no llena historial)
+      const urlKw = new URL(window.location.href);
+      const kw = (inputKw.value || "").trim();
+      if (kw) urlKw.searchParams.set("palabra_clave", kw);
+      else urlKw.searchParams.delete("palabra_clave");
+      window.history.replaceState(window.history.state || {}, "", urlKw.toString());
+    }, 400);
+  });
+
+  // Inicializar visual al cargar (si el input existe)
+  (function _initVisualKw() {
+    var _f = getForm();
+    var _inp = _f ? _f.querySelector('input[name="palabra_clave"]') : null;
+    if (_inp) actualizarVisualPalabraClave(_inp);
+  })();
 
   // ============================================================
   // 5. Filtrar por checkboxes sin recargar
   // ============================================================
-  form.querySelectorAll("input[type='checkbox']").forEach(function (checkbox) {
-    checkbox.addEventListener("change", function () {
-      actualizarListadoPlatosConSpinner();
+  // §45: change delegado en document. Resuelve el form dinámicamente.
+  document.addEventListener("change", function (event) {
+    const cb = event.target;
+    if (!cb.matches || !cb.matches('#form-filtros-platos input[type="checkbox"]')) return;
 
-      // Persistir todos los filtros en URL (pushState)
-      const urlCb = new URL(window.location.href);
-      const fdCb = new FormData(form);
-      const kwCb = fdCb.get("palabra_clave") || "";
-      if (kwCb) urlCb.searchParams.set("palabra_clave", kwCb);
-      else urlCb.searchParams.delete("palabra_clave");
-      if (fdCb.get("quecomemos")) urlCb.searchParams.set("quecomemos", "quecomemos");
-      else urlCb.searchParams.delete("quecomemos");
-      if (fdCb.get("misplatos")) urlCb.searchParams.set("misplatos", "misplatos");
-      else urlCb.searchParams.delete("misplatos");
-      urlCb.searchParams.set("ver_cotidiano", fdCb.get("ver_cotidiano") ? "1" : "0");
-      urlCb.searchParams.set("ver_especial", fdCb.get("ver_especial") ? "1" : "0");
-      window.history.pushState(window.history.state || {}, "", urlCb.toString());
-    });
+    const _f = getForm();
+    if (!_f) return;
+
+    actualizarListadoPlatosConSpinner();
+
+    // Persistir todos los filtros en URL (pushState)
+    const urlCb = new URL(window.location.href);
+    const fdCb = new FormData(_f);
+    const kwCb = fdCb.get("palabra_clave") || "";
+    if (kwCb) urlCb.searchParams.set("palabra_clave", kwCb);
+    else urlCb.searchParams.delete("palabra_clave");
+    if (fdCb.get("quecomemos")) urlCb.searchParams.set("quecomemos", "quecomemos");
+    else urlCb.searchParams.delete("quecomemos");
+    if (fdCb.get("misplatos")) urlCb.searchParams.set("misplatos", "misplatos");
+    else urlCb.searchParams.delete("misplatos");
+    urlCb.searchParams.set("ver_cotidiano", fdCb.get("ver_cotidiano") ? "1" : "0");
+    urlCb.searchParams.set("ver_especial", fdCb.get("ver_especial") ? "1" : "0");
+    window.history.pushState(window.history.state || {}, "", urlCb.toString());
   });
 
   // 5.a Toggle cruzado: al apagar uno de los dos checkboxes de categoría,
@@ -499,19 +525,20 @@ document.addEventListener("DOMContentLoaded", function () {
   // o uno solo, pero nunca ambos OFF (lista vacía).
   // Se corre en fase capture para que el toggle ocurra ANTES de que el
   // listener genérico lea el estado del form y dispare el fetch.
-  const checkboxesCategoria = form.querySelectorAll(
-    'input[name="ver_cotidiano"], input[name="ver_especial"]'
-  );
+  // §45: toggle cruzado delegado en document con capture, para que corra
+  // antes del listener change genérico que dispara el fetch.
+  document.addEventListener("change", function (event) {
+    const cb = event.target;
+    if (!cb.matches || !cb.matches('#form-filtros-platos input[name="ver_cotidiano"], #form-filtros-platos input[name="ver_especial"]')) return;
+    if (cb.checked) return;
 
-  checkboxesCategoria.forEach(function (checkbox) {
-    checkbox.addEventListener("change", function () {
-      if (checkbox.checked) return;
+    const _f = getForm();
+    if (!_f) return;
 
-      checkboxesCategoria.forEach(function (otro) {
-        if (otro !== checkbox) otro.checked = true;
-      });
-    }, true);
-  });
+    _f.querySelectorAll('input[name="ver_cotidiano"], input[name="ver_especial"]').forEach(function (otro) {
+      if (otro !== cb) otro.checked = true;
+    });
+  }, true);
 
   // ============================================================
   // 5.b Desplazar el selector horizontal con sus flechas
@@ -731,6 +758,26 @@ document.addEventListener("DOMContentLoaded", function () {
     form.querySelector('input[name="tipopag"]')?.value || "Principal"
   );
   actualizarSelectorHorizontalActivo(tipopagInicial);
+
+  // §45: MutationObserver mantiene 'form' actualizado cuando el DOM lo
+  // reemplaza (ej. tras asignar un plato). Con debounce vía requestAnimationFrame.
+  let _formRefreshScheduled = false;
+  if (typeof MutationObserver !== "undefined") {
+    const _obs = new MutationObserver(function () {
+      if (_formRefreshScheduled) return;
+      _formRefreshScheduled = true;
+      window.requestAnimationFrame(function () {
+        _formRefreshScheduled = false;
+        const nuevoForm = getForm();
+        if (nuevoForm && nuevoForm !== form) {
+          form = nuevoForm;
+          // Resincronizar visuales que dependen del form
+          try { actualizarVisualPalabraClave(); } catch (e) {}
+        }
+      });
+    });
+    _obs.observe(document.body, { childList: true, subtree: true });
+  }
 
 });
 
