@@ -16,28 +16,24 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
-          <fieldset class="mb-3">
-            <legend class="form-label fs-6 mb-2">Tipo de plato</legend>
-            <div class="d-flex flex-wrap gap-3">
+          <div class="mb-3">
+            <label for="editarSlotTipoSelect" class="form-label fs-6">Tipo de plato</label>
+            <select id="editarSlotTipoSelect" class="form-select" name="tipos">
+              <option value="">Cualquier tipo</option>
               {% for key, label in tipos_slot_choices %}
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="tipos" value="{{ key }}" id="editarSlotTipo{{ forloop.counter }}">
-                <label class="form-check-label" for="editarSlotTipo{{ forloop.counter }}">{{ label }}</label>
-              </div>
+              <option value="{{ key }}">{{ label }}</option>
               {% endfor %}
-            </div>
-          </fieldset>
-          <fieldset class="mb-3">
-            <legend class="form-label fs-6 mb-2">Subtipo de carta</legend>
-            <div class="d-flex flex-wrap gap-3">
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="editarSlotSubtipoSelect" class="form-label fs-6">Subtipo de carta</label>
+            <select id="editarSlotSubtipoSelect" class="form-select" name="subtipo_carta">
+              <option value="">Cualquier subtipo</option>
               {% for key, label in subtipo_slot_choices %}
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="subtipo_carta" value="{{ key }}" id="editarSlotSub{{ forloop.counter }}">
-                <label class="form-check-label" for="editarSlotSub{{ forloop.counter }}">{{ label }}</label>
-              </div>
+              <option value="{{ key }}">{{ label }}</option>
               {% endfor %}
-            </div>
-          </fieldset>
+            </select>
+          </div>
           <fieldset class="mb-3">
             <legend class="form-label fs-6 mb-2">Duración</legend>
             <div class="form-check">

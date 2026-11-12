@@ -538,16 +538,14 @@
   }
 
   function _aplicarCriterioAlModal(criterio) {
-    // Tipos
+    // Tipos (select único)
     var tipos = (criterio && criterio.tipos) || [];
-    document.querySelectorAll('#editarSlotForm input[name="tipos"]').forEach(function(cb) {
-      cb.checked = tipos.indexOf(cb.value) !== -1;
-    });
-    // Subtipo de carta
+    var tipoSel = document.getElementById("editarSlotTipoSelect");
+    if (tipoSel) tipoSel.value = tipos.length ? tipos[0] : "";
+    // Subtipo de carta (select único)
     var subtipos = (criterio && criterio.subtipo_carta) || [];
-    document.querySelectorAll('#editarSlotForm input[name="subtipo_carta"]').forEach(function(cb) {
-      cb.checked = subtipos.indexOf(cb.value) !== -1;
-    });
+    var subSel = document.getElementById("editarSlotSubtipoSelect");
+    if (subSel) subSel.value = subtipos.length ? subtipos[0] : "";
     // Ligereza
     var ligereza = (criterio && criterio.ligereza) || [];
     document.querySelectorAll('#editarSlotForm input[name="ligereza"]').forEach(function(cb) {
@@ -637,12 +635,10 @@
 
     // Armar body con tipos/subtipo/duración/medios
     var body = new URLSearchParams();
-    form.querySelectorAll('input[name="tipos"]:checked').forEach(function (cb) {
-      body.append("tipos", cb.value);
-    });
-    form.querySelectorAll('input[name="subtipo_carta"]:checked').forEach(function (cb) {
-      body.append("subtipo_carta", cb.value);
-    });
+    var tipoSel = document.getElementById("editarSlotTipoSelect");
+    if (tipoSel && tipoSel.value) body.set("tipos", tipoSel.value);
+    var subSel = document.getElementById("editarSlotSubtipoSelect");
+    if (subSel && subSel.value) body.set("subtipo_carta", subSel.value);
     form.querySelectorAll('input[name="ligereza"]:checked').forEach(function (cb) {
       body.append("ligereza", cb.value);
     });

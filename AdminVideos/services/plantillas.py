@@ -114,8 +114,9 @@ def label_preset(preset: str) -> str:
 
 def label_criterio(criterio: dict) -> str:
     '''Genera label dinámico desde un criterio JSON.
-    Ej: {'tipos': ['Guarnicion'], 'subtipo_carta': ['vegetarianos'], 'elaboracion_max': 30}
-        -> 'Guarnición · Vegetarianos · Rápido'
+    Orden: tipos · subtipo · ligereza · medios · Rápido
+    Ej: {'tipos': ['Principal'], 'medios': ['Sin coccion']}
+        -> 'Principal · Sin cocción'
     '''
     if not criterio:
         return "Personalizado"
@@ -123,6 +124,7 @@ def label_criterio(criterio: dict) -> str:
     parts = []
     tipo_labels = dict(TIPOS_SLOT_CHOICES)
     subtipo_labels = dict(SUBTIPO_CARTA_CHOICES)
+    medios_labels = dict(Plato.MEDIOS_CHOICES)
 
     for t in criterio.get("tipos") or []:
         parts.append(tipo_labels.get(t, t))
@@ -132,6 +134,9 @@ def label_criterio(criterio: dict) -> str:
 
     for lig in criterio.get("ligereza") or []:
         parts.append(LIGEREZA_LABELS.get(lig, lig))
+
+    for med in criterio.get("medios") or []:
+        parts.append(medios_labels.get(med, med))
 
     if criterio.get("elaboracion_max") or criterio.get("coccion_max"):
         parts.append("Rápido")

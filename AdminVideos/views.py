@@ -4766,14 +4766,14 @@ def _build_criterio_from_request(request):
         criterio.update(PRESETS[preset]["criterio"])
 
     valid_tipos = {k for k, _ in TIPOS_SLOT_CHOICES}
-    tipos = [t for t in request.POST.getlist("tipos") if t in valid_tipos]
-    if tipos:
-        criterio["tipos"] = tipos
+    tipo = (request.POST.get("tipos") or "").strip()
+    if tipo and tipo in valid_tipos:
+        criterio["tipos"] = [tipo]
 
     valid_subtipos = {k for k, _ in SUBTIPO_SLOT_CHOICES}
-    subtipos = [s for s in request.POST.getlist("subtipo_carta") if s in valid_subtipos]
-    if subtipos:
-        criterio["subtipo_carta"] = subtipos
+    subtipo = (request.POST.get("subtipo_carta") or "").strip()
+    if subtipo and subtipo in valid_subtipos:
+        criterio["subtipo_carta"] = [subtipo]
 
     if request.POST.get("elaboracion_rapida") == "1":
         criterio["elaboracion_max"] = 30
