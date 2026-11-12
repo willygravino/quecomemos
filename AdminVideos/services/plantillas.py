@@ -42,6 +42,15 @@ TIPOS_SLOT_CHOICES = [
 # Subtipos de carta sin el vacío inicial
 SUBTIPO_SLOT_CHOICES = [(k, v) for k, v in SUBTIPO_CARTA_CHOICES if k]
 
+# §42: opciones de ligereza para el modal (sin la opción vacía)
+LIGEREZA_SLOT_CHOICES = [
+    ("liviano", "Liviano"),
+    ("medio", "Mediano"),
+    ("pesado", "Pesado"),
+]
+
+LIGEREZA_LABELS = dict(LIGEREZA_SLOT_CHOICES)
+
 
 
 def criterio_desde_preset(preset: str) -> dict:
@@ -88,6 +97,10 @@ def filtrar_platos_por_criterio(criterio, platos_qs=None):
     if cocc_max is not None:
         qs = qs.filter(coccion__isnull=False, coccion__lte=cocc_max)
 
+    ligereza = criterio.get("ligereza") or []
+    if ligereza:
+        qs = qs.filter(ligereza__in=ligereza)
+
     return qs
 
 
@@ -116,6 +129,9 @@ def label_criterio(criterio: dict) -> str:
 
     for s_ in criterio.get("subtipo_carta") or []:
         parts.append(subtipo_labels.get(s_, s_))
+
+    for lig in criterio.get("ligereza") or []:
+        parts.append(LIGEREZA_LABELS.get(lig, lig))
 
     if criterio.get("elaboracion_max") or criterio.get("coccion_max"):
         parts.append("Rápido")

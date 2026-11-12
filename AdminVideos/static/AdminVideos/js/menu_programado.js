@@ -548,6 +548,11 @@
     document.querySelectorAll('#editarSlotForm input[name="subtipo_carta"]').forEach(function(cb) {
       cb.checked = subtipos.indexOf(cb.value) !== -1;
     });
+    // Ligereza
+    var ligereza = (criterio && criterio.ligereza) || [];
+    document.querySelectorAll('#editarSlotForm input[name="ligereza"]').forEach(function(cb) {
+      cb.checked = ligereza.indexOf(cb.value) !== -1;
+    });
     // Medios
     var medios = (criterio && criterio.medios) || [];
     document.querySelectorAll('#editarSlotForm input[name="medios"]').forEach(function(cb) {
@@ -637,6 +642,9 @@
     });
     form.querySelectorAll('input[name="subtipo_carta"]:checked').forEach(function (cb) {
       body.append("subtipo_carta", cb.value);
+    });
+    form.querySelectorAll('input[name="ligereza"]:checked').forEach(function (cb) {
+      body.append("ligereza", cb.value);
     });
     var elabChk = document.getElementById("editarSlotElabRapidaCheck");
     if (elabChk && elabChk.checked) body.set("elaboracion_rapida", "1");

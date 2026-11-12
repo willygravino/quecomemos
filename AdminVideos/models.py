@@ -339,6 +339,18 @@ class Plato(models.Model):
 
     estacionalidad = models.CharField(max_length=20, choices=ESTACIONALIDAD_CHOICES, default=TODO_EL_AÑO,null=True)  
 
+    LIGEREZA_LIVIANO = "liviano"
+    LIGEREZA_MEDIO = "medio"
+    LIGEREZA_PESADO = "pesado"
+    LIGEREZA_CHOICES = [
+        ("", "Sin definir"),
+        (LIGEREZA_LIVIANO, "Liviano"),
+        (LIGEREZA_MEDIO, "Mediano"),
+        (LIGEREZA_PESADO, "Pesado"),
+    ]
+    ligereza = models.CharField(max_length=20, choices=LIGEREZA_CHOICES, blank=True, default="",
+        help_text="Para el filtro de slots: liviano (fácil digestión), mediano, pesado.")
+
     insumos = models.ManyToManyField(
         Insumo,
         blank=True,
