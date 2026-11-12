@@ -67,6 +67,7 @@ class PlatoForm(forms.ModelForm):
             "subtipo_carta",
             "tipos",
             "estacionalidad",
+            "ligereza",
             "enlace",
             "image",
         ]
