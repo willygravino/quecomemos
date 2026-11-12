@@ -50,6 +50,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const botonCrear = event.target.closest("#botonCrearPlatoFlotante");
     if (!botonCrear) return;
 
+    const form = getForm();
+    if (!form) return;
     const tipopagFormulario =
       form.querySelector('input[name="tipopag"]')?.value || "";
     const tipopagUrl =
@@ -64,6 +66,8 @@ document.addEventListener("DOMContentLoaded", function () {
   // 2. Refrescar listado, carousel y lugares por AJAX
   // ============================================================
   function actualizarListadoPlatos() {
+    const form = getForm();
+    if (!form) return Promise.resolve();
     const url = form.dataset.listadoUrl;
     const formData = new FormData(form);
 
@@ -158,6 +162,8 @@ document.addEventListener("DOMContentLoaded", function () {
   // 3. Sincronizar selector horizontal y filtro global
   // ============================================================
   function estaActivoLoQueTengo() {
+    const form = getForm();
+    if (!form) return false;
     const input = form.querySelector('input[name="lo_que_tengo_activo"]');
     return Boolean(input && input.value === "1");
   }
@@ -195,6 +201,8 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   window.addEventListener("loQueTengo:disponibilidad", function (event) {
+    const form = getForm();
+    if (!form) return;
     const disponible = Boolean(event.detail && event.detail.disponible);
 
     if (disponible || !estaActivoLoQueTengo()) {
@@ -571,6 +579,9 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
+    const form = getForm();
+    if (!form) return;
+
     const inputTipopag = form.querySelector('input[name="tipopag"]');
     const inputLoQueTengo = form.querySelector('input[name="lo_que_tengo_activo"]');
 
@@ -638,6 +649,10 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
+    // §45c: resolver form dinámicamente (fix stale form post-asignar plato)
+    const form = getForm();
+    if (!form) return;
+
     const inputTipopag = form.querySelector('input[name="tipopag"]');
 
     if (!inputTipopag) {
@@ -697,6 +712,8 @@ document.addEventListener("DOMContentLoaded", function () {
   // 7. Soportar botón atrás / adelante del navegador
   // ============================================================
   window.addEventListener("popstate", function () {
+    const form = getForm();
+    if (!form) return;
     const params = new URLSearchParams(window.location.search);
     let tipopag = params.get("tipopag") || "Principal";
     let loQueTengoActivo = params.get("lo_que_tengo") === "1";
@@ -754,8 +771,9 @@ document.addEventListener("DOMContentLoaded", function () {
     actualizarListadoPlatosConSpinner();
   });
 
+  const _formInicial = getForm();
   const tipopagInicial = (
-    form.querySelector('input[name="tipopag"]')?.value || "Principal"
+    _formInicial?.querySelector('input[name="tipopag"]')?.value || "Principal"
   );
   actualizarSelectorHorizontalActivo(tipopagInicial);
 
