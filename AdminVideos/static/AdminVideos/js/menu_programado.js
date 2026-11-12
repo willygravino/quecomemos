@@ -546,6 +546,11 @@
     var subtipos = (criterio && criterio.subtipo_carta) || [];
     var subSel = document.getElementById("editarSlotSubtipoSelect");
     if (subSel) subSel.value = subtipos.length ? subtipos[0] : "";
+    // Categoría
+    var categorias = (criterio && criterio.categoria) || [];
+    document.querySelectorAll('#editarSlotForm input[name="categoria"]').forEach(function(cb) {
+      cb.checked = categorias.indexOf(cb.value) !== -1;
+    });
     // Ligereza
     var ligereza = (criterio && criterio.ligereza) || [];
     document.querySelectorAll('#editarSlotForm input[name="ligereza"]').forEach(function(cb) {
@@ -639,6 +644,9 @@
     if (tipoSel && tipoSel.value) body.set("tipos", tipoSel.value);
     var subSel = document.getElementById("editarSlotSubtipoSelect");
     if (subSel && subSel.value) body.set("subtipo_carta", subSel.value);
+    form.querySelectorAll('input[name="categoria"]:checked').forEach(function (cb) {
+      body.append("categoria", cb.value);
+    });
     form.querySelectorAll('input[name="ligereza"]:checked').forEach(function (cb) {
       body.append("ligereza", cb.value);
     });

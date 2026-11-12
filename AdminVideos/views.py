@@ -15,6 +15,7 @@ from AdminVideos.models import ElementoCompartido, Amistad, ProfilePlatoCompra, 
 from AdminVideos.services.plantillas import (
     LIGEREZA_SLOT_CHOICES,
     PRESETS,
+    SLOT_CATEGORIA_CHOICES,
     SUBTIPO_SLOT_CHOICES,
     TIPOS_SLOT_CHOICES,
     criterio_desde_preset,
@@ -3215,6 +3216,7 @@ def FiltroDePlatos(request):
                 "tipos_slot_choices": TIPOS_SLOT_CHOICES,
                 "subtipo_slot_choices": SUBTIPO_SLOT_CHOICES,
                 "ligereza_slot_choices": LIGEREZA_SLOT_CHOICES,
+                "slot_categoria_choices": SLOT_CATEGORIA_CHOICES,
             }
 
 
@@ -4775,6 +4777,11 @@ def _build_criterio_from_request(request):
     if subtipo and subtipo in valid_subtipos:
         criterio["subtipo_carta"] = [subtipo]
 
+    valid_categorias = {k for k, _ in SLOT_CATEGORIA_CHOICES}
+    categorias = [c for c in request.POST.getlist("categoria") if c in valid_categorias]
+    if categorias:
+        criterio["categoria"] = categorias
+
     if request.POST.get("elaboracion_rapida") == "1":
         criterio["elaboracion_max"] = 30
     if request.POST.get("coccion_rapida") == "1":
@@ -5000,6 +5007,7 @@ def ajax_get_slot(request, pk):
             "coccion_max": criterio.get("coccion_max"),
             "medios": criterio.get("medios") or [],
             "ligereza": criterio.get("ligereza") or [],
+            "categoria": criterio.get("categoria") or [],
         }
     })
 

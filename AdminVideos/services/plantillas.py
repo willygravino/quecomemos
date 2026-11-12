@@ -43,13 +43,25 @@ TIPOS_SLOT_CHOICES = [
 SUBTIPO_SLOT_CHOICES = [(k, v) for k, v in SUBTIPO_CARTA_CHOICES if k]
 
 # §42: opciones de ligereza para el modal (sin la opción vacía)
+# §44: en el filtro de slot solo se ofrece "Liviano" (nadie busca "pesado"
+# para programar). El form de plato sigue con 3 valores (para clasificar).
 LIGEREZA_SLOT_CHOICES = [
     ("liviano", "Liviano"),
-    ("medio", "Mediano"),
-    ("pesado", "Pesado"),
 ]
 
-LIGEREZA_LABELS = dict(LIGEREZA_SLOT_CHOICES)
+# Labels completos para renderizar slots legacy con "medio"/"pesado"
+LIGEREZA_LABELS = {
+    "liviano": "Liviano",
+    "medio": "Mediano",
+    "pesado": "Pesado",
+}
+
+# §44: categorías filtrables en el slot (sin "Ambos": es "aplica a las dos",
+# no una categoría a buscar)
+SLOT_CATEGORIA_CHOICES = [
+    ("Cotidiano", "Cotidiano"),
+    ("Especial", "Especial"),
+]
 
 
 
@@ -133,6 +145,10 @@ def label_criterio(criterio: dict) -> str:
 
     for s_ in criterio.get("subtipo_carta") or []:
         parts.append(subtipo_labels.get(s_, s_))
+
+    categoria_labels = dict(Plato.CATEGORIA_CHOICES)
+    for cat in criterio.get("categoria") or []:
+        parts.append(categoria_labels.get(cat, cat))
 
     for lig in criterio.get("ligereza") or []:
         parts.append(LIGEREZA_LABELS.get(lig, lig))

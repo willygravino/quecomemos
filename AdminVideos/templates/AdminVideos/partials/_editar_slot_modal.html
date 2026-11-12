@@ -35,6 +35,17 @@
             </select>
           </div>
           <fieldset class="mb-3">
+            <legend class="form-label fs-6 mb-2">Categoría</legend>
+            <div class="d-flex flex-wrap gap-3">
+              {% for key, label in slot_categoria_choices %}
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="categoria" value="{{ key }}" id="editarSlotCat{{ forloop.counter }}">
+                <label class="form-check-label" for="editarSlotCat{{ forloop.counter }}">{{ label }}</label>
+              </div>
+              {% endfor %}
+            </div>
+          </fieldset>
+          <fieldset class="mb-3">
             <legend class="form-label fs-6 mb-2">Duración</legend>
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="editarSlotElabRapidaCheck">
