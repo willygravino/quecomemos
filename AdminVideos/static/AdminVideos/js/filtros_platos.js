@@ -30,9 +30,9 @@ document.addEventListener("DOMContentLoaded", function () {
   // Se mantiene actualizada por MutationObserver al final del IIFE.
   let form = getForm();
 
-  const contenedor = document.getElementById("contenedor-listado-platos");
-
-  if (!form || !contenedor) return;
+  // §46: 'contenedor' era dead code (solo se usaba en este guard; los usos
+  // reales resuelven #contenedor-listado-platos dinámicamente).
+  if (!form || !document.getElementById("contenedor-listado-platos")) return;
 
   // Un único canal de render para listado + carousel + lugares.
   // Si cambia el filtro mientras hay un request en vuelo, sólo el último
@@ -41,8 +41,10 @@ document.addEventListener("DOMContentLoaded", function () {
   let listadoRequestSeq = 0;
 
   // Sincronizar el botón de creación con la vista inicial.
+  // §46: resolver el form del DOM (no usar el 'let form' del closure antes
+  // de que MutationObserver lo actualice)
   actualizarBotonCrearPlato(
-    form.querySelector('input[name="tipopag"]')?.value || "Principal"
+    getForm()?.querySelector('input[name="tipopag"]')?.value || "Principal"
   );
 
   // Impedir crear platos desde la vista Todos.
@@ -758,10 +760,12 @@ document.addEventListener("DOMContentLoaded", function () {
     if (cbCatPop) cbCatPop.checked = vcUrl === null ? true : vcUrl !== "0";
     if (cbEspPop) cbEspPop.checked = veUrl === null ? true : veUrl !== "0";
 
-    // Restaurar palabra_clave
+    // Restaurar palabra_clave (§46: inputPalabraClave se resolvía como
+    // global stale. Ahora dinámicamente desde el form del scope)
     const palabraPop = params.get("palabra_clave") || "";
-    if (inputPalabraClave && inputPalabraClave.value !== palabraPop) {
-      inputPalabraClave.value = palabraPop;
+    const inputKwPop = form.querySelector('input[name="palabra_clave"]');
+    if (inputKwPop && inputKwPop.value !== palabraPop) {
+      inputKwPop.value = palabraPop;
       actualizarVisualPalabraClave();
     }
 
@@ -811,38 +815,61 @@ document.addEventListener("DOMContentLoaded", function () {
 // - Click limpia el input y dispara el filtro automáticamente.
 // - Funciona en mobile (donde el navegador no muestra el X nativo).
 // ============================================================
+// ============================================================
+// §46: botón X para limpiar búsqueda (delegado, sobrevive a reemplazos)
+// ============================================================
 (function () {
-  function initClearSearch() {
-    const form = document.getElementById("form-filtros-platos");
-    if (!form) return;
-
-    const input = form.querySelector('input[name="palabra_clave"]');
-    const btn = form.querySelector(".btn-clear-search");
-    if (!input || !btn || btn.__clearBound) return;
-
-    function updateVisibility() {
-      const hasValue = (input.value || "").trim().length > 0;
-      btn.classList.toggle("is-visible", hasValue);
-    }
-
-    input.addEventListener("input", updateVisibility);
-
-    btn.addEventListener("click", function (e) {
-      e.preventDefault();
-      input.value = "";
-      input.dispatchEvent(new Event("input", { bubbles: true }));
-      updateVisibility();
-      input.focus();
-    });
-
-    updateVisibility();
-    btn.__clearBound = true;
+  function getForm() {
+    return document.getElementById("form-filtros-platos");
   }
 
+  function updateVisibility(input, btn) {
+    if (!input || !btn) return;
+    const hasValue = (input.value || "").trim().length > 0;
+    btn.classList.toggle("is-visible", hasValue);
+  }
+
+  function syncVisibility() {
+    const form = getForm();
+    if (!form) return;
+    updateVisibility(
+      form.querySelector('input[name="palabra_clave"]'),
+      form.querySelector(".btn-clear-search")
+    );
+  }
+
+  // Delegado: input del search → actualizar visibilidad del X
+  document.addEventListener("input", function (event) {
+    const inp = event.target;
+    if (!inp.matches || !inp.matches('#form-filtros-platos input[name="palabra_clave"]')) return;
+    const form = getForm();
+    if (!form) return;
+    const btn = form.querySelector(".btn-clear-search");
+    updateVisibility(inp, btn);
+  });
+
+  // Delegado: click en el X → limpiar
+  document.addEventListener("click", function (event) {
+    const btn = event.target.closest(".btn-clear-search");
+    if (!btn) return;
+    const form = getForm();
+    if (!form || !btn.closest("#form-filtros-platos")) return;
+
+    const inp = form.querySelector('input[name="palabra_clave"]');
+    if (!inp) return;
+
+    event.preventDefault();
+    inp.value = "";
+    inp.dispatchEvent(new Event("input", { bubbles: true }));
+    updateVisibility(inp, btn);
+    inp.focus();
+  });
+
+  // Inicializar al cargar
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initClearSearch);
+    document.addEventListener("DOMContentLoaded", syncVisibility);
   } else {
-    initClearSearch();
+    syncVisibility();
   }
 })();
 
