@@ -91,11 +91,13 @@ def filtrar_platos_por_criterio(criterio, platos_qs=None):
 
     elab_max = criterio.get("elaboracion_max")
     if elab_max is not None:
-        qs = qs.filter(elaboracion__isnull=False, elaboracion__lte=elab_max)
+        # NULL se trata como 0 (un plato sin dato de elaboración se considera rápido)
+        qs = qs.filter(Q(elaboracion__isnull=True) | Q(elaboracion__lte=elab_max))
 
     cocc_max = criterio.get("coccion_max")
     if cocc_max is not None:
-        qs = qs.filter(coccion__isnull=False, coccion__lte=cocc_max)
+        # NULL se trata como 0 (un plato sin dato de cocción se considera rápido)
+        qs = qs.filter(Q(coccion__isnull=True) | Q(coccion__lte=cocc_max))
 
     ligereza = criterio.get("ligereza") or []
     if ligereza:
