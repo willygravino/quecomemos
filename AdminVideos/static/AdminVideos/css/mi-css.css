@@ -4058,3 +4058,35 @@ button.menu-slot-pendiente:focus-visible {
     padding-top: 0.2rem !important;
   }
 }
+
+/* ============================================================================
+   §39: filtro dentro del sticky wrapper (después del selector).
+   Mobile: wrapper con max-height 60vh, y compactar el filtro para que los
+   3 elementos (carousel + selector + filtro) entren con scroll mínimo.
+   ============================================================================ */
+@media (max-width: 767.98px) {
+  .qc-sticky-header {
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  /* Compactar el bloque del filtro dentro del wrapper sticky */
+  .qc-sticky-header .filtro-platos-inline-shell {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding: 0.25rem 0.35rem !important;
+  }
+
+  .qc-sticky-header .filtros-platos-card {
+    margin-bottom: 0 !important;
+  }
+
+  .qc-sticky-header .filtros-platos-card .card-body {
+    padding: 0.35rem !important;
+  }
+
+  /* Reducir gap entre selector y filtro */
+  .qc-sticky-header > .selector-platos-shell {
+    margin-bottom: 0.15rem !important;
+  }
+}
