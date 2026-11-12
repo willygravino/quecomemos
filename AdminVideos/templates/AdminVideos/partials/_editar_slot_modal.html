@@ -1,13 +1,17 @@
 {# §31 E2: modal para editar el preset y criterios manuales de un slot #}
+{# §40: modal compartido para crear y editar slot. #}
 <div class="modal fade" id="editarSlotModal" tabindex="-1"
      aria-labelledby="editarSlotLabel" aria-hidden="true"
      data-editar-slot-url-template="{% url 'ajax_editar_slot' pk=0 %}"
+     data-crear-slot-url="{% url 'ajax_crear_slot' %}"
      data-get-slot-url-template="{% url 'ajax_get_slot' pk=0 %}">
   <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
       <form id="editarSlotForm" novalidate>
         {% csrf_token %}
         <input type="hidden" id="editarSlotIdInput" value="">
+        <input type="hidden" id="editarSlotDiaInput" value="">
+        <input type="hidden" id="editarSlotMomentoInput" value="">
         <div class="modal-header">
           <h5 class="modal-title" id="editarSlotLabel">Editar slot</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>

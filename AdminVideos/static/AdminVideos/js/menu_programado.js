@@ -319,7 +319,7 @@
      SLOTS SEMANALES: crear slot desde el menú
      ============================================================ */
 
-  // Click "+ Slot" → abre el modal de presets con día/momento precargados
+  // Click "+ Slot" → abre el form compartido en modo crear
   document.addEventListener("click", function (event) {
     const btn = event.target.closest(".js-crear-slot");
     if (!btn) return;
@@ -327,81 +327,20 @@
 
     const dia = btn.dataset.dia || "";
     const momento = btn.dataset.momento || "";
-    const diaInput = document.getElementById("slotDiaInput");
-    const momentoInput = document.getElementById("slotMomentoInput");
-    const modalEl = document.getElementById("crearSlotModal");
+    const modalEl = document.getElementById("editarSlotModal");
 
-    if (!dia || !momento || !diaInput || !momentoInput || !modalEl) return;
+    if (!dia || !momento || !modalEl) return;
 
-    diaInput.value = dia;
-    momentoInput.value = momento;
+    document.getElementById("editarSlotIdInput").value = "";
+    document.getElementById("editarSlotDiaInput").value = dia;
+    document.getElementById("editarSlotMomentoInput").value = momento;
+    document.getElementById("editarSlotPresetSelect").value = "";
+    _aplicarCriterioAlModal({});
+    document.getElementById("editarSlotLabel").textContent = "Agregar slot";
 
     if (window.bootstrap && bootstrap.Modal) {
       bootstrap.Modal.getOrCreateInstance(modalEl).show();
     }
-  }, true);
-
-  // Click preset en el modal → POST crear slot + refresh + close
-  document.addEventListener("click", function (event) {
-    const btn = event.target.closest(".js-elegir-preset");
-    if (!btn) return;
-    event.preventDefault();
-
-    const preset = btn.dataset.preset || "";
-    const diaInput = document.getElementById("slotDiaInput");
-    const momentoInput = document.getElementById("slotMomentoInput");
-    const modalEl = document.getElementById("crearSlotModal");
-
-    if (!preset || !diaInput || !momentoInput || !modalEl) return;
-
-    const dia = diaInput.value;
-    const momento = momentoInput.value;
-    if (!dia || !momento) return;
-
-    const url = modalEl.dataset.crearSlotUrl || "";
-    if (!url || !window.fetch) return;
-
-    // Convertir YYYY-MM-DD → dia_semana Django (0=lunes ... 6=domingo)
-    const partes = dia.split("-");
-    const fecha = new Date(Number(partes[0]), Number(partes[1]) - 1, Number(partes[2]));
-    const jsDay = fecha.getDay();            // 0=domingo, 1=lunes, ..., 6=sábado
-    const diaSemanaDjango = (jsDay + 6) % 7; // 0=lunes, ..., 6=domingo
-
-    btn.disabled = true;
-
-    const body = new URLSearchParams({
-      dia_semana: String(diaSemanaDjango),
-      momento: momento,
-      preset: preset
-    });
-
-    fetch(url, {
-      method: "POST",
-      body: body.toString(),
-      headers: {
-        "X-CSRFToken": getCSRFToken(),
-        "X-Requested-With": "XMLHttpRequest",
-        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
-      },
-      credentials: "same-origin"
-    })
-    .then(function (response) {
-      if (!response.ok) throw new Error("Error al crear slot");
-      return response.json();
-    })
-    .then(function (data) {
-      if (!data.ok) throw new Error("Respuesta inválida al crear slot");
-      if (window.bootstrap && bootstrap.Modal) {
-        bootstrap.Modal.getOrCreateInstance(modalEl).hide();
-      }
-      return refrescarMenuProgramado();
-    })
-    .catch(function (error) {
-      console.error(error);
-    })
-    .finally(function () {
-      btn.disabled = false;
-    });
   }, true);
 
   /* ============================================================
@@ -628,6 +567,9 @@
     var getUrl = getUrlTemplate.replace("/0/", "/" + slotId + "/");
 
     document.getElementById("editarSlotIdInput").value = slotId;
+    document.getElementById("editarSlotDiaInput").value = "";
+    document.getElementById("editarSlotMomentoInput").value = "";
+    document.getElementById("editarSlotLabel").textContent = "Editar slot";
 
     // Reset visual mientras carga
     document.getElementById("editarSlotPresetSelect").value = "";
@@ -675,11 +617,18 @@
 
     var slotId = document.getElementById("editarSlotIdInput").value || "";
     var modalEl = document.getElementById("editarSlotModal");
-    if (!slotId || !modalEl || !window.fetch) return;
+    if (!modalEl || !window.fetch) return;
 
-    var editUrlTemplate = modalEl.dataset.editarSlotUrlTemplate || "";
-    if (!editUrlTemplate) return;
-    var editUrl = editUrlTemplate.replace("/0/", "/" + slotId + "/");
+    var isCreate = !slotId;
+    var finalUrl;
+    if (isCreate) {
+      finalUrl = modalEl.dataset.crearSlotUrl || "";
+      if (!finalUrl) return;
+    } else {
+      var editUrlTemplate = modalEl.dataset.editarSlotUrlTemplate || "";
+      if (!editUrlTemplate) return;
+      finalUrl = editUrlTemplate.replace("/0/", "/" + slotId + "/");
+    }
 
     var saveBtn = document.getElementById("editarSlotSaveBtn");
     if (saveBtn) saveBtn.disabled = true;
@@ -695,7 +644,12 @@
       body.append("medios", cb.value);
     });
 
-    fetch(editUrl, {
+    if (isCreate) {
+      body.set("dia", document.getElementById("editarSlotDiaInput").value || "");
+      body.set("momento", document.getElementById("editarSlotMomentoInput").value || "");
+    }
+
+    fetch(finalUrl, {
       method: "POST",
       body: body.toString(),
       headers: {

@@ -4752,56 +4752,80 @@ def eliminar_menu_programado(request):
 
 @login_required
 def ajax_crear_slot(request):
-    """Crea un SlotSemanal para el usuario. Idempotente: si ya existe
-    un slot con mismo (propietario, dia_semana, momento, preset), lo devuelve."""
+    """Crea un SlotSemanal. Mismos parámetros que ajax_editar_slot
+    (preset, elaboracion_max, coccion_max, medios) + dia (YYYY-MM-DD) + momento."""
     if request.method != "POST":
         return JsonResponse({"ok": False, "error": "Método no permitido"}, status=405)
 
-    dia_semana_raw = request.POST.get("dia_semana")
-    momento = request.POST.get("momento")
-    preset = (request.POST.get("preset") or "").strip()
+    dia = (request.POST.get("dia") or "").strip()
+    momento = (request.POST.get("momento") or "").strip()
 
     try:
-        dia_semana = int(dia_semana_raw)
-    except (TypeError, ValueError):
-        return JsonResponse({"ok": False, "error": "dia_semana inválido"}, status=400)
+        fecha = datetime.datetime.strptime(dia, "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        return JsonResponse({"ok": False, "error": "Día inválido"}, status=400)
 
-    valid_dias = {d[0] for d in SlotSemanal.DIAS_SEMANA}
-    if dia_semana not in valid_dias:
-        return JsonResponse({"ok": False, "error": "dia_semana fuera de rango"}, status=400)
+    dia_semana = fecha.weekday()  # 0=lunes ... 6=domingo
 
     valid_momentos = {m[0] for m in SlotSemanal.MOMENTOS}
     if momento not in valid_momentos:
-        return JsonResponse({"ok": False, "error": "momento inválido"}, status=400)
+        return JsonResponse({"ok": False, "error": "Momento inválido"}, status=400)
 
-    if preset not in PRESETS:
-        return JsonResponse({"ok": False, "error": "preset desconocido"}, status=400)
+    preset = (request.POST.get("preset") or "").strip()
+    if preset and preset not in PRESETS:
+        return JsonResponse({"ok": False, "error": "Preset desconocido"}, status=400)
 
-    # Idempotente (QB4=C)
-    slot = SlotSemanal.objects.filter(
+    def parse_int(v):
+        if v is None or v == "":
+            return None
+        try:
+            n = int(v)
+            if n < 0:
+                raise ValueError
+            return n
+        except (TypeError, ValueError):
+            return "INVALID"
+
+    elab = parse_int(request.POST.get("elaboracion_max"))
+    cocc = parse_int(request.POST.get("coccion_max"))
+    if elab == "INVALID" or cocc == "INVALID":
+        return JsonResponse({"ok": False, "error": "Los tiempos deben ser números enteros >= 0"}, status=400)
+
+    valid_medios = {c[0] for c in Plato.MEDIOS_CHOICES}
+    medios_raw = request.POST.getlist("medios")
+    medios = [m for m in medios_raw if m in valid_medios]
+    if len(medios) != len(medios_raw):
+        return JsonResponse({"ok": False, "error": "Medio inválido"}, status=400)
+
+    criterio = {}
+    if preset:
+        criterio.update(PRESETS[preset]["criterio"])
+    if elab is not None:
+        criterio["elaboracion_max"] = elab
+    if cocc is not None:
+        criterio["coccion_max"] = cocc
+    if medios:
+        criterio["medios"] = medios
+
+    if not criterio:
+        return JsonResponse({"ok": False, "error": "Elegí un preset o al menos un filtro"}, status=400)
+
+    max_orden = (
+        SlotSemanal.objects
+        .filter(propietario=request.user, dia_semana=dia_semana, momento=momento)
+        .order_by("-orden")
+        .values_list("orden", flat=True)
+        .first()
+    ) or 0
+
+    slot = SlotSemanal.objects.create(
         propietario=request.user,
         dia_semana=dia_semana,
         momento=momento,
         preset=preset,
-    ).first()
-
-    if slot is None:
-        # orden = max(orden)+1 para ese (user, dia, momento)
-        max_orden = (
-            SlotSemanal.objects
-            .filter(propietario=request.user, dia_semana=dia_semana, momento=momento)
-            .order_by("-orden")
-            .values_list("orden", flat=True)
-            .first()
-        ) or 0
-        slot = SlotSemanal.objects.create(
-            propietario=request.user,
-            dia_semana=dia_semana,
-            momento=momento,
-            preset=preset,
-            criterio=criterio_desde_preset(preset),
-            orden=max_orden + 1,
-        )
+        criterio=criterio,
+        orden=max_orden + 1,
+    )
 
     return JsonResponse({
         "ok": True,
@@ -4810,10 +4834,11 @@ def ajax_crear_slot(request):
             "dia_semana": slot.dia_semana,
             "momento": slot.momento,
             "preset": slot.preset,
+            "preset_label": label_preset(slot.preset),
+            "criterio": criterio,
             "orden": slot.orden,
         },
     })
-
 
 @login_required
 def ajax_borrar_slot(request, pk):
