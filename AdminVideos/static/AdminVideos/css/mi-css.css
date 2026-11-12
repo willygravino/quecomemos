@@ -3819,11 +3819,6 @@ button.menu-slot-pendiente:focus-visible {
 }
 
 /* §31 C4b: plato que vino de un slot (violeta tenue, sin romper layout) */
-.plato-desde-slot {
-  box-shadow: inset 3px 0 0 var(--qc-slot-medio);
-  padding-left: .35rem;
-}
-
 /* §31 C5b: título de comida con slot pendiente (violeta apagado, NO primary) */
 .menu-programado-comida-wrapper.menu-programado-comida-solo-slot > h6 {
   background-color: rgba(214, 51, 132, 0.18) !important;
@@ -3838,23 +3833,17 @@ button.menu-slot-pendiente:focus-visible {
    §31 C5c: paleta magenta para "slots" (identidad visual única)
    ============================================================ */
 :root {
-  --qc-slot-suave:  #fbe6ef;
   --qc-slot-borde:  #e8a0c0;
-  --qc-slot-texto:  #8f1a52;
   --qc-slot-medio:  #d63384;
   --qc-slot-chip:   #821b53;
   --qc-slot-btn:    #771a4d;
-  --qc-slot-tab-inactivo: #8f5876;
   --qc-slot-fuerte: #b9246e;
 }
 [data-bs-theme="dark"] {
-  --qc-slot-suave:  #3a1a2b;
   --qc-slot-borde:  #8f3d6b;
-  --qc-slot-texto:  #ffc4dd;
   --qc-slot-medio:  #e83e8c;
   --qc-slot-chip:   #ba7c9d;
   --qc-slot-btn:    #a16e91;
-  --qc-slot-tab-inactivo: #3f2837;
   --qc-slot-fuerte: #ff85c0;
 }
 
@@ -3916,76 +3905,14 @@ button.menu-slot-pendiente:focus-visible {
    Oculta chips, botón "+ Slot", ✕, modales relacionados y
    neutraliza el color magenta del título y del borde del plato.
    ============================================================ */
-body.qc-slots-off .menu-slot-pendiente,
-body.qc-slots-off .btn.js-crear-slot,
-body.qc-slots-off .js-borrar-slot,
-body.qc-slots-off .js-abrir-elegir-plato {
-  display: none !important;
-}
-
 /* Comida que era "solo slot": al apagar slots, se ve como comida vacía */
-body.qc-slots-off .menu-programado-comida-wrapper.menu-programado-comida-solo-slot > h6 {
-  background-color: var(--bs-secondary-bg) !important;
-  color: var(--bs-secondary-color) !important;
-  opacity: 0.45 !important;
-}
-
 /* Plato que vino de slot: sin borde magenta */
-body.qc-slots-off .plato-desde-slot {
-  box-shadow: none !important;
-  padding-left: 0 !important;
-}
-
 /* §31 D1c: botón circular "S" para toggle de slots */
-.qc-slots-toggle-btn {
-  width: 1.5rem;
-  height: 1.5rem;
-  padding: 0;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 0.75rem;
-  font-family: inherit;
-  line-height: 1;
-  border: 1px solid var(--qc-slot-borde);
-  background: transparent;
-  color: var(--qc-slot-btn);
-  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-  flex-shrink: 0;
-}
-.qc-slots-toggle-btn:hover,
-.qc-slots-toggle-btn:focus-visible {
-  border-color: var(--qc-slot-medio);
-  color: var(--qc-slot-medio);
-  outline: none;
-}
-.qc-slots-toggle-btn[aria-pressed="true"] {
-  background: var(--qc-slot-medio);
-  color: #ffffff;
-  border-color: var(--qc-slot-medio);
-}
-.qc-slots-toggle-btn[aria-pressed="true"]:hover,
-.qc-slots-toggle-btn[aria-pressed="true"]:focus-visible {
-  background: var(--qc-slot-fuerte);
-  border-color: var(--qc-slot-fuerte);
-  color: #ffffff;
-}
-
-
 /* §31 D2b: con slots ON, el "recuadro exterior" celeste (#diasTabContent) y
    la tab activa pasan a magenta cuando el día activo está VACÍO (sin platos
    programados). Si tiene platos (parcial o completo), se mantienen los
    colores actuales (verde/violeta).
    Con slots OFF, quedan como estaban (celeste). */
-body:not(.qc-slots-off) #diasTabContent:not(.menu-dia-programado-activo) {
-  background-color: var(--qc-slot-medio) !important;
-}
-body:not(.qc-slots-off) #diasTab .nav-link.active:not(.menu-programado-dia-programado) {
-  background-color: var(--qc-slot-medio) !important;
-}
-
 /* ============================================================
    §31 D2c: eliminar el borde interior de .menu-programado-contenido-solido
    (el border 2px + el anillo de 1px del box-shadow no tenían función).
@@ -4006,73 +3933,14 @@ body:not(.qc-slots-off) #diasTab .nav-link.active:not(.menu-programado-dia-progr
    ============================================================ */
 
 /* VACÍO + INACTIVO (segundo plano): magenta apagado (--qc-slot-btn) */
-body:not(.qc-slots-off) #diasTab .nav-link:not(.menu-programado-dia-programado):not(.active) {
-  background-color: var(--qc-slot-tab-inactivo) !important;
-}
-body:not(.qc-slots-off) #diasTab .nav-link:not(.menu-programado-dia-programado):not(.active):hover,
-body:not(.qc-slots-off) #diasTab .nav-link:not(.menu-programado-dia-programado):not(.active):focus-visible {
-  background-color: color-mix(in srgb, var(--qc-slot-tab-inactivo) 85%, white) !important;
-}
-
 /* PARCIAL + ACTIVO: degradé violeta -> magenta (reemplaza #4e73df) */
-body:not(.qc-slots-off) #diasTab .nav-link.menu-dia-parcial.active {
-  background: linear-gradient(
-    to top,
-    var(--menu-programado-solido) 0%,
-    var(--menu-programado-solido) 15%,
-    var(--qc-slot-medio) 85%,
-    var(--qc-slot-medio) 100%
-  ) !important;
-}
-
 /* PARCIAL + INACTIVO light: #3154b8 -> magenta apagado */
-body:not(.qc-slots-off) #diasTab .nav-link.menu-dia-parcial:not(.active) {
-  background: linear-gradient(
-    to top,
-    var(--qc-menu-programado-inactivo) 0%,
-    var(--qc-menu-programado-inactivo) 15%,
-    var(--qc-slot-tab-inactivo) 85%,
-    var(--qc-slot-tab-inactivo) 100%
-  ) !important;
-}
-
 /* PARCIAL + INACTIVO dark: #2f3852 -> magenta apagado */
-body:not(.qc-slots-off) [data-bs-theme="dark"] #diasTab .nav-link.menu-dia-parcial:not(.active) {
-  background: linear-gradient(
-    to top,
-    color-mix(in srgb, var(--menu-programado-solido) 55%, #000) 0%,
-    color-mix(in srgb, var(--menu-programado-solido) 55%, #000) 15%,
-    var(--qc-slot-tab-inactivo) 85%,
-    var(--qc-slot-tab-inactivo) 100%
-  ) !important;
-}
-
 /* §31 D2h: hover en tabs PARCIALES INACTIVAS.
    La regla genérica de hover (background-color) no se ve porque el
    degradé (background: linear-gradient) tapa el background-color.
    Acá repetimos el degradé con el color de abajo aclarado (85% + 15% white,
    misma lógica que el resto de los hovers). */
-body:not(.qc-slots-off) #diasTab .nav-link.menu-dia-parcial:not(.active):hover,
-body:not(.qc-slots-off) #diasTab .nav-link.menu-dia-parcial:not(.active):focus-visible {
-  background: linear-gradient(
-    to top,
-    var(--qc-menu-programado-inactivo) 0%,
-    var(--qc-menu-programado-inactivo) 15%,
-    color-mix(in srgb, var(--qc-slot-tab-inactivo) 85%, white) 85%,
-    color-mix(in srgb, var(--qc-slot-tab-inactivo) 85%, white) 100%
-  ) !important;
-}
-[data-bs-theme="dark"] body:not(.qc-slots-off) #diasTab .nav-link.menu-dia-parcial:not(.active):hover,
-[data-bs-theme="dark"] body:not(.qc-slots-off) #diasTab .nav-link.menu-dia-parcial:not(.active):focus-visible {
-  background: linear-gradient(
-    to top,
-    color-mix(in srgb, var(--menu-programado-solido) 55%, #000) 0%,
-    color-mix(in srgb, var(--menu-programado-solido) 55%, #000) 15%,
-    color-mix(in srgb, var(--qc-slot-tab-inactivo) 85%, white) 85%,
-    color-mix(in srgb, var(--qc-slot-tab-inactivo) 85%, white) 100%
-  ) !important;
-}
-
 /* §31 C13+D2m: opacity fija en hijos específicos del wrapper -vacia.
    El título y "No hay platos" quedan apagados sin hover (no son clickeables).
    "+ Slot" mantiene brillo constante. */
