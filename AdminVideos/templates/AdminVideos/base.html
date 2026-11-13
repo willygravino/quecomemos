@@ -207,7 +207,7 @@
                             aria-labelledby="userDropdown">
 
                             {% if user.profile %}
-                            <a class="dropdown-item" href="{% url 'profile-update' user.profile.id %}">
+                            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#profileUpdateModal">
                                 <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                 Actualizar Perfil
                             </a>
@@ -1618,7 +1618,13 @@ document.addEventListener("DOMContentLoaded", function () {
    ==========================================  -->
 {% if request.GET.msg %}
   {% include "AdminVideos/partials/_toast_msg.html" %}
+
 {% endif %}
+
+  {# Modal "Actualizar perfil" (siempre en el DOM si hay profile) #}
+  {% if user.is_authenticated and user.profile %}
+    {% include "AdminVideos/partials/_profile_update_modal.html" %}
+  {% endif %}
 
 
 
