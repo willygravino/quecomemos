@@ -1721,3 +1721,26 @@ Primer intento falló con assert s.count(bloque_mal) == 1 → 0 matches por whit
 - Validación de error: si el form falla, cae a profile_form.html (página completa). Si molesta, feature aparte: AJAX + form_invalid JSON (patrón §23).
 - forgot-password.html sigue con lang="en" + textos en inglés (§48.4).
 - ProfileUpdate.form_valid hace form.save() sin commit=False, así que no setea user (ya está seteado por test_key / pk). Es correcto para UpdateView.
+
+
+### 50.8 Leccion: git add incompleto deja prod rota silenciosamente
+
+Caso 2026-11-13: los commits da99da6 y e059e43 incluyeron solo base.html
+con el include del partial _profile_update_modal.html. Pero el partial
+mismo y el form_valid de ProfileUpdate quedaron sin commitear (mi error
+en el bloque del paso anterior, solo puse base.html en git add).
+
+Produccion tiro 500 (TemplateDoesNotExist) al renderizar el home
+autenticado. Fix: commit b229676 agrego los 2 archivos faltantes.
+
+Regla nueva (obligatoria antes de cada push):
+
+    git status --short
+
+Si algo quedo como M o ?? despues del commit, NO pushear.
+Commitear primero. Un solo archivo olvidado puede tirar prod.
+
+Aplica especialmente cuando un feature agrega archivos NUEVOS
+(partials, templates, migraciones) o modifica VARIOS archivos
+(base.html + views.py). Si el commit message dice 'agrega X', el X
+tiene que estar en el commit.
