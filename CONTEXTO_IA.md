@@ -1528,3 +1528,43 @@ Revertir todo: `git revert <hash1> <hash2> <hash3>`.
 - **`signup.html`**: revisar si tiene doble línea visual como login. Diagnóstico muestra 1 `<hr>`, pero puede haber CSS de por medio.
 - **`auth_dark.css` está aislado** de `mi-css.css`. Si en el futuro se unifican, ojo con selectores globales (`.card`, `body`, `input`). Mejor mantenerlos separados.
 - **Eliminar light en `mi-css.css`**: si se quiere limpiar de verdad (borrar 136 overrides dark + 3 light inertes), es sesión aparte de 1-2 días, alto riesgo. Solo hacer si hay tiempo dedicado.
+
+---
+
+## 48.5 Sesión 2026-11-13 (cont.) — Limpieza de restos del modo claro
+
+### Qué se hizo (commit `e298fb6`)
+
+- **Eliminada** la única regla `[data-bs-theme="light"]` del CSS (L3870, selector agrupado con `dark` y base). Nunca matcheaba → dark-only desde §48.
+- **Consolidados** los bloques `:root` de `--qc-menu-*` (L2341) y `--qc-slot-*` (L3835) a **valores dark**. Mantienen el bloque `[data-bs-theme="dark"]` como override redundante (fallback seguro).
+- **Bump** de `mi-css.css` en `base.html`: `?v=20261113_123647`.
+- Net: **-236 bytes**. Sin cambios visuales esperados (dark ganaba antes y sigue ganando).
+
+### Estado final del CSS
+
+- **0** reglas `[data-bs-theme="light"]` en `mi-css.css`.
+- **138** overrides `[data-bs-theme="dark"]` (necesarios, son el dark mode).
+- **136 → 138**: +2 por los comentarios nuevos del bloque `:root`. El conteo se mantiene estable.
+
+### Bugs latentes detectados (NO tocados hoy, deuda)
+
+Diagnóstico de los 3 `background: #fff` en `mi-css.css`:
+
+| Selector | Override dark | Estado |
+|---|---|---|
+| `.menu-programado-faja` (L370) | ❌ no tiene | 🔴 **Bug latente**: fondo blanco en dark |
+| `.menu-programado-pill` (L389) | ✅ L1097 | 🟢 OK (pisado por dark) |
+| `.compartido-recibido-card` (L801) | ❌ no tiene | 🔴 **Bug latente**: fondo blanco en dark |
+
+**Verificar en pantalla** si se ven blancos en dark. Si sí, fix en sesión aparte (agregar override dark o cambiar base a `var(--bs-body-bg)`).
+
+### Deudas nuevas
+
+- **2 bugs latentes** de fondo blanco (arriba). Detectar visualmente antes de tocar.
+- **23 templates `.backup_*`** trackeados en git (`lista_filtrada.html.backup_*` + otros). Basura de versionado. **NO es CSS**, es limpieza de repo. Candidatos a `git rm --cached` en sesión aparte.
+
+### Estado del repo al cierre
+
+- `main` limpio, todo pusheado. HEAD: `e298fb6`.
+- `.gitignore` incluye `backups_sin_light/` (commit `cf71a94`).
+- `backups_sin_light/` contiene los backups de esta sesión (base.html, login.html, mi-css.css). Borrar cuando confirmes que no se necesita revertir.
