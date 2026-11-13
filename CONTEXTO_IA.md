@@ -1647,3 +1647,77 @@ Clave: `ElementoCompartido` tiene su propio campo `mensaje` (TextField). No depe
 - **`historial` no esta linkeado en navbar**. Accesible solo por URL directa. Ya estaba asi antes.
 - **Backup `backups_chat/`**: untracked, en `.gitignore`. Los 14 mensajes prod descartados (B2 acordado).
 - **Templates borrados** recuperables: `git show 156bd74^:AdminVideos/templates/AdminVideos/partials/_dropdown_mensajes.html`
+
+---
+
+## 50. Sesión 2026-11-13 (cont.) — Modal "Actualizar Perfil" + fix dark dropdowns
+
+### 50.1 Motivación
+
+El dropdown del avatar (navbar) tenía "Actualizar Perfil" como link a página completa. Se pidió abrirlo en modal para no perder el contexto. Al mismo tiempo se detectó que los dropdowns del navbar (notificaciones, perfil, amigues) tenían texto ilegible en dark (gris oscuro de sb-admin-2 sobre fondo oscuro).
+
+### 50.2 Fix dark dropdowns (commit da99da6)
+
+mi-css.css += ~30 líneas al final, acotadas a [data-bs-theme="dark"] .dropdown-menu:
+
+- .dropdown-item y .dropdown-header → var(--bs-body-color).
+- Hover/focus → var(--bs-secondary-bg).
+- .dropdown-divider → var(--bs-border-color).
+- .text-gray-300..900 (que sb-admin-2 define para light) → var(--bs-secondary-color) !important.
+
+Bump ?v= en base.html. Sin regresión en light (no existe).
+
+### 50.3 Modal "Actualizar Perfil" (commits da99da6 + e059e43)
+
+Nuevo partial _profile_update_modal.html (~62 líneas):
+
+- Bootstrap 5 Modal (modal-dialog-centered modal-lg).
+- Form method="post" enctype="multipart/form-data".
+- action="{% url 'profile-update' user.profile.id %}".
+- 4 campos: nombre, apellido, telefono, avatar (con miniatura del actual).
+- Botones Cancelar / Guardar.
+
+base.html:
+
+- Include del partial envuelto en {% if user.is_authenticated and user.profile %}.
+- Link del dropdown "Actualizar Perfil": ahora tiene data-bs-toggle="modal" data-bs-target="#profileUpdateModal" (antes era href a url).
+
+views.py — ProfileUpdate.form_valid override (4 líneas):
+
+    def form_valid(self, form):
+        self.object = form.save()
+        qs = urlencode({"msg": "Perfil actualizado", "level": "success"})
+        return redirect(f"{self.get_success_url()}?{qs}")
+
+Motivo: _toast_msg.html (en base.html L1620) consume querystring ?msg=, NO messages.success. base.html no tiene {% if messages %}. Sin el override, no aparecía toast post-guardado.
+
+### 50.4 Opción A elegida (sin AJAX)
+
+- Submit normal del form (no fetch). Redirect a success_url + ?msg=.
+- Si validación falla → cae a profile_form.html (página completa con errores). Degradación aceptada: los errores son raros, la UX no es crítica.
+- "Completar Perfil" (user sin Profile) sigue siendo link a página. No aplica modal.
+- ProfileCreate sin tocar.
+
+Descartado B (AJAX + FormData): ~50 líneas de JS nuevo, manejo de multipart, mayor superficie de bug para una ganancia marginal de UX.
+
+### 50.5 Bug encontrado y arreglado (commit e059e43)
+
+Síntoma: "Actualizar Perfil" no abría el modal en home normal (sin ?msg=).
+
+Causa raíz (§8): el include del modal quedó anidado DENTRO de {% if request.GET.msg %} (el script del paso anterior lo metió justo después del include de _toast_msg.html, que está envuelto en {% if request.GET.msg %}). En home normal (sin ?msg=), #profileUpdateModal no existía en el DOM y el link apuntaba a un id inexistente.
+
+Fix: toast adentro (correcto: solo se muestra con ?msg=), modal afuera (siempre en el DOM si hay user.profile).
+
+Primer intento falló con assert s.count(bloque_mal) == 1 → 0 matches por whitespace. Segundo intento por líneas (scan de line) funcionó.
+
+### 50.6 Patrón reutilizable
+
+- _toast_msg.html es por querystring, no messages. Cualquier vista que quiera toast post-redirect debe hacer redirect(url + "?" + urlencode({"msg": ..., "level": ...})). El JS del partial limpia los parámetros con history.replaceState.
+- Modales deben estar en base.html FUERA de bloques condicionales como {% if request.GET.msg %}. Si el trigger apunta a #id, el id tiene que existir siempre en el DOM.
+- Bootstrap 5 con data-bs-theme="dark" ya hereda dark a .modal-content y .form-control. No se necesita CSS custom para el modal.
+
+### 50.7 Deudas nuevas
+
+- Validación de error: si el form falla, cae a profile_form.html (página completa). Si molesta, feature aparte: AJAX + form_invalid JSON (patrón §23).
+- forgot-password.html sigue con lang="en" + textos en inglés (§48.4).
+- ProfileUpdate.form_valid hace form.save() sin commit=False, así que no setea user (ya está seteado por test_key / pk). Es correcto para UpdateView.
