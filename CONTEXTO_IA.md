@@ -1568,3 +1568,82 @@ Diagnóstico de los 3 `background: #fff` en `mi-css.css`:
 - `main` limpio, todo pusheado. HEAD: `e298fb6`.
 - `.gitignore` incluye `backups_sin_light/` (commit `cf71a94`).
 - `backups_sin_light/` contiene los backups de esta sesión (base.html, login.html, mi-css.css). Borrar cuando confirmes que no se necesita revertir.
+
+---
+
+## 49. Sesión 2026-11-13 (cont.) — Eliminación del chat
+
+### 49.1 Motivación
+
+El sistema de "chat" entre amigues (mensajería con historial) estaba a mitad de camino y no era la esencia del producto. Lo que **sí** se quería conservar: **compartir un plato o lista con un mensaje corto adjunto** ("probá cocinándolo a fuego fuerte"). Eso ya existía en `ElementoCompartido`, separado de `Mensaje`.
+
+**Decisión**: eliminar `Mensaje` (chat) completo. Mantener `ElementoCompartido` (compartir).
+
+### 49.2 Arquitectura final
+
+| Feature | Modelo | Estado |
+|---|---|---|
+| Chat tipo WhatsApp | `Mensaje` | Eliminado |
+| Compartir plato/lugar con mensaje | `ElementoCompartido` | Se mantiene |
+| Amistades | `Amistad` | Se mantiene |
+| Panel de amigues | `_panel_amigues.html` | Se mantiene |
+
+Clave: `ElementoCompartido` tiene su propio campo `mensaje` (TextField). No dependía de `Mensaje`.
+
+### 49.3 Commits
+
+4 commits del 2026-11-13:
+1. `156bd74` Eliminar UI del chat (navbar + modales + JS inline)
+2. `84c461e` Eliminar backend del chat + refactor historial
+3. `0a0ac6b` Eliminar modelo Mensaje + migracion 0110
+4. `56c1f49` docs: §49 (reintento con Python)
+
+**Revertir todo**: `git revert 156bd74 84c461e 0a0ac6b` + `python manage.py migrate AdminVideos 0109`.
+
+### 49.4 Qué se eliminó (~800 lineas netas + migracion)
+
+**Frontend** (base.html -502 lineas):
+- `<li>` del dropdown de mensajes en navbar
+- `_dropdown_mensajes.html` (60 lineas)
+- `_chat_modal_content.html` (83 lineas)
+- CSS `#mensajesDropdownContenido` (2 selectores agrupados)
+- JS `actualizarMensajes` + listener
+- `<script id="chat-modal-ajax">` (~277 lineas)
+
+**Backend** (views.py -302 lineas):
+- `EnviarMensaje`, `ajax_mensajes_usuario`, `ajax_eliminar_mensaje_chat`, `obtener_mensajes_agrupados`
+- Imports `Mensaje`, `Subquery`, `OuterRef`
+- `historial` refactor: sin `Mensaje`, solo `profile.sugeridos_descartados` e `importados`
+
+**URLs y modelo**:
+- `enviar-mensaje`, `ajax-mensajes-usuario`, `ajax-eliminar-mensaje-chat`
+- `class Mensaje` (models.py, 28 lineas)
+- `@admin.register(Mensaje)` + `MensajeAdmin`
+- Migracion `0110_delete_mensaje.py`
+
+### 49.5 Qué NO se tocó
+
+- `Amistad` (7 registros prod)
+- `ElementoCompartido` (2 registros prod)
+- `compartir_elemento`, `compartir_ing_plato`, `compartir_lista`
+- `agregar_plato_compartido`
+- `_panel_amigues.html`, `_platos_compartidos.html`, `_lugares_compartidos.html`
+- `obtener_usernames_amigues`, `obtener_usuarios_amigues`, `obtener_contexto_amigues`
+- `ajax_panel_amigues`, `ajax_solicitudes_amistad`, `sumar_amigue`, `amigue_borrar`, `SolicitarAmistad`
+- Boton "Compartir" del listado y dropdown de historial de compartidos
+
+### 49.6 Lecciones
+
+1. **Nombre ambiguo `mensaje`**: `Mensaje.mensaje` (chat) vs `ElementoCompartido.mensaje` (compartir). Verificar el modelo real antes de asumir acoplamiento.
+2. **`admin.py` es bloqueante silencioso**: registra modelos. Al borrar uno, hay que limpiar `admin.py` o `check` falla.
+3. **Scripts multi-archivo no transaccionales**: el Paso 3 escribio `views.py` y `urls.py` antes de fallar el assert en `historial.html`. Para próximos, escribir al final o usar `git stash` como red.
+4. **Verificar la migracion ANTES de migrate**: la pausa de seguridad (exit 1 si no es `DeleteModel`) evita `AlterField` inesperado.
+5. **`ajax_panel_amigues` NO leia `Mensaje`**: el grep de "quien mas lee Mensaje" lo confirmo. El unico lugar era `historial`, no `ajax_panel_amigues`.
+6. **Heredoc con backticks se rompe** (§28.4): el primer intento de §49 fallo silencioso. Reescrito con Python `Path.write_text()`.
+
+### 49.7 Deudas nuevas
+
+- **`historial.html`** hoy solo muestra platos descartados + importados. Si se quiere historial real de acciones, feature aparte.
+- **`historial` no esta linkeado en navbar**. Accesible solo por URL directa. Ya estaba asi antes.
+- **Backup `backups_chat/`**: untracked, en `.gitignore`. Los 14 mensajes prod descartados (B2 acordado).
+- **Templates borrados** recuperables: `git show 156bd74^:AdminVideos/templates/AdminVideos/partials/_dropdown_mensajes.html`

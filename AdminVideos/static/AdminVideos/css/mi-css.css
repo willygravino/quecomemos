@@ -4084,3 +4084,35 @@ button.menu-slot-pendiente:focus-visible {
     margin-bottom: 0.15rem !important;
   }
 }
+
+/* ============================================================
+   Dark mode: legibilidad de dropdowns del navbar
+   (notificaciones, perfil, amigues). sb-admin-2 define
+   colores de texto para light; el override dark de arriba
+   solo cubre el fondo del .dropdown-menu.
+   ============================================================ */
+[data-bs-theme="dark"] .dropdown-menu {
+  color: var(--bs-body-color);
+}
+[data-bs-theme="dark"] .dropdown-menu .dropdown-item,
+[data-bs-theme="dark"] .dropdown-menu .dropdown-header {
+  color: var(--bs-body-color);
+}
+[data-bs-theme="dark"] .dropdown-menu .dropdown-item:hover,
+[data-bs-theme="dark"] .dropdown-menu .dropdown-item:focus {
+  color: var(--bs-body-color);
+  background-color: var(--bs-secondary-bg);
+}
+[data-bs-theme="dark"] .dropdown-menu .dropdown-divider {
+  border-top-color: var(--bs-border-color);
+}
+/* text-gray-* de sb-admin-2 en dropdowns: grises ilegibles en dark */
+[data-bs-theme="dark"] .dropdown-menu .text-gray-300,
+[data-bs-theme="dark"] .dropdown-menu .text-gray-400,
+[data-bs-theme="dark"] .dropdown-menu .text-gray-500,
+[data-bs-theme="dark"] .dropdown-menu .text-gray-600,
+[data-bs-theme="dark"] .dropdown-menu .text-gray-700,
+[data-bs-theme="dark"] .dropdown-menu .text-gray-800,
+[data-bs-theme="dark"] .dropdown-menu .text-gray-900 {
+  color: var(--bs-secondary-color) !important;
+}
