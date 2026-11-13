@@ -16,12 +16,9 @@ reactivan para el botón de cerrar. El mensaje se inserta con textContent
 <div id="qcToastContainer" class="toast-container position-fixed top-0 end-0 p-3" aria-live="polite" aria-atomic="true"></div>
 
 <style>
-  /* Bootstrap .toast-container ya maneja width/max-width/position.
-     Solo ajustamos z-index por encima del navbar y dejamos que
-     cada toast reactive pointer-events. */
-  #qcToastContainer {
-    z-index: 1080;
-  }
+  /* Bootstrap 5.3 .toast-container ya define --bs-toast-zindex: 1090
+     y maneja posicionamiento + width. Solo agregamos la animacion
+     del emoji, que no existe en Bootstrap. */
   .qc-toast-pop {
     display: inline-block;
     transform: scale(.85);
