@@ -49,8 +49,7 @@
     Evita que los dropdowns grandes de la topbar
     se salgan del borde derecho/izquierdo de la pantalla.
   */
-  #amiguesDropdownContenido,
-  #mensajesDropdownContenido {
+  #amiguesDropdownContenido {
     right: 0 !important;
     left: auto !important;
     width: min(22rem, calc(100vw - 1.5rem));
@@ -61,8 +60,7 @@
   }
 
   @media (max-width: 575.98px) {
-    #amiguesDropdownContenido,
-    #mensajesDropdownContenido {
+    #amiguesDropdownContenido {
       position: fixed !important;
       top: 4.25rem !important;
       left: 0.75rem !important;
@@ -185,39 +183,7 @@
                       </div>
                     </li>
 
-                    <!-- Nav Item - CHAT -->
-
-                    <li class="nav-item dropdown no-arrow">
-                        <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fa-solid fa-comments"></i>
-                            <!-- Counter - Messages -->
-
-
-                            <span id="mensajesBadge"
-                                  class="badge badge-danger badge-counter {% if not mensajes %}d-none{% endif %}">
-                              {% if mensajes %}{{ mensajes|length }}{% endif %}
-                            </span>
-
-                          </a>
-                        <!-- Dropdown - Messages -->
-                        <div id="mensajesDropdownContenido"
-                            class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in overflow-auto"
-                            style="max-height: 600px;"
-                            aria-labelledby="messagesDropdown"
-                            data-url="{% url 'ajax-mensajes-usuario' %}">
-
-                          {% include "AdminVideos/partials/_dropdown_mensajes.html" %}
-
-                        </div>
-
-
-
-
-
-
-
-                    </li>
+                    
 
                     <div class="topbar-divider d-none d-sm-block"></div>
 
@@ -1332,51 +1298,7 @@ document.addEventListener("click", function (e) {
 </script>
 
 
-<!-- AJAX: mantiene actualizado el dropdown de mensajes en cualquier pantalla -->
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  const contenedorMensajes = document.getElementById("mensajesDropdownContenido");
-  const badgeMensajes = document.getElementById("mensajesBadge");
 
-  if (!contenedorMensajes || !badgeMensajes) {
-    return;
-  }
-
-  const urlMensajes = contenedorMensajes.dataset.url;
-
-  function actualizarMensajes() {
-    fetch(urlMensajes, {
-      headers: {
-        "X-Requested-With": "XMLHttpRequest"
-      }
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error("No se pudieron cargar los mensajes.");
-        }
-        return response.json();
-      })
-      .then(data => {
-        contenedorMensajes.innerHTML = data.html;
-
-        if (data.cantidad > 0) {
-          badgeMensajes.textContent = data.cantidad;
-          badgeMensajes.classList.remove("d-none");
-        } else {
-          badgeMensajes.textContent = "";
-          badgeMensajes.classList.add("d-none");
-        }
-      })
-      .catch(error => {
-        console.warn(error);
-      });
-  }
-
-  actualizarMensajes();
-
-  document.getElementById("messagesDropdown")?.addEventListener("click", actualizarMensajes);
-});
-</script>
 
 
 
@@ -1701,284 +1623,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 <!-- AJAX: chat emergente desde mensajes/amigues -->
-<script id="chat-modal-ajax">
-document.addEventListener("DOMContentLoaded", function () {
-  if (window.__chatModalAjaxBound) return;
-  window.__chatModalAjaxBound = true;
 
-  function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(";").shift();
-    return "";
-  }
-
-  function ensureChatModal() {
-    let modalEl = document.getElementById("chatModal");
-
-    if (modalEl) return modalEl;
-
-    modalEl = document.createElement("div");
-    modalEl.className = "modal fade";
-    modalEl.id = "chatModal";
-    modalEl.tabIndex = -1;
-    modalEl.setAttribute("aria-hidden", "true");
-
-    modalEl.innerHTML = `
-      <div class="modal-dialog modal-dialog-scrollable modal-lg">
-        <div class="modal-content" id="chatModalContent">
-          <div class="modal-body text-muted">Cargando chat…</div>
-        </div>
-      </div>
-    `;
-
-    document.body.appendChild(modalEl);
-
-    modalEl.addEventListener("hidden.bs.modal", function () {
-      const content = modalEl.querySelector("#chatModalContent");
-      if (content) {
-        content.innerHTML = '<div class="modal-body text-muted">Cargando chat…</div>';
-      }
-    });
-
-    return modalEl;
-  }
-
-  function scrollChatToBottom() {
-    const box = document.getElementById("chatMessages");
-    if (box) {
-      box.scrollTop = box.scrollHeight;
-    }
-  }
-
-  function actualizarBadgeMensajes(cantidad) {
-    const badge = document.getElementById("mensajesBadge");
-
-    if (!badge) return;
-
-    if (cantidad > 0) {
-      badge.textContent = cantidad;
-      badge.classList.remove("d-none");
-    } else {
-      badge.textContent = "";
-      badge.classList.add("d-none");
-    }
-  }
-
-  function cerrarDropdownAbierto(trigger) {
-    const dropdownMenu = trigger.closest(".dropdown-menu");
-    if (!dropdownMenu) return;
-
-    const dropdown = dropdownMenu.previousElementSibling;
-    if (!dropdown || !bootstrap.Dropdown) return;
-
-    const instance = bootstrap.Dropdown.getInstance(dropdown);
-    if (instance) {
-      instance.hide();
-    }
-  }
-
-  async function cargarChat(url) {
-    const modalEl = ensureChatModal();
-    const content = modalEl.querySelector("#chatModalContent");
-
-    content.innerHTML = '<div class="modal-body text-muted">Cargando chat…</div>';
-
-    const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-    modal.show();
-
-    const response = await fetch(url, {
-      headers: { "X-Requested-With": "XMLHttpRequest" },
-      credentials: "same-origin",
-    });
-
-    const data = await response.json();
-
-    if (!response.ok || !data.html) {
-      throw new Error("No se pudo cargar el chat.");
-    }
-
-    content.innerHTML = data.html;
-    actualizarBadgeMensajes(data.cantidad || 0);
-    bindChatForm(content);
-    bindChatInlineDeletes(content);
-    scrollChatToBottom();
-  }
-
-  function bindChatForm(context) {
-    const form = context.querySelector("#chatForm");
-    if (!form || form.__chatBound) return;
-
-    form.__chatBound = true;
-
-    form.addEventListener("submit", async function (event) {
-      event.preventDefault();
-
-      const button = form.querySelector('button[type="submit"]');
-      if (button) {
-        button.disabled = true;
-      }
-
-      try {
-        const response = await fetch(form.action, {
-          method: "POST",
-          body: new FormData(form),
-          headers: {
-            "X-Requested-With": "XMLHttpRequest",
-            "X-CSRFToken": getCookie("csrftoken"),
-          },
-          credentials: "same-origin",
-        });
-
-        const data = await response.json();
-
-        if (!response.ok || !data.html) {
-          throw new Error("No se pudo enviar el mensaje.");
-        }
-
-        const content = document.getElementById("chatModalContent");
-        content.innerHTML = data.html;
-
-        actualizarBadgeMensajes(data.cantidad || 0);
-        bindChatForm(content);
-        bindChatInlineDeletes(content);
-        scrollChatToBottom();
-      } catch (error) {
-        console.warn(error);
-      } finally {
-        if (button) {
-          button.disabled = false;
-        }
-      }
-    });
-  }
-
-
-  function escapeHtml(value) {
-    return String(value || "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  function bindChatInlineDeletes(context) {
-    context.querySelectorAll(".js-chat-inline-delete").forEach(function (button) {
-      if (button.__chatInlineDeleteBound) return;
-      button.__chatInlineDeleteBound = true;
-
-      button.addEventListener("click", function (event) {
-        event.preventDefault();
-
-        const content = document.getElementById("chatModalContent");
-        if (!content) return;
-
-        const action = button.getAttribute("data-confirm-action");
-        if (!action) return;
-
-        const title = button.getAttribute("data-confirm-title") || "Borrar mensaje";
-        const body = button.getAttribute("data-confirm-body") || "Este mensaje se borrará del chat de ambos.";
-        const btnText = button.getAttribute("data-confirm-btn") || "Borrar";
-
-        let slot = document.getElementById("chatInlineDeleteConfirm");
-
-        if (!slot) {
-          slot = document.createElement("div");
-          slot.id = "chatInlineDeleteConfirm";
-
-          const form = content.querySelector("#chatForm");
-          if (form) {
-            form.insertAdjacentElement("beforebegin", slot);
-          } else {
-            content.appendChild(slot);
-          }
-        }
-
-        slot.innerHTML = `
-          <div class="alert alert-warning py-2 px-3 mb-3" role="alert">
-            <div class="fw-semibold mb-1">${escapeHtml(title)}</div>
-            <div class="small mb-2">${escapeHtml(body)}</div>
-
-            <div class="d-flex justify-content-end gap-2">
-              <button type="button"
-                      class="btn btn-sm btn-outline-secondary js-chat-delete-cancel">
-                Cancelar
-              </button>
-
-              <button type="button"
-                      class="btn btn-sm btn-danger js-chat-delete-accept">
-                ${escapeHtml(btnText)}
-              </button>
-            </div>
-          </div>
-        `;
-
-        const cancelButton = slot.querySelector(".js-chat-delete-cancel");
-        const acceptButton = slot.querySelector(".js-chat-delete-accept");
-
-        if (cancelButton) {
-          cancelButton.addEventListener("click", function () {
-            slot.remove();
-          }, { once: true });
-        }
-
-        if (acceptButton) {
-          acceptButton.addEventListener("click", async function () {
-            acceptButton.disabled = true;
-
-            try {
-              const response = await fetch(action, {
-                method: "POST",
-                headers: {
-                  "X-Requested-With": "XMLHttpRequest",
-                  "X-CSRFToken": getCookie("csrftoken"),
-                },
-                credentials: "same-origin",
-              });
-
-              const data = await response.json();
-
-              if (!response.ok || !data.html) {
-                throw new Error(data.message || "No se pudo borrar el mensaje.");
-              }
-
-              content.innerHTML = data.html;
-
-              actualizarBadgeMensajes(data.cantidad || 0);
-              bindChatForm(content);
-              bindChatInlineDeletes(content);
-              scrollChatToBottom();
-            } catch (error) {
-              console.warn(error);
-              acceptButton.disabled = false;
-            }
-          }, { once: true });
-        }
-
-        slot.scrollIntoView({ block: "nearest", behavior: "smooth" });
-      });
-    });
-  }
-
-  document.addEventListener("click", function (event) {
-    const trigger = event.target.closest(".js-open-chat-modal");
-    if (!trigger) return;
-
-    event.preventDefault();
-
-    const url = trigger.dataset.chatUrl || trigger.getAttribute("href");
-    if (!url) return;
-
-    cerrarDropdownAbierto(trigger);
-
-    cargarChat(url).catch(function (error) {
-      console.warn(error);
-      window.location.href = url;
-    });
-  });
-});
-</script>
 
 
 
