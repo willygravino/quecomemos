@@ -1744,3 +1744,125 @@ Aplica especialmente cuando un feature agrega archivos NUEVOS
 (partials, templates, migraciones) o modifica VARIOS archivos
 (base.html + views.py). Si el commit message dice 'agrega X', el X
 tiene que estar en el commit.
+
+---
+
+## 51. Sesion 2026-11-13 (cont.) - Toast global + cerrar modal compartir
+
+### 51.1 Motivacion
+
+El modal Compartir plato dejaba el feedback inline dentro del modal
+(#compartirModalFeedback) y no lo cerraba en success. Quedaba abierto
+con Compartido correctamente adentro. Se pidio: toast (no bloqueante)
++ cerrar modal.
+
+Problema: el unico toast existente (_toast_msg.html) era por querystring
+(?msg=), solo servia para redirects, no para AJAX. No habia helper JS
+reutilizable.
+
+### 51.2 Sistema de toasts - estado final
+
+Dos entradas al mismo sistema:
+
+1. Programatico (JS inline / AJAX):
+
+    window.qcToast("Mensaje", "success")
+    window.qcToast("Mensaje", "danger")
+    window.qcToast("Mensaje", "warning")
+    window.qcToast("Mensaje", "info")
+
+Autohide 2.5s. Apilables. Z-index: Bootstrap 5.3 nativo
+(--bs-toast-zindex: 1090). Sin override.
+
+2. Por querystring (redirects):
+
+    /videos/list/filtro/?msg=Perfil+actualizado&level=success
+
+_toast_msg.html lee request.GET.msg y request.GET.level, llama a
+qcToast() por JS, limpia los params con history.replaceState. Usar en
+vistas que terminan con redirect() (ej: ProfileUpdate.form_valid).
+
+Ambos coexisten, comparten helper, mismo look.
+
+### 51.3 Archivos
+
+Nuevo partials/_toast_global.html (~114 lineas):
+- div id=qcToastContainer con class=toast-container position-fixed
+  top-0 end-0 p-3
+- window.qcToast(message, level) construye DOM con createElement +
+  textContent (XSS-safe)
+- Animacion del emoji (.qc-toast-pop + @keyframes), no existe en
+  Bootstrap
+
+Refactor partials/_toast_msg.html (~35 lineas):
+- Lee querystring, delega a window.qcToast(), limpia la URL
+
+base.html:
+- Include de _toast_global.html FUERA de if request.GET.msg (siempre
+  en el DOM)
+- Include de _toast_msg.html ADENTRO del if (solo si hay ?msg=)
+
+video_list_base.html:
+- Submit del compartir: .then() hace window.qcToast() + modal.hide()
+  + actualizarHistorialCompartidos()
+- .catch() mantiene mostrarFeedback() inline (alert rojo dentro del
+  modal, mas visible)
+- Validacion pre-submit (falta amigue, falta mensaje) sigue inline
+
+### 51.4 Commits
+
+- 98b6580 Toast global reutilizable + compartir cierra modal con toast
+- 231c6ae Quitar z-index hardcodeado del toast global
+
+### 51.5 Patron reutilizable
+
+Cualquier JS inline nuevo que necesite feedback no bloqueante:
+window.qcToast(msg, level). No crear mas alert() ni copiar HTML de
+toasts.
+
+Cualquier vista que hace redirect() y quiere feedback: redirect() con
+?msg= y level. Ya lo hace ProfileUpdate.form_valid.
+
+Errores de formulario que requieren que el usuario corrija algo:
+inline (alerta roja/amarilla dentro del modal/form), NO toast. El
+toast se va en 2.5s y no guia al usuario. Patron actual del compartir
+es el correcto: exito = toast + cerrar, error = inline + modal abierto.
+
+### 51.6 Lecciones
+
+1. Includes de helpers globales van FUERA de condicionales en base.html.
+Si el include define window.qcToast() pero esta dentro de un if
+request.GET.msg, la funcion no existe cuando no hay querystring. El
+usuario ve no pasa nada al tocar un boton que la usa. Este bug aparecio
+3 veces hoy (seccion 50.5 modal perfil, 50.8 git add incompleto, 51
+toast global). Regla: si el id o el window.X tiene que existir siempre,
+el include va a nivel top-level de base.html, no en un condicional.
+
+2. No hardcodear z-index si el framework lo resuelve. Bootstrap 5.3
+define --bs-toast-zindex: 1090 en .toast-container. Poner z-index:
+1080 lo baja (queda debajo de modales a 1055). Solucion: usar la clase
+toast-container position-fixed top-0 end-0 p-3 sin CSS custom. Si
+Bootstrap ya tiene una variable, usarla o no tocarla.
+
+3. El caracter de exclamacion en git commit -m rompe zsh. Palabras
+como esa en un mensaje disparan history expansion. Solucion: git
+commit -F /tmp/msg.txt con el mensaje escrito desde Python. Aplica a
+cualquier mensaje con exclamacion, backtick, dollar, question mark.
+
+4. Uso de .toast-container nativo vs. container custom con
+display:flex: el custom (con flex + align-items) rompia el width,
+toasts ocupaban casi toda la pantalla. Bootstrap resuelve el layout
+con .toast-container + .position-fixed. No reinventar.
+
+5. createElement + textContent es mas seguro que innerHTML para toasts:
+el mensaje puede venir de input del usuario (ej: nombre de un plato).
+Con innerHTML habria XSS. Con textContent no.
+
+### 51.7 Deudas nuevas
+
+- _panel_amigues.html tiene su propio buildPanelMessage (inline
+  feedback en el panel). Podria migrar a qcToast en sesion aparte.
+  No urgente: el panel no tiene modal, el inline funciona bien.
+- aria-live=polite en el container: los screen readers anuncian el
+  toast. Correcto para accesibilidad.
+- No hay test automatizado del qcToast. Deuda cronica (seccion 20).
