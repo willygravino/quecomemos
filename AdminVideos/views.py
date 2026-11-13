@@ -9,7 +9,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views import View
-from AdminVideos.models import ElementoCompartido, Amistad, ProfilePlatoCompra, HabitoSemanal, Ingrediente, IngredienteEnPlato, Insumo, Lugar, MenuDia, MenuItem, Plato, Profile, Mensaje, ProfileIngrediente, LoQueTengoPalabra, SlotSemanal, SUBTIPO_CARTA_CHOICES, SUBTIPO_CARTA_ORDEN, SUBTIPO_POSTRE_ORDEN
+from AdminVideos.models import ElementoCompartido, Amistad, ProfilePlatoCompra, HabitoSemanal, Ingrediente, IngredienteEnPlato, Insumo, Lugar, MenuDia, MenuItem, Plato, Profile, ProfileIngrediente, LoQueTengoPalabra, SlotSemanal, SUBTIPO_CARTA_CHOICES, SUBTIPO_CARTA_ORDEN, SUBTIPO_POSTRE_ORDEN
 
 
 from AdminVideos.services.plantillas import (
@@ -2301,166 +2301,10 @@ def obtener_ids_usuarios_con_amistad_activa(usuario):
 
 
 
-def obtener_mensajes_agrupados(usuario):
-    """
-    Devuelve el último mensaje de texto visible por usuario.
-    """
-    subquery_ultimo_mensaje = (
-        Mensaje.objects
-        .filter(
-            usuario_que_envia_fk=OuterRef("usuario_que_envia_fk"),
-            destinatario=usuario,
-            usuario_que_envia_fk__isnull=False,
-        )
-        .order_by("-creado_el")
-        .values("id")[:1]
-    )
-
-    mensajes_x_usuario = (
-        Mensaje.objects
-        .filter(
-            id__in=Subquery(subquery_ultimo_mensaje),
-            usuario_que_envia_fk__isnull=False,
-        )
-        .select_related("usuario_que_envia_fk__profile")
-        .order_by("-creado_el")
-    )
-
-    mensajes_agrupados = {
-        mensaje.usuario_que_envia_fk.username: {
-            "avatar_url": getattr(
-                mensaje.usuario_que_envia_fk.profile,
-                "avatar_url",
-                "/media/avatares/logo.png",
-            ) if hasattr(mensaje.usuario_que_envia_fk, "profile") else "/media/avatares/logo.png",
-            "mensaje": {
-                "contenido": mensaje.mensaje,
-                "creado_el": (timezone.now() - mensaje.creado_el).days,
-                "leido": mensaje.leido,
-            },
-        }
-        for mensaje in mensajes_x_usuario
-    }
-
-    return mensajes_agrupados
-
-
-
-@login_required
-def ajax_mensajes_usuario(request):
-    mensajes = obtener_mensajes_agrupados(request.user)
-    amigues = obtener_usernames_amigues(request.user)
-
-    usuarios_con_conversacion = set(mensajes.keys())
-    amigues_nuevo_mensaje = [
-        amigue for amigue in amigues
-        if amigue not in usuarios_con_conversacion
-    ]
-
-    cantidad_no_leidos = (
-        Mensaje.objects
-        .filter(
-            destinatario=request.user,
-            leido=False,
-            usuario_que_envia_fk__isnull=False,
-        )
-        .values("usuario_que_envia_fk")
-        .distinct()
-        .count()
-    )
-
-    html = render_to_string(
-        "AdminVideos/partials/_dropdown_mensajes.html",
-        {
-            "mensajes": mensajes,
-            "amigues_nuevo_mensaje": amigues_nuevo_mensaje,
-        },
-        request=request,
-    )
-
-    return JsonResponse({
-        "html": html,
-        "cantidad": cantidad_no_leidos,
-    })
 
 
 
 
-@login_required
-@require_POST
-def ajax_eliminar_mensaje_chat(request, pk):
-    mensaje = get_object_or_404(
-        Mensaje.objects.select_related("usuario_que_envia_fk", "destinatario"),
-        pk=pk,
-    )
-
-    # Seguridad: solo puede borrar quien participa en la conversación.
-    if (
-        mensaje.usuario_que_envia_fk_id != request.user.id
-        and mensaje.destinatario_id != request.user.id
-    ):
-        return JsonResponse({
-            "ok": False,
-            "message": "No podés borrar este mensaje.",
-        }, status=403)
-
-    # Necesitamos saber con quién era el chat antes de borrar.
-    destinatario = (
-        mensaje.destinatario
-        if mensaje.usuario_que_envia_fk_id == request.user.id
-        else mensaje.usuario_que_envia_fk
-    )
-
-    mensaje.delete()
-
-    Mensaje.objects.filter(
-        usuario_que_envia_fk=destinatario,
-        destinatario=request.user,
-        leido=False,
-    ).update(leido=True)
-
-    mensajes = Mensaje.objects.filter(
-        Q(usuario_que_envia_fk=request.user, destinatario=destinatario) |
-        Q(usuario_que_envia_fk=destinatario, destinatario=request.user)
-    ).order_by("-creado_el")
-
-    MensajeForm = forms.modelform_factory(
-        Mensaje,
-        fields=["mensaje", "destinatario"],
-    )
-
-    form = MensajeForm(initial={"destinatario": destinatario})
-    form.fields["destinatario"].queryset = User.objects.filter(pk=destinatario.pk)
-    form.fields["destinatario"].widget = forms.HiddenInput()
-
-    cantidad = (
-        Mensaje.objects
-        .filter(
-            destinatario=request.user,
-            leido=False,
-            usuario_que_envia_fk__isnull=False,
-        )
-        .values("usuario_que_envia_fk")
-        .distinct()
-        .count()
-    )
-
-    html = render_to_string(
-        "AdminVideos/partials/_chat_modal_content.html",
-        {
-            "form": form,
-            "mensajes": mensajes,
-            "destinatario": destinatario,
-            "amigues": obtener_usernames_amigues(request.user),
-        },
-        request=request,
-    )
-
-    return JsonResponse({
-        "ok": True,
-        "html": html,
-        "cantidad": cantidad,
-    })
 
 
 
@@ -3527,114 +3371,6 @@ class SolicitarAmistad(LoginRequiredMixin, FormView):
 
 
 
-class EnviarMensaje(LoginRequiredMixin, CreateView):
-    model = Mensaje
-    fields = ["mensaje", "destinatario"]
-
-    def es_ajax(self):
-        return self.request.headers.get("X-Requested-With") == "XMLHttpRequest"
-
-    def get_destinatario(self):
-        return get_object_or_404(User, username=self.kwargs.get("usuario"))
-
-    def configurar_form_destinatario(self, form):
-        destinatario = self.get_destinatario()
-        form.fields["destinatario"].queryset = User.objects.filter(pk=destinatario.pk)
-        form.initial["destinatario"] = destinatario
-        return form
-
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        return self.configurar_form_destinatario(form)
-
-    def get_empty_form(self):
-        form_class = self.get_form_class()
-        form = form_class()
-        return self.configurar_form_destinatario(form)
-
-    def get_success_url(self):
-        return reverse_lazy("enviar-mensaje", kwargs={"usuario": self.kwargs["usuario"]})
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        destinatario = self.get_destinatario()
-
-        Mensaje.objects.filter(
-            usuario_que_envia_fk=destinatario,
-            destinatario=self.request.user,
-            leido=False,
-        ).update(leido=True)
-
-        mensajes = Mensaje.objects.filter(
-            Q(usuario_que_envia_fk=self.request.user, destinatario=destinatario) |
-            Q(usuario_que_envia_fk=destinatario, destinatario=self.request.user)
-        ).order_by("-creado_el")
-
-        context["destinatario"] = destinatario
-        context["mensajes"] = mensajes
-        context["amigues"] = obtener_usernames_amigues(self.request.user)
-
-        return context
-
-    def cantidad_no_leidos(self):
-        return (
-            Mensaje.objects
-            .filter(
-                destinatario=self.request.user,
-                leido=False,
-                usuario_que_envia_fk__isnull=False,
-            )
-            .values("usuario_que_envia_fk")
-            .distinct()
-            .count()
-        )
-
-
-    def render_chat_ajax(self, form=None, status=200):
-        if form is None:
-            form = self.get_empty_form()
-
-        context = self.get_context_data(form=form)
-
-        html = render_to_string(
-            "AdminVideos/partials/_chat_modal_content.html",
-            context,
-            request=self.request,
-        )
-
-        return JsonResponse({
-            "ok": status < 400,
-            "html": html,
-            "cantidad": self.cantidad_no_leidos(),
-        }, status=status)
-
-    def get(self, request, *args, **kwargs):
-        self.object = None
-
-        if self.es_ajax():
-            return self.render_chat_ajax()
-
-        return redirect("filtro-de-platos")
-
-    def form_valid(self, form):
-        self.object = form.save(commit=False)
-        self.object.usuario_que_envia_fk = self.request.user
-        self.object.destinatario = self.get_destinatario()
-        self.object.save()
-
-        if self.es_ajax():
-            return self.render_chat_ajax(form=self.get_empty_form())
-
-        return redirect(self.get_success_url())
-
-    def form_invalid(self, form):
-        self.object = None
-
-        if self.es_ajax():
-            return self.render_chat_ajax(form=form, status=400)
-
-        return redirect("filtro-de-platos")
-
 
 
 class compartir_elemento(LoginRequiredMixin, CreateView):
@@ -3824,21 +3560,12 @@ def historial(request):
     # Obtener el perfil del usuario autenticado
     profile = request.user.profile
 
-    # Obtener todos los mensajes donde el usuario es el destinatario, ordenados por fecha de creación
-    # mensajes = Mensaje.objects.filter(destinatario=request.user).order_by("-creado_el")
-
-    # Obtener todos los mensajes donde el usuario es el destinatario o el que los envió, ordenados por fecha de creación
-    mensajes = Mensaje.objects.filter(
-        Q(destinatario=request.user) | Q(usuario_que_envia_fk=request.user)
-    ).order_by("-creado_el")
-
     # Formatear los platos descartados e importados
     platos_descartados = [f"Descartado {plato}" for plato in profile.sugeridos_descartados]
     platos_importados = [f"Agregado {plato}" for plato in profile.sugeridos_importados]
 
     # Pasar todos los datos al contexto
     context = {
-        "mensajes": mensajes,
         "platos_descartados": platos_descartados,
         "platos_importados": platos_importados,
     }

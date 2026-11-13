@@ -17,7 +17,7 @@ from django import views
 from django.contrib import admin
 from django.urls import path
 
-from AdminVideos.views import ajax_mensajes_usuario, ajax_eliminar_mensaje_chat, agregar_lugar_compartido, descartar_elemento_compartido, ajax_eliminar_programado, ajax_listado_platos, ajax_lo_que_tengo_palabras, ajax_lo_que_tengo_agregar, ajax_lo_que_tengo_eliminar, CrearLugar, EnviarMensaje, LugarDetail, LugarUpdate, PlatoDetail, agregar_a_mi_lista, agregar_plato_compartido, ajax_panel_amigues, ajax_solicitudes_amistad, amigue_borrar, api_ingredientes, api_insumos, api_toggle_item, compartir_elemento, compartir_ing_plato, descartar_sugerido, eliminar_lugar, eliminar_menu_programado, eliminar_plato, eliminar_programado, fijar_o_eliminar_habito, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, lista_de_compras, FiltroDePlatos, plato_ingredientes, plato_opciones_asignar, random_dia, set_dia_activo, sumar_amigue, user_logout, SolicitarAmistad, AsignarPlato, compartir_lista
+from AdminVideos.views import agregar_lugar_compartido, descartar_elemento_compartido, ajax_eliminar_programado, ajax_listado_platos, ajax_lo_que_tengo_palabras, ajax_lo_que_tengo_agregar, ajax_lo_que_tengo_eliminar, CrearLugar, LugarDetail, LugarUpdate, PlatoDetail, agregar_a_mi_lista, agregar_plato_compartido, ajax_panel_amigues, ajax_solicitudes_amistad, amigue_borrar, api_ingredientes, api_insumos, api_toggle_item, compartir_elemento, compartir_ing_plato, descartar_sugerido, eliminar_lugar, eliminar_menu_programado, eliminar_plato, eliminar_programado, fijar_o_eliminar_habito, historial, index, PlatoUpdate, PlatoCreate, Login, SignUp, ProfileCreate, ProfileUpdate, about, lista_de_compras, FiltroDePlatos, plato_ingredientes, plato_opciones_asignar, random_dia, set_dia_activo, sumar_amigue, user_logout, SolicitarAmistad, AsignarPlato, compartir_lista
 
 from AdminVideos.views import ajax_crear_slot, ajax_borrar_slot, ajax_platos_para_slot, ajax_editar_slot, ajax_get_slot
 from django.conf.urls.static import static
@@ -78,7 +78,6 @@ urlpatterns = [
     path('profile/<pk>/update', ProfileUpdate.as_view(), name="profile-update"),
     path('about', about, name="about"),
     path('solicitar/amistad', SolicitarAmistad.as_view(), name="solicitar-amistad" ),
-    path('mensaje/<str:usuario>/enviar', EnviarMensaje.as_view(), name="enviar-mensaje" ),
     path('menu/amigue/<pk>/borrar', amigue_borrar, name="amigue-borrar"),
     path('asignar/plato', AsignarPlato.as_view(), name="asignar-plato"), # type: ignore
     path("slot/crear/", ajax_crear_slot, name="ajax_crear_slot"),
@@ -98,8 +97,6 @@ urlpatterns = [
     path("ajax/lo-que-tengo/<int:pk>/eliminar/", ajax_lo_que_tengo_eliminar, name="ajax-lo-que-tengo-eliminar"),
     path("ajax/eliminar-programado/", ajax_eliminar_programado, name="ajax_eliminar_programado"),
     path("agregar-lugar-compartido/<int:pk>/<int:compartido_id>/", agregar_lugar_compartido, name="agregar-lugar-compartido"),
-    path("ajax/mensajes/", ajax_mensajes_usuario, name="ajax-mensajes-usuario"),
-    path("ajax/mensajes/<int:pk>/eliminar/", ajax_eliminar_mensaje_chat, name="ajax-eliminar-mensaje-chat"),
     path("ajax/solicitudes-amistad/", ajax_solicitudes_amistad, name="ajax-solicitudes-amistad"),
     path("ajax/panel-amigues/", ajax_panel_amigues, name="ajax-panel-amigues"),
 
