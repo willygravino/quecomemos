@@ -1381,3 +1381,106 @@ El 400 en /ajax/eliminar-programado/ (intermitente) era probablemente un doble P
 16. grep -c con || echo 0 duplica el 0. grep -c con 0 matches tiene exit 1. Con || echo 0 se agrega un 0 extra. Fix: if grep -q 'patron' file; then ...; fi.
 17. Heredocs bash con backticks + code fences se rompen. Aunque uses heredoc con delimitador quoted, si el contenido tiene triple backtick anidado + indentación que se pierde al pegar en VS Code, el delimitador de cierre puede quedar mal. Usar Python con listas de strings o escritura línea por línea.
 
+
+
+## 47. Cierre de sesión 2026-11-12 — Slots v2 + filtros + stale reference
+
+> Sesión de ~15 commits (41 → 46b). Actualizado: 2026-11-12.
+
+### 47.1 Resumen de commits (de §41 a §46b)
+
+| Commit | Qué hizo |
+|---|---|
+| §41 | Rediseño del modal de slot: checkboxes separados (Tipo, Subtipo, Duración, Medios) + veganos |
+| §42 | Campo `Plato.ligereza` (migración 0109) + filtro de slot + quitar "Pendiente:" del chip |
+| §42b | Agregar Ligereza al form de crear/editar plato |
+| §43 | Chip con todos los filtros + tipos/subtipos como select único |
+| §43b | Filtro "rápido": NULL de elaboración/cocción se trata como 0 |
+| §44 | Agregar Categoría (Cotidiano/Especial) al filtro + reducir Ligereza a solo "Liviano" |
+| §45 | Refactor `filtros_platos.js`: `getForm()` dinámico + listeners delegados |
+| §45c | Fix stale form en `actualizarListadoPlatos` + 7 scopes con shadowing |
+| §45d | Fix stale `contenedor-listado-platos` (carousel sí cambiaba, listado no) |
+| §46 | Limpieza post-refactor: 2 bugs latentes (`inputPalabraClave` huérfana en popstate, `initClearSearch` delegado) + dead code |
+| §46b | Bumpear `?v=` de `filtros_platos.js` (faltó en §46) |
+
+### 47.2 Modelos nuevos / modificados
+
+**`Plato.ligereza`** (migración 0109):
+- Choices: `""` (Sin definir), `"liviano"`, `"medio"`, `"pesado"`.
+- `help_text`: "Para el filtro de slots: liviano (fácil digestión), mediano, pesado."
+- **Form de plato**: sección "Ligereza" con dropdown (los 3 valores + Sin definir).
+- **Filtro de slot**: solo ofrece "Liviano" (nadie busca "pesado" para programar).
+
+**`SUBTIPO_CARTA_CHOICES`** (migración 0108):
+- Agregado `"veganos"` ("Veganos").
+
+### 47.3 Lección clave: "stale reference" (JS capturando nodos del DOM)
+
+**Síntoma**: después de asignar un plato, cambiar de item en el selector no cambiaba el listado. El selector sí cambiaba, el carousel sí cambiaba, el listado NO.
+
+**Causa raíz** (3 stale references de la misma saga):
+1. `const form = document.getElementById("form-filtros-platos")` del IIFE. `refrescarMenuProgramado` (u otro AJAX) reemplaza el form en el DOM. El closure sigue escribiendo el input del form viejo → POST con `tipopag` viejo → listado viejo.
+2. `const contenedor = document.getElementById("contenedor-listado-platos")`. Mismo problema: el render aplica `innerHTML` al contenedor viejo (desconectado), no al nuevo. **El carousel sí cambiaba** porque ya se resolvía con `getElementById` dentro de la función.
+3. `inputPalabraClave` capturado al cargar. En el `popstate` seguía usándose, pero la variable ya no existía → `ReferenceError` que cortaba la restauración del estado.
+
+**Patrón correcto**: cualquier referencia a un nodo del DOM que puede ser reemplazada por AJAX debe resolverse **en el momento de uso**, no capturarse en el closure.
+
+**Cómo se implementó**:
+- `getForm()` helper: `function getForm() { return document.getElementById("form-filtros-platos"); }`.
+- Shadowing con `const form = getForm()` al inicio de cada función/handler que usa el form (8 scopes).
+- Listeners directos → delegados en `document` (`submit`, `input`, `change`) con guard por `event.target.matches(...)`.
+- `MutationObserver` en `document.body` con rAF debounce: mantiene `let form = getForm()` actualizado para usos futuros fuera de shadowing.
+- Contenedor-listado se resuelve con `getElementById` inline en `actualizarListadoPlatos`.
+- `initClearSearch` fusionado con listeners delegados en `document`.
+
+**Lección para futuras IAs/colaboradores**: si un bug de filtro/UI aparece "solo después de X" (asignar, cambiar día, refrescar), sospechar de stale references. Buscar con `grep -n "= document.getElementById" AdminVideos/static/AdminVideos/js/*.js` y evaluar cuáles se capturan en closure vs cuáles se resuelven en el momento de uso.
+
+### 47.4 Estado del feature slots (completo, en producción)
+
+- **Chip "Pendiente: X"**: ahora solo muestra el label del criterio (sin "Pendiente:"). Ej: "Guarnición · Vegetarianos", "Principal · Sin cocción".
+- **Modal `#editarSlotModal`**: 5 secciones.
+  - Tipo de plato: **select único** (Principal, Guarnición, Entrada, Picada, Ingrediente de picada, Dip, Salsa, Postre, Torta, Trago).
+  - Subtipo de carta: **select único** (14 opciones + "— Sin clasificar —").
+  - Categoría: **checkboxes multi** (Cotidiano, Especial).
+  - Duración: **checkboxes** (Elaboración rápida ≤30, Cocción rápida ≤30). NULL en `elaboracion`/`coccion` se trata como 0.
+  - Ligereza: **checkbox único** (solo "Liviano"; "Medio" y "Pesado" quedan en el form de plato pero no en el filtro).
+  - Medios de cocción: **checkboxes multi** (Horno, Cocina, Parrilla, Wok, Sin cocción).
+- **Unificado crear/editar**: `+ Slot` abre el mismo modal vacío. Título dinámico ("Agregar slot" / "Editar slot"). Submit detecta `slotId` para POST a `/slot/crear/` o `/slot/<id>/editar/`.
+- **Label del chip**: `label_criterio(criterio)` en `services/plantillas.py` genera "Tipo · Subtipo · Categoría · Ligereza · Medio · Rápido" en ese orden.
+- **Legacy**: slots viejos con `preset` (aves, carne_roja, etc.) siguen mostrando su label original. Al editarlos, se convierten a criterio compuesto. Al abrir un slot con `ligereza: ["medio"]` o `["pesado"]`, el checkbox "Liviano" queda desmarcado y se pierde esa marca al guardar.
+
+### 47.5 Pendientes priorizados (para próximas sesiones)
+
+**Alta prioridad**:
+- **Backfill de `ligereza`**: 123 platos sin clasificar. Los slots "Liviano" no muestran nada hasta que se clasifiquen. Opciones: (a) clasificación manual al editar, (b) script de sugerencias heurísticas + revisión, (c) hacer `ligereza` obligatorio en el form de plato para nuevos.
+- **P1=D completo en slots**: tipos/subtipos como select único (hoy); migrar a checkboxes multi si se quiere combinar varios. §32.12 tiene la nota.
+- **Arreglos visuales** (a definir en próxima sesión — el dueño los pasará al inicio del nuevo chat).
+
+**Media prioridad**:
+- **12 vulnerabilidades Dependabot** (heredadas de §25). Bumps de bajo riesgo: `babel`, `charset-normalizer`, `idna`, `packaging`, `gunicorn`, `whitenoise`, `django-cors-headers`. Riesgo medio: `dj-database-url 0.5.0 → 3.1.2` (revisar parseo de `DATABASE_URL`).
+- **Tests del feature slots** (§20: `tests.py` sigue en 3 líneas).
+
+**Baja prioridad**:
+- Consolidar variables CSS `--qc-slot-*` (algunas con poco uso).
+- Unificar todos los `.modal` en `base.html` si es posible (hoy `_crear_slot_modal.html` no existe, `_editar_slot_modal.html` en `qc_slot_modales`, `_elegir_plato_slot_modal.html` en otro lado).
+
+### 47.6 Archivos clave modificados en esta sesión
+
+- `AdminVideos/models.py`: agregado `Plato.ligereza` y `veganos` en `SUBTIPO_CARTA_CHOICES`.
+- `AdminVideos/migrations/0108_subtipo_veganos.py`, `0109_ligereza.py`.
+- `AdminVideos/services/plantillas.py`: `LIGEREZA_SLOT_CHOICES`, `SLOT_CATEGORIA_CHOICES`, `label_criterio` extendido (medios, categoría, ligereza).
+- `AdminVideos/views.py`: `_build_criterio_from_request()` unificado, `ajax_get_slot`/`ajax_crear_slot`/`ajax_editar_slot` con los nuevos campos.
+- `AdminVideos/forms.py`: `"ligereza"` en `PlatoForm.fields`.
+- `AdminVideos/templates/AdminVideos/partials/_editar_slot_modal.html`: 5 secciones.
+- `AdminVideos/templates/AdminVideos/partials/_menu_programado_comida.html`: chip sin "Pendiente:".
+- `AdminVideos/templates/AdminVideos/plato_form_inner.html`: sección "Ligereza".
+- `AdminVideos/static/AdminVideos/js/filtros_platos.js`: refactor de stale reference.
+- `AdminVideos/static/AdminVideos/js/menu_programado.js`: `+ Slot` abre el modal unificado, sin `.js-elegir-preset`.
+
+### 47.7 Notas para el próximo chat
+
+- El proyecto está **en producción** (Railway). Cambios requieren rama + backup.
+- Leer `CONTEXTO_IA.md` completo (§1 a §47) antes de tocar nada.
+- El flujo de §10 (investigar → plan → esperar aprobación → ejecutar en pasos chicos) aplica siempre.
+- Los 12 warnings de Dependabot son deuda conocida, no bloquean el deploy.
+- Backups locales (`.js.antes_*`, `backups_*/`) están en `/tmp` o `.gitignore`. No se commitean.
