@@ -4,7 +4,7 @@ from .models import (
     Ingrediente, IngredienteEnPlato,
     MenuDia, MenuItem,
     MenuItemExtra,
-    Plato, Profile, Mensaje, Lugar,
+    Plato, Profile, Lugar,
     ProfileIngrediente, LoQueTengoPalabra,
     ProfilePlatoCompra,
     ElementoCompartido,
@@ -21,10 +21,6 @@ class ProfileAdmin(admin.ModelAdmin):
     search_fields = ("user__username", "nombre", "apellido", "telefono")
 
 
-@admin.register(Mensaje)
-class MensajeAdmin(admin.ModelAdmin):
-    list_display = ("id", "destinatario", "usuario_que_envia_fk", "leido", "creado_el")
-    search_fields = ("destinatario__username", "usuario_que_envia_fk__username", "mensaje")
 
 
 

@@ -680,7 +680,6 @@ class MenuItemExtra(models.Model):
         return f"{self.get_tipo_display()}: {self.nombre}"
 
 
-
 class ProfileIngrediente(models.Model):
     profile = models.ForeignKey(
         "Profile",
@@ -709,8 +708,6 @@ class ProfileIngrediente(models.Model):
 
     def __str__(self):
         return f"{self.profile.user} - {self.ingrediente} - {self.comentario} ({'tengo' if self.tengo else 'no tengo'})" 
-
-
 
 
 class ProfileInsumo(models.Model):
@@ -800,7 +797,6 @@ class Profile(models.Model):
         return f"Perfil de {self.user}"
 
 
-
 class HabitoSemanal(models.Model):
     DIAS_SEMANA = (
         (0, "Lunes"),
@@ -861,7 +857,6 @@ class HabitoSemanal(models.Model):
     def __str__(self):
         obj = self.plato if self.plato_id else self.lugar
         return f"{self.get_dia_semana_display()} - {self.momento} - {obj}"
-
 
 
 class Amistad(models.Model):
@@ -946,36 +941,6 @@ class Amistad(models.Model):
             return self.usuario_1
 
         return None
-
-
-class Mensaje(models.Model):
-    usuario_que_envia_fk = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name="mensajes_enviados",
-    )
-
-    mensaje = models.TextField(max_length=1000)
-
-    creado_el = models.DateTimeField(auto_now_add=True)
-
-    destinatario = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="mensajes",
-    )
-
-    leido = models.BooleanField(default=False)
-
-    borrado_antes = models.BooleanField(default=False)
-
-    def __str__(self):
-        remitente = self.usuario_que_envia_fk.username if self.usuario_que_envia_fk else "Sin remitente"
-        destinatario = self.destinatario.username if self.destinatario else "Sin destinatario"
-
-        return f"{self.id} - Mensaje de {remitente} a {destinatario}"
 
 
 class SlotSemanal(models.Model):
