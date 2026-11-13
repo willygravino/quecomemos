@@ -1,0 +1,105 @@
+{% comment %}
+Toast global reutilizable. Define window.qcToast(message, level).
+Se incluye UNA VEZ en base.html. Otros templates/JS llaman a la función.
+
+API:
+  window.qcToast("Mensaje", "success")   // icono ✅
+  window.qcToast("Mensaje", "danger")    // icono ⚠️
+  window.qcToast("Mensaje", "warning")   // icono ⚠️
+  window.qcToast("Mensaje", "info")      // icono ℹ️
+
+El container tiene pointer-events:none; los toasts individuales los
+reactivan para el botón de cerrar. El mensaje se inserta con textContent
+(XSS-safe).
+{% endcomment %}
+
+<div id="qcToastContainer" class="toast-container position-fixed top-0 end-0 p-3" aria-live="polite" aria-atomic="true"></div>
+
+<style>
+  /* Bootstrap .toast-container ya maneja width/max-width/position.
+     Solo ajustamos z-index por encima del navbar y dejamos que
+     cada toast reactive pointer-events. */
+  #qcToastContainer {
+    z-index: 1080;
+  }
+  .qc-toast-pop {
+    display: inline-block;
+    transform: scale(.85);
+    animation: qcToastPop .35s ease-out forwards;
+  }
+  @keyframes qcToastPop {
+    from { transform: scale(.6); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+</style>
+
+<script>
+(function () {
+  "use strict";
+
+  var QC_ICONS = {
+    success: "✅",
+    danger:  "⚠️",
+    warning: "⚠️",
+    info:    "ℹ️"
+  };
+
+  function buildToast(message, level) {
+    var text = (message == null) ? "" : String(message);
+    var lvl = level || "success";
+    var icon = QC_ICONS[lvl] || QC_ICONS.info;
+
+    var wrapper = document.createElement("div");
+    wrapper.className = "toast align-items-center text-bg-" + lvl + " border-0 shadow-sm";
+    wrapper.setAttribute("role", "alert");
+    wrapper.setAttribute("aria-live", "polite");
+    wrapper.setAttribute("aria-atomic", "true");
+
+    var dFlex = document.createElement("div");
+    dFlex.className = "d-flex";
+
+    var body = document.createElement("div");
+    body.className = "toast-body d-flex align-items-center gap-2";
+
+    var span = document.createElement("span");
+    span.className = "qc-toast-pop";
+    span.setAttribute("aria-hidden", "true");
+    span.textContent = icon;
+
+    var strong = document.createElement("strong");
+    strong.textContent = text;
+
+    body.appendChild(span);
+    body.appendChild(strong);
+
+    var closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.className = "btn-close btn-close-white me-2 m-auto";
+    closeBtn.setAttribute("data-bs-dismiss", "toast");
+    closeBtn.setAttribute("aria-label", "Cerrar");
+
+    dFlex.appendChild(body);
+    dFlex.appendChild(closeBtn);
+    wrapper.appendChild(dFlex);
+    return wrapper;
+  }
+
+  window.qcToast = function (message, level) {
+    if (!window.bootstrap || !window.bootstrap.Toast) {
+      console.warn("[qcToast] bootstrap no disponible:", message);
+      return;
+    }
+    var container = document.getElementById("qcToastContainer");
+    if (!container) {
+      console.warn("[qcToast] #qcToastContainer no existe en el DOM");
+      return;
+    }
+    var el = buildToast(message, level);
+    el.addEventListener("hidden.bs.toast", function () {
+      if (el.parentNode) el.parentNode.removeChild(el);
+    });
+    container.appendChild(el);
+    new window.bootstrap.Toast(el, { delay: 2500, autohide: true }).show();
+  };
+})();
+</script>

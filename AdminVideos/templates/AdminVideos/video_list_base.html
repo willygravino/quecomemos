@@ -334,7 +334,23 @@
         return data;
       })
       .then(function (data) {
-        mostrarFeedback(form, data.level || "success", data.message || "Compartido correctamente.");
+        // Toast programático (no bloquea; se autodestruye en 2.5s)
+        if (window.qcToast) {
+          window.qcToast(
+            data.message || "Compartido correctamente.",
+            data.level || "success"
+          );
+        }
+
+        // Cerrar el modal (el fetch ya terminó OK)
+        const modalEl = form.closest(".modal");
+        if (modalEl && window.bootstrap && window.bootstrap.Modal) {
+          const modalInst = window.bootstrap.Modal.getInstance(modalEl);
+          if (modalInst) {
+            modalInst.hide();
+          }
+        }
+
         actualizarHistorialCompartidos(data, formData);
 
         if (window.compartirActualizarDestinatarios) {

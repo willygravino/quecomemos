@@ -1616,6 +1616,9 @@ document.addEventListener("DOMContentLoaded", function () {
    Si la URL trae ?msg=... (y opcionalmente &level=success|danger|warning|info),
    muestra un toast y luego limpia esos parámetros sin recargar.
    ==========================================  -->
+
+  {# Toast global reutilizable: define window.qcToast(msg, level). #}
+  {% include "AdminVideos/partials/_toast_global.html" %}
 {% if request.GET.msg %}
   {% include "AdminVideos/partials/_toast_msg.html" %}
 

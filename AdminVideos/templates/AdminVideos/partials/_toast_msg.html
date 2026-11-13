@@ -1,38 +1,34 @@
-{# Toast global por querystring: ?msg=...&level=success|danger|warning|info #}
+{# Toast por querystring: ?msg=...&level=success|danger|warning|info #}
+{# Delega al helper global qcToast (definido en _toast_global.html). #}
 {% with msg=request.GET.msg level=request.GET.level|default:"success" %}
   {% if msg %}
-    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:1080;">
-      <div id="appToast"
-           class="toast align-items-center text-bg-{{ level }} border-0 shadow-sm"
-           role="alert" aria-live="polite" aria-atomic="true">
-        <div class="d-flex">
-          <div class="toast-body d-flex align-items-center gap-2">
-            <span class="ok-pop" aria-hidden="true">✅</span>
-            <span><strong>{{ msg }}</strong></span>
-          </div>
-          <button type="button" class="btn-close btn-close-white me-2 m-auto"
-                  data-bs-dismiss="toast" aria-label="Cerrar"></button>
-        </div>
-      </div>
-    </div>
-
-    <style>
-      .ok-pop { display:inline-block; transform:scale(.85); animation: okPop .35s ease-out forwards; }
-      @keyframes okPop { from { transform:scale(.6); opacity:0; } to { transform:scale(1); opacity:1; } }
-    </style>
-
     <script>
       (function () {
-        if (!window.bootstrap) return;
-        const el = document.getElementById("appToast");
-        if (!el) return;
+        var message = "{{ msg|escapejs }}";
+        var level = "{{ level|escapejs }}";
 
-        new bootstrap.Toast(el, { delay: 2500, autohide: true }).show();
+        function tryShow() {
+          if (window.qcToast) {
+            window.qcToast(message, level);
+            return true;
+          }
+          return false;
+        }
 
-        const url = new URL(window.location.href);
-        url.searchParams.delete("msg");
-        url.searchParams.delete("level");
-        window.history.replaceState({}, "", url.toString());
+        if (!tryShow()) {
+          if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", tryShow);
+          } else {
+            setTimeout(tryShow, 50);
+          }
+        }
+
+        try {
+          var url = new URL(window.location.href);
+          url.searchParams.delete("msg");
+          url.searchParams.delete("level");
+          window.history.replaceState({}, "", url.toString());
+        } catch (e) {}
       })();
     </script>
   {% endif %}
