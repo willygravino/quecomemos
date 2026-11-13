@@ -1484,3 +1484,47 @@ El 400 en /ajax/eliminar-programado/ (intermitente) era probablemente un doble P
 - El flujo de §10 (investigar → plan → esperar aprobación → ejecutar en pasos chicos) aplica siempre.
 - Los 12 warnings de Dependabot son deuda conocida, no bloquean el deploy.
 - Backups locales (`.js.antes_*`, `backups_*/`) están en `/tmp` o `.gitignore`. No se commitean.
+
+---
+
+## 48. Sesión 2026-11-13 — Eliminación del modo claro
+
+### 48.1 Qué se hizo
+
+**Light mode eliminado del sitio autenticado**:
+- `base.html`: removido init script (`quecomemos-bs-theme`), toggle HTML (botón ☀️/🌙) y toggle JS (listener `DOMContentLoaded`).
+- `data-bs-theme="dark"` hardcodeado en `<html>` L2 sigue siendo la **única fuente**.
+- Sin toggle, sin `localStorage`. Dark-only, sin flash.
+- Los 136 overrides `[data-bs-theme="dark"]` de `mi-css.css` **siguen funcionando** porque el atributo siempre está presente.
+
+**Login/Signup/Forgot en dark**:
+- 3 templates auth con `data-bs-theme="dark"` en `<html>`.
+- `auth_dark.css` nuevo (~102 líneas), acotado a auth, no toca `mi-css.css`.
+- `login.html`: removido `<hr>` interno del form (doble línea visual).
+- `login.html`: fix `type="submit"value=` (falta de espacio).
+
+### 48.2 Commits
+
+3 commits de esta sesión (buscar con `git --no-pager log --oneline --since="2026-11-13"`):
+
+1. `Eliminar modo claro: toggle + init + JS de alternancia`
+2. `Login/signup/forgot en dark mode`
+3. `docs: documentar eliminacion de light mode y auth dark (§48)`
+
+Revertir todo: `git revert <hash1> <hash2> <hash3>`.
+
+### 48.3 Lecciones
+
+1. **`sb-admin-2` es BS4, NO tiene `var(--bs-*)`**. Usar hex explícitos (`#e4e8f0`, `#131a2b`). Los `var(--bs-body-color)` caen silenciosamente a `undefined` → el browser ignora la declaración → gana el color de `sb-admin-2` (ej: `.text-gray-900` = gris oscuro ilegible sobre fondo dark).
+2. **Chrome autofill** solo se overridea con `-webkit-box-shadow: 0 0 0 1000px #color inset !important`. `background-color` con `!important` en CSS normal **no funciona**.
+3. **`<hr>` doble**: `sb-admin-2` puede tener `<hr>` internos en templates que separaban botones sociales (Google/Facebook) hoy eliminados. Si con 1 `<hr>` se ven 2 líneas, revisar CSS de `hr` en `sb-admin-2` (`border-top` + `border-bottom`).
+4. **`git diff` y screenshots no siempre coinciden**: el dueño puede editar archivos manualmente entre turnos. Siempre diagnosticar con `git --no-pager diff` antes de asumir.
+5. **`type="submit"value=` sin espacio**: HTML técnicamente inválido pero funcional. Detectado de paso en el diff.
+
+### 48.4 Deudas nuevas
+
+- **3 reglas light inertes** en `mi-css.css` (`:root` sin prefijo `dark`). No se ejecutan (dark hardcodeado). Limpieza en sesión aparte, §28.8 (regex peligrosos) aplica.
+- **`forgot-password.html`**: `lang="en"`, título "SB Admin 2 - Forgot Password", textos en inglés. Ya tiene `data-bs-theme="dark"` pero el resto es cosmético pendiente.
+- **`signup.html`**: revisar si tiene doble línea visual como login. Diagnóstico muestra 1 `<hr>`, pero puede haber CSS de por medio.
+- **`auth_dark.css` está aislado** de `mi-css.css`. Si en el futuro se unifican, ojo con selectores globales (`.card`, `body`, `input`). Mejor mantenerlos separados.
+- **Eliminar light en `mi-css.css`**: si se quiere limpiar de verdad (borrar 136 overrides dark + 3 light inertes), es sesión aparte de 1-2 días, alto riesgo. Solo hacer si hay tiempo dedicado.
