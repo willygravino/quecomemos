@@ -2339,16 +2339,10 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
    El recuadro del contenido acompaña el estado activo.
 */
 :root {
-  /* MODO CLARO */
-  /* Paleta principal de estados de pestañas */
-  /* LA SIGUIENTE ES LA PESTAÁ INACTIVA SIN PLATOS */
-  --qc-menu-vacio-inactivo: #3154b8;
-  /* --qc-menu-vacio-activo: #6f8eea; */
-  /* LA SIGUIENTE ES LA PESTAÑA ACTIVA SIN PLATOS */
-  --qc-menu-vacio-activo: #4e73df; 
-    /* LA SIGUIENTE ES LA PESTAÑA INACTIVA CON PLATOS PROGRAMADOS */
-  --qc-menu-programado-inactivo: #4c288d;
-/* LA SIGUIENTE ES LA PESTAÑA ACTIVA CON PLATOS PROGRAMADOS * */
+  /* Dark-only desde §48. Valores idénticos al bloque [data-bs-theme="dark"] para fallback. */
+  --qc-menu-vacio-inactivo: #2f3852;
+  --qc-menu-vacio-activo: #4e73df;
+  --qc-menu-programado-inactivo: #3b1f63;
   --qc-menu-programado-activo: #6f42c1;
 }
 
@@ -3833,11 +3827,12 @@ button.menu-slot-pendiente:focus-visible {
    §31 C5c: paleta magenta para "slots" (identidad visual única)
    ============================================================ */
 :root {
-  --qc-slot-borde:  #e8a0c0;
-  --qc-slot-medio:  #d63384;
-  --qc-slot-chip:   #821b53;
-  --qc-slot-btn:    #771a4d;
-  --qc-slot-fuerte: #b9246e;
+  /* Dark-only desde §48. Valores idénticos al bloque [data-bs-theme="dark"] para fallback. */
+  --qc-slot-borde:  #8f3d6b;
+  --qc-slot-medio:  #e83e8c;
+  --qc-slot-chip:   #ba7c9d;
+  --qc-slot-btn:    #a16e91;
+  --qc-slot-fuerte: #ff85c0;
 }
 [data-bs-theme="dark"] {
   --qc-slot-borde:  #8f3d6b;
@@ -3866,8 +3861,7 @@ button.menu-slot-pendiente:focus-visible {
    - Cubrir ambos modos con selectores especificos. */
 .menu-programado-comida-wrapper .btn.js-crear-slot,
 .menu-programado-comida-wrapper .btn.js-crear-slot.btn-link,
-[data-bs-theme="dark"] .menu-programado-comida-wrapper .btn.js-crear-slot,
-[data-bs-theme="light"] .menu-programado-comida-wrapper .btn.js-crear-slot {
+[data-bs-theme="dark"] .menu-programado-comida-wrapper .btn.js-crear-slot {
   --bs-btn-color: var(--qc-slot-btn);
   --bs-btn-hover-color: var(--qc-slot-medio);
   --bs-btn-active-color: var(--qc-slot-fuerte);
