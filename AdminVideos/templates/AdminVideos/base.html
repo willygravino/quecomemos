@@ -4,19 +4,7 @@
 <head>
     {% load static %}
 
-<!-- QC Bootstrap color-mode boot -->
-<script>
-  (function () {
-    try {
-      var key = "quecomemos-bs-theme";
-      var saved = localStorage.getItem(key);
-      var theme = saved || "dark";
-      document.documentElement.setAttribute("data-bs-theme", theme);
-    } catch (error) {
-      document.documentElement.setAttribute("data-bs-theme", "dark");
-    }
-  })();
-</script>
+
 
 
     <meta charset="utf-8">
@@ -128,18 +116,7 @@
                 <!-- Topbar Navbar -->
                 <ul class="navbar-nav ml-auto">
 
-<!-- QC Bootstrap theme toggle topbar -->
-<li class="nav-item mx-1 d-flex align-items-center">
-  <button type="button"
-          id="qcBootstrapThemeToggle"
-          class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1"
-          aria-label="Cambiar modo claro u oscuro"
-          aria-pressed="true"
-          title="Cambiar modo claro u oscuro">
-    <span id="qcBootstrapThemeToggleIcon">☀️</span>
-    <span id="qcBootstrapThemeToggleText">Claro</span>
-  </button>
-</li>
+
 
 
 
@@ -2003,39 +1980,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
-<!-- QC Bootstrap theme toggle script -->
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    var key = "quecomemos-bs-theme";
-    var btn = document.getElementById("qcBootstrapThemeToggle");
-    var icon = document.getElementById("qcBootstrapThemeToggleIcon");
-    var text = document.getElementById("qcBootstrapThemeToggleText");
 
-    function setTheme(theme) {
-      document.documentElement.setAttribute("data-bs-theme", theme);
-
-      try {
-        localStorage.setItem(key, theme);
-      } catch (error) {}
-
-      var isDark = theme === "dark";
-
-      if (icon) icon.textContent = isDark ? "☀️" : "🌙";
-      if (text) text.textContent = isDark ? "Claro" : "Oscuro";
-      if (btn) btn.setAttribute("aria-pressed", isDark ? "true" : "false");
-    }
-
-    var current = document.documentElement.getAttribute("data-bs-theme") || "dark";
-    setTheme(current);
-
-    if (btn) {
-      btn.addEventListener("click", function () {
-        var actual = document.documentElement.getAttribute("data-bs-theme") || "dark";
-        setTheme(actual === "dark" ? "light" : "dark");
-      });
-    }
-  });
-</script>
 
   <script src="{% static 'AdminVideos/js/lista_de_compras.js' %}?v=1"></script>
 <script src="{% static 'AdminVideos/js/overlay_ui.js' %}?v=1"></script>
