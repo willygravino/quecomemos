@@ -1,0 +1,56 @@
+{% comment %}
+Modal "Actualizar perfil". Se incluye en base.html solo si
+user.is_authenticated and user.profile. Envía POST al mismo
+endpoint que la página (ProfileUpdate), con multipart para avatar.
+Si la validación falla, ProfileUpdate renderiza profile_form.html
+(con errores). Si OK, redirect + ?msg=Perfil+actualizado&level=success
+que _toast_msg.html consume.
+{% endcomment %}
+<div class="modal fade" id="profileUpdateModal" tabindex="-1"
+     aria-labelledby="profileUpdateModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <form method="post" enctype="multipart/form-data"
+            action="{% url 'profile-update' user.profile.id %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="profileUpdateModalLabel">Actualizar perfil</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="modal_id_nombre" class="form-label">Nombre</label>
+            <input type="text" name="nombre" id="modal_id_nombre"
+                   class="form-control" value="{{ user.profile.nombre|default:'' }}">
+          </div>
+          <div class="mb-3">
+            <label for="modal_id_apellido" class="form-label">Apellido</label>
+            <input type="text" name="apellido" id="modal_id_apellido"
+                   class="form-control" value="{{ user.profile.apellido|default:'' }}">
+          </div>
+          <div class="mb-3">
+            <label for="modal_id_telefono" class="form-label">Teléfono</label>
+            <input type="text" name="telefono" id="modal_id_telefono"
+                   class="form-control" value="{{ user.profile.telefono|default:'' }}">
+          </div>
+          <div class="mb-3">
+            <label for="modal_id_avatar" class="form-label">Avatar</label>
+            {% if user.profile.avatar %}
+              <div class="mb-2">
+                <img src="{{ user.profile.avatar.url }}" alt="Avatar actual"
+                     style="max-height: 80px; border-radius: 50%;">
+              </div>
+            {% endif %}
+            <input type="file" name="avatar" id="modal_id_avatar"
+                   class="form-control" accept="image/*">
+            <div class="form-text">Dejá vacío para conservar el avatar actual.</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

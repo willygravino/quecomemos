@@ -1905,6 +1905,11 @@ class ProfileUpdate(LoginRequiredMixin, UserPassesTestMixin,  UpdateView):
     def test_func(self):
         return Profile.objects.filter(user=self.request.user).exists()
 
+    def form_valid(self, form):
+        self.object = form.save()
+        qs = urlencode({"msg": "Perfil actualizado", "level": "success"})
+        return redirect(f"{self.get_success_url()}?{qs}")
+
 
 
 
