@@ -4253,3 +4253,20 @@ button.menu-slot-pendiente:focus-visible {
 #diasTab .nav-link.active.tiene-slot-cena::after {
   box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.08);
 }
+
+/* ============================================================================
+   §49: meal-link del carousel mobile en magenta si hay slots configurados
+   - Con plato: .has-plato gana (color default, opacity 1).
+   - Solo slot: .has-slot:not(.has-plato) → magenta, opacity 0.85.
+   - Nada: opacity 0.45 (default actual).
+   El color usa --qc-slot-btn (mismo del texto "+ Slot").
+   ============================================================================ */
+.meal-link.has-slot:not(.has-plato) {
+  color: var(--qc-slot-btn) !important;
+  opacity: 0.85 !important;
+}
+.meal-link.has-slot:not(.has-plato):hover,
+.meal-link.has-slot:not(.has-plato):focus-visible {
+  color: var(--qc-slot-medio) !important;
+  opacity: 1 !important;
+}

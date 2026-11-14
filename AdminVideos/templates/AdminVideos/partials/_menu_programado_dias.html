@@ -124,28 +124,28 @@
   <!-- Zócalo del carousel: links a cada slide + tilde si hay plato en esa comida -->
 <div class="text-center mt-1" style="font-size:.7rem;">
   <a href="#"
-     class="text-muted mx-1 meal-link {% if dia_plato.1.desayuno %}has-plato{% endif %}"
+     class="text-muted mx-1 meal-link {% if dia_plato.1.desayuno %}has-plato{% elif slots_del_dia|get_momento:'desayuno' %}has-slot{% endif %}"
      data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}"
      data-bs-slide-to="0">
     Desayuno
   </a>
   ·
   <a href="#"
-     class="text-muted mx-1 meal-link {% if dia_plato.1.almuerzo %}has-plato{% endif %}"
+     class="text-muted mx-1 meal-link {% if dia_plato.1.almuerzo %}has-plato{% elif slots_del_dia|get_momento:'almuerzo' %}has-slot{% endif %}"
      data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}"
      data-bs-slide-to="1">
     Almuerzo
   </a>
   ·
   <a href="#"
-     class="text-muted mx-1 meal-link {% if dia_plato.1.merienda %}has-plato{% endif %}"
+     class="text-muted mx-1 meal-link {% if dia_plato.1.merienda %}has-plato{% elif slots_del_dia|get_momento:'merienda' %}has-slot{% endif %}"
      data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}"
      data-bs-slide-to="2">
     Merienda
   </a>
   ·
   <a href="#"
-     class="text-muted mx-1 meal-link {% if dia_plato.1.cena %}has-plato{% endif %}"
+     class="text-muted mx-1 meal-link {% if dia_plato.1.cena %}has-plato{% elif slots_del_dia|get_momento:'cena' %}has-slot{% endif %}"
      data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}"
      data-bs-slide-to="3">
     Cena
@@ -235,13 +235,13 @@
                       </button>
                     </div>
                     <div class="text-center mt-1" style="font-size:.7rem;">
-                      <a href="#" class="text-muted mx-1 meal-link" data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}" data-bs-slide-to="0">Desayuno</a>
+                      <a href="#" class="text-muted mx-1 meal-link {% if slots_del_dia|get_momento:'desayuno' %}has-slot{% endif %}" data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}" data-bs-slide-to="0">Desayuno</a>
                       ·
-                      <a href="#" class="text-muted mx-1 meal-link" data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}" data-bs-slide-to="1">Almuerzo</a>
+                      <a href="#" class="text-muted mx-1 meal-link {% if slots_del_dia|get_momento:'almuerzo' %}has-slot{% endif %}" data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}" data-bs-slide-to="1">Almuerzo</a>
                       ·
-                      <a href="#" class="text-muted mx-1 meal-link" data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}" data-bs-slide-to="2">Merienda</a>
+                      <a href="#" class="text-muted mx-1 meal-link {% if slots_del_dia|get_momento:'merienda' %}has-slot{% endif %}" data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}" data-bs-slide-to="2">Merienda</a>
                       ·
-                      <a href="#" class="text-muted mx-1 meal-link" data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}" data-bs-slide-to="3">Cena</a>
+                      <a href="#" class="text-muted mx-1 meal-link {% if slots_del_dia|get_momento:'cena' %}has-slot{% endif %}" data-bs-target="#comidasCarousel-{{ dia|date:'Y-m-d' }}" data-bs-slide-to="3">Cena</a>
                     </div>
                   </div>
 
