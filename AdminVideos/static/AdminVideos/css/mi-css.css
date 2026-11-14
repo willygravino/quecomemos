@@ -4215,14 +4215,6 @@ button.menu-slot-pendiente:focus-visible {
    - Sin slots: sin rayita.
    No interfiere con el fondo violeta/celeste de platos programados.
    ============================================================================ */
-
-:root {
-  --qc-slot-rayita: #d63384;
-}
-[data-bs-theme="dark"] {
-  --qc-slot-rayita: #e83e8c;
-}
-
 /* position relative necesario para ::after absoluto */
 #diasTab .nav-link {
   position: relative;
@@ -4236,24 +4228,24 @@ button.menu-slot-pendiente:focus-visible {
   left: -2px;     /* extensión horizontal para cubrir gaps (~2.88px) entre tabs */
   right: -2px;
   bottom: 0;
-  height: 2px;    /* más fina (era 3px) */
+  height: 1.5px;  /* más fina (era 3px, luego 2px) */
   pointer-events: none;
   z-index: 1;
 }
 
 /* Solo almuerzo: mitad izquierda */
 #diasTab .nav-link.tiene-slot-almuerzo:not(.tiene-slot-cena)::after {
-  background: linear-gradient(to right, var(--qc-slot-rayita) 0%, var(--qc-slot-rayita) 50%, transparent 50%, transparent 100%);
+  background: linear-gradient(to right, var(--qc-slot-btn) 0%, var(--qc-slot-btn) 50%, transparent 50%, transparent 100%);
 }
 
 /* Solo cena: mitad derecha */
 #diasTab .nav-link.tiene-slot-cena:not(.tiene-slot-almuerzo)::after {
-  background: linear-gradient(to right, transparent 0%, transparent 50%, var(--qc-slot-rayita) 50%, var(--qc-slot-rayita) 100%);
+  background: linear-gradient(to right, transparent 0%, transparent 50%, var(--qc-slot-btn) 50%, var(--qc-slot-btn) 100%);
 }
 
 /* Ambos: sólido */
 #diasTab .nav-link.tiene-slot-almuerzo.tiene-slot-cena::after {
-  background: var(--qc-slot-rayita);
+  background: var(--qc-slot-btn);
 }
 
 /* En tab activa, ligera elevación para que se vea sobre el fondo violeta */
