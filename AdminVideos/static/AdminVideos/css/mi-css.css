@@ -4233,10 +4233,10 @@ button.menu-slot-pendiente:focus-visible {
 #diasTab .nav-link.tiene-slot-cena::after {
   content: "";
   position: absolute;
-  left: 0;
-  right: 0;
+  left: -2px;     /* extensión horizontal para cubrir gaps (~2.88px) entre tabs */
+  right: -2px;
   bottom: 0;
-  height: 3px;
+  height: 2px;    /* más fina (era 3px) */
   pointer-events: none;
   z-index: 1;
 }
