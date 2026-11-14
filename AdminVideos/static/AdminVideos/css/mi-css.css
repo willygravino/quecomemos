@@ -4206,3 +4206,58 @@ button.menu-slot-pendiente:focus-visible {
 [data-bs-theme="dark"] .selector-platos-shell.lo-que-tengo-activo .selector-platos-item.is-active .icon-wrap {
   color: #ff7f8c;
 }
+
+/* ============================================================================
+   §48: rayita magenta en tabs según slots configurados
+   - Solo almuerzo: mitad izquierda magenta.
+   - Solo cena: mitad derecha magenta.
+   - Ambos: sólido magenta.
+   - Sin slots: sin rayita.
+   No interfiere con el fondo violeta/celeste de platos programados.
+   ============================================================================ */
+
+:root {
+  --qc-slot-rayita: #d63384;
+}
+[data-bs-theme="dark"] {
+  --qc-slot-rayita: #e83e8c;
+}
+
+/* position relative necesario para ::after absoluto */
+#diasTab .nav-link {
+  position: relative;
+}
+
+/* Base de la rayita (solo si hay slot) */
+#diasTab .nav-link.tiene-slot-almuerzo::after,
+#diasTab .nav-link.tiene-slot-cena::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Solo almuerzo: mitad izquierda */
+#diasTab .nav-link.tiene-slot-almuerzo:not(.tiene-slot-cena)::after {
+  background: linear-gradient(to right, var(--qc-slot-rayita) 0%, var(--qc-slot-rayita) 50%, transparent 50%, transparent 100%);
+}
+
+/* Solo cena: mitad derecha */
+#diasTab .nav-link.tiene-slot-cena:not(.tiene-slot-almuerzo)::after {
+  background: linear-gradient(to right, transparent 0%, transparent 50%, var(--qc-slot-rayita) 50%, var(--qc-slot-rayita) 100%);
+}
+
+/* Ambos: sólido */
+#diasTab .nav-link.tiene-slot-almuerzo.tiene-slot-cena::after {
+  background: var(--qc-slot-rayita);
+}
+
+/* En tab activa, ligera elevación para que se vea sobre el fondo violeta */
+#diasTab .nav-link.active.tiene-slot-almuerzo::after,
+#diasTab .nav-link.active.tiene-slot-cena::after {
+  box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.08);
+}
