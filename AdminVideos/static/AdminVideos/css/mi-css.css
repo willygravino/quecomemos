@@ -4270,3 +4270,42 @@ button.menu-slot-pendiente:focus-visible {
   color: var(--qc-slot-medio) !important;
   opacity: 1 !important;
 }
+
+/* ============================================================================
+   §51: fix scroll del modal de slot cuando el contenido no entra en mobile.
+   El <form> dentro de .modal-content rompe el flexbox de Bootstrap:
+   .modal-content debería ser flex-column con .modal-body flex-1 + scroll,
+   pero al tener el form como único hijo, el body no scrollea.
+   Solución: replicar el flex en el form.
+   ============================================================================ */
+#editarSlotModal .modal-content {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 1rem);
+  max-height: calc(100dvh - 1rem); /* dvh: viewport dinámico (mejor en mobile) */
+}
+#editarSlotModal .modal-content > form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+}
+#editarSlotModal .modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+#editarSlotModal .modal-header,
+#editarSlotModal .modal-footer {
+  flex-shrink: 0;
+}
+
+@media (max-width: 767.98px) {
+  #editarSlotModal .modal-dialog {
+    margin: 0.5rem;
+    max-height: calc(100vh - 1rem);
+    max-height: calc(100dvh - 1rem);
+  }
+}
