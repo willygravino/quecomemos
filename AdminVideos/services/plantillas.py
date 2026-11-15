@@ -20,7 +20,7 @@ PRESETS = {
     "pescado":      {"label": "Pescado",        "criterio": {"subtipo_carta": ["pescados"]}},
     "pasta":        {"label": "Pasta",          "criterio": {"subtipo_carta": ["pastas"]}},
     "vegetariano":  {"label": "Vegetariano",    "criterio": {"subtipo_carta": ["vegetarianos"]}},
-    "rapido":       {"label": "Rápido",         "criterio": {"elaboracion_max": 30, "coccion_max": 30}},
+    "rapido":       {"label": "Rápido",         "criterio": {"categorias_tiempo": ["rapido_15"]}},
     "guarnicion":   {"label": "Guarnición",     "criterio": {"tipos": ["Guarnicion"]}},
     "postre":       {"label": "Postre",         "criterio": {"tipos": ["Postre"]}},
 }
@@ -55,6 +55,15 @@ LIGEREZA_LABELS = {
     "medio": "Mediano",
     "pesado": "Pesado",
 }
+
+# §52: categorías de tiempo (rapidez del plato)
+CATEGORIA_TIEMPO_SLOT_CHOICES = [
+    ("rapido_15", "Listo en ≤15 min"),
+    ("rapido_30", "Listo en ≤30 min"),
+    ("poco_trabajo", "Poco trabajo, listo en >30 min"),
+    ("mucho_trabajo", "Mucho trabajo"),
+]
+CATEGORIA_TIEMPO_LABELS = dict(CATEGORIA_TIEMPO_SLOT_CHOICES)
 
 # §44: categorías filtrables en el slot (sin "Ambos": es "aplica a las dos",
 # no una categoría a buscar)
@@ -115,6 +124,10 @@ def filtrar_platos_por_criterio(criterio, platos_qs=None):
     if ligereza:
         qs = qs.filter(ligereza__in=ligereza)
 
+    categorias_tiempo = criterio.get("categorias_tiempo") or []
+    if categorias_tiempo:
+        qs = qs.filter(categoria_tiempo__in=categorias_tiempo)
+
     return qs
 
 
@@ -152,6 +165,9 @@ def label_criterio(criterio: dict) -> str:
 
     for lig in criterio.get("ligereza") or []:
         parts.append(LIGEREZA_LABELS.get(lig, lig))
+
+    for cat_t in criterio.get("categorias_tiempo") or []:
+        parts.append(CATEGORIA_TIEMPO_LABELS.get(cat_t, cat_t))
 
     for med in criterio.get("medios") or []:
         parts.append(medios_labels.get(med, med))

@@ -68,6 +68,7 @@ class PlatoForm(forms.ModelForm):
             "tipos",
             "estacionalidad",
             "ligereza",
+            "categoria_tiempo",
             "enlace",
             "image",
         ]

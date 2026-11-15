@@ -351,6 +351,23 @@ class Plato(models.Model):
     ligereza = models.CharField(max_length=20, choices=LIGEREZA_CHOICES, blank=True, default="",
         help_text="Para el filtro de slots: liviano (fácil digestión), mediano, pesado.")
 
+    CATEGORIA_TIEMPO_RAPIDO_15 = "rapido_15"
+    CATEGORIA_TIEMPO_RAPIDO_30 = "rapido_30"
+    CATEGORIA_TIEMPO_POCO_TRABAJO = "poco_trabajo"
+    CATEGORIA_TIEMPO_MUCHO_TRABAJO = "mucho_trabajo"
+    CATEGORIA_TIEMPO_CHOICES = [
+        (CATEGORIA_TIEMPO_RAPIDO_15, "Listo en ≤15 min"),
+        (CATEGORIA_TIEMPO_RAPIDO_30, "Listo en ≤30 min"),
+        (CATEGORIA_TIEMPO_POCO_TRABAJO, "Poco trabajo, listo en >30 min"),
+        (CATEGORIA_TIEMPO_MUCHO_TRABAJO, "Mucho trabajo"),
+        ("", "Sin clasificar"),
+    ]
+    categoria_tiempo = models.CharField(
+        max_length=20, choices=CATEGORIA_TIEMPO_CHOICES,
+        blank=True, default="",
+        help_text="Rapidez del plato: ≤15 total, ≤30 total, poco trabajo + cocción >30, mucho trabajo.",
+    )
+
     insumos = models.ManyToManyField(
         Insumo,
         blank=True,

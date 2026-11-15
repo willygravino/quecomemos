@@ -13,6 +13,7 @@ from AdminVideos.models import ElementoCompartido, Amistad, ProfilePlatoCompra, 
 
 
 from AdminVideos.services.plantillas import (
+    CATEGORIA_TIEMPO_SLOT_CHOICES,
     LIGEREZA_SLOT_CHOICES,
     PRESETS,
     SLOT_CATEGORIA_CHOICES,
@@ -3065,6 +3066,7 @@ def FiltroDePlatos(request):
                 "tipos_slot_choices": TIPOS_SLOT_CHOICES,
                 "subtipo_slot_choices": SUBTIPO_SLOT_CHOICES,
                 "ligereza_slot_choices": LIGEREZA_SLOT_CHOICES,
+                "categorias_tiempo_slot_choices": CATEGORIA_TIEMPO_SLOT_CHOICES,
                 "slot_categoria_choices": SLOT_CATEGORIA_CHOICES,
             }
 
@@ -4529,6 +4531,11 @@ def _build_criterio_from_request(request):
     if ligereza:
         criterio["ligereza"] = ligereza
 
+    valid_categorias_tiempo = {k for k, _ in CATEGORIA_TIEMPO_SLOT_CHOICES}
+    categorias_tiempo = [c for c in request.POST.getlist("categorias_tiempo") if c in valid_categorias_tiempo]
+    if categorias_tiempo:
+        criterio["categorias_tiempo"] = categorias_tiempo
+
     return criterio, preset
 
 @login_required
@@ -4740,6 +4747,7 @@ def ajax_get_slot(request, pk):
             "medios": criterio.get("medios") or [],
             "ligereza": criterio.get("ligereza") or [],
             "categoria": criterio.get("categoria") or [],
+            "categorias_tiempo": criterio.get("categorias_tiempo") or [],
         }
     })
 
