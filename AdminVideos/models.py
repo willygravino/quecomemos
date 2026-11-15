@@ -226,6 +226,18 @@ SUBTIPO_POSTRE_ORDEN = [
 ]
 
 
+CATEGORIA_TIEMPO_RAPIDO = "rapido"
+CATEGORIA_TIEMPO_MEDIA_HORA = "media_hora"
+CATEGORIA_TIEMPO_COCCION_LARGA = "coccion_larga"
+CATEGORIA_TIEMPO_ELABORADO = "elaborado"
+CATEGORIA_TIEMPO_CHOICES = [
+    (CATEGORIA_TIEMPO_RAPIDO, "Listo en ≈15 min"),
+    (CATEGORIA_TIEMPO_MEDIA_HORA, "Listo en ≈30 min"),
+    (CATEGORIA_TIEMPO_COCCION_LARGA, "Cocción larga, poca elaboración"),
+    (CATEGORIA_TIEMPO_ELABORADO, "Elaborado"),
+    ("", "Sin clasificar"),
+]
+
 class Plato(models.Model):
     nombre_plato = models.CharField(max_length=100)
 
@@ -351,17 +363,6 @@ class Plato(models.Model):
     ligereza = models.CharField(max_length=20, choices=LIGEREZA_CHOICES, blank=True, default="",
         help_text="Para el filtro de slots: liviano (fácil digestión), mediano, pesado.")
 
-    CATEGORIA_TIEMPO_RAPIDO_15 = "rapido_15"
-    CATEGORIA_TIEMPO_RAPIDO_30 = "rapido_30"
-    CATEGORIA_TIEMPO_POCO_TRABAJO = "poco_trabajo"
-    CATEGORIA_TIEMPO_MUCHO_TRABAJO = "mucho_trabajo"
-    CATEGORIA_TIEMPO_CHOICES = [
-        (CATEGORIA_TIEMPO_RAPIDO_15, "Listo en ≤15 min"),
-        (CATEGORIA_TIEMPO_RAPIDO_30, "Listo en ≤30 min"),
-        (CATEGORIA_TIEMPO_POCO_TRABAJO, "Poco trabajo, listo en >30 min"),
-        (CATEGORIA_TIEMPO_MUCHO_TRABAJO, "Mucho trabajo"),
-        ("", "Sin clasificar"),
-    ]
     categoria_tiempo = models.CharField(
         max_length=20, choices=CATEGORIA_TIEMPO_CHOICES,
         blank=True, default="",

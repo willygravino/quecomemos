@@ -10,7 +10,7 @@ from typing import Optional
 
 from django.db.models import Q, QuerySet
 
-from AdminVideos.models import Plato, SUBTIPO_CARTA_CHOICES
+from AdminVideos.models import CATEGORIA_TIEMPO_CHOICES, Plato, SUBTIPO_CARTA_CHOICES
 
 
 PRESETS = {
@@ -20,7 +20,7 @@ PRESETS = {
     "pescado":      {"label": "Pescado",        "criterio": {"subtipo_carta": ["pescados"]}},
     "pasta":        {"label": "Pasta",          "criterio": {"subtipo_carta": ["pastas"]}},
     "vegetariano":  {"label": "Vegetariano",    "criterio": {"subtipo_carta": ["vegetarianos"]}},
-    "rapido":       {"label": "Rápido",         "criterio": {"categorias_tiempo": ["rapido_15"]}},
+    "rapido":       {"label": "Rápido",         "criterio": {"categorias_tiempo": ["rapido"]}},
     "guarnicion":   {"label": "Guarnición",     "criterio": {"tipos": ["Guarnicion"]}},
     "postre":       {"label": "Postre",         "criterio": {"tipos": ["Postre"]}},
 }
@@ -56,12 +56,18 @@ LIGEREZA_LABELS = {
     "pesado": "Pesado",
 }
 
-# §52: categorías de tiempo (rapidez del plato)
+# §53-§54: categorías de tiempo en el slot.
+# §54: solo 2 criterios accionables: "rápido" o "poca elaboración".
+# Los labels de acá pisan los de models.py SOLO para el modal de slot y el chip.
+# El form del plato sigue usando CATEGORIA_TIEMPO_CHOICES con sus labels originales.
+_SLOT_CODES_TIEMPO = {"rapido", "coccion_larga"}
+_SLOT_LABEL_OVERRIDE = {
+    "coccion_larga": "Poca elaboración (puede tener cocción larga)",
+}
 CATEGORIA_TIEMPO_SLOT_CHOICES = [
-    ("rapido_15", "Listo en ≤15 min"),
-    ("rapido_30", "Listo en ≤30 min"),
-    ("poco_trabajo", "Poco trabajo, listo en >30 min"),
-    ("mucho_trabajo", "Mucho trabajo"),
+    (k, _SLOT_LABEL_OVERRIDE.get(k, v))
+    for k, v in CATEGORIA_TIEMPO_CHOICES
+    if k in _SLOT_CODES_TIEMPO
 ]
 CATEGORIA_TIEMPO_LABELS = dict(CATEGORIA_TIEMPO_SLOT_CHOICES)
 
