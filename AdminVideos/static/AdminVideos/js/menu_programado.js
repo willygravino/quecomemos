@@ -556,6 +556,11 @@
     document.querySelectorAll('#editarSlotForm input[name="ligereza"]').forEach(function(cb) {
       cb.checked = ligereza.indexOf(cb.value) !== -1;
     });
+    // Rapidez (categorias_tiempo)
+    var categoriasTiempo = (criterio && criterio.categorias_tiempo) || [];
+    document.querySelectorAll('#editarSlotForm input[name="categorias_tiempo"]').forEach(function(cb) {
+      cb.checked = categoriasTiempo.indexOf(cb.value) !== -1;
+    });
     // Medios
     var medios = (criterio && criterio.medios) || [];
     document.querySelectorAll('#editarSlotForm input[name="medios"]').forEach(function(cb) {
@@ -650,10 +655,9 @@
     form.querySelectorAll('input[name="ligereza"]:checked').forEach(function (cb) {
       body.append("ligereza", cb.value);
     });
-    var elabChk = document.getElementById("editarSlotElabRapidaCheck");
-    if (elabChk && elabChk.checked) body.set("elaboracion_rapida", "1");
-    var coccChk = document.getElementById("editarSlotCoccRapidaCheck");
-    if (coccChk && coccChk.checked) body.set("coccion_rapida", "1");
+    form.querySelectorAll('input[name="categorias_tiempo"]:checked').forEach(function (cb) {
+      body.append("categorias_tiempo", cb.value);
+    });
     form.querySelectorAll('input[name="medios"]:checked').forEach(function (cb) {
       body.append("medios", cb.value);
     });

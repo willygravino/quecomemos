@@ -61,8 +61,6 @@ class PlatoForm(forms.ModelForm):
             "componentes",
             "porciones",
             "medios",
-            "elaboracion",
-            "coccion",
             "categoria",
             "subtipo_carta",
             "tipos",

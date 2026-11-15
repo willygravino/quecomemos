@@ -46,18 +46,14 @@
             </div>
           </fieldset>
           <fieldset class="mb-3">
-            <legend class="form-label fs-6 mb-2">Duración</legend>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="editarSlotElabRapidaCheck">
-              <label class="form-check-label" for="editarSlotElabRapidaCheck">
-                Elaboración rápida <small class="text-muted">(hasta 30 min)</small>
-              </label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="editarSlotCoccRapidaCheck">
-              <label class="form-check-label" for="editarSlotCoccRapidaCheck">
-                Cocción rápida <small class="text-muted">(hasta 30 min)</small>
-              </label>
+            <legend class="form-label fs-6 mb-2">Rapidez</legend>
+            <div class="d-flex flex-wrap gap-3">
+              {% for key, label in categorias_tiempo_slot_choices %}
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="categorias_tiempo" value="{{ key }}" id="editarSlotRap{{ forloop.counter }}">
+                <label class="form-check-label" for="editarSlotRap{{ forloop.counter }}">{{ label }}</label>
+              </div>
+              {% endfor %}
             </div>
           </fieldset>
           <fieldset class="mb-3">

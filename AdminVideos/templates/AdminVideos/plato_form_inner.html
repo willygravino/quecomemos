@@ -424,21 +424,6 @@
                       {{ form.medios|add_class:"form-select" }}
                     </div>
 
-                    <div class="col-12 col-sm-6 col-lg-3">
-                      <label for="{{ form.elaboracion.id_for_label }}" class="form-label">Preparación</label>
-                      <div class="input-group">
-                        {{ form.elaboracion|add_class:"form-control" }}
-                        <span class="input-group-text">min</span>
-                      </div>
-                    </div>
-
-                    <div class="col-12 col-sm-6 col-lg-3">
-                      <label for="{{ form.coccion.id_for_label }}" class="form-label">Cocción</label>
-                      <div class="input-group">
-                        {{ form.coccion|add_class:"form-control" }}
-                        <span class="input-group-text">min</span>
-                      </div>
-                    </div>
                   </div>
                 </section>
 
@@ -469,6 +454,14 @@
                               {% for error in form.subtipo_carta.errors %}{{ error }}{% endfor %}
                           </div>
                       {% endif %}
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="{{ form.categoria_tiempo.id_for_label }}" class="form-label">
+                          Rapidez del plato
+                          <small class="text-muted fw-normal">(para filtros de slot: "listo en ≤15", "poco trabajo" etc.)</small>
+                      </label>
+                      {{ form.categoria_tiempo|add_class:"form-select" }}
                   </div>
 
                   <div class="mb-3">
