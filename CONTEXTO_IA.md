@@ -1868,11 +1868,11 @@ Con innerHTML habria XSS. Con textContent no.
 - No hay test automatizado del qcToast. Deuda cronica (seccion 20).
 
 
-## 49. Sesión 2026-11-15/16 — Búsqueda OR + conteos por tab + modal fuera del sticky
+## 52. Sesión 2026-11-15/16 — Búsqueda OR + conteos por tab + modal fuera del sticky
 
 > Commits: `34e9029` (§53-§54), `fd3ab63` (§55-§59), `eac8ba8` (§60-§61). Deployado a Railway.
 
-### 49.1 Resumen
+### 52.1 Resumen
 
 Sesión doble. Bloque 1: cerrar §53-§54 (taxonomía categoria_tiempo, slot reducido). Bloque 2: feature principal — el buscador ahora marca en QUÉ TABS hay resultados, con badge + borde rojo, sin auto-switch. Incluye OR entre búsqueda y "lo que tengo" + fix del modal "lo que tengo" que no cerraba.
 
@@ -1881,7 +1881,7 @@ Sesión doble. Bloque 1: cerrar §53-§54 (taxonomía categoria_tiempo, slot red
 - `fd3ab63` §55-§59: búsqueda por palabra indica coincidencias por tab + selector neutro.
 - `eac8ba8` §60-§61: modal lo-que-tengo fuera del sticky + OR con búsqueda.
 
-### 49.2 §53-§54: categoría de tiempo
+### 52.2 §53-§54: categoría de tiempo
 
 **Modelo `Plato.categoria_tiempo`** (migraciones `0111` + `0112`):
 - Choices: `rapido` ("Listo en ≈15 min"), `media_hora` ("Listo en ≈30 min"), `coccion_larga` ("Cocción larga, poca elaboración"), `elaborado` ("Elaborado"), `""` ("Sin clasificar").
@@ -1892,7 +1892,7 @@ Sesión doble. Bloque 1: cerrar §53-§54 (taxonomía categoria_tiempo, slot red
 - El form del plato conserva las 4 categorías (clasificación técnica).
 - El chip del slot usa `CATEGORIA_TIEMPO_LABELS = dict(CATEGORIA_TIEMPO_SLOT_CHOICES)`.
 
-### 49.3 §55-§59: búsqueda por palabra marca tabs con resultados
+### 52.3 §55-§59: búsqueda por palabra marca tabs con resultados
 
 **Comportamiento nuevo**:
 - Buscador `palabra_clave` → cada tab se marca con **badge (superíndice con número)** + **borde rojo** si tiene matches.
@@ -1920,7 +1920,7 @@ Sesión doble. Bloque 1: cerrar §53-§54 (taxonomía categoria_tiempo, slot red
   - Hover: `--bs-secondary-bg`.
 - Se quitaron también los `box-shadow: inset` residuales del §47b en `is-active` e `is-filtered-lo-que-tengo`.
 
-### 49.4 §60: modal "Lo que tengo" fuera del sticky
+### 52.4 §60: modal "Lo que tengo" fuera del sticky
 
 **Síntoma**: el modal abría pero no cerraba (ni ✕, ni "Cerrar", ni ESC). Solo recargando.
 
@@ -1937,7 +1937,7 @@ Sesión doble. Bloque 1: cerrar §53-§54 (taxonomía categoria_tiempo, slot red
 - Antes: tab activa con `lo_que_tengo` tenía fondo rojo + texto rojo.
 - Ahora: solo la clase aplicada por JS, **sin efecto visual propio**. El indicador es el mismo borde + badge que la búsqueda. **Unificación completa**: `lo_que_tengo` y `palabra_clave` se ven igual.
 
-### 49.5 §61: OR entre palabra_clave y "lo que tengo"
+### 52.5 §61: OR entre palabra_clave y "lo que tengo"
 
 **Cambio clave**: la relación pasó de **AND** (intersección) a **OR** (unión).
 
@@ -1955,14 +1955,14 @@ Sesión doble. Bloque 1: cerrar §53-§54 (taxonomía categoria_tiempo, slot red
 - `obtener_resultados_principales` y `calcular_conteos_por_tab` cargan las palabras y las pasan.
 - `filtrar_platos_por_lo_que_tengo` queda como **helper** (ya no se llama desde el flujo principal). Se mantiene por compat.
 
-### 49.6 Lecciones nuevas
+### 52.6 Lecciones nuevas
 
 1. **Django `{# ... #}` multilinea = NO es comentario.** `{# una línea #}` funciona; `{#\n varias\n líneas\n #}` se **renderiza como texto** en el HTML. Para comentarios multilínea: `{% comment %}...{% endcomment %}`. Para documentación interna: `CONTEXTO_IA.md`, no comentarios en templates.
 2. **Modales dentro de `.qc-sticky-header` → stacking context.** `position: sticky` + `z-index` crea contexto; modales quedan encerrados y el backdrop (global) gana. **Regla general**: modales siempre fuera de wrappers sticky/fixed con z-index. Usar `{% block qc_modal_pre %}`.
 3. **`grep -c` + `set -e` = corta el script.** `grep -c` con 0 matches devuelve exit 1. Con `set -e`, el script corta. Usar `grep -q` o `|| true` en scripts con `set -e`.
 4. **OR vs AND**: para "A O B", construir `Q()` con `|=` en un solo `.filter()`. No hacer `.filter(A).filter(B)` (que es AND).
 
-### 49.7 Puntos críticos actualizados (§15)
+### 52.7 Puntos críticos actualizados (§15)
 
 | Archivo | Punto | Qué hace |
 |---|---|---|
@@ -1981,7 +1981,7 @@ Sesión doble. Bloque 1: cerrar §53-§54 (taxonomía categoria_tiempo, slot red
 | `lista_filtrada.html` | `{% block qc_modal_pre %}` override | Incluye `_lo_que_tengo_modal.html`. |
 | `partials/_lo_que_tengo_modal.html` | (nuevo) | Modal extraído de `lista_filtrada.html`. |
 
-### 49.8 Deudas pendientes
+### 52.8 Deudas pendientes
 
 - **Limpieza de archivos untracked**: `fix_*.py`, `diag_*.txt`, `diagnostico*.txt`, `fase*.sh`, `backups_*/`. Agregar a `.gitignore` en sesión aparte.
 - **12 warnings de Dependabot** (heredados de §25).
