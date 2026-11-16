@@ -1866,3 +1866,125 @@ Con innerHTML habria XSS. Con textContent no.
 - aria-live=polite en el container: los screen readers anuncian el
   toast. Correcto para accesibilidad.
 - No hay test automatizado del qcToast. Deuda cronica (seccion 20).
+
+
+## 49. Sesión 2026-11-15/16 — Búsqueda OR + conteos por tab + modal fuera del sticky
+
+> Commits: `34e9029` (§53-§54), `fd3ab63` (§55-§59), `eac8ba8` (§60-§61). Deployado a Railway.
+
+### 49.1 Resumen
+
+Sesión doble. Bloque 1: cerrar §53-§54 (taxonomía categoria_tiempo, slot reducido). Bloque 2: feature principal — el buscador ahora marca en QUÉ TABS hay resultados, con badge + borde rojo, sin auto-switch. Incluye OR entre búsqueda y "lo que tengo" + fix del modal "lo que tengo" que no cerraba.
+
+**Commits**:
+- `34e9029` §53-§54: taxonomía categoria_tiempo + slot reducido a 2 criterios.
+- `fd3ab63` §55-§59: búsqueda por palabra indica coincidencias por tab + selector neutro.
+- `eac8ba8` §60-§61: modal lo-que-tengo fuera del sticky + OR con búsqueda.
+
+### 49.2 §53-§54: categoría de tiempo
+
+**Modelo `Plato.categoria_tiempo`** (migraciones `0111` + `0112`):
+- Choices: `rapido` ("Listo en ≈15 min"), `media_hora` ("Listo en ≈30 min"), `coccion_larga` ("Cocción larga, poca elaboración"), `elaborado` ("Elaborado"), `""` ("Sin clasificar").
+- **`CATEGORIA_TIEMPO_CHOICES` a nivel módulo** (no dentro de `class Plato`), junto a `SUBTIPO_CARTA_CHOICES`. Bug histórico: estaba dentro de la clase → `ImportError` al levantar el server porque `services/plantillas.py` la importaba.
+
+**Slot de tiempo** (`CATEGORIA_TIEMPO_SLOT_CHOICES` en `services/plantillas.py`):
+- Solo 2 criterios accionables: `rapido` ("Listo en ≈15 min") y `coccion_larga` ("Poca elaboración (puede tener cocción larga)").
+- El form del plato conserva las 4 categorías (clasificación técnica).
+- El chip del slot usa `CATEGORIA_TIEMPO_LABELS = dict(CATEGORIA_TIEMPO_SLOT_CHOICES)`.
+
+### 49.3 §55-§59: búsqueda por palabra marca tabs con resultados
+
+**Comportamiento nuevo**:
+- Buscador `palabra_clave` → cada tab se marca con **badge (superíndice con número)** + **borde rojo** si tiene matches.
+- Tabs sin matches: **sin muteo, sin fondo, sin badge** — comportamiento neutro.
+- Tab "Todos": badge con la suma total.
+- `lo_que_tengo` también activa los badges (sin necesidad de palabra clave).
+- **Sin auto-switch**: el usuario sigue donde está, ve dónde hay resultados y decide.
+
+**Backend**:
+- Nueva `calcular_conteos_por_tab(usuario, palabra_clave, ...)`: itera las 9 tabs de plato llamando `filtrar_platos` con cada `tipopag`. Suma `Delivery` y `Comerafuera` con búsqueda por `nombre`. Early return `{}` si no hay `palabra_clave` ni `lo_que_tengo_activo`.
+- `ajax_listado_platos` devuelve `"conteos_por_tab": {...}` en el JSON.
+
+**Frontend**:
+- `aplicarConteosSelector(data)` en `filtros_platos.js`: lee `data.conteos_por_tab`, aplica `.is-con-resultados` y crea `<span class="selector-platos-count">N</span>`. Si no hay búsqueda, limpia todo.
+
+**CSS**:
+- `.is-con-resultados { border-color: var(--bs-danger, #dc3545); }` — solo borde, sin fondo.
+- `.selector-platos-count` — badge rojo superíndice (`position: absolute; top: 0.15rem; right: 0.3rem`).
+- Sin muteo de tabs sin matches.
+
+**§56: paleta multicolor eliminada**:
+- Se quitaron las 24 `--qc-tab-color` (light) + 24 (dark). Tabs vuelven a:
+  - Reposo: `--bs-secondary-color` (gris).
+  - Activa: `--bs-primary` (azul).
+  - Hover: `--bs-secondary-bg`.
+- Se quitaron también los `box-shadow: inset` residuales del §47b en `is-active` e `is-filtered-lo-que-tengo`.
+
+### 49.4 §60: modal "Lo que tengo" fuera del sticky
+
+**Síntoma**: el modal abría pero no cerraba (ni ✕, ni "Cerrar", ni ESC). Solo recargando.
+
+**Causa raíz**: `.qc-sticky-header` tiene `position: sticky; z-index: 10` → **crea stacking context**. El modal (`z-index: 1050`) quedaba encerrado en ese contexto; el backdrop (`z-index: 1040`) vive en `<body>` global y ganaba. Los clicks iban al backdrop, no a los botones.
+
+**Diagnóstico**: en la consola del navegador, `document.elementFromPoint(innerWidth/2, innerHeight/2)` devolvía `DIV.modal-backdrop` en lugar de un elemento del modal. `bootstrap.Modal.getInstance(modal)` estaba OK (`_isShown: true`), pero el elemento visualmente tapado.
+
+**Fix** (mismo patrón que §32.13):
+- Modal extraído de `lista_filtrada.html` a `partials/_lo_que_tengo_modal.html`.
+- Nuevo `{% block qc_modal_pre %}{% endblock %}` en `video_list_base.html`, **antes** de `<div class="qc-sticky-header">`.
+- Override en `lista_filtrada.html`: `{% block qc_modal_pre %}{% include ... %}{% endblock %}`.
+
+**§60: fondos rojos de `is-filtered-lo-que-tengo` eliminados**:
+- Antes: tab activa con `lo_que_tengo` tenía fondo rojo + texto rojo.
+- Ahora: solo la clase aplicada por JS, **sin efecto visual propio**. El indicador es el mismo borde + badge que la búsqueda. **Unificación completa**: `lo_que_tengo` y `palabra_clave` se ven igual.
+
+### 49.5 §61: OR entre palabra_clave y "lo que tengo"
+
+**Cambio clave**: la relación pasó de **AND** (intersección) a **OR** (unión).
+
+| Antes | Ahora |
+|---|---|
+| `morron` **AND** `ananá` → platos que tengan **ambos** | `morron` **OR** `ananá` → platos con **uno u otro** |
+
+**Ejemplo real**: buscar "morron" con "Ananá en almíbar" en el pantry.
+- Antes: 1 plato ("Cerdo agridulce con ananá").
+- Ahora: 5 platos (los 5 con morron, el pantry no agrega porque el cerdo ya estaba en el conjunto de morron).
+
+**Implementación**:
+- Nueva `_cargar_palabras_pantry(usuario)` → lista de strings del `LoQueTengoPalabra` del user.
+- Nuevo parámetro `lo_que_tengo_palabras=None` en `filtrar_platos()`. Dentro, construye `Q()` con `|=` para palabra_clave + cada palabra del pantry.
+- `obtener_resultados_principales` y `calcular_conteos_por_tab` cargan las palabras y las pasan.
+- `filtrar_platos_por_lo_que_tengo` queda como **helper** (ya no se llama desde el flujo principal). Se mantiene por compat.
+
+### 49.6 Lecciones nuevas
+
+1. **Django `{# ... #}` multilinea = NO es comentario.** `{# una línea #}` funciona; `{#\n varias\n líneas\n #}` se **renderiza como texto** en el HTML. Para comentarios multilínea: `{% comment %}...{% endcomment %}`. Para documentación interna: `CONTEXTO_IA.md`, no comentarios en templates.
+2. **Modales dentro de `.qc-sticky-header` → stacking context.** `position: sticky` + `z-index` crea contexto; modales quedan encerrados y el backdrop (global) gana. **Regla general**: modales siempre fuera de wrappers sticky/fixed con z-index. Usar `{% block qc_modal_pre %}`.
+3. **`grep -c` + `set -e` = corta el script.** `grep -c` con 0 matches devuelve exit 1. Con `set -e`, el script corta. Usar `grep -q` o `|| true` en scripts con `set -e`.
+4. **OR vs AND**: para "A O B", construir `Q()` con `|=` en un solo `.filter()`. No hacer `.filter(A).filter(B)` (que es AND).
+
+### 49.7 Puntos críticos actualizados (§15)
+
+| Archivo | Punto | Qué hace |
+|---|---|---|
+| `views.py` | `_cargar_palabras_pantry` (~L1930) | Carga las palabras del pantry del usuario. |
+| `views.py` | `filtrar_platos(..., lo_que_tengo_palabras=None)` (~L1947) | Acepta lista de palabras de pantry y hace OR con palabra_clave. |
+| `views.py` | `calcular_conteos_por_tab` (~L2643) | Cuenta por tab respetando TODOS los filtros. |
+| `views.py` | `obtener_resultados_principales` (~L2736) | Usa `_palabras_pantry` y pasa a `filtrar_platos`. |
+| `views.py` | `filtrar_platos_por_lo_que_tengo` (~L2617) | Helper, ya no se llama desde el flujo. |
+| `views.py` | `ajax_listado_platos` (~L3280) | Devuelve `conteos_por_tab` en el JSON. |
+| `filtros_platos.js` | `aplicarConteosSelector(data)` | Aplica badge + `.is-con-resultados` a cada tab. |
+| `filtros_platos.js` | `.then` de `actualizarListadoPlatos` | Llama a `aplicarConteosSelector(data)` antes del `return data`. |
+| `mi-css.css` | `.is-con-resultados` | Solo borde rojo, sin fondo. |
+| `mi-css.css` | `§59b: is-active.is-con-resultados` | Fix de especificidad dark mode. |
+| `mi-css.css` | `§60: is-filtered-lo-que-tengo` | Sin fondo rojo, solo la clase. |
+| `video_list_base.html` | `{% block qc_modal_pre %}` | Antes del sticky-header, para modales. |
+| `lista_filtrada.html` | `{% block qc_modal_pre %}` override | Incluye `_lo_que_tengo_modal.html`. |
+| `partials/_lo_que_tengo_modal.html` | (nuevo) | Modal extraído de `lista_filtrada.html`. |
+
+### 49.8 Deudas pendientes
+
+- **Limpieza de archivos untracked**: `fix_*.py`, `diag_*.txt`, `diagnostico*.txt`, `fase*.sh`, `backups_*/`. Agregar a `.gitignore` en sesión aparte.
+- **12 warnings de Dependabot** (heredados de §25).
+- **Backfill de `ligereza`** (123 platos sin clasificar, §47.5).
+- **Backfill de `categoria_tiempo`** (0 platos clasificados).
+- **Verificar en mobile** que los slots del menú programado siguen funcionando con la nueva lógica OR (afecta `obtener_slots_por_comida`? pendiente de auditar).
