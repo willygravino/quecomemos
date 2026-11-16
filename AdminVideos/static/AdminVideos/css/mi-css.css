@@ -1758,19 +1758,9 @@ body.filtro-platos-cambiando [data-listado-url] {
 }
 
 
-.selector-platos-item.is-filtered-lo-que-tengo,
-.selector-platos-shell.lo-que-tengo-activo .selector-platos-item.is-active {
-  color: #dc3545;
-  background: rgba(220, 53, 69, .14);
-  border-color: transparent;
-}
-
-.selector-platos-item.is-filtered-lo-que-tengo .icon-wrap,
-.selector-platos-shell.lo-que-tengo-activo .selector-platos-item.is-active .icon-wrap {
-  color: #dc3545;
-  background: transparent;
-  border-color: transparent;
-}
+/* §60: is-filtered-lo-que-tengo ahora se comporta como borde rojo + badge
+   (igual que el filtro de palabra clave). Sin fondo, sin color rojo de texto.
+   La clase la sigue aplicando el JS, pero sin efecto visual propio. */
 
 .selector-platos-arrow {
   display: inline-flex;
@@ -1805,19 +1795,7 @@ body.filtro-platos-cambiando [data-listado-url] {
   border-color: transparent;
 }
 
-[data-bs-theme="dark"] .selector-platos-item.is-filtered-lo-que-tengo,
-[data-bs-theme="dark"] .selector-platos-shell.lo-que-tengo-activo .selector-platos-item.is-active {
-  color: #ff7f8c;
-  background: rgba(220, 53, 69, .20);
-  border-color: transparent;
-}
-
-[data-bs-theme="dark"] .selector-platos-item.is-filtered-lo-que-tengo .icon-wrap,
-[data-bs-theme="dark"] .selector-platos-shell.lo-que-tengo-activo .selector-platos-item.is-active .icon-wrap {
-  color: #ff7f8c;
-  background: transparent;
-  border-color: transparent;
-}
+/* §60 dark: mismo criterio (sin fondo rojo). */
 
 @media (max-width: 767.98px) {
   .selector-platos-shell {
@@ -4243,7 +4221,13 @@ button.menu-slot-pendiente:focus-visible {
 
 
 /* §59: tab con matches: solo borde rojo. Sin fondo, sin atenuar tabs sin matches. */
-.selector-platos-item.is-con-resultados {
+/* §59b: el borde rojo debe persistir aunque la tab se vuelva activa.
+   En dark mode, [data-bs-theme="dark"] .is-active tiene especificidad 0,3,0
+   y pisa con border-color: transparent al is-con-resultados (0,2,0).
+   Fix: agregar reglas con especificidad >= 0,3,0 para is-active + is-con-resultados. */
+.selector-platos-item.is-con-resultados,
+.selector-platos-item.is-active.is-con-resultados,
+[data-bs-theme="dark"] .selector-platos-item.is-active.is-con-resultados {
   border-color: var(--bs-danger, #dc3545);
 }
 

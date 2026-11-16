@@ -1934,6 +1934,18 @@ def _patron_busqueda(texto):
         return ""
     return r"\m" + escapado
 
+def _cargar_palabras_pantry(usuario):
+    """§61: devuelve la lista de palabras del 'Lo que tengo' del usuario.
+    Usado por filtrar_platos para aplicar OR con la busqueda por palabra clave."""
+    return [
+        palabra.strip()
+        for palabra in LoQueTengoPalabra.objects.filter(
+            profile__user=usuario
+        ).values_list("palabra", flat=True)
+        if palabra and palabra.strip()
+    ]
+
+
 def filtrar_platos(
     usuario,
     tipo_parametro,
@@ -1945,6 +1957,7 @@ def filtrar_platos(
     palabra_clave,
     ver_cotidiano=True,
     ver_especial=True,
+    lo_que_tengo_palabras=None,
 ):
     # Si no se selecciona ninguna de las dos opciones, no mostrar nada
     if quecomemos != "quecomemos" and misplatos != "misplatos":
@@ -1999,14 +2012,29 @@ def filtrar_platos(
     if dificultad and dificultad != "-":
         platos_qs = platos_qs.filter(dificultad=dificultad)
 
+    # §61: palabra_clave y "lo que tengo" se combinan con OR.
+    # Si el usuario busca "morron" y tiene "anana" en la heladera,
+    # mostramos platos con morron Y/O con anana (union, no interseccion).
+    condiciones_texto = Q()
     if palabra_clave:
         _patron = _patron_busqueda(palabra_clave)
         if _patron:
-            platos_qs = platos_qs.filter(
-                Q(nombre_plato__unaccent__iregex=_patron) |
-                Q(ingredientes__unaccent__iregex=_patron) |
-                Q(ingredientes_en_plato__ingrediente__nombre__unaccent__iregex=_patron)
-            ).distinct()
+            condiciones_texto |= (
+                Q(nombre_plato__unaccent__iregex=_patron)
+                | Q(ingredientes__unaccent__iregex=_patron)
+                | Q(ingredientes_en_plato__ingrediente__nombre__unaccent__iregex=_patron)
+            )
+    if lo_que_tengo_palabras:
+        for _palabra_pantry in lo_que_tengo_palabras:
+            _patron_p = _patron_busqueda(_palabra_pantry)
+            if _patron_p:
+                condiciones_texto |= (
+                    Q(nombre_plato__unaccent__iregex=_patron_p)
+                    | Q(ingredientes__unaccent__iregex=_patron_p)
+                    | Q(ingredientes_en_plato__ingrediente__nombre__unaccent__iregex=_patron_p)
+                )
+    if condiciones_texto:
+        platos_qs = platos_qs.filter(condiciones_texto).distinct()
 
     # Orden de prioridad de los platos:
     # 1) Nunca programados históricamente primero.
@@ -2629,13 +2657,20 @@ def calcular_conteos_por_tab(
     """§55: conteos de platos/lugares por tab para la busqueda por palabra clave.
     Se usa para pintar el selector con badge + estado (con/sin resultados).
     Devuelve {} si no hay palabra_clave (no hay nada que indicar)."""
-    if not palabra_clave or not palabra_clave.strip():
+    tiene_palabra = bool(palabra_clave and palabra_clave.strip())
+    if not tiene_palabra and not lo_que_tengo_activo:
         return {}
 
     TABS_PLATO = [
         "Principal", "Entrada", "Guarnicion", "Dip", "Salsa",
         "Picada", "Ingrediente de picada", "Postre", "Trago",
     ]
+
+    _palabras_pantry = (
+        _cargar_palabras_pantry(usuario)
+        if lo_que_tengo_activo
+        else None
+    )
 
     conteos = {}
     for tab in TABS_PLATO:
@@ -2650,10 +2685,9 @@ def calcular_conteos_por_tab(
             palabra_clave=palabra_clave,
             ver_cotidiano=ver_cotidiano,
             ver_especial=ver_especial,
+            lo_que_tengo_palabras=_palabras_pantry,
         )
-        qs = resultado["platos"]
-        qs = filtrar_platos_por_lo_que_tengo(qs, usuario, lo_que_tengo_activo)
-        conteos[tab] = qs.count()
+        conteos[tab] = resultado["platos"].count()
 
     _patron_lugar = _patron_busqueda(palabra_clave)
     if _patron_lugar:
@@ -2732,6 +2766,12 @@ def obtener_resultados_principales(
 
     tipo_parametro_filtro = None if tipo_parametro == "Todos" else tipo_parametro
 
+    _palabras_pantry = (
+        _cargar_palabras_pantry(usuario)
+        if lo_que_tengo_activo
+        else None
+    )
+
     resultado_filtro = filtrar_platos(
         usuario=usuario,
         tipo_parametro=tipo_parametro_filtro,
@@ -2743,19 +2783,10 @@ def obtener_resultados_principales(
         palabra_clave=palabra_clave,
         ver_cotidiano=ver_cotidiano,
         ver_especial=ver_especial,
+        lo_que_tengo_palabras=_palabras_pantry,
     )
 
     platos = resultado_filtro["platos"]
-
-    platos = filtrar_platos_por_lo_que_tengo(
-
-        platos=platos,
-
-        usuario=usuario,
-
-        activo=lo_que_tengo_activo,
-
-    )
 
     platos_carousel = platos
     platos_listado = platos
