@@ -4126,86 +4126,11 @@ button.menu-slot-pendiente:focus-visible {
    - Estado "lo que tengo" (rojo) se mantiene ganando en cascada.
    ============================================================ */
 
-/* Variables por categoría (light) */
-.selector-platos-item[data-tipopag="Principal"]             { --qc-tab-color: #4e73df; --qc-tab-bg: rgba(78,115,223,.14); }
-.selector-platos-item[data-tipopag="Entrada"]               { --qc-tab-color: #36b9cc; --qc-tab-bg: rgba(54,185,204,.14); }
-.selector-platos-item[data-tipopag="Guarnicion"]            { --qc-tab-color: #1cc88a; --qc-tab-bg: rgba(28,200,138,.14); }
-.selector-platos-item[data-tipopag="Dip"]                   { --qc-tab-color: #f6c23e; --qc-tab-bg: rgba(246,194,62,.16); }
-.selector-platos-item[data-tipopag="Salsa"]                 { --qc-tab-color: #e74a3b; --qc-tab-bg: rgba(231,74,59,.14); }
-.selector-platos-item[data-tipopag="Picada"]                { --qc-tab-color: #6f42c1; --qc-tab-bg: rgba(111,66,193,.14); }
-.selector-platos-item[data-tipopag="Ingrediente de picada"] { --qc-tab-color: #e83e8c; --qc-tab-bg: rgba(232,62,140,.14); }
-.selector-platos-item[data-tipopag="Postre"]                { --qc-tab-color: #d63384; --qc-tab-bg: rgba(214,51,132,.14); }
-.selector-platos-item[data-tipopag="Torta"]                 { --qc-tab-color: #d63384; --qc-tab-bg: rgba(214,51,132,.14); }
-.selector-platos-item[data-tipopag="Trago"]                 { --qc-tab-color: #17a2b8; --qc-tab-bg: rgba(23,162,184,.14); }
-.selector-platos-item[data-tipopag="Delivery"]              { --qc-tab-color: #fd7e14; --qc-tab-bg: rgba(253,126,20,.14); }
-.selector-platos-item[data-tipopag="Comerafuera"]           { --qc-tab-color: #20c997; --qc-tab-bg: rgba(32,201,151,.14); }
+/* §56: se elimino la paleta multicolor por categoria.
+   Todas las tabs ahora usan los fallbacks neutros de las reglas que consumen
+   --qc-tab-color / --qc-tab-bg (definidas mas abajo con fallback a --bs-primary). */
 
-/* Variables por categoría (dark: mas luminosas) */
-[data-bs-theme="dark"] .selector-platos-item[data-tipopag="Principal"]             { --qc-tab-color: #a3b8f0; --qc-tab-bg: rgba(78,115,223,.20); }
-[data-bs-theme="dark"] .selector-platos-item[data-tipopag="Entrada"]               { --qc-tab-color: #5ee0f0; --qc-tab-bg: rgba(54,185,204,.22); }
-[data-bs-theme="dark"] .selector-platos-item[data-tipopag="Guarnicion"]            { --qc-tab-color: #5ee0b0; --qc-tab-bg: rgba(28,200,138,.20); }
-[data-bs-theme="dark"] .selector-platos-item[data-tipopag="Dip"]                   { --qc-tab-color: #ffdb70; --qc-tab-bg: rgba(246,194,62,.20); }
-[data-bs-theme="dark"] .selector-platos-item[data-tipopag="Salsa"]                 { --qc-tab-color: #ff7f8c; --qc-tab-bg: rgba(231,74,59,.22); }
-[data-bs-theme="dark"] .selector-platos-item[data-tipopag="Picada"]                { --qc-tab-color: #a888e8; --qc-tab-bg: rgba(111,66,193,.22); }
-[data-bs-theme="dark"] .selector-platos-item[data-tipopag="Ingrediente de picada"] { --qc-tab-color: #ff85c0; --qc-tab-bg: rgba(232,62,140,.22); }
-[data-bs-theme="dark"] .selector-platos-item[data-tipopag="Postre"]                { --qc-tab-color: #ff85c0; --qc-tab-bg: rgba(214,51,132,.22); }
-[data-bs-theme="dark"] .selector-platos-item[data-tipopag="Torta"]                 { --qc-tab-color: #ff85c0; --qc-tab-bg: rgba(214,51,132,.22); }
-[data-bs-theme="dark"] .selector-platos-item[data-tipopag="Trago"]                 { --qc-tab-color: #5ee0f0; --qc-tab-bg: rgba(23,162,184,.22); }
-[data-bs-theme="dark"] .selector-platos-item[data-tipopag="Delivery"]              { --qc-tab-color: #ffa55c; --qc-tab-bg: rgba(253,126,20,.20); }
-[data-bs-theme="dark"] .selector-platos-item[data-tipopag="Comerafuera"]           { --qc-tab-color: #5ee0b0; --qc-tab-bg: rgba(32,201,151,.20); }
 
-/* Estado "Todos": sin color de categoria, solo el primary como fallback */
-.selector-platos-item[data-tipopag="Todos"] { --qc-tab-color: var(--bs-secondary-color); --qc-tab-bg: var(--bs-secondary-bg); }
-[data-bs-theme="dark"] .selector-platos-item[data-tipopag="Todos"] { --qc-tab-color: var(--bs-secondary-color); --qc-tab-bg: var(--bs-secondary-bg); }
-
-/* Icono en reposo: color de la categoria */
-.selector-platos-item .icon-wrap {
-  color: var(--qc-tab-color, currentColor);
-  transition: color .15s ease;
-}
-
-/* Hover: fondo suave, icono ya esta en su color */
-.selector-platos-item:hover,
-.selector-platos-item:focus {
-  background: var(--bs-secondary-bg);
-  color: var(--bs-body-color);
-}
-
-/* Activo: fondo del color de la categoria + borde interior 1px */
-.selector-platos-item.is-active {
-  color: var(--qc-tab-color, var(--bs-primary));
-  background: var(--qc-tab-bg, rgba(78,115,223,.14));
-  box-shadow: inset 0 0 0 1px var(--qc-tab-color, var(--bs-primary));
-  border-color: transparent;
-}
-.selector-platos-item.is-active .icon-wrap {
-  color: var(--qc-tab-color, var(--bs-primary));
-  background: transparent;
-  border-color: transparent;
-}
-
-/* Lo que tengo (estado, no categoria): rojo gana SIEMPRE */
-.selector-platos-item.is-filtered-lo-que-tengo,
-.selector-platos-shell.lo-que-tengo-activo .selector-platos-item.is-active {
-  color: #dc3545;
-  background: rgba(220, 53, 69, .14);
-  box-shadow: inset 0 0 0 1px #dc3545;
-  border-color: transparent;
-}
-.selector-platos-item.is-filtered-lo-que-tengo .icon-wrap,
-.selector-platos-shell.lo-que-tengo-activo .selector-platos-item.is-active .icon-wrap {
-  color: #dc3545;
-}
-[data-bs-theme="dark"] .selector-platos-item.is-filtered-lo-que-tengo,
-[data-bs-theme="dark"] .selector-platos-shell.lo-que-tengo-activo .selector-platos-item.is-active {
-  color: #ff7f8c;
-  background: rgba(220, 53, 69, .20);
-  box-shadow: inset 0 0 0 1px #ff7f8c;
-}
-[data-bs-theme="dark"] .selector-platos-item.is-filtered-lo-que-tengo .icon-wrap,
-[data-bs-theme="dark"] .selector-platos-shell.lo-que-tengo-activo .selector-platos-item.is-active .icon-wrap {
-  color: #ff7f8c;
-}
 
 /* ============================================================================
    §48: rayita magenta en tabs según slots configurados
@@ -4307,5 +4232,56 @@ button.menu-slot-pendiente:focus-visible {
     margin: 0.5rem;
     max-height: calc(100vh - 1rem);
     max-height: calc(100dvh - 1rem);
+  }
+}
+
+
+
+
+
+
+
+
+/* §59: tab con matches: solo borde rojo. Sin fondo, sin atenuar tabs sin matches. */
+.selector-platos-item.is-con-resultados {
+  border-color: var(--bs-danger, #dc3545);
+}
+
+/* Badge conteo: superindice absoluto, no empuja layout. */
+.selector-platos-item {
+  position: relative;
+}
+.selector-platos-count {
+  position: absolute;
+  top: 0.15rem;
+  right: 0.3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1rem;
+  height: 1rem;
+  padding: 0 0.22rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  background: var(--bs-danger, #dc3545);
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+[data-bs-theme="dark"] .selector-platos-count {
+  color: #1a0e11;
+  background: #ff7f8c;
+}
+
+@media (max-width: 767.98px) {
+  .selector-platos-count {
+    min-width: 0.9rem;
+    height: 0.9rem;
+    font-size: 0.55rem;
+    padding: 0 0.18rem;
+    top: 0.1rem;
+    right: 0.25rem;
   }
 }

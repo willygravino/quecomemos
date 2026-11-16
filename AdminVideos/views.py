@@ -2614,6 +2614,66 @@ def filtrar_platos_por_lo_que_tengo(platos, usuario, activo):
     return platos.filter(condicion).distinct()
 
 
+def calcular_conteos_por_tab(
+    usuario,
+    palabra_clave,
+    quecomemos,
+    misplatos,
+    medios,
+    categoria,
+    dificultad,
+    lo_que_tengo_activo=False,
+    ver_cotidiano=True,
+    ver_especial=True,
+):
+    """§55: conteos de platos/lugares por tab para la busqueda por palabra clave.
+    Se usa para pintar el selector con badge + estado (con/sin resultados).
+    Devuelve {} si no hay palabra_clave (no hay nada que indicar)."""
+    if not palabra_clave or not palabra_clave.strip():
+        return {}
+
+    TABS_PLATO = [
+        "Principal", "Entrada", "Guarnicion", "Dip", "Salsa",
+        "Picada", "Ingrediente de picada", "Postre", "Trago",
+    ]
+
+    conteos = {}
+    for tab in TABS_PLATO:
+        resultado = filtrar_platos(
+            usuario=usuario,
+            tipo_parametro=tab,
+            quecomemos=quecomemos,
+            misplatos=misplatos,
+            medios=medios,
+            categoria=categoria,
+            dificultad=dificultad,
+            palabra_clave=palabra_clave,
+            ver_cotidiano=ver_cotidiano,
+            ver_especial=ver_especial,
+        )
+        qs = resultado["platos"]
+        qs = filtrar_platos_por_lo_que_tengo(qs, usuario, lo_que_tengo_activo)
+        conteos[tab] = qs.count()
+
+    _patron_lugar = _patron_busqueda(palabra_clave)
+    if _patron_lugar:
+        conteos["Delivery"] = Lugar.objects.filter(
+            propietario=usuario,
+            delivery=True,
+            nombre__unaccent__iregex=_patron_lugar,
+        ).count()
+        conteos["Comerafuera"] = Lugar.objects.filter(
+            propietario=usuario,
+            delivery=False,
+            nombre__unaccent__iregex=_patron_lugar,
+        ).count()
+    else:
+        conteos["Delivery"] = 0
+        conteos["Comerafuera"] = 0
+
+    return conteos
+
+
 def obtener_resultados_principales(
     usuario,
     tipo_parametro,
@@ -3171,10 +3231,24 @@ def ajax_listado_platos(request):
         request=request
     )
 
+    conteos_por_tab = calcular_conteos_por_tab(
+        usuario=usuario,
+        palabra_clave=palabra_clave,
+        quecomemos=quecomemos,
+        misplatos=misplatos,
+        medios=medios,
+        categoria=categoria,
+        dificultad=dificultad,
+        lo_que_tengo_activo=lo_que_tengo_activo,
+        ver_cotidiano=ver_cotidiano,
+        ver_especial=ver_especial,
+    )
+
     return JsonResponse({
         "html_listado": html_listado,
         "html_carousel": html_carousel,
         "html_lugares": html_lugares,
+        "conteos_por_tab": conteos_por_tab,
     })
 
 

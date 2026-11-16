@@ -145,6 +145,8 @@ document.addEventListener("DOMContentLoaded", function () {
           contenedorLugares.innerHTML = data.html_lugares || "";
         }
 
+        // §55: aplicar badges/estado al selector con los conteos por tab
+        aplicarConteosSelector(data);
 
         return data;
       })
@@ -336,6 +338,40 @@ document.addEventListener("DOMContentLoaded", function () {
     document.body.classList.remove("filtro-platos-cambiando");
     const back = document.getElementById("filtrosLoadingBackdrop");
     if (back) back.remove();
+  }
+
+  // §55: aplica estado (con/sin resultados) y badge de conteo al selector
+  // a partir de data.conteos_por_tab del AJAX. Sin busqueda activa, limpia todo.
+  function aplicarConteosSelector(data) {
+    const conteos = (data && data.conteos_por_tab) || {};
+    const hayBusqueda = Object.keys(conteos).length > 0;
+
+    document.querySelectorAll(".js-filtro-tipopag").forEach(function (link) {
+      const tab = link.dataset.tipopag || "";
+      link.classList.remove("is-con-resultados");
+
+      const badgeViejo = link.querySelector(".selector-platos-count");
+      if (badgeViejo) badgeViejo.remove();
+
+      if (!hayBusqueda) return;
+
+      let count;
+      if (tab === "Todos") {
+        count = Object.values(conteos).reduce(function (acc, v) {
+          return acc + (Number(v) || 0);
+        }, 0);
+      } else {
+        count = Number(conteos[tab]) || 0;
+      }
+
+      if (count > 0) {
+        link.classList.add("is-con-resultados");
+        const badge = document.createElement("span");
+        badge.className = "selector-platos-count";
+        badge.textContent = String(count);
+        link.appendChild(badge);
+      }
+    });
   }
 
   function actualizarListadoPlatosConSpinner() {
