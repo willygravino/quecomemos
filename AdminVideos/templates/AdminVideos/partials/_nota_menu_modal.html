@@ -1,0 +1,62 @@
+<div
+  class="modal fade"
+  id="notaMenuModal"
+  tabindex="-1"
+  aria-labelledby="notaMenuModalLabel"
+  aria-hidden="true"
+  data-crear-url="{% url 'ajax_crear_nota' %}"
+  data-editar-base="{% url 'ajax_editar_nota' pk=0 %}"
+  data-borrar-base="{% url 'ajax_borrar_nota' pk=0 %}">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="notaMenuModalLabel">Nota del menú</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="notaMenuId" value="">
+        <input type="hidden" id="notaMenuDia" value="">
+        <input type="hidden" id="notaMenuMomento" value="">
+
+        <div class="mb-2">
+          <label for="notaMenuTexto" class="form-label">Nota</label>
+          <textarea
+            id="notaMenuTexto"
+            class="form-control"
+            rows="3"
+            maxlength="500"
+            placeholder="Ej: Cenamos en lo de Lucas, comemos rejunte..."></textarea>
+          <div class="form-text text-muted small">Máximo 500 caracteres.</div>
+        </div>
+
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="notaMenuCuenta"
+            checked>
+          <label class="form-check-label" for="notaMenuCuenta">
+            Válida como plato programado
+          </label>
+          <div class="form-text text-muted small">
+            Si está tildado, el día cuenta como programado (color de la tab).
+          </div>
+        </div>
+
+        <div class="alert alert-danger d-none mt-2 small" id="notaMenuError"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+          Cancelar
+        </button>
+        <button type="button" class="btn btn-primary btn-sm" id="notaMenuGuardarBtn">
+          Guardar
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

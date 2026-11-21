@@ -2809,9 +2809,9 @@ html[data-bs-theme="dark"] #insumos-ul .ingrediente-summary-btn:focus {
   transition: opacity 0.15s ease;
 }
 
-.menu-programado-comida-vacia h6 {
+.menu-programado-comida-vacia .menu-programado-comida-cabecera {
   background-color: var(--bs-secondary-bg) !important;
-  color: var(--bs-secondary-color) !important;
+  color: color-mix(in srgb, var(--bs-secondary-color) 70%, var(--bs-secondary-bg)) !important;
 }
 
 
@@ -3763,10 +3763,11 @@ button.menu-slot-pendiente:focus-visible {
   text-align: left;
   min-width: 0;
 }
+/* Mismo color de hover que lápiz y X del slot; sin tocar notas. */
 .menu-slot-pendiente-accion:hover,
 .menu-slot-pendiente-accion:focus-visible {
   outline: none;
-  color: var(--qc-slot-fuerte);
+  color: color-mix(in srgb, var(--qc-slot-medio) 35%, var(--bs-secondary-color));
 }
 
 .menu-slot-borrar-btn {
@@ -3792,13 +3793,17 @@ button.menu-slot-pendiente:focus-visible {
 
 /* §31 C4b: plato que vino de un slot (violeta tenue, sin romper layout) */
 /* §31 C5b: título de comida con slot pendiente (violeta apagado, NO primary) */
-.menu-programado-comida-wrapper.menu-programado-comida-solo-slot > h6 {
+.menu-programado-comida-wrapper.menu-programado-comida-solo-slot > .menu-programado-comida-cabecera {
   background-color: rgba(214, 51, 132, 0.18) !important;
-  color: var(--bs-body-color) !important;
-  opacity: 0.55;
+  /* Los textos tienen estilos propios: el color en el padre no basta. */
+  --qc-cabecera-slot-titulo: color-mix(in srgb, var(--qc-slot-chip) 70%, var(--bs-body-color));
+  --qc-cabecera-slot-nota: color-mix(in srgb, var(--qc-slot-chip) 55%, var(--bs-body-color));
 }
-[data-bs-theme="dark"] .menu-programado-comida-wrapper.menu-programado-comida-solo-slot > h6 {
-  background-color: rgba(240, 106, 171, 0.22) !important;
+.menu-programado-comida-wrapper.menu-programado-comida-solo-slot > .menu-programado-comida-cabecera > h6 {
+  color: var(--qc-cabecera-slot-titulo) !important;
+}
+[data-bs-theme="dark"] .menu-programado-comida-wrapper.menu-programado-comida-solo-slot > .menu-programado-comida-cabecera {
+  background-color: rgba(240, 106, 171, 0.15) !important;
 }
 
 /* ============================================================
@@ -3916,7 +3921,6 @@ button.menu-slot-pendiente:focus-visible {
 /* §31 C13+D2m: opacity fija en hijos específicos del wrapper -vacia.
    El título y "No hay platos" quedan apagados sin hover (no son clickeables).
    "+ Slot" mantiene brillo constante. */
-.menu-programado-comida-wrapper.menu-programado-comida-vacia > h6,
 .menu-programado-comida-wrapper.menu-programado-comida-vacia > [data-menu-dia] > p {
   opacity: 0.45;
 }
@@ -4268,4 +4272,206 @@ button.menu-slot-pendiente:focus-visible {
     top: 0.1rem;
     right: 0.25rem;
   }
+}
+
+
+
+
+/* §62b: nombre del plato en menu programado — violeta brillante.
+   Coherencia con --qc-menu-programado-activo (§32.5): el violeta
+   se asocia a "programado" en todo el proyecto. */
+.menu-programado-plato-nombre {
+  color: #a78bfa !important;
+  transition: color .15s ease;
+}
+/* Platos y notas programadas: mismo hover violeta, sin subrayado. */
+a.menu-programado-plato-nombre:hover,
+a.menu-programado-plato-nombre:focus,
+a.menu-programado-plato-nombre:focus-visible,
+.menu-programado-nota button.menu-programado-plato-nombre:hover,
+.menu-programado-nota button.menu-programado-plato-nombre:focus-visible {
+  color: #c4b5fd !important; /* tono violeta claro existente */
+  text-decoration: none !important;
+}
+/* Nota simple: hover gris más claro, nunca magenta ni subrayado. */
+.menu-programado-nota button.menu-programado-nota-sin-cuenta:hover,
+.menu-programado-nota button.menu-programado-nota-sin-cuenta:focus-visible {
+  color: color-mix(in srgb, var(--bs-secondary-color) 35%, var(--bs-body-color));
+  text-decoration: none !important;
+}
+/* Señal visible para edición con teclado, sin tocar hover del mouse. */
+.menu-programado-nota button.menu-programado-nota-texto:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 0.2rem;
+}
+
+/* Cabecera de comida con "+ Nota" integrado — presentación, sin cambiar lógica. */
+.menu-programado-comida-cabecera {
+  min-width: 0;
+  gap: 0.5rem;
+}
+.menu-programado-comida-cabecera h6 {
+  min-width: 0;
+}
+.menu-programado-comida-cabecera .menu-programado-nueva-nota-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+  padding: 0.15rem 0.4rem;
+  border: 0;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.8rem;
+  line-height: 1.3;
+  font-weight: 400;
+  opacity: 0.8;
+  cursor: pointer;
+  transition: opacity 0.12s ease;
+}
+.menu-programado-comida-cabecera .menu-programado-nueva-nota-btn:hover,
+.menu-programado-comida-cabecera .menu-programado-nueva-nota-btn:focus-visible {
+  background: transparent;
+  color: inherit;
+  opacity: 1;
+}
+.menu-programado-comida-cabecera .menu-programado-nueva-nota-btn:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+/* Estado con solo slots: el enlace acompaña la identidad magenta del título. */
+.menu-programado-comida-solo-slot .menu-programado-comida-cabecera .menu-programado-nueva-nota-btn {
+  color: var(--qc-cabecera-slot-nota) !important;
+  opacity: 1;
+}
+/* En vacío, la acción se lee un poco más clara que el título. */
+.menu-programado-comida-vacia .menu-programado-comida-cabecera .menu-programado-nueva-nota-btn {
+  color: var(--bs-secondary-color);
+  opacity: 0.8;
+}
+
+/* §64: listado de notas — misma sangría que los platos, texto en bastardilla. */
+.menu-programado-nota {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+}
+.menu-programado-nota .menu-programado-nota-texto {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-style: italic;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding-block: 0;
+  padding-inline-end: 0;
+  margin-block: 0;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+/* Las acciones comparten los estilos reales de los slots. */
+.menu-programado-nota-acciones {
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--bs-secondary-color);
+}
+/* Solo las notas no programadas se atenúan. Las otras conservan el violeta. */
+.menu-programado-nota .menu-programado-nota-sin-cuenta {
+  color: var(--bs-secondary-color);
+}
+
+/* §64b: hover neutro de notas y acciones de platos. */
+/* Solo notas: prevalece sobre el hover magenta/rojo compartido con slots.
+   Las acciones de los slots mantienen sus estados originales. */
+.menu-programado-nota .menu-slot-editar-btn:hover,
+.menu-programado-nota .menu-slot-editar-btn:focus-visible,
+.menu-programado-nota .menu-slot-borrar-btn:hover,
+.menu-programado-nota .menu-slot-borrar-btn:focus-visible {
+  color: var(--bs-body-color);
+  opacity: 1;
+}
+
+/* Pin y papelera de platos: se aclara el color actual, sin sustituirlo.
+   Esto respeta el verde de los pines que ya están fijados. */
+.menu-programado-comida-wrapper .js-toggle-habito i,
+.menu-programado-comida-wrapper .js-eliminar-programado i {
+  transition: filter 0.15s ease, opacity 0.15s ease;
+}
+.menu-programado-comida-wrapper .js-toggle-habito:hover i,
+.menu-programado-comida-wrapper .js-toggle-habito:focus-visible i,
+.menu-programado-comida-wrapper .js-eliminar-programado:hover i,
+.menu-programado-comida-wrapper .js-eliminar-programado:focus-visible i {
+  filter: brightness(1.4);
+  opacity: 1;
+}
+
+/* §64c: nota con ícono regular (contorno), centrado en la primera línea. */
+.menu-programado-nota .menu-programado-nota-texto {
+  position: relative;
+  padding-inline-start: 1.35rem;
+  margin-inline-start: 0.1rem;
+  text-decoration: none !important;
+}
+.menu-programado-nota .menu-programado-nota-texto::before {
+  content: "\f249"; /* Font Awesome Regular: note-sticky */
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0.75em;
+  transform: translateY(-50%);
+  width: 1.1rem;
+  font-family: "Font Awesome 6 Free";
+  font-weight: 400; /* regular, no solid */
+  font-style: normal;
+  font-size: 1em;
+  line-height: 1;
+  text-align: center;
+  color: currentColor;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+/* §64d: extras del plato — violeta secundario, sin subrayado. */
+/* El nombre del plato mantiene su violeta más intenso. Usamos tokens
+   existentes y mezclas de color para no introducir tonos fijos. */
+.menu-programado-comida-wrapper .btn.js-asignar-extra.btn-link {
+  --qc-extra-normal: color-mix(in srgb,
+    var(--qc-menu-programado-activo, var(--bs-purple)) 60%,
+    var(--bs-secondary-color));
+  --qc-extra-hover: color-mix(in srgb,
+    var(--qc-menu-programado-activo, var(--bs-purple)) 45%,
+    var(--bs-body-color));
+  --bs-btn-color: var(--qc-extra-normal);
+  --bs-btn-hover-color: var(--qc-extra-hover);
+  --bs-btn-active-color: var(--qc-extra-hover);
+  color: var(--qc-extra-normal) !important; /* Prevalece sobre text-success */
+  text-decoration: none !important;
+  transition: color .15s ease;
+}
+.menu-programado-comida-wrapper .btn.js-asignar-extra.btn-link:hover,
+.menu-programado-comida-wrapper .btn.js-asignar-extra.btn-link:focus,
+.menu-programado-comida-wrapper .btn.js-asignar-extra.btn-link:focus-visible,
+.menu-programado-comida-wrapper .btn.js-asignar-extra.btn-link:active {
+  color: var(--qc-extra-hover) !important;
+  text-decoration: none !important;
+}
+
+/* §64e: hover uniforme y más apagado en las acciones del slot. */
+/* Mezcla el magenta propio del slot con el gris secundario ya existente.
+   No modifica notas, platos ni el estado normal de estos íconos. */
+.menu-slot-pendiente > .menu-slot-editar-btn:hover,
+.menu-slot-pendiente > .menu-slot-editar-btn:focus-visible,
+.menu-slot-pendiente > .menu-slot-borrar-btn:hover,
+.menu-slot-pendiente > .menu-slot-borrar-btn:focus-visible {
+  color: color-mix(in srgb, var(--qc-slot-medio) 35%, var(--bs-secondary-color));
+  opacity: 1;
 }

@@ -698,6 +698,27 @@ class MenuItemExtra(models.Model):
         return f"{self.get_tipo_display()}: {self.nombre}"
 
 
+class MenuNota(models.Model):
+    """§63: nota libre por (día + comida) del menú programado.
+    Ej: "Cenamos en lo de Lucas", "Comemos rejunte".
+    Si cuenta_como_programada=True, hace que el día cuente como programado
+    para el coloreado de las tabs, aunque no haya MenuItem.
+    Se borra cuando el día pasa (lazy cleanup en FiltroDePlatos).
+    Varias notas por (día+comida) permitidas: se muestran todas en el listado."""
+    menu = models.ForeignKey(MenuDia, on_delete=models.CASCADE, related_name="notas")
+    momento = models.CharField(max_length=20, choices=MenuItem.MOMENTO_CHOICES)
+    texto = models.CharField(max_length=500)
+    cuenta_como_programada = models.BooleanField(default=True)
+    creado_el = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["menu", "momento"])]
+        ordering = ["creado_el"]
+
+    def __str__(self):
+        return f"{self.menu.fecha} {self.momento}: {self.texto[:40]}"
+
+
 class ProfileIngrediente(models.Model):
     profile = models.ForeignKey(
         "Profile",

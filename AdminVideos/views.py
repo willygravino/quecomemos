@@ -2412,7 +2412,21 @@ def obtener_platos_compartidos_pendientes(usuario):
 
 
 
+def limpiar_notas_pasadas(usuario):
+    """§63: borra las notas de menús de fechas anteriores a hoy.
+    Se llama al inicio de FiltroDePlatos y ajax_listado_platos (lazy cleanup).
+    Sin historial: cuando el día pasa, la nota desaparece."""
+    from AdminVideos.models import MenuNota
+    hoy = timezone.localdate()
+    MenuNota.objects.filter(
+        menu__propietario=usuario,
+        menu__fecha__lt=hoy,
+    ).delete()
+
+
 def obtener_platos_dia_x_dia(usuario, fechas_existentes, habitos_set):
+    from AdminVideos.models import MenuNota
+
     dias_programados = set()
 
     platos_dia_x_dia = defaultdict(
@@ -2423,6 +2437,35 @@ def obtener_platos_dia_x_dia(usuario, fechas_existentes, habitos_set):
             "cena": [],
         }
     )
+
+    # §63: notas libres por (día + comida). Varias por (día+comida).
+    notas_dia_x_dia = defaultdict(
+        lambda: {
+            "desayuno": [],
+            "almuerzo": [],
+            "merienda": [],
+            "cena": [],
+        }
+    )
+
+    notas_qs = (
+        MenuNota.objects
+        .filter(
+            menu__propietario=usuario,
+            menu__fecha__in=fechas_existentes,
+        )
+        .select_related("menu")
+    )
+
+    for nota in notas_qs:
+        fec = nota.menu.fecha
+        notas_dia_x_dia[fec][nota.momento].append({
+            "id": nota.id,
+            "texto": nota.texto,
+            "cuenta_como_programada": nota.cuenta_como_programada,
+        })
+        if nota.cuenta_como_programada:
+            dias_programados.add(fec)
 
     items = (
         MenuItem.objects
@@ -2475,14 +2518,31 @@ def obtener_platos_dia_x_dia(usuario, fechas_existentes, habitos_set):
                 "slot_origen_id": item.slot_origen_id,
             })
 
-    # Días con almuerzo Y cena: menú "completo" del día.
-    # El resto (solo almuerzo, solo cena, solo desayuno, etc.) = "parcial".
+    # §63: día "completo" = almuerzo Y cena cubiertos, contando platos O notas válidas.
     dias_completos = set()
-    for fec, momentos in platos_dia_x_dia.items():
-        if momentos.get("almuerzo") and momentos.get("cena"):
+    fechas_con_algo = set(platos_dia_x_dia.keys()) | set(notas_dia_x_dia.keys())
+    for fec in fechas_con_algo:
+        momentos_platos = platos_dia_x_dia.get(fec, {})
+        momentos_notas = notas_dia_x_dia.get(fec, {})
+
+        almuerzo_cubierto = bool(momentos_platos.get("almuerzo")) or any(
+            n["cuenta_como_programada"]
+            for n in momentos_notas.get("almuerzo", [])
+        )
+        cena_cubierta = bool(momentos_platos.get("cena")) or any(
+            n["cuenta_como_programada"]
+            for n in momentos_notas.get("cena", [])
+        )
+
+        if almuerzo_cubierto and cena_cubierta:
             dias_completos.add(fec)
 
-    return dict(platos_dia_x_dia), dias_programados, dias_completos
+    return (
+        dict(platos_dia_x_dia),
+        dias_programados,
+        dias_completos,
+        dict(notas_dia_x_dia),
+    )
 
 
 
@@ -3040,6 +3100,8 @@ def obtener_contexto_compartidos(usuario):
 @login_required(login_url=reverse_lazy('login'), redirect_field_name=None)
 def FiltroDePlatos(request):
 
+    limpiar_notas_pasadas(request.user)
+
     fecha_actual, dias_desde_hoy = obtener_dias_desde_hoy()
 
     # Obtener el usuario actual
@@ -3096,7 +3158,7 @@ def FiltroDePlatos(request):
     contexto_compartidos = obtener_contexto_compartidos(usuario)
 
 
-    platos_dia_x_dia, dias_programados, dias_completos = obtener_platos_dia_x_dia(
+    platos_dia_x_dia, dias_programados, dias_completos, notas_dia_x_dia = obtener_platos_dia_x_dia(
         usuario,
         fechas_existentes,
         habitos_set
@@ -3150,6 +3212,7 @@ def FiltroDePlatos(request):
                 "salsas": salsas,
                 "postres": postres,
                 "platos_dia_x_dia": platos_dia_x_dia,
+                "notas_dia_x_dia": notas_dia_x_dia,
                 "lugares": lugares,
                 "habitos_lookup": habitos_lookup,
                 "slots_por_comida": slots_por_comida,
@@ -3170,6 +3233,7 @@ def FiltroDePlatos(request):
 @login_required(login_url=reverse_lazy('login'), redirect_field_name=None)
 def ajax_listado_platos(request):
     usuario = request.user
+    limpiar_notas_pasadas(usuario)
 
     perfil = obtener_perfil_usuario(usuario)
     if perfil is None:
@@ -3282,6 +3346,95 @@ def ajax_listado_platos(request):
         "conteos_por_tab": conteos_por_tab,
     })
 
+
+
+@login_required
+@require_POST
+def ajax_crear_nota(request):
+    """§63: crea una nota libre por (día + comida). Devuelve {ok, nota}."""
+    from AdminVideos.models import MenuNota
+
+    usuario = request.user
+    dia_str = (request.POST.get("dia") or "").strip()
+    momento = (request.POST.get("momento") or "").strip()
+    texto = (request.POST.get("texto") or "").strip()
+    cuenta = request.POST.get("cuenta_como_programada") in {"1", "on", "true", "yes"}
+
+    if not dia_str:
+        return JsonResponse({"ok": False, "error": "Falta 'dia'."}, status=400)
+    if momento not in dict(MenuItem.MOMENTO_CHOICES):
+        return JsonResponse({"ok": False, "error": "Momento inválido."}, status=400)
+    if not texto:
+        return JsonResponse({"ok": False, "error": "La nota está vacía."}, status=400)
+    if len(texto) > 500:
+        return JsonResponse({"ok": False, "error": "Máximo 500 caracteres."}, status=400)
+
+    from datetime import date as _date
+    try:
+        dia = _date.fromisoformat(dia_str)
+    except ValueError:
+        return JsonResponse({"ok": False, "error": "Fecha inválida."}, status=400)
+
+    menu, _ = MenuDia.objects.get_or_create(
+        propietario=usuario,
+        fecha=dia,
+    )
+    nota = MenuNota.objects.create(
+        menu=menu,
+        momento=momento,
+        texto=texto,
+        cuenta_como_programada=cuenta,
+    )
+    return JsonResponse({
+        "ok": True,
+        "nota": {
+            "id": nota.id,
+            "momento": nota.momento,
+            "texto": nota.texto,
+            "cuenta_como_programada": nota.cuenta_como_programada,
+        },
+    })
+
+
+@login_required
+@require_POST
+def ajax_editar_nota(request, pk):
+    """§63: edita texto y checkbox de una nota existente."""
+    from AdminVideos.models import MenuNota
+
+    try:
+        nota = MenuNota.objects.get(pk=pk, menu__propietario=request.user)
+    except MenuNota.DoesNotExist:
+        return JsonResponse({"ok": False, "error": "No encontrada."}, status=404)
+
+    texto = (request.POST.get("texto") or "").strip()
+    if not texto:
+        return JsonResponse({"ok": False, "error": "La nota está vacía."}, status=400)
+    if len(texto) > 500:
+        return JsonResponse({"ok": False, "error": "Máximo 500 caracteres."}, status=400)
+
+    cuenta = request.POST.get("cuenta_como_programada") in {"1", "on", "true", "yes"}
+
+    nota.texto = texto
+    nota.cuenta_como_programada = cuenta
+    nota.save(update_fields=["texto", "cuenta_como_programada"])
+
+    return JsonResponse({"ok": True})
+
+
+@login_required
+@require_POST
+def ajax_borrar_nota(request, pk):
+    """§63: borra una nota (solo el dueño)."""
+    from AdminVideos.models import MenuNota
+
+    try:
+        nota = MenuNota.objects.get(pk=pk, menu__propietario=request.user)
+    except MenuNota.DoesNotExist:
+        return JsonResponse({"ok": False, "error": "No encontrada."}, status=404)
+
+    nota.delete()
+    return JsonResponse({"ok": True})
 
 
 def _profile_usuario(usuario):

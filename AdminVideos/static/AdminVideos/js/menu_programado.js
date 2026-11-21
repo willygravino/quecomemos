@@ -702,4 +702,222 @@
 
 
 
+
+  /* ============================================================
+     §63: NOTAS DE MENÚ PROGRAMADO
+     - Crear/editar/borrar notas libres por (día+comida).
+     - Sigue el patrón de slots (delegado en document, fetch, refresh).
+     ============================================================ */
+
+  function _abrirModalNota(modo, datos) {
+    const modalEl = document.getElementById("notaMenuModal");
+    if (!modalEl) return;
+
+    const inputId = document.getElementById("notaMenuId");
+    const inputDia = document.getElementById("notaMenuDia");
+    const inputMomento = document.getElementById("notaMenuMomento");
+    const inputTexto = document.getElementById("notaMenuTexto");
+    const inputCuenta = document.getElementById("notaMenuCuenta");
+    const lblTitulo = document.getElementById("notaMenuModalLabel");
+    const errorBox = document.getElementById("notaMenuError");
+
+    if (errorBox) {
+      errorBox.classList.add("d-none");
+      errorBox.textContent = "";
+    }
+
+    if (modo === "editar") {
+      inputId.value = datos.id || "";
+      inputDia.value = "";
+      inputMomento.value = "";
+      inputTexto.value = datos.texto || "";
+      inputCuenta.checked = Boolean(datos.cuenta);
+      if (lblTitulo) lblTitulo.textContent = "Editar nota del menú";
+    } else {
+      inputId.value = "";
+      inputDia.value = datos.dia || "";
+      inputMomento.value = datos.momento || "";
+      inputTexto.value = "";
+      inputCuenta.checked = true;  // tildado por defecto
+      if (lblTitulo) lblTitulo.textContent = "Nota del menú";
+    }
+
+    if (window.bootstrap && bootstrap.Modal) {
+      bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    }
+
+    setTimeout(function () { inputTexto.focus(); }, 150);
+  }
+
+  // Click en "+ Nota"
+  document.addEventListener("click", function (event) {
+    const btn = event.target.closest(".js-nueva-nota");
+    if (!btn) return;
+    event.preventDefault();
+    event.stopPropagation();
+
+    _abrirModalNota("crear", {
+      dia: btn.dataset.dia || "",
+      momento: btn.dataset.momento || "",
+    });
+  });
+
+  // Click en lápiz (editar nota)
+  document.addEventListener("click", function (event) {
+    const btn = event.target.closest(".js-editar-nota");
+    if (!btn) return;
+    event.preventDefault();
+    event.stopPropagation();
+
+    _abrirModalNota("editar", {
+      id: btn.dataset.notaId || "",
+      texto: btn.dataset.texto || "",
+      cuenta: btn.dataset.cuenta === "1",
+    });
+  });
+
+  // Click en ✕ (borrar nota)
+  document.addEventListener("click", async function (event) {
+    const btn = event.target.closest(".js-borrar-nota");
+    if (!btn) return;
+    event.preventDefault();
+    event.stopPropagation();
+
+    const borrarUrl = btn.dataset.borrarUrl || "";
+    if (!borrarUrl || !window.fetch) return;
+
+    const confirmar = window.confirmDialog
+      ? await window.confirmDialog({
+          title: "Borrar nota",
+          body: "¿Borrar esta nota?",
+          confirmText: "Borrar",
+          confirmClass: "btn-danger",
+        })
+      : window.confirm("¿Borrar esta nota?");
+
+    if (!confirmar) return;
+
+    btn.disabled = true;
+
+    fetch(borrarUrl, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": getCSRFToken(),
+        "X-Requested-With": "XMLHttpRequest",
+      },
+      credentials: "same-origin",
+    })
+      .then(function (response) {
+        if (!response.ok) throw new Error("Error al borrar nota");
+        return response.json();
+      })
+      .then(function (data) {
+        if (!data.ok) throw new Error(data.error || "Error al borrar nota");
+        if (window.refrescarMenuProgramado) return window.refrescarMenuProgramado();
+      })
+      .catch(function (error) {
+        console.error(error);
+        alert(error.message || "Error al borrar nota");
+        btn.disabled = false;
+      });
+  });
+
+  // Click en "Guardar" (crear o editar según si hay id)
+  document.addEventListener("click", function (event) {
+    const btn = event.target.closest("#notaMenuGuardarBtn");
+    if (!btn) return;
+    event.preventDefault();
+    event.stopPropagation();
+
+    const modalEl = document.getElementById("notaMenuModal");
+    if (!modalEl || !window.fetch) return;
+
+    const inputId = document.getElementById("notaMenuId");
+    const inputDia = document.getElementById("notaMenuDia");
+    const inputMomento = document.getElementById("notaMenuMomento");
+    const inputTexto = document.getElementById("notaMenuTexto");
+    const inputCuenta = document.getElementById("notaMenuCuenta");
+    const errorBox = document.getElementById("notaMenuError");
+
+    const notaId = (inputId.value || "").trim();
+    const texto = (inputTexto.value || "").trim();
+    const cuenta = inputCuenta.checked;
+
+    if (errorBox) {
+      errorBox.classList.add("d-none");
+      errorBox.textContent = "";
+    }
+
+    if (!texto) {
+      if (errorBox) {
+        errorBox.textContent = "La nota no puede estar vacía.";
+        errorBox.classList.remove("d-none");
+      }
+      return;
+    }
+
+    let url, formData;
+    const crearUrl = modalEl.dataset.crearUrl || "";
+    const editarBase = modalEl.dataset.editarBase || "";
+
+    if (notaId) {
+      url = editarBase.replace("/0/", "/" + notaId + "/");
+      formData = new FormData();
+      formData.append("texto", texto);
+      if (cuenta) formData.append("cuenta_como_programada", "on");
+    } else {
+      url = crearUrl;
+      const dia = (inputDia.value || "").trim();
+      const momento = (inputMomento.value || "").trim();
+      if (!dia || !momento) {
+        if (errorBox) {
+          errorBox.textContent = "Falta día o comida.";
+          errorBox.classList.remove("d-none");
+        }
+        return;
+      }
+      formData = new FormData();
+      formData.append("dia", dia);
+      formData.append("momento", momento);
+      formData.append("texto", texto);
+      if (cuenta) formData.append("cuenta_como_programada", "on");
+    }
+
+    btn.disabled = true;
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": getCSRFToken(),
+        "X-Requested-With": "XMLHttpRequest",
+      },
+      body: formData,
+      credentials: "same-origin",
+    })
+      .then(function (response) {
+        return response.json().then(function (data) {
+          return { ok: response.ok, data: data };
+        });
+      })
+      .then(function (result) {
+        if (!result.ok || !result.data.ok) {
+          throw new Error(result.data.error || "Error al guardar nota");
+        }
+        if (window.bootstrap && bootstrap.Modal) {
+          bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+        }
+        if (window.refrescarMenuProgramado) return window.refrescarMenuProgramado();
+      })
+      .catch(function (error) {
+        console.error(error);
+        if (errorBox) {
+          errorBox.textContent = error.message || "Error al guardar nota";
+          errorBox.classList.remove("d-none");
+        }
+      })
+      .finally(function () {
+        btn.disabled = false;
+      });
+  });
+
 })();

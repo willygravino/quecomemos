@@ -1,10 +1,47 @@
 {# Renderiza una comida del menú programado: título, items y estado vacío #}
 
-<div class="menu-programado-comida-wrapper{% if not platos and not slots %} menu-programado-comida-vacia{% elif not platos and slots %} menu-programado-comida-solo-slot{% endif %}">
+<div class="menu-programado-comida-wrapper{% if not platos and not slots and not notas_momento %} menu-programado-comida-vacia{% elif not platos and slots %} menu-programado-comida-solo-slot{% endif %}">
 
-  <h6 class="fw-bold ms-1 bg-primary text-white p-1 rounded">{{ titulo }}</h6>
+  <div class="menu-programado-comida-cabecera d-flex align-items-center justify-content-between mb-1 ms-1 bg-primary text-white p-1 rounded">
+    <h6 class="fw-bold mb-0">{{ titulo }}</h6>
+    <button type="button"
+            class="menu-programado-nueva-nota-btn js-nueva-nota{% if notas_momento %} menu-programado-nueva-nota-muteado{% endif %}"
+            data-dia="{{ dia|date:'Y-m-d' }}"
+            data-momento="{{ comida }}"
+            title="Agregar nota a {{ titulo }}">
+      <i class="fa-solid fa-plus" aria-hidden="true"></i> Nota
+    </button>
+  </div>
 
   <div data-menu-dia="{{ dia|date:'Y-m-d' }}" data-menu-comida="{{ comida }}">
+    {% if notas_momento %}
+      <div class="menu-programado-notas">
+        {% for nota in notas_momento %}
+          <div class="menu-programado-nota mb-1 ms-1" data-nota-id="{{ nota.id }}">
+            <button type="button"
+                    class="menu-programado-nota-texto js-editar-nota{% if nota.cuenta_como_programada %} menu-programado-plato-nombre{% else %} menu-programado-nota-sin-cuenta{% endif %}"
+                    data-nota-id="{{ nota.id }}"
+                    data-texto="{{ nota.texto|escape }}"
+                    data-cuenta="{{ nota.cuenta_como_programada|yesno:'1,0' }}"
+                    aria-label="Editar nota: {{ nota.texto|truncatechars:70 }}"
+                    title="Editar nota">
+              &nbsp; {{ nota.texto }}
+            </button>
+            <div class="menu-programado-nota-acciones d-flex">
+              <button type="button"
+                      class="menu-slot-borrar-btn js-borrar-nota"
+                      data-nota-id="{{ nota.id }}"
+                      data-borrar-url="{% url 'ajax_borrar_nota' pk=nota.id %}"
+                      aria-label="Borrar nota"
+                      title="Borrar nota">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
     {% if platos %}
       {% for plato in platos %}
         {% if modo == "desktop" %}
@@ -49,7 +86,7 @@
       {% endif %}
     {% endfor %}
 
-    {% if not platos and not slots %}
+    {% if not platos and not slots and not notas_momento %}
       <p class="mb-1 ms-1 d-flex align-items-center">No hay platos programados.</p>
     {% endif %}
 
