@@ -3166,6 +3166,15 @@ def FiltroDePlatos(request):
 
 
 
+    # El encabezado de cada comida también cuenta las notas válidas como programadas.
+    notas_programadas_dia_x_dia = {
+        fecha: {
+            momento: any(nota['cuenta_como_programada'] for nota in notas)
+            for momento, notas in momentos.items()
+        }
+        for fecha, momentos in notas_dia_x_dia.items()
+    }
+
     habitos_lookup = obtener_habitos_lookup(habitos)
     slots_por_comida = obtener_slots_por_comida(usuario, dias_desde_hoy)
 
@@ -3213,6 +3222,7 @@ def FiltroDePlatos(request):
                 "postres": postres,
                 "platos_dia_x_dia": platos_dia_x_dia,
                 "notas_dia_x_dia": notas_dia_x_dia,
+                "notas_programadas_dia_x_dia": notas_programadas_dia_x_dia,
                 "lugares": lugares,
                 "habitos_lookup": habitos_lookup,
                 "slots_por_comida": slots_por_comida,

@@ -19,3 +19,10 @@ def get_momento(slots_dia, momento):
         return []
     val = slots_dia.get(momento)
     return val if isinstance(val, list) else []
+
+@register.filter
+def get_nota_programada(notas_dia, momento):
+    """Indica si hay una nota que cuenta como plato programado en la comida."""
+    if not isinstance(notas_dia, dict):
+        return False
+    return bool(notas_dia.get(momento, False))

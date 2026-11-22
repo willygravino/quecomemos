@@ -33,25 +33,25 @@
 
     <!-- Desayuno -->
     <div class="col-md-3">
-      {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Desayuno" platos=dia_plato.1.desayuno comida="desayuno" modo="desktop" slots=slots_del_dia|get_momento:"desayuno" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"desayuno" %}
+      {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Desayuno" platos=dia_plato.1.desayuno comida="desayuno" modo="desktop" slots=slots_del_dia|get_momento:"desayuno" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"desayuno" nota_programada=notas_programadas_dia_x_dia|get_dia:dia|get_nota_programada:"desayuno" %}
     </div>
 
 
 
     <!-- Almuerzo -->
     <div class="col-md-3">
-      {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Almuerzo" platos=dia_plato.1.almuerzo comida="almuerzo" modo="desktop" slots=slots_del_dia|get_momento:"almuerzo" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"almuerzo" %}
+      {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Almuerzo" platos=dia_plato.1.almuerzo comida="almuerzo" modo="desktop" slots=slots_del_dia|get_momento:"almuerzo" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"almuerzo" nota_programada=notas_programadas_dia_x_dia|get_dia:dia|get_nota_programada:"almuerzo" %}
     </div>
 
 
     <!-- Merienda -->
     <div class="col-md-3">
-      {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Merienda" platos=dia_plato.1.merienda comida="merienda" modo="desktop" slots=slots_del_dia|get_momento:"merienda" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"merienda" %}
+      {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Merienda" platos=dia_plato.1.merienda comida="merienda" modo="desktop" slots=slots_del_dia|get_momento:"merienda" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"merienda" nota_programada=notas_programadas_dia_x_dia|get_dia:dia|get_nota_programada:"merienda" %}
     </div>
 
     <!-- Cena -->
     <div class="col-md-3">
-      {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Cena" platos=dia_plato.1.cena comida="cena" modo="desktop" slots=slots_del_dia|get_momento:"cena" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"cena" %}
+      {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Cena" platos=dia_plato.1.cena comida="cena" modo="desktop" slots=slots_del_dia|get_momento:"cena" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"cena" nota_programada=notas_programadas_dia_x_dia|get_dia:dia|get_nota_programada:"cena" %}
     </div>
 
 
@@ -78,28 +78,28 @@
       <!-- Slide 1: Desayuno-->
       <div class="carousel-item">
         <div class="px-5">
-          {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Desayuno" platos=dia_plato.1.desayuno comida="desayuno" modo="mobile" slots=slots_del_dia|get_momento:"desayuno" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"desayuno" %}
+          {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Desayuno" platos=dia_plato.1.desayuno comida="desayuno" modo="mobile" slots=slots_del_dia|get_momento:"desayuno" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"desayuno" nota_programada=notas_programadas_dia_x_dia|get_dia:dia|get_nota_programada:"desayuno" %}
         </div>
       </div>
 
       <!-- Slide 2: Almuerzo -->
       <div class="carousel-item active">
         <div class="px-5">
-          {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Almuerzo" platos=dia_plato.1.almuerzo comida="almuerzo" modo="mobile" slots=slots_del_dia|get_momento:"almuerzo" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"almuerzo" %}
+          {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Almuerzo" platos=dia_plato.1.almuerzo comida="almuerzo" modo="mobile" slots=slots_del_dia|get_momento:"almuerzo" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"almuerzo" nota_programada=notas_programadas_dia_x_dia|get_dia:dia|get_nota_programada:"almuerzo" %}
         </div>
       </div>
 
       <!-- Slide 3: Merienda -->
       <div class="carousel-item">
         <div class="px-5">
-          {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Merienda" platos=dia_plato.1.merienda comida="merienda" modo="mobile" slots=slots_del_dia|get_momento:"merienda" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"merienda" %}
+          {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Merienda" platos=dia_plato.1.merienda comida="merienda" modo="mobile" slots=slots_del_dia|get_momento:"merienda" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"merienda" nota_programada=notas_programadas_dia_x_dia|get_dia:dia|get_nota_programada:"merienda" %}
         </div>
       </div>
 
       <!-- Slide 4: Cena -->
       <div class="carousel-item">
         <div class="px-5">
-          {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Cena" platos=dia_plato.1.cena comida="cena" modo="mobile" slots=slots_del_dia|get_momento:"cena" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"cena" %}
+          {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Cena" platos=dia_plato.1.cena comida="cena" modo="mobile" slots=slots_del_dia|get_momento:"cena" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"cena" nota_programada=notas_programadas_dia_x_dia|get_dia:dia|get_nota_programada:"cena" %}
         </div>
       </div>
 
@@ -179,16 +179,16 @@
                   <div class="d-none d-md-block">
                     <div class="row gx-0">
                       <div class="col-md-3">
-                        {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Desayuno" platos="" comida="desayuno" modo="desktop" slots=slots_del_dia|get_momento:"desayuno" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"desayuno" %}
+                        {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Desayuno" platos="" comida="desayuno" modo="desktop" slots=slots_del_dia|get_momento:"desayuno" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"desayuno" nota_programada=notas_programadas_dia_x_dia|get_dia:dia|get_nota_programada:"desayuno" %}
                       </div>
                       <div class="col-md-3">
-                        {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Almuerzo" platos="" comida="almuerzo" modo="desktop" slots=slots_del_dia|get_momento:"almuerzo" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"almuerzo" %}
+                        {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Almuerzo" platos="" comida="almuerzo" modo="desktop" slots=slots_del_dia|get_momento:"almuerzo" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"almuerzo" nota_programada=notas_programadas_dia_x_dia|get_dia:dia|get_nota_programada:"almuerzo" %}
                       </div>
                       <div class="col-md-3">
-                        {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Merienda" platos="" comida="merienda" modo="desktop" slots=slots_del_dia|get_momento:"merienda" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"merienda" %}
+                        {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Merienda" platos="" comida="merienda" modo="desktop" slots=slots_del_dia|get_momento:"merienda" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"merienda" nota_programada=notas_programadas_dia_x_dia|get_dia:dia|get_nota_programada:"merienda" %}
                       </div>
                       <div class="col-md-3">
-                        {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Cena" platos="" comida="cena" modo="desktop" slots=slots_del_dia|get_momento:"cena" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"cena" %}
+                        {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Cena" platos="" comida="cena" modo="desktop" slots=slots_del_dia|get_momento:"cena" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"cena" nota_programada=notas_programadas_dia_x_dia|get_dia:dia|get_nota_programada:"cena" %}
                       </div>
                     </div>
                   </div>
@@ -204,22 +204,22 @@
                       <div class="carousel-inner">
                         <div class="carousel-item">
                           <div class="px-5">
-                            {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Desayuno" platos="" comida="desayuno" modo="mobile" slots=slots_del_dia|get_momento:"desayuno" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"desayuno" %}
+                            {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Desayuno" platos="" comida="desayuno" modo="mobile" slots=slots_del_dia|get_momento:"desayuno" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"desayuno" nota_programada=notas_programadas_dia_x_dia|get_dia:dia|get_nota_programada:"desayuno" %}
                           </div>
                         </div>
                         <div class="carousel-item active">
                           <div class="px-5">
-                            {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Almuerzo" platos="" comida="almuerzo" modo="mobile" slots=slots_del_dia|get_momento:"almuerzo" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"almuerzo" %}
+                            {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Almuerzo" platos="" comida="almuerzo" modo="mobile" slots=slots_del_dia|get_momento:"almuerzo" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"almuerzo" nota_programada=notas_programadas_dia_x_dia|get_dia:dia|get_nota_programada:"almuerzo" %}
                           </div>
                         </div>
                         <div class="carousel-item">
                           <div class="px-5">
-                            {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Merienda" platos="" comida="merienda" modo="mobile" slots=slots_del_dia|get_momento:"merienda" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"merienda" %}
+                            {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Merienda" platos="" comida="merienda" modo="mobile" slots=slots_del_dia|get_momento:"merienda" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"merienda" nota_programada=notas_programadas_dia_x_dia|get_dia:dia|get_nota_programada:"merienda" %}
                           </div>
                         </div>
                         <div class="carousel-item">
                           <div class="px-5">
-                            {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Cena" platos="" comida="cena" modo="mobile" slots=slots_del_dia|get_momento:"cena" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"cena" %}
+                            {% include "AdminVideos/partials/_menu_programado_comida.html" with titulo="Cena" platos="" comida="cena" modo="mobile" slots=slots_del_dia|get_momento:"cena" notas_momento=notas_dia_x_dia|get_dia:dia|get_momento:"cena" nota_programada=notas_programadas_dia_x_dia|get_dia:dia|get_nota_programada:"cena" %}
                           </div>
                         </div>
                       </div>
