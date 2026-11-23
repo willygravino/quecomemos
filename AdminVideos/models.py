@@ -715,6 +715,12 @@ class NotaSemanal(models.Model):
 
     class Meta:
         ordering = ["dia_semana", "momento", "id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["propietario", "dia_semana", "momento", "texto"],
+                name="uq_nota_semanal_propietario_dia_momento_texto",
+            )
+        ]
 
     def __str__(self):
         return f"{self.get_dia_semana_display()} {self.momento}: {self.texto[:40]}"

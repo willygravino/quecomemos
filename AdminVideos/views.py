@@ -2438,30 +2438,36 @@ def asegurar_notas_semanales(usuario, fechas):
     if not reglas:
         return
 
-    # Menus con fecha ya creada, evitando búsquedas redundantes.
+    # 1) Pre-crear los menus que falten
     menus = {
         menu.fecha: menu
         for menu in MenuDia.objects.filter(propietario=usuario, fecha__in=fechas)
     }
+    fechas_faltantes = [f for f in fechas if f not in menus]
+    for fecha in fechas_faltantes:
+        menu, _ = MenuDia.objects.get_or_create(
+            propietario=usuario, fecha=fecha,
+        )
+        menus[fecha] = menu
+
+    # 2) Batch de MenuNota faltantes
+    nuevas = []
     for fecha in fechas:
+        menu = menus[fecha]
         for regla in reglas:
             if fecha.weekday() != regla.dia_semana:
                 continue
-            menu = menus.get(fecha)
-            if menu is None:
-                menu, _ = MenuDia.objects.get_or_create(
-                    propietario=usuario, fecha=fecha,
-                )
-                menus[fecha] = menu
-            MenuNota.objects.get_or_create(
+            nuevas.append(MenuNota(
                 menu=menu,
                 momento=regla.momento,
                 nota_semanal=regla,
-                defaults={
-                    "texto": regla.texto,
-                    "cuenta_como_programada": regla.cuenta_como_programada,
-                },
-            )
+                texto=regla.texto,
+                cuenta_como_programada=regla.cuenta_como_programada,
+            ))
+
+    # 3) Un solo INSERT; ignore_conflicts tolera duplicados existentes.
+    if nuevas:
+        MenuNota.objects.bulk_create(nuevas, ignore_conflicts=True)
 
 
 def obtener_platos_dia_x_dia(usuario, fechas_existentes, habitos_set):
@@ -3491,13 +3497,12 @@ def ajax_fijar_nota(request, pk):
 @login_required
 @require_POST
 def ajax_editar_nota(request, pk):
-    """§63: edita texto y checkbox de una nota existente."""
-    from AdminVideos.models import MenuNota
+    """§63: edita texto y checkbox de una nota existente.
 
-    try:
-        nota = MenuNota.objects.get(pk=pk, menu__propietario=request.user)
-    except MenuNota.DoesNotExist:
-        return JsonResponse({"ok": False, "error": "No encontrada."}, status=404)
+    select_for_update(of=("self",)) lockea solo la fila de MenuNota.
+    """
+    from AdminVideos.models import MenuNota
+    from django.db import transaction
 
     texto = (request.POST.get("texto") or "").strip()
     if not texto:
@@ -3507,8 +3512,14 @@ def ajax_editar_nota(request, pk):
 
     cuenta = request.POST.get("cuenta_como_programada") in {"1", "on", "true", "yes"}
 
-    from django.db import transaction
     with transaction.atomic():
+        try:
+            nota = MenuNota.objects.select_for_update(of=("self",)).get(
+                pk=pk, menu__propietario=request.user,
+            )
+        except MenuNota.DoesNotExist:
+            return JsonResponse({"ok": False, "error": "No encontrada."}, status=404)
+
         if nota.nota_semanal_id:
             # Editar una nota fijada actualiza el hábito y todas sus instancias.
             regla = nota.nota_semanal
@@ -3528,16 +3539,21 @@ def ajax_editar_nota(request, pk):
 @login_required
 @require_POST
 def ajax_borrar_nota(request, pk):
-    """§63: borra una nota (solo el dueño)."""
+    """§63: borra una nota (solo el dueño).
+
+    select_for_update(of=("self",)) evita race con ajax_fijar_nota.
+    """
     from AdminVideos.models import MenuNota
-
-    try:
-        nota = MenuNota.objects.get(pk=pk, menu__propietario=request.user)
-    except MenuNota.DoesNotExist:
-        return JsonResponse({"ok": False, "error": "No encontrada."}, status=404)
-
     from django.db import transaction
+
     with transaction.atomic():
+        try:
+            nota = MenuNota.objects.select_for_update(of=("self",)).get(
+                pk=pk, menu__propietario=request.user,
+            )
+        except MenuNota.DoesNotExist:
+            return JsonResponse({"ok": False, "error": "No encontrada."}, status=404)
+
         if nota.nota_semanal_id:
             # Borrar una nota fijada elimina también el hábito semanal.
             regla = nota.nota_semanal
