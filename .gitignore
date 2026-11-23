@@ -158,8 +158,8 @@ backups_chat/
 # Con .gitignore ya no ensucian `git status`. Quedan en disco para referencia.
 backups_*/
 diag_*.txt
-diagnostico_paso*.txt
-diagnostico_audit*.txt
+diagnostico*.txt
+diagnostico*.json
 estado_tras_abort.txt
 fix_*.py
 ajustar_*.py
@@ -168,3 +168,4 @@ implementar_*.py
 unificar_*.py
 fase*.sh
 *.zip
+editar_*.py
