@@ -2072,3 +2072,38 @@ El menú programado solo permitía platos. El dueño quería anotar cosas como "
 **Comando correcto:**
 ```bash
 python3 manage.py test AdminVideos.test_notas_semanales --keepdb -v 2
+
+### 53.10 Dependabot — bumps de bajo riesgo (§53.10)
+
+**Commit**: `5a31687`. 8 paquetes actualizados en `requirements.txt`.
+
+**Bumps aplicados**:
+- babel 2.17.0 → 2.18.0
+- charset-normalizer 3.1.0 → 3.5.3
+- django-cors-headers 4.3.1 → 4.9.0 (soporta Django 5.2)
+- idna 3.4 → 3.20
+- packaging 24.0 → 26.3
+- sqlparse 0.4.4 → 0.5.5
+- typing_extensions 4.10.0 → 4.15.0
+- whitenoise 6.9.0 → 6.12.0 (soporta Django 5.2)
+
+**Excluidos a propósito** (sesión dedicada):
+- **gunicorn 21.2.0**: salto 21→26 remueve `eventlet worker`, requiere `gunicorn_h1c`. Riesgo de romper el arranque en Railway.
+- **dj-database-url 0.5.0**: cambio de API (0.5 → 3.x) puede romper el parseo de `DATABASE_URL` en Railway (§25).
+
+**Verificación**: `pip check` → `No broken requirements found`. `manage.py check` → `no issues`. Deploy OK en Railway.
+
+**Estado del badge**: al momento del commit, GitHub reporta 12 vulnerabilidades (6 high, 6 moderate). Las que quedan son de dependencias transitivas (no las 8 recién actualizadas) o de los 2 paquetes excluidos. Recalcular el badge después de ~10 min del push para confirmar.
+
+**Regla nueva**: al actualizar paquetes con salto de **major version** (ej: gunicorn 21→26), verificar primero si remueve APIs (eventlet, workers) o cambia el parseo de configuración (dj-database-url). Si sí, sesión dedicada con test de deploy a Railway.
+
+### 53.11 CSS `!important` — skip consciente
+
+De los ~15 `!important` del feature §63-§64:
+- **4 son necesarios** (L4284, L4293, L4456, L4464): pisan `text-primary` y `text-success` de Bootstrap 5.3, que usan `!important` internamente. Sin el `!important`, el color de Bootstrap gana.
+- **6 son removibles** (text-decoration, hover sin conflicto real): pero la ganancia es marginal (558 → 552 `!important` en `mi-css.css` = 1% de reducción) y el riesgo/costo de verificación visual (30 min por cada build, todas las tabs, dark, mobile) supera el beneficio.
+
+**Decisión**: no tocar. La deuda del `!important` masivo (558 total) es general (§48.4), no del feature de notas. Si en el futuro se hace un cleanup global, esta decisión se puede revisar en conjunto.
+
+**Lo que SÍ vale la pena** (deuda baja): agregar comentarios explicativos en los 4 `!important` necesarios, para que futuras IAs no los remuevan y rompan el color. Algunos ya tienen (ej: L4456 dice `/* Prevalece sobre text-success */`).
+
