@@ -1988,3 +1988,87 @@ Sesión doble. Bloque 1: cerrar §53-§54 (taxonomía categoria_tiempo, slot red
 - **Backfill de `ligereza`** (123 platos sin clasificar, §47.5).
 - **Backfill de `categoria_tiempo`** (0 platos clasificados).
 - **Verificar en mobile** que los slots del menú programado siguen funcionando con la nueva lógica OR (afecta `obtener_slots_por_comida`? pendiente de auditar).
+
+
+## 53. Sesión 2026-11-21/23 — Notas por comida + pin semanal (§63-§64)
+
+> Commits: `fb434aa` (§63), `b58a237` (fix cabeceras), `c6707b5` (§64 pin semanal), `4c7e4f6` (mejoras eficiencia). Deployado a Railway.
+
+### 53.1 Motivación
+
+El menú programado solo permitía platos. El dueño quería anotar cosas como "Cenamos en lo de Lucas", "Comemos rejunte" para que el día cuente como programado sin tener que asignar un plato. Y que ciertas notas se repitan semanalmente (todos los lunes, etc.), igual que los hábitos de platos.
+
+### 53.2 Modelo
+
+**`MenuNota`** (`models.py`): instancia concreta por (día + comida).
+- `menu` (FK a `MenuDia`, CASCADE)
+- `nota_semanal` (FK a `NotaSemanal`, SET_NULL, nullable): si está, la nota vino de una regla.
+- `momento` (desayuno/almuerzo/merienda/cena, `MenuItem.MOMENTO_CHOICES`)
+- `texto` (max 500)
+- `cuenta_como_programada` (bool, default True): si True, el día se pinta como programado aunque no haya MenuItem.
+- `creado_el` (auto_now_add)
+- `UniqueConstraint(["menu","momento","nota_semanal"], condition=Q(nota_semanal__isnull=False))`: permite varias notas sueltas en la misma comida, pero no duplica la misma regla.
+
+**`NotaSemanal`** (regla recurrente):
+- `propietario` (FK a User, CASCADE)
+- `dia_semana` (PositiveSmallIntegerField, choices 0-6)
+- `momento`
+- `texto` (max 500)
+- `cuenta_como_programada`
+- `creado_el`
+- `UniqueConstraint(propietario, dia_semana, momento, texto)` (§64).
+- `ordering=["dia_semana","momento","id"]`.
+
+**Patrón**: regla + instancia materializada. Mismo patrón que Google Calendar / Todoist. La regla perdura, las instancias se materializan con lazy cleanup.
+
+### 53.3 Flujo
+
+1. **Crear nota**: POST `/nota/crear/` (`ajax_crear_nota`). Crea `MenuDia` si no existe.
+2. **Editar nota**: POST `/nota/<pk>/editar/` (`ajax_editar_nota`). `transaction.atomic + select_for_update(of=("self",))`. Si la nota es fija, propaga a la regla y a todas sus instancias.
+3. **Borrar nota**: POST `/nota/<pk>/borrar/` (`ajax_borrar_nota`). `transaction.atomic + select_for_update`. Si es fija, borra la regla y todas las instancias.
+4. **Fijar/desfijar**: POST `/nota/<pk>/fijar/` (`ajax_fijar_nota`). Toggle:
+   - **Fijar**: crea `NotaSemanal` con `(propietario, dia_semana, momento, texto, cuenta)` de la nota actual.
+   - **Desfijar**: borra las otras instancias de la regla, deja la actual como nota suelta (`nota_semanal=NULL`), borra la regla.
+5. **Materializar reglas**: `asegurar_notas_semanales(usuario, fechas)` al inicio de `FiltroDePlatos`. Usa `bulk_create(ignore_conflicts=True)` (1 query) para crear las instancias que falten según cada regla × fecha visible.
+6. **Cleanup**: `limpiar_notas_pasadas(usuario)` borra `MenuNota` con `menu__fecha__lt=hoy` en `FiltroDePlatos` y `ajax_listado_platos`.
+
+### 53.4 UI
+
+- **Header de comida** (`_menu_programado_comida.html`): botón `+ Nota` al lado del título. Si ya hay notas, el botón queda atenuado (opacity 0.5) pero clickeable.
+- **Listado de notas**: debajo de los platos, con ícono `note-sticky` (regular), texto en bastardilla, pin y ✕ por nota.
+- **Modal** (`_nota_menu_modal.html`): textarea + checkbox "Válida como plato programado" (tildado por defecto). Incluido en `pre-base.html` (`{% block qc_slot_modales %}`), no en `lista_filtrada.html` (evita stacking context del sticky, ver §32.13).
+- **Pin reutiliza `js-toggle-habito`** con clase extra `js-toggle-nota-habito`. El handler común en `menu_programado.js` distingue: si es nota, POST + CSRF; si es plato, GET (endpoint `fijar-o-eliminar-habito`).
+
+### 53.5 Eficiencia (§64)
+
+- `asegurar_notas_semanales`: antes 1 query por `get_or_create` (35 queries con 5 reglas × 7 días). Ahora `bulk_create(ignore_conflicts=True)` (1 query). `ignore_conflicts` tolera duplicados existentes sin romper con el constraint.
+- `ajax_editar_nota` / `ajax_borrar_nota`: `select_for_update(of=("self",))` + `transaction.atomic`. Sin el `of=("self",)`, el JOIN con MenuDia (por el filtro `menu__propietario`) lockearía también la fila del menú, innecesario.
+
+### 53.6 Puntos críticos (§15)
+
+| Archivo | Punto | Qué hace |
+|---|---|---|
+| `models.py` | `NotaSemanal` (~L699) | Regla semanal con UniqueConstraint. |
+| `models.py` | `MenuNota` (~L728) | Instancia por (día + comida). FK opcional a `NotaSemanal`. |
+| `views.py` | `limpiar_notas_pasadas` (~L2415) | Cleanup lazy de notas de días pasados. |
+| `views.py` | `asegurar_notas_semanales` (~L2427) | Materializa reglas. `bulk_create`. |
+| `views.py` | `ajax_crear_nota` | Crea nota. |
+| `views.py` | `ajax_editar_nota` | Edita + propaga si fija. `select_for_update`. |
+| `views.py` | `ajax_borrar_nota` | Borra + propaga si fija. `select_for_update`. |
+| `views.py` | `ajax_fijar_nota` | Toggle pin. `transaction.atomic + select_for_update`. |
+| `views.py` | `obtener_platos_dia_x_dia` | 4-tupla: `(platos, dias_programados, dias_completos, notas_dia_x_dia)`. |
+| `views.py` | `FiltroDePlatos` / `ajax_listado_platos` | Llaman `limpiar_notas_pasadas` + `asegurar_notas_semanales`. |
+| `urls.py` | `nota/crear/`, `nota/<pk>/editar/`, `nota/<pk>/fijar/`, `nota/<pk>/borrar/` | Rutas AJAX. |
+| `_menu_programado_comida.html` | bloque `js-nueva-nota` + `js-editar-nota` + `js-borrar-nota` | Botones. |
+| `_nota_menu_modal.html` | partial completo | Modal. |
+| `menu_programado.js` | handlers `js-nueva-nota`/`js-editar-nota`/`js-borrar-nota`/`#notaMenuGuardarBtn` | CRUD + pin. |
+| `slots_extras.py` | `get_nota_programada` | Boolean si hay nota válida en el momento. |
+| `test_notas_semanales.py` | 6 tests | Regresión del pin (ver §53.7 para cómo correrlos). |
+
+### 53.7 Cómo correr los tests (realidad del proyecto)
+
+**El proyecto no tiene DB local.** Todo corre contra Railway, incluido `manage.py test`. El problema conocido: `test_railway` queda colgado entre runs, y `manage.py test` sin `--keepdb` se cuelga esperando "yes/no" para dropear.
+
+**Comando correcto:**
+```bash
+python3 manage.py test AdminVideos.test_notas_semanales --keepdb -v 2
