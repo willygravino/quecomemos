@@ -698,6 +698,28 @@ class MenuItemExtra(models.Model):
         return f"{self.get_tipo_display()}: {self.nombre}"
 
 
+class NotaSemanal(models.Model):
+    """Nota que se repite cada semana en un momento concreto."""
+    propietario = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name="notas_semanales",
+    )
+    dia_semana = models.PositiveSmallIntegerField(choices=[
+        (0, "Lunes"), (1, "Martes"), (2, "Miércoles"),
+        (3, "Jueves"), (4, "Viernes"), (5, "Sábado"), (6, "Domingo"),
+    ])
+    momento = models.CharField(max_length=20, choices=MenuItem.MOMENTO_CHOICES)
+    texto = models.CharField(max_length=500)
+    cuenta_como_programada = models.BooleanField(default=True)
+    creado_el = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["dia_semana", "momento", "id"]
+
+    def __str__(self):
+        return f"{self.get_dia_semana_display()} {self.momento}: {self.texto[:40]}"
+
+
 class MenuNota(models.Model):
     """§63: nota libre por (día + comida) del menú programado.
     Ej: "Cenamos en lo de Lucas", "Comemos rejunte".
@@ -706,6 +728,10 @@ class MenuNota(models.Model):
     Se borra cuando el día pasa (lazy cleanup en FiltroDePlatos).
     Varias notas por (día+comida) permitidas: se muestran todas en el listado."""
     menu = models.ForeignKey(MenuDia, on_delete=models.CASCADE, related_name="notas")
+    nota_semanal = models.ForeignKey(
+        "NotaSemanal", null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="instancias",
+    )
     momento = models.CharField(max_length=20, choices=MenuItem.MOMENTO_CHOICES)
     texto = models.CharField(max_length=500)
     cuenta_como_programada = models.BooleanField(default=True)
@@ -713,6 +739,13 @@ class MenuNota(models.Model):
 
     class Meta:
         indexes = [models.Index(fields=["menu", "momento"])]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["menu", "momento", "nota_semanal"],
+                condition=models.Q(nota_semanal__isnull=False),
+                name="uq_nota_semanal_por_comida",
+            )
+        ]
         ordering = ["creado_el"]
 
     def __str__(self):

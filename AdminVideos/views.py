@@ -2424,6 +2424,46 @@ def limpiar_notas_pasadas(usuario):
     ).delete()
 
 
+def asegurar_notas_semanales(usuario, fechas):
+    """Materializa una instancia por fecha visible, sin duplicados.
+
+    La regla semanal perdura aunque las notas de fechas pasadas se limpien.
+    """
+    from AdminVideos.models import MenuNota, NotaSemanal
+
+    fechas = list(fechas)
+    if not fechas:
+        return
+    reglas = list(NotaSemanal.objects.filter(propietario=usuario))
+    if not reglas:
+        return
+
+    # Menus con fecha ya creada, evitando búsquedas redundantes.
+    menus = {
+        menu.fecha: menu
+        for menu in MenuDia.objects.filter(propietario=usuario, fecha__in=fechas)
+    }
+    for fecha in fechas:
+        for regla in reglas:
+            if fecha.weekday() != regla.dia_semana:
+                continue
+            menu = menus.get(fecha)
+            if menu is None:
+                menu, _ = MenuDia.objects.get_or_create(
+                    propietario=usuario, fecha=fecha,
+                )
+                menus[fecha] = menu
+            MenuNota.objects.get_or_create(
+                menu=menu,
+                momento=regla.momento,
+                nota_semanal=regla,
+                defaults={
+                    "texto": regla.texto,
+                    "cuenta_como_programada": regla.cuenta_como_programada,
+                },
+            )
+
+
 def obtener_platos_dia_x_dia(usuario, fechas_existentes, habitos_set):
     from AdminVideos.models import MenuNota
 
@@ -2454,7 +2494,7 @@ def obtener_platos_dia_x_dia(usuario, fechas_existentes, habitos_set):
             menu__propietario=usuario,
             menu__fecha__in=fechas_existentes,
         )
-        .select_related("menu")
+        .select_related("menu", "nota_semanal")
     )
 
     for nota in notas_qs:
@@ -2463,6 +2503,7 @@ def obtener_platos_dia_x_dia(usuario, fechas_existentes, habitos_set):
             "id": nota.id,
             "texto": nota.texto,
             "cuenta_como_programada": nota.cuenta_como_programada,
+            "fija": nota.nota_semanal_id is not None,
         })
         if nota.cuenta_como_programada:
             dias_programados.add(fec)
@@ -3114,6 +3155,7 @@ def FiltroDePlatos(request):
     habitos, habitos_set = obtener_habitos_usuario(perfil)
 
     asegurar_menus_desde_habitos(request, usuario, dias_desde_hoy, habitos)
+    asegurar_notas_semanales(usuario, dias_desde_hoy)
 
     dia_activo, dia_activo_obj = obtener_dia_activo(request, dias_desde_hoy)
 
@@ -3408,6 +3450,46 @@ def ajax_crear_nota(request):
 
 @login_required
 @require_POST
+def ajax_fijar_nota(request, pk):
+    """Activa o desactiva la repetición semanal de una nota de fecha.
+
+    Desfijar conserva la nota seleccionada como nota normal de esa fecha;
+    las instancias generadas para otras fechas dejan de repetirse.
+    """
+    from AdminVideos.models import MenuNota, NotaSemanal
+    from django.db import transaction
+    from django.shortcuts import get_object_or_404
+
+    with transaction.atomic():
+        nota = get_object_or_404(
+            MenuNota.objects.select_related("menu", "nota_semanal").select_for_update(of=("self",)),
+            pk=pk,
+            menu__propietario=request.user,
+        )
+        if nota.nota_semanal_id:
+            regla = nota.nota_semanal
+            # La actual queda intacta; las demás instancias eran repetición.
+            MenuNota.objects.filter(nota_semanal=regla).exclude(pk=nota.pk).delete()
+            nota.nota_semanal = None
+            nota.save(update_fields=["nota_semanal"])
+            regla.delete()
+            fijado = False
+        else:
+            regla = NotaSemanal.objects.create(
+                propietario=request.user,
+                dia_semana=nota.menu.fecha.weekday(),
+                momento=nota.momento,
+                texto=nota.texto,
+                cuenta_como_programada=nota.cuenta_como_programada,
+            )
+            nota.nota_semanal = regla
+            nota.save(update_fields=["nota_semanal"])
+            fijado = True
+    return JsonResponse({"ok": True, "fijado": fijado})
+
+
+@login_required
+@require_POST
 def ajax_editar_nota(request, pk):
     """§63: edita texto y checkbox de una nota existente."""
     from AdminVideos.models import MenuNota
@@ -3425,10 +3507,21 @@ def ajax_editar_nota(request, pk):
 
     cuenta = request.POST.get("cuenta_como_programada") in {"1", "on", "true", "yes"}
 
-    nota.texto = texto
-    nota.cuenta_como_programada = cuenta
-    nota.save(update_fields=["texto", "cuenta_como_programada"])
-
+    from django.db import transaction
+    with transaction.atomic():
+        if nota.nota_semanal_id:
+            # Editar una nota fijada actualiza el hábito y todas sus instancias.
+            regla = nota.nota_semanal
+            regla.texto = texto
+            regla.cuenta_como_programada = cuenta
+            regla.save(update_fields=["texto", "cuenta_como_programada"])
+            MenuNota.objects.filter(nota_semanal=regla).update(
+                texto=texto, cuenta_como_programada=cuenta,
+            )
+        else:
+            nota.texto = texto
+            nota.cuenta_como_programada = cuenta
+            nota.save(update_fields=["texto", "cuenta_como_programada"])
     return JsonResponse({"ok": True})
 
 
@@ -3443,7 +3536,15 @@ def ajax_borrar_nota(request, pk):
     except MenuNota.DoesNotExist:
         return JsonResponse({"ok": False, "error": "No encontrada."}, status=404)
 
-    nota.delete()
+    from django.db import transaction
+    with transaction.atomic():
+        if nota.nota_semanal_id:
+            # Borrar una nota fijada elimina también el hábito semanal.
+            regla = nota.nota_semanal
+            MenuNota.objects.filter(nota_semanal=regla).delete()
+            regla.delete()
+        else:
+            nota.delete()
     return JsonResponse({"ok": True})
 
 

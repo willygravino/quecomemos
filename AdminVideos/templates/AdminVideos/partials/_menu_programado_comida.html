@@ -23,13 +23,23 @@
                     data-nota-id="{{ nota.id }}"
                     data-texto="{{ nota.texto|escape }}"
                     data-cuenta="{{ nota.cuenta_como_programada|yesno:'1,0' }}"
+                    data-fija="{{ nota.fija|yesno:'1,0' }}"
                     aria-label="Editar nota: {{ nota.texto|truncatechars:70 }}"
                     title="Editar nota">
               &nbsp; {{ nota.texto }}
             </button>
             <div class="menu-programado-nota-acciones d-flex">
+              {# Mismo pin e identidad cromática que un plato (incluido hover). #}
+              <a href="{% url 'ajax_fijar_nota' pk=nota.id %}"
+                 title="{% if nota.fija %}Eliminar hábito{% else %}Fijar hábito{% endif %}"
+                 aria-label="{% if nota.fija %}Desfijar nota semanal{% else %}Fijar nota semanal{% endif %}"
+                 class="{% if modo == 'desktop' %}ms-2 {% endif %}js-toggle-habito js-toggle-nota-habito"
+                 data-ajax-url="{% url 'ajax_fijar_nota' pk=nota.id %}">
+                <i class="bi bi-pin-angle-fill fa-lg {% if modo == 'mobile' %}ms-2 {% endif %}{% if nota.fija %}text-success{% else %}text-secondary{% endif %}"></i>
+              </a>
               <button type="button"
                       class="menu-slot-borrar-btn js-borrar-nota"
+                      data-fija="{{ nota.fija|yesno:'1,0' }}"
                       data-nota-id="{{ nota.id }}"
                       data-borrar-url="{% url 'ajax_borrar_nota' pk=nota.id %}"
                       aria-label="Borrar nota"

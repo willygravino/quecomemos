@@ -243,10 +243,12 @@
 
     link.classList.add("pe-none");
 
+    const esNota = link.classList.contains("js-toggle-nota-habito");
     fetch(ajaxUrl, {
-      method: "GET",
+      method: esNota ? "POST" : "GET",
       headers: {
-        "X-Requested-With": "XMLHttpRequest"
+        "X-Requested-With": "XMLHttpRequest",
+        ...(esNota ? {"X-CSRFToken": getCSRFToken()} : {})
       },
       credentials: "same-origin"
     })
@@ -732,7 +734,8 @@
       inputMomento.value = "";
       inputTexto.value = datos.texto || "";
       inputCuenta.checked = Boolean(datos.cuenta);
-      if (lblTitulo) lblTitulo.textContent = "Editar nota del menú";
+      if (lblTitulo) lblTitulo.textContent = datos.fija
+        ? "Editar nota semanal (todas las semanas)" : "Editar nota del menú";
     } else {
       inputId.value = "";
       inputDia.value = datos.dia || "";
@@ -773,6 +776,7 @@
       id: btn.dataset.notaId || "",
       texto: btn.dataset.texto || "",
       cuenta: btn.dataset.cuenta === "1",
+      fija: btn.dataset.fija === "1",
     });
   });
 
@@ -785,15 +789,17 @@
 
     const borrarUrl = btn.dataset.borrarUrl || "";
     if (!borrarUrl || !window.fetch) return;
-
+    const mensajeBorrar = btn.dataset.fija === "1"
+      ? "¿Borrar esta nota fijada y su repetición semanal?"
+      : "¿Borrar esta nota?";
     const confirmar = window.confirmDialog
       ? await window.confirmDialog({
           title: "Borrar nota",
-          body: "¿Borrar esta nota?",
+          body: mensajeBorrar,
           confirmText: "Borrar",
           confirmClass: "btn-danger",
         })
-      : window.confirm("¿Borrar esta nota?");
+      : window.confirm(mensajeBorrar);
 
     if (!confirmar) return;
 
