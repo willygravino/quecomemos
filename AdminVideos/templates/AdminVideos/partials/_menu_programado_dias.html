@@ -268,7 +268,7 @@
   {% endfor %}
 
 <!-- IMPRESION MENU PROGRAMADO: MODAL -->
-{% if platos_dia_x_dia %}
+{% if platos_dia_x_dia or notas_dia_x_dia %}
 {# Comportamiento: menu_print_sheet.js. Estilos: menu_print_sheet.css. Gestos: QCOverlayUI. #}
 
 {# Reutiliza la infraestructura visual/táctil de plato_create_sheet.css #}
@@ -330,9 +330,7 @@
 
     <div class="menu-print-day-options mb-4">
       {% for dia in dias_desde_hoy %}
-        {% if dia in platos_dia_x_dia %}
-          {% for dia_plato in platos_dia_x_dia.items %}
-            {% if dia_plato.0 == dia %}
+        {% if dia in platos_dia_x_dia or dia in notas_dia_x_dia %}
               <label class="menu-print-day-option">
                 <input type="checkbox"
                        value="{{ dia|date:'Y-m-d' }}"
@@ -343,8 +341,6 @@
                   <small>{{ dia|date:"d/m" }}</small>
                 </span>
               </label>
-            {% endif %}
-          {% endfor %}
         {% endif %}
       {% endfor %}
     </div>
@@ -354,71 +350,81 @@
 
       <div class="menu-print-preview-grid">
         {% for dia in dias_desde_hoy %}
-          {% if dia in platos_dia_x_dia %}
-            {% for dia_plato in platos_dia_x_dia.items %}
-              {% if dia_plato.0 == dia %}
+          {% with platos_del_dia=platos_dia_x_dia|get_dia:dia notas_del_dia=notas_dia_x_dia|get_dia:dia %}
+          {% if platos_del_dia or notas_del_dia %}
 
-                <article class="menu-print-preview-day js-menu-print-preview-day"
-                         data-print-date="{{ dia|date:'Y-m-d' }}"
-                         style="grid-column: {% if dia|date:'w' == '0' %}7{% else %}{{ dia|date:'w' }}{% endif %};">
+            <article class="menu-print-preview-day js-menu-print-preview-day"
+                     data-print-date="{{ dia|date:'Y-m-d' }}"
+                     style="grid-column: {% if dia|date:'w' == '0' %}7{% else %}{{ dia|date:'w' }}{% endif %};">
 
-                  <div class="menu-print-preview-head">
-                    <strong>{{ dia|date:"l" }}</strong>
-                    <small>{{ dia|date:"d/m/Y" }}</small>
-                  </div>
+              <div class="menu-print-preview-head">
+                <strong>{{ dia|date:"l" }}</strong>
+                <small>{{ dia|date:"d/m/Y" }}</small>
+              </div>
 
-                  <div class="menu-print-preview-body">
+              <div class="menu-print-preview-body">
 
-                    {% if dia_plato.1.desayuno %}
-                      <section>
-                        <div class="menu-print-preview-meal">Desayuno</div>
-                        <ul>
-                          {% for item in dia_plato.1.desayuno %}
-                            <li>{{ item.nombre }}</li>
-                          {% endfor %}
-                        </ul>
-                      </section>
-                    {% endif %}
+                {% if platos_del_dia.desayuno or notas_del_dia.desayuno %}
+                  <section>
+                    <div class="menu-print-preview-meal">Desayuno</div>
+                    <ul>
+                      {% for item in platos_del_dia.desayuno %}
+                        <li>{{ item.nombre }}</li>
+                      {% endfor %}
+                      {% for nota in notas_del_dia.desayuno %}
+                        <li class="menu-print-preview-nota{% if nota.cuenta_como_programada %}-plato{% else %}-simple{% endif %}">{{ nota.texto }}</li>
+                      {% endfor %}
+                    </ul>
+                  </section>
+                {% endif %}
 
-                    {% if dia_plato.1.almuerzo %}
-                      <section>
-                        <div class="menu-print-preview-meal">Almuerzo</div>
-                        <ul>
-                          {% for item in dia_plato.1.almuerzo %}
-                            <li>{{ item.nombre }}</li>
-                          {% endfor %}
-                        </ul>
-                      </section>
-                    {% endif %}
+                {% if platos_del_dia.almuerzo or notas_del_dia.almuerzo %}
+                  <section>
+                    <div class="menu-print-preview-meal">Almuerzo</div>
+                    <ul>
+                      {% for item in platos_del_dia.almuerzo %}
+                        <li>{{ item.nombre }}</li>
+                      {% endfor %}
+                      {% for nota in notas_del_dia.almuerzo %}
+                        <li class="menu-print-preview-nota{% if nota.cuenta_como_programada %}-plato{% else %}-simple{% endif %}">{{ nota.texto }}</li>
+                      {% endfor %}
+                    </ul>
+                  </section>
+                {% endif %}
 
-                    {% if dia_plato.1.merienda %}
-                      <section>
-                        <div class="menu-print-preview-meal">Merienda</div>
-                        <ul>
-                          {% for item in dia_plato.1.merienda %}
-                            <li>{{ item.nombre }}</li>
-                          {% endfor %}
-                        </ul>
-                      </section>
-                    {% endif %}
+                {% if platos_del_dia.merienda or notas_del_dia.merienda %}
+                  <section>
+                    <div class="menu-print-preview-meal">Merienda</div>
+                    <ul>
+                      {% for item in platos_del_dia.merienda %}
+                        <li>{{ item.nombre }}</li>
+                      {% endfor %}
+                      {% for nota in notas_del_dia.merienda %}
+                        <li class="menu-print-preview-nota{% if nota.cuenta_como_programada %}-plato{% else %}-simple{% endif %}">{{ nota.texto }}</li>
+                      {% endfor %}
+                    </ul>
+                  </section>
+                {% endif %}
 
-                    {% if dia_plato.1.cena %}
-                      <section>
-                        <div class="menu-print-preview-meal">Cena</div>
-                        <ul>
-                          {% for item in dia_plato.1.cena %}
-                            <li>{{ item.nombre }}</li>
-                          {% endfor %}
-                        </ul>
-                      </section>
-                    {% endif %}
+                {% if platos_del_dia.cena or notas_del_dia.cena %}
+                  <section>
+                    <div class="menu-print-preview-meal">Cena</div>
+                    <ul>
+                      {% for item in platos_del_dia.cena %}
+                        <li>{{ item.nombre }}</li>
+                      {% endfor %}
+                      {% for nota in notas_del_dia.cena %}
+                        <li class="menu-print-preview-nota{% if nota.cuenta_como_programada %}-plato{% else %}-simple{% endif %}">{{ nota.texto }}</li>
+                      {% endfor %}
+                    </ul>
+                  </section>
+                {% endif %}
 
-                  </div>
-                </article>
+              </div>
+            </article>
 
-              {% endif %}
-            {% endfor %}
           {% endif %}
+          {% endwith %}
         {% endfor %}
       </div>
     </div>

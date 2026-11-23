@@ -4475,3 +4475,28 @@ a.menu-programado-plato-nombre:focus-visible,
   color: color-mix(in srgb, var(--qc-slot-medio) 35%, var(--bs-secondary-color));
   opacity: 1;
 }
+
+/* §65: notas en preview de impresion del menu programado */
+/* nota-plato: solo italica. Color y tamano heredados = identica a un plato normal. */
+/* nota-simple: sin bullet + gris apagado + tamano reducido para distinguirse. */
+.menu-print-preview-nota-plato {
+  font-style: italic;
+}
+.menu-print-preview-nota-simple {
+  list-style: none;
+  font-style: italic;
+  color: var(--bs-secondary-color);
+  font-size: 0.9em;
+  padding-left: 1em;
+}
+@media print {
+  .menu-print-preview-nota-plato {
+    color: inherit !important;
+  }
+  .menu-print-preview-nota-simple {
+    color: #777 !important;
+  }
+}
+
+
+
