@@ -152,3 +152,19 @@ backups_variedades/
 backups_slots/
 backups_sin_light/
 backups_chat/
+
+# === Diagnóstico y backups de sesión (2026-11) ===
+# Archivos temporales de sesiones de fix/ajuste que NO deben trackearse.
+# Con .gitignore ya no ensucian `git status`. Quedan en disco para referencia.
+backups_*/
+diag_*.txt
+diagnostico_paso*.txt
+diagnostico_audit*.txt
+estado_tras_abort.txt
+fix_*.py
+ajustar_*.py
+corregir_*.py
+implementar_*.py
+unificar_*.py
+fase*.sh
+*.zip
